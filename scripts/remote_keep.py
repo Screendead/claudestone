@@ -35,22 +35,29 @@ def docker_answers() -> bool:
         return False
 
 
-def keep(cmd: list[str], answers=docker_answers, poll: float = POLL) -> int:
+def keep(cmd: list[str], answers=docker_answers, poll: float = POLL, before=None) -> int:
+    """Run cmd until it exits with anything but LOST. `before`, if given, is called before
+    each start and returns arguments to append to cmd for that run."""
     child = None
+    stopping = None
 
     def stop(signum, frame):
-        if child and child.poll() is None:
-            child.terminate()
-            child.wait()
-        sys.exit(128 + signum)
+        nonlocal stopping
+        stopping = signum
+        if child is None or child.poll() is not None:
+            sys.exit(128 + signum)
+        # Waiting here would deadlock on the lock of the child.wait() this interrupted.
+        child.terminate()
 
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     quick = 0
     while True:
         t0 = time.monotonic()
-        child = subprocess.Popen(cmd)
+        child = subprocess.Popen(cmd + (before() if before else []))
         code = child.wait()
+        if stopping:
+            sys.exit(128 + stopping)
         if code != LOST:
             return code
         quick = quick + 1 if time.monotonic() - t0 < QUICK else 0
