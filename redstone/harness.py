@@ -2,24 +2,32 @@ import re
 import socket
 import subprocess
 import time
-from pathlib import Path
 
 from .build import Build, Pos, write_datapack
+from . import servers
+from .plots import MAIN
 from .rcon import Rcon
+from .servers import Server
 
-SERVER_DIR = Path(__file__).resolve().parent.parent / "server"
+SERVER_DIR = servers.MAIN.dir
 PACK = "redstone_ai"
+# Between `execute positioned <origin>` and a command, so that Rig.command can tell
+# whether it succeeded.
+RUN_WRAP = f"store success storage {PACK}:probe ok int 1 run "
 # Covers the longest scheduled tick a component can leave behind and the torch burnout
 # memory (RedstoneTorchBlock: 8 toggles within 60 ticks burns a torch out for 160 ticks),
 # which is kept per position and would otherwise carry into the next test.
 FLUSH_TICKS = 170
 BUTTON_TICKS = {"minecraft:stone_button": 20, "minecraft:polished_blackstone_button": 20}
 PLAIN_SUPPORTS = ("stone", "cobblestone", "smooth_stone", "stone_bricks", "white_concrete", "white_wool")
+BUILD_TOP = 319  # the overworld's highest block
+KILL_MARGIN = 2
 OPPOSITE = {"north": (0, 0, 1), "south": (0, 0, -1), "east": (-1, 0, 0), "west": (1, 0, 0)}
 
 
 def parse_state(state: str) -> tuple[str, dict[str, str]]:
-    block, _, rest = state.partition("[")
+    """Block id and properties; any block-entity NBT after them is dropped."""
+    block, _, rest = state.split("{")[0].partition("[")
     props = dict(kv.split("=") for kv in rest.rstrip("]").split(",") if kv)
     return block, props
 
@@ -28,16 +36,45 @@ def format_state(block: str, props: dict[str, str]) -> str:
     return block + ("[" + ",".join(f"{k}={v}" for k, v in props.items()) + "]" if props else "")
 
 
-def signal_property(state: str) -> str | None:
-    """The property that says whether a block is carrying signal, if any."""
+BOOL, INVERTED, ANALOG = "bool", "inverted", "analog"
+# block -> (property, kind). BOOL reads 1 when the property is true, ANALOG reads its
+# 0-15 value. A hopper's `enabled` is the inverse of power, so INVERTED reads 1 when
+# it is false, i.e. when the hopper is locked.
+SIGNALS = {
+    "redstone_wire": ("power", ANALOG),
+    **dict.fromkeys(("redstone_torch", "redstone_wall_torch", "redstone_lamp"), ("lit", BOOL)),
+    **dict.fromkeys(("repeater", "comparator", "lever", "observer", "powered_rail", "activator_rail",
+                     "detector_rail", "note_block", "lectern", "lightning_rod", "tripwire", "tripwire_hook"),
+                    ("powered", BOOL)),
+    **dict.fromkeys(("piston", "sticky_piston"), ("extended", BOOL)),
+    **dict.fromkeys(("dispenser", "dropper", "crafter"), ("triggered", BOOL)),
+    **dict.fromkeys(("daylight_detector", "target", "sculk_sensor", "calibrated_sculk_sensor",
+                     "light_weighted_pressure_plate", "heavy_weighted_pressure_plate"), ("power", ANALOG)),
+    "hopper": ("enabled", INVERTED),
+}
+SUFFIX_SIGNALS = (("copper_bulb", ("lit", BOOL)), ("_trapdoor", ("open", BOOL)), ("_door", ("open", BOOL)),
+                  ("_fence_gate", ("open", BOOL)), ("_button", ("powered", BOOL)),
+                  ("_pressure_plate", ("powered", BOOL)))
+
+
+def signal(state: str) -> tuple[str, str] | None:
+    """(property, kind) of the property that says whether a block carries signal, if any."""
     name = parse_state(state)[0].removeprefix("minecraft:")
-    if name == "redstone_wire":
-        return "power"
-    if name in ("redstone_torch", "redstone_wall_torch", "redstone_lamp"):
-        return "lit"
-    if name in ("repeater", "comparator", "lever", "observer") or name.endswith("_button"):
-        return "powered"
-    return None
+    if name in SIGNALS:
+        return SIGNALS[name]
+    return next((v for suffix, v in SUFFIX_SIGNALS if name.endswith(suffix)), None)
+
+
+def has_level(state: str) -> bool:
+    """Whether a `level` step can read an exact 0-15 strength here."""
+    sig = signal(state)
+    return parse_state(state)[0] == "minecraft:comparator" or (sig is not None and sig[1] == ANALOG)
+
+
+def _checks(prop: str, kind: str) -> list[tuple[str, int]]:
+    if kind == ANALOG:
+        return [(f"{prop}={n}", n) for n in range(1, 16)]
+    return [(f"{prop}={'false' if kind == INVERTED else 'true'}", 1)]
 
 
 # Minecraft stops a function after 65536 commands (maxCommandChainLength), so probes
@@ -47,16 +84,18 @@ WARP_RATE = 10000  # the maximum /tick rate
 
 
 def probe_functions(build: Build, only: set[Pos] | None = None) -> tuple[list[str], list[Pos]]:
-    """Functions that write each probed block's signal level into storage as bN."""
-    probed = [p for p in sorted(build.blocks) if signal_property(build.blocks[p]) and (only is None or p in only)]
+    """Functions that write each probed block's signal level into storage as bN, and a
+    comparator's output strength as cN."""
+    probed = [p for p in sorted(build.blocks) if signal(build.blocks[p]) and (only is None or p in only)]
     lines = []
     for i, (x, y, z) in enumerate(probed):
         block = parse_state(build.blocks[(x, y, z)])[0]
-        prop = signal_property(build.blocks[(x, y, z)])
-        checks = [(f"power={n}", n) for n in range(1, 16)] if prop == "power" else [(f"{prop}=true", 1)]
-        for predicate, value in checks:
+        for predicate, value in _checks(*signal(build.blocks[(x, y, z)])):
             lines.append(f"execute if block ~{x} ~{y} ~{z} {block}[{predicate}] run "
                          f"data modify storage {PACK}:probe s.b{i} set value {value}")
+        if block == "minecraft:comparator":
+            lines.append(f"execute store result storage {PACK}:probe s.c{i} int 1 run "
+                         f"data get block ~{x} ~{y} ~{z} OutputSignal")
     chunks = [lines[i:i + PROBE_CHUNK] for i in range(0, len(lines), PROBE_CHUNK)] or [[]]
     return ["\n".join(c) + "\n" for c in chunks], probed
 
@@ -72,7 +111,7 @@ def attached_to(pos: Pos, props: dict[str, str]) -> Pos:
     return (x + dx, y + dy, z + dz)
 
 
-def _rcon_up(port=25575) -> bool:
+def _rcon_up(port: int = servers.MAIN.rcon_port) -> bool:
     try:
         socket.create_connection(("127.0.0.1", port), timeout=0.5).close()
         return True
@@ -80,44 +119,107 @@ def _rcon_up(port=25575) -> bool:
         return False
 
 
-def ensure_server(server_dir: Path = SERVER_DIR, timeout=120) -> None:
-    if _rcon_up():
+def ensure_server(server: Server = servers.MAIN, timeout=180) -> None:
+    if _rcon_up(server.rcon_port):
         return
-    log = open(server_dir / "harness.log", "w")
+    log = open(server.dir / "harness.log", "w")
     subprocess.Popen(
-        ["java", "-Xmx2G", "-jar", "server.jar", "nogui"],
-        cwd=server_dir, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+        ["java", f"-Xmx{server.memory}", "-jar", "server.jar", "nogui"],
+        cwd=server.dir, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
         start_new_session=True,
     )
     deadline = time.time() + timeout
     while time.time() < deadline:
-        if _rcon_up():
+        if _rcon_up(server.rcon_port):
             return
         time.sleep(0.5)
-    raise TimeoutError("server did not open RCON")
+    raise TimeoutError(f"{server.name} did not open RCON")
+
+
+def clear_commands(origin: Pos, size: Pos) -> list[str]:
+    """Empty a box without drops and remove the entities in it."""
+    (ox, oy, oz), (sx, sy, sz) = origin, size
+    # Fill is capped at 32768 blocks per command, so clear in 32 x 32 columns; strict: no
+    # neighbour updates, so attached torches and levers don't pop off as items.
+    fills = [f"fill {x} {oy} {z} {min(x + 31, ox + sx - 1)} {oy + sy - 1} {min(z + 31, oz + sz - 1)} air strict"
+             for x in range(ox, ox + sx, 32) for z in range(oz, oz + sz, 32)]
+    return fills + [kill_command(origin, size)]
+
+
+def kill_command(origin: Pos, size: Pos) -> str:
+    """Remove the entities of a plot, with those that have left it sideways or upwards
+    (projectiles, minecarts), but not the plot's own labels and status sign."""
+    (ox, oy, oz), (sx, _, sz) = origin, size
+    m = KILL_MARGIN
+    return (f"kill @e[type=!player,tag=!plot_label,tag=!plot_status,x={ox - m},y={oy},z={oz - m},"
+            f"dx={sx - 1 + 2 * m},dy={BUILD_TOP - oy},dz={sz - 1 + 2 * m}]")
+
+
+def wait_loaded(rcon: Rcon, origin: Pos, size: Pos, timeout=60) -> None:
+    (ox, oy, oz), (sx, _, sz) = origin, size
+    corners = [(x, oy, z) for x in (ox, ox + sx - 1) for z in (oz, oz + sz - 1)]
+    deadline = time.time() + timeout
+    while not all(rcon.cmd(f"execute if loaded {x} {y} {z}").startswith("Test passed") for x, y, z in corners):
+        if time.time() > deadline:
+            raise TimeoutError(f"area at {origin} did not load")
+        time.sleep(0.05)
+
+
+def mirror(rcon: Rcon, origin: Pos, size: Pos, build: Build) -> None:
+    """Place a build in a plot of another server with plain commands: no tick control,
+    data pack or reload, so it is safe while that server runs a test elsewhere."""
+    (ox, oy, oz), (sx, _, sz) = origin, size
+    rcon.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
+    wait_loaded(rcon, origin, size)
+    for command in clear_commands(origin, size) + [f"execute positioned {ox} {oy} {oz} run {c}"
+                                                   for c in build.to_commands()]:
+        checked(rcon, command)
 
 
 class CommandFailed(Exception):
     pass
 
 
+def checked(rcon: Rcon, command: str) -> str:
+    out = rcon.cmd(command)
+    if ("Unknown or incomplete" in out or "Incorrect argument" in out or "<--[HERE]" in out
+            or "not loaded" in out):
+        raise CommandFailed(f"{command!r}: {out}")
+    return out
+
+
 class Rig:
     """Places a build in a tick-frozen world and advances it tick by tick."""
 
-    def __init__(self, rcon: Rcon, origin: Pos = (128, -63, 128), size: Pos = (192, 24, 192)):
+    def __init__(self, rcon: Rcon, origin: Pos = MAIN.origin, size: Pos = MAIN.size, plot: str = MAIN.name,
+                 server: Server = servers.MAIN, display: Rcon | None = None):
         self.r = rcon
+        # Where players watch: the plot status signs live in the main world.
+        self.display = display or rcon
+        self.server = server
+        self.plot = plot
+        self.heading: list[dict] = []
         self.origin = origin
         self.size = size
         self.build = Build()
+        self.loaded = Build()  # as placed by load(), less its drivers, before any use()
         self.pending: list[tuple[int, Pos]] = []
         self.probed: list[Pos] = []
+        self.levels: dict[Pos, int] = {}
         self.probe_count = 0
         self.fast_depth = 0
-        self.datapacks = SERVER_DIR / self.level_name() / "datapacks"
-        self.r.cmd("tick freeze")
+        self.datapacks = server.dir / server.level_name() / "datapacks"
         ox, _, oz = origin
         sx, _, sz = size
-        self.r.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
+        if server == servers.MAIN:
+            self.r.cmd("tick freeze")
+            self.r.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
+        else:
+            # A satellite keeps only the plot under test loaded.
+            self.r.cmd("forceload remove all")
+            self.r.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
+            wait_loaded(self.r, origin, size)
+            self.r.cmd("tick freeze")
 
     @staticmethod
     def level_name() -> str:
@@ -169,32 +271,35 @@ class Rig:
         return _Fast()
 
     def run(self, command: str) -> str:
-        out = self.r.cmd(command)
-        if "Unknown or incomplete" in out or "Incorrect argument" in out or "<--[HERE]" in out:
-            raise CommandFailed(f"{command!r}: {out}")
-        return out
+        return checked(self.r, command)
+
+    def command(self, command: str) -> tuple[bool, str]:
+        """Run a command with `~` at the build origin: whether it succeeded, and the
+        server's reply. A failed command still replies, often with its reason."""
+        reply = self.run(f"execute positioned {self.abs((0, 0, 0))} {RUN_WRAP}{command}")
+        return int(re.findall(r"(-?\d+)", self.run(f"data get storage {PACK}:probe ok"))[-1]) == 1, reply
 
     def clear(self) -> None:
-        # Fill is capped at 32768 blocks per command, so clear in 32 x 32 columns.
-        (ox, oy, oz), (sx, sy, sz) = self.origin, self.size
-        for x in range(ox, ox + sx, 32):
-            for z in range(oz, oz + sz, 32):
-                # strict: no neighbour updates, so attached torches and levers don't
-                # pop off as items.
-                self.run(f"fill {x} {oy} {z} {min(x + 31, ox + sx - 1)} {oy + sy - 1} "
-                         f"{min(z + 31, oz + sz - 1)} air strict")
+        for command in clear_commands(self.origin, self.size):
+            self.run(command)
         with self.fast():
             self._advance(FLUSH_TICKS)
+        # A chunk's entities load after its blocks, so the first kill can miss them.
+        self.run(kill_command(self.origin, self.size))
 
-    def load(self, build: Build, probe: set[Pos] | None = None) -> None:
+    def load(self, build: Build, probe: set[Pos] | None = None, drivers: set[Pos] = frozenset()) -> None:
         """Place a build. `probe` limits snapshots to those cells (default: every
-        signal-carrying block)."""
+        signal-carrying block). `drivers` are input cells the build places a redstone
+        block in; drive() may move them later."""
         (lo, hi) = build.bounds()
         for a, b, s in zip(lo, hi, self.size):
             if a < 0 or b >= s:
                 raise ValueError(f"build bounds {lo}..{hi} exceed rig size {self.size}")
+        wait_loaded(self.r, self.origin, self.size)
         self.clear()
-        self.build = Build(dict(build.blocks))
+        design = {p: b for p, b in build.blocks.items() if p not in drivers}
+        self.loaded = Build(design, list(build.entities))
+        self.build = Build(dict(design))
         self.pending = []
         probes, self.probed = probe_functions(self.build, probe)
         self.probe_count = len(probes)
@@ -208,13 +313,27 @@ class Rig:
             raise CommandFailed(f"build function: {out}")
 
     def snapshot(self) -> dict[Pos, int]:
-        """Signal level of every probed block: dust power 0-15, otherwise 1 or 0."""
+        """Signal level of every probed block: analog power 0-15, otherwise 1 or 0. Sets
+        `levels` to the output strength of each probed comparator."""
         self.run(f"data modify storage {PACK}:probe s set value {{}}")
         for i in range(self.probe_count):
             self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:probe{i}")
         out = self.run(f"data get storage {PACK}:probe s")
-        found = {int(i): int(v) for i, v in re.findall(r"b(\d+): (\d+)", out)}
+        found = {int(i): int(v) for i, v in re.findall(r"\bb(\d+): (\d+)", out)}
+        self.levels = {self.probed[int(i)]: int(v) for i, v in re.findall(r"\bc(\d+): (\d+)", out)}
         return {pos: found.get(i, 0) for i, pos in enumerate(self.probed)}
+
+    def level(self, pos: Pos) -> int:
+        """Exact 0-15 strength: a comparator's output, or an analog block's power."""
+        state = self.build.blocks.get(pos, "")
+        if not has_level(state):
+            raise ValueError(f"{pos} ({state or 'air'}) has no signal strength to read")
+        block = parse_state(state)[0]
+        if block == "minecraft:comparator":
+            self.run(f"execute store result storage {PACK}:probe l int 1 run data get block {self.abs(pos)} OutputSignal")
+            return int(re.findall(r"(-?\d+)", self.run(f"data get storage {PACK}:probe l"))[-1])
+        prop = signal(state)[0]
+        return next((n for n in range(16) if self.is_(pos, f"{block}[{prop}={n}]")), 0)
 
     def is_(self, pos: Pos, predicate: str) -> bool:
         out = self.run(f"execute if block {self.abs(pos)} {predicate}")
@@ -236,20 +355,20 @@ class Rig:
 
     def describe(self, pos: Pos) -> str:
         """The live value of whatever property carries signal at pos, for failure reports."""
-        block = parse_state(self.build.blocks.get(pos, "minecraft:air"))[0]
+        state = self.build.blocks.get(pos, "minecraft:air")
+        block = parse_state(state)[0]
         name = block.removeprefix("minecraft:")
-        if name == "redstone_wire":
-            level = next(p for p in range(16) if self.is_(pos, f"redstone_wire[power={p}]"))
-            return f"{name} power={level}"
-        prop = signal_property(block)
-        if prop:
-            on = self.is_(pos, f"{block}[{prop}=true]")
-            return f"{name} {prop if on else 'un' + prop}"
-        return name
+        sig = signal(state)
+        if not sig:
+            return name
+        prop, kind = sig
+        if kind == ANALOG:
+            return f"{name} {prop}={self.level(pos)}"
+        live = "true" if self.is_(pos, f"{block}[{prop}=true]") else "false"
+        return f"{name} {prop}={live}" + (" (locked)" if kind == INVERTED and live == "false" else "")
 
     def dump(self) -> str:
-        interesting = [p for p, s in sorted(self.build.blocks.items()) if any(
-            k in s for k in ("redstone", "repeater", "comparator", "lever", "button", "lamp", "observer", "piston"))]
+        interesting = [p for p, s in sorted(self.build.blocks.items()) if signal(s) or "redstone_block" in s]
         return "\n".join(f"  {p}: {self.describe(p)}" for p in interesting)
 
     def use(self, pos: Pos) -> None:

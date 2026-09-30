@@ -1,24 +1,120 @@
 import fcntl
+import json
+import os
+import time
 
 import pytest
 
-from redstone.harness import SERVER_DIR, Rig, ensure_server
+from redstone import fileformat, showroom
+from redstone.harness import Rig, _rcon_up, ensure_server, mirror
+from redstone.plots import MAIN as MAIN_PLOT, PLOTS, plot_for
 from redstone.rcon import Rcon
+from redstone.servers import MAIN, PLOT_RECORDS, SATELLITES, SERVERS
+
+# "auto": a plot other than main runs on the first free satellite that is up (main if
+# none is); "main" or a satellite's name pins every test to that server.
+SERVER = os.environ.get("REDSTONE_SERVER", "auto")
 
 
 @pytest.fixture(scope="session")
-def rcon():
-    ensure_server()
-    # One test area and one data pack per server, so concurrent pytest runs take turns.
-    with open(SERVER_DIR / "rig.lock", "w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        r = Rcon()
-        yield r
-        # Tests freeze the world; let it run again for anyone playing on the server.
-        r.cmd("tick unfreeze")
+def connect():
+    opened: dict[str, Rcon] = {}
+
+    def get(server):
+        if server.name not in opened:
+            # Satellites are started by scripts.servers only.
+            if server == MAIN:
+                ensure_server(server)
+            opened[server.name] = Rcon(port=server.rcon_port)
+        return opened[server.name]
+
+    yield get
+    for r in opened.values():
         r.close()
 
 
+@pytest.fixture(scope="session")
+def rcon(connect):
+    return connect(MAIN)
+
+
+def _take_satellite():
+    """The lock file of the first satellite that is up and idle, and that satellite."""
+    up = [s for s in SATELLITES if _rcon_up(s.rcon_port)]
+    if not up:
+        return None, None
+    while True:
+        for sat in up:
+            lock = open(sat.lock, "w")
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return lock, sat
+            except BlockingIOError:
+                lock.close()
+        time.sleep(0.1)
+
+
+@pytest.hookimpl(wrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):
+    # The rig fixture's teardown reads the call phase's outcome from the item.
+    rep = yield
+    setattr(item, f"rep_{rep.when}", rep)
+    return rep
+
+
+def _plot(request):
+    """$REDSTONE_PLOT, else main, unless the library build under test does not fit main."""
+    if "REDSTONE_PLOT" in os.environ:
+        return PLOTS[os.environ["REDSTONE_PLOT"]]
+    path = getattr(request.node, "callspec", None) and request.node.callspec.params.get("path")
+    build = fileformat.load(path).build if path else None
+    if build and build.blocks:
+        lo, hi = build.bounds()
+        if any(a < 0 or b >= s for a, b, s in zip(lo, hi, MAIN_PLOT.size)):
+            return plot_for(path) or MAIN_PLOT
+    return MAIN_PLOT
+
+
 @pytest.fixture
-def rig(rcon):
-    return Rig(rcon)
+def rig(connect, request):
+    plot = _plot(request)
+    PLOT_RECORDS.mkdir(exist_ok=True)
+    # Two runs of one plot would both mirror into, and sign on, the same place in main.
+    with open(PLOT_RECORDS / f"{plot.name}.lock", "w") as plot_lock:
+        fcntl.flock(plot_lock, fcntl.LOCK_EX)
+        lock, server = None, None
+        if SERVER == "auto" and plot.name != MAIN_PLOT.name:
+            lock, server = _take_satellite()
+        if lock is None:
+            # The tick clock, tick rate and test data pack are global to a server, so one
+            # test at a time runs on it, whatever its plot; other runs wait here.
+            server = MAIN if SERVER == "auto" else SERVERS[SERVER]
+            lock = open(server.lock, "w")
+            fcntl.flock(lock, fcntl.LOCK_EX)
+        (PLOT_RECORDS / f"{plot.name}.json").write_text(json.dumps({"server": server.name}))
+        r = connect(server)
+        rig = None
+        try:
+            rig = Rig(r, plot.origin, plot.size, plot.name, server=server, display=connect(MAIN))
+            yield rig
+        finally:
+            # Tests freeze the world; let it run again for anyone watching.
+            r.cmd("tick unfreeze")
+            lock.close()
+        # Players watch main, so a satellite's build is placed there too, where it runs
+        # live. Plain commands only, so this needs no lock on main. In any other plot the
+        # build joins the plot's showroom beside the family's other variants; a test run on
+        # main itself cleared that plot, so the whole showroom is redrawn.
+        if not rig.loaded.blocks:
+            return
+        if plot.name == MAIN_PLOT.name:
+            if server != MAIN:
+                mirror(connect(MAIN), plot.origin, plot.size, rig.loaded)
+            return
+        tested = getattr(rig, "tested", None)
+        rep = getattr(request.node, "rep_call", None)
+        if tested and rep:
+            # The spec's own build, not rig.loaded: a tile test loads two copies.
+            showroom.show(connect(MAIN), plot.name, tested["spec"], tested["spec"].build,
+                          {"test": tested["test"], "passed": rep.passed, "delay": tested["delay"]},
+                          full=server == MAIN)

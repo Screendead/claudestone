@@ -47,15 +47,23 @@ class Rcon:
         return self._recv()
 
     def cmd(self, command):
-        # Vanilla reads one packet per socket read, so requests can't be pipelined.
-        # Long responses arrive as consecutive 4096-byte packets; a shorter one ends it.
-        self._send(EXEC, command)
-        out = []
+        # Vanilla reads one packet per socket read, so requests can't be pipelined. A long
+        # response arrives as several 4096-char packets with no end marker, so after a full
+        # one we send a second request and read until its reply. Replies are matched by id:
+        # one left over from an earlier command (e.g. after a timeout) is dropped.
+        want = self._send(EXEC, command)
+        out, sentinel = [], None
         while True:
-            _, body = self._recv()
-            out.append(body)
-            if len(body.encode()) < 4096:
+            req_id, body = self._recv()
+            if req_id == sentinel:
                 return "".join(out)
+            if req_id != want:
+                continue
+            out.append(body)
+            if sentinel is None:
+                if len(body) < 4000:
+                    return body
+                sentinel = self._send(EXEC, "")
 
     def close(self):
         self.sock.close()

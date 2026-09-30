@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -12,11 +13,15 @@ class Build:
     """A build is a sparse grid of block states, relative to its origin (0, 0, 0)."""
 
     blocks: dict[Pos, str] = field(default_factory=dict)
+    # Summoned after the blocks exist: (x, y, z) as block-relative floats, entity id, SNBT.
+    entities: list[tuple[tuple[float, float, float], str, str]] = field(default_factory=list)
 
     def place(self, pos: Pos, state: str) -> "Build":
-        if ":" not in state.split("[")[0]:
-            state = "minecraft:" + state
-        self.blocks[pos] = state
+        self.blocks[pos] = namespaced(state)
+        return self
+
+    def summon(self, pos: tuple[float, float, float], entity: str, nbt: str = "") -> "Build":
+        self.entities.append((pos, namespaced(entity), nbt))
         return self
 
     def merge(self, other: "Build", offset: Pos = (0, 0, 0)) -> "Build":
@@ -24,11 +29,13 @@ class Build:
             if pos in self.blocks and self.blocks[pos] != state:
                 raise ValueError(f"overlap at {pos}: {self.blocks[pos]} vs {state}")
             self.blocks[pos] = state
+        self.entities += other.shifted(offset).entities
         return self
 
     def shifted(self, offset: Pos) -> "Build":
         dx, dy, dz = offset
-        return Build({(x + dx, y + dy, z + dz): s for (x, y, z), s in self.blocks.items()})
+        return Build({(x + dx, y + dy, z + dz): s for (x, y, z), s in self.blocks.items()},
+                     [((x + dx, y + dy, z + dz), e, n) for (x, y, z), e, n in self.entities])
 
     def with_base(self, material: str = "minecraft:smooth_stone") -> "Build":
         """Add a support block under every block in layer y=1 that lacks one."""
@@ -50,10 +57,16 @@ class Build:
         # itself runs updateNeighborsAt(pos) once the whole build exists, like the final
         # pass of structure-block placement.
         update = [f"clone ~{x} ~{y} ~{z} ~{x} ~{y} ~{z} ~{x} ~{y} ~{z} replace force" for x, y, z in order]
-        return place + update
+        summon = [f"summon {e} ~{x} ~{y} ~{z} {n}".rstrip() for (x, y, z), e, n in self.entities]
+        return place + summon + update
 
     def to_mcfunction(self) -> str:
         return "\n".join(self.to_commands()) + "\n"
+
+
+def namespaced(state: str) -> str:
+    """Add minecraft: to a bare id; properties and block-entity NBT may follow it."""
+    return state if ":" in re.split(r"[\[{]", state)[0] else "minecraft:" + state
 
 
 def write_datapack(datapacks_dir: Path, name: str, functions: dict[str, str]) -> Path:
