@@ -19,6 +19,10 @@ server's log and crash reports are saved before removal, as
 
 with RCON only on the desktop's loopback, forwarded to the laptop through the SSH master.
 
+The image also carries python3, pyyaml, pip and python-sat: the harness runs each test in
+the container next to its server (`redstone/remote.py`, via `docker exec -i dsatN python3 -c
+...`), and `python -m scripts.remote_run` runs offline searches in throwaway containers of it.
+
 Level `testworld`; the data pack dir is `/srv/testworld/datapacks` (`docker cp` into it,
 then `reload`). A TCP connect through the tunnel succeeds even with the server down, so
 wait for an RCON login, not an open port. `MEMORY` (default 1G) and `JAVA_OPTS` are optional.

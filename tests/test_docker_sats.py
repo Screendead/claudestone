@@ -629,13 +629,22 @@ def test_conftest_offers_dsats_then_laptop_satellites_that_are_up(monkeypatch, p
     monkeypatch.setattr(c, "_rcon_up", lambda port: port == lap[1].rcon_port)
     seen = {}
 
-    def take_idle(candidates, spare):
-        seen["candidates"], seen["spare"] = candidates, spare
+    def take_idle(candidates, spare, ready):
+        seen["candidates"], seen["spare"], seen["ready"] = candidates, spare, ready
         return None, None
 
     monkeypatch.setattr(c, "take_idle", take_idle)
     assert c._take_satellite() == (None, None)
     assert seen["candidates"] == [*d, lap[1]] and seen["spare"] is c.docker_sats.start_spare
+    # A test run in the dsat's container waits there for its server: no RCON check here.
+    asked = []
+    monkeypatch.setattr(ds.DockerSatellite, "is_up", lambda self: asked.append(self.name) or False)
+    dsat = ds.DockerSatellite("dsat1", d[0].dir, 0, 25676, "1G")
+    monkeypatch.setattr(c.remote, "ENABLED", True)
+    assert seen["ready"](dsat) and not asked
+    monkeypatch.setattr(c.remote, "ENABLED", False)
+    assert not seen["ready"](dsat) and asked == ["dsat1"]
+    assert seen["ready"](lap[1])
 
 
 # Live: only when the desktop answers. Uses dsat6, which scripts and tests pick last.

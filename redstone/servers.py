@@ -45,11 +45,15 @@ SERVERS = {s.name: s for s in [MAIN, *SATELLITES]}
 PLOT_RECORDS = ROOT / "plots"
 
 
-def take_idle(candidates: list[Server], spare=lambda: None):
+def answers(server) -> bool:
+    return not hasattr(server, "is_up") or server.is_up()
+
+
+def take_idle(candidates: list[Server], spare=lambda: None, ready=answers):
     """The held rig.lock and the server of the first idle candidate, else of spare()
     (asked once), else of the first candidate to come free: (None, None) when there are
     none. A candidate with is_up() was listed without asking it (a busy server can't
-    answer in time), so it is asked once its lock is won, and dropped if down."""
+    answer in time), so it is asked (`ready`) once its lock is won, and dropped if down."""
     up = list(candidates)
     asked_spare = False
     while True:
@@ -61,7 +65,7 @@ def take_idle(candidates: list[Server], spare=lambda: None):
             except BlockingIOError:
                 lock.close()
                 continue
-            if hasattr(server, "is_up") and not server.is_up():
+            if not ready(server):
                 lock.close()
                 up.remove(server)
                 continue

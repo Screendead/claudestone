@@ -106,7 +106,8 @@ def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
         watch.autostart()
     _announce(rig, spec.name, test["name"])
     try:
-        result = _run(rig, spec, test, trace)
+        # A Docker satellite's rig (redstone.remote) runs _run in the container.
+        result = rig.run_spec(spec, test, trace) if hasattr(rig, "run_spec") else _run(rig, spec, test, trace)
     except BaseException:
         _event(rig, "result", spec, test, passed=False)
         raise
