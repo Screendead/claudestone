@@ -403,3 +403,10 @@ def test_throughput_below_min_fails_after_the_window():
         run(rig, item_spec([{"throughput": {"to": "feed", "item": "cobblestone", "ticks": 80, "min": 11}},
                             {"run": "say after"}]))
     assert rig.log[-1] == (80, "say after")
+
+
+def test_throughput_that_cannot_read_still_takes_its_ticks():
+    rig = FakeRig(replies={GET: (False, "The target block is not a block entity")})
+    with pytest.raises(AssertionError, match="throughput: no items to read"):
+        run(rig, item_spec([{"throughput": {"to": "feed", "ticks": 80}}, {"run": "say after"}]))
+    assert rig.log[-1] == (80, "say after")

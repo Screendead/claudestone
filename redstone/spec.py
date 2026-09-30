@@ -458,7 +458,11 @@ def _throughput(rig, spec, arg, rec):
     rec.frame(f"throughput {_fmt_levels(arg)}")
     try:
         before = {k: count_items(contents(rig, p), item) for k, p in ends.items()}
-        rec.wait(ticks)
+    except ValueError as e:
+        rec.advance(ticks)  # later steps keep their ticks
+        return rec.fail(f"throughput: {e}")
+    rec.wait(ticks)
+    try:
         after = {k: count_items(contents(rig, p), item) for k, p in ends.items()}
     except ValueError as e:
         return rec.fail(f"throughput: {e}")

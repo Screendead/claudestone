@@ -318,8 +318,8 @@ def _item_problems(spec, kind, arg, at):
                                                   and _count(i.get("count", 1), 1) and set(i) <= {"id", "count"}
                                                   for i in items):
             return out + [f"items {items!r} is not a list of {{id, count}}"]
-        if "items" in arg and "item" in arg:
-            out.append("give items or item, not both")
+        if "items" in arg and ("item" in arg or "count" in arg):
+            out.append("give items, or item and count, not both")
         if not ("items" in arg or "item" in arg or arg.get("clear")):
             out.append("needs items, item or clear: true")
         if not out:
