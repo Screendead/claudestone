@@ -1,0 +1,49 @@
+name: hopper_chain_rate_container_steps
+description: A chest over two hoppers into a chest moves one item every 8 gt; also the live check of the insert, expect_items and throughput steps (fresh containers, comparator updates, shulker components).
+traits: [compact, container_based]
+palette:
+  '=': smooth_stone
+  .: air
+  F: {name: feed, block: 'chest[facing=north]'}
+  H: {name: h1, block: 'hopper[facing=east]'}
+  h: {name: h2, block: 'hopper[facing=east]'}
+  C: {name: out, block: 'chest[facing=north]'}
+  B: {name: spare, block: 'barrel[facing=up]'}
+  P: {name: probe, block: 'hopper[facing=down]'}
+  c: comparator[facing=west]
+  o: {output: level, block: redstone_wire}
+layers:
+  0: |
+    =======
+  1: |
+    HhCBPco
+  2: |
+    F......
+tests:
+- name: fresh containers read empty
+  steps:
+  - expect_items: {cell: spare, empty: true}
+  - expect_items: {cell: probe, empty: true}
+  - expect_items: {cell: out, empty: true}
+- name: insert into a fresh barrel and hopper, and the comparator sees it
+  steps:
+  - insert: {cell: spare, item: dirt, count: 5}
+  - expect_items: {cell: spare, item: dirt, count: 5}
+  - insert: {cell: probe, item: cobblestone, count: 1}
+  - wait: 4
+  - expect_items: {cell: probe, item: cobblestone, count: 1}
+  - check: if block ~6 ~1 ~0 redstone_wire[power=1]
+  - insert: {cell: probe, clear: true}
+  - wait: 4
+  - expect_items: {cell: probe, empty: true}
+  - check: if block ~6 ~1 ~0 redstone_wire[power=0]
+- name: a shulker box with contents is counted as one item
+  steps:
+  - run: 'data merge block ~3 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:cobblestone",count:64}}]}}]}'
+  - expect_items: {cell: spare, item: shulker_box, count: 1}
+  - expect_items: {cell: spare, item: cobblestone, count: 0}
+- name: two hoppers move one item every 8 gt
+  steps:
+  - insert: {cell: feed, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 40
+  - throughput: {from: feed, to: out, item: cobblestone, ticks: 400, min: 49, max: 51}
