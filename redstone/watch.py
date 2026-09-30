@@ -58,14 +58,14 @@ DEFAULTS = {
     "tour_min": 4.0,     # seconds a touring shot is held before an event may cut in
     "camera": "entity",  # or "tp": teleport the players instead (steps, but needs no entity)
     "rate": 20.0,        # director loop, and tp-camera updates, per second
-    "glide": 20,         # teleport_duration of the camera entities, ticks: longer is smoother and lags more
+    "cam_every": 0.25,   # seconds between camera-entity glides
     "attach_delay": 0.6, # seconds from summoning the camera entity to spectating it
     "text_every": 0.5,   # the client drops an actionbar after 3 s of its ticks, which run fast in a warp
     "fov": 70.0,         # the client's vertical field of view
     "aspect": 16 / 9,
     "margin": 0.85,      # of the half field of view the build may fill
     "elevation": 35.0,
-    "motion": "orbit",   # "orbit": swing round the build; "dolly": slide sideways
+    "motion": "dolly",   # "dolly": slide sideways; "orbit": swing round the build (tp camera only, see EntityCamera)
     "sway": 20.0,        # degrees either side of north an orbit swings
     "dolly": 0.2,        # how far a dolly slides either side, as a fraction of the distance
     "period": 60.0,      # seconds per full swing
@@ -760,86 +760,16 @@ def caption(shot: Shot, live: str | None) -> dict:
 CAM = "watch_cam"
 CAM_SELECTOR = f"@e[type=item_display,tag={CAM}]"
 SNAP_STEP = 0.1  # seconds between the stages of a snap: at least one server tick apart
-TICK = 0.05
-PACK = "watch"
-STORE = "watch:cam"
-OBJ = "watch_cam"
-# Game ticks the camera function may run past the director's own count of real time. A
-# warp that starts before the director sees the freeze plays at most this much of the path;
-# a director that stalls longer holds the camera still.
-CREDIT = 20
-QUEUE_LOW, QUEUE_HIGH = 40, 60  # poses queued: topped up to HIGH when below LOW
-EASE_TICKS = 40  # after main ran frozen, the motion speeds back up over this many ticks
-
-# One pose a tick from the queue. `data merge` flips OnGround on alternate ticks, so each
-# tick's move differs from the last one sendChanges saw and goes out as an
-# EntityPositionSync with exact rotation, not a 1/256-turn byte (ServerEntity.createMovePacket);
-# a merge that changes nothing fails without touching the entity. The credit check is how the
-# function stays still in a warp: tick functions run while main steps, and `tick query` is
-# above their permission level.
-TICK_FUNCTION = f"""execute store result score #now {OBJ} run time query gametime
-execute unless score #now {OBJ} <= #until {OBJ} run return 0
-scoreboard players add #par {OBJ} 1
-execute if score #par {OBJ} matches 2.. run scoreboard players set #par {OBJ} 0
-execute unless data storage {STORE} q[0] run scoreboard players add #under {OBJ} 1
-execute if data storage {STORE} q[0].d0 as {CAM_SELECTOR} run data merge entity @s {{teleport_duration:0}}
-execute if data storage {STORE} q[0].x run function {PACK}:move with storage {STORE} q[0]
-execute if data storage {STORE} q[0].D run function {PACK}:restore with storage {STORE} q[0]
-execute if data storage {STORE} q[0] store result score #done {OBJ} run data get storage {STORE} q[0].n
-execute if score #par {OBJ} matches 0 as {CAM_SELECTOR} run data merge entity @s {{OnGround:0b}}
-execute if score #par {OBJ} matches 1 as {CAM_SELECTOR} run data merge entity @s {{OnGround:1b}}
-data remove storage {STORE} q[0]
-"""
-PACK_FUNCTIONS = {
-    "tick": TICK_FUNCTION,
-    "move": f"$execute as {CAM_SELECTOR} run tp @s $(x) $(y) $(z) $(r) $(p)\n",
-    "restore": f"$execute as {CAM_SELECTOR} run data merge entity @s {{teleport_duration:$(D)}}\n",
-    "load": f"scoreboard objectives add {OBJ} dummy\n",
-}
-
-
-def pack_dir() -> Path:
-    return servers.MAIN.dir / servers.MAIN.level_name() / "datapacks"
-
-
-def install_pack(datapacks: Path) -> bool:
-    """Write the camera data pack; whether any file changed."""
-    from .build import write_datapack
-
-    root = datapacks / PACK
-    files = {root / "data" / PACK / "function" / f"{k}.mcfunction": v for k, v in PACK_FUNCTIONS.items()}
-    tags = root / "data" / "minecraft" / "tags" / "function"
-    files[tags / "tick.json"] = json.dumps({"values": [f"{PACK}:tick"]})
-    files[tags / "load.json"] = json.dumps({"values": [f"{PACK}:load"]})
-    try:
-        if all(p.read_text() == v for p, v in files.items()):
-            return False
-    except OSError:
-        pass
-    write_datapack(datapacks, PACK, PACK_FUNCTIONS)
-    tags.mkdir(parents=True, exist_ok=True)
-    for p in (tags / "tick.json", tags / "load.json"):
-        p.write_text(files[p])
-    return True
 
 
 def cam_ticks(cfg: dict) -> int:
-    """teleport_duration of the camera entities while they glide."""
-    return max(1, min(59, int(cfg["glide"])))
+    """teleport_duration of the camera entities: one tick past the glide interval, so each
+    glide is still moving when the next one retargets it (then its speed is steady)."""
+    return max(1, min(59, round(cfg["cam_every"] * 20) + 1))
 
 
 def _cam_of(player: str, limit: str = ",limit=1") -> str:
     return f"@e[type=item_display,tag={CAM}_{player}{limit}]"
-
-
-def _number(reply: str) -> int | None:
-    m = re.search(r"(-?\d+)", reply)
-    return int(m.group(1)) if m else None
-
-
-def pose_item(pose: tuple, n: int, extra: str = "") -> str:
-    x, y, z, yaw, pitch = pose
-    return f"{{x:{x:.4f},y:{y:.4f},z:{z:.4f},r:{yaw:.4f},p:{pitch:.4f},n:{n}{extra}}}"
 
 
 class EntityCamera:
@@ -851,41 +781,23 @@ class EntityCamera:
     position and rotation (Camera.alignWithEntity), plus an eye height that eases halfway to
     the entity's each tick (Camera.tick): 1.62 for a player, 0 for a display entity. So the
     camera is attached once and then only these entities move: switching from the player to
-    an entity, or between a player view and an entity, shows as a slow drop.
-
-    While main runs normally, the entities are moved by the `watch:tick` function of a data
-    pack this class installs on main: it plays one queued pose a tick, so the motion has
-    the server's tick clock, not the director's, and every move carries exact rotation (see
-    TICK_FUNCTION). The director keeps QUEUE_LOW..QUEUE_HIGH poses queued in storage and
-    grants the function game ticks as real time passes (#until). A cut is queued too: a tick
-    at teleport_duration 0, a snap, then the glide duration again (a tick's entity data goes
-    out after its position).
-
+    an entity, or between a player view and an entity, shows as a slow drop. Rotation
+    reaches the client in 1/256 turns (ServerEntity.sendChanges packs it into a byte), so a
+    turning camera turns in 1.4 degree steps; the default motion slides without turning.
     The client freezes non-player entities while the server's tick is frozen
-    (TickRateManager.isEntityFrozen) and tick functions don't run then, so the camera holds
-    still; a cut then goes straight over RCON, whose snap still lands. A spectator is
-    attached only if its client has the entity (ClientPacketListener.handleSetCamera ignores
-    an unknown id), so a camera is summoned where its player is. The server re-attaches
-    nothing by itself: sneaking detaches, and re-sending spectate to an attached player does
-    nothing (ServerPlayer.setCamera)."""
+    (TickRateManager.isEntityFrozen), so glides wait for main to run; a snap (teleport_duration
+    0) still lands. A spectator is attached only if its client has the entity
+    (ClientPacketListener.handleSetCamera ignores an unknown id), so a camera is summoned where
+    its player is. The server re-attaches nothing by itself: sneaking detaches, and
+    re-sending spectate to an attached player does nothing (ServerPlayer.setCamera)."""
 
-    def __init__(self, rcon, cfg: dict, datapacks: Path | None = None):
+    def __init__(self, rcon, cfg: dict):
         self.rcon, self.cfg = rcon, cfg
-        self.datapacks = datapacks
-        self.pose: tuple | None = None  # eye x y z yaw pitch of the latest queued or snapped pose
+        self.pose: tuple | None = None  # eye x y z yaw pitch
         self.cams: set[str] = set()
         self.attach: dict[str, float] = {}  # player -> when to spectate its new camera
         self.snap: list = []  # pending (when, command) stages
         self.next_check = 0.0
-        self.installed = False
-        self.live = False       # the function drives the camera
-        self.clock = None       # (game time, wall time) when main last answered running normally
-        self.until = None       # the credit last granted
-        self.seq = None         # number of the last pose queued
-        self.done = 0           # number of the last pose the function played
-        self.marks: list = []   # (number, token) of each queued pose, to resume from
-        self.restart = False    # requeue from the first pose not played
-        self.cutting = False    # queue a cut next
 
     def sync(self, watched: list[str], now: float) -> None:
         for p in sorted(self.cams - set(watched)):
@@ -905,54 +817,11 @@ class EntityCamera:
         self.cams.add(player)
         self.attach[player] = now + self.cfg["attach_delay"]
 
-    def ticking(self, normal: bool, now: float) -> None:
-        """Called a few times a second with whether main runs normally."""
-        if normal and not self.installed:
-            self._install()
-        if normal:
-            game = _number(self.rcon.cmd("time query gametime"))
-            done = _number(self.rcon.cmd(f"scoreboard players get #done {OBJ}"))
-        else:
-            game = done = None
-        if game is None:
-            if self.live:
-                self._grant(-1)
-                self.live, self.restart = False, True
-            self.clock = None
-            return
-        self.clock = (game, now)
-        if done is not None:
-            self.done = done
-        if self.seq is None:
-            self.seq = self.done
-        if not self.live:
-            self.live, self.restart = True, True
-        self.marks = [m for m in self.marks if m[0] > self.done]
-
-    def _install(self) -> None:
-        datapacks = self.datapacks or pack_dir()
-        if install_pack(datapacks) or f"file/{PACK}" not in self.rcon.cmd("datapack list enabled"):
-            self.rcon.cmd("reload")
-            if f"file/{PACK}" not in self.rcon.cmd("datapack list enabled"):
-                self.rcon.cmd(f'datapack enable "file/{PACK}"')
-        self.rcon.cmd(f"scoreboard objectives add {OBJ} dummy")
-        self.installed = True
-
-    def _grant(self, until: int) -> None:
-        if until != self.until:
-            self.rcon.cmd(f"scoreboard players set #until {OBJ} {until}")
-            self.until = until
-
-    def cut(self, pose: tuple, now: float, fresh: bool = True) -> None:
-        """Jump every camera to `pose`. `fresh`: a new shot, whose motion starts at `pose`;
-        otherwise the same shot again from the pose on screen (a new camera attached)."""
+    def cut(self, pose: tuple, now: float) -> None:
+        """Jump every camera to `pose`: teleport_duration 0 first, the teleport a tick later
+        (a tick's entity data goes out after its position), the glide duration after that."""
         self.pose = pose
-        if fresh:
-            self.marks = []
-        if self.live:
-            self.cutting = True
-            return
-        self.restart = True
+        x, y, z, yaw, pitch = pose
         each = f"execute as {CAM_SELECTOR} run data merge entity @s "
         self.rcon.cmd(each + "{teleport_duration:0}")
         self.snap = [(now + SNAP_STEP, lambda: self._tp(self.pose)),
@@ -962,59 +831,10 @@ class EntityCamera:
         x, y, z, yaw, pitch = pose
         self.rcon.cmd(f"tp {CAM_SELECTOR} {x:.3f} {y:.3f} {z:.3f} {yaw:.2f} {pitch:.2f}")
 
-    def feed(self, now: float, step, rewind) -> None:
-        """Keep the queue topped up with `step()` -> (pose, token), one pose per tick of
-        motion; `rewind(token, ease)` goes back to where a queued pose was made."""
-        if not self.cams:
-            self.live = False  # a clock this old must not grant credit to a camera summoned later
-        if not self.live or self.snap:
-            return
-        if self.cutting or self.restart:
-            if self.marks:
-                rewind(self.marks[0][1], ease=not self.cutting)
-            self.marks = []
-            items = []
-            if self.cutting:
-                items.append(f"{{d0:1b,n:{self._next()}}}")
-            for i in range(QUEUE_HIGH - len(items)):
-                pose, token = step()
-                n = self._next()
-                self.marks.append((n, token))
-                self.pose = pose
-                items.append(pose_item(pose, n, f",D:{cam_ticks(self.cfg)}" if self.cutting and i == 1 else ""))
-            self._send(items, replace=True)
-            self.cutting = self.restart = False
-        elif self.seq - self.done < QUEUE_LOW:
-            items = []
-            while self.seq - self.done < QUEUE_HIGH:
-                pose, token = step()
-                n = self._next()
-                self.marks.append((n, token))
-                self.pose = pose
-                items.append(pose_item(pose, n))
-            self._send(items, replace=False)
-        if self.clock:
-            game, then = self.clock
-            self._grant(game + int((now - then) / TICK) + CREDIT)
-
-    def _next(self) -> int:
-        self.seq += 1
-        return self.seq
-
-    def _send(self, items: list[str], replace: bool) -> None:
-        from scripts.lint import RCON_MAX
-
-        head = [f"data modify storage {STORE} q set value [", f"data modify storage {STORE} in set value ["]
-        first = True
-        while items:
-            prefix = head[0] if replace and first else head[1]
-            k = 1
-            while k < len(items) and len(prefix) + len(",".join(items[:k + 1])) + 1 <= RCON_MAX:
-                k += 1
-            self.rcon.cmd(prefix + ",".join(items[:k]) + "]")
-            if not (replace and first):
-                self.rcon.cmd(f"data modify storage {STORE} q append from storage {STORE} in[]")
-            items, first = items[k:], False
+    def glide(self, pose: tuple) -> None:
+        self.pose = pose
+        if not self.snap:
+            self._tp(pose)
 
     def snapping(self) -> bool:
         return bool(self.snap)
@@ -1027,7 +847,7 @@ class EntityCamera:
             del self.attach[p]
             self.rcon.cmd(f"spectate {_cam_of(p)} {p}")
         if attached and self.pose is not None:
-            self.cut(self.pose, now, fresh=False)
+            self.cut(self.pose, now)
         if now < self.next_check:
             return
         self.next_check = now + 1
@@ -1039,13 +859,10 @@ class EntityCamera:
 
     def remove(self) -> None:
         self.rcon.cmd(f"kill {CAM_SELECTOR}")
-        self.rcon.cmd(f"scoreboard players set #until {OBJ} -1")
-        self.rcon.cmd(f"data remove storage {STORE} q")
         self.cams.clear()
         self.attach.clear()
         self.snap = []
         self.pose = None
-        self.until, self.live, self.marks = -1, False, []
 
 
 class TpCamera:
@@ -1091,8 +908,7 @@ class Director:
 
     def __init__(self, rcon, sources: Sources, cfg: dict | None = None, state_path: Path = STATE,
                  config_path: Path | None = CONFIG, status_dir: Path = STATUS,
-                 showroom: Path = SHOWROOM, fallback: str | None = None, overrides: dict | None = None,
-                 datapacks: Path | None = None):
+                 showroom: Path = SHOWROOM, fallback: str | None = None, overrides: dict | None = None):
         self.sources = sources
         self.config_path, self.overrides = config_path, overrides or {}
         self.cfg = cfg or load_config(config_path) | self.overrides
@@ -1104,8 +920,7 @@ class Director:
         self.framing: Framing | None = None
         self.shot: Shot | None = None
         self.motion_t = 0.0    # seconds of motion so far in this shot; paused while main is frozen
-        self.ease_n = EASE_TICKS  # ticks of motion since the camera function last resumed
-        self.datapacks = datapacks
+        self.moving_since = None  # when main last started running normally
         self.normal = True
         self.last = None
         self.due = {"players": 0.0, "events": 0.0, "config": 0.0, "text": 0.0, "glide": 0.0, "tick": 0.0}
@@ -1124,12 +939,7 @@ class Director:
         if self.camera is not None and isinstance(self.camera, self._camera_kind()):
             self.camera.rcon = value
         else:
-            self.camera = self._new_camera()
-
-    def _new_camera(self):
-        if self._camera_kind() is EntityCamera:
-            return EntityCamera(self.rcon, self.cfg, self.datapacks)
-        return TpCamera(self.rcon, self.cfg)
+            self.camera = self._camera_kind()(value, self.cfg)
 
     def _camera_kind(self):
         return EntityCamera if self.cfg["camera"] == "entity" else TpCamera
@@ -1145,7 +955,7 @@ class Director:
             self.cfg.update(load_config(self.config_path) | self.overrides)
             if (self.cfg["camera"], self.motion()) != before:
                 self.camera.remove()
-                self.camera = self._new_camera()
+                self.camera = self._camera_kind()(self.rcon, self.cfg)
                 self.framing = None
             self.due["config"] = now + 2
         if now >= self.due["players"]:
@@ -1158,10 +968,10 @@ class Director:
             self.due["events"] = now + 0.5
         if now >= self.due["tick"]:
             normal = running_normally(self.rcon.cmd("tick query"))
+            if normal and not self.normal:
+                self.moving_since = now
             self.normal = normal
-            if self.watched and isinstance(self.camera, EntityCamera):
-                self.camera.ticking(normal, now)
-            self.due["tick"] = now + 0.25
+            self.due["tick"] = now + 0.5
         if not self.watched:
             return
         shot, cut = self.scheduler.pick(now, self.tour())
@@ -1170,9 +980,9 @@ class Director:
         if cut or self.framing is None or shot.box != self.framing.box or self.camera.pose is None:
             self.framing = frame(shot.box, self.fixed + slot_obstacles(shot.plot, shot.spec, self.showroom),
                                  self.cfg, self.motion())
-            self.motion_t, self.ease_n = 0.0, EASE_TICKS
+            self.motion_t = 0.0
             self.camera.cut(self.pose(), now)
-            self.due["glide"] = now + 1 / self.cfg["rate"]
+            self.due["glide"] = now + self.cfg["cam_every"]
             cut = True
             if self.log:
                 f = self.framing
@@ -1180,30 +990,18 @@ class Director:
                          f"box {shot.box} el {f.elevation} dist {f.distance:.1f} sway {f.sway:g} "
                          f"dolly {f.dolly:g} -> eye {' '.join(f'{v:.2f}' for v in self.camera.pose)}")
         self.shot = shot
-        if isinstance(self.camera, EntityCamera):
-            self.camera.feed(now, self.step, self.rewind)
-        elif self.motion():
-            self.motion_t += dt
+        entity = self.cfg["camera"] == "entity"
+        if self.motion() and (self.normal or not entity) and not self.camera.snapping():
+            # After a frozen span the motion speeds back up over two seconds.
+            ease = 1.0 if self.moving_since is None else min(1.0, (now - self.moving_since) / 2)
+            self.motion_t += dt * ease
             if now + 1e-6 >= self.due["glide"]:
                 self.camera.glide(self.pose())
-                self.due["glide"] = now + 1 / self.cfg["rate"]
+                self.due["glide"] = now + (self.cfg["cam_every"] if entity else 1 / self.cfg["rate"])
         self.camera.keep(now)
         if cut or now >= self.due["text"]:
             self.text(shot)
             self.due["text"] = now + self.cfg["text_every"]
-
-    def step(self) -> tuple:
-        """The pose for the next tick of motion, and a token to rewind to it."""
-        token = (self.motion_t, self.ease_n)
-        pose = self.pose()
-        if self.motion():
-            self.motion_t += TICK * min(1.0, self.ease_n / EASE_TICKS)
-            self.ease_n += 1
-        return pose, token
-
-    def rewind(self, token: tuple, ease: bool) -> None:
-        """Back to where `step` made a token; `ease`: speed up from rest again."""
-        self.motion_t, self.ease_n = token[0], 0 if ease else token[1]
 
     def pose(self) -> tuple:
         eye, yaw, pitch = self.framing.pose(phase_at(self.motion_t, self.cfg) if self.motion() else 0.0)
@@ -1294,9 +1092,6 @@ def run(cfg_overrides: dict | None = None) -> int:
                 while True:
                     began = time.time()
                     director.tick(began)
-                    took = time.time() - began
-                    if took > 0.5:  # a stall longer than CREDIT ticks holds the orbit still
-                        print(f"{time.strftime('%H:%M:%S')} slow director tick {took:.2f} s", flush=True)
                     if not director.cfg["enabled"]:
                         print("disabled by config; exiting", flush=True)
                         return 0

@@ -5,8 +5,6 @@ import json
 import math
 import os
 import random
-import re
-import struct
 import time
 
 import pytest
@@ -306,8 +304,7 @@ class FakeRcon:
 def _director(tmp_path, rcon, **cfg):
     src = w.Sources(tmp_path / "events.jsonl", tmp_path, tmp_path / "traces", start=0)
     return w.Director(rcon, src, dict(CFG, **cfg), state_path=tmp_path / "state.json", config_path=None,
-                      status_dir=tmp_path / "status", showroom=tmp_path, fallback="creative",
-                      datapacks=tmp_path / "datapacks")
+                      status_dir=tmp_path / "status", showroom=tmp_path, fallback="creative")
 
 
 def _run(d, start, end, rate=20):
@@ -348,476 +345,69 @@ def test_director_picks_up_a_player_who_joins(tmp_path):
 
 GLIDE = f"tp {w.CAM_SELECTOR} "
 DURATION = f"execute as {w.CAM_SELECTOR} run data merge entity @s {{teleport_duration:"
-QUEUE_SET = f"data modify storage {w.STORE} q set value ["
-QUEUE_IN = f"data modify storage {w.STORE} in set value ["
 
 
-def _pack(**cfg):
-    return dict(CFG, tour_dwell=1e9, **cfg)
-
-
-class _Return(Exception):
-    pass
-
-
-def _f32(x):
-    return struct.unpack("f", struct.pack("f", x))[0]
-
-
-def _wrap(a):
-    a = math.fmod(a, 360.0)
-    return a - 360 if a >= 180 else a + 360 if a < -180 else a
-
-
-def _byte(a):
-    v = math.floor(a * 256 / 360) & 0xFF
-    return v - 256 if v >= 128 else v
-
-
-class FakeMain(FakeRcon):
-    """FakeRcon plus what the camera uses on main: game time, freezes and warps, storage,
-    scores, the data pack's functions (run from their text), and the camera entity with
-    what ServerEntity.sendChanges sends for it each tick. All cameras share one entity."""
-
-    def __init__(self, players=("Jack",), functions=None):
-        super().__init__(players)
-        self.functions = dict(functions or w.PACK_FUNCTIONS)
-        self.game, self.stepping, self.enabled, self.reloads = 1000, 0, False, 0
-        self.scores, self.store = {}, {"q": [], "in": []}
-        self.ent = None
-        self.sent = None  # what the client was last sent: base pos, rotation bytes, on-ground
-        self.packets = []  # (wall time, kind, pos, yaw, pitch, duration)
-        self.played = []   # (game time, pose number) of each pose the function took
-        self.now = 0.0
-
-    def cmd(self, c):
-        reply = self._reply(c)
-        if reply is not None:
-            self.log.append(c)
-            return reply
-        return self._act(c)
-
-    def _reply(self, c):
-        if c == "tick query":
-            state = "frozen" if self.frozen and not self.stepping else "running normally"
-            return f"The game is {state}Target tick rate: {10000.0 if self.stepping else 20.0} per second."
-        if c == "time query gametime":
-            return f"The time is {self.game}"
-        if c == "datapack list enabled":
-            return "There are 2 data packs enabled: [vanilla (built-in)]" + (", [file/watch]" if self.enabled else "")
-        m = re.fullmatch(r"scoreboard players get (\S+) (\S+)", c)
-        if m:
-            v = self.scores.get(m.group(1))
-            return f"{m.group(1)} has {v} [{m.group(2)}]" if v is not None else "Can't get value"
-        return None
-
-    def _act(self, c):
-        if c.startswith("datapack enable"):
-            self.enabled = True
-        if c == "reload":
-            self.reloads += 1
-        m = re.fullmatch(r"data modify storage \S+ (q|in) set value \[(.*)\]", c)
-        if m:
-            self.store[m.group(1)] = [self._item(i) for i in re.findall(r"\{([^}]*)\}", m.group(2))]
-        elif c.endswith(" q append from storage watch:cam in[]"):
-            self.store["q"] += self.store["in"]
-        elif c.startswith(("execute as @e", "tp @e", "scoreboard players set", "data remove")):
-            self.run(c)
-        if c.startswith("execute at ") and " run summon item_display" in c and self.ent is None:
-            yaw, pitch = map(float, re.search(r"Rotation:\[(\S+)f,(\S+)f\]", c).groups())
-            self.ent = {"pos": (0.0, 70.0, 0.0), "yaw": yaw, "pitch": pitch, "og": False, "dur": 0, "dirty": False}
-            self.sent = {"pos": self.ent["pos"], "yb": _byte(yaw), "xb": _byte(pitch), "og": False}
-        out = super().cmd(c)
-        if not self.cams:
-            self.ent = None
-        return out
-
-    @staticmethod
-    def _item(body):
-        out = {}
-        for kv in body.split(","):
-            k, v = kv.split(":")
-            v = v.rstrip("b")
-            out[k] = float(v) if "." in v else int(v)
-        return out
-
-    def _path(self, path):
-        m = re.fullmatch(r"(\w+)\[0\](?:\.(\w+))?", path)
-        q = self.store.get(m.group(1), [])
-        if not q:
-            return None
-        return q[0] if m.group(2) is None else q[0].get(m.group(2))
-
-    def run(self, c, me=None, args=None):
-        if c.startswith("$"):
-            c = re.sub(r"\$\((\w+)\)", lambda m: repr(args[m.group(1)]), c[1:])
-        if c.startswith("execute "):
-            return self._execute(c[8:], me, args)
-        if c == "return 0":
-            raise _Return
-        m = re.fullmatch(r"function watch:(\w+)(?: with storage \S+ (\S+))?", c)
-        if m:
-            got = self._path(m.group(2)) if m.group(2) else None
-            for line in self.functions[m.group(1)].splitlines():
-                self.run(line, me, got)
-            return 1
-        m = re.fullmatch(r"scoreboard players (add|set) (\S+) \S+ (-?\d+)", c)
-        if m:
-            v = int(m.group(3))
-            self.scores[m.group(2)] = v + (self.scores.get(m.group(2), 0) if m.group(1) == "add" else 0)
-            return 1
-        if c == "time query gametime":
-            return self.game
-        m = re.fullmatch(r"data get storage \S+ (\S+)", c)
-        if m:
-            return int(self._path(m.group(1)))
-        m = re.fullmatch(r"data remove storage \S+ (\w+)(\[0\])?", c)
-        if m:
-            q = self.store[m.group(1)]
-            if m.group(2):
-                del q[:1]
-            else:
-                q.clear()
-            return 1
-        m = re.fullmatch(r"data merge entity @s \{(\w+):(\w+)\}", c)
-        if m:
-            k, v = m.groups()
-            if k == "teleport_duration" and int(v) != me["dur"]:
-                me["dur"], me["dirty"] = int(v), True
-            elif k == "OnGround":
-                me["og"] = v == "1b"
-            return 1
-        m = re.fullmatch(r"tp (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)", c)
-        if m:
-            if m.group(1) != "@s":
-                return self._execute(f"as {m.group(1)} run tp @s {c.split(' ', 2)[2]}", me, args)
-            x, y, z, yaw, pitch = map(float, m.groups()[1:])
-            me.update(pos=(x, y, z), yaw=_f32(_wrap(yaw)), pitch=_f32(pitch), og=True)
-            return 1
-        raise AssertionError(f"FakeMain can't run {c!r}")
-
-    def _execute(self, rest, me, args):
-        store = None
-        while not rest.startswith("run "):
-            m = re.match(r"(if|unless) (score \S+ \S+ <= \S+ \S+|score \S+ \S+ matches \S+|data storage \S+ \S+) ", rest)
-            if m:
-                ok = self._test(m.group(2))
-                if ok != (m.group(1) == "if"):
-                    return 0
-            elif (m := re.match(r"as (@e\[\S+\]) ", rest)):
-                if self.ent is None:
-                    return 0
-                me = self.ent
-            elif (m := re.match(r"store result score (\S+) \S+ ", rest)):
-                store = m.group(1)
-            else:
-                raise AssertionError(f"FakeMain can't run execute {rest!r}")
-            rest = rest[m.end():]
-        v = self.run(rest[4:], me, args)
-        if store:
-            self.scores[store] = v
-        return v
-
-    def _test(self, cond):
-        p = cond.split()
-        if p[0] == "data":
-            return self._path(p[3]) is not None
-        if p[3] == "<=":
-            a, b = self.scores.get(p[1]), self.scores.get(p[4])
-            return a is not None and b is not None and a <= b
-        v, lo, _, hi = self.scores.get(p[1]), *p[4].partition("..")
-        return v is not None and (int(lo) if lo else -1e9) <= v <= (int(hi) if hi else 1e9 if ".." in p[4] else int(lo))
-
-    def tick(self, now):
-        """One server tick: the tick function (unless frozen), then sendChanges."""
-        self.now = now
-        runs = not self.frozen or self.stepping
-        if runs and self.enabled and self.ent is not None:
-            head = self.store["q"][0].get("n") if self.store["q"] else None
-            try:
-                self.run("function watch:tick")
-            except _Return:
-                head = None
-            if head is not None and (not self.store["q"] or self.store["q"][0].get("n") != head):
-                self.played.append((self.game, int(head), self.ent["pos"]))
-        if runs:
-            self.game += 1
-            self.stepping = max(0, self.stepping - 1)
-        self._send_changes(now)
-
-    def _send_changes(self, now):
-        e, s = self.ent, self.sent
-        if e is None:
-            return
-        yb, xb = _byte(e["yaw"]), _byte(e["pitch"])
-        rot = yb != s["yb"] or xb != s["xb"]
-        kind = None
-        if e["og"] != s["og"]:
-            kind = "sync"
-            s["og"] = e["og"]
-        elif sum((a - b) ** 2 for a, b in zip(e["pos"], s["pos"])) >= 7.6293945e-6:
-            kind = "posrot" if rot else "pos"
-        elif rot:
-            kind = "rot"
-        if kind:
-            yaw, pitch = (e["yaw"], e["pitch"]) if kind == "sync" else (yb * 360 / 256, xb * 360 / 256)
-            if kind != "rot":
-                s["pos"] = e["pos"]
-            if kind != "pos":
-                s["yb"], s["xb"] = yb, xb
-            self.packets.append((now, kind, e["pos"] if kind != "rot" else None, yaw, pitch, None))
-        if e["dirty"]:
-            e["dirty"] = False
-            self.packets.append((now, "data", None, 0, 0, e["dur"]))
-
-
-class FakeClient:
-    """The camera entity on a 26.3 client: LinearInterpolationHandler (moves 1/remaining of
-    the way to its target each client tick; a new target restarts the count at
-    teleport_duration; duration 0 snaps) and the camera's partial-tick lerp."""
-
-    def __init__(self, pos, yaw, pitch):
-        self.pos, self.yaw, self.pitch = pos, yaw, pitch
-        self.old = (pos, yaw, pitch)
-        self.steps, self.left, self.target = 0, 0, None
-
-    def packet(self, kind, pos, yaw, pitch, duration):
-        if kind == "data":
-            self.steps = duration
-            return
-        cur = self.target if self.left else (self.pos, self.yaw, self.pitch)
-        pos = cur[0] if pos is None else pos
-        if kind == "pos":
-            yaw, pitch = cur[1], cur[2]
-        target = (pos, _f32(yaw), _f32(pitch))
-        if self.steps == 0:
-            self.pos, self.yaw, self.pitch = target
-            self.old, self.left = target, 0
-        elif not self.left or target != self.target:
-            self.target, self.left = target, self.steps
-
-    def tick(self):
-        self.old = (self.pos, self.yaw, self.pitch)
-        if not self.left:
-            return
-        a = 1 / self.left
-        tp, ty, tx = self.target
-        self.pos = tuple(p + a * (t - p) for p, t in zip(self.pos, tp))
-        self.yaw = _f32(self.yaw + a * _wrap(ty - self.yaw))
-        self.pitch = _f32(self.pitch + a * (tx - self.pitch))
-        self.left -= 1
-
-    def view(self, pt):
-        (p0, y0, x0), (p1, y1, x1) = self.old, (self.pos, self.yaw, self.pitch)
-        return tuple(a + pt * (b - a) for a, b in zip(p0, p1)), y0 + pt * _wrap(y1 - y0), x0 + pt * (x1 - x0)
-
-
-def _play(d, rcon, start, end, frozen=(), director_gaps=(), fps=60, phase=0.013, latency=0.03):
-    """Run director (20/s), server (20 ticks/s) and a client together from `start` to `end`
-    wall seconds; frames (time, yaw, pitch) of the client's view from the first packet on.
-    `director_gaps`: (from, to) spans the director doesn't run."""
-    events = [(i / 20, 0) for i in range(round(start * 20), round(end * 20))]
-    events += [(i / 20 + 0.02, 1) for i in range(round(start * 20), round(end * 20))]
-    events += [(i / fps, 2) for i in range(math.ceil(start * fps), math.floor(end * fps))]
-    client, frames, seen, ticks_done = None, [], 0, None
-    for t, kind in sorted(events):
-        if kind == 0:
-            if not any(a <= t < b for a, b in director_gaps):
-                d.tick(t)
-        elif kind == 1:
-            rcon.frozen = any(a <= t < b for a, b in frozen)
-            rcon.tick(t)
-        else:
-            while seen < len(rcon.packets) and rcon.packets[seen][0] + latency <= t:
-                p = rcon.packets[seen]
-                if client is None and rcon.ent is not None:
-                    e = rcon.ent
-                    client = FakeClient(p[2] or e["pos"], p[3], p[4])
-                client.packet(*p[1:])
-                seen += 1
-            if client is None:
-                continue
-            due = math.floor((t - phase) * 20)
-            if ticks_done is None:
-                ticks_done = due
-            for _ in range(min(10, due - ticks_done)):
-                client.tick()
-            ticks_done = due
-            pos, yaw, pitch = client.view((t - phase) * 20 - due)
-            frames.append((t, yaw, pitch, pos))
-    return frames
-
-
-def _ripple(frames, t0, t1):
-    """Worst deviation, in degrees, of the view's yaw from a straight line through the
-    frames within 0.5 s either side (a steady turn has none; a step or a pause shows)."""
-    pts = [(t, y) for t, y, _, _ in frames if t0 - 0.5 <= t <= t1 + 0.5]
-    worst = 0.0
-    for i, (t, y) in enumerate(pts):
-        if not t0 <= t <= t1:
-            continue
-        near = [(a, b) for a, b in pts if abs(a - t) <= 0.5]
-        n = len(near)
-        ma, mb = sum(a for a, _ in near) / n, sum(b for _, b in near) / n
-        k = sum((a - ma) * (b - mb) for a, b in near) / sum((a - ma) ** 2 for a, _ in near)
-        worst = max(worst, abs(y - (mb + k * (t - ma))))
-    return worst
-
-
-def _orbiting(tmp_path, rcon=None, **cfg):
-    rcon = rcon or FakeMain()
-    tmp_path.mkdir(parents=True, exist_ok=True)
+def test_entity_camera_attaches_once_then_snaps_to_the_shot_and_glides(tmp_path):
+    rcon = FakeRcon()
     _showroom(tmp_path, "and", {"a": _entry(10)})
-    return rcon, _director(tmp_path, rcon, **_pack(**cfg))
-
-
-def test_camera_pack_is_written_once_and_enabled(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 2)
-    root = tmp_path / "datapacks" / "watch"
-    assert (root / "data" / "watch" / "function" / "tick.mcfunction").read_text() == w.TICK_FUNCTION
-    tag = json.loads((root / "data" / "minecraft" / "tags" / "function" / "tick.json").read_text())
-    assert tag == {"values": ["watch:tick"]} and (root / "pack.mcmeta").exists()
-    assert rcon.enabled and rcon.reloads == 1
-    assert not w.install_pack(tmp_path / "datapacks")  # unchanged: no reload next time
-
-
-def test_orbit_plays_one_pose_a_tick_with_exact_rotation(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 30)
-    games = [g for g, _, _ in rcon.played]
-    numbers = [n for _, n, _ in rcon.played]
-    assert games == list(range(games[0], games[0] + len(games)))  # every tick, none skipped
-    assert numbers == sorted(set(numbers))
-    tail = numbers[60:]  # after the cut on attaching, which drops what was queued before it
-    assert tail == list(range(tail[0], tail[0] + len(tail)))  # none lost
-    assert rcon.scores.get("#under", 0) == 0
-    moves = [p for p in rcon.packets if p[1] not in ("data",) and p[0] > 2]
-    assert moves and all(p[1] == "sync" for p in moves)  # never byte rotation
-    box = w.slot_box("and", _entry(10))
-    for p in moves:
-        assert w.look(p[2], w.centre(box)) == pytest.approx((p[3], p[4]), abs=1e-3)
-    assert max(p[3] for p in moves) - min(p[3] for p in moves) > 10  # it swings
-    for c in rcon.log:
-        assert len(c.encode()) <= 1400
-    assert not rcon.since(len(rcon.log) // 2, GLIDE)  # the director no longer moves it
-
-
-@pytest.mark.parametrize("glide", [10, 20])
-def test_orbit_turns_steadily_on_the_client(tmp_path, glide):
-    """The client's view, frame by frame, through a stretch where the swing is at speed:
-    within a small fraction of a degree of a steady turn (1 degree is about 24 px across a
-    1920 px, 70 degree view). The same pose stream without the OnGround flip goes out with
-    byte rotation, and shows its 1.4 degree steps."""
-    worst = {}
-    for flip in (True, False):
-        functions = dict(w.PACK_FUNCTIONS)
-        if not flip:
-            functions["tick"] = "\n".join(l for l in w.TICK_FUNCTION.splitlines() if "OnGround" not in l)
-        rcon, d = _orbiting(tmp_path / str(flip), FakeMain(functions=functions), glide=glide)
-        frames = _play(d, rcon, 0, 40)
-        worst[flip] = _ripple(frames, 20, 38)
-        speeds = [abs(_wrap(b[1] - a[1])) / (b[0] - a[0]) for a, b in zip(frames, frames[1:]) if 22 <= a[0] <= 38]
-        if flip:
-            assert min(speeds) > 0.5 * max(speeds)  # no pauses
-    assert worst[True] < 0.02
-    assert worst[False] > 5 * worst[True] and worst[False] > 0.1
-
-
-def test_camera_cut_is_queued_as_a_snap(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 3)
-    n = len(rcon.log)
-    _showroom(tmp_path, "and", {"a": _entry(10), "b": _entry(100, "fail", (12, 0))})
-    d.sources.start = 0
-    _play(d, rcon, 3, 10)
-    assert d.shot.spec == "b"
-    assert not rcon.since(n, ("execute at", "kill", "tp @a", GLIDE, DURATION))
-    cut, = [c for c in rcon.since(n, QUEUE_SET)]
-    items = re.findall(r"\{([^}]*)\}", cut)
-    assert items[0].startswith("d0:1b") and "D:" not in items[1] and items[2].endswith(f",D:{CFG['glide']}")
-    datas = [p for p in rcon.packets if p[1] == "data" and p[0] > 3]
-    assert [p[5] for p in datas] == [0, CFG["glide"]]
-    snap = next(i for i, p in enumerate(rcon.packets) if p[1] == "data" and p[0] > 3)
-    moves = [p for p in rcon.packets[snap + 1:] if p[1] != "data"][:2]
-    b = w.slot_box("and", _entry(100, "fail", (12, 0)))
-    assert w.look(moves[0][2], w.centre(b)) == pytest.approx(moves[0][3:5], abs=1e-3)  # lands on the new shot
-
-
-def test_camera_holds_still_while_main_is_frozen_and_eases_back(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 20)
-    played = len(rcon.played)
-    _play(d, rcon, 20, 30, frozen=[(20, 30)])
-    assert len(rcon.played) == played and rcon.scores["#until"] == -1
-    n = len(rcon.log)
-    frames = _play(d, rcon, 30, 40)
-    moved = [p[2] for p in rcon.played[played:]]
-    assert len(moved) > 150 and rcon.scores.get("#under", 0) == 0
-    steps = [math.dist(a, b) for a, b in zip(moved, moved[1:])]
-    assert steps[0] < 0.1 * max(steps)  # speeds up from rest
-    assert not rcon.since(n, QUEUE_SET + "{d0")  # no snap on resuming
-
-
-def test_a_warp_the_director_has_not_seen_plays_at_most_the_credit(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 10)
-    before = len(rcon.played)
-    rcon.frozen, rcon.stepping = True, 170  # the harness freezes and steps between director ticks
-    for _ in range(170):
-        rcon.tick(10.01)
-    assert len(rcon.played) - before <= w.CREDIT + 2
-
-
-def test_a_director_stall_under_the_credit_leaves_no_gap(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 12, director_gaps=[(6, 6.8)])
-    games = [g for g, _, _ in rcon.played]
-    assert games == list(range(games[0], games[0] + len(games)))
-
-
-def test_camera_cut_while_frozen_goes_straight_over_rcon(tmp_path):
-    rcon, d = _orbiting(tmp_path)
-    _play(d, rcon, 0, 3)
-    n = len(rcon.log)
-    _showroom(tmp_path, "and", {"a": _entry(10), "b": _entry(100, "fail", (12, 0))})
-    d.sources.start = 0
-    _play(d, rcon, 3, 10, frozen=[(3, 10)])
-    assert d.shot.spec == "b"
-    assert rcon.since(n, DURATION + "0}") and rcon.since(n, GLIDE)
-    assert not rcon.since(n, QUEUE_SET)
-    k = len(rcon.played)
-    _play(d, rcon, 10, 12)
-    assert len(rcon.played) > k and rcon.scores.get("#under", 0) == 0
-
-
-def test_entity_camera_attaches_once_then_snaps_to_the_shot(tmp_path):
-    rcon, d = _orbiting(tmp_path)
+    d = _director(tmp_path, rcon)
     d.tick(0)
     summon, = rcon.since(0, "execute at Jack run summon item_display ~ ~ ~ ")
     assert '"watch_cam","watch_cam_Jack"' in summon and "teleport_duration:0" in summon
     assert not rcon.since(0, "spectate")  # not before the client has the entity
-    _play(d, rcon, 0.05, 1.5)
+    _run(d, 0.05, 1.5)
     spectate = f"spectate @e[type=item_display,tag=watch_cam_Jack,limit=1] Jack"
     assert rcon.log.count(spectate) >= 1
+    # A snap after attaching: duration 0, then the teleport, then the glide duration.
     after = rcon.log[rcon.log.index(spectate):]
-    assert [c for c in after if c.startswith(QUEUE_SET)][0].startswith(QUEUE_SET + "{d0:1b")
-    _play(d, rcon, 1.5, 11.5)
-    assert rcon.since(0, spectate)[1:]  # re-sent each second: sneaking detaches
-    assert len(rcon.since(0, "execute at")) == 1 and not rcon.since(0, "tp @a")
+    snap = [c for c in after if c.startswith((DURATION, GLIDE))][:3]
+    assert snap[0] == DURATION + "0}" and snap[1].startswith(GLIDE) and snap[2] == DURATION + f"{w.cam_ticks(CFG)}}}"
+    assert w.cam_ticks(CFG) == 6
+    n = len(rcon.log)
+    _run(d, 1.5, 11.5)
+    glides = [_pose(c) for c in rcon.since(n, GLIDE)]
+    assert 38 <= len(glides) <= 41  # every 0.25 s
+    assert len({g[3:] for g in glides}) == 1  # a dolly never turns
+    box = w.slot_box("and", _entry(10))
+    for a, b in zip(glides, glides[1:]):
+        assert math.dist(a[:3], b[:3]) < 0.1
+    assert max(math.dist(glides[0][:3], g[:3]) for g in glides) > 0.3
+    for g in glides:
+        assert g[1] >= SURFACE + w.GROUND_CLEARANCE
+    assert not rcon.since(0, "tp @a")  # the players themselves are never teleported
+    assert rcon.since(n, spectate)  # re-sent each second: sneaking detaches
+    assert len(rcon.since(0, "execute at")) == 1
     bars = rcon.since(0, "title @a[tag=watch] actionbar")
     assert 22 <= len(bars) <= 26 and '"a"' in bars[0] and "green" in bars[0]
 
 
-def test_dolly_slides_without_turning(tmp_path):
-    rcon, d = _orbiting(tmp_path, motion="dolly")
-    _play(d, rcon, 0, 20)
-    moves = [p for p in rcon.packets if p[1] == "sync" and p[0] > 2]
-    assert len({(round(p[3], 3), round(p[4], 3)) for p in moves}) == 1
-    assert max(math.dist(moves[0][2], p[2]) for p in moves) > 0.3
-    for a, b in zip(moves, moves[1:]):
-        assert math.dist(a[2], b[2]) < 0.05
-        assert a[2][1] >= SURFACE + w.GROUND_CLEARANCE
+def test_entity_camera_cut_snaps_without_new_entities(tmp_path):
+    rcon = FakeRcon()
+    _showroom(tmp_path, "and", {"a": _entry(10)})
+    d = _director(tmp_path, rcon)
+    _run(d, 0, 3)
+    n = len(rcon.log)
+    _showroom(tmp_path, "and", {"a": _entry(10), "b": _entry(100, "fail", (12, 0))})
+    d.sources.start = 0
+    _run(d, 3, 10)
+    assert d.shot.spec == "b"
+    assert not rcon.since(n, ("execute at", "kill", "tp @a"))
+    assert rcon.since(n, DURATION + "0}")
+
+
+def test_entity_camera_holds_still_while_main_is_frozen(tmp_path):
+    rcon = FakeRcon()
+    _showroom(tmp_path, "and", {"a": _entry(10)})
+    d = _director(tmp_path, rcon)
+    _run(d, 0, 5)
+    rcon.frozen = True
+    _run(d, 5, 5.5)
+    t, n = d.motion_t, len(rcon.log)
+    _run(d, 5.5, 10)
+    assert not rcon.since(n, GLIDE) and d.motion_t == t
+    rcon.frozen = False
+    _run(d, 10, 10.6)
+    assert rcon.since(n, GLIDE) and d.motion_t - t < 0.3  # eases back in
 
 
 def test_entity_camera_comes_back_when_cleared_away(tmp_path):
