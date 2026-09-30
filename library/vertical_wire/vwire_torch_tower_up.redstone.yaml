@@ -1,0 +1,68 @@
+name: vwire_torch_tower_up
+description: 'The classic 1x1 torch tower carrying a level upward. A repeater (facing north, input from the driver side) hard-powers the bottom stone; torches and stones alternate above it, each torch turning off when the stone under it is powered and hard-powering the stone above it when lit. Four torches, so it does not invert (odd counts invert). Interface: input driver a north of the repeater at y1; output o is the top torch at y8 (lit = 1), which will hard-power a block placed above it. 1x9x2 including the feed repeater; the tower itself is a 1x1 column. Rise 7, 10 ticks (2 for the repeater, 2 per torch: 1 tick per block of rise). Versus the others: the smallest level-carrying riser and stackable indefinitely with no regeneration, but slower than dust (0 ticks up to 15 blocks) and it makes light updates; torches burn out if the input toggles more than about 8 times in 60 ticks. Copies side by side do not interact (vwire_torch_tower_bus).'
+traits:
+- vertical
+- torch_based
+- silent
+- one_wide
+- tileable
+- stackable
+- ultracompact
+- reset_safe
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  v: repeater[facing=north]
+  '*': redstone_torch
+  o: {output: o, block: redstone_torch}
+layers:
+  0: |
+    .
+    S
+    .
+  1: |
+    a
+    v
+    S
+  2: |
+    .
+    .
+    *
+  3: |
+    .
+    .
+    S
+  4: |
+    .
+    .
+    *
+  5: |
+    .
+    .
+    S
+  6: |
+    .
+    .
+    *
+  7: |
+    .
+    .
+    S
+  8: |
+    .
+    .
+    o
+tests:
+- name: logic
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+    0 | 0
+    1 | 1
+  delay: 10

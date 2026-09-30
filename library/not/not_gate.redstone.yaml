@@ -1,0 +1,32 @@
+name: not_gate
+description: |
+  The textbook buffered inverter: a repeater drives a block, a wall torch on the block's far
+  face inverts it, and the torch powers a dust output. The input repeater isolates the gate,
+  so the output can never feed back into the input line, which may be dust.
+  Interface: input driver at (0,1,0) behind the repeater (1,1,0), facing west (input on the
+  west); block at (2,1,0); wall torch at (3,1,0) facing east; output: dust at (4,1,0), strength
+  15. Supports on layer 0. Box 4x2x1 plus the input cell. Delay 4 ticks (repeater 2 + torch 2) on both edges.
+  Trade-off: the most forgiving layout (isolated input, dust output ready to route) at twice
+  the delay of not_torch_compact. Emits light; torch burnout limit is 8 turn-offs in 60 ticks.
+  The router in scripts/generate.py places this exact geometry, so its cells must not move.
+traits: [horizontal, flat, torch_based, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '>': repeater[facing=west]
+  '#': white_concrete
+  ): redstone_wall_torch[facing=east]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .====
+  1: |
+    a>#)o
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+  delay: 4

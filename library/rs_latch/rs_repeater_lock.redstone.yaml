@@ -1,0 +1,105 @@
+name: rs_repeater_lock
+description: >-
+  Loop-free RS latch: the state is held by a locked repeater, not by feedback, so there
+  is nothing that can oscillate, decay or burn out. A subtract comparator L with a
+  redstone block at its rear outputs 15 minus its strongest side input, and s and r sit
+  on its two sides, so L is a NOR gate of the inputs. L faces into the side of the
+  output repeater Q and locks it whenever neither input is present. Q's own input is s,
+  delayed 2 gt by a second repeater so that when s is released the lock arrives before Q
+  hears its input fall. Interface (top view, north up): s is the cell at (x1,y1,z1)
+  touching L's west side, and a dust spur from it feeds the input repeater from the west
+  (x0,z0..z1); Q is the repeater at (x2,y1,z0), flowing east; L is south of Q (x2,y1,z1)
+  with the redstone block south of it (x2,y1,z2); r is the cell at (x3,y1,z1) on L's
+  east side. Q is the output: a full-strength repeater. Continue it with a repeater or
+  comparator, not dust, because the r cell touches the cell in front of Q. Set and reset
+  both take exactly 4 gt; s wins while both are held. Pulses of 2 gt latch; 1 gt pulses
+  are ignored cleanly (no glitch on q), which makes it a good latch for noisy
+  observer-driven inputs. 3x2x3 of blocks. Lightless and silent. Trade-off against
+  rs_comparator_ring: bigger and slower (4 gt against 0/2 gt) and it needs a redstone
+  block, but its output is a clean strength-15 repeater and it has no loop to glitch on
+  short pulses.
+traits: [lightless, silent, pistonless, entityless, comparator_based, flat, horizontal, reset_safe, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  L: comparator[facing=south,mode=subtract,powered=true]{OutputSignal:15}
+  R: redstone_block
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: 'repeater[facing=west,locked=true]'}
+layers:
+  0: |
+    ===.
+    =.=.
+    ....
+  1: |
+    ->q.
+    -sLr
+    ..R.
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+    0 1 | 0
+    1 0 | 1
+    1 1 | 1
+    0 0 | 1
+  delay: 4
+- name: set and reset take 4 gt
+  steps:
+  - drive: {s: 1}
+  - {wait: 3}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {s: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 3}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: short pulses
+  steps:
+  - drive: {s: 1}
+  - {wait: 2}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 2}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: one gt pulses are ignored
+  steps:
+  - drive: {s: 1}
+  - {wait: 1}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 1}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 1}

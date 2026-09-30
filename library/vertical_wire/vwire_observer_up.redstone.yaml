@@ -1,0 +1,157 @@
+name: vwire_observer_up
+description: '1x1 pulse riser: a column of observers facing down, each watching the one below and firing into the one above. Every change of the input, rising or falling, arrives at the top as one 2-tick pulse after exactly 2 ticks per observer. Two lanes are built side by side to prove it tiles (an observer only sees its own face). Interface: input drivers a, b north of the dust at the foot of each lane (y1); outputs o, p are the top observers (y9), which hard-power whatever is above them. 2x10x1, 8 up, 16 ticks, pulse 2 ticks. An edge 1-3 ticks after the previous one is swallowed by the first observer (it already has a tick scheduled), so edges must be at least 4 ticks apart (both tested). Versus the others: lightless, silent and one block square, and it goes as high as you like without regeneration, but it carries edges, not levels: put a T flip-flop or copper bulb on top to recover a level (vwire_observer_bulb_down does this going down), or use vwire_torch_tower_up (half the delay, but
+  light updates) for a level.'
+traits:
+- vertical
+- observer_based
+- lightless
+- silent
+- one_wide
+- tileable
+- stackable
+- compact
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  '-': redstone_wire
+  A: observer[facing=down]
+  o: {output: o, block: 'observer[facing=down]'}
+  p: {output: p, block: 'observer[facing=down]'}
+layers:
+  0: |
+    ..
+    SS
+  1: |
+    ab
+    --
+  2: |
+    ..
+    AA
+  3: |
+    ..
+    AA
+  4: |
+    ..
+    AA
+  5: |
+    ..
+    AA
+  6: |
+    ..
+    AA
+  7: |
+    ..
+    AA
+  8: |
+    ..
+    AA
+  9: |
+    ..
+    op
+tests:
+- name: edges
+  steps:
+  - drive: {a: 1}
+  - {wait: 15}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 10}
+  - expect: {o: 0}
+  - drive: {a: 0}
+  - {wait: 15}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 10}
+  - expect: {o: 0}
+  - drive: {a: 1}
+  - {wait: 15}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 10}
+  - expect: {o: 0}
+  - drive: {a: 0}
+  - {wait: 15}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 10}
+  - expect: {o: 0}
+- name: edge 3 ticks after another is lost
+  steps:
+  - drive: {a: 1}
+  - {wait: 3}
+  - drive: {a: 0}
+  - {wait: 12}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 0}
+- name: edges 4 ticks apart both arrive
+  steps:
+  - drive: {a: 1}
+  - {wait: 4}
+  - drive: {a: 0}
+  - {wait: 11}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+- name: channels independent
+  steps:
+  - drive: {b: 1}
+  - {wait: 30}
+  - expect: {o: 0}
+  - drive: {b: 0}
+  - {wait: 30}
+  - expect: {o: 0}

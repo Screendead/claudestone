@@ -1,0 +1,379 @@
+name: seg_bulb_3x5
+description: 'A 3x5 diamond digit of waxed copper bulbs driven by observers: the smallest display in the family (3x5x2, 22 blocks). A copper bulb toggles on each rising edge; an observer behind it watches the segment''s input cell and pulses on every change, rising or falling, so the bulb flips on both edges and follows the input level. Bulbs give full light 15 with no 4-tick lamp tail: both edges take 2 game ticks (the observer), tested. The observers are placed already powered: a pasted observer (setblock) sees its neighbours and fires once, which would toggle every bulb on; placed powered it just turns itself off (ObserverBlock.onPlace), so the digit starts dark, which the first test checks. Limit: the observer is busy for 4 ticks after each change, so an input pulse of 3 ticks or less flips the bulb once and leaves it out of step (tested); feed it clean levels. Interface: face at z=0 looking north, x=0 is the viewer''s right; inputs are the cells the observers watch at z=2: a (1,5),
+  b (0,4), c (0,2), d (1,1), e (2,2), f (2,4), g (1,3). Trade-off: brightest, smallest and symmetric in delay, but copper bulbs click and it trusts the input to change slower than every 4 ticks.'
+traits:
+- observer_based
+- entityless
+- pistonless
+- vertical
+- ultracompact
+- survival_friendly
+- tileable
+- stackable
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  A: black_concrete
+  B: waxed_copper_bulb[lit=false,powered=false]
+  d: {name: d_obs, block: 'observer[facing=south,powered=true]'}
+  C: {input: d}
+  c: {name: c_obs, block: 'observer[facing=south,powered=true]'}
+  e: {name: e_obs, block: 'observer[facing=south,powered=true]'}
+  D: {input: c}
+  E: {input: e}
+  g: {name: g_obs, block: 'observer[facing=south,powered=true]'}
+  F: {input: g}
+  b: {name: b_obs, block: 'observer[facing=south,powered=true]'}
+  f: {name: f_obs, block: 'observer[facing=south,powered=true]'}
+  G: {input: b}
+  H: {input: f}
+  a: {name: a_obs, block: 'observer[facing=south,powered=true]'}
+  I: {input: a}
+layers:
+  1: |
+    ABA
+    .d.
+    .C.
+  2: |
+    BAB
+    c.e
+    D.E
+  3: |
+    ABA
+    .g.
+    .F.
+  4: |
+    BAB
+    b.f
+    G.H
+  5: |
+    ABA
+    .a.
+    .I.
+tests:
+- name: every digit and every lone segment
+  steps:
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 1
+      c: 1
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 1
+      b: 1
+      c: 0
+      d: 1
+      e: 1
+      f: 0
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 0
+      f: 0
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 0
+      b: 1
+      c: 1
+      d: 0
+      e: 0
+      f: 1
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 1
+      b: 0
+      c: 1
+      d: 1
+      e: 0
+      f: 1
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 1
+      b: 0
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 0
+      f: 1
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 1
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 1
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 0
+      c: 1
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 1
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 1
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 1
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=true]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 1
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - {wait: 6}
+  - {check: 'if block ~1 ~5 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~0 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~2 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~2 ~4 ~0 waxed_copper_bulb[lit=false]'}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+- name: 2 ticks on both edges
+  steps:
+  - drive: {g: 1}
+  - {wait: 1}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - {wait: 1}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - {wait: 20}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - drive: {g: 0}
+  - {wait: 1}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}
+  - {wait: 1}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - {wait: 20}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+- name: tracks a 4 tick pulse, loses a 3 tick one
+  steps:
+  - drive: {g: 1}
+  - {wait: 4}
+  - drive: {g: 0}
+  - {wait: 20}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=false]'}
+  - drive: {g: 1}
+  - {wait: 3}
+  - drive: {g: 0}
+  - {wait: 20}
+  - {check: 'if block ~1 ~3 ~0 waxed_copper_bulb[lit=true]'}

@@ -1,0 +1,130 @@
+name: rs_comparator_ring
+description: >-
+  Lightless, silent RS latch: a 3x2 ring of dust closed by a repeater (flowing east on
+  the north row) and a comparator (flowing west on the south row). The repeater
+  regenerates the loop to full strength every lap, so the stored 1 never decays; the
+  comparator is the only element that can be switched off, by a side input. Interface
+  (top view, north up): s is the cell west of the north-west dust (x0,y1,z0); it powers
+  the ring dust directly, so q (the south-west dust, x1,y1,z1) rises in 0 gt and the
+  loop has closed by 4 gt; a set pulse of 4 gt or more latches cleanly (3 gt latches
+  with a 1 gt dip in q). r is the cell against the comparator's south side (x2,y1,z2); q
+  falls at 2 gt and the ring is empty by 4 gt; the reset pulse must last at least 2 gt.
+  Take q from the west column of dust and keep everything else off the r cell. Set wins
+  while both are held. 3x2x2 of blocks (base included); every input and output is on the
+  cell's own layer, so cells stack at a 2-block pitch (see rs_ring_stack). No torches,
+  lamps or moving blocks, so no light or sound updates and nothing to burn out, which
+  also makes it safe to hammer with fast pulses. Trade-off: q is dust at strength 13-14
+  rather than a repeater, and s shares q's dust, so a stuck s holds q high
+  combinationally.
+traits: [stackable, ultrafast, lightless, silent, pistonless, entityless, comparator_based, flat, horizontal, compact, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  C: comparator[facing=east]
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: redstone_wire}
+layers:
+  0: |
+    .===
+    .===
+    ....
+  1: |
+    s->-
+    .qC-
+    ..r.
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+    0 1 | 0
+    1 0 | 1
+    1 1 | 1
+    1 0 | 1
+  delay: 2
+- name: set is combinational, reset is 2 gt
+  steps:
+  - drive: {s: 1}
+  - expect: {q: 1}
+  - {wait: 4}
+  - drive: {s: 0}
+  - expect: {q: 1}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: two gt reset pulse clears
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 2}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: set held through a reset
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {r: 0}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+- name: fast toggling never burns out
+  steps:
+  - drive: {s: 1}
+  - {wait: 4}
+  - drive: {s: 0}
+  - drive: {r: 1}
+  - {wait: 4}
+  - drive: {r: 0}
+  - drive: {s: 1}
+  - {wait: 4}
+  - drive: {s: 0}
+  - drive: {r: 1}
+  - {wait: 4}
+  - drive: {r: 0}
+  - drive: {s: 1}
+  - {wait: 4}
+  - drive: {s: 0}
+  - drive: {r: 1}
+  - {wait: 4}
+  - drive: {r: 0}
+  - drive: {s: 1}
+  - {wait: 4}
+  - drive: {s: 0}
+  - drive: {r: 1}
+  - {wait: 4}
+  - drive: {r: 0}
+  - drive: {s: 1}
+  - {wait: 4}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 4}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}

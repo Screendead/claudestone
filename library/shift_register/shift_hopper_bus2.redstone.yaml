@@ -1,0 +1,305 @@
+name: shift_hopper_bus2
+description: 'Two shift_hopper lanes side by side at a pitch of 1, sharing one clock: a 2-bit-wide word shifts through 4 stages, and this spec is the proof that hopper lanes tile. Lane A: supply S (x=2) and hoppers h0..h3 (x=3..6) at z=2 facing east into a chest (x=7); its taps qa0..qa3 are comparators on the north side (z=1, output north). Lane B is offset one block east: supply at x=3, hoppers x=4..7 at z=3 into a chest at x=8; its taps qb0..qb3 are comparators on the south side (z=4, output south), so neither lane''s comparators point into the other''s hoppers. The dust on top of both hopper rows forms one 2-wide sheet, driven exactly as in shift_hopper by NOT clk (subtract comparator at x=1, y=2, z=2 on a redstone block) ORed with clk through a repeater set to 4 game ticks (x=2, y=2, z=3); clk is the cell at x=1, y=2, z=3. da (x=1, z=1) and db (x=2, z=4) gate their lane''s supply through subtract comparators on redstone blocks (z=0 and z=5). Timing as shift_hopper: taps move exactly
+  4 ticks after the rising edge, d is taken up to and including the edge tick, clock at least 2 high, 4 low and 8 per period (tested at 4/4). Each supply holds 320 sticks. Size 9x3x6. Silent, lightless, no entities, starts cleared. More lanes: a lane needs a free side for its taps, so lanes come in pairs; two pairs should abut with their tap rows back to back (a comparator ignores signal into its front), but only one pair is tested here.'
+traits: [compact, fast, horizontal, tileable, silent, lightless, pistonless, entityless, container_based, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  a: {input: da}
+  b: {input: db}
+  k: {input: clk}
+  R: redstone_block
+  N: comparator[facing=north,mode=subtract]
+  M: comparator[facing=south,mode=subtract]
+  L: comparator[facing=west,mode=subtract]
+  r: repeater[facing=west,delay=2]
+  S: hopper[facing=east]{TransferCooldown:20,Items:[{Slot:0b,id:"minecraft:stick",count:64},{Slot:1b,id:"minecraft:stick",count:64},{Slot:2b,id:"minecraft:stick",count:64},{Slot:3b,id:"minecraft:stick",count:64},{Slot:4b,id:"minecraft:stick",count:64}]}
+  H: hopper[facing=east]
+  K: chest[facing=north]
+  A: {output: qa0, block: 'comparator[facing=south]'}
+  E: {output: qb0, block: 'comparator[facing=north]'}
+  B: {output: qa1, block: 'comparator[facing=south]'}
+  F: {output: qb1, block: 'comparator[facing=north]'}
+  C: {output: qa2, block: 'comparator[facing=south]'}
+  G: {output: qb2, block: 'comparator[facing=north]'}
+  D: {output: qa3, block: 'comparator[facing=south]'}
+  J: {output: qb3, block: 'comparator[facing=north]'}
+layers:
+  0: |
+    .........
+    ..=====..
+    .........
+    .........
+    ...=====.
+    .........
+  1: |
+    ..R......
+    .aNABCD..
+    .=SHHHHK.
+    ..=SHHHHK
+    ..bMEFGJ.
+    ...R.....
+  2: |
+    .........
+    .........
+    RL-----..
+    .kr-----.
+    .........
+    .........
+tests:
+- name: two lanes shift different words on one clock, 4 ticks after each edge
+  steps:
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - drive: {da: 1, db: 0}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 1, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 1, qa2: 0, qa3: 0, qb0: 1, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 1, qa2: 0, qa3: 0, qb0: 1, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 1, qa2: 1, qa3: 0, qb0: 1, qb1: 1, qb2: 0, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 1, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 1, qa2: 1, qa3: 0, qb0: 1, qb1: 1, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 0, qa2: 1, qa3: 1, qb0: 1, qb1: 1, qb2: 1, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 0, qa2: 1, qa3: 1, qb0: 1, qb1: 1, qb2: 1, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 1, qa2: 0, qa3: 1, qb0: 1, qb1: 1, qb2: 1, qb3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 1, qa2: 0, qa3: 1, qb0: 1, qb1: 1, qb2: 1, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 0, qb0: 0, qb1: 1, qb2: 1, qb3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 1, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 0, qb0: 0, qb1: 1, qb2: 1, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 1, qb0: 1, qb1: 0, qb2: 1, qb3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 1, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 1, qb0: 1, qb1: 0, qb2: 1, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 1, qa2: 0, qa3: 0, qb0: 0, qb1: 1, qb2: 0, qb3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 1, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 1, qa2: 0, qa3: 0, qb0: 0, qb1: 1, qb2: 0, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 1, qa2: 1, qa3: 0, qb0: 0, qb1: 0, qb2: 1, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 1, qa2: 1, qa3: 0, qb0: 0, qb1: 0, qb2: 1, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 1, qa2: 1, qa3: 1, qb0: 1, qb1: 0, qb2: 0, qb3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 1, qa2: 1, qa3: 1, qb0: 1, qb1: 0, qb2: 0, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 1, qb0: 0, qb1: 1, qb2: 0, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 1, qb0: 0, qb1: 1, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 1, qb0: 0, qb1: 0, qb2: 1, qb3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 1, qb0: 0, qb1: 0, qb2: 1, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 20}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 1}
+- name: 8-tick period with both lanes
+  steps:
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - drive: {da: 0, db: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 1, qb1: 0, qb2: 0, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 1, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 0, qb0: 1, qb1: 0, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 0, qb0: 1, qb1: 1, qb2: 0, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 1, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 0, qb0: 1, qb1: 1, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 1, qa2: 0, qa3: 0, qb0: 0, qb1: 1, qb2: 1, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 1, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 1, qa2: 0, qa3: 0, qb0: 0, qb1: 1, qb2: 1, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 1, qa2: 1, qa3: 0, qb0: 1, qb1: 0, qb2: 1, qb3: 1}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 1, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 1, qa2: 1, qa3: 0, qb0: 1, qb1: 0, qb2: 1, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 1, qa2: 1, qa3: 1, qb0: 0, qb1: 1, qb2: 0, qb3: 1}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 1, qa2: 1, qa3: 1, qb0: 0, qb1: 1, qb2: 0, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 1, qa2: 1, qa3: 1, qb0: 0, qb1: 0, qb2: 1, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 1, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 1, qa2: 1, qa3: 1, qb0: 0, qb1: 0, qb2: 1, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 0, qa2: 1, qa3: 1, qb0: 1, qb1: 0, qb2: 0, qb3: 1}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 0, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 0, qa2: 1, qa3: 1, qb0: 1, qb1: 0, qb2: 0, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 1, qa2: 0, qa3: 1, qb0: 1, qb1: 1, qb2: 0, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 0, db: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 1, qa2: 0, qa3: 1, qb0: 1, qb1: 1, qb2: 0, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 0, qb0: 1, qb1: 1, qb2: 1, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 1, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 0, qb0: 1, qb1: 1, qb2: 1, qb3: 0}
+  - {wait: 1}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 1, qb0: 0, qb1: 1, qb2: 1, qb3: 1}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 1, qa1: 0, qa2: 0, qa3: 1, qb0: 0, qb1: 1, qb2: 1, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 1, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 1, qb3: 1}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 1, qa2: 0, qa3: 0, qb0: 0, qb1: 0, qb2: 1, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 1}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {da: 0, db: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {qa0: 0, qa1: 0, qa2: 1, qa3: 0, qb0: 0, qb1: 0, qb2: 0, qb3: 1}
+  - {wait: 1}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 1, qb0: 0, qb1: 0, qb2: 0, qb3: 0}
+  - drive: {clk: 0}
+  - {wait: 14}
+  - expect: {qa0: 0, qa1: 0, qa2: 0, qa3: 1, qb0: 0, qb1: 0, qb2: 0, qb3: 0}

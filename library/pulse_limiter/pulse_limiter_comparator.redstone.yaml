@@ -1,0 +1,657 @@
+name: pulse_limiter_comparator
+description: 'Pulse limiter (monostable) with a long, adjustable limit and no torches: comparator out (x=3, z=0, subtract mode, facing west) reads input a (x=2, z=0) on its back; a also runs through dust (x=1..0) and two delay-4 repeaters (x=1..2, z=1, facing west) into the side dust (x=3, z=1). Out = a - a delayed 16 ticks: an input longer than 16 ticks is cut to 16, a shorter one passes through unchanged, both 2 ticks late (output east of out, x=4). Re-arms 16 ticks after the input falls. Add or re-click repeaters for any limit from 4 ticks up. 4x2x2, flat, silent. Trade-off versus pulse_rising_comparator: the same circuit with a longer delay line; versus pulse_limiter_instant_piston: 2 ticks of latency but silent, lightless and flat.'
+traits: [compact, flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '-': redstone_wire
+  r: repeater[facing=west,delay=4]
+  s: {name: side, block: redstone_wire}
+  o: {output: out, block: 'comparator[facing=west,mode=subtract]'}
+layers:
+  0: |
+    ====
+    ====
+  1: |
+    --ao
+    -rrs
+tests:
+- name: stays off after placement
+  settle: 0
+  steps:
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+- name: long input is cut to 16 ticks
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+- name: shorter inputs pass through unchanged, 2 ticks late
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+- name: re-arms 16 ticks after the input falls
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}

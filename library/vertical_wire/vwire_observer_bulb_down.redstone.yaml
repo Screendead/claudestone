@@ -1,0 +1,87 @@
+name: vwire_observer_bulb_down
+description: 'A level carried down a 1x1 column without torches in the shaft: the observer faller (vwire_observer_down) turns each input edge into a pulse, and a copper bulb at the bottom toggles on every pulse, so its state follows the input; a comparator reads the bulb. Interface: input driver a north of the dust on top (y10); output o is the comparator at (y2, z2) facing north, beside the bulb. 1x10x2 (the column is 1x1, the comparator sticks out at the bottom), 8 down, 16 ticks (14 through seven observers, 2 through the comparator). Input edges must be at least 4 ticks apart (an edge 1-3 ticks after another is swallowed by the top observer, which leaves the bulb out of step; the 4-tick case is tested here, the loss on vwire_observer_up). The bulb holds state, so it must start in step with the input: the data pack''s bottom-up placement fires the observers an odd number of times, so the bulb is saved lit and settles unlit; built by hand, place the bulb last, unlit, with the input off.
+  Versus the others: the only 1x1 way to bring a level down; slower than vwire_torch_ladder_down and the bulb clicks and lights, but the shaft itself is lightless.'
+traits:
+- vertical
+- observer_based
+- one_wide
+- stackable
+- compact
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  A: copper_bulb[lit=true]
+  o: {output: o, block: 'comparator[facing=north]'}
+  B: observer[facing=up]
+  a: {input: a}
+  '-': redstone_wire
+layers:
+  1: |
+    .
+    .
+    S
+  2: |
+    .
+    A
+    o
+  3: |
+    .
+    B
+    .
+  4: |
+    .
+    B
+    .
+  5: |
+    .
+    B
+    .
+  6: |
+    .
+    B
+    .
+  7: |
+    .
+    B
+    .
+  8: |
+    .
+    B
+    .
+  9: |
+    .
+    B
+    .
+  10: |
+    a
+    -
+    .
+tests:
+- name: logic
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+    0 | 0
+    1 | 1
+  delay: 16
+- name: toggles 4 ticks apart
+  steps:
+  - drive: {a: 1}
+  - {wait: 4}
+  - drive: {a: 0}
+  - {wait: 4}
+  - drive: {a: 1}
+  - {wait: 40}
+  - expect: {o: 1}
+  - drive: {a: 0}
+  - {wait: 4}
+  - drive: {a: 1}
+  - {wait: 4}
+  - drive: {a: 0}
+  - {wait: 40}
+  - expect: {o: 0}

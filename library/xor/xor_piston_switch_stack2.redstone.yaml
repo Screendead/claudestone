@@ -1,0 +1,68 @@
+name: xor_piston_switch_stack2
+description: "Proof that xor_piston_switch stacks: two copies at a vertical pitch of 2, tested over all 16 input combinations. The upper copy's floor sits directly on the lower copy's pistons, and neither copy powers the other's pistons, directly or through quasi-connectivity."
+traits: [stackable, piston_based, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  R: redstone_block
+  P: sticky_piston[facing=east]
+  Q: sticky_piston[facing=west]
+  v: repeater[facing=north]
+  a:
+    input: a0
+  b:
+    input: b0
+  o:
+    output: out0
+    block: redstone_wire
+  A:
+    input: a1
+  B:
+    input: b1
+  C:
+    output: out1
+    block: redstone_wire
+layers:
+  0: |
+    ......
+    ..==..
+    ......
+    ..==..
+  1: |
+    aPR...
+    ..vv..
+    ...#Qb
+    ..-o..
+  2: |
+    ......
+    ..==..
+    ......
+    ..==..
+  3: |
+    APR...
+    ..vv..
+    ...#QB
+    ..-C..
+tests:
+- name: logic
+  truth_table: |
+    a0  b0  a1  b1 | out0  out1
+    0   0   0   0  | 0     0
+    1   0   0   0  | 1     0
+    1   1   0   0  | 0     0
+    0   1   0   0  | 1     0
+    0   1   1   0  | 1     1
+    1   1   1   0  | 0     1
+    1   0   1   0  | 1     1
+    0   0   1   0  | 0     1
+    0   0   1   1  | 0     0
+    1   0   1   1  | 1     0
+    1   1   1   1  | 0     0
+    0   1   1   1  | 1     0
+    0   1   0   1  | 1     1
+    1   1   0   1  | 0     1
+    1   0   0   1  | 1     1
+    0   0   0   1  | 0     1
+  delay: 5

@@ -1,0 +1,137 @@
+name: add_full_comparator_lightless
+description: |-
+  Lightless, silent full adder built from comparators only. A half adder (the
+  add_half_comparator_flat layout) makes P = A xor B on a dust loop and G = A and B.
+  Carry uses the mux form: cout = (P and C) or (A and not P); A and not P is G, and
+  P and C is the comparator t at (6,1,5) facing north, which reads P from the loop
+  and subtracts NOT C, made by the comparator notc at (5,1,5) facing west from the
+  redstone block behind it minus C. Sum is P xor C in a 3D bridge XOR (the
+  xor_comparator_bridge core: two subtract comparators, one output lifted over the
+  other) fed by two repeaters, one restoring P from the loop's midpoint and one
+  restoring C, because a subtract XOR only cancels when both inputs have the same
+  strength. Interface: A into the dust at (8,1,1) and B into the dust at (7,1,2) at
+  full strength (the tests drop a redstone block on each from above), C at the cell
+  (5,1,6), which touches notc and starts the dust line to the sum bridge; sum is the
+  dust at (3,2,5) on top of the bridge, cout the dust at (7,1,6). 11x4x8. Delay:
+  cout 4 ticks from any input, sum 4 ticks from C and 6 from A or B (exact worst case
+  6, tested). Hazard: when A or B and C change together the C half arrives 2 ticks
+  before the P half, so sum can dip for 2 ticks (tested: A and C rising with B held
+  on takes sum 1 -> 0 at tick 4 -> 1 at tick 6); cout does not glitch. cout is not full strength: t passes on P's strength from the
+  loop (9 to 13 at the output in traces), fine as a bit, but put a repeater after it
+  before anything that compares strengths. Trade-off versus
+  add_full_piston_instant: silent and lightless and carry 4, but C to cout also takes
+  4 ticks instead of 0. Copies stack directly on top of each other
+  (add_full_comparator_lightless_x2).
+traits:
+- lightless
+- silent
+- pistonless
+- entityless
+- stackable
+- comparator_based
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  A: comparator[facing=south,mode=subtract]
+  B: comparator[facing=north,mode=subtract]
+  v: repeater[facing=north]
+  <: repeater[facing=east]
+  '>': repeater[facing=west]
+  p: {name: p, block: redstone_wire}
+  R: redstone_block
+  C: {name: notc, block: 'comparator[facing=west,mode=subtract]'}
+  t: {name: t, block: 'comparator[facing=north,mode=subtract]'}
+  c: {input: c}
+  D: {output: cout, block: redstone_wire}
+  a: {input: a}
+  b: {input: b}
+  s: {output: sum, block: redstone_wire}
+layers:
+  0: |
+    .....===...
+    .....=.====
+    ..=..=.==.=
+    ..=====.===
+    ====..===.=
+    =.=====...=
+    =....======
+    ======.....
+  1: |
+    .....--#...
+    .....-.A---
+    ..#..-.-B.v
+    ..A-<--.#-B
+    ->-B..--p.-
+    -.##RCt...-
+    -....c#D---
+    ------.....
+  2: |
+    ...........
+    ........a..
+    ..-....b...
+    ..#........
+    ..#........
+    ..-s.......
+    ...........
+    ...........
+  3: |
+    ...........
+    ...........
+    ...........
+    ..-........
+    ..-........
+    ...........
+    ...........
+    ...........
+tests:
+- name: logic
+  truth_table: |
+    a b c | sum cout
+    0 0 0 | 0 0
+    0 0 1 | 1 0
+    0 1 1 | 0 1
+    0 1 0 | 1 0
+    1 1 0 | 0 1
+    1 1 1 | 1 1
+    1 0 1 | 0 1
+    1 0 0 | 1 0
+    0 1 1 | 0 1
+    1 0 0 | 1 0
+    1 1 1 | 1 1
+    0 0 0 | 0 0
+  delay: 6
+- name: c path timing
+  steps:
+  - drive: {a: 1}
+  - {wait: 10}
+  - expect: {sum: 1, cout: 0}
+  - drive: {c: 1}
+  - {wait: 3}
+  - expect: {sum: 1, cout: 0}
+  - {wait: 1}
+  - expect: {sum: 0, cout: 1}
+  - {wait: 6}
+  - drive: {c: 0}
+  - {wait: 3}
+  - expect: {sum: 0, cout: 1}
+  - {wait: 1}
+  - expect: {sum: 1, cout: 0}
+  - {wait: 6}
+  - drive: {a: 0, b: 1}
+  - {wait: 10}
+  - expect: {sum: 1, cout: 0}
+  - drive: {a: 1, c: 1}
+  - {wait: 3}
+  - expect: {cout: 0}
+  - {wait: 1}
+  - expect: {cout: 1}
+  - expect: {sum: 0}
+  - {wait: 1}
+  - expect: {sum: 0}
+  - {wait: 1}
+  - expect: {sum: 1, cout: 1}

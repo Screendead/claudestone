@@ -1,0 +1,31 @@
+name: wire_dust_run
+description: >-
+  The baseline: 15 redstone dust on a 1-wide row of blocks, the longest run a full-strength
+  source can light. Dust updates in the same tick as its source, so the output follows the input
+  in 0 game ticks. Interface: input driver a on the west end (x=0, y=1), output dust at the east
+  end (x=15, y=1), which sits at strength 1, so anything reading it must accept a weak signal
+  (a repeater does, as wire_repeater_line tests). Size 16x2x1 including the
+  driver cell. Trade-off: the fastest and simplest level wire, silent and lightless, but only 15
+  blocks long and not side-by-side tileable (parallel dust merges); extend it with
+  wire_repeater_line, bundle it with wire_checker_bus or wire_flat_bus.
+traits: [instant, ultrafast, ultracompact, flat, one_wide, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  a: {input: a}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .===============
+  1: |
+    a--------------o
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+    0 | 0
+    1 | 1
+  delay: 0

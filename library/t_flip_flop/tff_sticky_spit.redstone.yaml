@@ -1,0 +1,126 @@
+name: tff_sticky_spit
+description: >-
+  Sticky-piston block spitting: a sticky piston given a pulse of 2 gt or less
+  finishes pushing its block but leaves it behind, and the next such pulse pulls it
+  back. Decompiled PistonBaseBlock.triggerEvent: if the block two ahead is still a
+  moving piston when the retract event runs, it is placed where it was going and not
+  pulled; once it has landed, a retract pulls it. The flip-flop is therefore a 2 gt
+  rising-edge pulse generator plus a sticky piston (x0,y1,z3, facing south) moving a
+  redstone block between (x0,y1,z4) and (x0,y1,z5); q is the dust (x1,y1,z5) that only
+  the far position powers. The pulse generator is observer-based: t (x2,y1,z0) powers
+  the dust row at z0, which the observer (x0,y1,z1, facing north) watches; the
+  observer's 2 gt pulse enters gate repeater (x0,y1,z2, facing north), which drives the
+  piston. The gate is locked from its side by an 8 gt repeater (x1,y1,z2, facing east)
+  fed from t through dust (x2,y1,z1..z2). The lock lags t, so it is still off when the
+  rising-edge observer pulse arrives and still on when the falling-edge pulse arrives:
+  only rising edges get through, with no torch or inverter. The lock starts powered so
+  the observer's pulse at placement is blocked too. 3x2x6 of blocks. Delay exactly 6 gt
+  both ways (observer 2, gate 2, piston 2). Input timing: gaps of at least 8 gt, and
+  pulses either 2-3 gt (next rising edge 12 gt or more later) or at least 8 gt; a pulse
+  of 4-7 gt lets the falling-edge observer pulse through as well and the toggle is
+  undone; 1 gt pulses are not supported (a lone one toggled, a train of them did not count reliably). Trade-off: the piston representative; it is
+  loud and moves a block (light updates), and it is the only one here whose output is a
+  real redstone block, which strongly powers anything beside its far position.
+traits: [piston_based, observer_based, flat, horizontal, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  O: observer[facing=north]
+  g: repeater[facing=north,locked=true]
+  k: repeater[facing=east,delay=4,powered=true]
+  P: sticky_piston[facing=south]
+  R: redstone_block
+  t: {input: t}
+  q: {output: q, block: redstone_wire}
+layers:
+  0: |
+    ==.
+    ..=
+    ===
+    ...
+    ...
+    .=.
+  1: |
+    --t
+    O.-
+    gk-
+    P..
+    R..
+    .q.
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 6
+- name: output flips exactly 6 gt after each rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 30
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+- name: 2 gt pulses with 10 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 10
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 10
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: 8 gt pulses with 8 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 8
+  - drive: {t: 0}
+  - wait: 8
+  - drive: {t: 1}
+  - wait: 8
+  - drive: {t: 0}
+  - wait: 8
+  - drive: {t: 1}
+  - wait: 8
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 8
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}

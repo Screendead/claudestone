@@ -1,0 +1,259 @@
+name: dec_analog_onehot
+description: >-
+  Signal strength to one-hot: strength s = 1..8 lights exactly output o<s>; 0 and 9-15
+  light nothing (tested for every level and for 15). Nothing lights or moves. The input
+  comparator k (1,2) facing west reads whatever sits behind it at (0,2) (the tests place
+  a composter there, levels 0-8; a chest, item frame, cake or another comparator line
+  works the same) and starts a dust line east along z=2 whose cell n carries s-n.
+  Repeaters facing the line turn cell n into the threshold T_n = [s > n] at full
+  strength, and output k is one subtract comparator computing T_(k-1) AND NOT T_k:
+  threshold k-1 at its back, threshold k at its side. The layout trick is feeding every
+  output a back and a side without the side ever carrying a lower threshold (which would
+  zero it): south of the line, row z=4 repeats comparator / dust / stone, so outputs 1,
+  4, 7 read the tap directly behind them and the dust to their east, and each stone
+  block, strongly powered by its tap, hands its threshold to the dust on both sides;
+  row z=5 puts outputs 2, 5, 8 behind that dust with the stone-fed dust at their side;
+  outputs 3 and 6 sit north of the line fed by a second pair of taps. Interface (x east,
+  z south, layer 1 on an 11x6 base): input at (0,2) behind k, or drive the dust at (2,2)
+  directly; outputs are comparators o1 (2,4), o4 (5,4), o7 (8,4) leaving south into
+  (x,5) (read with a repeater there: those cells touch stone-fed dust), o2 (3,5), o5
+  (6,5), o8 (9,5) leaving south off the edge, o3 (4,0), o6 (7,0) leaving north off the
+  edge, all at strength 15. 11x2x6. Delay: 4 game ticks from the dust line, 6 from the
+  container behind k, on both edges (tested). Extend the period-3 pattern for more
+  levels (up to 15; one more line cell and tap per level). Trade-off: the only analog
+  member of the family; versus decoding bits it needs one wire in instead of several,
+  and it pairs with dec_enc_analog-style strength encoders or any item-count reading.
+traits:
+- lightless
+- silent
+- pistonless
+- entityless
+- flat
+- analog
+- comparator_based
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  S: stone
+  k: comparator[facing=west]
+  v: repeater[facing=north]
+  ^: repeater[facing=south]
+  A: {output: o3, block: 'comparator[facing=south,mode=subtract]'}
+  B: {output: o6, block: 'comparator[facing=south,mode=subtract]'}
+  C: {output: o1, block: 'comparator[facing=north,mode=subtract]'}
+  D: {output: o4, block: 'comparator[facing=north,mode=subtract]'}
+  E: {output: o7, block: 'comparator[facing=north,mode=subtract]'}
+  F: {output: o2, block: 'comparator[facing=north,mode=subtract]'}
+  G: {output: o5, block: 'comparator[facing=north,mode=subtract]'}
+  H: {output: o8, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    ===========
+    ===========
+    ===========
+    ===========
+    ===========
+    ===========
+  1: |
+    ....A-.B-..
+    ....^^.^^..
+    .k---------
+    ..vvvvvvvvv
+    ..C-SD-SE-S
+    ...F-.G-.H-
+tests:
+- name: every level
+  steps:
+  - {run: 'setblock ~0 ~1 ~2 composter[level=1]'}
+  - {wait: 10}
+  - expect:
+      o1: 1
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=2]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 1
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=3]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 1
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=4]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 1
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=5]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 1
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=6]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 1
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=7]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 1
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=8]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 1
+  - {run: 'setblock ~0 ~1 ~2 composter[level=0]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=5]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 1
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=1]'}
+  - {wait: 10}
+  - expect:
+      o1: 1
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=8]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 1
+  - {run: 'setblock ~0 ~1 ~2 composter[level=3]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 1
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'setblock ~0 ~1 ~2 composter[level=0]'}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+- name: six ticks from the composter on both edges
+  steps:
+  - run: setblock ~0 ~1 ~2 composter[level=3]
+  - wait: 10
+  - expect: {o3: 1, o4: 0}
+  - run: setblock ~0 ~1 ~2 composter[level=4]
+  - wait: 5
+  - expect: {o3: 1, o4: 0}
+  - wait: 1
+  - expect: {o3: 0, o4: 1}
+  - run: setblock ~0 ~1 ~2 composter[level=5]
+  - wait: 5
+  - expect: {o4: 1, o5: 0}
+  - wait: 1
+  - expect: {o4: 0, o5: 1}
+  - run: setblock ~0 ~1 ~2 composter[level=6]
+  - wait: 5
+  - expect: {o5: 1, o6: 0}
+  - wait: 1
+  - expect: {o5: 0, o6: 1}
+  - run: setblock ~0 ~1 ~2 composter[level=2]
+  - wait: 5
+  - expect: {o6: 1, o2: 0}
+  - wait: 1
+  - expect: {o6: 0, o2: 1}
+  - run: setblock ~0 ~1 ~2 composter[level=0]
+  - wait: 5
+  - expect: {o2: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, o5: 0, o6: 0, o7: 0, o8: 0}
+- name: strengths above eight light nothing
+  steps:
+  - run: setblock ~0 ~1 ~2 redstone_block
+  - wait: 10
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, o5: 0, o6: 0, o7: 0, o8: 0}
+  - run: setblock ~0 ~1 ~2 air
+  - wait: 10
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, o5: 0, o6: 0, o7: 0, o8: 0}

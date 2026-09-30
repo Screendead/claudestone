@@ -1,0 +1,158 @@
+name: count_bulb_ripple_bus
+description: 'Four count_bulb_ripple_down counters packed 2 wide (z0, z1) and 2 high (rows y1 and y3, each on its own comparator base) in 8x4x2, 4 blocks per bit, to prove the cell tiles: a copper bulb is not a redstone conductor, so a bulb powered by its comparator does not power the bulb beside or above it; comparators only power forward; each clock cell touches only its own bulb. Inputs clk_a (x0,y1,z0), clk_b (x0,y1,z1), clk_c (x0,y3,z0), clk_d (x0,y3,z1); outputs a0..a3, b0..b3, c0..c3, d0..d3 are the comparators at x2, x4, x6, x8 of the same row (facing west). Same 2 gt per bit as the single counter. The test gives each counter a different number of pulses, then pulses all four together. Use it as the template for a counter bus; count_bulb_ripple_down explains the cell.'
+traits:
+- compact
+- tileable
+- stackable
+- entityless
+- pistonless
+- comparator_based
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  B: waxed_copper_bulb
+  a: {input: clk_a}
+  '0': {output: a0, block: 'comparator[facing=west]'}
+  '1': {output: a1, block: 'comparator[facing=west]'}
+  '2': {output: a2, block: 'comparator[facing=west]'}
+  '3': {output: a3, block: 'comparator[facing=west]'}
+  b: {input: clk_b}
+  '4': {output: b0, block: 'comparator[facing=west]'}
+  '5': {output: b1, block: 'comparator[facing=west]'}
+  '6': {output: b2, block: 'comparator[facing=west]'}
+  '7': {output: b3, block: 'comparator[facing=west]'}
+  c: {input: clk_c}
+  '8': {output: c0, block: 'comparator[facing=west]'}
+  '9': {output: c1, block: 'comparator[facing=west]'}
+  E: {output: c2, block: 'comparator[facing=west]'}
+  F: {output: c3, block: 'comparator[facing=west]'}
+  d: {input: clk_d}
+  G: {output: d0, block: 'comparator[facing=west]'}
+  H: {output: d1, block: 'comparator[facing=west]'}
+  I: {output: d2, block: 'comparator[facing=west]'}
+  J: {output: d3, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    ..=.=.=.=
+    ..=.=.=.=
+  1: |
+    aB0B1B2B3
+    bB4B5B6B7
+  2: |
+    ..=.=.=.=
+    ..=.=.=.=
+  3: |
+    cB8B9BEBF
+    dBGBHBIBJ
+tests:
+- name: four counters packed 2 wide and 2 high count independently
+  steps:
+  - {expect: {a0: 0, a1: 0, a2: 0, a3: 0, b0: 0, b1: 0, b2: 0, b3: 0, c0: 0, c1: 0, c2: 0, c3: 0, d0: 0, d1: 0, d2: 0, d3: 0}}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {expect: {a0: 1, a1: 1, a2: 1, a3: 1, b0: 0, b1: 0, b2: 0, b3: 0, c0: 0, c1: 0, c2: 0, c3: 0, d0: 0, d1: 0, d2: 0, d3: 0}}
+  - {drive: {clk_b: 1}}
+  - {wait: 10}
+  - {drive: {clk_b: 0}}
+  - {wait: 10}
+  - {drive: {clk_b: 1}}
+  - {wait: 10}
+  - {drive: {clk_b: 0}}
+  - {wait: 10}
+  - {expect: {a0: 1, a1: 1, a2: 1, a3: 1, b0: 0, b1: 1, b2: 1, b3: 1, c0: 0, c1: 0, c2: 0, c3: 0, d0: 0, d1: 0, d2: 0, d3: 0}}
+  - {drive: {clk_c: 1}}
+  - {wait: 10}
+  - {drive: {clk_c: 0}}
+  - {wait: 10}
+  - {drive: {clk_c: 1}}
+  - {wait: 10}
+  - {drive: {clk_c: 0}}
+  - {wait: 10}
+  - {drive: {clk_c: 1}}
+  - {wait: 10}
+  - {drive: {clk_c: 0}}
+  - {wait: 10}
+  - {expect: {a0: 1, a1: 1, a2: 1, a3: 1, b0: 0, b1: 1, b2: 1, b3: 1, c0: 1, c1: 0, c2: 1, c3: 1, d0: 0, d1: 0, d2: 0, d3: 0}}
+  - {drive: {clk_d: 1}}
+  - {wait: 10}
+  - {drive: {clk_d: 0}}
+  - {wait: 10}
+  - {drive: {clk_d: 1}}
+  - {wait: 10}
+  - {drive: {clk_d: 0}}
+  - {wait: 10}
+  - {drive: {clk_d: 1}}
+  - {wait: 10}
+  - {drive: {clk_d: 0}}
+  - {wait: 10}
+  - {drive: {clk_d: 1}}
+  - {wait: 10}
+  - {drive: {clk_d: 0}}
+  - {wait: 10}
+  - {expect: {a0: 1, a1: 1, a2: 1, a3: 1, b0: 0, b1: 1, b2: 1, b3: 1, c0: 1, c1: 0, c2: 1, c3: 1, d0: 0, d1: 0, d2: 1, d3: 1}}
+  - {drive: {clk_a: 1, clk_b: 1, clk_c: 1, clk_d: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0, clk_b: 0, clk_c: 0, clk_d: 0}}
+  - {wait: 10}
+  - {expect: {a0: 0, a1: 1, a2: 1, a3: 1, b0: 1, b1: 0, b2: 1, b3: 1, c0: 0, c1: 0, c2: 1, c3: 1, d0: 1, d1: 1, d2: 0, d3: 1}}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {drive: {clk_a: 1}}
+  - {wait: 10}
+  - {drive: {clk_a: 0}}
+  - {wait: 10}
+  - {expect: {a0: 0, a1: 0, a2: 0, a3: 0, b0: 1, b1: 0, b2: 1, b3: 1, c0: 0, c1: 0, c2: 1, c3: 1, d0: 1, d1: 1, d2: 0, d3: 1}}

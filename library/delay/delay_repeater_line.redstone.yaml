@@ -1,0 +1,35 @@
+name: delay_repeater_line
+description: 'Exact delay line of four repeaters set to 1, 2, 3 and 4 (each repeater adds 2 game ticks per notch), so 20 game ticks from input a to out on both edges. Input a is the west end (x=0, y=1), out is the last repeater (x=4, y=1; it powers the block or dust east of it); signal runs west to east on one layer over a smooth-stone base. 4x2x1 plus the driver cell. Re-click repeaters for any even delay from 8 to 32 ticks at this length, or add repeaters for 8 ticks per block. It is silent, lightless and one wide, so copies sit side by side for a bus. Trade-off: 8 ticks per block is the densest repeater delay but still long for big delays (see delay_hopper_timer); pulses shorter than a repeater''s setting are stretched to that setting (see delay_pulse_preserving).'
+traits: [flat, one_wide, horizontal, tileable, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '1': repeater[facing=west,delay=1]
+  '2': repeater[facing=west,delay=2]
+  '3': repeater[facing=west,delay=3]
+  '4': {output: out, block: 'repeater[facing=west,delay=4]'}
+layers:
+  0: |
+    .====
+  1: |
+    a1234
+tests:
+- name: both edges 20 ticks
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+  delay: 20
+- name: exact edges and retrigger
+  steps:
+  - drive: {a: 1}
+  - wait: 19
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 19
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

@@ -1,0 +1,183 @@
+name: analog_change_pulse
+description: 'Analog change detector: an observer (z=3) facing a dust cell (z=2) fires a 2 game tick pulse whenever that dust''s strength changes by any amount, up or down, not only when it turns on or off, because every power level is a different block state of the dust. Here a comparator reading a hopper (z=0..1) feeds the dust; the pulse leaves the observer''s back into the output dust (z=4). The pulse starts 2 ticks after the dust changes and lasts 2 ticks. An observer does not see a container''s contents change, so watch the comparator''s output dust, not the container. 1x2x5, one wide, silent (observers make no sound) and lightless. Tests: changes 0-5, 5-6, 6-15, 15-14, 14-1, 1-0, 0-8, 8-9 each give exactly one pulse at 4-5 ticks after the hopper changes (2 of them the fixture comparator), and setting the same level again gives none. Trade-off: the cheapest way to clock a register or send an update when an item count moves; it cannot tell up from down (compare two analog_peak_hold
+  or a delayed copy with analog_subtract for that).'
+traits:
+- analog
+- observer_based
+- silent
+- lightless
+- pistonless
+- entityless
+- flat
+- one_wide
+- horizontal
+- ultracompact
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  H: hopper[facing=down]
+  C: comparator[facing=north]
+  D: {name: s, block: redstone_wire}
+  O: {name: obs, block: 'observer[facing=north]'}
+  o: {output: pulse, block: redstone_wire}
+layers:
+  0: |
+    =
+    =
+    =
+    =
+    =
+  1: |
+    H
+    C
+    D
+    O
+    o
+tests:
+- name: a 2-tick pulse for every change of level, none without
+  steps:
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - &id001 {wait: 1}
+  - &id002
+    expect: {pulse: 0}
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - &id003 {wait: 1}
+  - &id004
+    expect: {pulse: 0}
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[]}'}
+  - &id005 {wait: 1}
+  - &id006
+    expect: {pulse: 0}
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 3}
+  - expect: {pulse: 0}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 1}
+  - {wait: 1}
+  - expect: {pulse: 0}
+  - {wait: 10}
+  - expect: {pulse: 0}

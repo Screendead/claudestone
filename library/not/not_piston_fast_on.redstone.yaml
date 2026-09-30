@@ -1,0 +1,64 @@
+name: not_piston_fast_on
+description: |
+  An inverter whose rising edge takes 1 tick, the mirror of not_piston_fast_off. A fixed
+  redstone block feeds dust on top of a block, which steps down one block to the output
+  dust. While the input is on, a sticky piston holds a stone block in the cell above the
+  output dust; a conductor there cuts the diagonal dust connection. Releasing the input
+  makes the piston pull the stone away in its block event the next tick, the cell becomes a
+  moving block at once, the step reconnects, and the output lights 1 tick after the input
+  falls. Pushing the stone back only cuts the step when the move finishes, so the falling
+  edge is slow.
+  Interface: redstone block at (0,2,0); dust (1,2,0) on block (1,1,0); output dust at
+  (2,1,0) on a support (2,0,0), strength 14; stone at (3,2,0) in front of a sticky piston at
+  (4,2,0) facing west; input: the driver east of the piston at (5,2,0), or any signal into
+  the piston. Delays: rising 1 tick, falling 3 ticks.
+  Trade-off: fastest possible turn-on (for resetting or re-arming something the moment an
+  input drops); slow turn-off, noise and moving-block light updates. A single NOT cannot have
+  both 1-tick edges: pistons remove blocks at once but place them late, so one edge always
+  waits for a placement. Keep input pulses and gaps at least 3 ticks: re-driving the piston 1
+  tick after a retraction began did not give the expected edge in testing.
+traits: [piston_based, compact, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  R: redstone_block
+  '-': redstone_wire
+  X: stone
+  P: 'sticky_piston[facing=west]'
+  o: {output: out, block: redstone_wire}
+  a: {input: a}
+layers:
+  0: |
+    ..=...
+  1: |
+    .#o...
+  2: |
+    R-.XPa
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+  delay: 3
+- name: edges
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 4
+  - drive: {a: 1}
+  - wait: 3
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}

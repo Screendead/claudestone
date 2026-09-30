@@ -1,0 +1,279 @@
+name: shift_master_slave
+description: 'Edge-triggered serial-in parallel-out shift register, the fastest in the family: q moves exactly 4 ticks after the rising edge and it shifts at a 4-tick clock period (2 high, 2 low), both tested. Each bit is a master-slave pair of locked repeaters on the data row (z=2), data flowing west to east: d is the cell at x=1, masters at x=2,4,6,8, slaves q0..q3 at x=3,5,7,9 (all facing west, delay 1); q3 powers whatever is east of it. Masters are locked from the south by repeaters (z=3) on the clk line (dust, z=4), so they freeze while clk is high. Slaves are locked from the north by subtract comparators (z=1) whose rear reads a barrel holding one stick (a constant 1) and whose sides read clk dust that zigzags over the barrels (z=0, y=1-2), so they freeze while clk is low. Both locks are one diode from clk, so on the rising edge the masters freeze in the same tick the slaves open, and on the falling edge the slaves freeze in the same tick the masters open; a master''s new output then
+  arrives 2 ticks later, when the slave is already locked. clk is the cell at x=1, z=4 and reaches the zigzag by a dust staircase over the x=0 column. d must be settled 1 tick before the edge; a change in the edge tick itself races the master lock (avoid it), and a change 1 tick or more after the edge waits for the next edge, so the hold time is 1 tick. Size 10x3x5 (bits are 2x3x5, the first two columns are the clock and d entry); about 12 bits per dust run before the clk lines need a repeater. Lightless, silent, no entities, starts cleared. Trade-off: 2 latches and 2 lock diodes per bit and 3 tall, against shift_pulse_lock''s 1 latch and 1 lock per bit; in return 2.5x less latency, a 2.75x faster clock and 1-tick setup and hold.'
+traits: [ultrafast, fast, horizontal, lightless, silent, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  d: {input: d}
+  k: {input: clk}
+  m: repeater[facing=west]
+  v: repeater[facing=south]
+  C: comparator[facing=north,mode=subtract]
+  B: barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}
+  a: {output: q0, block: 'repeater[facing=west]'}
+  b: {output: q1, block: 'repeater[facing=west]'}
+  c: {output: q2, block: 'repeater[facing=west]'}
+  e: {output: q3, block: 'repeater[facing=west]'}
+layers:
+  0: |
+    ..=.=.=.=.
+    ..========
+    ..========
+    ..=.=.=.=.
+    =.========
+  1: |
+    ==-B-B-B-B
+    =.-C-C-C-C
+    =dmambmcme
+    =.v.v.v.v.
+    -k--------
+  2: |
+    --.-.-.-.-
+    -.........
+    -.........
+    -.........
+    ..........
+tests:
+- name: shifts 1011 through, q moves 4 ticks after each rising edge
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - {wait: 6}
+  - drive: {clk: 0}
+  - {wait: 20}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+- name: shifts at the 4-tick minimum period (2 high, 2 low)
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 2}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+- name: setup 1 tick, later d changes and the falling edge ignored
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - drive: {d: 1}
+  - {wait: 3}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - {wait: 30}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 30}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {d: 0}
+  - {wait: 5}
+  - drive: {d: 1}
+  - {wait: 5}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}

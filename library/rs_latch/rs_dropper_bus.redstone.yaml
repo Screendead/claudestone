@@ -1,0 +1,55 @@
+name: rs_dropper_bus
+description: >-
+  Three rs_dropper_pair cells side by side at a 1-block pitch, the proof that the pair
+  tiles: a 3-bit edge-triggered register in a 3x2x3 box. Each lane is dropper A (x0)
+  facing east into dropper B (x1), with a comparator (x2) reading B; lane k's sk and rk
+  cells are directly under A and B. Neighbouring droppers and comparators ignore each
+  other (comparators only give signal forward), and nothing sits on top of a dropper, so
+  quasi-connectivity has nothing to pick up. Per-lane timing is the single cell's: 6 gt
+  on either rising edge.
+traits: [tileable, compact, container_based, lightless, pistonless, entityless, flat, horizontal, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  A: 'dropper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'
+  B: dropper[facing=west]
+  a: {input: s1}
+  b: {input: r1}
+  c: {input: s2}
+  d: {input: r2}
+  e: {input: s3}
+  f: {input: r3}
+  x: {output: q1, block: 'comparator[facing=west]'}
+  y: {output: q2, block: 'comparator[facing=west]'}
+  z: {output: q3, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    ab=
+    cd=
+    ef=
+  1: |
+    ABx
+    ABy
+    ABz
+tests:
+- name: placed reset
+  steps:
+  - expect: {q1: 0, q2: 0, q3: 0}
+- name: lanes are independent
+  truth_table: |
+    s1 r1 s2 r2 s3 r3 | q1 q2 q3
+    1  0  0  0  0  0  | 1  0  0
+    0  0  0  0  0  0  | 1  0  0
+    0  0  1  0  0  0  | 1  1  0
+    0  0  0  0  0  0  | 1  1  0
+    0  0  0  0  1  0  | 1  1  1
+    0  0  0  0  0  0  | 1  1  1
+    0  1  0  0  0  0  | 0  1  1
+    0  0  0  0  0  0  | 0  1  1
+    0  0  0  1  0  0  | 0  0  1
+    0  0  0  0  0  0  | 0  0  1
+    1  0  0  0  0  1  | 1  0  0
+    0  0  0  0  0  0  | 1  0  0
+    0  1  0  0  0  0  | 0  0  0
+    0  0  0  0  0  0  | 0  0  0
+  delay: 6

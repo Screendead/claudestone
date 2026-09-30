@@ -1,0 +1,172 @@
+name: seg_dec_decimal
+description: 'Ten one-hot digit lines (d0-d9, e.g. a row of levers) to seven segment outputs, as a lightless ROM of repeaters: no torches, lamps or pistons, so no light updates and no sound. Digit lines are dust columns at y=3 running south on blocks; segment outputs are dust rows at y=1 running east. A tap (digit k lights segment s) is a dust stub off the digit column onto a block, a repeater reading that block and pointing south into a block P, and P standing on the segment row: a hard-powered block powers the dust under it. Taps for even rows sit east of their column and odd rows west, so no two taps touch; columns are 3 apart. Each row has one repeater so its far taps reach the east end. Interface: digit k enters at (1+3k, 3, 0) from the north (tested with a redstone block there; a repeater or dust feeding the column should act the same); outputs are the east ends of the rows at x=29, y=1: a z=3, b z=5, c z=7, d z=9, e z=11, f z=13, g z=15. With no line on, every segment is off; two
+  lines on show the OR of both glyphs. 30 wide x 4 tall x 15 deep, 965 blocks. Delay: 4 game ticks worst case (2 for the digits whose taps are within 14 blocks of the row''s end, 4 through the row repeater), tested for each digit alone. Trade-off: the lightless, silent decoder; it needs one-hot input (levers, or any one-hot source), where seg_dec_bcd takes 4-bit binary but uses torches.'
+traits:
+- lightless
+- silent
+- pistonless
+- entityless
+- fast
+- reset_safe
+- survival_friendly
+- tick_accurate
+palette:
+  .: air
+  '#': white_concrete
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  a: {output: a, block: redstone_wire}
+  b: {output: b, block: redstone_wire}
+  c: {output: c, block: redstone_wire}
+  d: {output: d, block: redstone_wire}
+  e: {output: e, block: redstone_wire}
+  f: {output: f, block: redstone_wire}
+  g: {output: g, block: redstone_wire}
+  v: repeater[facing=north]
+  A: {input: d0}
+  B: {input: d1}
+  C: {input: d2}
+  D: {input: d3}
+  E: {input: d4}
+  F: {input: d5}
+  G: {input: d6}
+  H: {input: d7}
+  I: {input: d8}
+  J: {input: d9}
+layers:
+  0: |
+    ..............................
+    ..............................
+    ..............................
+    ##############################
+    ..............................
+    ##############################
+    ..............................
+    ##############################
+    ..............................
+    ##############################
+    ..............................
+    ##############################
+    ..............................
+    ##############################
+    ..............................
+    ##############################
+  1: |
+    ..............................
+    ..............................
+    ..#.....#..#.....#..#..#..#..#
+    ---------------->------------a
+    #..#..#..#..#........#..#..#..
+    -------------->--------------b
+    ..#..#.....#..#..#..#..#..#..#
+    ---------------->------------c
+    #.....#..#.....#..#.....#..#..
+    -------------->--------------d
+    ..#.....#...........#.....#...
+    ---------------->------------e
+    #...........#..#..#.....#..#..
+    -------------->--------------f
+    ........#..#..#..#..#.....#..#
+    ---------------------->------g
+  2: |
+    ..............................
+    .##.#..##.##.#..##.##.##.##.##
+    .#v.#..#v.#v.#..#v.#v.#v.#v.#v
+    #####.########..##.###########
+    v#.v#.v#.v#.v#..#..#.v#.v#.v#.
+    ########.######.##.###########
+    .#v.#v.#..#v.#v.#v.#v.#v.#v.#v
+    ###.####.###.########.########
+    v#..#.v#.v#..#.v#.v#..#.v#.v#.
+    ###.#.#####..#.##.###.#.#####.
+    .#v.#..#v.#..#..#..#v.#..#v.#.
+    ###.#..##.#.##.##.###.#.#####.
+    v#..#..#..#.v#.v#.v#..#.v#.v#.
+    ##..#..##.###########.#.######
+    .#..#..#v.#v.#v.#v.#v.#..#v.#v
+    .#..#..##.##.##.##.##.#..##.##
+  3: |
+    .A..B..C..D..E..F..G..H..I..J.
+    .--.-..--.--.-..--.--.--.--.--
+    .-..-..-..-..-..-..-..-..-..-.
+    --.--.--.--.--..-..-.--.--.--.
+    .-..-..-..-..-..-..-..-..-..-.
+    .--.--.-..--.--.--.--.--.--.--
+    .-..-..-..-..-..-..-..-..-..-.
+    --..-.--.--..-.--.--..-.--.--.
+    .-..-..-..-..-..-..-..-..-..-.
+    .--.-..--.-..-..-..--.-..--.-.
+    .-..-..-..-..-..-..-..-..-..-.
+    --..-..-..-.--.--.--..-.--.--.
+    .-..-..-..-..-..-..-..-..-..-.
+    .-..-..--.--.--.--.--.-..--.--
+    .-..-..-..-..-..-..-..-..-..-.
+    .-..-..-..-..-..-..-..-..-..-.
+tests:
+- name: each digit line alone, then none
+  truth_table: |
+    d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 | a b c d e f g
+    0 0 0 0 0 0 0 0 1 0 | 1 1 1 1 1 1 1
+    1 0 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 0
+    0 1 0 0 0 0 0 0 0 0 | 0 1 1 0 0 0 0
+    0 0 1 0 0 0 0 0 0 0 | 1 1 0 1 1 0 1
+    0 0 0 1 0 0 0 0 0 0 | 1 1 1 1 0 0 1
+    0 0 0 0 1 0 0 0 0 0 | 0 1 1 0 0 1 1
+    0 0 0 0 0 1 0 0 0 0 | 1 0 1 1 0 1 1
+    0 0 0 0 0 0 1 0 0 0 | 1 0 1 1 1 1 1
+    0 0 0 0 0 0 0 1 0 0 | 1 1 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 | 1 1 1 1 0 1 1
+    0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0
+  delay: 4
+- name: dark from placement
+  steps:
+  - expect: &id001
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+- name: 'exact edges: near digit 2 ticks, far digit 4'
+  steps:
+  - drive: {d7: 1}
+  - {wait: 1}
+  - expect: {a: 0, b: 0, c: 0}
+  - {wait: 1}
+  - expect:
+      a: 1
+      b: 1
+      c: 1
+      d: 0
+  - {wait: 20}
+  - drive: {d7: 0}
+  - {wait: 1}
+  - expect: {a: 1}
+  - {wait: 1}
+  - expect: *id001
+  - {wait: 20}
+  - drive: {d0: 1}
+  - {wait: 3}
+  - expect: {a: 0}
+  - {wait: 1}
+  - expect:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 0
+- name: two lines at once show both glyphs
+  steps:
+  - drive: {d1: 1, d4: 1}
+  - {wait: 10}
+  - expect:
+      a: 0
+      b: 1
+      c: 1
+      d: 0
+      e: 0
+      f: 1
+      g: 1

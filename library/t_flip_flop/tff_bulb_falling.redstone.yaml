@@ -1,0 +1,82 @@
+name: tff_bulb_falling
+description: >-
+  Negative-edge T flip-flop: the copper bulb is powered by an inverter (a subtract-mode
+  comparator whose rear sits on a redstone block and whose side is t), so the bulb sees
+  a rising edge when t falls. Use it where a toggle should fire on release, or as the
+  per-stage cell of an up-counting ripple counter (the rising-edge tff_bulb_counter
+  counts down). Interface (top view, north up): redstone block (x0,y1,z0), inverter
+  comparator (x1,y1,z0, facing west), bulb (x2,y1,z0), q comparator (x3,y1,z0, facing
+  west, powering x4). t is the cell south of the inverter (x1,y1,z1), feeding its side.
+  4x2x1 of blocks. Delay 4 gt from the falling edge (2 gt inverter, 0 gt bulb, 2 gt
+  comparator); rising edges do nothing. Accepts 2 gt pulses with 2 gt gaps. Start-up
+  caveat: a bulb that is already powered when placed lights up (onPlace toggles it), so
+  hand-built it starts at q=1. The packaged place function toggles it once while the
+  build settles, so it places the bulb already lit and it ends at q=0 (tested). Trade-off versus
+  tff_copper_bulb: 2 gt slower and twice the size, but triggers on the other edge;
+  still clicks and emits light.
+traits: [compact, flat, horizontal, pistonless, entityless, comparator_based, tick_accurate, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  K: redstone_block
+  C: 'comparator[facing=west,mode=subtract,powered=true]{OutputSignal:15}'
+  B: 'waxed_copper_bulb[lit=true,powered=true]'
+  t: {input: t}
+  q: {output: q, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    .=.=
+    ....
+  1: |
+    KCBq
+    .t..
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on falling edges
+  truth_table: |
+    t | q
+    1 | 0
+    0 | 1
+    1 | 1
+    0 | 0
+  delay: 4
+- name: output flips exactly 4 gt after the falling edge
+  steps:
+  - drive: {t: 1}
+  - wait: 20
+  - expect: {q: 0}
+  - drive: {t: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: 2 gt pulses with 2 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 2
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 2
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 0}

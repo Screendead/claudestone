@@ -1,0 +1,61 @@
+name: rs_ring_stack
+description: >-
+  Two rs_comparator_ring cells stacked at a 2-block pitch, the proof that the ring is
+  stackable: each cell's base sits directly on the ring below it, and the cells do not
+  disturb each other. Dust never powers the block above it, diodes read only
+  horizontally, and a dust-powered block cannot power other dust, so a column of these
+  cells is a dense bit-addressable register (one bit per 3x2x2 cell, inputs and output
+  on each cell's own layer). Interface per cell k (k=1 at y1, k=2 at y3): sk is the cell
+  west of the north-west dust (x0,z0), rk the cell south of the comparator (x2,z2), qk
+  the south-west dust (x1,z1). Timing is the single cell's: set 0 gt, reset 2 gt. 3x4x2
+  of blocks for two bits.
+traits: [stackable, lightless, silent, pistonless, entityless, comparator_based, horizontal, compact, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  C: comparator[facing=east]
+  a: {input: s1}
+  b: {input: r1}
+  c: {input: s2}
+  d: {input: r2}
+  p: {output: q1, block: redstone_wire}
+  q: {output: q2, block: redstone_wire}
+layers:
+  0: |
+    .===
+    .===
+    ....
+  1: |
+    a->-
+    .pC-
+    ..b.
+  2: |
+    .===
+    .===
+    ....
+  3: |
+    c->-
+    .qC-
+    ..d.
+tests:
+- name: placed reset
+  steps:
+  - expect: {q1: 0, q2: 0}
+- name: cells are independent
+  truth_table: |
+    s1 r1 s2 r2 | q1 q2
+    1  0  0  0  | 1  0
+    0  0  0  0  | 1  0
+    0  0  1  0  | 1  1
+    0  0  0  0  | 1  1
+    0  1  0  0  | 0  1
+    0  0  0  0  | 0  1
+    0  0  0  1  | 0  0
+    0  0  0  0  | 0  0
+    0  0  1  0  | 0  1
+    0  0  0  0  | 0  1
+    1  0  0  1  | 1  0
+    0  0  0  0  | 1  0
+  delay: 2

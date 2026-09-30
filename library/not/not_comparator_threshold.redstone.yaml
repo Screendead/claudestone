@@ -1,0 +1,63 @@
+name: not_comparator_threshold
+description: |
+  An analog NOT with a settable threshold: a subtract-mode comparator reads a composter at its
+  back (a composter's comparator output is its fill level, 0-8, with no block entity or items
+  to store) and the input at its side. The output is on exactly when the input is weaker than
+  the level: out = level - input when input < level, else 0. Level 8 here, so inputs 0-7
+  count as "off" and 8-15 as "on".
+  Interface: comparator at (1,1,0) facing west on a support (1,0,0); composter[level=8] at
+  (0,1,0); input: the dust at the south side cell (1,1,1). Output: the comparator, driving
+  east at (2,1,0), strength level - input. The gate is 2x2x2 (comparator, composter, support,
+  first input dust); the dust line down z (1,1,1..9) is test scaffolding that makes weak
+  inputs: driver a at (2,1,1) gives 15, c at (2,1,8) gives 8 and b at (1,1,10) gives 7 at the
+  comparator. Delay 2 ticks.
+  Trade-off: same size, speed, silence and darkness as not_comparator_subtract, but it
+  rejects weak noise (anything under 8 leaves it on) and turns a long dust line's fading
+  signal into a clean decision; set the level 1-8 by composting in survival. Output is at most
+  8 strong, so it reaches 7 dust before needing a repeater.
+traits: [fast, analog, lightless, silent, pistonless, entityless, comparator_based, container_based, flat, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  C: composter[level=8]
+  '-': redstone_wire
+  o: {output: out, block: 'comparator[facing=west,mode=subtract]'}
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+layers:
+  0: |
+    .=.
+    .=.
+    .=.
+    .=.
+    .=.
+    .=.
+    .=.
+    .=.
+    .=.
+    .=.
+    ...
+  1: |
+    Co.
+    .-a
+    .-.
+    .-.
+    .-.
+    .-.
+    .-.
+    .-.
+    .-c
+    .-.
+    .b.
+tests:
+- name: threshold at 8
+  truth_table: |
+    a b c | out
+    0 0 0 | 1
+    1 0 0 | 0
+    0 1 0 | 1
+    0 0 1 | 0
+    0 1 1 | 0
+    1 1 0 | 0
+  delay: 2

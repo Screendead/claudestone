@@ -1,0 +1,550 @@
+name: shift_hopper_1wide
+description: 'One-block-wide serial-in serial-out shift register that shifts on BOTH clock edges: every change of clk moves each bit one hopper along. Everything lies in the plane z=0, so lanes can sit side by side. Hoppers S (supply, x=4), h0..h2 (x=5..7, facing east) and h3 (x=8, facing down into a chest) carry the bits as items; the dust lying on top of them (y=2) is the lock line, powered by a wall torch at its east end (x=9, y=2). An observer (x=12, y=2) watches the clk cell (x=13, y=2) and fires a 2-tick pulse on each change, which a repeater (delay 2, 4 game ticks) stretches into the torch''s block, so the torch goes out and every hopper is unlocked for 4 ticks, 8 to 12 ticks after the clock change; each hopper moves one item and then sits out its 8-tick cooldown. d (x=0, y=1) reaches S through a repeater into a block carrying a wall torch that locks S unless d=1. q is the comparator at x=9, y=1, facing west (h3 on its west is its input; it outputs east), the serial output, 10 ticks
+  after the clock change; take it with a repeater at x=10, since the block above that cell is powered by the clock pulse. Timing: a d change up to 3 ticks after a clock change is taken by it, one 8 or more ticks after waits for the next; 4-7 ticks is unreliable. Clock changes at least 9 ticks apart (tested sustained), because of the hopper cooldown and because the lock torch burns out after 8 turn-offs within 60 ticks. S starts with 320 sticks and a 20-tick transfer cooldown, which also swallows the observer''s pulse at placement. Size 12x3x1 of blocks plus the d and clk cells at the two ends. Silent, no entities; the two torches make light updates. Trade-off: the only one-wide design and a double-data-rate clock, but only the last stage is tapped (a comparator per stage needs a side), latency is 10 ticks and it uses torches.'
+traits: [one_wide, compact, horizontal, silent, pistonless, entityless, container_based, observer_based, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  d: {input: d}
+  k: {input: clk}
+  r: repeater[facing=west]
+  t: redstone_wall_torch[facing=east]
+  T: redstone_wall_torch[facing=west]
+  S: hopper[facing=east]{TransferCooldown:20,Items:[{Slot:0b,id:"minecraft:stick",count:64},{Slot:1b,id:"minecraft:stick",count:64},{Slot:2b,id:"minecraft:stick",count:64},{Slot:3b,id:"minecraft:stick",count:64},{Slot:4b,id:"minecraft:stick",count:64}]}
+  H: hopper[facing=east]
+  V: hopper[facing=down]
+  K: chest
+  q: {output: q, block: 'comparator[facing=west]'}
+  p: repeater[facing=east,delay=2]
+  O: observer[facing=east]
+layers:
+  0: |
+    .=......K=.....
+  1: |
+    dr#tSHHHVq.=...
+  2: |
+    ....-----T#pOk.
+tests:
+- name: every clock change shifts, q moves 10 ticks after it
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: sustained 9-tick shifts (hopper cooldown, torch burnout limit)
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 7}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 8}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - expect: {q: 0}
+- name: a d change 3 ticks after a clock change is taken by it
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 1}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 1}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {d: 1}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 1}
+  - {wait: 6}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {d: 1}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {d: 0}
+  - {wait: 6}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: a d change 8 ticks after a clock change waits for the next
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 8}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 8}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 10}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 20}
+  - expect: {q: 0}

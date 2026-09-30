@@ -1,0 +1,136 @@
+name: tff_torch_repeater
+description: >-
+  Classic edge-triggered master-slave flip-flop built from two repeater latches, with
+  its inverted output fed back as data. Master repeater M (x1,y1,z4) and slave repeater
+  q (x2,y1,z4) both face west, so data flows east. t reaches block X through one dust;
+  X drives lock repeater (x1,y1,z3), which freezes M while t is high, and a wall torch on
+  X's east face (x2,y1,z2) inverts t into lock repeater (x2,y1,z3), which freezes the
+  slave while t is low. On a rising edge the master locks 2 gt later, the slave unlocks
+  at 4 gt and passes the master's value at 6 gt; the slave hard-powers block (x3,y1,z4),
+  whose wall torch (x3,y1,z5) is not-q and runs back through dust along z5 and up x0
+  into M's input, reaching M only after it is locked. Interface (top view, north up): t
+  is the cell north of the dust (x1,y1,z0); q is the slave repeater (x2,y1,z4, facing
+  west) and its powered block at x3; not-q is the torch at (x3,y1,z5). 4x2x5 of blocks.
+  Delay exactly 6 gt on the rising edge. Rising edges must be at least 8 gt apart (not-q needs 8 gt to get round to the master), with pulses of at least 3 gt and gaps of at
+  least 2 gt (a 2 gt pulse is ignored, never half-taken). Trade-off: the textbook design
+  with the most common parts (dust, repeaters, two torches); it is silent but not
+  lightless, and it is the same size and speed as tff_lightless_lock, which replaces the
+  torches with comparators and redstone blocks. Two torches toggle once per edge, far
+  below burnout.
+traits: [torch_based, silent, flat, horizontal, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  X: smooth_stone
+  S: smooth_stone
+  ')': redstone_wall_torch[facing=east]
+  u: redstone_wall_torch[facing=south]
+  v: repeater[facing=north]
+  V: repeater[facing=north,powered=true]
+  M: repeater[facing=west,powered=true]
+  t: {input: t}
+  q: {output: q, block: 'repeater[facing=west,locked=true]'}
+layers:
+  0: |
+    ....
+    .=..
+    ....
+    .==.
+    ===.
+    ===.
+  1: |
+    .t..
+    .-..
+    .X).
+    .vV.
+    -MqS
+    ---u
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 6
+- name: output flips exactly 6 gt after each rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 30
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+- name: 3 gt pulses with 5 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 5
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 5
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: 6 gt pulses with 2 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 2
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 2
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: a 2 gt pulse is too short and is ignored
+  steps:
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+  - drive: {t: 1}
+  - wait: 10
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}

@@ -1,0 +1,46 @@
+name: wire_analog_comparator
+description: >-
+  A wire that keeps signal strength. Dust loses one level per block and a repeater resets to 15,
+  so neither can carry an analog value. A comparator in compare mode with nothing at its sides
+  passes its rear strength through unchanged. Here each comparator strongly powers a solid block
+  at that same strength, and the next comparator reads the block, so the line is comparator,
+  block, comparator, block: 2 blocks per 2 game ticks with the value kept exactly.
+  The line is the six comparators and five blocks from x=12 to x=22 (11 blocks, 12 ticks),
+  facing west (input from the west). Its input is the dust ending at x=11 and its output is the
+  dust starting at x=23. The test scaffolding sets the strength: driver a at x=0 feeds 11 dust,
+  so strength 5 arrives, and driver b at x=9, z=1 raises it to 13. Four probes on the output
+  dust prove the exact value arrives: o5, o6, o13 and o14 sit where the dust is lit only if the
+  line delivered at least 5, 6, 13 or 14. Whole test build 37x2x2. Trade-off: 8x slower than
+  wire_repeater_line and half as dense per tick, but the only way to move a 0-15 value more than
+  a few blocks; comparator lines side by side don't interact, so it also tiles at pitch 1 (not
+  tested here).
+traits: [analog, comparator_based, flat, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  c: comparator[facing=west]
+  a: {input: a}
+  b: {input: b}
+  P: {output: o5, block: redstone_wire}
+  Q: {output: o6, block: redstone_wire}
+  R: {output: o13, block: redstone_wire}
+  S: {output: o14, block: redstone_wire}
+layers:
+  0: |
+    .====================================
+    .....................................
+  1: |
+    a-----------c#c#c#c#c#c----PQ------RS
+    .........b...........................
+tests:
+- name: strength 5 and 13 arrive exactly
+  truth_table: |
+    a b | o5 o6 o13 o14
+    0 0 | 0  0  0   0
+    1 0 | 1  0  0   0
+    0 1 | 1  1  1   0
+    1 1 | 1  1  1   0
+    1 0 | 1  0  0   0
+  delay: 12

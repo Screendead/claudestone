@@ -1,0 +1,115 @@
+name: clock_hopper_piston
+description: 'Classic long-period hopper clock, period set by the item count: 16N - 12 game ticks for N items (148 ticks with the 10 redstone dust here, 1012 with 64, both tested; a full 320 should give 5108, about 4 minutes). Row z=0: hoppers A (x=2, y=1, facing east, holds the items) and B (x=3, y=1, facing west) push into each other; a redstone block (x=3, y=2) sits on B and locks it. Comparator ca (x=1, y=1, facing east) reads A and hard-powers the stone at x=0, whose top dust (x=0, y=2, placed as a cross so it points into its neighbour) powers sticky piston L (x=1, y=2, facing east); cb, the stone at x=5 and its dust power sticky piston M (x=4, y=2, facing west) from B. The two pistons jam each other so the block''s position is a latch: while A drains into B, L is extended and M, powered too, cannot push the block into L''s head; when A empties L retracts and drags the block onto A, M extends behind it, and B drains back; when B empties M drags it back. Output out (repeater x=3, y=2,
+  z=1, facing north) reads the redstone block when it is on B: 72 ticks on, 76 off with 10 items (8N-8 on, 8N-4 off); from placement it is on at tick 2 for 75 ticks, then runs on. ca and cb also carry the phase. 6x3x2 (6x3x1 without the output repeater). Trade-off: the most ticks per block of any clock here and survival-standard, but pistons click and cause light updates, and there is no on/off input (a free-running clock). clock_hopper_cascade is the silent, lightless version (32N - 8 ticks, but 8x2x8); clock_hopper_ring is silent and tiny but only 7 ticks per hopper.'
+traits:
+- compact
+- container_based
+- piston_based
+- comparator_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  a: {name: ca, block: 'comparator[facing=east]'}
+  b: {name: cb, block: 'comparator[facing=west]'}
+  A: hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:10}]}
+  B: hopper[facing=west]
+  d: {name: da, block: 'redstone_wire[north=side,south=side,east=side,west=side]'}
+  e: {name: db, block: 'redstone_wire[north=side,south=side,east=side,west=side]'}
+  L: sticky_piston[facing=east]
+  M: sticky_piston[facing=west]
+  R: redstone_block
+  o: {output: out, block: 'repeater[facing=north]'}
+layers:
+  0: |
+    .=..=.
+    ......
+  1: |
+    SaABbS
+    ...=..
+  2: |
+    dL.RMe
+    ...o..
+tests:
+- name: 'runs from placement: 72 on, 76 off with 10 items'
+  settle: 0
+  steps:
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 74}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 75}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 71}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 75}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 71}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 75}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 71}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 75}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 71}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 75}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 71}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 75}
+  - expect: {out: 0}
+- name: the comparators show each hopper emptying for 2 ticks
+  settle: 0
+  steps:
+  - {wait: 74}
+  - expect: {ca: 1, cb: 1}
+  - {wait: 1}
+  - expect: {ca: 0, cb: 1}
+  - {wait: 1}
+  - expect: {ca: 0, cb: 1}
+  - {wait: 1}
+  - expect: {ca: 1, cb: 1}
+  - {wait: 71}
+  - expect: {ca: 1, cb: 1}
+  - {wait: 1}
+  - expect: {ca: 1, cb: 0}
+  - {wait: 1}
+  - expect: {ca: 1, cb: 0}
+  - {wait: 1}
+  - expect: {ca: 1, cb: 1}
+  - {wait: 71}
+  - expect: {ca: 1, cb: 1}
+  - {wait: 1}
+  - expect: {ca: 0, cb: 1}
+  - {wait: 1}
+  - expect: {ca: 0, cb: 1}

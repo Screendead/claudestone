@@ -1,0 +1,67 @@
+name: or_nor_torch_isolated
+description: >-
+  Torch NOR with isolated inputs: dust from the west (a) and east (b) points into one
+  block, and a wall torch hangs on the block's south face. A dust-powered block never
+  powers dust, so neither input can back-feed the other at zero cost. Interface: inputs
+  as dust on layer 1 west/east of the block; out is the torch on the south face (a third
+  input can point in from the north). Size 3x2x2, flat, delay 2 game ticks, output 15.
+  Trade-off versus or_nor_torch_compact: two blocks wider for isolation; versus
+  or_nor_comparator: same speed with a torch (light updates, burnout) but it accepts
+  inputs of any strength and outputs 15.
+traits: [compact, fast, ultrafast, torch_based, flat, horizontal, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  t: {output: out, block: 'redstone_wall_torch[facing=south]'}
+layers:
+  0: |
+    .=.=.
+    .....
+  1: |
+    aiSjb
+    ..t..
+tests:
+- name: logic
+  truth_table: |
+    a b | out ia ib
+    0 0 | 1 0 0
+    0 1 | 0 0 1
+    1 0 | 0 1 0
+    1 1 | 0 1 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: one tick pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}

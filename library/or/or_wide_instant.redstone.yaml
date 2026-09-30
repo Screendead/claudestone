@@ -1,0 +1,80 @@
+name: or_wide_instant
+description: >-
+  n-input OR with zero delay and full isolation, tileable along x. The bus is dust on a
+  row of glass; each input is dust one block lower that steps up onto the glass from the
+  north or the south, alternating so neighbouring input stubs never touch. A glass step
+  is a zero-tick diode (dust reads the dust diagonally below a non-conductor, never the
+  reverse), so every input feeds the bus and nothing feeds back. Interface: input k
+  arrives on layer 1 at column k, from the north for even k (a, c) and from the south
+  for odd k (b, d); out is the east end of the bus on layer 2. One column per input;
+  this instance is 4 inputs, 5x3x3. Delay 0 game ticks for any width. Limit (computed, not
+  tested at length): a stub at 15 puts 14 on the bus, which loses 1 per column, so the
+  output may be at most 13 columns past the farthest input's step, less if the stub
+  arrives weaker (add a repeater, or use or_wide_repeater). Trade-off versus or_wide_repeater:
+  2 ticks faster and one column per input, but one block taller and the output is weak.
+traits: [ultrafast, instant, compact, tileable, lightless, silent, pistonless, entityless, analog, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  k: {name: ic, block: redstone_wire}
+  l: {name: id, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .....
+    =.=..
+    .....
+    .=.=.
+    .....
+  1: |
+    a.c..
+    i.k..
+    GGGGG
+    .j.l.
+    .b.d.
+  2: |
+    .....
+    .....
+    ----o
+    .....
+    .....
+tests:
+- name: logic
+  truth_table: |
+    a b c d | out ia ib ic id
+    0 0 0 0 | 0 0 0 0 0
+    0 0 0 1 | 1 0 0 0 1
+    0 0 1 0 | 1 0 0 1 0
+    0 0 1 1 | 1 0 0 1 1
+    0 1 0 0 | 1 0 1 0 0
+    0 1 0 1 | 1 0 1 0 1
+    0 1 1 0 | 1 0 1 1 0
+    0 1 1 1 | 1 0 1 1 1
+    1 0 0 0 | 1 1 0 0 0
+    1 0 0 1 | 1 1 0 0 1
+    1 0 1 0 | 1 1 0 1 0
+    1 0 1 1 | 1 1 0 1 1
+    1 1 0 0 | 1 1 1 0 0
+    1 1 0 1 | 1 1 1 0 1
+    1 1 1 0 | 1 1 1 1 0
+    1 1 1 1 | 1 1 1 1 1
+  delay: 0
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - expect: {out: 0}

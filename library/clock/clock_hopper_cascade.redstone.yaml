@@ -1,0 +1,137 @@
+name: clock_hopper_cascade
+description: 'Silent, lightless, pistonless long-period clock whose period grows with the item count, with no latch at all: four hoppers in a 2x2 ring (A x=3,z=3 facing east; B x=4,z=3 facing south; C x=4,z=4 facing west; D x=3,z=4 facing north; y=1) where each hopper is locked exactly while the hopper before it holds items. Every lock path is the same, rotated round the ring: a comparator reads the hopper (e.g. ka at x=3, z=2 facing south reads A), a repeater squares its weak 1-3 signal to 15 (out, x=3, z=1), dust loops round the outside and a repeater points into the next hopper (lock_b, x=4, z=2, facing north, into B). So the whole stack moves one hop per phase: while A drains into B, B is locked (A has items) and collects; once A is empty B unlocks and drains into C, which is locked because B has items, and so on. Period 32N - 8 game ticks for N items (N >= 2): 152 here with 5 redstone dust, 312 with 10, 2040 with 64, 10232 (8.5 minutes) with a full 320. out (A holds items) is on 16N
+  - 10 and off 16N + 2 (70/82 here); from placement it is on at tick 4 for 33 ticks, then runs on. The four comparators ka, kb, kc, kd are four phases a quarter period apart and together count a 2-bit Gray code, so it is also a 4-phase clock. 8x2x8, flat. Trade-off: the silent, lightless answer to clock_hopper_piston with twice the ticks per item, but 8x8 of floor, 4 block-entity hoppers and no on/off input.'
+traits:
+- flat
+- horizontal
+- container_based
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  A: {output: out, block: 'repeater[facing=south]'}
+  B: {name: ka, block: 'comparator[facing=south]'}
+  C: {name: lock_b, block: 'repeater[facing=north]'}
+  D: {name: lock_a, block: 'repeater[facing=west]'}
+  E: hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:5}]}
+  F: hopper[facing=south]
+  G: {name: kb, block: 'comparator[facing=west]'}
+  H: {name: b, block: 'repeater[facing=west]'}
+  I: {name: d, block: 'repeater[facing=east]'}
+  J: {name: kd, block: 'comparator[facing=east]'}
+  K: hopper[facing=north]
+  L: hopper[facing=west]
+  M: {name: lock_c, block: 'repeater[facing=east]'}
+  N: {name: lock_d, block: 'repeater[facing=south]'}
+  O: {name: kc, block: 'comparator[facing=north]'}
+  P: {name: c, block: 'repeater[facing=north]'}
+layers:
+  0: |
+    ...==...
+    ...==...
+    ...==...
+    ===..===
+    ===..===
+    ...==...
+    ...==...
+    ...==...
+  1: |
+    ...--...
+    ...A-...
+    ...BC...
+    --DEFGH-
+    -IJKLM--
+    ...NO...
+    ...-P...
+    ...--...
+tests:
+- name: 'runs from placement: period 152 with 5 items, 70 on, 82 off'
+  settle: 0
+  steps:
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 2}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 32}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 69}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 69}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 69}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 69}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 69}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 69}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 81}
+  - expect: {out: 0}
+- name: the four comparators step through a 2-bit Gray code, a quarter period apart
+  settle: 0
+  steps:
+  - {wait: 120}
+  - expect: {ka: 1, kb: 0, kc: 0, kd: 1}
+  - {wait: 40}
+  - expect: {ka: 1, kb: 1, kc: 0, kd: 0}
+  - {wait: 40}
+  - expect: {ka: 0, kb: 1, kc: 1, kd: 0}
+  - {wait: 40}
+  - expect: {ka: 0, kb: 0, kc: 1, kd: 1}
+  - {wait: 32}
+  - expect: {ka: 1, kb: 0, kc: 0, kd: 1}
+  - {wait: 40}
+  - expect: {ka: 1, kb: 1, kc: 0, kd: 0}
+  - {wait: 40}
+  - expect: {ka: 0, kb: 1, kc: 1, kd: 0}
+  - {wait: 40}
+  - expect: {ka: 0, kb: 0, kc: 1, kd: 1}

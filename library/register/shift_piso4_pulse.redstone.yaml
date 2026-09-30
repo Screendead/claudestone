@@ -1,0 +1,160 @@
+name: shift_piso4_pulse
+description: 'Parallel-in serial-out 4-bit shift register (a serializer) built on shift_pulse_lock: each stage''s input is a concrete block, and a repeater pointing into that block from the north injects the parallel input p_i, so every rising clock edge does q_i := q_(i-1) OR p_i (q_(-1) is the serial input d). Loading is therefore one clock edge with the word on p0..p3 while the register is empty (after four shifts of zeros); a 1 already shifting in is ORed with the loaded word, as the tests show. Layout: p0..p3 are the cells at z=0, x=2,4,6,8 (repeaters at z=1 carry them into the concretes at z=2); d is the cell at x=0, z=2 (through a repeater into the stage-0 concrete); the data repeaters q0..q3 (x=3,5,7,9, z=2, facing west, delay 2) are the parallel outputs and q3 is the serial output, powering the cell east of it. Lock repeaters (z=3), lock dust (z=4) and the rising-edge pulse corner (x=0-2, z=4-6, clk is the cell at x=2, z=6) are exactly shift_pulse_lock''s: every rising edge unlocks
+  the stages from edge+6 to edge+12. Timing: q moves exactly 10 ticks after the rising edge. Hold p_i high over one edge only, from no later than 3 ticks after it to no earlier than 7 ticks after it (tested at edge+3..+7 and edge-3..+10); p pulses between edges do nothing. d passes a repeater first, so its window should be shift_pulse_lock''s moved 2 ticks earlier; it is only tested settled from 3 ticks before to 10 after the edge. Clock as shift_pulse_lock: at least 5 high and 6 low. Size 10x2x6 of blocks plus the row of p cells north of it. Lightless, silent, no entities, starts cleared. Trade-off: no load/shift mode line and no multiplexer, so it costs only one repeater and one block per bit over the plain shift register, but it loads by OR, so the word must be loaded into an emptied register; a true multiplexed load needs a load line and its inverse at every stage.'
+traits: [compact, flat, horizontal, lightless, silent, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  d: {input: d}
+  k: {input: clk}
+  '0': {input: p0}
+  '1': {input: p1}
+  '2': {input: p2}
+  '3': {input: p3}
+  a: {output: q0, block: 'repeater[facing=west,delay=2]'}
+  b: {output: q1, block: 'repeater[facing=west,delay=2]'}
+  c: {output: q2, block: 'repeater[facing=west,delay=2]'}
+  e: {output: q3, block: 'repeater[facing=west,delay=2]'}
+  i: repeater[facing=west]
+  n: repeater[facing=north]
+  v: repeater[facing=south]
+  B: redstone_block
+  L: comparator[facing=west,mode=subtract]
+  C: comparator[facing=south,mode=subtract]
+  A: repeater[facing=east,delay=1]
+  D: repeater[facing=west,delay=2]
+layers:
+  0: |
+    ..........
+    ..=.=.=.=.
+    .=.=.=.=.=
+    ...=.=.=.=
+    ..========
+    ===.......
+    ==........
+  1: |
+    ..0.1.2.3.
+    ..n.n.n.n.
+    di#a#b#c#e
+    ...v.v.v.v
+    .BL-------
+    -DC.......
+    -Ak.......
+tests:
+- name: loads a word in one edge and shifts it out
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {p0: 1, p1: 0, p2: 1, p3: 1}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {p0: 0, p1: 0, p2: 0, p3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {p0: 0, p1: 1, p2: 1, p3: 0}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {p0: 0, p1: 0, p2: 0, p3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {d: 1, p0: 1, p1: 0, p2: 0, p3: 0}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {d: 0, p0: 0, p1: 0, p2: 0, p3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - {wait: 3}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+- name: p window is edge+3 to edge+7; between edges it does nothing; loads OR into what shifts in
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 3}
+  - drive: {p0: 1, p1: 1, p2: 1, p3: 1}
+  - {wait: 4}
+  - drive: {p0: 0, p1: 0, p2: 0, p3: 0}
+  - {wait: 3}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {p0: 1, p1: 0, p2: 1, p3: 0}
+  - {wait: 5}
+  - drive: {p0: 0, p1: 0, p2: 0, p3: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1, p0: 1, p1: 0, p2: 0, p3: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0, p0: 0, p1: 0, p2: 0, p3: 0}
+  - {wait: 10}
+  - drive: {clk: 1, p0: 0, p1: 0, p2: 1, p3: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 0, p0: 0, p1: 0, p2: 0, p3: 0}
+  - {wait: 10}

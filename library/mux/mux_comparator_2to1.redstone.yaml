@@ -1,0 +1,96 @@
+name: mux_comparator_2to1
+description: |-
+  Lightless, silent, analog 2:1 multiplexer from three subtract-mode comparators and a redstone block: out = s ? b : a.
+  gate_a has a at its back and s on its side, so it outputs a - s: a while s is off. not_s reads the constant 15 of the redstone block behind it and subtracts s, giving 15 - s, and points that into the side of gate_b, which has b at its back: gate_b outputs b - (15 - s), so b while s is on. gate_b strongly powers the concrete beside the output dust and gate_a points straight into that dust, so out carries max(gate_a, gate_b), the selected input at its own signal strength (analog values pass through, tested with cake sources).
+  Interface (top view, north up, everything on the layer above the base): a enters gate_a's back from the north (east column); s is the cell between not_s and gate_a and feeds both their sides; b enters gate_b's back from the west (south row); out is the dust in the south-east corner and continues south or east. Select lines must arrive at full strength 15 (a redstone block, repeater or comparator next to the s cell): a weaker s leaks the deselected input.
+  3x2x3 of blocks, plus the b cell to the west. Delay: a->out and b->out 2 ticks, s->out 2 ticks via gate_a and 4 ticks via not_s -> gate_b, so 4 worst case (tested).
+  The family's default 2:1: the smallest and the only analog one. mux_torch_2to1 needs no nether quartz, mux_piston_instant switches data in 0 ticks.
+traits:
+- ultracompact
+- lightless
+- silent
+- pistonless
+- entityless
+- flat
+- horizontal
+- comparator_based
+- analog
+- fast
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  R: redstone_block
+  a: {input: a}
+  b: {input: b}
+  s: {input: s}
+  N: {name: not_s, block: 'comparator[facing=north,mode=subtract]'}
+  A: {name: gate_a, block: 'comparator[facing=north,mode=subtract]'}
+  B: {name: gate_b, block: 'comparator[facing=west,mode=subtract]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ....
+    .=.=
+    .=.=
+  1: |
+    .R.a
+    .NsA
+    bB#o
+tests:
+- name: logic
+  truth_table: |
+    s a b | out
+    0 0 0 | 0
+    0 1 0 | 1
+    1 1 0 | 0
+    0 1 0 | 1
+    0 0 1 | 0
+    1 0 1 | 1
+    0 0 1 | 0
+    0 1 1 | 1
+    1 1 1 | 1
+    1 0 1 | 1
+    1 0 0 | 0
+    1 1 0 | 0
+    1 1 1 | 1
+    0 1 1 | 1
+  delay: 4
+- name: data paths are 2 ticks
+  steps:
+  - drive: {a: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {b: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+- name: analog strengths pass
+  steps:
+  - {run: fill ~0 ~0 ~2 ~0 ~0 ~2 smooth_stone}
+  - {run: fill ~3 ~0 ~0 ~3 ~0 ~0 smooth_stone}
+  - {run: 'setblock ~0 ~1 ~2 cake[bites=2]'}
+  - {run: 'setblock ~3 ~1 ~0 cake[bites=4]'}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~2 redstone_wire[power=6]'}
+  - {run: setblock ~2 ~1 ~1 redstone_block}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~2 redstone_wire[power=10]'}

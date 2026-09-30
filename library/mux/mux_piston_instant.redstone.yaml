@@ -1,0 +1,132 @@
+name: mux_piston_instant
+description: |-
+  2:1 multiplexer whose data paths are plain dust, so a and b reach out in 0 ticks: out = s ? b : a.
+  a and b each climb down one step into a shared lower dust net (a_low, b_low, out). A dust step only connects while the cell above the lower dust is not a conductor, so a block in that cell cuts the line. One sticky piston moves a single concrete block between the two gap cells: retracted it sits in b's gap (b cut, a connected); extended, the piston head (not a conductor) takes its place and opens b while the block closes a's gap. Opening is instant because the moving block and head are not conductors from the tick the piston fires; closing waits until the block lands.
+  Interface (top view, north up): a enters from the north at the upper level, b from the south at the upper level, out leaves west on the lower level; s powers the piston from the east. The dust is bidirectional, so the same block is also mux_demux_piston_instant.
+  4x3x3 of blocks. Delay: data 0 ticks whichever input is selected (tested with s held off and on); select: a newly selected input appears after 1 tick, the old one is cut after 3 ticks, so for about 2 ticks after s changes out is a OR b (tested at exact ticks); 3 ticks worst case. Output strength is 13 from a and 12 from b at full-strength inputs (tested), so not analog. Trade-off: the only mux with an instant data path; noisy and lit by the piston, and not analog. Use mux_comparator_2to1 when silence or strength matters.
+traits:
+- ultrafast
+- instant
+- compact
+- piston_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  o: {output: out, block: redstone_wire}
+  a: {name: a_low, block: redstone_wire}
+  b: {name: b_low, block: redstone_wire}
+  A: {input: a}
+  B: {name: a_up, block: redstone_wire}
+  p: {name: piston, block: 'sticky_piston[facing=west]'}
+  s: {input: s}
+  C: {name: b_up, block: redstone_wire}
+  D: {input: b}
+layers:
+  0: |
+    .....
+    .....
+    ===..
+    .....
+    .....
+  1: |
+    .....
+    .#...
+    oab..
+    ..#..
+    .....
+  2: |
+    .A...
+    .B...
+    ..#ps
+    ..C..
+    ..D..
+tests:
+- name: logic
+  truth_table: |
+    s a b | out
+    0 0 0 | 0
+    0 1 0 | 1
+    1 1 0 | 0
+    0 1 0 | 1
+    0 0 1 | 0
+    1 0 1 | 1
+    0 0 1 | 0
+    0 1 1 | 1
+    1 1 1 | 1
+    1 0 1 | 1
+    1 0 0 | 0
+    1 1 0 | 0
+    1 1 1 | 1
+    0 1 1 | 1
+  delay: 3
+- name: data path is instant while s is off
+  truth_table: |
+    s a b | out
+    0 0 0 | 0
+    0 1 0 | 1
+    0 1 1 | 1
+    0 0 1 | 0
+    0 0 0 | 0
+    0 0 1 | 0
+    0 1 0 | 1
+    0 1 1 | 1
+  delay: 0
+- name: select edges
+  steps:
+  - drive: {b: 1}
+  - {wait: 10}
+  - expect: {out: 0}
+  - drive: {s: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - drive: {b: 0, a: 1}
+  - {wait: 10}
+  - expect: {out: 1}
+  - drive: {s: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 10}
+  - drive: {s: 0}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+- name: data path is instant while s is on
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {b: 1}
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - expect: {out: 1}
+  - drive: {a: 0, b: 0}
+  - expect: {out: 0}
+- name: output strength
+  steps:
+  - drive: {a: 1}
+  - {wait: 5}
+  - {check: 'if block ~0 ~1 ~2 redstone_wire[power=13]'}
+  - drive: {a: 0, b: 1, s: 1}
+  - {wait: 10}
+  - {check: 'if block ~0 ~1 ~2 redstone_wire[power=12]'}

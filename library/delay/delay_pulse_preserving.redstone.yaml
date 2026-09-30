@@ -1,0 +1,79 @@
+name: delay_pulse_preserving
+description: 'Pulse-preserving delay line: five repeaters all on delay 1 (2 game ticks each), 10 ticks from input a to out on both edges. Input a is the west end (x=0, y=1), out is the last repeater (x=5, y=1; it powers the block or dust east of it); signal runs west to east on one layer over a smooth-stone base, one wide, 5x2x1 plus the driver cell. A repeater stretches any pulse shorter than its own setting up to that setting, and swallows any off-gap no longer than it, so only delay-1 repeaters keep narrow pulse trains intact. Measured on 26.3: 2-tick and longer on-pulses and 3-tick and longer off-gaps come out exactly as they went in, 10 ticks later; a 1-tick pulse comes out as 2 ticks (the repeater minimum); a 2-tick gap is swallowed by the first repeater. Trade-off versus delay_repeater_line: 2 ticks per block instead of up to 8, so four times longer for the same delay; use it where pulse widths carry information (pulse trains, observer outputs, 2-tick clocks).'
+traits: [flat, one_wide, horizontal, tileable, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '>': repeater[facing=west,delay=1]
+  o: {output: out, block: 'repeater[facing=west,delay=1]'}
+layers:
+  0: |
+    .=====
+  1: |
+    a>>>>o
+tests:
+- name: both edges 10 ticks
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+  delay: 10
+- name: 2 tick pulse stays 2 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}
+- name: 3 tick gap stays 3 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 6
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 20
+  - expect: {out: 1}
+- name: 2 tick gap is swallowed
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - wait: 7
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+- name: 1 tick pulse comes out as 2 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 9
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

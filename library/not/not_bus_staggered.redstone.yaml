@@ -1,0 +1,52 @@
+name: not_bus_staggered
+description: |
+  A pitch-1 inverter bus at torch speed (2 ticks), with no isolating repeaters. Each lane is
+  the not_torch_compact cell (dust on top of a block, wall torch on its east face); neighbouring
+  lanes alternate between two heights so their dust never meets on one layer. The only link
+  left would be the diagonal step between a low lane's dust and the high lane's dust beside
+  it; a conductor block above every low lane's dust cuts that step, so the lanes stay separate.
+  Interface: low lanes (z = 0, 2): input dust at (1,1,z) on block (1,0,z), driver at (0,1,z);
+  output wall torch at (2,0,z) facing east; cutter block at (1,2,z). High lane (z = 1): input
+  dust at (1,2,1) on block (1,1,1), driver at (0,2,1); output wall torch at (2,1,1) facing
+  east. Tile by repeating the two-lane pattern in z. 2x3x3 for three bits. Delay 2 ticks.
+  Trade-off: twice as fast as not_bus_tileable and shorter (2 blocks deep against 3), but the
+  bus is three blocks tall and the incoming lines must already alternate heights (the usual
+  staggered dust bus). Emits light; torch burnout limit applies per lane.
+traits: [tileable, ultrafast, fast, compact, torch_based, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '#': white_concrete
+  C: stone
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  x: {output: x, block: 'redstone_wall_torch[facing=east]'}
+  y: {output: y, block: 'redstone_wall_torch[facing=east]'}
+  z: {output: z, block: 'redstone_wall_torch[facing=east]'}
+layers:
+  0: |
+    .#x
+    ...
+    .#z
+  1: |
+    a-.
+    .#y
+    c-.
+  2: |
+    .C.
+    b-.
+    .C.
+tests:
+- name: lanes independent
+  truth_table: |
+    a b c | x y z
+    0 0 0 | 1 1 1
+    1 0 0 | 0 1 1
+    0 1 0 | 1 0 1
+    0 0 1 | 1 1 0
+    1 1 0 | 0 0 1
+    0 1 1 | 1 0 0
+    1 0 1 | 0 1 0
+    1 1 1 | 0 0 0
+  delay: 2

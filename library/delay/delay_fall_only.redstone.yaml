@@ -1,0 +1,64 @@
+name: delay_fall_only
+description: 'Off-delay (TOF) timer: out rises the same tick as a and falls 24 ticks after a falls. Input a (x=0, z=0) powers the out dust (x=0, z=1) directly, and also a line of three delay-4 repeaters each firing into a concrete block; every block, while strongly powered, powers the dust line running under the row, so out = a OR a+8 OR a+16 OR a+24 ticks. The taps overlap for any input held 8 ticks or more, so out stays on continuously and drops exactly 24 ticks after a falls; an input shorter than 8 ticks leaves a gap after it (the repeaters stretch it to 8 but do not bridge back to the input). Add a repeater and block per extra 8 ticks, or re-click the repeaters. 7x2x2, flat, silent, lightless. Trade-off versus delay_repeater_line: the rising edge is instant, only the falling edge is delayed, which is what a hold/keep-alive timer needs; versus delay_rise_only: the mirror image.'
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  '-': redstone_wire
+  '4': repeater[facing=west,delay=4]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .======
+    =======
+  1: |
+    a4#4#4#
+    o------
+traits: [flat, horizontal, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+tests:
+- name: rise same tick, fall 24 ticks late
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - wait: 30
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 22
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}
+- name: 8 tick input held without a gap
+  steps:
+  - drive: {a: 1}
+  - wait: 8
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 4
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - wait: 3
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: retrigger while holding restarts the hold
+  steps:
+  - drive: {a: 1}
+  - wait: 30
+  - drive: {a: 0}
+  - wait: 12
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 23
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

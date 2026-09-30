@@ -1,0 +1,125 @@
+name: and_piston_gate
+description: >-
+  A's dust steps up a block to the output dust; B opens that step. Dust only
+  connects up a block when the block above the lower dust is not a conductor,
+  so a stone blocker there cuts A's line. B's sticky piston pushes the blocker
+  away; the moment the piston's block event runs the cell becomes a moving
+  piston (never a conductor) and A's signal flows, so B rising takes 1gt. A
+  itself is pure dust, so while B is on, A reaches the output in 0 game ticks.
+  B falling is the slow edge: the blocker is pulled back as a moving block and
+  only cuts the line when it lands, 3gt. Interface: A enters as dust from the
+  west at y=1; B powers the piston from the south at y=2; the output is the dust
+  on the concrete, facing east at y=2 (extend it east). 2x3x2, six blocks. Delay 3gt
+  worst case (tested), 0gt on the A path (tested): the fastest AND here, but
+  pistons are loud, cause light updates, and it glitches high for up to 3gt if
+  A rises in the same tick B falls (tested). B must be held for at least 3gt:
+  a 1-2gt pulse makes the sticky piston drop the blocker instead of pulling it
+  back, leaving the gate open until B's next full cycle pulls it home (both
+  tested).
+traits: [ultrafast, instant, piston_based, entityless, survival_friendly, vertical, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  '-': {name: a_line, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+  P: 'sticky_piston[facing=north]'
+layers:
+  0: |
+    ...
+    .=.
+    ...
+    ...
+  1: |
+    ...
+    a-#
+    ...
+    ...
+  2: |
+    ...
+    .So
+    .P.
+    .b.
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+    0 0 | 0
+    1 0 | 0
+    1 1 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+  delay: 3
+- name: a path is instant while b is held
+  truth_table: |
+    a b | out
+    0 1 | 0
+    1 1 | 1
+    0 1 | 0
+    1 1 | 1
+  delay: 0
+- name: b edges
+  steps:
+  - drive: {a: 1}
+  - wait: 10
+  - expect: {out: 0, a_line: 1}
+  - drive: {b: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - drive: {b: 0}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: hazard when a rises as b falls
+  steps:
+  - drive: {b: 1}
+  - wait: 10
+  - drive: {a: 1, b: 0}
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: b pulses of 3 ticks are safe
+  steps:
+  - drive: {b: 1}
+  - wait: 3
+  - drive: {b: 0}
+  - wait: 10
+  - drive: {a: 1}
+  - wait: 5
+  - expect: {out: 0}
+- name: shorter b pulses drop the blocker until the next full b cycle
+  steps:
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 10
+  - drive: {a: 1}
+  - wait: 5
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 10
+  - expect: {out: 0}
+- name: long hold
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 100
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 100
+  - expect: {out: 0}

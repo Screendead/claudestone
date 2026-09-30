@@ -1,0 +1,169 @@
+name: add_full_comparator_lightless_x2
+description: >-
+  Two add_full_comparator_lightless copies stacked directly on top of each other
+  (pitch 4, the copy's full height: the upper floor rests on the lower copy's
+  bridge and input cells), inputs a1/b1/c1 below and a2/b2/c2 above. The table
+  changes one, both or neither copy per row and checks they stay independent,
+  which backs the stackable claim. 11x8x8. Delay 6 (sum from A/B), cout 4.
+traits: [lightless, silent, pistonless, entityless, stackable, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  A: comparator[facing=south,mode=subtract]
+  B: comparator[facing=north,mode=subtract]
+  v: repeater[facing=north]
+  <: repeater[facing=east]
+  '>': repeater[facing=west]
+  p: {name: p1, block: redstone_wire}
+  R: redstone_block
+  C: {name: notc1, block: 'comparator[facing=west,mode=subtract]'}
+  t: {name: t1, block: 'comparator[facing=north,mode=subtract]'}
+  c: {input: c1}
+  D: {output: cout1, block: redstone_wire}
+  a: {input: a1}
+  b: {input: b1}
+  s: {output: sum1, block: redstone_wire}
+  E: {name: p2, block: redstone_wire}
+  F: {name: notc2, block: 'comparator[facing=west,mode=subtract]'}
+  G: {name: t2, block: 'comparator[facing=north,mode=subtract]'}
+  H: {input: c2}
+  I: {output: cout2, block: redstone_wire}
+  J: {input: a2}
+  K: {input: b2}
+  M: {output: sum2, block: redstone_wire}
+layers:
+  0: |
+    .....===...
+    .....=.====
+    ..=..=.==.=
+    ..=====.===
+    ====..===.=
+    =.=====...=
+    =....======
+    ======.....
+  1: |
+    .....--#...
+    .....-.A---
+    ..#..-.-B.v
+    ..A-<--.#-B
+    ->-B..--p.-
+    -.##RCt...-
+    -....c#D---
+    ------.....
+  2: |
+    ...........
+    ........a..
+    ..-....b...
+    ..#........
+    ..#........
+    ..-s.......
+    ...........
+    ...........
+  3: |
+    ...........
+    ...........
+    ...........
+    ..-........
+    ..-........
+    ...........
+    ...........
+    ...........
+  4: |
+    .....===...
+    .....=.====
+    ..=..=.==.=
+    ..=====.===
+    ====..===.=
+    =.=====...=
+    =....======
+    ======.....
+  5: |
+    .....--#...
+    .....-.A---
+    ..#..-.-B.v
+    ..A-<--.#-B
+    ->-B..--E.-
+    -.##RFG...-
+    -....H#I---
+    ------.....
+  6: |
+    ...........
+    ........J..
+    ..-....K...
+    ..#........
+    ..#........
+    ..-M.......
+    ...........
+    ...........
+  7: |
+    ...........
+    ...........
+    ...........
+    ..-........
+    ..-........
+    ...........
+    ...........
+    ...........
+tests:
+- name: copies independent
+  truth_table: |
+    a1 b1 c1 a2 b2 c2 | sum1 cout1 sum2 cout2
+    0 0 0 0 0 0 | 0 0 0 0
+    0 0 1 0 0 0 | 1 0 0 0
+    0 1 1 0 0 0 | 0 1 0 0
+    0 1 0 0 0 0 | 1 0 0 0
+    1 1 0 0 0 0 | 0 1 0 0
+    1 1 1 0 0 0 | 1 1 0 0
+    1 0 1 0 0 0 | 0 1 0 0
+    1 0 0 0 0 0 | 1 0 0 0
+    0 1 1 0 0 0 | 0 1 0 0
+    1 0 0 0 0 0 | 1 0 0 0
+    1 1 1 0 0 0 | 1 1 0 0
+    0 0 0 0 0 0 | 0 0 0 0
+    0 0 0 1 1 1 | 0 0 1 1
+    0 0 1 1 1 1 | 1 0 1 1
+    0 1 1 1 1 1 | 0 1 1 1
+    0 1 0 1 1 1 | 1 0 1 1
+    1 1 0 1 1 1 | 0 1 1 1
+    1 1 1 1 1 1 | 1 1 1 1
+    1 0 1 1 1 1 | 0 1 1 1
+    1 0 0 1 1 1 | 1 0 1 1
+    0 1 1 1 1 1 | 0 1 1 1
+    1 0 0 1 1 1 | 1 0 1 1
+    1 1 1 1 1 1 | 1 1 1 1
+    0 0 0 1 1 1 | 0 0 1 1
+    0 0 0 0 0 0 | 0 0 0 0
+    0 0 0 0 0 1 | 0 0 1 0
+    0 0 0 0 1 1 | 0 0 0 1
+    0 0 0 0 1 0 | 0 0 1 0
+    0 0 0 1 1 0 | 0 0 0 1
+    0 0 0 1 1 1 | 0 0 1 1
+    0 0 0 1 0 1 | 0 0 0 1
+    0 0 0 1 0 0 | 0 0 1 0
+    0 0 0 0 1 1 | 0 0 0 1
+    0 0 0 1 0 0 | 0 0 1 0
+    0 0 0 1 1 1 | 0 0 1 1
+    0 0 0 0 0 0 | 0 0 0 0
+    1 1 1 0 0 0 | 1 1 0 0
+    1 1 1 0 0 1 | 1 1 1 0
+    1 1 1 0 1 1 | 1 1 0 1
+    1 1 1 0 1 0 | 1 1 1 0
+    1 1 1 1 1 0 | 1 1 0 1
+    1 1 1 1 1 1 | 1 1 1 1
+    1 1 1 1 0 1 | 1 1 0 1
+    1 1 1 1 0 0 | 1 1 1 0
+    1 1 1 0 1 1 | 1 1 0 1
+    1 1 1 1 0 0 | 1 1 1 0
+    1 1 1 1 1 1 | 1 1 1 1
+    1 1 1 0 0 0 | 1 1 0 0
+    0 0 0 0 0 0 | 0 0 0 0
+    1 1 1 1 1 1 | 1 1 1 1
+    0 1 1 1 0 0 | 0 1 1 0
+    1 0 0 0 1 1 | 1 0 0 1
+    0 0 0 0 0 0 | 0 0 0 0
+    1 0 1 0 1 0 | 0 1 1 0
+    0 1 0 1 0 1 | 1 0 0 1
+    0 0 0 0 0 0 | 0 0 0 0
+  delay: 6

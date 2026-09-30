@@ -1,0 +1,78 @@
+name: cross_underpass_stack
+description: 'Two cross_underpass cells stacked at a pitch of 3 layers, the upper cell''s base resting directly on the lower cell''s block X, to show the cell stacks: 1x6x3, 14 blocks, four independent lines. The upper base block touches only X and air, and the lower B dust cannot climb onto it because nothing on it is dust. A lines are instant, B lines 2 ticks. Interface per cell as in cross_underpass: A along x at y1 and y4, B along z at y2 and y5.'
+traits:
+- stackable
+- fast
+- lightless
+- silent
+- pistonless
+- entityless
+- one_wide
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a0}
+  A: {output: a0_out, block: redstone_wire}
+  b: {input: b0}
+  '-': redstone_wire
+  B: {output: b0_out, block: 'repeater[facing=north]'}
+  C: {input: a1}
+  D: {output: a1_out, block: redstone_wire}
+  E: {input: b1}
+  F: {output: b1_out, block: 'repeater[facing=north]'}
+layers:
+  0: |
+    ..
+    ..
+    .=
+    ..
+  1: |
+    ..
+    .#
+    aA
+    .#
+  2: |
+    .b
+    .-
+    .#
+    .B
+  3: |
+    ..
+    ..
+    .=
+    ..
+  4: |
+    ..
+    .#
+    CD
+    .#
+  5: |
+    .E
+    .-
+    .#
+    .F
+tests:
+- name: independent
+  truth_table: |
+    a0 b0 a1 b1 | a0_out b0_out a1_out b1_out
+    0 0 0 0 | 0 0 0 0
+    0 0 0 1 | 0 0 0 1
+    0 0 1 1 | 0 0 1 1
+    0 0 1 0 | 0 0 1 0
+    0 1 1 0 | 0 1 1 0
+    0 1 1 1 | 0 1 1 1
+    0 1 0 1 | 0 1 0 1
+    0 1 0 0 | 0 1 0 0
+    1 1 0 0 | 1 1 0 0
+    1 1 0 1 | 1 1 0 1
+    1 1 1 1 | 1 1 1 1
+    1 1 1 0 | 1 1 1 0
+    1 0 1 0 | 1 0 1 0
+    1 0 1 1 | 1 0 1 1
+    1 0 0 1 | 1 0 0 1
+    1 0 0 0 | 1 0 0 0
+  delay: 2

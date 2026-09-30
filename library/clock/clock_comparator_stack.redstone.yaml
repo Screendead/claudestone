@@ -1,0 +1,279 @@
+name: clock_comparator_stack
+description: 'Two clock_comparator_repeater clocks stacked 2 blocks apart, proving the design is stackable: each layer''s base sits on the layer below without coupling, so a bank of clocks with different periods fits in a 2x4x3 column (plus the en cells to the west). Lower clock (y=0-1): en1 at x=0, y=1, z=0; out1 dust x=2, y=1, z=0; repeater delay 1, period 8 (4 on, 4 off). Upper clock (y=2-3): en2 at x=0, y=3, z=0; out2 dust x=2, y=3, z=0; repeater delay 2, period 12 (6 on, 6 off). Each first rises 2 ticks after its own en and stops low when it drops. The upper base blocks only ever carry weak power from the dust on them, which dust below does not pick up, and comparators and repeaters power only forwards, so the layers cannot see each other; stack as many as needed. Trade-off: the same clock as clock_comparator_repeater, shown stacked; use it when you need several independent rates in one footprint.'
+traits:
+- compact
+- stackable
+- horizontal
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  A: {input: en1}
+  B: {name: cmp1, block: 'comparator[facing=west,mode=subtract]'}
+  C: {output: out1, block: redstone_wire}
+  D: {name: rep1, block: 'repeater[facing=south,delay=1]'}
+  '-': redstone_wire
+  E: {input: en2}
+  F: {name: cmp2, block: 'comparator[facing=west,mode=subtract]'}
+  G: {output: out2, block: redstone_wire}
+  H: {name: rep2, block: 'repeater[facing=south,delay=2]'}
+layers:
+  0: |
+    .==
+    .==
+    .==
+  1: |
+    ABC
+    .D-
+    .--
+  2: |
+    .==
+    .==
+    .==
+  3: |
+    EFG
+    .H-
+    .--
+tests:
+- name: lower runs alone, upper stays off
+  steps:
+  - drive: {en1: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 3}
+  - expect: {out1: 0, out2: 0}
+- name: upper runs alone, lower stays off
+  steps:
+  - drive: {en2: 1}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 1, out1: 0}
+  - {wait: 1}
+  - expect: {out2: 0, out1: 0}
+  - {wait: 5}
+  - expect: {out2: 0, out1: 0}
+- name: both together keep their own periods
+  steps:
+  - drive: {en1: 1, en2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 1}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 1, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+  - {wait: 1}
+  - expect: {out1: 0, out2: 0}
+- name: stopping one leaves the other running
+  steps:
+  - drive: {en1: 1, en2: 1}
+  - {wait: 13}
+  - drive: {en1: 0}
+  - {wait: 1}
+  - expect: {out1: 0}
+  - {wait: 19}
+  - expect: {out1: 0}
+  - expect: {out2: 0}
+  - {wait: 4}
+  - expect: {out2: 0}
+  - {wait: 1}
+  - expect: {out2: 1}

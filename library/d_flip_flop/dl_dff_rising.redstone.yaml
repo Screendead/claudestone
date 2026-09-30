@@ -1,0 +1,150 @@
+name: dl_dff_rising
+description: "Rising-edge D flip-flop from two repeater-lock latches in series (master-slave), with no torch. Data runs west to east on the north row: d enters the master repeater at x=1 from the west, passes a concrete block at x=2 into the slave repeater q at x=3 (facing west), and q powers whatever is east of it. clk arrives at the cell in the middle of the south side (x=2, z=1). The master is locked by a repeater on its south side fed by clk through two dust, so it freezes while clk is high; the slave is locked by a subtract-mode comparator on its south side whose rear reads a cake (constant 14) and whose west side reads clk, so it freezes while clk is low. The driver cell touches only the concrete block (which a signal source beside it does not power), the side of the master and the comparator. Timing: q changes exactly 4 ticks after the rising edge; d must be settled 1 tick before the edge and a change in the same tick as the edge (or later) is ignored, because the master's lock is a prioritised repeater. The falling edge and d changes at any other time never reach q. Blocks (WxHxD) 3x2x3 (18 cells, the clk cell inside the footprint). Lightless and silent. Trade-off: the fastest and smallest single-edge flip-flop here; the cake must stay uneaten (a redstone block cannot replace it, it would power the clk dust)."
+traits: [ultracompact, ultrafast, flat, horizontal, silent, lightless, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  d: {input: d}
+  c: {input: clk}
+  m: repeater[facing=west]
+  q: {output: q, block: 'repeater[facing=west]'}
+  M: repeater[facing=south]
+  S: comparator[facing=south,mode=subtract]
+  K: cake
+layers:
+  0: |
+    .=.=
+    .=.=
+    .===
+  1: |
+    dm#q
+    .McS
+    .--K
+tests:
+- name: captures on the rising edge in 4 ticks
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: setup one tick, same-tick change ignored, later change ignored
+  steps:
+  - drive: {d: 1}
+  - wait: 1
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 10
+  - drive: {d: 0, clk: 1}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 10
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+- name: seven cycles with d flipped after each edge
+  steps:
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 1}

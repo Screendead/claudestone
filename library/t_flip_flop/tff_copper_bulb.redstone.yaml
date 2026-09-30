@@ -1,0 +1,84 @@
+name: tff_copper_bulb
+description: >-
+  The smallest and fastest T flip-flop: one waxed copper bulb read by one comparator.
+  In 26.3 CopperBulbBlock.neighborChanged cycles LIT on the spot whenever the bulb goes
+  from unpowered to powered (no scheduled tick, verified by decompiling the server), so
+  the bulb itself changes in 0 gt and a player sees it light on the tick of the edge;
+  the comparator reading it (strength 15 when lit, 0 when not) is the only delay, 2 gt.
+  Falling edges only clear the bulb's POWERED flag. Interface (top view, north up): t is
+  the cell west of the bulb (x0,y1,z0); the bulb is at (x1,y1,z0); q is the comparator
+  east of it (x2,y1,z0, facing west, so it reads the bulb and powers x3). 2x2x1 of
+  blocks: bulb, comparator and the comparator's support. Delay 2 gt on the rising edge;
+  it accepts 1 gt pulses and 1 gt gaps (a 2 gt period), the fastest input in the family.
+  Waxed so random weathering never changes the block. Copies tile side by side at a
+  1-block pitch and stack at a 2-block pitch (tff_bulb_bus proves both) and chain into a
+  counter (tff_bulb_counter). Trade-off: the bulb clicks and emits light, so it is
+  neither silent nor lightless; see tff_lightless_lock or tff_hopper_fast for that. It
+  keeps its state through power loss and chunk unloads.
+traits: [ultracompact, ultrafast, flat, horizontal, one_wide, tileable, stackable, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  B: waxed_copper_bulb
+  t: {input: t}
+  q: {output: q, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    ..=
+  1: |
+    tBq
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 2
+- name: output flips exactly 2 gt after each rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 60
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 60
+  - expect: {q: 1}
+- name: 1 gt pulses with 1 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 0}

@@ -1,0 +1,70 @@
+name: vwire_torch_tower_bus
+description: 'Proof that torch towers tile at pitch 1: two vwire_torch_tower_up columns side by side (x0, x1) with independent inputs a, b and outputs o, p. A torch only reads the block it stands on and only hard-powers the block above it, and stones do not power stones, so neighbouring columns never interact (tested with every input pattern and back). 2x9x2, rise 7, 10 ticks per channel. Use this for vertical buses of any width; the dust risers need a gap or skew between channels (vwire_staircase_bus).'
+traits:
+- vertical
+- torch_based
+- silent
+- tileable
+- stackable
+- reset_safe
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  v: repeater[facing=north]
+  '*': redstone_torch
+  o: {output: o, block: redstone_torch}
+  p: {output: p, block: redstone_torch}
+layers:
+  0: |
+    ..
+    SS
+    ..
+  1: |
+    ab
+    vv
+    SS
+  2: |
+    ..
+    ..
+    **
+  3: |
+    ..
+    ..
+    SS
+  4: |
+    ..
+    ..
+    **
+  5: |
+    ..
+    ..
+    SS
+  6: |
+    ..
+    ..
+    **
+  7: |
+    ..
+    ..
+    SS
+  8: |
+    ..
+    ..
+    op
+tests:
+- name: logic
+  truth_table: |
+    a b | o p
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+    1 1 | 1 1
+    0 1 | 0 1
+    1 0 | 1 0
+  delay: 10

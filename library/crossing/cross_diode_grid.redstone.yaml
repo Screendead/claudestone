@@ -1,0 +1,87 @@
+name: cross_diode_grid
+description: 'A two-dimensional bus crossing that tiles at pitch 1 for B and pitch 2 for A, all repeaters: each B lane (along z, at y1) alternates repeater, block, repeater, block, repeater; each A line (along x) is a chain of repeaters standing on one row of those blocks at y2. A B repeater strongly powers its block, which only the next B repeater reads (a repeater on top takes input only from behind); the A repeaters read only each other. Here three lanes by two lines, 3x3x5 including the base. Delay is 2 ticks per repeater: each A line pays 2 ticks per lane and each lane 2 ticks per line plus 2, 6 ticks here, and every output leaves at full strength. Interface: A lines enter the west face at y2 and leave east; lanes enter from the north at y1 and leave south. Leads at pitch 1 must stay repeaters (side-by-side dust would merge). Versus cross_alternating_bus both buses are dense, at the cost of A being slow.'
+traits:
+- compact
+- lightless
+- silent
+- pistonless
+- entityless
+- tileable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  b: {input: b0}
+  A: {input: b1}
+  B: {input: b2}
+  v: repeater[facing=north]
+  '#': white_concrete
+  C: {output: b0_out, block: 'repeater[facing=north]'}
+  D: {output: b1_out, block: 'repeater[facing=north]'}
+  E: {output: b2_out, block: 'repeater[facing=north]'}
+  a: {input: a0}
+  '>': repeater[facing=west]
+  F: {output: a0_out, block: 'repeater[facing=west]'}
+  G: {input: a1}
+  H: {output: a1_out, block: 'repeater[facing=west]'}
+layers:
+  0: |
+    ....
+    .===
+    .===
+    .===
+    .===
+    .===
+  1: |
+    .bAB
+    .vvv
+    .###
+    .vvv
+    .###
+    .CDE
+  2: |
+    ....
+    ....
+    a>>F
+    ....
+    G>>H
+    ....
+tests:
+- name: independent
+  truth_table: |
+    b0 b1 b2 a0 a1 | b0_out b1_out b2_out a0_out a1_out
+    0 0 0 0 0 | 0 0 0 0 0
+    0 0 0 0 1 | 0 0 0 0 1
+    0 0 0 1 1 | 0 0 0 1 1
+    0 0 0 1 0 | 0 0 0 1 0
+    0 0 1 1 0 | 0 0 1 1 0
+    0 0 1 1 1 | 0 0 1 1 1
+    0 0 1 0 1 | 0 0 1 0 1
+    0 0 1 0 0 | 0 0 1 0 0
+    0 1 1 0 0 | 0 1 1 0 0
+    0 1 1 0 1 | 0 1 1 0 1
+    0 1 1 1 1 | 0 1 1 1 1
+    0 1 1 1 0 | 0 1 1 1 0
+    0 1 0 1 0 | 0 1 0 1 0
+    0 1 0 1 1 | 0 1 0 1 1
+    0 1 0 0 1 | 0 1 0 0 1
+    0 1 0 0 0 | 0 1 0 0 0
+    1 1 0 0 0 | 1 1 0 0 0
+    1 1 0 0 1 | 1 1 0 0 1
+    1 1 0 1 1 | 1 1 0 1 1
+    1 1 0 1 0 | 1 1 0 1 0
+    1 1 1 1 0 | 1 1 1 1 0
+    1 1 1 1 1 | 1 1 1 1 1
+    1 1 1 0 1 | 1 1 1 0 1
+    1 1 1 0 0 | 1 1 1 0 0
+    1 0 1 0 0 | 1 0 1 0 0
+    1 0 1 0 1 | 1 0 1 0 1
+    1 0 1 1 1 | 1 0 1 1 1
+    1 0 1 1 0 | 1 0 1 1 0
+    1 0 0 1 0 | 1 0 0 1 0
+    1 0 0 1 1 | 1 0 0 1 1
+    1 0 0 0 1 | 1 0 0 0 1
+    1 0 0 0 0 | 1 0 0 0 0
+  delay: 6

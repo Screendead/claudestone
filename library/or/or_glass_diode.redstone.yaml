@@ -1,0 +1,49 @@
+name: or_glass_diode
+description: >-
+  Instant and isolated: each input dust steps up onto the glass block that carries the
+  output dust. Dust on a non-conductor reads the dust diagonally below it, but the dust
+  below cannot read back up through glass (RedstoneWireEvaluator only looks up past a
+  conductor), so the step is a zero-tick diode. Interface: a (west) and b (east) arrive
+  as dust on layer 1; out is the dust on top of the glass, layer 2, and continues north
+  or south on glass or upside-down slabs. Size 3x3x1 (one wide), delay 0 game ticks; the
+  input dust ia/ib are part of the gate and the test checks they are never back-fed.
+  Output strength is max(a, b) - 1. Trade-off versus or_dust_merge: one block taller and
+  wider, but isolated; versus or_block_repeater: 2 ticks faster, but the output is weak
+  dust instead of a regenerated 15.
+traits: [ultrafast, instant, compact, lightless, silent, pistonless, entityless, one_wide, vertical, analog, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  a: {input: a}
+  b: {input: b}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .=.=.
+  1: |
+    aiGjb
+  2: |
+    ..o..
+tests:
+- name: logic
+  truth_table: |
+    a b | out ia ib
+    0 0 | 0 0 0
+    0 1 | 1 0 1
+    1 0 | 1 1 0
+    1 1 | 1 1 1
+  delay: 0
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - expect: {out: 0}

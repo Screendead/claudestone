@@ -1,0 +1,139 @@
+name: dl_dff_hopper_register_x2
+description: 'Two dl_dff_hopper_register bits side by side at pitch 1 (z=0 and z=1) with the clock distribution a bus needs, proving the design tiles: one clk input (x=2, y=3, z=2) feeds the shared master hold sheet through a dust strip in the control row z=2, and that strip also powers a concrete block whose torch drives the shared slave hold sheet (the one inverter per bus). Each bit has its own d (d0, d1 at x=0, y=1) and q (q0, q1, comparators at x=9, y=3). Eight clock cycles with every d0/d1 combination show each bit capturing its own d exactly 4 ticks after the rising edge and holding through the falling edge while d changes. Blocks (WxHxD) 9x5x3.'
+traits: [tileable, vertical, silent, pistonless, entityless, container_based, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  a: {input: d0}
+  b: {input: d1}
+  c: {input: clk}
+  r: repeater[facing=west]
+  t: redstone_torch
+  A: 'hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'
+  B: hopper[facing=west]
+  C: comparator[facing=west]
+  x: {output: q0, block: 'comparator[facing=west]'}
+  y: {output: q1, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    .=.=.......
+    .=.=.......
+    ...........
+  1: |
+    ar#r#=.=...
+    br#r#=.=...
+    ...........
+  2: |
+    ..tABC#r#=.
+    ..tABC#r#=.
+    ...===.....
+  3: |
+    ...--.tABx.
+    ...--.tABy.
+    ..c---##...
+  4: |
+    .......--..
+    .......--..
+    ......t-...
+tests:
+- name: each bit captures its own d 4 ticks after the rising edge
+  steps:
+  - expect: {q0: 0, q1: 0}
+  - drive: {d0: 1, d1: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 0, q1: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 0}
+  - drive: {d0: 0, d1: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 1, q1: 0}
+  - drive: {d0: 0, d1: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 1, q1: 0}
+  - wait: 1
+  - expect: {q0: 0, q1: 1}
+  - drive: {d0: 1, d1: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 0, q1: 1}
+  - drive: {d0: 1, d1: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 0, q1: 1}
+  - wait: 1
+  - expect: {q0: 1, q1: 1}
+  - drive: {d0: 0, d1: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 1, q1: 1}
+  - drive: {d0: 0, d1: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 1, q1: 1}
+  - wait: 1
+  - expect: {q0: 0, q1: 0}
+  - drive: {d0: 1, d1: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 0, q1: 0}
+  - drive: {d0: 1, d1: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 0, q1: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 1}
+  - drive: {d0: 0, d1: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 1, q1: 1}
+  - drive: {d0: 1, d1: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 1, q1: 1}
+  - wait: 1
+  - expect: {q0: 1, q1: 0}
+  - drive: {d0: 0, d1: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 1, q1: 0}
+  - drive: {d0: 0, d1: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 1, q1: 0}
+  - wait: 1
+  - expect: {q0: 0, q1: 1}
+  - drive: {d0: 1, d1: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 0, q1: 1}
+  - drive: {d0: 0, d1: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 3
+  - expect: {q0: 0, q1: 1}
+  - wait: 1
+  - expect: {q0: 0, q1: 0}
+  - drive: {d0: 1, d1: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q0: 0, q1: 0}

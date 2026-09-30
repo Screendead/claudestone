@@ -1,0 +1,137 @@
+name: xor_piston_switch
+description: "A two-way light switch made of pistons. a's sticky piston at (1,1,0), facing east, slides a redstone block between two cells. Repeaters at (2,1,1) and (3,1,1) read those cells, so exactly one repeater is on, carrying not-a or a. b's sticky piston at (4,1,2), facing west, slides a solid block between the two cells the repeaters point into: retracted, the block sits in front of the a repeater; extended, in front of the not-a repeater. The output dust (2,1,3)-(3,1,3) touches both cells and is powered by whichever cell holds the hard-powered block, so out = (a and not b) or (not a and b). It uses no torch and no comparator. Interface: a powers its piston from the west at (0,1,0); b powers its piston from the east at (5,1,2); keep other power away from both pistons, including the cells above them (quasi-connectivity). The output is dust at (3,1,3), leaving south. Size 4x2x4 (32 blocks), flat, with inputs and output on one layer. It stacks at a pitch of 2 (see xor_piston_switch_stack2). Delay: a rising 5 game ticks, a falling 3; after a b edge the output falls in 1 tick (the block leaves as soon as the piston starts) and rises in 3. Trade-offs: pistons are noisy and cause light updates. As with any sticky piston, pulses shorter than a stroke can drop the block, so drive it with clean levels."
+traits: [compact, flat, horizontal, stackable, piston_based, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  R: redstone_block
+  P: sticky_piston[facing=east]
+  Q: sticky_piston[facing=west]
+  v: repeater[facing=north]
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ......
+    ..==..
+    ......
+    ..==..
+  1: |
+    aPR...
+    ..vv..
+    ...#Qb
+    ..-o..
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+  delay: 5
+- name: edges
+  steps:
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 7
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 11
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 7
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 11
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 9
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 9
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 9
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 9
+  - expect: {out: 0}
+- name: simultaneous and staggered
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 0, b: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 1, b: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 16
+  - expect: {out: 0}

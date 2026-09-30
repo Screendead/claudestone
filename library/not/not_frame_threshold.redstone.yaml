@@ -1,0 +1,52 @@
+name: not_frame_threshold
+description: |
+  An entity-tuned inverter: a subtract-mode comparator reads, through the solid block behind
+  it, an item frame hanging on that block's far face. A frame holding an item outputs
+  rotation + 1 (1-8), so the comparator gives out = k - input and the gate is on exactly when
+  the input is weaker than k. Rotation 7 here, so k = 8. Retune it in place by clicking the
+  frame (each click rotates it one step), with no blocks broken.
+  Interface: comparator at (2,1,0) facing west on a support (2,0,0); concrete at (1,1,0);
+  item frame in the cell (0,1,0), facing west, holding redstone dust at rotation 7. Input:
+  the south side cell (2,1,1). Output: the comparator, driving east at (3,1,0), strength
+  k - input. Delay 2 ticks. Test scaffolding: a dust line east of the comparator shows the
+  output reaches exactly 8 dust (reach8 lit, reach9 dark), and a dust (shared) sits in the
+  frame's own cell (0,1,0) on a support, proving the frame and dust coexist.
+  Trade-off: versus not_comparator_threshold the constant costs no block of its own: the
+  frame is an entity with no collision above its 2-pixel-thin footprint, so its cell can
+  still hold dust, a rail or a slab of another circuit, and the block it hangs on can be any
+  full block already in the build. The cost is one more block of length and an entity to
+  keep loaded. Lightless and silent.
+traits: [uses_entities, analog, lightless, silent, pistonless, comparator_based, flat, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  o: {output: out, block: 'comparator[facing=west,mode=subtract]'}
+  a: {input: a}
+  '-': redstone_wire
+  s: {name: shared, block: redstone_wire}
+  g: {name: reach8, block: redstone_wire}
+  h: {name: reach9, block: redstone_wire}
+layers:
+  0: |
+    =.==========
+    ............
+  1: |
+    s#o-------gh
+    ..a.........
+entities:
+- {type: item_frame, pos: [0.0, 1.5, 0.0], nbt: '{Facing:4b,ItemRotation:7b,Item:{id:"minecraft:redstone",count:1}}'}
+tests:
+- name: logic
+  truth_table: |
+    a | out reach8 reach9
+    0 | 1   1      0
+    1 | 0   0      0
+  delay: 2
+- name: frame survives with dust in its cell
+  steps:
+  - wait: 220
+  - expect: {out: 1, reach8: 1, reach9: 0, shared: 0}
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}

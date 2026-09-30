@@ -1,0 +1,85 @@
+name: cross_alternating_bus
+description: 'One instant wire A under a pitch-1 bus of B lanes whose directions alternate, so no two dust cells ever sit side by side: in each row across the bus, dust alternates with a repeater whose axis is perpendicular to it, and dust never connects to or locks a repeater from the side. Every lane is dust into a block over A and a repeater reading it (the cross_underpass cell), so A crosses the whole bus in 0 ticks and each lane costs 2 ticks. Here four lanes, 5x3x3 including the base, 1 block per lane of width. Interface: A enters the west face at y1 and leaves east; even lanes (b0, b2) enter from the north at y2 and leave south, odd lanes (b1, b3) enter from the south and leave north. Stack more A lines by repeating the 3-deep cell along z: each lane''s repeater feeds the next cell''s dust. The leads on both faces must keep the pitch-1 discipline too: two dust cells side by side merge, so each lane''s lead next to a neighbour''s must be a repeater (in the test, drivers and air stand
+  in for leads). Versus cross_underpass_bus it halves the lane pitch; versus cross_diode_grid A is instant but only one A line per three cells of depth.'
+traits:
+- compact
+- fast
+- lightless
+- silent
+- pistonless
+- entityless
+- tileable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  '-': redstone_wire
+  A: {output: a_out, block: redstone_wire}
+  b: {input: b0}
+  B: {input: b2}
+  C: {output: b1_out, block: 'repeater[facing=south]'}
+  D: {output: b3_out, block: 'repeater[facing=south]'}
+  E: {output: b0_out, block: 'repeater[facing=north]'}
+  F: {output: b2_out, block: 'repeater[facing=north]'}
+  G: {input: b1}
+  H: {input: b3}
+layers:
+  0: |
+    ......
+    ......
+    .=====
+    ......
+    ......
+  1: |
+    ......
+    .####.
+    a----A
+    .####.
+    ......
+  2: |
+    .b.B..
+    .-C-D.
+    .####.
+    .E-F-.
+    ..G.H.
+tests:
+- name: independent
+  truth_table: |
+    a b0 b1 b2 b3 | a_out b0_out b1_out b2_out b3_out
+    0 0 0 0 0 | 0 0 0 0 0
+    0 0 0 0 1 | 0 0 0 0 1
+    0 0 0 1 1 | 0 0 0 1 1
+    0 0 0 1 0 | 0 0 0 1 0
+    0 0 1 1 0 | 0 0 1 1 0
+    0 0 1 1 1 | 0 0 1 1 1
+    0 0 1 0 1 | 0 0 1 0 1
+    0 0 1 0 0 | 0 0 1 0 0
+    0 1 1 0 0 | 0 1 1 0 0
+    0 1 1 0 1 | 0 1 1 0 1
+    0 1 1 1 1 | 0 1 1 1 1
+    0 1 1 1 0 | 0 1 1 1 0
+    0 1 0 1 0 | 0 1 0 1 0
+    0 1 0 1 1 | 0 1 0 1 1
+    0 1 0 0 1 | 0 1 0 0 1
+    0 1 0 0 0 | 0 1 0 0 0
+    1 1 0 0 0 | 1 1 0 0 0
+    1 1 0 0 1 | 1 1 0 0 1
+    1 1 0 1 1 | 1 1 0 1 1
+    1 1 0 1 0 | 1 1 0 1 0
+    1 1 1 1 0 | 1 1 1 1 0
+    1 1 1 1 1 | 1 1 1 1 1
+    1 1 1 0 1 | 1 1 1 0 1
+    1 1 1 0 0 | 1 1 1 0 0
+    1 0 1 0 0 | 1 0 1 0 0
+    1 0 1 0 1 | 1 0 1 0 1
+    1 0 1 1 1 | 1 0 1 1 1
+    1 0 1 1 0 | 1 0 1 1 0
+    1 0 0 1 0 | 1 0 0 1 0
+    1 0 0 1 1 | 1 0 0 1 1
+    1 0 0 0 1 | 1 0 0 0 1
+    1 0 0 0 0 | 1 0 0 0 0
+  delay: 2

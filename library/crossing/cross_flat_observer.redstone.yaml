@@ -1,0 +1,80 @@
+name: cross_flat_observer
+description: 'A flat crossing (2 tall including the base) in which A stays plain, instant dust and B is carried as edges: an observer line in the base layer passes under A''s dust, and a copper bulb at the far end turns the edges back into a level. Every change of B (both edges) makes the first observer pulse; the pulse walks the observer line, 2 ticks per observer, powers a block under the bulb, and the bulb toggles on each pulse, so it is lit exactly when B is on. A comparator reads the bulb. Observers only watch the block in front, emit only out of their back and do not conduct, so A''s dust standing on one is never powered by it and never triggers it. 3x2x5 including the base, 12 blocks. Delay: A 0 ticks, B 8 ticks (three observers and the comparator). Interface: A west to east at y1; B''s source must sit in front of the first observer at y0 on the north side and change block state exactly once per edge of B (a repeater, comparator, lamp, or a block placed and removed; not dust, whose
+  strength changes would each pulse the observer and flip the bulb''s parity), and B leaves south out of the comparator at y1. The bulb must start unlit with B off. Edges must be at least 4 ticks apart: the pulse test shows a 4-tick B pulse survives and a 3-tick one (tested while designing) desynchronises the bulb. Versus cross_flat_comparator: A is instant and B carries no strength condition, but B is slow, the bulb lights and clicks.'
+traits:
+- flat
+- observer_based
+- horizontal
+- pistonless
+- entityless
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  b: {input: b}
+  A: observer[facing=north]
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  '-': redstone_wire
+  B: {output: a_out, block: redstone_wire}
+  C: waxed_copper_bulb[lit=false,powered=false]
+  D: {output: b_out, block: 'comparator[facing=north,mode=compare]'}
+layers:
+  0: |
+    ..b.
+    ..A.
+    .=A=
+    ..A.
+    ..#.
+    ..=.
+  1: |
+    ....
+    ....
+    a--B
+    ....
+    ..C.
+    ..D.
+tests:
+- name: independent
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 8
+- name: a is instant
+  truth_table: |
+    a | a_out
+    0 | 0
+    1 | 1
+  delay: 0
+- name: 4-tick pulses keep parity
+  steps:
+  - drive: {b: 1}
+  - {wait: 4}
+  - drive: {b: 0}
+  - {wait: 20}
+  - expect: {b_out: 0}
+  - drive: {b: 1}
+  - {wait: 4}
+  - drive: {b: 0}
+  - {wait: 20}
+  - expect: {b_out: 0}
+  - drive: {b: 1}
+  - {wait: 20}
+  - expect: {b_out: 1}
+  - drive: {b: 0}
+  - {wait: 4}
+  - drive: {b: 1}
+  - {wait: 20}
+  - expect: {b_out: 1}
+  - drive: {b: 0}
+  - {wait: 20}
+  - expect: {b_out: 0}

@@ -1,0 +1,72 @@
+name: cross_instant_bus
+description: 'Two instant buses crossing: cross_instant_column cells tiled at pitch 2 both ways. B lanes are dust on the base at y1 along z; A lines are dust along x at y3 on rows of blocks at y2 that pass over every lane. Every line is instant (0 ticks) whatever the bus width, limited only by dust''s 15-block reach. Here two by two, 4x4x4 including the base. Interface: A lines enter the west face at y3 and leave east; B lanes enter the north face at y1 and leave south. Versus cross_diode_grid it is twice the pitch and a layer taller but has no delay at all.'
+traits:
+- ultrafast
+- instant
+- lightless
+- silent
+- pistonless
+- entityless
+- tileable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  b: {input: b0}
+  A: {input: b1}
+  '-': redstone_wire
+  B: {output: b0_out, block: redstone_wire}
+  C: {output: b1_out, block: redstone_wire}
+  '#': white_concrete
+  a: {input: a0}
+  D: {output: a0_out, block: redstone_wire}
+  E: {input: a1}
+  F: {output: a1_out, block: redstone_wire}
+layers:
+  0: |
+    .....
+    .=.=.
+    .=.=.
+    .=.=.
+    .=.=.
+  1: |
+    .b.A.
+    .-.-.
+    .-.-.
+    .-.-.
+    .B.C.
+  2: |
+    .....
+    .####
+    .....
+    .####
+    .....
+  3: |
+    .....
+    a---D
+    .....
+    E---F
+    .....
+tests:
+- name: independent
+  truth_table: |
+    b0 b1 a0 a1 | b0_out b1_out a0_out a1_out
+    0 0 0 0 | 0 0 0 0
+    0 0 0 1 | 0 0 0 1
+    0 0 1 1 | 0 0 1 1
+    0 0 1 0 | 0 0 1 0
+    0 1 1 0 | 0 1 1 0
+    0 1 1 1 | 0 1 1 1
+    0 1 0 1 | 0 1 0 1
+    0 1 0 0 | 0 1 0 0
+    1 1 0 0 | 1 1 0 0
+    1 1 0 1 | 1 1 0 1
+    1 1 1 1 | 1 1 1 1
+    1 1 1 0 | 1 1 1 0
+    1 0 1 0 | 1 0 1 0
+    1 0 1 1 | 1 0 1 1
+    1 0 0 1 | 1 0 0 1
+    1 0 0 0 | 1 0 0 0
+  delay: 0

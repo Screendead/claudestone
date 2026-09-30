@@ -1,0 +1,71 @@
+name: mux_torch_2to1
+description: |-
+  Quartzless 2:1 multiplexer from five redstone torches, for survival before the Nether: out = s ? b : a.
+  Two torch towers. Tower a: a powers a block whose torch (not_a) strongly powers the block above it; s also powers that block through rep_s, so its torch gate_a = NOR(not a, s) = a and not s. Tower b: b's torch not_b powers the upper block, and not_s (a wall torch on the block that s powers) feeds it through dust, so gate_b = NOR(not b, not s) = b and s. gate_a and gate_b stand on top of their towers either side of the output dust, which ORs them. rep_s is not decoration: the upper block of tower a is strongly powered by not_a, and dust touching it would carry that power back into the s line.
+  Interface (top view, north up): a enters from the south on the bottom layer (west column), b likewise in the middle column; s is the cell above the s line on the top rear row; out is the dust on the top layer between the two gate torches.
+  5x5x3 of blocks. Delay 4 ticks from every input (tested). Versus mux_comparator_2to1: same 4-tick worst case, bigger, torch-lit and not analog, but built from redstone, sticks and stone only.
+traits:
+- torch_based
+- vertical
+- silent
+- pistonless
+- entityless
+- fast
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  A: {name: not_a, block: redstone_torch}
+  B: {name: not_b, block: redstone_torch}
+  r: {name: rep_s, block: 'repeater[facing=south]'}
+  C: {name: not_s, block: 'redstone_wall_torch[facing=north]'}
+  g: {name: gate_a, block: redstone_torch}
+  o: {output: out, block: redstone_wire}
+  D: {name: gate_b, block: redstone_torch}
+  s: {input: s}
+layers:
+  0: |
+    .....
+    =.=..
+    .....
+  1: |
+    #.#..
+    -.-..
+    a.b..
+  2: |
+    A.B==
+    =....
+    ====.
+  3: |
+    ###--
+    r...C
+    ----#
+  4: |
+    goD..
+    .....
+    .s...
+tests:
+- name: logic
+  truth_table: |
+    s a b | out
+    0 0 0 | 0
+    0 1 0 | 1
+    1 1 0 | 0
+    0 1 0 | 1
+    0 0 1 | 0
+    1 0 1 | 1
+    0 0 1 | 0
+    0 1 1 | 1
+    1 1 1 | 1
+    1 0 1 | 1
+    1 0 0 | 0
+    1 1 0 | 0
+    1 1 1 | 1
+    0 1 1 | 1
+  delay: 4

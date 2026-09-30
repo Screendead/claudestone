@@ -1,0 +1,138 @@
+name: analog_const_lectern
+description: 'Player-selectable constant 1..15: a lectern (x=0) holding a book and quill with exactly 15 pages, read by a comparator behind it (x=1). The comparator reads floor(14 * page / (pages - 1)) + 1, so with 15 pages page p (0-based) gives exactly p + 1, and a player sets the level in survival by turning pages, with no items to count. Output: comparator facing east into the dust at x=2. 3x2x1, one wide. Turning a page also makes the lectern strongly power the block under it for a moment, so keep dust off that block (here smooth stone with nothing else on it). A book with other page counts gives coarser steps (a 2-page book is 1 or 15). Tests: every page 0..14 reads 1..15, 2 ticks after the page changes. Trade-off: the only 1..15 selector a player can change by hand in survival without redstone; analog_const_container is fixed at build time, analog_const_item_frame has 8 steps but no block of its own.'
+traits:
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- tick_accurate
+- reset_safe
+- survival_friendly
+- flat
+- horizontal
+- one_wide
+- ultracompact
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  L: lectern[facing=north,has_book=true]{Book:{id:"minecraft:writable_book",count:1,components:{"minecraft:writable_book_content":{pages:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]}}},Page:6}
+  C: {name: reader, block: 'comparator[facing=west]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ===
+  1: |
+    LCo
+tests:
+- name: page p gives p + 1 two ticks later
+  steps:
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:7}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=7]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:0}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:1}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:1}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=1]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:1}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:2}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:2}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=2]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:2}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:3}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:3}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=3]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:3}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:4}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:4}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=4]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:4}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:5}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:5}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=5]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:5}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:6}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:6}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=6]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:6}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:7}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:7}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=7]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:7}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:8}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:8}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=8]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:8}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:9}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:9}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=9]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:9}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:10}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:10}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=10]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:10}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:11}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:11}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=11]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:11}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:12}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:12}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=12]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:12}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:13}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:13}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=13]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:13}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:14}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:14}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=14]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:14}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=15]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:14}'}
+  - {wait: 2}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=15]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:0}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:1}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:1}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=1]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Page:7}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:8}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:8}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=8]'}

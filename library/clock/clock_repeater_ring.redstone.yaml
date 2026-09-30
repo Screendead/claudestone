@@ -1,0 +1,300 @@
+name: clock_repeater_ring
+description: 'Pulse-train clock with a programmable duty cycle: a 3x3 ring of three 2-delay repeaters and a subtract comparator, dust in the corners, that recirculates whatever pulse you inject. Ring (y=1, z=1 to 3, x=0 to 2): out repeater (x=1, z=1, facing west) -> corner dust -> repeater (x=2, z=2, facing north) -> corner -> repeater (x=1, z=3, facing east) -> corner -> comparator (x=0, z=2, facing south, subtract) -> corner dust (x=0, z=1). Lap time 4+4+4+2 = 14 ticks. Input start (x=0, z=0, north of the NW corner dust) injects a pulse as wide as it is held (minimum 4, the repeater delay; an off-gap under 4 ticks is filled in), so holding start 3 ticks gives out 4 on, 10 off and holding it 8 gives 8 on, 6 off; a start longer than 10 ticks leaves a gap under 4, which fills in, so the ring latches on (out stays high until stop). Two pulses per lap need a longer ring, since every pulse and every gap is at least 4 ticks. Out first rises 4 ticks after start rises. Input stop is the centre
+  cell (x=1, z=2): it feeds the comparator''s side (repeaters ignore a redstone block on their side), which kills the pulse at the comparator; a pulse already past it still reaches out once, then the ring is empty and stays empty after stop is released until start is pulsed again. Starts empty after placement. Size 3x2x3 plus the start cell. Trade-off: the only clock here with a duty cycle you set at run time and multiple pulses per lap; needs a pulse to start rather than a level enable (use clock_comparator_repeater for a plain enable). The lap is the sum of the loop delays (14 tested), so the repeater settings or a bigger ring change it.'
+traits:
+- compact
+- flat
+- horizontal
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- lockable
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  s: {input: start}
+  x: {input: stop}
+  '-': redstone_wire
+  a: {output: out, block: 'repeater[facing=west,delay=2]'}
+  b: {name: b, block: 'repeater[facing=north,delay=2]'}
+  c: {name: c, block: 'repeater[facing=east,delay=2]'}
+  C: {name: cmp, block: 'comparator[facing=south,mode=subtract]'}
+layers:
+  0: |
+    ...
+    ===
+    ===
+    ===
+  1: |
+    s..
+    -a-
+    Cxb
+    -c-
+tests:
+- name: empty after placement
+  steps:
+  - {wait: 40}
+  - expect: {out: 0, b: 0, c: 0, cmp: 0}
+- name: '3-tick start: 4 on, 10 off'
+  steps:
+  - drive: {start: 1}
+  - {wait: 3}
+  - drive: {start: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+- name: '8-tick start: 8 on, 6 off'
+  steps:
+  - drive: {start: 1}
+  - {wait: 8}
+  - drive: {start: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 2}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 5}
+  - expect: {out: 0}
+- name: stop lets the pulse in flight out once, then the ring stays empty
+  steps:
+  - drive: {start: 1}
+  - {wait: 8}
+  - drive: {start: 0}
+  - {wait: 40}
+  - drive: {stop: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 4}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 39}
+  - expect: {out: 0}
+  - drive: {stop: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 29}
+  - expect: {out: 0}
+  - drive: {start: 1}
+  - {wait: 3}
+  - drive: {start: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 9}
+  - expect: {out: 0}
+- name: 'a start over 10 ticks leaves a gap under 4, fills the ring: out stays on until stop'
+  steps:
+  - drive: {start: 1}
+  - {wait: 12}
+  - drive: {start: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 59}
+  - expect: {out: 1}
+  - drive: {stop: 1}
+  - {wait: 20}
+  - expect: {out: 0}
+  - drive: {stop: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 29}
+  - expect: {out: 0}

@@ -1,0 +1,150 @@
+name: xor_xnor_comparator_flat
+description: "xor_comparator_flat with an inverting comparator in front of a. The inverter at (3,1,2) faces north with a redstone block behind it (constant 15) and takes a on its east side, so it puts 15-a into the a dust. The flat crosswise subtract pair then computes (not a) xor b. a must arrive at full strength and b at 15 when on, because the core outputs |(15-a)-b|. Interface: a arrives at the inverter's east side (4,1,2) as dust, a diode or a redstone block. b is fed from directly above its dust, at (2,2,4). The output is dust at (3,1,6). Size 4x2x6 (48 blocks), flat. Delay 4 game ticks on a's edges and 2 on b's. Lightless and silent. Trade-offs: the flat 4-tick XNOR, at the price of b arriving from above. xor_xnor_comparator_bridge takes both inputs on the build layer but is 4 tall."
+traits: [compact, ultrafast, flat, comparator_based, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  R: redstone_block
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .....
+    .....
+    ====.
+    ====.
+    ====.
+    ====.
+    .===.
+  1: |
+    .....
+    ...R.
+    --#Na
+    -.S-.
+    -.-N.
+    --.#.
+    .--o.
+  2: |
+    .....
+    .....
+    .....
+    .....
+    ..b..
+    .....
+    .....
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+  delay: 4
+- name: edges
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+- name: simultaneous and staggered
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 0, b: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 1, b: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 16
+  - expect: {out: 1}

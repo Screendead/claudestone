@@ -1,0 +1,161 @@
+name: add_full_piston_instant
+description: |-
+  Full adder whose carry-in reaches carry-out in 0 ticks: C runs on plain dust,
+  and the only thing between carry-in and carry-out is a dust step up from low (8,1,7)
+  to up (9,2,7). A block of stone sits in the cell above low, and a solid block there
+  cuts that step. A sticky piston at (8,2,6), facing south, holds the stone. P = A xor B
+  (the add_half_comparator_flat comparator core and loop) reaches the piston through
+  the dust at (8,2,5). When P is on the piston pushes the stone out and the cell above
+  low becomes the piston head or a moving block, neither of which is a redstone
+  conductor (checked in the decompiled MovingPistonBlock and piston properties), so
+  the step connects in the same tick the comparator fires. G = A and B powers the
+  carry-out side directly. When A = B the stone is back in place and cout is G.
+  Sum is P xor C in the bridge XOR, as in add_full_comparator_lightless. Interface:
+  A into the dust at (8,1,1), B into the dust at (7,1,2) at full strength (redstone
+  blocks dropped on them in the tests), C at (7,1,7) beside low; outputs cout (dust at
+  (11,2,7), y=2) and sum (dust at (3,2,5)). 12x4x8. Delays (tested exactly): C to cout
+  0 ticks with A xor B on, both edges; A or B to cout 2 ticks when the line opens, 4
+  when it closes (the sticky piston pulls the stone back over 2 more ticks), 4 through
+  G; sum 6 from A or B, 4 from C; worst case over the truth table 6. For those 2 ticks
+  while A falls with B and C held (the line is already open and G still on), G also
+  drives the carry-in side: harmless here, but in a chain it briefly lifts the
+  previous bit's carry-out. Not silent, not lightless (a piston moves). Chaining: the carry
+  line loses 3 strength from low to cout and a following bit's carry-in run past its
+  sum bridge costs 8 more, so at this width each bit needs a repeater in front of it
+  (add_full_piston_instant_x2: 0 ticks across a bit, 2 per repeater). Trade-off: the fastest carry in the family, bought with a piston,
+  sound and size; add_full_comparator_lightless is quiet but takes 4 ticks from C to
+  cout.
+traits:
+- instant
+- fast
+- piston_based
+- comparator_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  A: comparator[facing=south,mode=subtract]
+  B: comparator[facing=north,mode=subtract]
+  v: repeater[facing=north]
+  <: repeater[facing=east]
+  '>': repeater[facing=west]
+  p: {name: p, block: redstone_wire}
+  g: {name: g, block: redstone_wire}
+  c: {input: c}
+  l: {name: low, block: redstone_wire}
+  a: {input: a}
+  b: {input: b}
+  s: {output: sum, block: redstone_wire}
+  C: sticky_piston[facing=south]
+  S: stone
+  D: {name: up, block: redstone_wire}
+  E: {output: cout, block: redstone_wire}
+layers:
+  0: |
+    .....===....
+    .....=.====.
+    ..=..=.==.=.
+    ..=====.===.
+    ====..===.=.
+    =.==....=.=.
+    =.........=.
+    ============
+  1: |
+    .....--#....
+    .....-.A---.
+    ..#..-.-B.v.
+    ..A-<--.#-B.
+    ->-B..--p.g.
+    -.##....#.-.
+    -.........-.
+    -------cl###
+  2: |
+    ............
+    ........a...
+    ..-....b....
+    ..#.........
+    ..#.........
+    ..-s....-...
+    ........C...
+    ........SD-E
+  3: |
+    ............
+    ............
+    ............
+    ..-.........
+    ..-.........
+    ............
+    ............
+    ............
+tests:
+- name: logic
+  truth_table: |
+    a b c | sum cout
+    0 0 0 | 0 0
+    0 0 1 | 1 0
+    0 1 1 | 0 1
+    0 1 0 | 1 0
+    1 1 0 | 0 1
+    1 1 1 | 1 1
+    1 0 1 | 0 1
+    1 0 0 | 1 0
+    0 1 1 | 0 1
+    1 0 0 | 1 0
+    1 1 1 | 1 1
+    0 0 0 | 0 0
+  delay: 6
+- name: carry is instant when a=1 b=0
+  truth_table: |
+    a b c | cout
+    1 0 0 | 0
+    1 0 1 | 1
+    1 0 0 | 0
+    1 0 1 | 1
+  delay: 0
+- name: piston edges
+  steps:
+  - drive: {c: 1}
+  - {wait: 6}
+  - expect: {cout: 0, sum: 1}
+  - drive: {a: 1}
+  - {wait: 1}
+  - expect: {cout: 0}
+  - {wait: 1}
+  - expect: {cout: 1}
+  - {wait: 10}
+  - drive: {a: 0}
+  - {wait: 3}
+  - expect: {cout: 1}
+  - {wait: 1}
+  - expect: {cout: 0}
+  - {wait: 10}
+  - drive: {a: 1, b: 1}
+  - {wait: 3}
+  - expect: {cout: 0, sum: 1}
+  - {wait: 1}
+  - expect: {cout: 1}
+  - {wait: 10}
+  - drive: {c: 0}
+  - expect: {cout: 1}
+  - {wait: 6}
+  - expect: {cout: 1, sum: 0}
+  - drive: {a: 0}
+  - {wait: 3}
+  - expect: {cout: 1}
+  - {wait: 1}
+  - expect: {cout: 0}
+  - {wait: 2}
+  - expect: {cout: 0, sum: 1}
+- name: carry is instant when a=0 b=1
+  truth_table: |
+    a b c | cout
+    0 1 0 | 0
+    0 1 1 | 1
+    0 1 0 | 0
+    0 1 1 | 1
+  delay: 0

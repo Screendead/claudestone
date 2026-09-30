@@ -1,0 +1,153 @@
+name: shift_pulse_lock_x2
+description: 'Two shift_pulse_lock registers stacked directly on top of each other (the upper copy''s y=0 layer rests on the lower copy''s components, pitch 2 in y), each with its own d, clk and outputs: the proof that shift_pulse_lock stacks. Lower copy: d_lo, clk_lo, lo0..lo3 at y=1; upper copy: d_hi, clk_hi, hi0..hi3 at y=3, same x/z as in shift_pulse_lock. Nothing in either copy powers the layer above or below: the upper supports only ever carry dust (weak power, which dust ignores) and no lower component points up. Timing per copy exactly as shift_pulse_lock (q 10 ticks after the rising edge). Size 10x4x5. Lightless, silent, no entities.'
+traits: [compact, stackable, horizontal, lightless, silent, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  d: {input: d_lo}
+  k: {input: clk_lo}
+  a: {output: lo0, block: 'repeater[facing=west,delay=2]'}
+  b: {output: lo1, block: 'repeater[facing=west,delay=2]'}
+  c: {output: lo2, block: 'repeater[facing=west,delay=2]'}
+  e: {output: lo3, block: 'repeater[facing=west,delay=2]'}
+  v: repeater[facing=south]
+  B: redstone_block
+  L: comparator[facing=west,mode=subtract]
+  C: comparator[facing=south,mode=subtract]
+  A: repeater[facing=east,delay=1]
+  D: repeater[facing=west,delay=2]
+  '#': white_concrete
+  f: {input: d_hi}
+  g: {input: clk_hi}
+  h: {output: hi0, block: 'repeater[facing=west,delay=2]'}
+  i: {output: hi1, block: 'repeater[facing=west,delay=2]'}
+  j: {output: hi2, block: 'repeater[facing=west,delay=2]'}
+  l: {output: hi3, block: 'repeater[facing=west,delay=2]'}
+layers:
+  0: |
+    ...=======
+    ...=======
+    ..========
+    ===.......
+    ===.......
+  1: |
+    ..da#b#c#e
+    ...v.v.v.v
+    .BL-------
+    -DC.......
+    -Ak.......
+  2: |
+    ...=======
+    ...=======
+    ..========
+    ===.......
+    ===.......
+  3: |
+    ..fh#i#j#l
+    ...v.v.v.v
+    .BL-------
+    -DC.......
+    -Ag.......
+tests:
+- name: two stacked copies shift different words together
+  steps:
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 0}
+  - drive: {d_lo: 1, d_hi: 0}
+  - {wait: 5}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 0}
+  - {wait: 1}
+  - expect: {lo0: 1, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 0}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 0, d_hi: 1}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 1, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 0}
+  - {wait: 1}
+  - expect: {lo0: 0, lo1: 1, lo2: 0, lo3: 0, hi0: 1, hi1: 0, hi2: 0, hi3: 0}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 1, d_hi: 1}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 0, lo1: 1, lo2: 0, lo3: 0, hi0: 1, hi1: 0, hi2: 0, hi3: 0}
+  - {wait: 1}
+  - expect: {lo0: 1, lo1: 0, lo2: 1, lo3: 0, hi0: 1, hi1: 1, hi2: 0, hi3: 0}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 1, d_hi: 0}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 1, lo1: 0, lo2: 1, lo3: 0, hi0: 1, hi1: 1, hi2: 0, hi3: 0}
+  - {wait: 1}
+  - expect: {lo0: 1, lo1: 1, lo2: 0, lo3: 1, hi0: 0, hi1: 1, hi2: 1, hi3: 0}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 0, d_hi: 1}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 1, lo1: 1, lo2: 0, lo3: 1, hi0: 0, hi1: 1, hi2: 1, hi3: 0}
+  - {wait: 1}
+  - expect: {lo0: 0, lo1: 1, lo2: 1, lo3: 0, hi0: 1, hi1: 0, hi2: 1, hi3: 1}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 0, d_hi: 0}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 0, lo1: 1, lo2: 1, lo3: 0, hi0: 1, hi1: 0, hi2: 1, hi3: 1}
+  - {wait: 1}
+  - expect: {lo0: 0, lo1: 0, lo2: 1, lo3: 1, hi0: 0, hi1: 1, hi2: 0, hi3: 1}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 0, d_hi: 0}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 0, lo1: 0, lo2: 1, lo3: 1, hi0: 0, hi1: 1, hi2: 0, hi3: 1}
+  - {wait: 1}
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 1, hi0: 0, hi1: 0, hi2: 1, hi3: 0}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 9}
+  - drive: {d_lo: 0, d_hi: 0}
+  - {wait: 1}
+  - drive: {clk_lo: 1, clk_hi: 1}
+  - {wait: 9}
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 1, hi0: 0, hi1: 0, hi2: 1, hi3: 0}
+  - {wait: 1}
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 1}
+  - drive: {clk_lo: 0, clk_hi: 0}
+  - {wait: 20}
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 1}
+- name: each copy ignores the other's clock and data
+  steps:
+  - expect: {lo0: 0, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 0}
+  - drive: {d_lo: 1, d_hi: 1}
+  - {wait: 5}
+  - drive: {clk_lo: 1}
+  - {wait: 20}
+  - expect: {lo0: 1, lo1: 0, lo2: 0, lo3: 0, hi0: 0, hi1: 0, hi2: 0, hi3: 0}
+  - drive: {clk_lo: 0}
+  - {wait: 10}
+  - drive: {clk_hi: 1}
+  - {wait: 20}
+  - expect: {lo0: 1, lo1: 0, lo2: 0, lo3: 0, hi0: 1, hi1: 0, hi2: 0, hi3: 0}
+  - drive: {clk_hi: 0, d_lo: 0}
+  - {wait: 10}
+  - drive: {clk_hi: 1}
+  - {wait: 20}
+  - expect: {lo0: 1, lo1: 0, lo2: 0, lo3: 0, hi0: 1, hi1: 1, hi2: 0, hi3: 0}
+  - drive: {clk_hi: 0}
+  - {wait: 10}
+  - drive: {clk_lo: 1}
+  - {wait: 20}
+  - expect: {lo0: 0, lo1: 1, lo2: 0, lo3: 0, hi0: 1, hi1: 1, hi2: 0, hi3: 0}
+  - drive: {clk_lo: 0}
+  - {wait: 10}

@@ -1,0 +1,127 @@
+name: mux_torch_lane_x2
+description: 'Two copies of mux_torch_lane side by side at pitch 1 (x = 0 and x = 1) sharing one pair of select rows: a 2-bit bus multiplexer, out_k = s ? b_k : a_k. The select rows are dust that runs across both lanes (driven from x = 2); everything else in a lane is repeaters, blocks and torches, which neither join nor power the neighbouring lane. Every data combination is tested under both selects, plus select switching with the two lanes carrying opposite data. Widen the bus by repeating the lane; one select row feeds up to 15 lanes before it needs a repeater at the trunk. 2x5x9 of blocks; delay 10 ticks worst case, as for one lane (tested).'
+traits:
+- tileable
+- vertical
+- torch_based
+- silent
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a0}
+  A: {input: a1}
+  v: repeater[facing=north]
+  '#': white_concrete
+  ^: repeater[facing=south]
+  '-': redstone_wire
+  s: {input: s}
+  t: {name: t10, block: redstone_torch}
+  B: {name: t11, block: redstone_torch}
+  C: {name: not_s0, block: 'redstone_wall_torch[facing=north]'}
+  D: {name: not_s1, block: 'redstone_wall_torch[facing=north]'}
+  E: {input: s_rear}
+  F: {name: t20, block: 'redstone_wall_torch[facing=north]'}
+  G: {name: t21, block: 'redstone_wall_torch[facing=north]'}
+  b: {input: b0}
+  H: {input: b1}
+  o: {output: out0, block: redstone_torch}
+  I: {output: out1, block: redstone_torch}
+layers:
+  0: |
+    ...
+    ==.
+    ...
+    ==.
+    ==.
+    ...
+    ...
+    ...
+    ...
+  1: |
+    aA.
+    vv.
+    ##.
+    ^^.
+    --s
+    ...
+    ...
+    ==.
+    ==.
+  2: |
+    ...
+    ...
+    tB.
+    ##.
+    ...
+    CD.
+    ##.
+    ^^.
+    --E
+  3: |
+    ...
+    ...
+    ##.
+    ^^.
+    FG.
+    ##.
+    ^^.
+    bH.
+    ...
+  4: |
+    ...
+    ...
+    oI.
+    ...
+    ...
+    ...
+    ...
+    ...
+    ...
+tests:
+- name: logic
+  truth_table: |
+    s s_rear a0 b0 a1 b1 | out0 out1
+    0 0 0 0 0 0 | 0 0
+    0 0 0 0 0 1 | 0 0
+    0 0 0 0 1 0 | 0 1
+    0 0 0 0 1 1 | 0 1
+    0 0 0 1 0 0 | 0 0
+    0 0 0 1 0 1 | 0 0
+    0 0 0 1 1 0 | 0 1
+    0 0 0 1 1 1 | 0 1
+    0 0 1 0 0 0 | 1 0
+    0 0 1 0 0 1 | 1 0
+    0 0 1 0 1 0 | 1 1
+    0 0 1 0 1 1 | 1 1
+    0 0 1 1 0 0 | 1 0
+    0 0 1 1 0 1 | 1 0
+    0 0 1 1 1 0 | 1 1
+    0 0 1 1 1 1 | 1 1
+    1 1 0 0 0 0 | 0 0
+    1 1 0 0 0 1 | 0 1
+    1 1 0 0 1 0 | 0 0
+    1 1 0 0 1 1 | 0 1
+    1 1 0 1 0 0 | 1 0
+    1 1 0 1 0 1 | 1 1
+    1 1 0 1 1 0 | 1 0
+    1 1 0 1 1 1 | 1 1
+    1 1 1 0 0 0 | 0 0
+    1 1 1 0 0 1 | 0 1
+    1 1 1 0 1 0 | 0 0
+    1 1 1 0 1 1 | 0 1
+    1 1 1 1 0 0 | 1 0
+    1 1 1 1 0 1 | 1 1
+    1 1 1 1 1 0 | 1 0
+    1 1 1 1 1 1 | 1 1
+    0 0 1 0 0 1 | 1 0
+    1 1 1 0 0 1 | 0 1
+    0 0 1 0 0 1 | 1 0
+    0 0 0 1 1 0 | 0 1
+    1 1 0 1 1 0 | 1 0
+    0 0 0 1 1 0 | 0 1
+  delay: 10

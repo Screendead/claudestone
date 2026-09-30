@@ -1,0 +1,129 @@
+name: xor_comparator_bridge
+description: "Two subtract-mode comparators read the same two dust cells crosswise. C1 at (2,1,2) faces north with a as its rear and b as its side; C2 at (1,1,1) faces south with b as its rear and a as its side. So one outputs a-b and the other b-a, and at most one is ever on. Both comparators read the very same cells, so the output strength is |a-b|. Checked live: a at 15 and b at 11 give 4. For digital use, both inputs must be at the same strength when on (both full, or equal dust runs); otherwise put a repeater on each input. C2 fires north into a block whose top dust climbs a two-high bridge over the comparators and lands beside C1's output block, so the OR is a dust junction on y2. A comparator XOR's wiring is a K3,3, so some crossing is unavoidable; here it costs height instead of footprint. Interface: a enters as dust from the east into cell (2,1,1); b enters as dust from the west into cell (1,1,2). The output is dust at (2,2,3) on the upper layer; take it south or east. Size 2x4x4 (32 blocks). Delay 2 game ticks on every edge (one comparator), the floor for any gate built from components. Output strength is 15 through C1 and 11 through the bridge from C2. Trade-offs: the fastest and smallest combinational XOR here, lightless and silent. xor_gate costs 6 ticks but normalises its inputs with repeaters. It stacks at a pitch of 4 (see xor_comparator_bridge_stack2). xor_comparator_flat is 2 tall but needs one input fed from above; xor_observer_bulb is 5x smaller but counts edges."
+traits: [compact, ultrafast, comparator_based, analog, vertical, stackable, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ....
+    .==.
+    .==.
+    ....
+  1: |
+    .#..
+    .S-a
+    b-N.
+    .##.
+  2: |
+    .-..
+    .#..
+    .#..
+    .-o.
+  3: |
+    ....
+    .-..
+    .-..
+    ....
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+  delay: 2
+- name: edges
+  steps:
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+- name: simultaneous and staggered
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 0, b: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 1, b: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 16
+  - expect: {out: 0}

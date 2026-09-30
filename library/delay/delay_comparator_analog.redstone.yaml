@@ -1,0 +1,82 @@
+name: delay_comparator_analog
+description: 'Analog delay line: comparators chained back to front copy their input strength exactly, 2 game ticks per comparator, so a 0-15 signal comes out delayed but unchanged (a repeater chain would restore it to 15). Signal runs west to east on layer y=1 over a smooth-stone base: input a (x=0, z=2) feeds c1, a comparator in subtract mode whose side reads a hopper holding 4 stacks and 24 redstone (strength 13, via the north reader comparator), so c1 outputs 15-13 = 2; c2 and c3 pass that 2 on, and the dust tail after them reads 2, 1, 0. The tests prove strength is preserved (tail1 lit, tail2 dark) and the delay is exactly 6 ticks on both edges. The hopper and reader are the test''s way of making a sub-15 input; in use, the chain is just c2/c3 style comparators, 1 wide, 2 ticks per block, any length, and c1 shows the subtract trick for scaling a level down by a constant. 6x2x3. Pulses: measured on 26.3, on-pulses and off-gaps of 3 ticks or more come out exactly as they went in, while 2 ticks or less are filtered out entirely, so the chain doubles as a glitch filter. Trade-off: 2 ticks per block (repeaters give up to 8) and no signal restoration, but it is the only delay here that carries signal strength, e.g. for analog buses, item-count or hex-encoded signals.'
+traits: [flat, horizontal, analog, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  h: 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:24}]}'
+  r: 'comparator[facing=north]'
+  s: {name: c1, block: 'comparator[facing=west,mode=subtract]'}
+  c: 'comparator[facing=west]'
+  o: {output: out, block: redstone_wire}
+  t: {name: tail1, block: redstone_wire}
+  u: {name: tail2, block: redstone_wire}
+layers:
+  0: |
+    .=.....
+    .=.....
+    .======
+  1: |
+    .h.....
+    .r.....
+    asccotu
+tests:
+- name: strength 2 preserved, 6 ticks
+  truth_table: |
+    a | c1 out tail1 tail2
+    0 | 0  0   0     0
+    1 | 1  1   1     0
+  delay: 6
+- name: 3 tick pulse and gap pass intact
+  steps:
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1, tail1: 1, tail2: 0}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: 2 tick pulses and gaps are filtered out
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}

@@ -1,0 +1,155 @@
+name: wire_sculk_wireless
+description: >-
+  A wireless link: no blocks between the ends, and it passes straight through walls (only wool
+  blocks vibrations). The input opens an iron trapdoor, a block_open game event (vibration
+  frequency 10); closing it is block_close (frequency 9). Two calibrated sculk sensors 15 blocks
+  away each listen only for the frequency on their back face: A's back reads a comparator on a
+  cake with 2 bites taken (strength (7-2)*2 = 10), B's reads the same comparator through two dust
+  (10 then 9). So A pulses for 10 ticks on the input's rising edge and B on its falling edge, and
+  footsteps (1), block placing (13) and breaking (12) nearby are ignored. A waxed copper bulb
+  between the sensors toggles on each pulse, so it follows the input level, and a comparator
+  reads it out. A vibration takes floor(distance) ticks to arrive, so the link costs about one
+  tick per block: 15 ticks to the edge outputs, 17 to the level.
+  Interface: input driver a at (x=2, z=0, y=1) behind the trapdoor at z=1; a solid stone wall
+  across z=8; sensors A (x=1) and B (x=3) at z=16 facing north, bulb at x=2 between them; outputs
+  up (x=0) and down (x=4) are dust beside the sensors at z=16 (10-tick pulses, strength 1), and
+  out (the level) is dust at (x=2, z=14) after the comparator at z=15. Size 5x3x21.
+  Limits (tested): hold each input level at least 10 ticks. A shorter pulse overlaps the two
+  sensor pulses into one bulb toggle and the level output inverts until corrected. Each sensor
+  also needs 10 ticks of cooldown, so each edge type can repeat at most every 20 ticks. Range is
+  16 blocks, and any other frequency-10 or -9 source in range (doors, trapdoors, pistons, levers)
+  also triggers it.
+  Trade-off: no wire volume at all and it crosses other circuitry and walls, but slow (1 tick per
+  block), noisy and lit; wire_repeater_line covers the same 15 blocks in 2 ticks if there is room.
+traits: [horizontal, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  '-': redstone_wire
+  t: iron_trapdoor[facing=south,half=bottom]
+  A: calibrated_sculk_sensor[facing=north]
+  B: calibrated_sculk_sensor[facing=north]
+  L: waxed_copper_bulb
+  C: comparator[facing=south]
+  c: comparator[facing=south]
+  k: cake[bites=2]
+  a: {input: a}
+  u: {output: up, block: redstone_wire}
+  d: {output: down, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    SSSSS
+    .....
+    .....
+    .....
+    .....
+    .....
+    ..=..
+    ..=..
+    =...=
+    .=.=.
+    .=.=.
+    ...=.
+    ...=.
+  1: |
+    ..a..
+    ..t..
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    SSSSS
+    .....
+    .....
+    .....
+    .....
+    .....
+    ..o..
+    ..C..
+    uALBd
+    .c.-.
+    .k.-.
+    ...c.
+    ...k.
+  2: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    SSSSS
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+tests:
+- name: level follows the input
+  settle: 60
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+    0 | 0
+    1 | 1
+  delay: 17
+- name: edge pulses
+  settle: 60
+  steps:
+  - drive: {a: 1}
+  - wait: 14
+  - expect: {up: 0, down: 0}
+  - wait: 1
+  - expect: {up: 1, down: 0}
+  - wait: 9
+  - expect: {up: 1, down: 0}
+  - wait: 1
+  - expect: {up: 0, down: 0}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 14
+  - expect: {up: 0, down: 0}
+  - wait: 1
+  - expect: {up: 0, down: 1}
+  - wait: 10
+  - expect: {up: 0, down: 0}
+- name: a 12-tick pulse survives
+  settle: 60
+  steps:
+  - drive: {a: 1}
+  - wait: 12
+  - drive: {a: 0}
+  - wait: 5
+  - expect: {out: 1}
+  - wait: 40
+  - expect: {out: 0}
+- name: a 5-tick pulse inverts the level
+  settle: 60
+  steps:
+  - drive: {a: 1}
+  - wait: 5
+  - drive: {a: 0}
+  - wait: 60
+  - expect: {out: 1}

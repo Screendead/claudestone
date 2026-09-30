@@ -1,0 +1,156 @@
+name: and_comparator_lightless
+description: >-
+  Two subtract-mode comparators and a redstone block; no torches, so no light
+  updates and no sound. The inverter comparator (not_b) reads the constant 15 of
+  the redstone block behind it and subtracts B on its side, giving 15 when B is
+  off.
+  The output comparator (out) reads A at its back and subtracts that, so it
+  outputs A-15 = 0 unless B is on, then passes A. Interface: A drives the back of
+  out from the north; B drives the north side of not_b; out faces south and powers
+  the cell south of it. 3x2x1 with its base (3 blocks above the base). Delay:
+  A->out 2gt, B->out 4gt (tested). Smallest AND in the family and the lightless,
+  silent choice; slower on B than the piston gate, and needs a full redstone
+  block (9 dust) per gate in survival. With analog inputs it computes
+  max(0, A + B - 15), the Lukasiewicz fuzzy AND: full-strength inputs pass
+  through, weak ones cancel (tested with cake comparator sources). The empty
+  first row only makes room for that test's analog source. Copies stack
+  directly on top of each other (proved by and_comparator_lightless_x2).
+traits: [ultracompact, stackable, lightless, silent, pistonless, entityless, flat, comparator_based, analog, tick_accurate, reset_safe, survival_friendly, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: 'comparator[facing=north,mode=subtract]'}
+  c: {name: not_b, block: 'comparator[facing=east,mode=subtract]'}
+  R: redstone_block
+layers:
+  0: |
+    ...
+    ...
+    ==.
+  1: |
+    ...
+    ab.
+    ocR
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+    0 0 | 0
+    1 0 | 0
+    1 1 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+  delay: 4
+- name: a path is 2 ticks
+  steps:
+  - drive: {b: 1}
+  - wait: 10
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: b path is 4 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 10
+  - expect: {out: 0, not_b: 1}
+  - drive: {b: 1}
+  - wait: 2
+  - expect: {out: 0, not_b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 3
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: analog lukasiewicz and
+  steps:
+  - run: fill ~0 ~0 ~0 ~1 ~0 ~1 smooth_stone
+  - run: setblock ~1 ~1 ~1 comparator[facing=north]
+  - run: setblock ~1 ~1 ~0 cake
+  - run: setblock ~0 ~1 ~1 cake
+  - wait: 10
+  - check: if block ~1 ~1 ~2 comparator{OutputSignal:1}
+  - check: if block ~0 ~1 ~2 comparator{OutputSignal:13}
+  - run: setblock ~0 ~1 ~1 cake[bites=1]
+  - wait: 10
+  - check: if block ~0 ~1 ~2 comparator{OutputSignal:11}
+  - run: setblock ~1 ~1 ~0 cake[bites=6]
+  - wait: 10
+  - check: if block ~1 ~1 ~2 comparator{OutputSignal:13}
+  - check: if block ~0 ~1 ~2 comparator{OutputSignal:0}
+  - run: setblock ~0 ~1 ~1 cake
+  - wait: 10
+  - check: if block ~0 ~1 ~2 comparator{OutputSignal:1}
+- name: b toggled every 2 ticks, no burnout
+  steps:
+  - drive: {a: 1}
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 10
+  - expect: {out: 1}

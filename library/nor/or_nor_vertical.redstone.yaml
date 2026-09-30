@@ -1,0 +1,61 @@
+name: or_nor_vertical
+description: >-
+  NOR that sends its result up: dust from the west (a) and east (b) points into a
+  block, a standing torch on top of it inverts, and the torch hard-powers the block
+  above, whose top dust (out) sits at full 15. That upper block can also feed dust or
+  components on any of its four sides at 15, so the result fans out one floor up.
+  Interface: inputs on layer 1, out on layer 4 above the gate. Size 3x5x1 (one wide),
+  delay 2 game ticks. Inputs are isolated (a dust-powered block never powers dust).
+  Trade-off versus or_nor_torch_isolated: 3 blocks taller but one wide and the result
+  arrives upstairs, strong, without a repeater.
+traits: [compact, fast, ultrafast, torch_based, vertical, one_wide, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  T: stone
+  '*': redstone_torch
+  a: {input: a}
+  b: {input: b}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .=.=.
+  1: |
+    aiSjb
+  2: |
+    ..*..
+  3: |
+    ..T..
+  4: |
+    ..o..
+tests:
+- name: logic
+  truth_table: |
+    a b | out ia ib
+    0 0 | 1 0 0
+    0 1 | 0 0 1
+    1 0 | 0 1 0
+    1 1 | 0 1 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

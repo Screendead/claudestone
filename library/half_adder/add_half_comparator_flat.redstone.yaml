@@ -1,0 +1,106 @@
+name: add_half_comparator_flat
+description: >-
+  Lightless, silent half adder on one layer. Sum is the classic comparator XOR:
+  two subtract-mode comparators in a 2x2 diagonal core, S at (2,1,1) facing south
+  (B minus A) and N at (3,1,2) facing north (A minus B), each hard-powering a
+  block; a dust loop joins the two blocks into the sum. Carry is A minus (A minus
+  B): the comparator at (5,1,3) facing north reads A through a repeater and
+  subtracts a dust tap on N's output block. The repeater is what makes it
+  glitch-free: without it the carry comparator sees A before N has fired and
+  flashes on for 2 ticks when A rises alone (tested and fixed). Interface: A
+  enters the dust at (3,1,1) and B the dust at (2,1,2) at full strength 15 (the
+  tests drop a redstone block on top of each; a weaker input unbalances the
+  subtraction); sum is the dust at (3,1,4) and carry the dust at (5,1,4), both
+  on the south edge. 6x2x5 including the floor. Delay: sum 2 ticks, carry 4
+  ticks (exact, tested). On A falling with B held on, sum rises at 2 while carry
+  holds until 4, so both read 1 for two ticks, and on B rising with A held sum drops at 2 while
+  carry only rises at 4. Interface rule: the outputs settle at different ticks,
+  so sample them together at tick 4 or later. Trade-off: fastest sum and the only
+  flat, lightless option in the family, and copies stack 3 apart
+  (add_half_comparator_flat_x2); the price is that the inputs must be
+  full strength and the loop takes most of the area.
+traits: [lightless, silent, pistonless, entityless, flat, horizontal, stackable, compact, comparator_based, fast, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  C: comparator[facing=north,mode=subtract]
+  v: repeater[facing=north]
+  s: {output: sum, block: redstone_wire}
+  c: {output: carry, block: redstone_wire}
+  a: {input: a}
+  b: {input: b}
+layers:
+  0: |
+    ======
+    ======
+    ======
+    ======
+    ======
+  1: |
+    --#...
+    -.S---
+    -.-N.v
+    --.#-C
+    .--s.c
+  2: |
+    ......
+    ...a..
+    ..b...
+    ......
+    ......
+tests:
+- name: logic
+  truth_table: |
+    a b | sum carry
+    0 0 | 0 0
+    0 1 | 1 0
+    1 1 | 0 1
+    1 0 | 1 0
+    0 0 | 0 0
+    1 1 | 0 1
+    0 0 | 0 0
+    1 0 | 1 0
+    1 1 | 0 1
+    0 1 | 1 0
+  delay: 4
+- name: sum in 2 ticks carry in 4 no glitch
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {sum: 0, carry: 0}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}
+  - wait: 1
+  - expect: {sum: 0, carry: 0}
+  - wait: 1
+  - expect: {sum: 0, carry: 0}
+  - wait: 1
+  - expect: {sum: 0, carry: 1}
+  - drive: {a: 0}
+  - wait: 2
+  - expect: {sum: 1, carry: 1}
+  - wait: 2
+  - expect: {sum: 1, carry: 0}
+  - drive: {b: 0}
+  - wait: 2
+  - expect: {sum: 0, carry: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {sum: 0, carry: 0}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}
+  - wait: 1
+  - expect: {sum: 1, carry: 0}

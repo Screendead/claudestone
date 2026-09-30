@@ -1,0 +1,156 @@
+name: xor_xnor_torch_fast
+description: "XNOR = NOR(a,b) or AND(a,b), both terms two torch stages or fewer. T0 on the centre block (2,1,1) is NOR(a,b). Torches under the corner blocks invert a and b, and their lines meet at (2,1,5), whose torch T_and = NOR(not a, not b) = a and b. The two terms cannot meet in one plane, because this graph is not planar with its terminals on the edge. Instead each torch hard-powers the block above it, and one dust line on y3 (2,3,2)-(2,3,6) runs over supports between those two blocks, so it is lit by either. Interface: a enters as dust at the north-west corner (0,1,0) and b at the north-east corner (4,1,0), both heading south. The output is dust at (2,3,6) on the top layer; continue it south on y3. Size 5x4x6 (120 blocks). Delay: 4 game ticks for edges from a=b=0 up to one input on, or from a=b=1 down to one input on (through the inverters); 2 ticks on the edges back to a=b (through T0 or T_and alone). Trade-offs: the fastest torch-only XNOR here, 4 ticks against 6 for xor_xnor_torch_flat, at twice the volume and 4 tall. Comparator XNORs match 4 ticks in 40-48 blocks with no light."
+traits: [ultrafast, vertical, torch_based, silent, pistonless, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  u: redstone_wall_torch[facing=south]
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .....
+    =====
+    =====
+    =====
+    =====
+    =====
+    .....
+  1: |
+    a...b
+    --#--
+    -.u.-
+    #...#
+    u...u
+    --#--
+    ..u..
+  2: |
+    .....
+    .....
+    ..#..
+    ..#..
+    ..#..
+    ..#..
+    ..#..
+  3: |
+    .....
+    .....
+    ..-..
+    ..-..
+    ..-..
+    ..-..
+    ..o..
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+  delay: 4
+- name: edges
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+- name: simultaneous and staggered
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 0, b: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 1, b: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 16
+  - expect: {out: 1}

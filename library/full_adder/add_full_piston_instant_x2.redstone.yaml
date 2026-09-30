@@ -1,0 +1,108 @@
+name: add_full_piston_instant_x2
+description: >-
+  Two add_full_piston_instant bits chained west to east (bit 0 at x 0-11, bit 1 at x
+  13-24), with one repeater at (12,1,7) facing west between them. Carry-in enters at
+  (7,1,7); bit 0's carry-out (c1, dust at (11,2,7)) hard-powers nothing, so the
+  repeater reads the block under it and restores full strength for bit 1's carry
+  line; cout is bit 1's carry-out at (24,2,7). The repeater is needed: this bit is 12
+  wide and its carry line loses 12 strength end to end (7 of it on the run past the
+  sum bridge), so a second bit fed straight from the first ends at strength 0
+  (tried: cout stayed off). Budget one repeater per bit at this width: the repeating unit is a bit plus that
+  repeater cell, pitch 13, so copies do not simply tile edge to edge. Measured
+  exactly: carry-in to c1 0 ticks and carry-in to cout 2 ticks when both bits
+  propagate; worst case over the ripple table 10 ticks (bit 1's sum). Not silent,
+  not lightless (pistons). 25x4x8.
+traits: [piston_based, comparator_based, entityless, instant, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  A: comparator[facing=south,mode=subtract]
+  B: comparator[facing=north,mode=subtract]
+  v: repeater[facing=north]
+  <: repeater[facing=east]
+  '>': repeater[facing=west]
+  c: {input: cin}
+  a: {input: a0}
+  C: {input: a1}
+  b: {input: b0}
+  D: {input: b1}
+  s: {output: sum0, block: redstone_wire}
+  E: {output: sum1, block: redstone_wire}
+  F: sticky_piston[facing=south]
+  S: stone
+  G: {output: c1, block: redstone_wire}
+  H: {output: cout, block: redstone_wire}
+layers:
+  0: |
+    .....===..........===....
+    .....=.====.......=.====.
+    ..=..=.==.=....=..=.==.=.
+    ..=====.===....=====.===.
+    ====..===.=..====..===.=.
+    =.==....=.=..=.==....=.=.
+    =.........=..=.........=.
+    =========================
+  1: |
+    .....--#..........--#....
+    .....-.A---.......-.A---.
+    ..#..-.-B.v....#..-.-B.v.
+    ..A-<--.#-B....A-<--.#-B.
+    ->-B..---.-..->-B..---.-.
+    -.##....#.-..-.##....#.-.
+    -.........-..-.........-.
+    -------c-###>---------###
+  2: |
+    .........................
+    ........a............C...
+    ..-....b.......-....D....
+    ..#............#.........
+    ..#............#.........
+    ..-s....-......-E....-...
+    ........F............F...
+    ........S--G.........S--H
+  3: |
+    .........................
+    .........................
+    .........................
+    ..-............-.........
+    ..-............-.........
+    .........................
+    .........................
+    .........................
+tests:
+- name: ripple
+  truth_table: |
+    a0 b0 a1 b1 cin | sum0 c1 sum1 cout
+    0 0 0 0 0 | 0 0 0 0
+    1 0 0 0 0 | 1 0 0 0
+    1 1 0 0 1 | 1 1 1 0
+    1 0 1 0 1 | 0 1 0 1
+    0 1 0 1 0 | 1 0 1 0
+    1 1 1 0 0 | 0 1 0 1
+    0 0 1 1 1 | 1 0 0 1
+    1 0 0 1 1 | 0 1 0 1
+    0 1 1 0 1 | 0 1 0 1
+    1 1 1 1 0 | 0 1 1 1
+    1 1 1 1 1 | 1 1 1 1
+    0 0 0 0 1 | 1 0 0 0
+    0 1 1 0 0 | 1 0 1 0
+    1 0 1 0 0 | 1 0 1 0
+  delay: 10
+- name: carry crosses bit 0 in 0 ticks
+  truth_table: |
+    a0 b0 a1 b1 cin | c1
+    1 0 0 1 0 | 0
+    1 0 0 1 1 | 1
+    1 0 0 1 0 | 0
+    1 0 0 1 1 | 1
+  delay: 0
+- name: carry crosses both bits in 2 ticks
+  truth_table: |
+    a0 b0 a1 b1 cin | cout
+    0 1 1 0 0 | 0
+    0 1 1 0 1 | 1
+    0 1 1 0 0 | 0
+    0 1 1 0 1 | 1
+  delay: 2

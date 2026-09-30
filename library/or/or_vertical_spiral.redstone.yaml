@@ -1,0 +1,104 @@
+name: or_vertical_spiral
+description: >-
+  Vertical n-input OR in a 2x2 column, zero delay and isolated. The bus is a dust
+  spiral climbing one block per step around a 2x2 column, each dust on its own glass
+  block, so signal only travels up (a glass step is a zero-tick diode). Below every
+  spiral glass is air, not the dust of the turn beneath, which is why a spiral works
+  where a 2-wide zigzag does not: an input can step up onto any glass without reading
+  the bus back. Input k enters one block lower than spiral step k from outside the
+  column, in a pinwheel so no two input stubs touch: a from the west at y=1, b from the
+  north at y=2, c from the east at y=3, d from the south at y=4 (all as dust). out is
+  the top of the spiral (layer 5); keep climbing for more inputs, one level each.
+  4 inputs: 4x6x4 including the stubs (2x2 column). Delay 0 game ticks. Limit (computed):
+  the output may be at most 13 levels above the lowest input's step before a repeater. Trade-off versus
+  or_wide_instant: a column instead of a row, for inputs that arrive on different floors.
+traits: [ultrafast, instant, vertical, stackable, lightless, silent, pistonless, entityless, analog, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  k: {name: ic, block: redstone_wire}
+  l: {name: id, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ......
+    ......
+    .=....
+    ......
+    ......
+    ......
+  1: |
+    ......
+    ...=..
+    aiG...
+    ......
+    ......
+    ......
+  2: |
+    ...b..
+    ...j..
+    ..-G..
+    ....=.
+    ......
+    ......
+  3: |
+    ......
+    ......
+    ...-..
+    ...Gkc
+    ..=...
+    ......
+  4: |
+    ......
+    ......
+    ......
+    ..G-..
+    ..l...
+    ..d...
+  5: |
+    ......
+    ......
+    ......
+    ..o...
+    ......
+    ......
+tests:
+- name: logic
+  truth_table: |
+    a b c d | out ia ib ic id
+    0 0 0 0 | 0 0 0 0 0
+    0 0 0 1 | 1 0 0 0 1
+    0 0 1 0 | 1 0 0 1 0
+    0 0 1 1 | 1 0 0 1 1
+    0 1 0 0 | 1 0 1 0 0
+    0 1 0 1 | 1 0 1 0 1
+    0 1 1 0 | 1 0 1 1 0
+    0 1 1 1 | 1 0 1 1 1
+    1 0 0 0 | 1 1 0 0 0
+    1 0 0 1 | 1 1 0 0 1
+    1 0 1 0 | 1 1 0 1 0
+    1 0 1 1 | 1 1 0 1 1
+    1 1 0 0 | 1 1 1 0 0
+    1 1 0 1 | 1 1 1 0 1
+    1 1 1 0 | 1 1 1 1 0
+    1 1 1 1 | 1 1 1 1 1
+  delay: 0
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - expect: {out: 0}

@@ -1,0 +1,852 @@
+name: dec_3to8_ring
+description: >-
+  3-to-8 decoder in exactly 4 game ticks, lightless, and hazard-free: every output
+  changes 4 ticks after any input change and nothing blips in between, even when all
+  three inputs flip at once (tested tick by tick over 17 changes). Two copies of the
+  dec_2to4_fast NOR ring sit one above the other (north ring z 3-5 decodes c=0 to m0-m3,
+  south ring z 9-11 decodes c=1 to m4-m7). In each ring four subtract comparators read
+  their centre from behind and the two corners beside them, so each output is centre
+  AND NOT (corner OR corner); the corners carry a, b and their inverses, and the
+  centre, instead of a redstone block, is a stone block powered through the dust on top
+  of it from a stone hub above that: NOT c (a comparator inverter) for the north ring,
+  c (a repeater) for the south. The two rings put their NOT a and NOT b corners face to
+  face across the gap, so a single driver with two relay dust feeds two inverters that
+  share one redstone block (and the same for b); the positive corners, on the far
+  sides, are fed by repeaters. Every corner and both centres therefore switch on the
+  same tick (2 after the input), and every output 2 ticks later. The input wires cross:
+  b runs at ground level round the west and ends on the north and south repeaters of
+  the east corners, a climbs to layer 3 on floating stone and passes over b's wire to
+  the west repeaters, and c's wire runs at layer 3 down the west. Interface (x east, z
+  south, base layer 0, rings on layer 1): inputs a (5,1,7), b (1,1,7), c (2,3,3), strong
+  sources; outputs are comparators m0 (3,1,3) leaving north, m1 (4,1,4) east, m2
+  (2,1,4) west, m3 (3,1,5) south, m7 (3,1,9) north, m5 (4,1,10) east, m6 (2,1,10) west,
+  m4 (3,1,11) south, each at strength 15 (m = a + 2b + 4c). Read the outputs through
+  repeaters: several output cells touch inverter sides or input wires. 7x4x15.
+  Trade-off: large (the price of the wire crossings) but as fast as a single 2-to-4 and
+  glitch-free, so it can drive memory or clocked logic directly. A 4-to-16 needs four
+  rings whose centres carry the four combinations of two more inputs (not tested here).
+traits: [ultrafast, fast, lightless, silent, pistonless, entityless, comparator_based, tick_accurate, survival_friendly, reset_safe]
+palette:
+  .: air
+  A: {input: a}
+  B: {input: b}
+  C: {input: c}
+  D: {output: m0, block: 'comparator[facing=south,mode=subtract]'}
+  E: {output: m1, block: 'comparator[facing=west,mode=subtract]'}
+  F: {output: m3, block: 'comparator[facing=north,mode=subtract]'}
+  G: {output: m2, block: 'comparator[facing=east,mode=subtract]'}
+  H: {output: m7, block: 'comparator[facing=south,mode=subtract]'}
+  I: {output: m5, block: 'comparator[facing=west,mode=subtract]'}
+  J: {output: m4, block: 'comparator[facing=north,mode=subtract]'}
+  K: {output: m6, block: 'comparator[facing=east,mode=subtract]'}
+  S: stone
+  '=': smooth_stone
+  '-': redstone_wire
+  L: repeater[facing=north]
+  M: comparator[facing=south,mode=subtract]
+  R: redstone_block
+  N: comparator[facing=north,mode=subtract]
+  O: repeater[facing=south]
+layers:
+  0: |
+    SSSSS==
+    S===S==
+    S======
+    S======
+    S======
+    S======
+    S======
+    S======
+    S======
+    S======
+    S======
+    S======
+    S======
+    S===S==
+    SSSSS==
+  1: |
+    -----..
+    -.S.-..
+    -.L.L..
+    -.-D-..
+    -.GSE..
+    -.-F-..
+    --M.M-S
+    -BR.RA.
+    --N.N-S
+    -.-H-..
+    -.KSI..
+    -.-J-..
+    -.O.O..
+    -.S.-..
+    -----..
+  2: |
+    ..SSSSS
+    ..-...S
+    ......S
+    .S.S..S
+    .S.-..S
+    .S....S
+    .S....-
+    .S.....
+    .SSS..-
+    ...S..S
+    ...-..S
+    ......S
+    ......S
+    ..-...S
+    ..SSSSS
+  3: |
+    ..-----
+    ......-
+    ...R..-
+    .-CN..-
+    .-.S..-
+    .-....-
+    .-.....
+    .-.....
+    .---...
+    ...L..-
+    ...S..-
+    ......-
+    ......-
+    ......-
+    ..-----
+tests:
+- name: logic
+  truth_table: |-
+    a b c | m0 m1 m2 m3 m4 m5 m6 m7
+    0 0 0 | 1 0 0 0 0 0 0 0
+    1 0 0 | 0 1 0 0 0 0 0 0
+    0 1 0 | 0 0 1 0 0 0 0 0
+    1 1 0 | 0 0 0 1 0 0 0 0
+    0 0 1 | 0 0 0 0 1 0 0 0
+    1 0 1 | 0 0 0 0 0 1 0 0
+    0 1 1 | 0 0 0 0 0 0 1 0
+    1 1 1 | 0 0 0 0 0 0 0 1
+    1 0 1 | 0 0 0 0 0 1 0 0
+    0 1 0 | 0 0 1 0 0 0 0 0
+    1 1 1 | 0 0 0 0 0 0 0 1
+    0 0 0 | 1 0 0 0 0 0 0 0
+    0 1 1 | 0 0 0 0 0 0 1 0
+    1 0 0 | 0 1 0 0 0 0 0 0
+    0 0 1 | 0 0 0 0 1 0 0 0
+    1 1 0 | 0 0 0 1 0 0 0 0
+    0 0 0 | 1 0 0 0 0 0 0 0
+  delay: 4
+- name: every change takes exactly 4 ticks with no glitch
+  steps:
+  - drive: {a: 1, b: 0, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 1, b: 1, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 1, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 1, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 1, b: 1, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 6}
+  - drive: {a: 1, b: 0, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 0, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 0, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 1, b: 1, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 6}
+  - drive: {a: 0, b: 0, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 1
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 1, b: 0, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 1, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 1
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 0, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 1
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 1, b: 1, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 1
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 1, c: 1}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 1
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 1, b: 0, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 1
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}
+  - drive: {a: 0, b: 0, c: 0}
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 1}
+  - expect:
+      m0: 1
+      m1: 0
+      m2: 0
+      m3: 0
+      m4: 0
+      m5: 0
+      m6: 0
+      m7: 0
+  - {wait: 6}

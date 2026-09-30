@@ -1,0 +1,72 @@
+name: latch
+description: 'The classic torch-inverted repeater-lock D latch. While e is on, q follows d; when e goes off, q holds. d (x=0, z=0) runs east through a buffer repeater into the latch repeater (x=2, facing west) and on to the dust q (x=4). The latch repeater is locked from its south side by a lock repeater driven by a wall torch; e (x=0, z=3) reaches that torch''s block through a repeater, so the lock is active while e is off. q follows d 4 ticks later; raising e changes q 8 ticks later. Blocks (WxHxD) 4x2x4 on a smooth-stone base. Trade-off: the textbook build, easy to read and extend, but twice the delay of dl_subtract_lock (which replaces the torch with a comparator, so it is also lightless) and several times its volume.'
+traits: [flat, horizontal, silent, pistonless, entityless, torch_based, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  ^: repeater[facing=south]
+  n: redstone_wall_torch[facing=north]
+  d: {input: d}
+  e: {input: e}
+  l: {name: latch, block: 'repeater[facing=west]'}
+  q: {output: q, block: redstone_wire}
+layers:
+  0: |
+    .====
+    ..=..
+    .....
+    .==..
+  1: |
+    d>l-q
+    ..^..
+    ..n..
+    e>#..
+tests:
+- name: transparent in 4 ticks
+  truth_table: |
+    e d | q
+    1 0 | 0
+    1 1 | 1
+  delay: 4
+- name: enable gates d in 8 ticks
+  truth_table: |
+    e d | q
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    0 1 | 1
+    0 0 | 1
+    1 0 | 0
+  delay: 8
+- name: follows while enabled
+  steps:
+  - drive: {e: 1, d: 1}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q: 0}
+- name: holds a 1 when locked
+  steps:
+  - drive: {e: 1, d: 1}
+  - {wait: 10}
+  - drive: {e: 0}
+  - {wait: 10}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {e: 1}
+  - {wait: 10}
+  - expect: {q: 0}
+- name: holds a 0 when locked
+  steps:
+  - drive: {e: 1}
+  - {wait: 10}
+  - drive: {e: 0}
+  - {wait: 10}
+  - drive: {d: 1}
+  - {wait: 10}
+  - expect: {q: 0}

@@ -1,0 +1,91 @@
+name: not_comparator_subtract
+description: |
+  A lightless, silent inverter: a comparator in subtract mode with a redstone block at its
+  back (a constant 15) and the input at its side, so the output is 15 minus the input.
+  Nothing lights, moves or burns out, so it can toggle every tick-pair indefinitely.
+  Interface: comparator at (1,1,0), facing west (back on the west, output east), on a support
+  at (1,0,0); redstone block at (0,1,0). Input: the south side cell (1,1,1) (the north side
+  works too). Output: the comparator itself, driving east at (2,1,0) with strength 15 - input.
+  Box 2x2x1, three blocks. Delay 2 ticks on both edges.
+  Trade-off: ties not_torch_compact for size and speed and wins on light, sound and burnout,
+  but it is analog: an input of strength k leaves 15 - k, so only a full-strength (15) input
+  turns it off; feed it from a repeater, a torch or dust at 15 (see not_comparator_threshold
+  for a deliberate threshold). The input must arrive from the side, so copies cannot sit side
+  by side in the input plane; they stack vertically at a pitch of 2 instead.
+traits: [ultracompact, ultrafast, compact, fast, lightless, silent, pistonless, entityless, comparator_based, analog, flat, stackable, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  o: {output: out, block: 'comparator[facing=west,mode=subtract]'}
+  a: {input: a}
+layers:
+  0: |
+    .=
+    ..
+  1: |
+    Ro
+    .a
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+  delay: 2
+- name: fast toggling never burns out
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}

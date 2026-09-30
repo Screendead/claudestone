@@ -1,0 +1,95 @@
+name: analog_const_item_frame
+description: 'Zero-footprint constant 1..8: an item frame with an item, hung on the far (west) face of the stone W (x=1, z=1), is read by the comparator C behind W (x=2, facing west, output east) as rotation + 1 (0 with the frame empty). The comparator reads the frame through W because W itself carries less than 15. A player sets the level in survival by clicking the frame (8 steps, and a click updates the comparator at once). The frame is an entity with no collision, so its block cell is still free: here a north-south dust line (x=0, z=0..2, driven from above z=0) runs through the frame''s own cell, and the test shows it still carries its signal while the comparator keeps reading the frame. Core: wall plus comparator, 2x1x1 of blocks, the frame costs no volume. Tests: rotations 0..7 read 1..8 and an empty frame reads 0 (an NBT edit, unlike a click, needs a neighbour update, which the test gives with a setblock beside the comparator); the dust through the frame''s cell passes 0/15 with no
+  delay while the output stays on. Trade-off: fewer levels than analog_const_lectern or a container, needs an entity (item frames can be broken by explosions and pushed off by pistons), but no block of its own and silent unless clicked. Glow item frames work the same and give no light.'
+traits:
+- analog
+- comparator_based
+- uses_entities
+- silent
+- lightless
+- pistonless
+- flat
+- horizontal
+- ultracompact
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  W: stone
+  C: {output: out, block: 'comparator[facing=west]'}
+  F: {name: through, block: redstone_wire}
+  b: redstone_wire
+  d: {name: far, block: redstone_wire}
+  n: {input: line}
+layers:
+  0: |
+    =..
+    ===
+    =..
+  1: |
+    b..
+    FWC
+    d..
+  2: |
+    n..
+    ...
+    ...
+entities:
+- type: item_frame
+  pos:
+  - 0.0
+  - 1.5
+  - 1.0
+  nbt: '{Facing:4b,Item:{id:"minecraft:stick",count:1},ItemRotation:4b}'
+tests:
+- name: rotation r reads r + 1
+  steps:
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:0b}'}
+  - {run: setblock ~2 ~2 ~1 stone}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:1b}'}
+  - {run: setblock ~2 ~2 ~1 air}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:2}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:2b}'}
+  - {run: setblock ~2 ~2 ~1 stone}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:3}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:3b}'}
+  - {run: setblock ~2 ~2 ~1 air}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:4b}'}
+  - {run: setblock ~2 ~2 ~1 stone}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:5b}'}
+  - {run: setblock ~2 ~2 ~1 air}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:6}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:6b}'}
+  - {run: setblock ~2 ~2 ~1 stone}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:7b}'}
+  - {run: setblock ~2 ~2 ~1 air}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:3b}'}
+  - {run: setblock ~2 ~2 ~1 stone}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'execute positioned ~0.5 ~1.5 ~1.5 as @e[type=item_frame,distance=..0.8] run data remove entity @s Item'}
+  - {run: setblock ~2 ~2 ~1 air}
+  - {wait: 4}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+- name: the frame's cell still carries a wire
+  truth_table: |
+    line | through far out
+    0 | 0 0 1
+    1 | 1 1 1
+  delay: 0

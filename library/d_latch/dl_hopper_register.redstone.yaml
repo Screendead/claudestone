@@ -1,0 +1,100 @@
+name: dl_hopper_register
+description: "Register bit that tiles at pitch 1: copies placed directly side by side (along z) form a bus with no crosstalk and a shared hold line (see dl_hopper_register_x3, which proves it with three bits). Memory is one item shuttling between two hoppers that face each other (x=3 faces east, x=4 faces west, y=2); a powered hopper is locked, and the item always ends in the locked one, since the unlocked one pushes into it. hold is a dust strip lying on top of both hoppers (y=3), so hold=1 locks both and freezes the item; in a bus it is one continuous two-dust-wide sheet. d enters at x=0, y=1 through a repeater into a concrete block: a torch on that block locks the west hopper when d=0, and a second repeater powers the block under the east hopper when d=1, so with hold off the item moves east for d=1 and west for d=0. q is a comparator (x=5, y=2, facing west) reading the east hopper. Timing: q follows d in 6 ticks (fresh hoppers); flipping d within 8 ticks of the last move waits for the hopper cooldown, up to 10 ticks; hold takes effect in 0 ticks (dust), so d must be settled 4 ticks before hold rises; releasing hold updates q in 3 ticks. hold is active-high (one torch per bus makes an active-high enable). The item starts in the west hopper, so q starts at 0. Blocks (WxHxD) 5x4x1: 5 long, 4 tall, 1 wide. Silent, no pistons or entities; one torch. Trade-off: slower than the repeater-lock latches and item-based, but the only latch here that tiles side by side at pitch 1, since a repeater lock always needs the neighbour's column."
+traits: [one_wide, tileable, vertical, lockable, silent, pistonless, entityless, container_based, torch_based, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  d: {input: d}
+  h: {input: hold}
+  r: repeater[facing=west]
+  R: repeater[facing=west]
+  t: redstone_torch
+  A: 'hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'
+  B: hopper[facing=west]
+  q: {output: q, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    .=.=.=.
+  1: |
+    dr#R#=.
+  2: |
+    ..tABq.
+  3: |
+    ...--h.
+tests:
+- name: transparent in 6 ticks
+  truth_table: |
+    d | q
+    0 | 0
+    1 | 1
+  delay: 6
+- name: starts at 0 and holds both values
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 10
+  - drive: {hold: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 20
+  - drive: {d: 1}
+  - wait: 20
+  - drive: {d: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {hold: 0}
+  - wait: 2
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - wait: 10
+  - drive: {hold: 1}
+  - wait: 5
+  - drive: {d: 1}
+  - wait: 20
+  - expect: {q: 0}
+  - drive: {hold: 0}
+  - wait: 2
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+- name: setup 4 ticks
+  steps:
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {hold: 1}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {hold: 0}
+  - wait: 20
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {hold: 1}
+  - wait: 20
+  - expect: {q: 0}
+  - drive: {hold: 0}
+  - wait: 20
+  - drive: {d: 1}
+  - wait: 3
+  - drive: {hold: 1}
+  - wait: 20
+  - expect: {q: 0}
+- name: hopper cooldown stretches a quick flip to 10 ticks
+  steps:
+  - drive: {d: 1}
+  - wait: 3
+  - drive: {d: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - wait: 20
+  - expect: {q: 0}

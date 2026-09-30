@@ -1,0 +1,71 @@
+name: vwire_torch_ladder_down
+description: 'A level carried down 1 tick per block in a 1x2 column. A redstone torch cannot power the block below it, but a wall torch does give signal downward (RedstoneWallTorchBlock.getSignal is only 0 towards its own support), so each stage is: a stone, a wall torch on its side, dust directly under that torch, the stone under that dust. The next stage hangs on the other column. Four torches, so it does not invert. Interface: input driver a north of the top dust (y10), which powers the top stone; output o is the dust at y2 in the north column. 1x10x2, 8 down, 8 ticks. Versus the others: the fastest compact level-carrying way down beyond the 15-block dust limit (dust stairs are 0 ticks but grow sideways, the observer ladder is 2 ticks per block and passes only pulses); it makes light updates and torches burn out on very fast toggling; lanes cannot sit side by side (their dust would join).'
+traits:
+- vertical
+- torch_based
+- silent
+- one_wide
+- stackable
+- compact
+- fast
+- reset_safe
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  o: {output: o, block: redstone_wire}
+  n: redstone_wall_torch[facing=north]
+  '-': redstone_wire
+  u: redstone_wall_torch[facing=south]
+  a: {input: a}
+layers:
+  1: |
+    .
+    S
+    .
+  2: |
+    .
+    o
+    .
+  3: |
+    .
+    n
+    S
+  4: |
+    .
+    .
+    -
+  5: |
+    .
+    S
+    u
+  6: |
+    .
+    -
+    .
+  7: |
+    .
+    n
+    S
+  8: |
+    .
+    .
+    -
+  9: |
+    .
+    S
+    u
+  10: |
+    a
+    -
+    .
+tests:
+- name: logic
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+  delay: 8

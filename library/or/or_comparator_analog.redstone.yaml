@@ -1,0 +1,81 @@
+name: or_comparator_analog
+description: >-
+  Lossless analog OR (signal-strength max). Dust lines point into one block from the
+  west (a) and east (b); a comparator in compare mode on the block's south face reads
+  the block. A dust-powered block carries the strongest dust pointing into it with no
+  loss, so the comparator outputs max(a, b) exactly, while the block keeps the inputs
+  isolated from each other. Interface: inputs on layer 1 west/east of the block; the
+  comparator faces north (reads north), output south. Core 3x2x2, delay 2 game ticks.
+  The test fixture feeds a through 13 dust (strength 3 at the block) and runs the
+  output into 4 dust: with a alone, near (1st dust) is lit but far (4th) is not, which
+  a digital OR (repeater output 15) would light; so the strength is proven, not claimed.
+  Trade-off: same size and speed as or_block_repeater, but its output keeps the input
+  strength instead of regenerating 15.
+traits: [compact, fast, analog, comparator_based, lightless, silent, pistonless, entityless, flat, horizontal, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  C: {name: cmp, block: 'comparator[facing=north,mode=compare]'}
+  o: {output: out, block: redstone_wire}
+  f: {name: far, block: redstone_wire}
+layers:
+  0: |
+    .===============.
+    ..............=..
+    ..............=..
+    ..............=..
+    ..............=..
+    ..............=..
+  1: |
+    ai------------Sjb
+    ..............C..
+    ..............o..
+    ..............-..
+    ..............-..
+    ..............f..
+tests:
+- name: logic
+  truth_table: |
+    a b | out far ia ib
+    0 0 | 0 0 0 0
+    0 1 | 1 1 0 1
+    1 0 | 1 0 1 0
+    1 1 | 1 1 1 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: one tick pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}

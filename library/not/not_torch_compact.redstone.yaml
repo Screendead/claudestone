@@ -1,0 +1,107 @@
+name: not_torch_compact
+description: |
+  The smallest torch inverter: a block B with the input dust on top and a wall torch on its
+  east face. Dust always powers the block beneath it, whatever its shape, so the dust needs
+  no connection toward B and the whole gate is three blocks in a 2x2x1 box that needs no
+  support (B carries both the dust and the torch).
+  Interface: input dust at (0,1,0) on top of B, driven from any side or from above (here
+  from (1,1,0), the air cell above the torch, which is inside the box). Output: the wall torch
+  at (1,0,0), facing east; it powers the block above it strongly and dust or components
+  east, north, south and below it. Delay 2 ticks on both edges (one torch).
+  Trade-off: ties not_comparator_subtract for the smallest box and fewest ticks, but it emits
+  light, and the torch burns out: the tests show 7 turn-offs 8 ticks apart are fine, while the
+  8th inside 60 ticks leaves it dark for 160 ticks. The output is a torch at the base layer,
+  so the next stage must sit next to or on top of it.
+  For no light use not_comparator_subtract; for isolation from the input use not_gate.
+traits: [ultracompact, ultrafast, compact, fast, torch_based, flat, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '#': white_concrete
+  o: {output: out, block: 'redstone_wall_torch[facing=east]'}
+  '-': redstone_wire
+  a: {input: a}
+layers:
+  0: |
+    #o
+  1: |
+    -a
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+  delay: 2
+- name: repeated toggles
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 2
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 30
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 2
+  - expect: {out: 1}
+- name: burns out on the eighth fast pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 4
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 0}
+  - wait: 150
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 1}

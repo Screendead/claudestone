@@ -1,0 +1,45 @@
+name: and_nand_torch
+description: >-
+  Two-torch NAND: each input dust points into a block, the wall torch on that
+  block's east face inverts it, and both torches feed the output dust between
+  them (OR of the inversions). Interface: A enters as dust from the west on the
+  north row, B on the south row, y=1; the output dust (out) sits between the
+  torches, extend it east. 3x2x3. Delay 2gt on both inputs (tested): the
+  fastest NAND and the cheapest; and_nand_comparator is the dark, silent one.
+  Like every torch design it burns out if a torch toggles 8 times within
+  60gt (then it stays dark for 160gt), so inputs must not toggle faster than
+  that; the comparator variants have no such limit.
+traits: [compact, fast, flat, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  b: {input: b}
+  '-': redstone_wire
+  ): redstone_wall_torch[facing=east]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .=..
+    ...=
+    .=..
+  1: |
+    a-#)
+    ...o
+    b-#)
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+    0 0 | 1
+    1 1 | 0
+  delay: 2

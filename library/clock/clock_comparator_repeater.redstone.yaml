@@ -1,0 +1,206 @@
+name: clock_comparator_repeater
+description: 'Toggleable lightless, silent square-wave clock, 2x2x3 plus the en cell: a subtract-mode comparator gated by its own delayed output. Input en is the cell west of the comparator (x=0, z=0) and drives the comparator''s back; the comparator (x=1, z=0, facing west, output east) lights the dust out (x=2, z=0), which runs south along x=2 and west along z=2 into a repeater (x=1, z=1, facing south, delay 1) that hard-feeds the comparator''s south side with a clean 15, so out = en - delayed(out). With en on, out is 4 ticks on, 4 off (period 8, duty 50%), the first rising edge 2 game ticks after en rises; dropping en ends a high phase 2 ticks later and a low phase stays low, so it always stops at 0 and restarts clean. An en pulse shorter than 2 ticks is ignored (the comparator never ticks). Tune it with the repeater: delay d gives 2+2d ticks on and 2+2d off (period 8 with delay 1 here, 12 with delay 2 in clock_comparator_stack; 16 and 20 by the same rule), and more repeaters in the loop
+  give longer periods at 50% duty. Trade-off: the best general toggleable clock here (no light, no sound, stops low); clock_comparator_dust is faster (period 4) but 50%-only and weaker, clock_torch_repeater is the textbook version but lights up, is slower (period 12) and has only an active-high stop.'
+traits:
+- compact
+- flat
+- horizontal
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  e: {input: en}
+  C: {name: cmp, block: 'comparator[facing=west,mode=subtract]'}
+  o: {output: out, block: redstone_wire}
+  '-': redstone_wire
+  r: {name: rep, block: 'repeater[facing=south,delay=1]'}
+layers:
+  0: |
+    .==
+    .==
+    .==
+  1: |
+    eCo
+    .r-
+    .--
+tests:
+- name: off after placement, first edge 2 ticks after en, period 8
+  steps:
+  - {wait: 20}
+  - expect: {out: 0}
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+- name: stop while high falls 2 ticks later and restarts clean
+  steps:
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {en: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 29}
+  - expect: {out: 0}
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 3}
+  - expect: {out: 0}
+- name: stop while low stays low
+  steps:
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 3}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - drive: {en: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 39}
+  - expect: {out: 0}
+- name: one tick enable is ignored
+  steps:
+  - drive: {en: 1}
+  - {wait: 1}
+  - drive: {en: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 19}
+  - expect: {out: 0}

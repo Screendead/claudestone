@@ -1,0 +1,413 @@
+name: pulse_rising_comparator
+description: 'Rising-edge detector with no torches: comparator out (x=2, z=0) in subtract mode, facing west, reads input a (x=1, z=0) on its back and a delayed copy of a on its south side: a feeds dust at x=0, z=0 and z=1, a delay-2 repeater (x=1, z=1, facing west) and the side dust (x=2, z=1). Out = a - delayed(a), so a rise gives a 4 tick pulse 2 ticks later (output east of out, x=3) and a fall gives nothing. The pulse is 2 x repeater delay ticks (4 to 8 for delay 2 to 4); delay 1 gives no pulse at all, because the repeater''s side input lands in the same tick as the comparator''s update and wins. An input shorter than the pulse passes through at its own width (2 or 3 ticks); a 1 tick input is ignored. 3x2x2 with its base, flat, silent. Trade-off: the smallest and fastest (2 ticks) lightless rising edge; versus pulse_rising_observer_lock it passes short inputs through instead of giving a fixed pulse, versus pulse_rising_instant_piston it is 2 ticks slower but silent and robust.'
+traits: [ultracompact, fast, flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '-': redstone_wire
+  r: repeater[facing=west,delay=2]
+  o: {output: out, block: 'comparator[facing=west,mode=subtract]'}
+  s: {name: side, block: redstone_wire}
+layers:
+  0: |
+    ===
+    ===
+  1: |
+    -ao
+    -rs
+tests:
+- name: stays off after placement
+  settle: 0
+  steps:
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+- name: rising edge gives a 4 tick pulse 2 ticks later, falling edge nothing
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+- name: short inputs pass through, 1 tick is ignored
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 2
+  - expect: {out: 0}
+- name: repeated 5 on 5 off toggles each give a pulse
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}

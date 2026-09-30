@@ -1,0 +1,472 @@
+name: count_bulb_sync
+description: 'Synchronous 4-bit counter: every bit changes exactly 2 gt after the rising edge, whatever the width. Bulb n is powered by the clock and by a mask P_n = q0 OR ... OR q(n-1). A copper bulb only toggles when its power rises, so on a rising edge exactly the unmasked bulbs toggle (bit n toggles when all lower bits are 0: a down counter), and mask changes during the high phase do nothing because the bulbs are already powered. Clock: a dust line (z0) with a one-dust branch south into each bulb (z1), so every bulb sees the edge on the same tick. Outputs: a comparator south of each bulb (z3, facing north). Masks: each comparator''s output dust climbs onto the top of the bulb row (y2), where dust standing on bulb n powers it; repeaters on the blocks between bulbs pass each mask on to the next bit (P(n+1) = P_n OR q_n). Interface (top view, north up): clk (x0,y1,z0) at the west end of the clock line; bulbs at x1, x4, x7, x10 (y1,z2); outputs q0..q3 are the comparators at x1, x4, x7, x10
+  (y1,z3, facing north). 10x3x5. Delay exactly 2 gt for all four bits (traced on 0 to 15 and 15 down to 11). The clock must be high for 2 gt or more (1 gt pulses miscounted in a trial run); the whole 16-count passes with 2 gt high, 4 gt low. Loads at 0 and counts 15, 14, ...; count_bulb_sync_up is the up-counting version. Trade-off: the fastest counter here and glitch-free (all bits change on one tick, so a decoder never sees an intermediate value), for 5x the volume of count_bulb_ripple_down.'
+traits:
+- ultrafast
+- fast
+- tick_accurate
+- entityless
+- pistonless
+- comparator_based
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': stone
+  '-': redstone_wire
+  c: {input: clk}
+  B: waxed_copper_bulb
+  '>': repeater[facing=west]
+  '0': {output: q0, block: 'comparator[facing=north]'}
+  '1': {output: q1, block: 'comparator[facing=north]'}
+  '2': {output: q2, block: 'comparator[facing=north]'}
+  '3': {output: q3, block: 'comparator[facing=north]'}
+layers:
+  0: |
+    .==========
+    .=..=..=..=
+    ...........
+    .=..=..=..=
+    .==.==.==..
+  1: |
+    c----------
+    .-..-..-..-
+    .B##B##B##B
+    .0##1##2##3
+    .--.--.--..
+  2: |
+    ...........
+    ...........
+    ...-->-->--
+    ..--.--.--.
+    ...........
+tests:
+- name: counts down through all 16 states and wraps
+  steps:
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 0, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 0, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 1, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 1, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+- name: 2-tick clock pulses are enough
+  steps:
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 0, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 1, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 1, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 2}
+  - {drive: {clk: 0}}
+  - {wait: 4}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+- name: every bit changes exactly 2 ticks after the rising edge
+  steps:
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 0, q3: 0}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 1}
+  - {expect: {q0: 0, q1: 0, q2: 1, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+  - {wait: 1}
+  - {expect: {q0: 1, q1: 1, q2: 0, q3: 1}}
+- name: holds through long high and low phases
+  steps:
+  - {drive: {clk: 1}}
+  - {wait: 100}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 0}}
+  - {wait: 100}
+  - {expect: {q0: 1, q1: 1, q2: 1, q3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 8}
+  - {drive: {clk: 0}}
+  - {wait: 100}
+  - {expect: {q0: 0, q1: 1, q2: 1, q3: 1}}

@@ -1,0 +1,65 @@
+name: xor_torch_flat_stack2
+description: "Proof that xor_torch_flat stacks: two copies, one directly on top of the other (pitch 2), with inputs a0/b0 below and a1/b1 above, tested over all 16 input combinations in Gray-code order. The torches of the lower copy hard-power the floor of the upper one, which carries nothing, so the copies do not interact."
+traits: [stackable, torch_based, silent, pistonless, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  u: redstone_wall_torch[facing=south]
+  a: {input: a0}
+  b: {input: b0}
+  c: {input: a1}
+  d: {input: b1}
+  o: {output: out0, block: redstone_wire}
+  p: {output: out1, block: redstone_wire}
+layers:
+  0: |
+    .....
+    =====
+    =====
+    =====
+    =====
+    =====
+  1: |
+    a...b
+    --#--
+    -.u.-
+    #---#
+    u...u
+    --o--
+  2: |
+    .....
+    =====
+    =====
+    =====
+    =====
+    =====
+  3: |
+    c...d
+    --#--
+    -.u.-
+    #---#
+    u...u
+    --p--
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 | out0 out1
+    0  0  0  0  | 0    0
+    1  0  0  0  | 1    0
+    1  1  0  0  | 0    0
+    0  1  0  0  | 1    0
+    0  1  1  0  | 1    1
+    1  1  1  0  | 0    1
+    1  0  1  0  | 1    1
+    0  0  1  0  | 0    1
+    0  0  1  1  | 0    0
+    1  0  1  1  | 1    0
+    1  1  1  1  | 0    0
+    0  1  1  1  | 1    0
+    0  1  0  1  | 1    1
+    1  1  0  1  | 0    1
+    1  0  0  1  | 1    1
+    0  0  0  1  | 0    1
+  delay: 4

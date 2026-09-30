@@ -1,0 +1,84 @@
+name: dl_lock_pair
+description: 'The smallest D latch: two repeaters. The data repeater q (facing west, so d enters from the west at x=0 and q powers whatever is east of it at x=2) is locked by a second repeater pointing into its south side; that lock repeater is driven from the south by the hold input. hold=0: transparent, q follows d 2 ticks later. hold=1: q is frozen; the lock engages 2 ticks after hold rises, so d must settle at least 1 tick before hold rises (a d change in the same tick as hold is not captured). Releasing hold passes the current d after 4 ticks. The enable is active-low (a hold/lock line): one inverter per bus turns it into an enable (see dl_subtract_lock for a per-bit active-high enable). Blocks (WxHxD): 1x2x2 (the q repeater, the lock repeater and their two supports); d sits west of q and hold two cells south of q. Lightless and silent; the fastest and smallest latch in the family. It is one block wide in x but data runs along x, so side-by-side copies do not form a bus without rerouting.'
+traits: [ultracompact, ultrafast, flat, horizontal, lockable, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  d: {input: d}
+  h: {input: hold}
+  q: {output: q, block: 'repeater[facing=west]'}
+  v: repeater[facing=south]
+layers:
+  0: |
+    .=
+    .=
+    ..
+  1: |
+    dq
+    .v
+    .h
+tests:
+- name: transparent in 2 ticks
+  truth_table: |
+    d | q
+    0 | 0
+    1 | 1
+  delay: 2
+- name: starts at 0 and holds both values
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {hold: 1}
+  - wait: 4
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 10
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {hold: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - drive: {hold: 1}
+  - wait: 4
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {hold: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+- name: setup time is one tick
+  steps:
+  - drive: {d: 1}
+  - wait: 1
+  - drive: {hold: 1}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {hold: 0}
+  - wait: 10
+  - drive: {d: 0}
+  - wait: 1
+  - drive: {hold: 1}
+  - wait: 10
+  - expect: {q: 0}
+- name: same tick change is not captured
+  steps:
+  - drive: {d: 1, hold: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {hold: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {d: 0, hold: 1}
+  - wait: 10
+  - expect: {q: 1}

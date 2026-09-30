@@ -1,0 +1,53 @@
+name: and_comparator_3input
+description: >-
+  Three-input AND from three subtract-mode comparators and two redstone blocks in
+  one 5x1 row, no torches. Each side of the output comparator (out) is fed by an
+  inverter comparator that reads a redstone block behind it (15) and subtracts
+  one input on its side. A comparator subtracts the larger of its two sides, so
+  out = A - max(15-B, 15-C): on only when A, B and C are all on. Interface: A
+  drives the back of out from the north; B drives the north side of the east
+  inverter, C the north side of the west inverter; out faces south. The south
+  sides of the inverters must stay unpowered (powering one would OR a fourth
+  input into that inverter's input). 5x2x1 with its base, 5 blocks above it.
+  Delay: A 2gt, B and C 4gt (tested). Lightless and silent; the torch
+  equivalent (and_torch_3input) is several times the volume at the same 4gt.
+traits: [compact, lightless, silent, pistonless, entityless, flat, comparator_based, tick_accurate, reset_safe, survival_friendly, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  k: {input: c}
+  o: {output: out, block: 'comparator[facing=north,mode=subtract]'}
+  n: {name: not_b, block: 'comparator[facing=east,mode=subtract]'}
+  m: {name: not_c, block: 'comparator[facing=west,mode=subtract]'}
+  R: redstone_block
+layers:
+  0: |
+    .....
+    .===.
+  1: |
+    .kab.
+    RmonR
+tests:
+- name: logic
+  truth_table: |
+      a b c | out
+      0 0 0 | 0
+      0 0 1 | 0
+      0 1 1 | 0
+      0 1 0 | 0
+      1 1 0 | 0
+      1 1 1 | 1
+      1 0 1 | 0
+      1 0 0 | 0
+      1 1 1 | 1
+      0 0 0 | 0
+      1 1 1 | 1
+      0 1 1 | 0
+      1 1 1 | 1
+      1 0 1 | 0
+      1 1 1 | 1
+      1 1 0 | 0
+      1 1 1 | 1
+  delay: 4

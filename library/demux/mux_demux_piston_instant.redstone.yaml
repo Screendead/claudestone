@@ -1,0 +1,110 @@
+name: mux_demux_piston_instant
+description: |-
+  1:2 demultiplexer with a 0-tick data path: mux_piston_instant driven from its output. d feeds the lower dust net; one sticky piston moves one concrete block between the two dust-step gaps, so d flows up to out0 (s off) or out1 (s on), and the cut output falls to 0.
+  Interface (top view, north up): d enters from the west on the lower level; out0 leaves north and out1 south on the upper level; s powers the piston from the east.
+  3x3x5 of blocks. Delay: d->outputs 0 ticks (tested with s held off and on); select: the new output lights after 1 tick and the old one goes dark after 3, so for about 2 ticks both carry d (tested at exact ticks); 3 ticks worst case. Output strengths 13 (out0) and 12 (out1) from a full-strength d (tested), so not analog. Noisy and lit by the piston; mux_demux_comparator is the quiet, analog 2-tick alternative.
+traits:
+- ultrafast
+- instant
+- compact
+- piston_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  d: {input: d}
+  a: {name: a_low, block: redstone_wire}
+  b: {name: b_low, block: redstone_wire}
+  o: {output: out0, block: redstone_wire}
+  A: {name: a_up, block: redstone_wire}
+  p: {name: piston, block: 'sticky_piston[facing=west]'}
+  s: {input: s}
+  B: {name: b_up, block: redstone_wire}
+  C: {output: out1, block: redstone_wire}
+layers:
+  0: |
+    .....
+    .....
+    .==..
+    .....
+    .....
+  1: |
+    .#...
+    .#...
+    dab..
+    ..#..
+    ..#..
+  2: |
+    .o...
+    .A...
+    ..#ps
+    ..B..
+    ..C..
+tests:
+- name: logic
+  truth_table: |
+    s d | out0 out1
+    0 0 | 0 0
+    0 1 | 1 0
+    1 1 | 0 1
+    0 1 | 1 0
+    0 0 | 0 0
+    1 0 | 0 0
+    1 1 | 0 1
+    1 0 | 0 0
+    0 0 | 0 0
+    0 1 | 1 0
+  delay: 3
+- name: data path is instant while s is off
+  truth_table: |
+    s d | out0 out1
+    0 0 | 0 0
+    0 1 | 1 0
+    0 0 | 0 0
+    0 1 | 1 0
+  delay: 0
+- name: data path is instant
+  steps:
+  - drive: {d: 1}
+  - expect: {out0: 1, out1: 0}
+  - drive: {d: 0}
+  - expect: {out0: 0, out1: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {d: 1}
+  - expect: {out0: 0, out1: 1}
+  - drive: {d: 0}
+  - expect: {out0: 0, out1: 0}
+  - drive: {d: 1}
+  - expect: {out1: 1}
+- name: select edges
+  steps:
+  - drive: {d: 1}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 1}
+  - expect: {out0: 1, out1: 1}
+  - {wait: 1}
+  - expect: {out0: 1, out1: 1}
+  - {wait: 1}
+  - expect: {out0: 0, out1: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 1}
+  - expect: {out0: 1, out1: 1}
+  - {wait: 1}
+  - expect: {out0: 1, out1: 1}
+  - {wait: 1}
+  - expect: {out0: 1, out1: 0}
+- name: output strength
+  steps:
+  - drive: {d: 1}
+  - {wait: 5}
+  - {check: 'if block ~1 ~2 ~0 redstone_wire[power=13]'}
+  - drive: {s: 1}
+  - {wait: 10}
+  - {check: 'if block ~2 ~2 ~4 redstone_wire[power=12]'}

@@ -1,0 +1,66 @@
+name: cross_underpass_inline
+description: 'cross_underpass with both lines entering and leaving on the same layer, still only 3 tall including the base: 1x3x5, 12 blocks. A (along x) is dust at y1 under block X. B (along z) enters at y1, climbs one step onto a support to y2 as dust pointing into X, a repeater reads X, and the repeater strongly powers a block whose underside feeds B''s outgoing dust back at y1 (dust reads a strongly powered block above it). A is instant, B 2 ticks. Interface: A west to east at y1 (probed under X); B north to south at y1. Versus cross_instant_bridge it is one layer lower and shorter but B takes 2 ticks; versus cross_instant_dip it needs no trench.'
+traits:
+- compact
+- fast
+- horizontal
+- vertical
+- lightless
+- silent
+- pistonless
+- entityless
+- one_wide
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  b: {input: b}
+  '-': redstone_wire
+  '#': white_concrete
+  a: {input: a}
+  A: {output: a_out, block: redstone_wire}
+  B: {output: b_out, block: redstone_wire}
+  v: repeater[facing=north]
+layers:
+  0: |
+    ..
+    .=
+    ..
+    .=
+    ..
+    .=
+  1: |
+    .b
+    .-
+    .#
+    aA
+    .#
+    .B
+  2: |
+    ..
+    ..
+    .-
+    .#
+    .v
+    .#
+tests:
+- name: independent
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 2
+- name: a is instant
+  truth_table: |
+    a | a_out
+    0 | 0
+    1 | 1
+  delay: 0

@@ -1,0 +1,107 @@
+name: dec_2to4_compact
+description: >-
+  The smallest 2-to-4 decoder in the library: six subtract comparators, a redstone block,
+  a stone hub and two dust in a 4x4 footprint, no torches. Comparator p (1,2) faces south
+  with input a behind it and b beside it, so it outputs a AND NOT b into the stone hub
+  (1,1); the hub strongly powers the dust on both of its sides, handing that one result
+  to three consumers without extra gates. o0 (0,0) faces east and subtracts the dust at
+  (0,1), which touches both b and the hub (so it carries a OR b), from the redstone block:
+  NOR. o1 (3,1) faces west and simply relays the hub dust (2,1). o2 (0,3) faces north:
+  b behind, a beside: b AND NOT a. o3 (2,3) faces west: a behind, minus comparator q
+  (2,2), a second relay of the hub, beside it: a AND NOT (a AND NOT b) = a AND b.
+  Interface (x east, z south, layer 1 on a 4x4 base): inputs a (1,3) and b (0,2), any
+  strong source or a dust line (comparators read dust directly); outputs are comparators
+  o0 (0,0) leaving west, o1 (3,1) leaving east, o2 (0,3) leaving south, o3 (2,3) leaving
+  east, each at strength 15. 4x2x4, worst delay 6 game ticks (tested), per path: b to o0
+  and o2 2, a to o2 and o3 2, a to o0 and o1 4, b to o1 4, b to o3 6.
+  Trade-off: the price of the size is hazards, measured tick by tick in the
+  "transitions" test: raising a while b is off blips o3 for ticks 2-6, and dropping b
+  while a is on leaves o1 and o3 on together for 2 ticks. Latch or clock the outputs,
+  or use dec_2to4_fast (4 ticks, no glitches even when both inputs change at once) when a glitch
+  would be read.
+traits: [ultracompact, compact, flat, horizontal, lightless, silent, pistonless, entityless, comparator_based, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  R: redstone_block
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  p: 'comparator[facing=south,mode=subtract]'
+  q: 'comparator[facing=north,mode=subtract]'
+  A: {output: o0, block: 'comparator[facing=east,mode=subtract]'}
+  B: {output: o1, block: 'comparator[facing=west,mode=subtract]'}
+  C: {output: o2, block: 'comparator[facing=north,mode=subtract]'}
+  D: {output: o3, block: 'comparator[facing=west,mode=subtract]'}
+layers:
+  0: |
+    ====
+    ====
+    ====
+    ====
+  1: |
+    AR..
+    -S-B
+    bpq.
+    CaD.
+tests:
+- name: logic
+  truth_table: |
+    a b | o0 o1 o2 o3
+    0 0 | 1 0 0 0
+    1 0 | 0 1 0 0
+    0 1 | 0 0 1 0
+    1 1 | 0 0 0 1
+    0 0 | 1 0 0 0
+    1 1 | 0 0 0 1
+    1 0 | 0 1 0 0
+    0 1 | 0 0 1 0
+    1 1 | 0 0 0 1
+    0 0 | 1 0 0 0
+  delay: 6
+- name: transitions
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 1}
+  - wait: 2
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 1}
+  - wait: 2
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 3
+  - expect: {o0: 0, o1: 1}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 6
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {o0: 1, o2: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 8
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 8
+  - drive: {b: 0}
+  - wait: 3
+  - expect: {o1: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 1}
+  - wait: 2
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 4
+  - drive: {b: 1}
+  - wait: 3
+  - expect: {o1: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - wait: 2
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}

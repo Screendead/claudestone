@@ -1,0 +1,62 @@
+name: cross_underpass_bus
+description: 'One instant wire A crossing a bus of B lanes at pitch 2, built from cross_underpass cells: A is a continuous dust line on the base at y1 along x; each B lane (along z, at y2) is dust into a block over A and a repeater reading that block. Here three lanes, 6x3x3 including the base. A pays 0 ticks for every lane it passes (it is only limited by dust''s 15-block reach); each lane costs 2 ticks. The test drives every combination of A and the three lanes, one input changing per row, so any leak between lanes or into A fails a row. Interface: A enters the west face at y1 and leaves east; lanes enter from the north at y2 (into dust) and leave south out of their repeaters. Versus cross_alternating_bus this needs pitch 2 but every lane flows the same way.'
+traits:
+- fast
+- lightless
+- silent
+- pistonless
+- entityless
+- tileable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  '-': redstone_wire
+  A: {output: a_out, block: redstone_wire}
+  b: {input: b0}
+  B: {input: b1}
+  C: {input: b2}
+  D: {output: b0_out, block: 'repeater[facing=north]'}
+  E: {output: b1_out, block: 'repeater[facing=north]'}
+  F: {output: b2_out, block: 'repeater[facing=north]'}
+layers:
+  0: |
+    .......
+    .......
+    .======
+    .......
+  1: |
+    .......
+    .#.#.#.
+    a-----A
+    .#.#.#.
+  2: |
+    .b.B.C.
+    .-.-.-.
+    .#.#.#.
+    .D.E.F.
+tests:
+- name: independent
+  truth_table: |
+    a b0 b1 b2 | a_out b0_out b1_out b2_out
+    0 0 0 0 | 0 0 0 0
+    0 0 0 1 | 0 0 0 1
+    0 0 1 1 | 0 0 1 1
+    0 0 1 0 | 0 0 1 0
+    0 1 1 0 | 0 1 1 0
+    0 1 1 1 | 0 1 1 1
+    0 1 0 1 | 0 1 0 1
+    0 1 0 0 | 0 1 0 0
+    1 1 0 0 | 1 1 0 0
+    1 1 0 1 | 1 1 0 1
+    1 1 1 1 | 1 1 1 1
+    1 1 1 0 | 1 1 1 0
+    1 0 1 0 | 1 0 1 0
+    1 0 1 1 | 1 0 1 1
+    1 0 0 1 | 1 0 0 1
+    1 0 0 0 | 1 0 0 0
+  delay: 2

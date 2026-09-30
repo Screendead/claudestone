@@ -1,0 +1,90 @@
+name: or_nor_torch_compact
+description: >-
+  Smallest torch NOR: one dust on a block with a wall torch on the block's south face.
+  Interface: a and b meet the dust from the west and east on layer 1 (any dust or
+  source touching it); out is the torch on layer 0, south face, lit when both are off.
+  Size 1x2x2, delay 2 game ticks, output 15. Trade-off: the inputs share the dust, so
+  they are not isolated from each other (use or_nor_torch_isolated), and the torch
+  makes light updates (use or_nor_comparator for lightless). Mind torch burnout: 8 turn-offs within 60 ticks switch it off for 160 ticks with a
+  fizz sound, which the burnout test demonstrates.
+traits: [ultracompact, fast, ultrafast, torch_based, flat, one_wide, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  S: stone
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  t: {output: out, block: 'redstone_wall_torch[facing=south]'}
+layers:
+  0: |
+    .S.
+    .t.
+  1: |
+    a-b
+    ...
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 0 | 0
+    1 1 | 0
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: burnout
+  steps:
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - wait: 4
+  - expect: {out: 0}
+  - wait: 170
+  - expect: {out: 1}

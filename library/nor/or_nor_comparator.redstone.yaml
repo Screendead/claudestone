@@ -1,0 +1,110 @@
+name: or_nor_comparator
+description: >-
+  Lightless, silent NOR in one comparator. The comparator is in subtract mode with a
+  redstone block behind it (rear = 15) and the inputs on its two sides; a comparator
+  takes the stronger side, so out = 15 - max(a, b), which is 0 when either input is a
+  full-strength 15. Interface: comparator faces north (redstone block to its north);
+  a on the west side, b on the east side, layer 1; out is the comparator, output
+  south, 15 when both are off. Size 1x2x2, delay 2 game ticks. Inputs must arrive at
+  strength 15 (a repeater, torch, redstone block or adjacent source); weaker dust would leak
+  through as a weak on (from the subtract formula, not tested here) (use or_nor_comparator_any_strength). No torch, so no light
+  updates and no burnout. Not pitch-1 tileable: the inputs sit on the sides.
+traits: [ultracompact, fast, ultrafast, comparator_based, analog, lightless, silent, pistonless, entityless, flat, one_wide, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    ...
+    .=.
+  1: |
+    .R.
+    aob
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 0 | 0
+    1 1 | 0
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: one tick pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+- name: no burnout
+  steps:
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 3
+  - wait: 4
+  - expect: {out: 1}

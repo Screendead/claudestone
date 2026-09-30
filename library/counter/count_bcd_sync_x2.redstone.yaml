@@ -1,0 +1,509 @@
+name: count_bcd_sync_x2
+description: 'Two count_bcd_sync decades cascaded into a 00-99 down counter (88, 87, ..., 00, 99, ...): the template for chaining any number of decades. A second comparator on the east face of the units'' bulb 3 (x14,y1,z2, facing west) reads q3, which rises only on the units'' 0-to-9 wrap, and drives the tens'' clock line through dust and a repeater (x16,y1,z1); the tens'' clock is then high for two units counts, well over the 14 gt a decade needs. The units'' Z line climbs to y3 over the east end so the borrow can run along y1 underneath it. Placement: the units load at 8, whose bulb 3 is lit, so the borrow is high from the first tick; the borrow comparator and repeater are placed already on, the tens'' clock line is therefore powered while the tens'' bulbs are placed, and each tens bulb flips as it lands, so the tens bulbs are placed inverted (0-2 lit, 3 unlit) and come up at 8: it loads showing 88. Interface (top view, north up): clk (x0,y1,z0); units bulbs at x1, x5, x9, x13 and tens
+  bulbs at x17, x21, x25, x29 (y1,z2); outputs u0..u3 and t0..t3 (bit 0 least significant) are repeaters at those x on y1,z4 (facing north). 31x4x9. Delay: units 4 gt after the rising edge; tens 8 gt after the edge that wraps the units (4 gt borrow path + 4 gt). The clock must stay high at least 14 gt, as for one decade. Trade-off: two decades of glitch-free BCD for 1116 blocks of volume; each further decade adds 16 blocks of length and 4 gt of carry delay.'
+traits:
+- fast
+- tick_accurate
+- entityless
+- pistonless
+- comparator_based
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': stone
+  '-': redstone_wire
+  c: {input: clk}
+  B: waxed_copper_bulb
+  L: waxed_copper_bulb[lit=true]
+  r: comparator[facing=north]
+  C: comparator[facing=north,powered=true]{OutputSignal:15}
+  w: comparator[facing=west,powered=true]{OutputSignal:15}
+  h: repeater[facing=south,powered=true]
+  b: waxed_copper_bulb
+  l: waxed_copper_bulb[lit=true]
+  t: repeater[facing=north]
+  T: repeater[facing=north,powered=true]
+  Z: comparator[facing=south,mode=subtract]
+  K: composter[level=1]
+  '>': repeater[facing=west]
+  ^: repeater[facing=south]
+  p: repeater[facing=south]
+  v: repeater[facing=north]
+  S: comparator[facing=west,mode=subtract]
+  '0': {output: u0, block: 'repeater[facing=north]'}
+  '1': {output: u1, block: 'repeater[facing=north]'}
+  '2': {output: u2, block: 'repeater[facing=north]'}
+  '3': {output: u3, block: 'repeater[facing=north,powered=true]'}
+  '4': {output: t0, block: 'repeater[facing=north]'}
+  '5': {output: t1, block: 'repeater[facing=north]'}
+  '6': {output: t2, block: 'repeater[facing=north]'}
+  '7': {output: t3, block: 'repeater[facing=north,powered=true]'}
+layers:
+  0: |
+    .=============..==============..
+    .=...=...=...=..==...=...=...=..
+    ..............===...............
+    .=...=...=...=...=...=...=...=..
+    .=...=...=...=...=...=...=...=..
+    .===.===.===.=.=.===.===.===.=.=
+    .=...=...=...=.=.=...=...=...=.=
+    .===============.===============
+    ................................
+  1: |
+    c-------------..--------------..
+    .-...-#..-.#.-..h-...-#..-.#.-..
+    .B..#B###B###Lw--l..#l###l###b#.
+    .r..#r..#r..#C...r..#r..#r..#C..
+    .0.##1.##2.##3.#.4.##5.##6.##7.#
+    .---.---.---.-.-.---.---.---.-.-
+    .t...t...t...T.^.t...t...t...T.^
+    .--------------Z.--------------Z
+    ...............K...............K
+  2: |
+    ......##########......##########
+    .....#v..#.v.#.#.....#v..#.v.#.#
+    ....--->---S--.#....--->---S--.#
+    ....p...p...p..#....p...p...p..#
+    ...--..--..--..-...--..--..--..-
+    ................................
+    ................................
+    ................................
+    ................................
+  3: |
+    ......----------......----------
+    ...............-...............-
+    ...............-...............-
+    ...............-...............-
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+tests:
+- name: two decades count down 88 to 00 and wrap to 99
+  settle: 60
+  steps:
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 1, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 1, u2: 1, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 1, u2: 1, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 0, u2: 1, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 1, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 1, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 1, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 1, t0: 1, t1: 1, t2: 1, t3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 1, t0: 1, t1: 1, t2: 1, t3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 0, t0: 1, t1: 0, t2: 0, t3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 1, t0: 0, t1: 0, t2: 0, t3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 0}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 1, t0: 1, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 1, t0: 1, t1: 0, t2: 0, t3: 1}}
+- name: the borrow reaches the tens 4 ticks after the units wrap
+  settle: 60
+  steps:
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 1, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {drive: {clk: 1}}
+  - {wait: 20}
+  - {drive: {clk: 0}}
+  - {wait: 10}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {drive: {clk: 1}}
+  - {wait: 3}
+  - {expect: {u0: 0, u1: 0, u2: 0, u3: 0, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {wait: 1}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 1, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {wait: 3}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 1, t0: 0, t1: 0, t2: 0, t3: 1}}
+  - {wait: 1}
+  - {expect: {u0: 1, u1: 0, u2: 0, u3: 1, t0: 1, t1: 1, t2: 1, t3: 0}}

@@ -1,0 +1,57 @@
+name: cross_instant_dip
+description: 'Both lines instant and on the same layer with only one layer of headroom: A dips one block into a three-long trench while B hops one block up over it. 5x4x3 including the trench floor, 16 blocks. The wire layer is y2 on a floor at y1. A (along x) steps down to y1 for three cells; B (along z) steps up onto block X at y2, which caps the middle trench cell, and back down. X caps A''s middle dust so it cannot connect up into B, and the trench cells either side have no support beside them for a diagonal. Interface: A west to east at y2, B north to south at y2; the trench is one block below the floor. Versus cross_instant_bridge it trades height above the floor (2 layers instead of 3) for a trench and a 5-wide A.'
+traits:
+- ultrafast
+- instant
+- horizontal
+- vertical
+- lightless
+- silent
+- pistonless
+- entityless
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  b: {input: b}
+  a: {input: a}
+  '#': white_concrete
+  A: {output: a_out, block: redstone_wire}
+  B: {output: b_out, block: redstone_wire}
+layers:
+  0: |
+    ......
+    ......
+    ..===.
+    ......
+  1: |
+    ......
+    ...=..
+    .=---=
+    ...=..
+  2: |
+    ...b..
+    ...-..
+    a-.#.A
+    ...B..
+  3: |
+    ......
+    ......
+    ...-..
+    ......
+tests:
+- name: independent
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 0

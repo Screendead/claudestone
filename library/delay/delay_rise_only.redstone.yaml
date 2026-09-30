@@ -1,0 +1,69 @@
+name: delay_rise_only
+description: 'On-delay with fast release, no torches: out rises 28 ticks after a rises and falls 2 ticks after a falls. Input a (x=0, z=1) drives a line of three delay-4 repeaters east along z=1 into the side of comparator not_late (x=4, subtract mode, back fed by the redstone block south of it), which is 15 minus the late signal, a lightless NOT. Comparator gate (x=4, z=0, subtract mode) takes a itself on its back through the dust row along z=0 and not_late on its side, so out (dust, x=5, z=0) = a AND late(a). The falling edge only has to cross gate, hence 2 ticks. 6x2x3. Caveat, tested: the repeater line itself still takes 24 ticks to clear, so an input that returns within that time turns out back on after only 2 ticks; for a timer that also restarts from zero, see delay_hopper_timer (8 ticks per item, retentive). Trade-off versus delay_repeater_line: fast release and debouncing of short pulses (anything shorter than the delay never reaches out) at the cost of 2 comparators and a block.'
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '-': redstone_wire
+  '4': repeater[facing=west,delay=4]
+  G: {name: gate, block: 'comparator[facing=west,mode=subtract]'}
+  N: {name: not_late, block: 'comparator[facing=south,mode=subtract]'}
+  R: redstone_block
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ======
+    .====.
+    ......
+  1: |
+    ----Go
+    a444N.
+    ....R.
+traits: [flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+tests:
+- name: rise 28 ticks, fall 2 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 27
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 40
+  - expect: {out: 0}
+- name: pulses shorter than the delay never reach out
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 5
+  - expect: {out: 0}
+  - wait: 5
+  - expect: {out: 0}
+  - wait: 5
+  - expect: {out: 0}
+  - wait: 5
+  - expect: {out: 0}
+  - wait: 5
+  - expect: {out: 0}
+  - wait: 30
+  - expect: {out: 0}
+- name: quick return within 24 ticks is only 2 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 40
+  - drive: {a: 0}
+  - wait: 5
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

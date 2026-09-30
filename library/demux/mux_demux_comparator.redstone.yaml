@@ -1,0 +1,92 @@
+name: mux_demux_comparator
+description: |-
+  Lightless, silent, analog 1:2 demultiplexer from three subtract-mode comparators and a redstone block: out0 = s ? 0 : d, out1 = s ? d : 0.
+  gate0 reads d through one dust at its back and subtracts s on its side. not_s reads the redstone block's constant 15 and subtracts s, and points 15 - s into the side of gate1, which reads d directly at its back, so gate1 outputs d - (15 - s). Signal strengths pass unchanged (tested with cake sources), so it also routes analog values.
+  Interface (top view, north up, all on the layer above the base): d is the cell south of s; s sits between not_s and gate0 and feeds both their sides (it must be at full strength); out0 is the dust at the north-east corner, out1 the dust at the south-west corner.
+  4x2x3 of blocks. Delay: d->outputs 2 ticks; s->out0 2 ticks, s->out1 4 ticks, so 4 worst case (tested). The mirror of mux_comparator_2to1; mux_demux_piston_instant has a 0-tick data path, mux_demux_lock_latch holds the deselected output instead of clearing it, mux_demux_1to4_comparator is the 4-way version.
+traits:
+- ultracompact
+- lightless
+- silent
+- pistonless
+- entityless
+- flat
+- horizontal
+- comparator_based
+- analog
+- fast
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  R: redstone_block
+  d: {input: d}
+  s: {input: s}
+  N: {name: not_s, block: 'comparator[facing=north,mode=subtract]'}
+  G: {name: gate0, block: 'comparator[facing=south,mode=subtract]'}
+  H: {name: gate1, block: 'comparator[facing=east,mode=subtract]'}
+  o: {output: out0, block: redstone_wire}
+  p: {output: out1, block: redstone_wire}
+layers:
+  0: |
+    ...=
+    .=.=
+    ==.=
+  1: |
+    .R.o
+    .NsG
+    pHd-
+tests:
+- name: logic
+  truth_table: |
+    s d | out0 out1
+    0 0 | 0 0
+    0 1 | 1 0
+    1 1 | 0 1
+    0 1 | 1 0
+    0 0 | 0 0
+    1 0 | 0 0
+    1 1 | 0 1
+    1 0 | 0 0
+    0 0 | 0 0
+    0 1 | 1 0
+  delay: 4
+- name: data path is 2 ticks
+  steps:
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {out0: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out0: 1, out1: 0}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {out0: 1}
+  - {wait: 1}
+  - expect: {out0: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {out0: 0, out1: 0}
+  - {wait: 1}
+  - expect: {out0: 0, out1: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {out1: 1}
+  - {wait: 1}
+  - expect: {out1: 0}
+- name: analog strengths pass
+  steps:
+  - {run: setblock ~2 ~0 ~2 smooth_stone}
+  - {run: 'setblock ~3 ~1 ~2 cake[bites=1]'}
+  - {run: 'setblock ~2 ~1 ~2 cake[bites=4]'}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=12]'}
+  - {check: 'if block ~0 ~1 ~2 redstone_wire[power=0]'}
+  - {run: setblock ~2 ~1 ~1 redstone_block}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=0]'}
+  - {check: 'if block ~0 ~1 ~2 redstone_wire[power=6]'}

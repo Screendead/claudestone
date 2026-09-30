@@ -1,0 +1,148 @@
+name: analog_const_container
+description: 'Constant strength source: a comparator (x=1) reading a container behind it (x=0) outputs a fixed 0-15 set by how full the container is, floor(1 + 14 * fullness) for any non-empty container, where fullness sums count / max stack over the slots divided by the slot count. Here the container is a decorated pot, a one-slot container, so the strength is set by one stack of stone (count: strength) 1:1, 2:5, 3:10, 4:14, 5:19, 6:23, 7:28, 8:32, 9:37, 10:42, 11:46, 12:51, 13:55, 14:60, 15:64; one unstackable item (a sword) gives 15. The pot is the finest-grained and cheapest container: no ticking, not a hopper that pulls items, players insert one item per click, and hoppers can fill or drain it. Output: the comparator, facing east into the dust at x=2. 3x2x1 (pot, comparator, output dust), one wide. For other containers use the same formula with their slot count (hopper 5, dropper and dispenser 9, chest and barrel 27; a hopper needs 1, 23, 46, 69, ... redstone per level), or a block-state
+  source (cake 14 - 2 * bites, composter level, cauldron level, respawn anchor 0/3/7/11/15, end portal frame with eye 15) when no block entity is wanted. A comparator also reads the container through one solid block when that block carries less than 15, so the pot can sit behind a wall. Tests: all 16 strengths (the pot emptied for 0), each appearing on the comparator exactly 2 ticks after the contents change. Trade-off versus analog_const_lectern (player-selectable 1..15 by page) and analog_const_item_frame (1..8 dial, no block cell of its own): this one is fixed at build time and needs no entity.'
+traits:
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- tick_accurate
+- reset_safe
+- survival_friendly
+- flat
+- horizontal
+- one_wide
+- ultracompact
+- container_based
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  P: decorated_pot[facing=north]{item:{id:"minecraft:stone",count:37}}
+  C: {name: reader, block: 'comparator[facing=west]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ===
+  1: |
+    PCo
+tests:
+- name: every strength from item count, 2 ticks
+  steps:
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:9}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=9]'}
+  - {run: data remove block ~0 ~1 ~0 item}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:0}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:0}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=0]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:1}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:1}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:1}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=1]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:5}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:2}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:2}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=2]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:10}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:3}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:3}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=3]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:14}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:4}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:4}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=4]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:19}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:5}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:5}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=5]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:23}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:6}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:6}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=6]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:28}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:7}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:7}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=7]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:32}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:8}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:8}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=8]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:37}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:9}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:9}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=9]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:42}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:10}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:10}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=10]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:46}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:11}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:11}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=11]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:51}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:12}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:12}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=12]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:55}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:13}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:13}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=13]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:60}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:14}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:14}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=14]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:64}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=15]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:10}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:3}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:3}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=3]'}
+  - {run: data remove block ~0 ~1 ~0 item}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:0}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:0}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=0]'}
+  - {run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:64}}'}
+  - {wait: 1}
+  - {check: 'unless data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {wait: 1}
+  - {check: 'if data block ~1 ~1 ~0 {OutputSignal:15}'}
+  - {check: 'if block ~2 ~1 ~0 redstone_wire[power=15]'}

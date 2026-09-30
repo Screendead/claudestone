@@ -1,0 +1,59 @@
+name: not_torch_tower
+description: |
+  A 1x1 torch tower: three stages of block + standing torch stacked straight up. Each torch
+  sits on a block and strongly powers the block above it, so each stage inverts and lifts the
+  signal two blocks; three stages give NOT and climb six blocks in a single column.
+  Interface: input dust at (0,1,0) (a line pointing east into the bottom block (1,1,0)), driven
+  here from the air cell above it at (0,2,0). Output: the top standing torch at (1,6,0); it
+  powers the block above it strongly and dust or components on its four sides. The
+  intermediate torches t1 (1,2,0) and t2 (1,4,0) are named for traces. Delay 6 ticks (2 per
+  stage) on both edges; drop or add stages in pairs to trade height for delay (1 stage =
+  not_torch_compact-speed NOT with vertical output, 2 stages = buffer).
+  Trade-off: the only way to carry an inverted signal straight up in a 1x1 footprint without
+  observers or scaffolding, but every stage costs 2 ticks and light, and every torch has the
+  8-turn-offs-in-60-ticks burnout limit. For downward signals see not_torch_down.
+traits: [vertical, stackable, torch_based, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  w: 'redstone_wire[east=side,west=side]'
+  a: {input: a}
+  p: {name: t1, block: redstone_torch}
+  q: {name: t2, block: redstone_torch}
+  o: {output: out, block: redstone_torch}
+layers:
+  0: |
+    =.
+  1: |
+    w#
+  2: |
+    ap
+  3: |
+    .#
+  4: |
+    .q
+  5: |
+    .#
+  6: |
+    .o
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+  delay: 6
+- name: stage by stage
+  steps:
+  - expect: {t1: 1, t2: 0, out: 1}
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {t1: 0, t2: 0, out: 1}
+  - wait: 2
+  - expect: {t1: 0, t2: 1, out: 1}
+  - wait: 2
+  - expect: {t1: 0, t2: 1, out: 0}
+  - drive: {a: 0}
+  - wait: 6
+  - expect: {t1: 1, t2: 0, out: 1}

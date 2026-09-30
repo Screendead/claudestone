@@ -1,0 +1,305 @@
+name: analog_dac
+description: '4-bit binary to signal strength (DAC): out = 8*b3 + 4*b2 + 2*b1 + b0 as the output strength of comparator C3 (x=4, z=2), in 8 game ticks worst case, lightless and silent. It computes 15 - 8*!b3 - 4*!b2 - 2*!b1 - !b0 along a chain of three subtract comparators (x=2..4, z=2, all facing west so the value flows east). The first term costs nothing: C1 reads the stone block X (x=1, z=2) behind it, which the b3 dust (x=1, z=1) powers at 15, and when X is under 15 a comparator reading through a block takes the container two blocks behind instead, here a hopper of strength 7 (x=0, z=2). So C1''s rear is 15 or 7 with no gate and no delay. Each later bit enters as a gate comparator in subtract mode, rear on a hopper constant (4, 2, 1) and the bit on its side, giving k*!b into the chain comparator''s side: G2 (x=2, z=3) with b2 at x=1, z=3; G1 (x=3, z=1) with b1 through a repeater at x=4, z=1 (dust at x=5, z=1) because both side cells of G1 touch chain comparators; G0 (x=4, z=3) with b0
+  at x=5, z=3. Bits must arrive at full strength 15 (the b3 input must be exactly 15 for the block trick; a repeater into X does that). Delays measured on both edges: b2 and b1 8 ticks (a repeater is 2 game ticks), b3 6, b0 4. Output: C3 facing east into x=5, z=2. 6x2x5 including the constant hoppers (bit drivers sit above the bit dusts). Tests: all 16 codes give exactly their value, plus each bit''s delay on both edges. Trade-off: a small, exact DAC; to go faster, feed the chain from the other end (the least significant bit has the shortest path) or give each chain stage its own inverted bit.'
+traits:
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+- compact
+- flat
+- container_based
+palette:
+  .: air
+  '=': smooth_stone
+  Q: redstone_wire
+  E: {name: b3_dust, block: redstone_wire}
+  H: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}
+  h: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}
+  J: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}
+  K: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}
+  G: comparator[facing=north,mode=subtract]
+  r: repeater[facing=east]
+  W: {name: b1_dust, block: redstone_wire}
+  X: stone
+  A: comparator[facing=west,mode=subtract]
+  B: comparator[facing=west,mode=subtract]
+  C: {output: out, block: 'comparator[facing=west,mode=subtract]'}
+  V: {name: b2_dust, block: redstone_wire}
+  F: comparator[facing=south,mode=subtract]
+  g: comparator[facing=south,mode=subtract]
+  Y: {name: b0_dust, block: redstone_wire}
+  e: {input: b3}
+  v: {input: b2}
+  w: {input: b1}
+  y: {input: b0}
+layers:
+  0: |
+    .=....
+    .=.===
+    .====.
+    .==.==
+    ......
+  1: |
+    .Q.H..
+    .E.GrW
+    hXABC.
+    .VF.gY
+    ..J.K.
+  2: |
+    ......
+    .e...w
+    ......
+    .v...y
+    ......
+tests:
+- name: nonzero, worst path b2
+  truth_table: |
+    b3 b2 b1 b0 | out
+    0 0 0 0 | 0
+    0 1 0 0 | 1
+    0 0 0 0 | 0
+    1 0 0 0 | 1
+    0 0 0 0 | 0
+    0 0 1 0 | 1
+    0 0 0 0 | 0
+    0 0 0 1 | 1
+    1 1 1 1 | 1
+    0 0 0 0 | 0
+    0 1 0 1 | 1
+    1 0 1 0 | 1
+  delay: 8
+- name: every code gives its value
+  steps:
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:1}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 1
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:2}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 1
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:3}'}
+  - drive:
+      b3: 0
+      b2: 1
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:4}'}
+  - drive:
+      b3: 0
+      b2: 1
+      b1: 0
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:5}'}
+  - drive:
+      b3: 0
+      b2: 1
+      b1: 1
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:6}'}
+  - drive:
+      b3: 0
+      b2: 1
+      b1: 1
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:7}'}
+  - drive:
+      b3: 1
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:8}'}
+  - drive:
+      b3: 1
+      b2: 0
+      b1: 0
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:9}'}
+  - drive:
+      b3: 1
+      b2: 0
+      b1: 1
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:10}'}
+  - drive:
+      b3: 1
+      b2: 0
+      b1: 1
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:11}'}
+  - drive:
+      b3: 1
+      b2: 1
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:12}'}
+  - drive:
+      b3: 1
+      b2: 1
+      b1: 0
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:13}'}
+  - drive:
+      b3: 1
+      b2: 1
+      b1: 1
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:14}'}
+  - drive:
+      b3: 1
+      b2: 1
+      b1: 1
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:15}'}
+  - drive:
+      b3: 0
+      b2: 1
+      b1: 0
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:5}'}
+  - drive:
+      b3: 1
+      b2: 0
+      b1: 1
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:10}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - drive:
+      b3: 1
+      b2: 1
+      b1: 1
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:15}'}
+  - drive:
+      b3: 0
+      b2: 1
+      b1: 1
+      b0: 1
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:7}'}
+  - drive:
+      b3: 1
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:8}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}
+- name: per-bit delays both edges
+  steps:
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - drive: {b2: 1}
+  - {wait: 7}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:4}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:4}'}
+  - drive: {b2: 0}
+  - {wait: 7}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - drive: {b3: 1}
+  - {wait: 5}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:8}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:8}'}
+  - drive: {b3: 0}
+  - {wait: 5}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - drive: {b1: 1}
+  - {wait: 7}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:2}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:2}'}
+  - drive: {b1: 0}
+  - {wait: 7}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - drive:
+      b3: 0
+      b2: 0
+      b1: 0
+      b0: 0
+  - {wait: 12}
+  - drive: {b0: 1}
+  - {wait: 3}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:1}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:1}'}
+  - drive: {b0: 0}
+  - {wait: 3}
+  - {check: 'unless data block ~4 ~1 ~2 {OutputSignal:0}'}
+  - {wait: 1}
+  - {check: 'if data block ~4 ~1 ~2 {OutputSignal:0}'}

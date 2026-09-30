@@ -1,0 +1,88 @@
+name: or_nor_wide_lightless
+description: >-
+  n-input NOR with no torches: the zero-tick glass bus of or_wide_instant feeds the side
+  of a subtract-mode comparator whose rear reads a composter at level 1. The bus
+  arrives weakened (strength 10-13 here), which a redstone-block rear would let through
+  as a weak on; the level-1 composter makes any strength 1-15 count as on, so the bus
+  needs no repeater. Interface: input k arrives on layer 1 at column k, from the north
+  for even k (a, c) and from the south for odd k (b, d); the bus runs east on layer 2
+  into the comparator's west side; out is the comparator (faces north, composter to its
+  north), output south at strength 1. 4 inputs: 6x3x3; one column per extra input.
+  Delay 2 game ticks for any width. Trade-off versus or_nor_wide_torch: lightless and
+  burnout-free, but the output is strength 1 (add a repeater for 15).
+traits: [fast, ultrafast, compact, tileable, comparator_based, container_based, lightless, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  S: stone
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  k: {name: ic, block: redstone_wire}
+  l: {name: id, block: redstone_wire}
+  K: composter[level=1]
+  o: {output: out, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    ......
+    =.=...
+    ......
+    .=.=..
+    ......
+  1: |
+    a.c...
+    i.k...
+    GGGGGS
+    .j.l..
+    .b.d..
+  2: |
+    ......
+    .....K
+    -----o
+    ......
+    ......
+tests:
+- name: logic
+  truth_table: |
+    a b c d | out ia ib ic id
+    0 0 0 0 | 1 0 0 0 0
+    0 0 0 1 | 0 0 0 0 1
+    0 0 1 0 | 0 0 0 1 0
+    0 0 1 1 | 0 0 0 1 1
+    0 1 0 0 | 0 0 1 0 0
+    0 1 0 1 | 0 0 1 0 1
+    0 1 1 0 | 0 0 1 1 0
+    0 1 1 1 | 0 0 1 1 1
+    1 0 0 0 | 0 1 0 0 0
+    1 0 0 1 | 0 1 0 0 1
+    1 0 1 0 | 0 1 0 1 0
+    1 0 1 1 | 0 1 0 1 1
+    1 1 0 0 | 0 1 1 0 0
+    1 1 0 1 | 0 1 1 0 1
+    1 1 1 0 | 0 1 1 1 0
+    1 1 1 1 | 0 1 1 1 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

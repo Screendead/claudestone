@@ -1,0 +1,139 @@
+name: mux_demux_lock_latch
+description: |-
+  Addressable latch: a 1:2 demultiplexer whose deselected output holds its last value instead of clearing, built on repeater locking. The selected output follows d; the other one freezes, so two one-bit registers share a data line and are written by pointing s at one.
+  d sits between the backs of two repeaters, r0 (to q0) and r1 (to q1). lock0, a repeater fed by s through dust, points into r0's side, so r0 is locked while s is on. not_s, a redstone-block inverter comparator with s on its side, points into r1's side, so r1 is locked while s is off. A locked repeater keeps its output whatever its input does. No torches, so no light updates.
+  Interface (top view, north up, one layer over a base): d is the centre cell; s is the cell north of d; q0 is the dust south of r0, q1 the dust east of r1. s must be full strength at not_s's side (it is a direct neighbour).
+  5x2x5 of blocks. Timing (tested at exact ticks): d->selected output 2 ticks; after s switches, the newly selected output shows d 4 ticks later; setup 1 tick (d changed 1 tick before s is captured by the output being deselected) and hold 1 tick (d may change 1 tick after s). Starts with both outputs off. Unlike mux_demux_comparator it is not combinational: use it where the deselected side must remember.
+traits:
+- lockable
+- compact
+- lightless
+- silent
+- pistonless
+- entityless
+- flat
+- horizontal
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  '-': redstone_wire
+  s: {input: s}
+  A: {name: not_s, block: 'comparator[facing=north,mode=subtract]'}
+  d: {input: d}
+  r: {name: r1, block: 'repeater[facing=west]'}
+  q: {output: q1, block: redstone_wire}
+  l: {name: lock0, block: 'repeater[facing=west]'}
+  B: {name: r0, block: 'repeater[facing=north]'}
+  C: {output: q0, block: redstone_wire}
+layers:
+  0: |
+    .....
+    ==.=.
+    =..==
+    ===..
+    ..=..
+  1: |
+    ...R.
+    --sA.
+    -.drq
+    -lB..
+    ..C..
+tests:
+- name: selected output follows, the other holds
+  steps:
+  - expect: {q0: 0, q1: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - expect: {q0: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - expect: {q1: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0}
+  - drive: {d: 1}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 1}
+  - drive: {d: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0}
+  - drive: {d: 1}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0}
+  - drive: {d: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 0}
+  - drive: {d: 1}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1}
+- name: 'hold time: d may change 1 tick after s switches'
+  steps:
+  - drive: {d: 1}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 1}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0}
+  - drive: {d: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 1}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1}
+- name: 'setup time is 1: d changed 1 tick before s is captured'
+  steps:
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {d: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1}
+- name: a new selection shows d after 4 ticks
+  steps:
+  - drive: {d: 1}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 3}
+  - expect: {q1: 0}
+  - {wait: 1}
+  - expect: {q1: 1}
+  - drive: {d: 0}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 3}
+  - expect: {q0: 1}
+  - {wait: 1}
+  - expect: {q0: 0}

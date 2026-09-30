@@ -1,0 +1,56 @@
+name: or_gate
+description: >-
+  The textbook isolated OR: each input passes a repeater (facing west: input from the
+  west, output east) into a shared dust line, so neither input can back-feed the other
+  and both arrive at 15. Interface: a enters at the west end of the north row, b at the
+  west end of the south row (layer 1); out is the dust at the east end of the middle row.
+  Size 4x2x3, flat, delay 2 game ticks. Trade-off: the baseline other variants beat;
+  or_block_repeater is isolated with the same delay in 3x2x2 and a 15 output, and
+  or_glass_diode is isolated at 0 ticks. The input repeaters can be locked from the side
+  or given extra delay, which the others cannot.
+traits: [fast, flat, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '>': repeater[facing=west]
+  '-': redstone_wire
+  o: {output: out, block: redstone_wire}
+  b: {input: b}
+layers:
+  0: |
+    .==..
+    ..===
+    .==..
+  1: |
+    a>-..
+    ..--o
+    b>-..
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 0 | 1
+    1 1 | 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

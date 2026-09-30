@@ -1,0 +1,63 @@
+name: delay_piston_odd_tick
+description: 'Odd-tick edge delays from a sticky piston: rise 3 game ticks, fall 1 tick, the only sub-2-tick edge and the only odd delays in the family (every repeater, comparator, torch and observer costs 2). Input a (x=0) powers a sticky piston facing east (x=1) holding a redstone block (x=2); extending moves the block to x=3, next to the out dust (x=4), and it only starts powering once the move finishes, 3 ticks after a rises. Retracting turns the block into a moving block at once, so out drops 1 tick after a falls. 4x2x1 plus the driver cell, one wide. Chain it with 2-tick parts to reach any odd delay or to skew one edge against the other by 2 ticks. Caveat, tested: an input pulse shorter than 3 ticks makes the sticky piston spit its block, so out stays on until a next falls (the next retraction pulls the block back and heals it). Trade-off: odd and 1-tick timing, but pistons are loud, light-updating, and 26.3 piston timing is only valid in the order tested here; everything else in the family is silent.'
+traits: [flat, horizontal, one_wide, ultrafast, piston_based, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  P: sticky_piston[facing=east]
+  R: redstone_block
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .====
+  1: |
+    aPR.o
+tests:
+- name: rise 3 ticks, fall 1 tick
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: 3 tick pulse comes out 1 tick long
+  steps:
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+- name: 2 tick pulse spits the block until the next fall
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 5
+  - drive: {a: 1}
+  - wait: 3
+  - expect: {out: 1}

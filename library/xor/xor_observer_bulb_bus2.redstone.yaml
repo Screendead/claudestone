@@ -1,0 +1,52 @@
+name: xor_observer_bulb_bus2
+description: "Proof that xor_observer_bulb tiles at a pitch of 1: two copies side by side in x (a 2-bit bus XOR, 2x3x2), tested over all 16 input combinations. Observers output only through their back face, the bulbs emit no power, and the comparators face north-south, so neighbouring columns never interact."
+traits: [tileable, observer_based, pistonless, tick_accurate, survival_friendly, entityless]
+palette:
+  .: air
+  '#': white_concrete
+  U: observer[facing=up,powered=true]
+  D: observer[facing=down,powered=true]
+  L: waxed_copper_bulb
+  a: {input: a0}
+  b: {input: b0}
+  c: {input: a1}
+  d: {input: b1}
+  o: {output: out0, block: 'comparator[facing=north]'}
+  p: {output: out1, block: 'comparator[facing=north]'}
+layers:
+  0: |
+    ac
+    ..
+  1: |
+    DD
+    ##
+  2: |
+    LL
+    op
+  3: |
+    UU
+    ..
+  4: |
+    bd
+    ..
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 | out0 out1
+    0  0  0  0  | 0    0
+    1  0  0  0  | 1    0
+    1  1  0  0  | 0    0
+    0  1  0  0  | 1    0
+    0  1  1  0  | 1    1
+    1  1  1  0  | 0    1
+    1  0  1  0  | 1    1
+    0  0  1  0  | 0    1
+    0  0  1  1  | 0    0
+    1  0  1  1  | 1    0
+    1  1  1  1  | 0    0
+    0  1  1  1  | 1    0
+    0  1  0  1  | 1    1
+    1  1  0  1  | 0    1
+    1  0  0  1  | 1    1
+    0  0  0  1  | 0    1
+  delay: 4

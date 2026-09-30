@@ -1,0 +1,139 @@
+name: analog_lift_down
+description: 'Lossless analog lift going down two levels per comparator: a comparator''s output block (stone at x=2, y=5) strongly powers the dust under it (x=2, y=4) at the full strength, that dust powers the stone it lies on (x=2, y=3) at the same strength, and the next comparator (x=3, y=3, facing west so it reads that stone) copies it into the next block (x=4, y=3), and so on: every 2 game ticks the strength drops two blocks with no decay. One wide (z=0), each step 2 blocks along x and 2 down; stack more steps for any depth. The dusts are isolated dots, so they point into nothing but the block below. Here the top comparator (x=1, y=5) reading the hopper at x=0 is the fixture that sets the input; the lift itself is the two steps x=2..5, and the output dust at x=6, y=1 reads the input strength exactly. 7x6x1. Tests: all 16 strengths arrive unchanged, 6 ticks after the hopper changes (2 for the fixture, 4 for the two steps). Trade-off: twice the depth per tick of analog_lift_up and of a
+  comparator staircase; a dust staircase would lose 1 per step, a repeater restores to 15.'
+traits:
+- analog
+- comparator_based
+- vertical
+- one_wide
+- stackable
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+- fast
+palette:
+  .: air
+  S: stone
+  a: comparator[facing=west]
+  b: {output: out, block: redstone_wire}
+  c: {name: drop2, block: redstone_wire}
+  d: {name: drop1, block: redstone_wire}
+  e: hopper[facing=down]
+layers:
+  0: |
+    .....SS
+  1: |
+    ....Sab
+  2: |
+    ...Sc..
+  3: |
+    ..SaS..
+  4: |
+    .Sd....
+  5: |
+    eaS....
+tests:
+- name: every strength down 4 levels in 4 ticks
+  steps:
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[]}'}
+  - {wait: 6}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=0]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=1]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=1]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=2]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=2]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=3]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=3]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=4]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=4]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=5]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=5]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=6]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=6]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=7]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=7]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=8]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=8]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=9]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=9]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=10]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=10]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=11]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=11]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=12]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=12]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=13]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=13]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=14]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=14]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=15]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=15]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=4]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=4]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=15]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=15]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=0]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=0]'}
+  - {run: 'data merge block ~0 ~5 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 5}
+  - {check: 'unless block ~6 ~1 ~0 redstone_wire[power=9]'}
+  - {wait: 1}
+  - {check: 'if block ~6 ~1 ~0 redstone_wire[power=9]'}

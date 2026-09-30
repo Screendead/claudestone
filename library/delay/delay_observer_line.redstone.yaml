@@ -1,0 +1,37 @@
+name: delay_observer_line
+description: 'Flat edge delay one block tall: a row of observers all facing west, each watching the one to its west, 2 game ticks per block. Every change of input a, rising or falling, comes out of the east observer 8 ticks later as a 2-tick pulse on its east face (it strong-powers the block at x=5). Input a is the west cell (x=0), observers fill x=1 to 4 on the same layer, no base: 4x1x1, so it can run through a floor, under dust or in a 1-high gap where repeaters (which need a block under them) cannot. It carries edges, not levels. Trade-off versus delay_repeater_line: 2 ticks per block instead of up to 8 and pulses only, but half the height and no support blocks; versus delay_observer_tower: the same thing lying down.'
+traits: [flat, horizontal, one_wide, tileable, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly]
+palette:
+  .: air
+  a: {input: a}
+  '>': observer[facing=west]
+  o: {output: out, block: 'observer[facing=west]'}
+layers:
+  1: |
+    a>>>o
+tests:
+- name: each edge becomes a 2 tick pulse 8 ticks later
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}

@@ -1,0 +1,47 @@
+name: or_dust_merge
+description: >-
+  The zero-cost OR: two dust lines meeting in one dust. Interface: a arrives from the
+  west, b from the east, both on layer 1; the merge dust (out) is the output and can
+  continue north or south. Size 1x2x1 (one dust on one support; the input lines are
+  yours). Delay 0 game ticks, and it is analog: out = max(a, b) - 1. Trade-off: no
+  isolation, so a powers b's line and vice versa (b's source sees a). Use it when the
+  inputs are driven by diodes or torches anyway; otherwise pick or_glass_diode (also 0
+  ticks, isolated) or or_block_repeater (2 ticks, isolated, output 15).
+traits: [ultracompact, ultrafast, instant, lightless, silent, pistonless, entityless, flat, one_wide, horizontal, analog, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .=.
+  1: |
+    aob
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 0 | 1
+    1 1 | 1
+  delay: 0
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - expect: {out: 0}
+- name: one tick pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 0}

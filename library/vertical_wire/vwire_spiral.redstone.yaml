@@ -1,0 +1,76 @@
+name: vwire_spiral
+description: 'Instant bidirectional wire in a 2x2 footprint: dust on a spiral staircase of solid blocks, one step per corner. The cell above each dust is air (the next block in that corner is 4 higher), so every step reads its neighbours up and down just as on vwire_staircase. Interface: the bottom dust named bottom at (x0, y1, z1) with driver a north of it, the top dust o at (x0, y9, z1) with driver t north of it; either end can be the input. 2x10x2, 8 up or down, 0 ticks; continue the spiral to go higher (stackable), up to 15 dust before a repeater is needed. Versus the others: the most compact instant two-way riser (40 blocks of volume against 90 for the straight staircase) and the only compact instant way down; lightless and silent. Glass or slab steps should make it one-way up, by the same rule as vwire_glass_zigzag_up (not built).'
+traits:
+- vertical
+- lightless
+- silent
+- instant
+- ultrafast
+- ultracompact
+- stackable
+- reset_safe
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  b: {name: bottom, block: redstone_wire}
+  '-': redstone_wire
+  t: {input: t}
+  o: {output: o, block: redstone_wire}
+layers:
+  0: |
+    ..
+    S.
+    ..
+  1: |
+    a.
+    bS
+    ..
+  2: |
+    ..
+    .-
+    .S
+  3: |
+    ..
+    ..
+    S-
+  4: |
+    ..
+    S.
+    -.
+  5: |
+    ..
+    -S
+    ..
+  6: |
+    ..
+    .-
+    .S
+  7: |
+    ..
+    ..
+    S-
+  8: |
+    ..
+    S.
+    -.
+  9: |
+    t.
+    o.
+    ..
+tests:
+- name: up
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+  delay: 0
+- name: down
+  truth_table: |
+    t | bottom
+    0 | 0
+    1 | 1
+  delay: 0

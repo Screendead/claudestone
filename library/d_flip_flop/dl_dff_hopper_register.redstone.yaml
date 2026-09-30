@@ -1,0 +1,213 @@
+name: dl_dff_hopper_register
+description: "Rising-edge D flip-flop register bit that tiles at pitch 1 (copies directly side by side along z; see dl_dff_hopper_register_x2). Two dl_hopper_register latches in series, master (x=1..5) then slave (x=6..9), all in one vertical plane: each stores one item in a pair of facing hoppers, and a powered hopper is locked. The master's hold is a dust strip on its hoppers fed by clk (cell x=2, y=3), so the master freezes the instant clk rises; the slave's hold is a dust strip on its hoppers fed by nclk (x=9, y=4), the inverted clock, which one torch per bus provides. The master output comparator (x=5, y=2) powers a block whose torch and repeater set the slave's hopper locks, exactly as d does for the master. d enters at x=0, y=1; q is the comparator at x=9, y=3 facing west. Timing (nclk one torch behind clk): q changes 4 ticks after the rising edge; d must be settled 4 ticks before it; everything else, including the falling edge and d changes at any other time, is ignored. Keep clk low for at least 10 ticks so a master move is not delayed by the 8-tick hopper cooldown. Both items start in the west hoppers, so q starts at 0. Blocks (WxHxD) 9x5x1. Silent; one torch per latch, no pistons or entities. Trade-off: 3x the volume of dl_dff_rising, but it stacks into a bus at pitch 1, which repeater locks cannot."
+traits: [one_wide, tileable, vertical, silent, pistonless, entityless, container_based, torch_based, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  d: {input: d}
+  c: {input: clk}
+  n: {input: nclk}
+  r: repeater[facing=west]
+  t: redstone_torch
+  A: 'hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'
+  B: hopper[facing=west]
+  C: comparator[facing=west]
+  q: {output: q, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    .=.=.......
+  1: |
+    dr#r#=.=...
+  2: |
+    ..tABC#r#=.
+  3: |
+    ..c--.tABq.
+  4: |
+    .......--n.
+tests:
+- name: q moves 4 ticks after the rising edge
+  steps:
+  - drive: {nclk: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 20
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 2
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 10
+  - drive: {d: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 2
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - wait: 20
+  - expect: {q: 0}
+- name: setup 4 ticks before the edge
+  steps:
+  - drive: {nclk: 1}
+  - wait: 10
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 20
+  - drive: {d: 0}
+  - wait: 3
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 20
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 20
+  - expect: {q: 0}
+- name: eight cycles of 24 ticks with d flipped mid-cycle
+  steps:
+  - drive: {nclk: 1}
+  - wait: 10
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {nclk: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {nclk: 1}
+  - wait: 6
+  - expect: {q: 0}

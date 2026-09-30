@@ -1,0 +1,60 @@
+name: cross_underpass
+description: 'The smallest crossing: 1x3x3 including its base, 7 blocks. A (along x) is plain dust on the base at y1, passing straight under block X. B (along z) runs one layer up at y2: dust pointing into X from the north, and a repeater on the south side reading X. Dust only weakly powers X, and a weakly powered block powers diodes but never dust, so A below never sees B; A''s dust does not power the block above it, so B never sees A. A is instant (0 ticks, it is just wire), B costs one repeater (2 ticks) and leaves at full strength. Interface: A enters the west face and leaves the east face at y1 (the probed A cell is the one under X); B enters from the north at y2 into the dust and leaves the repeater southward at y2. Tiles along x at pitch 2 with A one continuous wire (tested in cross_underpass_bus), at pitch 1 with alternating lane directions (cross_alternating_bus), and stacks at a pitch of 3 layers (cross_underpass_stack). Versus the others: cross_instant_column makes B instant too
+  for one more layer; cross_underpass_inline brings B back to A''s layer; cross_analog_underpass keeps B''s signal strength.'
+traits:
+- ultracompact
+- fast
+- lightless
+- silent
+- pistonless
+- entityless
+- one_wide
+- tileable
+- stackable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  A: {output: a_out, block: redstone_wire}
+  b: {input: b}
+  '-': redstone_wire
+  B: {output: b_out, block: 'repeater[facing=north]'}
+layers:
+  0: |
+    ..
+    ..
+    .=
+    ..
+  1: |
+    ..
+    .#
+    aA
+    .#
+  2: |
+    .b
+    .-
+    .#
+    .B
+tests:
+- name: independent
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 2
+- name: a is instant
+  truth_table: |
+    a | a_out
+    0 | 0
+    1 | 1
+  delay: 0

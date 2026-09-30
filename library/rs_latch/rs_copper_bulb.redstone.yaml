@@ -1,0 +1,135 @@
+name: rs_copper_bulb
+description: >-
+  Copper-bulb RS latch. A waxed copper bulb is a T flip-flop that toggles on every
+  rising edge of its power, so on its own it cannot ignore a second set. Here a subtract
+  comparator F reads the bulb and feeds its 15 back onto the bulb through a repeater and
+  a dust loop over the top, so a lit bulb keeps itself powered and every further set
+  edge is masked. Reset is an observer that watches the r cell and pulses F's side: F
+  drops, the feedback lapses for 2 gt (bulb unpowered, still lit), then returns, and
+  that fresh rising edge toggles the bulb off. An unlit bulb has no feedback to cut, so
+  a reset of a reset latch does nothing. The repeater after F is load-bearing: it makes
+  F's scheduled tick outrank the observer's, so F sees the 2 gt observer pulse instead
+  of swallowing it. Interface (side view along x=0, north = z0): s is the cell under the
+  bulb (x0,y0,z1); the bulb is at (x0,y1,z1); q is the comparator on the bulb's north
+  face (x0,y1,z0), outputting north; F is south of the bulb (x0,y1,z2) and the observer
+  (x1,y1,z2) looks east at the r cell (x2,y1,z2). Set: q rises in 2 gt; hold s for at
+  least 4 gt so the feedback takes over. Reset is edge-triggered: q falls 10 gt after r
+  rises, and r's falling edge does nothing. s held through a reset keeps the bulb
+  powered, so set wins. 2x4x5 of blocks. Trade-offs: slow reset, and the bulb lights up
+  and clicks; in exchange the state lives in one block's lit property, survives unloads,
+  and the observer makes reset edge-triggered for free.
+traits: [observer_based, comparator_based, vertical, pistonless, entityless, reset_safe, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  X: stone
+  O: waxed_copper_bulb[lit=false,powered=false]
+  F: comparator[facing=north,mode=subtract]
+  W: observer[facing=east]
+  v: repeater[facing=north]
+  '-': redstone_wire
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: 'comparator[facing=south]'}
+layers:
+  0: |
+    =..
+    s..
+    =..
+    =..
+    ...
+  1: |
+    q..
+    O..
+    FWr
+    v..
+    X..
+  2: |
+    ...
+    -..
+    X..
+    X..
+    -..
+  3: |
+    ...
+    ...
+    -..
+    -..
+    ...
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    0 1 | 0
+    0 0 | 0
+  delay: 10
+- name: set 2 gt, reset 10 gt after the rising edge
+  steps:
+  - drive: {s: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 2}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 9}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 20}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: set held through a reset wins
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 0}
+  - {wait: 20}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+- name: repeated sets and resets are idempotent
+  steps:
+  - drive: {r: 1}
+  - {wait: 20}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 20}
+  - drive: {r: 0}
+  - {wait: 20}
+  - drive: {r: 1}
+  - {wait: 20}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}

@@ -1,0 +1,46 @@
+name: not_target_tap
+description: |
+  Inverts a signal tapped off the side of a dust line without breaking or bending the line.
+  Dust only powers the blocks it points into, so a straight line running past an ordinary
+  block leaves it unpowered; but dust always connects to a target block (it counts as a
+  signal source) and a target block is a full conductor, so the line reaches sideways into
+  it and a wall torch on its far face inverts the line. The plain concrete block on the other
+  side of the same dust is the control: its torch never turns off.
+  Interface: the line runs west to east along z=2 from the driver at (0,1,2) to the
+  pass-through dust thru (3,1,2). Target block at (2,1,3); output: wall torch at (2,1,4)
+  facing south. Control torch plain at (2,1,0) facing north on concrete (2,1,1). Delay 2 ticks
+  (one torch); the line itself is unaffected (0 ticks, same strength).
+  Trade-off: needs a target block (survival-craftable) and one extra side cell next to the
+  line; the textbook alternative is a dust branch into a block, which bends the main line
+  into a T and costs a cell of dust. Emits light; torch burnout limit applies.
+traits: [compact, fast, horizontal, flat, torch_based, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  T: target
+  a: {input: a}
+  h: {name: thru, block: redstone_wire}
+  p: {name: plain, block: 'redstone_wall_torch[facing=north]'}
+  o: {output: out, block: 'redstone_wall_torch[facing=south]'}
+layers:
+  0: |
+    ....
+    ....
+    .===
+    ....
+    ....
+  1: |
+    ..p.
+    ..#.
+    a--h
+    ..T.
+    ..o.
+tests:
+- name: logic
+  truth_table: |
+    a | out thru plain
+    0 | 1   0    1
+    1 | 0   1    1
+  delay: 2

@@ -1,0 +1,68 @@
+name: tff_bulb_bus
+description: >-
+  Four tff_copper_bulb cells packed as a 2x2 array to prove the cell tiles: two side by
+  side in z at a 1-block pitch and a second pair stacked 2 blocks above. Nothing leaks
+  between neighbours: a bulb only reacts to power, not to a neighbouring bulb, the
+  comparators only power forward (east), and each driver cell touches only its own bulb
+  (the support blocks of the lower comparators carry the upper ones). Interface: inputs
+  t0/t1 at (x0,y1,z0)/(x0,y1,z1) and t2/t3 at (x0,y3,z0)/(x0,y3,z1), each west of its
+  bulb; outputs q0..q3 are the comparators at x2 on the same row and layer, facing west
+  and powering x3. 2x4x2 of blocks for 4 bits (4 blocks per bit including supports, the same
+  per-bit volume as a single tff_copper_bulb, hence ultracompact);
+  delay 2 gt per bit. Use it as the storage for a bus of toggles or as the template
+  for laying out many counters in parallel. Trade-off: bulbs click and light up.
+palette:
+  .: air
+  '=': smooth_stone
+  B: waxed_copper_bulb
+  w: {input: t0}
+  x: {input: t1}
+  y: {input: t2}
+  z: {input: t3}
+  a: {output: q0, block: 'comparator[facing=west]'}
+  b: {output: q1, block: 'comparator[facing=west]'}
+  c: {output: q2, block: 'comparator[facing=west]'}
+  d: {output: q3, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    ..=
+    ..=
+  1: |
+    wBa
+    xBb
+  2: |
+    ..=
+    ..=
+  3: |
+    yBc
+    zBd
+tests:
+- name: placed reset
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+- name: bits toggle independently
+  truth_table: |
+    t0 t1 t2 t3 | q0 q1 q2 q3
+    0  1  0  0  | 0  1  0  0
+    0  0  0  0  | 0  1  0  0
+    1  0  0  1  | 1  1  0  1
+    0  0  0  0  | 1  1  0  1
+    0  0  1  0  | 1  1  1  1
+    0  0  0  0  | 1  1  1  1
+    1  1  1  1  | 0  0  0  0
+    0  0  0  0  | 0  0  0  0
+  delay: 2
+- name: one bit held high while the others toggle
+  steps:
+  - drive: {t1: 1}
+  - wait: 5
+  - drive: {t0: 1, t2: 1, t3: 1}
+  - wait: 5
+  - drive: {t0: 0, t2: 0, t3: 0}
+  - wait: 5
+  - drive: {t0: 1, t3: 1}
+  - wait: 5
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {t1: 0}
+  - wait: 20
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}

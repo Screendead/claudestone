@@ -1,0 +1,142 @@
+name: dec_enc_analog
+description: >-
+  Priority encoder to signal strength: of inputs 1-8, the highest one on sets the output
+  strength to its number (none = 0), in 2 game ticks, from one dust line and two
+  comparators. Input k powers the line cell at distance 9-k from the output end, so the
+  line's end carries 6+k for the highest k (dust takes the maximum, so priority is free
+  and instant); the output comparator (0,1) faces east, reads that end behind it and
+  subtracts a constant 6 at its side, which comparator k (0,2) reads from a composter at
+  level 6 (0,3). Interface (x east, z south, layer 1 on a 10x4 base): inputs d8..d1 at
+  (2..9, 0) are strong sources on the north side of the line (buttons, levers, redstone
+  blocks); the output comparator leaves west off the edge at strength k (tested for
+  every k and for overlapping inputs). 10x2x4, delay 2 game ticks on both edges.
+  Feed it into dec_analog_onehot to get one-hot back, or into a single comparator to
+  compare against a threshold. Trade-offs: one wire out instead of three bits, and
+  priority at no cost, but the output is analog: reading it as bits needs a decoder, and
+  it cannot drive a long dust run without losing value (repeat it with a comparator, not
+  a repeater). A composter at level 7 is not a constant: it ripens to 8 a second later,
+  which is why this uses 6.
+traits:
+- ultracompact
+- ultrafast
+- flat
+- horizontal
+- analog
+- lightless
+- silent
+- pistonless
+- entityless
+- comparator_based
+- container_based
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  k: comparator[facing=south]
+  c: composter[level=6]
+  '1': {input: d1}
+  '2': {input: d2}
+  '3': {input: d3}
+  '4': {input: d4}
+  '5': {input: d5}
+  '6': {input: d6}
+  '7': {input: d7}
+  '8': {input: d8}
+  o: {output: out, block: 'comparator[facing=east,mode=subtract]'}
+layers:
+  0: |
+    ==========
+    ==========
+    ==========
+    ==========
+  1: |
+    ..87654321
+    o---------
+    k.........
+    c.........
+tests:
+- name: any input
+  truth_table: |-
+    d1 d2 d3 d4 d5 d6 d7 d8 | out
+    0 0 0 0 0 0 0 0 | 0
+    1 0 0 0 0 0 0 0 | 1
+    0 1 0 0 0 0 0 0 | 1
+    0 0 1 0 0 0 0 0 | 1
+    0 0 0 1 0 0 0 0 | 1
+    0 0 0 0 1 0 0 0 | 1
+    0 0 0 0 0 1 0 0 | 1
+    0 0 0 0 0 0 1 0 | 1
+    0 0 0 0 0 0 0 1 | 1
+    0 0 0 0 0 0 0 0 | 0
+  delay: 2
+- name: strength equals the input number
+  steps:
+  - drive: {d1: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:1}'}
+  - drive: {d1: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d2: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:2}'}
+  - drive: {d2: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d3: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:3}'}
+  - drive: {d3: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d4: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:4}'}
+  - drive: {d4: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d5: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:5}'}
+  - drive: {d5: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d6: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:6}'}
+  - drive: {d6: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d7: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:7}'}
+  - drive: {d7: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+  - drive: {d8: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:8}'}
+  - drive: {d8: 0}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:0}'}
+- name: highest input wins
+  steps:
+  - drive: {d2: 1, d5: 1}
+  - {wait: 4}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:5}'}
+  - drive: {d8: 1}
+  - {wait: 1}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:5}'}
+  - {wait: 1}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:8}'}
+  - drive: {d8: 0, d5: 0}
+  - {wait: 1}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:8}'}
+  - {wait: 1}
+  - {check: 'if block ~0 ~1 ~1 comparator{OutputSignal:2}'}
+  - drive: {d2: 0}
+  - {wait: 2}
+  - expect: {out: 0}

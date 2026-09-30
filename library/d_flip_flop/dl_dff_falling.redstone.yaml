@@ -1,0 +1,151 @@
+name: dl_dff_falling
+description: 'Falling-edge D flip-flop: dl_dff_rising with the two locks swapped. Data runs west to east on the north row: d enters the master repeater at x=1, passes a concrete block into the slave repeater q at x=3 (facing west). clk arrives at the middle of the south side (x=2, z=1). The master is locked by a subtract-mode comparator (rear: a cake, constant 14; east side: the clk cell) so it freezes while clk is low; the slave is locked by a repeater fed from clk through two dust, so it freezes while clk is high. q changes exactly 4 ticks after the falling edge; d must be settled 1 tick before the edge; a d change in the same tick as the edge is a race decided by update order (the master lock is a comparator, not a prioritised repeater), and a change 1 tick after it is ignored. The rising edge and other d changes never reach q. Blocks (WxHxD) 3x2x3. Lightless and silent. Trade-off versus dl_dff_rising: same size and speed, but no same-tick hold guarantee.'
+traits: [compact, fast, flat, horizontal, silent, lightless, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  d: {input: d}
+  c: {input: clk}
+  m: repeater[facing=west]
+  q: {output: q, block: 'repeater[facing=west]'}
+  M: repeater[facing=south]
+  S: comparator[facing=south,mode=subtract]
+  K: cake
+layers:
+  0: |
+    .=.=
+    .=.=
+    .===
+  1: |
+    dm#q
+    .ScM
+    .K--
+tests:
+- name: captures on the falling edge in 4 ticks
+  steps:
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 10
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: setup one tick, later change ignored
+  steps:
+  - drive: {clk: 1}
+  - wait: 10
+  - drive: {d: 1}
+  - wait: 1
+  - drive: {clk: 0}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - wait: 10
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+- name: seven cycles with d flipped after each edge
+  steps:
+  - drive: {clk: 1}
+  - wait: 10
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wait: 4
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 1}

@@ -1,0 +1,67 @@
+name: or_block_repeater
+description: >-
+  Two dust lines point into one block from opposite sides and a single repeater reads
+  the block. Dust soft-powers the block it points into, and a soft-powered block never
+  powers dust, so the inputs cannot feed each other: the block itself is the isolation.
+  Interface: a enters from the west, b from the east (dust on layer 1); out is the
+  repeater on the south face, facing north (input side north), output full strength 15
+  toward the south. A third input can point into the block from the north. Size 3x2x2,
+  flat, delay 2 game ticks (the repeater). Trade-off: half the size of or_gate with the
+  same delay and a regenerated output; or_glass_diode is 2 ticks faster but weaker.
+traits: [compact, fast, lightless, silent, pistonless, entityless, flat, horizontal, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  o: {output: out, block: 'repeater[facing=north]'}
+layers:
+  0: |
+    .=.=.
+    ..=..
+  1: |
+    aiSjb
+    ..o..
+tests:
+- name: logic
+  truth_table: |
+    a b | out ia ib
+    0 0 | 0 0 0
+    0 1 | 1 0 1
+    1 0 | 1 1 0
+    1 1 | 1 1 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: one tick pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

@@ -1,0 +1,49 @@
+name: delay_torch_tower
+description: 'Vertical delay that also lifts the signal: a one-wide torch tower, each torch on the block below it and powering the block above, 2 game ticks per torch and 2 blocks of height per torch. Four torches keep the polarity, so out follows a 8 ticks later on both edges. Input a is at the west (x=0, y=1): it powers the dust at x=1, which points east into the concrete foot at x=2; the torches stand at x=2, y=2, 4, 6 and 8, the top one is out. 2x9x1. Use an odd count for an inverting delay, and stop at any torch to tap an intermediate delay. Trade-off: the fastest way up (1 tick per block of height, no repeaters), but torches light up, burn out above 8 toggles in 60 ticks, and it only goes up; for a lightless or silent vertical line see delay_observer_tower.'
+traits: [vertical, one_wide, torch_based, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  '-': redstone_wire
+  '*': redstone_torch
+  o: {output: out, block: redstone_torch}
+layers:
+  0: |
+    .=.
+  1: |
+    a-#
+  2: |
+    ..*
+  3: |
+    ..#
+  4: |
+    ..*
+  5: |
+    ..#
+  6: |
+    ..*
+  7: |
+    ..#
+  8: |
+    ..o
+tests:
+- name: both edges 8 ticks
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+  delay: 8
+- name: exact edges
+  steps:
+  - drive: {a: 1}
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 7
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

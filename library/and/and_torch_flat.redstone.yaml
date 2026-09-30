@@ -1,0 +1,50 @@
+name: and_torch_flat
+description: >-
+  Three-torch AND, two blocks tall. Each input dust points into its own block;
+  the wall torch on that block's east face inverts it. The two inverted signals
+  meet on one dust between the torches, and that dust powers the base block
+  under it, which carries the output torch on its east face at ground level
+  (NOR of the inversions = AND). Interface: A enters as dust from the west on the
+  north row, B on the south row, both at y=1; the output torch (out) faces east
+  at y=0 and hard-powers the cell above it, so take the output from a block
+  there or from dust east of the torch. 4x2x3 box. Delay 4gt on both inputs
+  (tested). The general-purpose AND: cheap, flat, symmetric; and_comparator_lightless
+  is a quarter of the volume and dark, and_piston_gate is faster.
+  Like every torch design it burns out if a torch toggles 8 times within
+  60gt (then it stays dark for 160gt), so inputs must not toggle faster than
+  that; the comparator variants have no such limit.
+traits: [compact, flat, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  b: {input: b}
+  '-': redstone_wire
+  ): redstone_wall_torch[facing=east]
+  m: {name: nand, block: redstone_wire}
+  o: {output: out, block: 'redstone_wall_torch[facing=east]'}
+layers:
+  0: |
+    .=...
+    ...=o
+    .=...
+  1: |
+    a-#).
+    ...m.
+    b-#).
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+    0 0 | 0
+    1 0 | 0
+    1 1 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+  delay: 4

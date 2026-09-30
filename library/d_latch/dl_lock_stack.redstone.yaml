@@ -1,0 +1,87 @@
+name: dl_lock_stack
+description: 'Three dl_lock_pair latches stacked vertically at a pitch of 2 blocks, sharing one hold line that climbs a glass zigzag: a register whose bits sit on top of each other, 1 block wide and 4 deep. Each bit is a data repeater q (x=1, z=0, facing west: d enters from x=0, q drives x=2) locked from its south by a repeater whose input is the hold dust at z=2 on that level; the dust zigzags between z=2 and z=3 on glass, which does not cut the diagonal connection, so one hold input (x=0, y=1, z=2) reaches every level with no torch. Bits are at y=1, 3, 5 (d0..d2 at x=0; q0..q2 are the repeaters). Timing equals dl_lock_pair: q follows d in 2 ticks, hold freezes all bits 2 ticks after it rises (d must settle 1 tick before; a same-tick change is ignored), release passes d in 4 ticks. The hold dust loses 2 strength per bit, so add a repeater after 7 bits. hold is active-low (one inverter per register makes an enable). Blocks (WxHxD) 1x6x4 for three bits. Lightless and silent. Trade-off: the densest multi-bit register here (8 cells per bit) and as fast as the single latch, but the bits stack vertically, so the data lines must be routed on alternate layers; for a side-by-side bus use dl_hopper_register.'
+traits: [stackable, vertical, lockable, compact, fast, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  '-': redstone_wire
+  a: {input: d0}
+  b: {input: d1}
+  c: {input: d2}
+  h: {input: hold}
+  x: {output: q0, block: 'repeater[facing=west]'}
+  y: {output: q1, block: 'repeater[facing=west]'}
+  z: {output: q2, block: 'repeater[facing=west]'}
+  v: repeater[facing=south]
+layers:
+  0: |
+    .=..
+    .=..
+    .G..
+    ....
+  1: |
+    ax..
+    .v..
+    h-..
+    .G..
+  2: |
+    .=..
+    .=..
+    .G..
+    .-..
+  3: |
+    by..
+    .v..
+    .-..
+    .G..
+  4: |
+    .=..
+    .=..
+    .G..
+    .-..
+  5: |
+    cz..
+    .v..
+    .-..
+    ....
+tests:
+- name: bits are independent, 2 ticks
+  truth_table: |
+    d0 d1 d2 | q0 q1 q2
+    0 0 0 | 0 0 0
+    1 0 0 | 1 0 0
+    0 1 0 | 0 1 0
+    0 0 1 | 0 0 1
+    1 1 0 | 1 1 0
+    0 1 1 | 0 1 1
+    1 0 1 | 1 0 1
+    1 1 1 | 1 1 1
+  delay: 2
+- name: shared hold freezes every bit
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0}
+  - drive: {d0: 1, d2: 1}
+  - wait: 4
+  - drive: {hold: 1}
+  - wait: 4
+  - drive: {d0: 0, d1: 1, d2: 0}
+  - wait: 20
+  - expect: {q0: 1, q1: 0, q2: 1}
+  - drive: {hold: 0}
+  - wait: 3
+  - expect: {q0: 1, q1: 0, q2: 1}
+  - wait: 1
+  - expect: {q0: 0, q1: 1, q2: 0}
+- name: setup one tick, same-tick change ignored, on the top bit
+  steps:
+  - drive: {d2: 1}
+  - wait: 1
+  - drive: {hold: 1}
+  - wait: 10
+  - expect: {q2: 1}
+  - drive: {hold: 0}
+  - wait: 10
+  - drive: {d2: 0, hold: 1}
+  - wait: 10
+  - expect: {q2: 1}

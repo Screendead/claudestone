@@ -1,0 +1,64 @@
+name: dl_hopper_register_x3
+description: 'Three dl_hopper_register bits placed side by side at pitch 1 (z=0, 1, 2), proving the design tiles: each bit has its own d (d0..d2 at x=0) and q (q0..q2, comparators at x=5), and a single hold input (x=5, y=3, z=1) powers the shared two-dust-wide hold sheet on top of all six hoppers. Every combination of d0..d2 reaches its own q in exactly 6 ticks with no crosstalk, and hold freezes all bits at once. Blocks (WxHxD) 5x4x3. See dl_hopper_register for how a bit works and its timing.'
+traits: [tileable, vertical, lockable, silent, pistonless, entityless, container_based, torch_based, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  a: {input: d0}
+  b: {input: d1}
+  c: {input: d2}
+  h: {input: hold}
+  r: repeater[facing=west]
+  t: redstone_torch
+  A: 'hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'
+  B: hopper[facing=west]
+  x: {output: q0, block: 'comparator[facing=west]'}
+  y: {output: q1, block: 'comparator[facing=west]'}
+  z: {output: q2, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    .=.=.=
+    .=.=.=
+    .=.=.=
+  1: |
+    ar#r#=
+    br#r#=
+    cr#r#=
+  2: |
+    ..tABx
+    ..tABy
+    ..tABz
+  3: |
+    ...--.
+    ...--h
+    ...--.
+tests:
+- name: bits are independent, 6 ticks
+  truth_table: |
+    d0 d1 d2 | q0 q1 q2
+    0 0 0 | 0 0 0
+    1 0 0 | 1 0 0
+    0 1 0 | 0 1 0
+    0 0 1 | 0 0 1
+    1 1 0 | 1 1 0
+    0 1 1 | 0 1 1
+    1 0 1 | 1 0 1
+    1 1 1 | 1 1 1
+  delay: 6
+- name: shared hold freezes every bit
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0}
+  - drive: {d0: 1, d2: 1}
+  - wait: 10
+  - drive: {hold: 1}
+  - wait: 5
+  - drive: {d0: 0, d1: 1, d2: 0}
+  - wait: 20
+  - expect: {q0: 1, q1: 0, q2: 1}
+  - drive: {hold: 0}
+  - wait: 2
+  - expect: {q0: 1, q1: 0, q2: 1}
+  - wait: 1
+  - expect: {q0: 0, q1: 1, q2: 0}

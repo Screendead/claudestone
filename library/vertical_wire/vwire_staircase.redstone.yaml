@@ -1,0 +1,155 @@
+name: vwire_staircase
+description: 'Instant bidirectional wire: dust on a one-wide staircase of solid blocks. Each dust reads the one above it because the step beside it is a conductor with air above the dust, and the one below it because the block beside it one level up is air, so power flows both ways. Interface: bottom end is the dust named bottom at (y1, z1) with driver a north of it; top end is the dust o at (y9, z9) with driver t south of it; either end can be the input. 1x10x9, 8 up or down, 0 ticks. Versus the others: the only one-wide design that goes down instantly (a two-column zigzag can''t: the support would have to be a conductor and a non-conductor at once), survival-cheap, but it takes one block of run per block of rise; vwire_spiral packs the same thing into 2x2. Strength drops 1 per step: 15 blocks of travel before a repeater landing is needed.'
+traits:
+- vertical
+- lightless
+- silent
+- one_wide
+- instant
+- ultrafast
+- reset_safe
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  b: {name: bottom, block: redstone_wire}
+  '-': redstone_wire
+  o: {output: o, block: redstone_wire}
+  t: {input: t}
+layers:
+  0: |
+    .
+    S
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+  1: |
+    a
+    b
+    S
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+  2: |
+    .
+    .
+    -
+    S
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+  3: |
+    .
+    .
+    .
+    -
+    S
+    .
+    .
+    .
+    .
+    .
+    .
+  4: |
+    .
+    .
+    .
+    .
+    -
+    S
+    .
+    .
+    .
+    .
+    .
+  5: |
+    .
+    .
+    .
+    .
+    .
+    -
+    S
+    .
+    .
+    .
+    .
+  6: |
+    .
+    .
+    .
+    .
+    .
+    .
+    -
+    S
+    .
+    .
+    .
+  7: |
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    -
+    S
+    .
+    .
+  8: |
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    -
+    S
+    .
+  9: |
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    o
+    t
+tests:
+- name: up
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+  delay: 0
+- name: down
+  truth_table: |
+    t | bottom
+    0 | 0
+    1 | 1
+  delay: 0

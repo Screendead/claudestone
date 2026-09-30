@@ -1,0 +1,57 @@
+name: or_nor_comparator_any_strength
+description: >-
+  Lightless NOR that treats any input strength 1-15 as on. A comparator in subtract
+  mode reads a composter at level 1 behind it (rear = 1); any side input of 1 or more
+  meets or beats the rear, so the output is off, and with both inputs off it is 1.
+  Interface: comparator faces north (composter to its north); a on the west side, b on
+  the east side, layer 1; out is the comparator, output south at strength 1 (a repeater
+  after it restores 15, at +2 ticks). Core 1x2x2 (composter, comparator, support); the
+  test fixture feeds a through 15 dust so it arrives at strength 1 (named weak), proving
+  the weakest input still switches it. Delay 2 game ticks. Trade-off versus
+  or_nor_comparator: accepts weak dust inputs, but its own output is only strength 1.
+  A composter is a plain block state (no block entity), so it pastes exactly.
+traits: [compact, fast, ultrafast, comparator_based, container_based, lightless, silent, pistonless, entityless, flat, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  K: composter[level=1]
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  w: {name: weak, block: redstone_wire}
+  o: {output: out, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    ..................
+    .================.
+  1: |
+    ................K.
+    a--------------wob
+tests:
+- name: logic
+  truth_table: |
+    a b | out weak
+    0 0 | 1 0
+    0 1 | 0 0
+    1 0 | 0 1
+    1 1 | 0 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

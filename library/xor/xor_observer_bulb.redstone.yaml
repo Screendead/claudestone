@@ -1,0 +1,153 @@
+name: xor_observer_bulb
+description: "Parity instead of logic. The observer below the bulb watches a's cell and the observer above it watches b's cell. Each observer pulses the waxed copper bulb on every change of its input, rising or falling. The bulb toggles on each pulse, so it is lit exactly when a and b differ, and a comparator reads it. Interface: a is the cell directly below the column, (0,0,0); b is the cell directly above, (0,4,0). Each can be any block whose state changes with the signal, such as dust, a repeater or a redstone block. A strength-only change on dust also counts as an edge. The output is the comparator at (0,2,1), which reads the bulb and faces south. Size 1x3x2 (6 blocks). It is 1 wide, and copies tile at a pitch of 1 for buses (see xor_observer_bulb_bus2): observers, bulb and comparator only interact along their own column. Delay 4 game ticks on every edge (observer, then comparator). Trade-offs: it counts edges instead of reading levels. a and b must change at least 2 ticks apart; edges 0 or 1 tick apart merge into one pulse, and the output stays inverted until the next edge (the hazard test pins this). Build it with both inputs off. The palette places the observers already powered, because a setblock placement fires an observer once and would toggle the bulb. The bulb lights and clicks. Use a comparator XOR if the inputs can change together."
+traits: [ultracompact, fast, one_wide, tileable, vertical, observer_based, pistonless, tick_accurate, survival_friendly, entityless]
+palette:
+  .: air
+  '#': white_concrete
+  U: observer[facing=up,powered=true]
+  D: observer[facing=down,powered=true]
+  L: waxed_copper_bulb
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: 'comparator[facing=north]'}
+layers:
+  0: |
+    a
+    .
+  1: |
+    D
+    #
+  2: |
+    L
+    o
+  3: |
+    U
+    .
+  4: |
+    b
+    .
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+  delay: 4
+- name: edges
+  steps:
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+- name: edges 2 ticks apart
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 12
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 12
+  - expect: {out: 0}
+- name: hazard, edges 0 or 1 tick apart
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 12
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 12
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 0}
+  - wait: 12
+  - expect: {out: 1}

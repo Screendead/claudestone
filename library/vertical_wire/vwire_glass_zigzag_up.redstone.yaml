@@ -1,0 +1,84 @@
+name: vwire_glass_zigzag_up
+description: 'Instant one-way riser. Dust zigzags between two columns, each dust sitting on a glass block that is also the block above the dust one step lower. Dust reads a neighbour''s wire one level down whenever the block beside it is a non-conductor (RedstoneWireEvaluator.getIncomingWireSignal), so power climbs; going down would need that same support to be a conductor, so the column is also a diode: a signal at the top never reaches the bottom (tested). Top slabs work in place of glass (checked). Interface: input driver a on the north side of the bottom dust (y1); output o is the dust at y9 in the north column; t is a test-only driver above the output. 1x10x2 (x,y,z), rise 8, 0 ticks. Dust loses 1 strength per step, so it tops out at 15 blocks of rise; see vwire_glass_zigzag_long past that. Versus the others: the smallest instant riser; it cannot carry a signal down (vwire_spiral, vwire_staircase can) and two copies cannot sit side by side at pitch 1 (a dust always sees the neighbouring
+  column''s dust through the glass), so leave a one-block gap for buses.'
+traits:
+- vertical
+- lightless
+- silent
+- one_wide
+- instant
+- ultrafast
+- ultracompact
+- reset_safe
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  b: {name: bottom, block: redstone_wire}
+  A: glass
+  '-': redstone_wire
+  o: {output: o, block: redstone_wire}
+  t: {input: t}
+layers:
+  0: |
+    .
+    S
+    .
+  1: |
+    a
+    b
+    A
+  2: |
+    .
+    A
+    -
+  3: |
+    .
+    -
+    A
+  4: |
+    .
+    A
+    -
+  5: |
+    .
+    -
+    A
+  6: |
+    .
+    A
+    -
+  7: |
+    .
+    -
+    A
+  8: |
+    .
+    A
+    -
+  9: |
+    .
+    o
+    .
+  10: |
+    .
+    t
+    .
+tests:
+- name: logic
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+  delay: 0
+- name: one way
+  steps:
+  - drive: {t: 1}
+  - {wait: 10}
+  - expect: {o: 1, bottom: 0}
+  - drive: {t: 0, a: 1}
+  - {wait: 2}
+  - expect: {o: 1, bottom: 1}

@@ -1,0 +1,100 @@
+name: wire_observer_bus
+description: >-
+  An edge wire with a 1x1 cross-section and no support blocks: a chain of observers, each
+  watching the one before it and powering the one behind it. Each change of the input (either
+  edge) travels as a 2-tick pulse at 2 game ticks per block. An observer sees only the block its
+  face points at, and powers only the block behind it, which is the next observer in its own
+  line, so chains can be packed solid in both directions: the densest bus in the library. Shown as a
+  2x2 bundle of 8-observer lines along x: inputs a,b (y=0, z=0/1) and c,d (y=1, z=0/1) are driver
+  cells at x=0; every observer faces west (watches west, outputs east); the outputs A,B,C,D are
+  the last observers (x=8), which pulse 16 ticks after each input edge. Size 9x2x2. It carries
+  events, not levels: two input edges closer than 4 ticks merge into one pulse, and a level
+  needs a latch or T flip-flop at the far end. Trade-off: a quarter of the cross-section of
+  wire_checker_bus and it turns and climbs freely, but 16x slower per block and pulses only;
+  wire_rail_pulse_bus is 10x faster per block if 2 levels of height are free.
+traits: [ultracompact, observer_based, tileable, stackable, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  O: observer[facing=west]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  A: {output: A, block: 'observer[facing=west]'}
+  B: {output: B, block: 'observer[facing=west]'}
+  C: {output: C, block: 'observer[facing=west]'}
+  D: {output: D, block: 'observer[facing=west]'}
+layers:
+  0: |
+    aOOOOOOOA
+    bOOOOOOOB
+  1: |
+    cOOOOOOOC
+    dOOOOOOOD
+tests:
+- name: rising edge pulses one line only
+  steps:
+  - drive: {a: 1}
+  - wait: 15
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 20
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+- name: falling edge pulses too
+  steps:
+  - drive: {d: 1}
+  - wait: 30
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - drive: {d: 0}
+  - wait: 15
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 1}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 1}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+- name: diagonal lines at once
+  steps:
+  - drive: {b: 1, c: 1}
+  - wait: 16
+  - expect: {A: 0, B: 1, C: 1, D: 0}
+  - wait: 2
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+- name: edges 4 ticks apart stay separate
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 12
+  - expect: {A: 1, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0, C: 0, D: 0}
+  - wait: 1
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+- name: edges 2 ticks apart merge
+  steps:
+  - drive: {c: 1}
+  - wait: 2
+  - drive: {c: 0}
+  - wait: 14
+  - expect: {A: 0, B: 0, C: 1, D: 0}
+  - wait: 2
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 2
+  - expect: {A: 0, B: 0, C: 0, D: 0}
+  - wait: 10
+  - expect: {A: 0, B: 0, C: 0, D: 0}

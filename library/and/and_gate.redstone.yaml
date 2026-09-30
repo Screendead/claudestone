@@ -1,0 +1,43 @@
+name: and_gate
+description: >-
+  The textbook three-torch AND: each input goes through a repeater into a block,
+  the wall torch on that block inverts it, the two inversions merge on dust that
+  points into a middle block, and the torch on that block inverts again. The
+  input repeaters make each input one-way (nothing inside can back-feed the
+  input lines) at a cost of 2gt. Interface: A enters from the west on the north
+  row, B on the south row, both at y=1 into repeaters facing east; the output
+  dust (out) is at the east end of the middle row. 8x2x3. Delay 6gt (tested).
+  and_torch_flat is the same circuit with dust instead of the repeaters: half
+  the volume and 4gt.
+  Like every torch design it burns out if a torch toggles 8 times within
+  60gt (then it stays dark for 160gt), so inputs must not toggle faster than
+  that; the comparator variants have no such limit.
+traits: [flat, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '>': repeater[facing=west]
+  '#': white_concrete
+  ): redstone_wall_torch[facing=east]
+  '-': redstone_wire
+  o: {output: out, block: redstone_wire}
+  b: {input: b}
+layers:
+  0: |
+    .====....
+    ....=====
+    .====....
+  1: |
+    a>#)-....
+    ....--#)o
+    b>#)-....
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 0
+    1 0 | 0
+    1 1 | 1
+  delay: 6

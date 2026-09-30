@@ -1,0 +1,141 @@
+name: analog_peak_hold
+description: 'Analog peak detector: q holds the largest strength its input d has had since the last reset, losslessly and indefinitely. The memory is a ring of four comparators around a 3x3 square (x=0..2, z=3..5) passing the value through white concrete corner blocks with no decay, as in dl_analog_ring, but writing needs no gate: d is a dust (x=0, z=2) pointing into the north-west corner block, and a block takes the strongest power into it, so the ring holds max(ring, d). Reset: the east ring comparator (x=2, z=4) is in subtract mode with the r dust (x=3, z=4) on its side; holding r for at least one lap (8 game ticks) empties the ring down to the present d. Output q is the dust (x=2, z=2) beside the north-east corner, which that corner''s comparator powers at full strength: q shows a new peak 2 game ticks after d reaches it. d must stay at a new peak for one lap (8 ticks) to be stored whole; a shorter pulse leaves a travelling pattern. Core 4x2x4 (z=2..5); the hopper and comparator at z=0..1
+  are the fixture setting d, and d_max forces 15. Tests: q starts at 0, takes 7 then 12 while ignoring 3 and 0, catches a forced 15, and a reset leaves exactly the present input (5, then 0). Trade-off: no enable wiring at all, the cheapest analog memory; a sample-and-hold that can also go down needs dl_analog_ring''s gated write.'
+traits:
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- compact
+- flat
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  a: hopper[facing=down]
+  b: comparator[facing=north]
+  c: {name: d, block: redstone_wire}
+  d: {output: q, block: redstone_wire}
+  '#': white_concrete
+  e: comparator[facing=west]
+  f: comparator[facing=south]
+  g: {name: clear, block: 'comparator[facing=north,mode=subtract]'}
+  h: {name: r_dust, block: redstone_wire}
+  i: comparator[facing=east]
+  j: {input: d_max}
+  k: {input: r}
+layers:
+  0: |
+    ....
+    =...
+    =.=.
+    .=..
+    =.==
+    .=..
+  1: |
+    a...
+    b...
+    c.d.
+    #e#.
+    f.gh
+    #i#.
+  2: |
+    ....
+    ....
+    j...
+    ....
+    ...k
+    ....
+tests:
+- name: holds the largest strength seen
+  steps:
+  - &id001 {check: 'if block ~2 ~1 ~2 redstone_wire[power=0]'}
+  - &id002
+    expect: {q: 0}
+  - &id003 {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - &id004 {wait: 3}
+  - &id005 {check: 'if block ~2 ~1 ~2 redstone_wire[power=0]'}
+  - {wait: 1}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 8}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {wait: 4}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=7]'}
+  - {wait: 1}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=12]'}
+  - {wait: 8}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[]}'}
+  - {wait: 30}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=12]'}
+  - drive: {d_max: 1}
+  - {wait: 1}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=12]'}
+  - {wait: 1}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+  - {wait: 8}
+  - drive: {d_max: 0}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=15]'}
+- name: reset keeps only the present strength
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 4}
+  - drive: {r: 1}
+  - {wait: 12}
+  - drive: {r: 0}
+  - {wait: 12}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {wait: 3}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=5]'}
+  - {run: 'data merge block ~0 ~1 ~0 {Items:[]}'}
+  - {wait: 6}
+  - drive: {r: 1}
+  - {wait: 12}
+  - drive: {r: 0}
+  - {wait: 12}
+  - {check: 'if block ~2 ~1 ~2 redstone_wire[power=0]'}
+  - expect: {q: 0}

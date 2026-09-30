@@ -1,0 +1,352 @@
+name: clock_comparator_dust
+description: 'Fastest clean clock here: period 4 game ticks (2 on, 2 off), toggled by en, with no torches, repeater-free loop and no sound. A subtract-mode comparator (x=1, z=0, facing west) has en on its back (the cell west of it, x=0, z=0) and its output dust (x=2, z=0) runs round x=2, z=1 into the dust at x=1, z=1, which points into the comparator''s south side. The comparator output is 15 - side, and dust loses 1 per block, so the output swings 15, 15, 2, 2 while the side dust swings 13, 13, 0, 0: the side dust is a clean on/off square wave and the repeater out (x=1, z=2, facing north, delay 1) squares it to a 15/0 output 2 ticks later. First out edge 4 ticks after en rises; dropping en lets the current half period finish, then one last out pulse at most, then it rests at 0. Size 2x2x3 plus the en cell west of the comparator. Trade-off: twice the speed of clock_comparator_repeater and nothing to tune, but the period is fixed at 4 and the comparator''s own output dust is analog (15/2),
+  so take the signal from the side dust or the repeater, never from the comparator''s front. No Java clock has a period of 2 game ticks: every component that can hold a state change (repeater, comparator, torch, observer) takes at least 2 ticks, so a loop half-period is at least 2.'
+traits:
+- ultrafast
+- compact
+- flat
+- horizontal
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  e: {input: en}
+  C: {name: cmp, block: 'comparator[facing=west,mode=subtract]'}
+  a: {name: front, block: redstone_wire}
+  b: redstone_wire
+  s: {name: side, block: redstone_wire}
+  o: {output: out, block: 'repeater[facing=north,delay=1]'}
+layers:
+  0: |
+    .==
+    .==
+    .=.
+  1: |
+    eCa
+    .sb
+    .o.
+tests:
+- name: off after placement, first edge 4 ticks after en, period 4
+  steps:
+  - {wait: 20}
+  - expect: {out: 0, side: 0}
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 2}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+- name: side is a clean square wave, comparator front swings 15 to 2
+  steps:
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 1}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 1}
+  - expect: {side: 0}
+  - {wait: 2}
+  - {check: 'if block ~1 ~1 ~1 redstone_wire[power=13] if block ~2 ~1 ~0 redstone_wire[power=15]'}
+  - {wait: 2}
+  - {check: 'if block ~1 ~1 ~1 redstone_wire[power=0] if block ~2 ~1 ~0 redstone_wire[power=2]'}
+- name: 'stop while side high: one last out pulse, then 0'
+  steps:
+  - drive: {en: 1}
+  - {wait: 30}
+  - expect: {side: 1}
+  - drive: {en: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 29}
+  - expect: {out: 0}
+  - expect: {side: 0}
+  - drive: {en: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 2}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+- name: stop while side low
+  steps:
+  - drive: {en: 1}
+  - {wait: 32}
+  - expect: {side: 0, out: 1}
+  - drive: {en: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 29}
+  - expect: {out: 0}

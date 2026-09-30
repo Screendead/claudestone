@@ -1,0 +1,57 @@
+name: not_comparator_stack
+description: |
+  Three not_comparator_subtract gates stacked at a vertical pitch of 2, proving the lightless
+  inverter tiles upward into a bus with no crosstalk. A comparator reads only its back and
+  sides and drives only its front, the redstone block constants power nothing but the
+  comparator behind them, and each support block sits under its own comparator, so three
+  independent inputs give three independent inverted outputs.
+  Interface per layer k (y = 1, 3, 5): redstone block at (0,y,0); comparator at (1,y,0) facing
+  west on a support (1,y-1,0); input at the south side cell (1,y,1); output: the comparator,
+  driving east into (2,y,0). The bus is 2 wide, 1 deep and 2 per bit tall (2x6x1 for 3 bits).
+  Delay 2 ticks per bit.
+  Trade-off: the lightless alternative to not_bus_tileable (which tiles sideways at pitch 1
+  but costs 4 ticks, light and a burnout limit): 2 ticks, dark, silent, but it tiles only
+  vertically, because a comparator's input must come from the side.
+traits: [stackable, horizontal, compact, fast, lightless, silent, pistonless, entityless, comparator_based, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  x: {output: x, block: 'comparator[facing=west,mode=subtract]'}
+  y: {output: y, block: 'comparator[facing=west,mode=subtract]'}
+  z: {output: z, block: 'comparator[facing=west,mode=subtract]'}
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+layers:
+  0: |
+    .=
+    ..
+  1: |
+    Rx
+    .a
+  2: |
+    .=
+    ..
+  3: |
+    Ry
+    .b
+  4: |
+    .=
+    ..
+  5: |
+    Rz
+    .c
+tests:
+- name: bits independent
+  truth_table: |
+    a b c | x y z
+    0 0 0 | 1 1 1
+    1 0 0 | 0 1 1
+    0 1 0 | 1 0 1
+    0 0 1 | 1 1 0
+    1 1 0 | 0 0 1
+    0 1 1 | 1 0 0
+    1 0 1 | 0 1 0
+    1 1 1 | 0 0 0
+  delay: 2

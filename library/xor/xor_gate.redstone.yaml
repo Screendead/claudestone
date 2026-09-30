@@ -1,0 +1,182 @@
+name: xor_gate
+description: "(a and not b) or (b and not a), each half a subtract-mode comparator. Input repeaters at the west edge isolate the input lines and restore full strength. One branch bridges over the other on y2 and y3. A flat layout with both inputs and the output on the edge does not exist for this wiring (it is a K3,3). Interface: a enters from the west at (0,1,0) and b from the west at (0,1,2), each through a repeater[facing=west] (input on its west side). The output is dust at (9,1,1) on the east edge. Size 9x4x5. Delay: 4 game ticks on edges to or from a=b=0 (input repeater, then comparator), 6 on edges to or from a=b=1 (the side input passes an extra repeater). Trade-offs: the textbook form, with both inputs entering from the same side and on the same layer as the output. It is superseded on size and speed by xor_comparator_bridge (2 ticks, 32 blocks). Keep it where the input lines must be isolated by repeaters."
+traits: [horizontal, comparator_based, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '>': repeater[facing=west]
+  '-': redstone_wire
+  A: comparator[facing=west,mode=subtract]
+  '#': white_concrete
+  ^: repeater[facing=south]
+  o: {output: out, block: redstone_wire}
+  b: {input: b}
+layers:
+  0: |
+    .========.
+    ...=.=..==
+    .========.
+    ...=...=..
+    ...=====..
+  1: |
+    a>---A---.
+    ...#.^..-o
+    b>-----A-.
+    ...#...^..
+    ...-----..
+  2: |
+    ..........
+    ...-......
+    ...#......
+    ...-......
+    ..........
+  3: |
+    ..........
+    ..........
+    ...-......
+    ..........
+    ..........
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 0 | 1
+    1 1 | 0
+  delay: 6
+- name: edges
+  steps:
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 6
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 6
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 8
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 6
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 6
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 8
+  - expect: {out: 0}
+- name: simultaneous and staggered
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 0, b: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 16
+  - expect: {out: 0}
+  - drive: {a: 1, b: 0}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 16
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 16
+  - expect: {out: 0}

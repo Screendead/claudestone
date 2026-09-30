@@ -1,0 +1,91 @@
+name: rs_hopper_pair
+description: >-
+  Silent, lightless RS latch whose state is one item in one of two hoppers that face
+  each other. Both hoppers are held locked by subtract-mode comparators whose rears sit
+  on redstone blocks; an input on a comparator's side cancels its 15, unlocking that
+  hopper, which pushes the item across on the same tick. q is a comparator reading
+  hopper B (strength 1). Interface (top view, north up): hopper A (x1,y1,z1) faces east
+  into hopper B (x2,y1,z1), which faces west; their lock comparators sit south of them
+  (z2) on the redstone blocks (z3). s is the cell west of A's lock comparator (x0,y1,z2)
+  and r the cell east of B's (x3,y1,z2). q is the comparator north of B (x2,y1,z0),
+  outputting north. Level-sensitive: holding s keeps A unlocked. s and r together unlock
+  both hoppers, which then pass the item back and forth every 8 gt (a hopper clock), so
+  that input is forbidden. Set and reset each take 4 gt when the hopper that receives
+  the item has been idle for 8 gt (a hopper that just received an item waits out an 8 gt
+  cooldown before it can pass it back, so a reset within 8 gt of a set lands late but
+  still lands). 2x2x4 of blocks (4x2x4 with the input cells). The only family member
+  that is both silent and lightless while keeping its state in an inventory: no clicks,
+  no light updates, nothing to burn out, and the item survives chunk unloads. The
+  trade-offs are size, a weak strength-1 output, and the 8 gt hopper cooldown between
+  opposite edges. The lock comparators are placed already outputting 15 so the hoppers
+  start locked and the latch starts reset (item in A).
+traits: [silent, lightless, pistonless, entityless, container_based, comparator_based, flat, horizontal, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  A: 'hopper[facing=east,enabled=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'
+  B: 'hopper[facing=west,enabled=false]'
+  C: 'comparator[facing=south,mode=subtract,powered=true]{OutputSignal:15}'
+  R: redstone_block
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: 'comparator[facing=south]'}
+layers:
+  0: |
+    ..=.
+    ....
+    .==.
+    ....
+  1: |
+    ..q.
+    .AB.
+    sCCr
+    .RR.
+tests:
+- name: placed reset
+  steps:
+  - {wait: 20}
+  - expect: {q: 0}
+- name: sequence
+  settle: 30
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+  delay: 4
+- name: set and reset timing
+  steps:
+  - drive: {s: 1}
+  - {wait: 3}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 3}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: reset right after set waits out the cooldown
+  steps:
+  - drive: {s: 1}
+  - {wait: 4}
+  - expect: {q: 1}
+  - drive: {s: 0}
+  - drive: {r: 1}
+  - {wait: 20}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}

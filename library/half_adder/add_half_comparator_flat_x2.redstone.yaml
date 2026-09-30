@@ -1,0 +1,118 @@
+name: add_half_comparator_flat_x2
+description: >-
+  Two add_half_comparator_flat copies stacked 3 blocks apart (the upper copy's
+  floor sits directly on the lower copy's input cells), with independent inputs
+  a1/b1 (lower) and a2/b2 (upper). The truth table changes both copies in the
+  same and in different ticks and checks neither disturbs the other, which is
+  what backs the stackable claim on the single copy. Lower copy as in
+  add_half_comparator_flat; upper copy is the same shifted up 3. 6x5x5. Delay 4
+  (carry), sum 2.
+traits: [lightless, silent, pistonless, entityless, stackable, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  A: comparator[facing=south,mode=subtract]
+  B: comparator[facing=north,mode=subtract]
+  v: repeater[facing=north]
+  s: {output: sum1, block: redstone_wire}
+  c: {output: carry1, block: redstone_wire}
+  a: {input: a1}
+  b: {input: b1}
+  C: {output: sum2, block: redstone_wire}
+  D: {output: carry2, block: redstone_wire}
+  E: {input: a2}
+  F: {input: b2}
+layers:
+  0: |
+    ======
+    ======
+    ======
+    ======
+    ======
+  1: |
+    --#...
+    -.A---
+    -.-B.v
+    --.#-B
+    .--s.c
+  2: |
+    ......
+    ...a..
+    ..b...
+    ......
+    ......
+  3: |
+    ======
+    ======
+    ======
+    ======
+    ======
+  4: |
+    --#...
+    -.A---
+    -.-B.v
+    --.#-B
+    .--C.D
+  5: |
+    ......
+    ...E..
+    ..F...
+    ......
+    ......
+tests:
+- name: copies independent
+  truth_table: |
+    a1 b1 a2 b2 | sum1 carry1 sum2 carry2
+    0 0 0 0 | 0 0 0 0
+    0 1 0 0 | 1 0 0 0
+    1 1 0 0 | 0 1 0 0
+    1 0 0 0 | 1 0 0 0
+    0 0 0 0 | 0 0 0 0
+    1 1 0 0 | 0 1 0 0
+    0 0 0 0 | 0 0 0 0
+    1 0 0 0 | 1 0 0 0
+    1 1 0 0 | 0 1 0 0
+    0 1 0 0 | 1 0 0 0
+    0 0 1 1 | 0 0 0 1
+    0 1 1 1 | 1 0 0 1
+    1 1 1 1 | 0 1 0 1
+    1 0 1 1 | 1 0 0 1
+    0 0 1 1 | 0 0 0 1
+    1 1 1 1 | 0 1 0 1
+    0 0 1 1 | 0 0 0 1
+    1 0 1 1 | 1 0 0 1
+    1 1 1 1 | 0 1 0 1
+    0 1 1 1 | 1 0 0 1
+    0 0 0 0 | 0 0 0 0
+    0 0 0 1 | 0 0 1 0
+    0 0 1 1 | 0 0 0 1
+    0 0 1 0 | 0 0 1 0
+    0 0 0 0 | 0 0 0 0
+    0 0 1 1 | 0 0 0 1
+    0 0 0 0 | 0 0 0 0
+    0 0 1 0 | 0 0 1 0
+    0 0 1 1 | 0 0 0 1
+    0 0 0 1 | 0 0 1 0
+    1 1 0 0 | 0 1 0 0
+    1 1 0 1 | 0 1 1 0
+    1 1 1 1 | 0 1 0 1
+    1 1 1 0 | 0 1 1 0
+    1 1 0 0 | 0 1 0 0
+    1 1 1 1 | 0 1 0 1
+    1 1 0 0 | 0 1 0 0
+    1 1 1 0 | 0 1 1 0
+    1 1 1 1 | 0 1 0 1
+    1 1 0 1 | 0 1 1 0
+    0 0 0 0 | 0 0 0 0
+    1 1 1 1 | 0 1 0 1
+    0 1 1 0 | 1 0 1 0
+    1 0 0 1 | 1 0 1 0
+    0 0 0 0 | 0 0 0 0
+    1 0 1 0 | 1 0 1 0
+    0 1 0 1 | 1 0 1 0
+    1 1 0 0 | 0 1 0 0
+    0 0 1 1 | 0 0 0 1
+    0 0 0 0 | 0 0 0 0
+  delay: 4

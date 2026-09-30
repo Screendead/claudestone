@@ -1,0 +1,46 @@
+name: wire_repeater_line
+description: >-
+  The standard long-distance level wire at its best spacing: a repeater (delay 1) then 15 dust,
+  repeated. A repeater re-drives the dust to 15 and the 15th dust still carries 1, which is
+  enough to trigger the next repeater, so the period is 16 blocks per 2 game ticks (8 blocks per
+  tick, both edges). This file is two periods: input driver a at x=0 on the west end, repeaters at
+  x=1 and x=17 (facing west, i.e. input from the west), output dust at x=32 (strength 1).
+  Size 33x2x1 including the driver. Extend it by continuing the pattern: the next repeater goes
+  where the output dust is plus one. Trade-off: the fastest both-edge, silent, lightless wire for
+  distances beyond 15; wire_piston_instant is faster for a single edge; parallel copies merge,
+  so buses use wire_checker_bus or wire_flat_bus.
+traits: [fast, flat, one_wide, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  a: {input: a}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .================================
+  1: |
+    a>--------------->--------------o
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+    0 | 0
+    1 | 1
+  delay: 4
+- name: 2-tick pulse passes intact
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

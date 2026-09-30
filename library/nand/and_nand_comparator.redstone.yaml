@@ -1,0 +1,100 @@
+name: and_nand_comparator
+description: >-
+  Lightless, silent NAND. Two subtract-mode comparators face each other across
+  one dust; each reads a redstone block behind it (15) and subtracts its input on
+  its north side, so each outputs NOT of its input and the dust between them is
+  the OR of the two: NAND. Interface: A drives the north side of the west
+  comparator, B the north side of the east one; the output dust (out) sits in
+  the middle, take it off north or south. The south sides of the comparators
+  must stay unpowered (they would OR in another input). 5x2x1 with its base, a
+  single row of five blocks. Delay 2gt
+  (tested), same as the torch NAND, but no light or burnout, and each copy needs
+  two redstone blocks.
+traits: [ultracompact, fast, lightless, silent, pistonless, entityless, flat, comparator_based, tick_accurate, reset_safe, survival_friendly, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  w: 'comparator[facing=west,mode=subtract]'
+  e: 'comparator[facing=east,mode=subtract]'
+  o: {output: out, block: redstone_wire}
+  R: redstone_block
+layers:
+  0: |
+    .....
+    .===.
+  1: |
+    .a.b.
+    RwoeR
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+    0 0 | 1
+    1 1 | 0
+  delay: 2
+- name: b toggled every 2 ticks, no burnout
+  steps:
+  - drive: {a: 1}
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 2
+  - drive: {b: 0}
+  - wait: 2
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 10
+  - expect: {out: 0}

@@ -1,0 +1,70 @@
+name: or_wide_repeater
+description: >-
+  n-input OR as a flat bus: a dust line along x with one repeater per input pointing
+  into it from the south. Repeaters isolate the inputs and restore each to 15 at the
+  bus. Interface: input k arrives from the south at column k (layer 1, the repeater's
+  input side); out is the east end of the bus. One column per input, all from one side,
+  so it takes a bus of parallel lines directly; this instance is 4 inputs, 5x2x2. Delay 2
+  game ticks for any width up to 15 inputs (bus strength); beyond that, extend the bus
+  with a repeater. Trade-off versus or_wide_instant: 2 ticks slower but flat (2 tall),
+  inputs all on one side at pitch 1, and a strong bus.
+traits: [fast, compact, tileable, flat, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  ^: repeater[facing=south]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =====
+    ====.
+    .....
+  1: |
+    ----o
+    ^^^^.
+    abcd.
+tests:
+- name: logic
+  truth_table: |
+    a b c d | out
+    0 0 0 0 | 0
+    0 0 0 1 | 1
+    0 0 1 0 | 1
+    0 0 1 1 | 1
+    0 1 0 0 | 1
+    0 1 0 1 | 1
+    0 1 1 0 | 1
+    0 1 1 1 | 1
+    1 0 0 0 | 1
+    1 0 0 1 | 1
+    1 0 1 0 | 1
+    1 0 1 1 | 1
+    1 1 0 0 | 1
+    1 1 0 1 | 1
+    1 1 1 0 | 1
+    1 1 1 1 | 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

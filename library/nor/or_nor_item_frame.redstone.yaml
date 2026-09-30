@@ -1,0 +1,60 @@
+name: or_nor_item_frame
+description: >-
+  Lightless NOR whose threshold is set by an item frame. A subtract-mode comparator
+  reads through a solid block to an item frame hung on that block's far face; a frame
+  holding an item gives rotation + 1 (1-8), so the rear is K and the output is on only
+  while max(a, b) < K. Here the item is unrotated (K = 1): any input 1-15 turns it off,
+  like or_nor_comparator_any_strength, but the constant lives in an entity on the back
+  of an ordinary block, so that block can be part of a wall or floor you already have,
+  and rotating the item should raise the threshold to reject weak or noisy inputs
+  without rebuilding (from ItemFrame.getAnalogOutput; only K = 1 is tested here). Interface: comparator faces north; the stone north of it, the fixed
+  frame (facing north) on the stone's north face; a on the west side, b on the east
+  side, layer 1; out is the comparator, output south at strength K - max(a, b).
+  Blocks 1x2x2 plus the frame's cell, delay 2 game ticks.
+traits: [compact, fast, ultrafast, comparator_based, uses_entities, analog, lightless, silent, pistonless, flat, one_wide, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    ...
+    ...
+    .=.
+  1: |
+    ...
+    .S.
+    aob
+entities:
+- {type: item_frame, pos: [1.0, 1.5, 0.0], nbt: '{Facing:2b,Fixed:1b,Item:{id:"minecraft:stick",count:1}}'}
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 0 | 0
+    1 1 | 0
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

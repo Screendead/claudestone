@@ -1,0 +1,114 @@
+name: rs_torch_nor
+description: >-
+  The textbook two-torch RS NOR latch, laid flat, with both Q and not-Q. Torch TA hangs
+  on block A and feeds dust into block B; torch TB hangs on B and feeds dust back into
+  A, so exactly one torch is lit. Interface (top view, north up): the s driver sits on
+  top of the dust just south of A (x0,y2,z1) and the r driver on top of the dust between
+  TA and B (x2,y2,z0); a redstone block on top of a dust cell powers it without
+  re-shaping it, so it keeps pointing into its block. q is torch TB (x3,y1,z1, facing
+  south) and nq is torch TA (x1,y1,z0, facing east); take either from any neighbouring
+  dust. 4x3x3 including the base and the input row (4x2x3 of blocks without the input
+  cells). Set: nq falls at 2 gt, q rises at 4 gt. Reset: q falls at 2 gt, nq rises at 4
+  gt. s and r together force both outputs off; releasing both in the same tick races the
+  two torches and can burn them out, so that input is forbidden. Placed in the reset
+  state (TA lit, TB unlit). Survival-friendly, cheap and easy to read, and the only
+  variant with a native not-Q; but not the smallest (see rs_dropper_pair and
+  rs_comparator_ring), not lightless or silent (see the comparator variants), and the
+  torches burn out if either input toggles more than 8 times in 60 gt.
+traits: [torch_based, survival_friendly, reset_safe, flat, pistonless, entityless, horizontal, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  A: stone
+  B: stone
+  '-': redstone_wire
+  s: {input: s}
+  r: {input: r}
+  n: {name: nq, block: 'redstone_wall_torch[facing=east,lit=true]'}
+  q: {output: q, block: 'redstone_wall_torch[facing=south,lit=false]'}
+layers:
+  0: |
+    ..=.
+    =...
+    ====
+  1: |
+    An-B
+    -..q
+    ----
+  2: |
+    ..r.
+    s...
+    ....
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0, nq: 1}
+- name: sequence
+  truth_table: |
+    s r | q nq
+    1 0 | 1 0
+    0 0 | 1 0
+    0 1 | 0 1
+    0 0 | 0 1
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 4
+- name: set timing
+  steps:
+  - drive: {s: 1}
+  - {wait: 1}
+  - expect: {q: 0, nq: 1}
+  - {wait: 1}
+  - expect: {q: 0, nq: 0}
+  - {wait: 1}
+  - expect: {q: 0, nq: 0}
+  - {wait: 1}
+  - expect: {q: 1, nq: 0}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1, nq: 0}
+- name: reset timing
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 1}
+  - expect: {q: 1, nq: 0}
+  - {wait: 1}
+  - expect: {q: 0, nq: 0}
+  - {wait: 1}
+  - expect: {q: 0, nq: 0}
+  - {wait: 1}
+  - expect: {q: 0, nq: 1}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0, nq: 1}
+- name: repeated inputs are idempotent
+  steps:
+  - drive: {r: 1}
+  - {wait: 10}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 0, nq: 1}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1, nq: 0}
+- name: both then r released leaves set
+  steps:
+  - drive: {s: 1, r: 1}
+  - {wait: 10}
+  - expect: {q: 0, nq: 0}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 1, nq: 0}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1, nq: 0}

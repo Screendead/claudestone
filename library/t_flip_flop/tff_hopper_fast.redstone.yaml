@@ -1,0 +1,137 @@
+name: tff_hopper_fast
+description: >-
+  The faster hopper T flip-flop: the lock is an OR of not-t and t-delayed, so the
+  unlock window opens on the first comparator delay instead of after a separate pulse
+  generator. Hoppers A (x2,y1,z2, facing east) and B (x3,y1,z2, facing west) share one
+  item and a lock dust line on top of them (y2). Two sources power that line: comparator
+  L (x2,y2,z3, facing south, subtract, rear on a redstone block at x2,y2,z4, side = t)
+  gives 15 - t, and repeater (x3,y2,z1, facing north, 4 gt) gives t delayed; its input
+  comes from t through the dust loop along x0 and z0. On a rising edge L drops at 2 gt
+  and the repeater relocks at 4 gt, so both hoppers are unlocked for 2 gt; the holder
+  pushes the item across at once and the receiver's 7-8 gt cooldown stops it answering.
+  On a falling edge L relocks at 2 gt, before the repeater lets go at 4 gt, so nothing
+  moves. q is the comparator (x4,y1,z2, facing west, strength 1) reading B, powering x5;
+  t is at (x1,y2,z3). 5x3x5 of blocks. Delay exactly 4 gt (2 gt unlock, the item
+  moves on that tick, 2 gt comparator). Needs pulses of at least 2 gt, gaps of at least
+  4 gt and rising edges at least 8 gt apart (the hopper cooldown); a 1 gt pulse is
+  ignored. Trade-off: 2 gt faster than tff_hopper_pulse for one more row of blocks and
+  a longer dust loop; still silent, lightless and state-in-an-item.
+traits: [silent, lightless, pistonless, entityless, container_based, comparator_based, fast, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  K: redstone_block
+  A: 'hopper[facing=east,enabled=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'
+  B: 'hopper[facing=west,enabled=false]'
+  L: 'comparator[facing=south,mode=subtract,powered=true]{OutputSignal:15}'
+  R: 'repeater[facing=north,delay=2]'
+  t: {input: t}
+  q: {output: q, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    .....
+    .....
+    ....=
+    .....
+    .....
+  1: |
+    ====.
+    =..=.
+    =.ABq
+    =.=..
+    .....
+  2: |
+    ----.
+    -..R.
+    -.--.
+    -tL..
+    ..K..
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 4
+- name: output flips exactly 4 gt after each rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 30
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+- name: 2 gt pulses with 6 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 6
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 6
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: 4 gt pulses with 4 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 4
+  - drive: {t: 0}
+  - wait: 4
+  - drive: {t: 1}
+  - wait: 4
+  - drive: {t: 0}
+  - wait: 4
+  - drive: {t: 1}
+  - wait: 4
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 4
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: a 1 gt pulse is too short and is ignored
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+  - drive: {t: 1}
+  - wait: 10
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}

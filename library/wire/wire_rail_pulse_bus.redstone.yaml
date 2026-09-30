@@ -1,0 +1,88 @@
+name: wire_rail_pulse_bus
+description: >-
+  The fastest flat pitch-1 edge bus. A powered rail passes power along up to 8 more powered rails in the
+  same tick it is powered, but a rail powers nothing, so each run of 9 rails ends in an observer
+  that watches the last rail and, 2 ticks after it changes, powers the first rail of the next run.
+  Each input edge travels as a 2-tick pulse at 10 blocks per 2 game ticks. Rails follow only their
+  own shape and observers power only the block behind them, so lines lie side by side with no gap.
+  Shown as 2 lines of 3 stages, 30 blocks along x: inputs a (z=0) and b (z=1) are driver cells at
+  x=0 feeding the first rail; observers at x=10 and x=20 face west (watch west, output east); the
+  outputs A and B are the last observers at x=30, which pulse 6 ticks after each input edge. All
+  rails are powered_rail shape=east_west on a smooth-stone base. Size 31x2x2. Trade-off: 5x faster
+  per block than wire_flat_bus and flat, but it carries edges, not levels: two input edges closer
+  than 4 ticks merge. wire_observer_bus is denser but 10x slower.
+traits: [fast, rail_based, observer_based, flat, tileable, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  r: powered_rail[shape=east_west]
+  O: observer[facing=west]
+  a: {input: a}
+  b: {input: b}
+  A: {output: A, block: 'observer[facing=west]'}
+  B: {output: B, block: 'observer[facing=west]'}
+layers:
+  0: |
+    .==============================
+    .==============================
+  1: |
+    arrrrrrrrrOrrrrrrrrrOrrrrrrrrrA
+    brrrrrrrrrOrrrrrrrrrOrrrrrrrrrB
+tests:
+- name: rising edge
+  steps:
+  - drive: {a: 1}
+  - wait: 5
+  - expect: {A: 0, B: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0}
+  - wait: 1
+  - expect: {A: 1, B: 0}
+  - wait: 1
+  - expect: {A: 0, B: 0}
+  - wait: 20
+  - expect: {A: 0, B: 0}
+- name: falling edge
+  steps:
+  - drive: {b: 1}
+  - wait: 20
+  - drive: {b: 0}
+  - wait: 5
+  - expect: {A: 0, B: 0}
+  - wait: 1
+  - expect: {A: 0, B: 1}
+  - wait: 2
+  - expect: {A: 0, B: 0}
+- name: both lines together
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 6
+  - expect: {A: 1, B: 1}
+  - wait: 2
+  - expect: {A: 0, B: 0}
+- name: edges 4 ticks apart stay separate
+  steps:
+  - drive: {b: 1}
+  - wait: 4
+  - drive: {b: 0}
+  - wait: 2
+  - expect: {A: 0, B: 1}
+  - wait: 2
+  - expect: {A: 0, B: 0}
+  - wait: 2
+  - expect: {A: 0, B: 1}
+  - wait: 2
+  - expect: {A: 0, B: 0}
+- name: edges 2 ticks apart merge
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {A: 1, B: 0}
+  - wait: 2
+  - expect: {A: 0, B: 0}
+  - wait: 2
+  - expect: {A: 0, B: 0}
+  - wait: 10
+  - expect: {A: 0, B: 0}

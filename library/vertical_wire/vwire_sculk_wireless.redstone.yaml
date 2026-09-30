@@ -1,0 +1,167 @@
+name: vwire_sculk_wireless
+description: 'Wireless vertical link with nothing in between. The input opens an oak trapdoor, which emits a block_open vibration (frequency 10); a calibrated sculk sensor listens within 16 blocks, and its back input is set to 10 by a comparator reading a cake with 2 bites eaten, so it ignores other frequencies such as the trapdoor closing (9), footsteps (1) and block placement (13) (the filter in CalibratedSculkSensorBlockEntity). It does NOT ignore other frequency-10 events within 16 blocks: levers, buttons, doors, fence gates, other trapdoors, chests and note blocks also fire it, so keep those out of range or occluded. Interface: input driver a south of the trapdoor at (y1, z2), a second trapdoor input d at (y17, z2) proves it works downward too; the sensor at (y9, z2) faces south; output o is the dust east of it. 2x17x3 as tested, but only the 1-block trapdoor and the 3-block receiver are needed. Delay = distance in blocks (8 ticks at 8 blocks); output is a 10-tick pulse on rising edges
+  only, then a 10-tick cooldown. Versus the others: crosses floors and gaps of up to 16 blocks with no shaft at all, at the price of sound, light, a rising-edge-only pulse and a delay that grows with distance; wool between sender and receiver blocks it.'
+traits:
+- vertical
+- compact
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  A: oak_trapdoor[half=bottom,facing=north]
+  a: {input: a}
+  S: stone
+  B: cake[bites=2]
+  C: comparator[facing=north]
+  D: calibrated_sculk_sensor[facing=south]
+  o: {output: o, block: redstone_wire}
+  d: {input: d}
+layers:
+  1: |
+    ..
+    ..
+    A.
+    a.
+  8: |
+    S.
+    S.
+    .S
+    ..
+  9: |
+    B.
+    C.
+    Do
+    ..
+  17: |
+    ..
+    ..
+    A.
+    d.
+tests:
+- name: rising edges only, both directions
+  steps:
+  - drive: {a: 1}
+  - {wait: 7}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 9}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 20}
+  - drive: {a: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - drive: {d: 1}
+  - {wait: 7}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 9}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 20}
+  - drive: {d: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - drive: {a: 1}
+  - {wait: 7}
+  - expect: {o: 0}
+  - {wait: 1}
+  - expect: {o: 1}
+  - {wait: 9}
+  - expect: {o: 1}
+  - {wait: 1}
+  - expect: {o: 0}
+  - {wait: 20}
+  - drive: {a: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}
+  - {wait: 2}
+  - expect: {o: 0}

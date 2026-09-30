@@ -1,0 +1,41 @@
+name: delay_serpentine
+description: 'Long exact delay packed into a square: 16 delay-4 repeaters snaking through four touching rows, 128 game ticks on both edges in 6x2x4 (22 of the 24 cells used). Input a is the driver at x=0, z=0; the rows run east (z=0), west (z=1), east (z=2), west (z=3), and out is the last repeater (x=1, z=3, facing east, output on its west face) so the result comes back on the input side. Each U-turn is two dusts. Two tricks make touching rows work: antiparallel repeaters side by side ignore each other (a repeater side only listens to a diode pointing into it), and the turn columns are staggered (x=5 then x=6 on the east, x=1 on the west) so no two U-turn dusts touch, which would short a whole row. Re-click repeaters for 32 to 128 ticks, or add row pairs. Trade-off versus delay_repeater_line: a 6x4 footprint instead of a 16-long line for the same 16 repeaters; versus delay_hopper_timer: 2 ticks resolution and the falling edge is delayed too, at about 3 ticks per block of volume against the hopper timer''s 3.5 to 70.'
+traits: [flat, horizontal, compact, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '4': repeater[facing=west,delay=4]
+  '<': repeater[facing=east,delay=4]
+  '-': redstone_wire
+  o: {output: out, block: 'repeater[facing=east,delay=4]'}
+layers:
+  0: |
+    .=====.
+    .=====.
+    .======
+    .======
+  1: |
+    a4444-.
+    .-<<<-.
+    .-4444-
+    .o<<<<-
+tests:
+- name: both edges 128 ticks
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+  delay: 128
+- name: exact edges
+  steps:
+  - drive: {a: 1}
+  - wait: 127
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 127
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

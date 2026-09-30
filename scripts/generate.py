@@ -1,13 +1,20 @@
-"""Regenerate library/*.redstone.yaml files that come from generators."""
-
-from pathlib import Path
+"""Regenerate library/**/*.redstone.yaml files that come from generators."""
 
 from redstone.fileformat import dump, load
+from redstone.library import LIBRARY, SUFFIX, path_of
 from redstone.devices import DIGITS, seven_segment, switch
 from redstone.pla import or_plane, pla
 from redstone.route import Circuit
 
-LIBRARY = Path(__file__).resolve().parent.parent / "library"
+# Building-block folder for each generated spec; the rest are whole builds.
+# ripple_adder_2bit spans 49 cells in z, more than a family plot's 48, so it is a build.
+FOLDER = {"pla_xor": "xor", "full_adder": "full_adder",
+          "encoder": "encoder", "half_adder": "half_adder", "digit": "seven_segment",
+          "digit_one": "seven_segment", "lever_switch": "input", "button_switch": "input"}
+
+
+def destination(name: str):
+    return LIBRARY / FOLDER.get(name, "builds") / f"{name}{SUFFIX}"
 
 
 def generated():
@@ -59,7 +66,7 @@ def generated_devices():
 
 def generated_circuits():
 
-    not_gate = load(LIBRARY / "not_gate.redstone.yaml")
+    not_gate = load(path_of("not_gate"))
     yield (Circuit("route_chain").add("A", not_gate, (0, 0, 2)).add("B", not_gate, (12, 0, 8))
            .connect("A.out", "B.a")
            .build("Two NOT gates joined by a routed wire.", lambda v: {"B.out": v["A.a"]}))
@@ -82,8 +89,7 @@ def generated_circuits():
 
 
 def two_digit_adder():
-    lib = {p.stem.removesuffix(".redstone"): p for p in LIBRARY.glob("*.redstone.yaml")}
-    part = {n: load(lib[n]) for n in ("lever_switch", "button_switch", "encoder", "half_adder",
+    part = {n: load(path_of(n)) for n in ("lever_switch", "button_switch", "encoder", "half_adder",
                                       "full_adder", "latch", "decoder", "digit", "digit_one")}
     c = Circuit("two_digit_adder", size=(192, 24, 192))
     # The player stands at the north edge facing south, so their left is +x.
@@ -148,5 +154,5 @@ def adder_test(spec, pairs) -> dict:
 
 if __name__ == "__main__":
     for spec in generated():
-        (LIBRARY / f"{spec.name}.redstone.yaml").write_text(dump(spec))
+        destination(spec.name).write_text(dump(spec))
         print("wrote", spec.name)

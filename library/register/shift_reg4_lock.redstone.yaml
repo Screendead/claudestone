@@ -1,0 +1,125 @@
+name: shift_reg4_lock
+description: 'Four-bit parallel register (a word latch) from repeater locks: one locked repeater per bit and one shared hold line, bits stacked north to south at a pitch of 3. Bit j occupies rows z=3j..3j+2: d_j is the cell at x=0, z=3j; q_j is the repeater at x=1 facing west, so q_j powers the cell east of it (x=2, z=3j), where a dust or a repeater may take it on; the lock repeater at z=3j+1 points into q_j from the south and reads a dust at z=3j+2 that climbs onto a concrete block at x=2 and joins the hold line, dust on glass along x=3, y=2, fed by the hold cell at x=3, y=2, z=0. The glass (not a conductor) and the concrete above each output cell (x=2, y=2) keep whatever you put at the output cell from powering or joining the hold line. hold=0: every q follows its d 2 ticks later. hold=1: the word is frozen 2 ticks after hold rises; d must settle at least 1 tick before hold rises (a change in the hold tick races the lock) and any change from 1 tick after it is ignored. Releasing hold passes
+  the current word after 4 ticks. Size 3x3x12 of blocks plus the d column (3x3x3 per bit); the hold line reaches 14 bits before it needs a repeater. Lightless, silent, no entities, starts at 0. Trade-off: 2 ticks through with no torches and the whole word in one 3-high layer, but a pitch of 3; d_latch/dl_lock_stack stacks the same latch vertically at pitch 2 and d_latch/dl_hopper_register tiles at pitch 1 with slower, torch-driven hopper latches.'
+traits: [ultrafast, fast, horizontal, tileable, lockable, lightless, silent, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  G: glass
+  '#': white_concrete
+  h: {input: hold}
+  v: repeater[facing=south]
+  '0': {input: d0}
+  a: {output: q0, block: 'repeater[facing=west]'}
+  '1': {input: d1}
+  b: {output: q1, block: 'repeater[facing=west]'}
+  '2': {input: d2}
+  c: {output: q2, block: 'repeater[facing=west]'}
+  '3': {input: d3}
+  e: {output: q3, block: 'repeater[facing=west]'}
+layers:
+  0: |
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+    .=..
+  1: |
+    0a.G
+    .v.G
+    .-#G
+    1b.G
+    .v.G
+    .-#G
+    2c.G
+    .v.G
+    .-#G
+    3e.G
+    .v.G
+    .-#G
+  2: |
+    ..#h
+    ...-
+    ..--
+    ..#-
+    ...-
+    ..--
+    ..#-
+    ...-
+    ..--
+    ..#-
+    ...-
+    ..--
+tests:
+- name: transparent in 2 ticks
+  truth_table: |
+    d0 d1 d2 d3 | q0 q1 q2 q3
+    0 0 0 0 | 0 0 0 0
+    1 0 1 0 | 1 0 1 0
+    0 1 0 1 | 0 1 0 1
+    1 1 1 1 | 1 1 1 1
+    0 1 1 0 | 0 1 1 0
+  delay: 2
+- name: holds a word while every d flips
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d0: 1, d1: 0, d2: 1, d3: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - {wait: 1}
+  - drive: {hold: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - {wait: 1}
+  - drive: {d0: 0, d1: 1, d2: 0, d3: 1}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {d0: 1, d1: 1, d2: 1, d3: 1}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {d0: 0, d1: 0, d2: 0, d3: 0}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {d0: 0, d1: 1, d2: 1, d3: 0}
+  - {wait: 5}
+  - drive: {hold: 0}
+  - {wait: 3}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {hold: 1}
+  - {wait: 10}
+  - drive: {d0: 1, d1: 0, d2: 0, d3: 1}
+  - {wait: 20}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {hold: 0}
+  - {wait: 4}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+- name: setup 1 tick before hold, later changes ignored
+  steps:
+  - drive: {d0: 1, d1: 1, d2: 0, d3: 0}
+  - {wait: 1}
+  - drive: {hold: 1}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {hold: 0}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {hold: 1}
+  - {wait: 1}
+  - drive: {d0: 0, d1: 0, d2: 1, d3: 1}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {hold: 0}
+  - {wait: 3}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}

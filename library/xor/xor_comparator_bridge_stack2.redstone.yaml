@@ -1,0 +1,86 @@
+name: xor_comparator_bridge_stack2
+description: "Proof that xor_comparator_bridge stacks at a pitch of 4 (its own height): two copies, tested over all 16 input combinations. At a pitch of 3 the copies collide."
+traits: [stackable, comparator_based, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  a:
+    input: a0
+  b:
+    input: b0
+  o:
+    output: out0
+    block: redstone_wire
+  A:
+    input: a1
+  B:
+    input: b1
+  C:
+    output: out1
+    block: redstone_wire
+layers:
+  0: |
+    ....
+    .==.
+    .==.
+    ....
+  1: |
+    .#..
+    .S-a
+    b-N.
+    .##.
+  2: |
+    .-..
+    .#..
+    .#..
+    .-o.
+  3: |
+    ....
+    .-..
+    .-..
+    ....
+  4: |
+    ....
+    .==.
+    .==.
+    ....
+  5: |
+    .#..
+    .S-A
+    B-N.
+    .##.
+  6: |
+    .-..
+    .#..
+    .#..
+    .-C.
+  7: |
+    ....
+    .-..
+    .-..
+    ....
+tests:
+- name: logic
+  truth_table: |
+    a0  b0  a1  b1 | out0  out1
+    0   0   0   0  | 0     0
+    1   0   0   0  | 1     0
+    1   1   0   0  | 0     0
+    0   1   0   0  | 1     0
+    0   1   1   0  | 1     1
+    1   1   1   0  | 0     1
+    1   0   1   0  | 1     1
+    0   0   1   0  | 0     1
+    0   0   1   1  | 0     0
+    1   0   1   1  | 1     0
+    1   1   1   1  | 0     0
+    0   1   1   1  | 1     0
+    0   1   0   1  | 1     1
+    1   1   0   1  | 0     1
+    1   0   0   1  | 1     1
+    0   0   0   1  | 0     1
+  delay: 2

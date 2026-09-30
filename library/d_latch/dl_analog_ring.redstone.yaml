@@ -1,0 +1,318 @@
+name: dl_analog_ring
+description: 'Analog D latch: stores a signal strength 0-15, not just on/off, losslessly and indefinitely. Memory is a ring of four comparators (x=2..4, z=3..5) that pass strength unchanged through concrete corner blocks, so the value circulates without decay. Writing: e (cell x=1, z=3) powers a dust on the west side of the ring comparator D (x=2, z=4, subtract mode), which empties the ring while e is on; at the same time a subtract comparator N (x=1, z=2, rear on a redstone block) stops outputting, so the injector comparator G (x=2, z=2, subtract mode, rear on the d dust at x=2, z=1) passes d into the ring corner at x=2, z=3. When e falls, D reopens 2 ticks before G closes, so the loop takes over without a gap. Because D clears on write, a smaller value overwrites a larger one. Read q from any dust or comparator beside a corner block; here q is the dust at x=4, z=6 (strength = stored value). While e is on, q follows d 6 ticks later; raising e changes q 8 ticks later. d must be steady 6 ticks before e falls and e must stay on at least 8 ticks, or part of the old value keeps circulating as a travelling pattern. Test fixtures, not part of the latch: input hi drives the d dust at 15, input lo at 10 through five dust (x=3..7, z=1), and q_hi (x=4, z=7) is a compare-mode comparator whose side reads 12 from a comparator on a one-bite cake, so it is on only for stored strengths of 12 or more. Latch core (WxHxD) 5x2x4 (x=0..4, z=2..5); whole spec 8x2x7. Lightless and silent. Trade-off: the only latch here that keeps signal strength, at about 4x the volume and 3x the delay of the 1-bit latches.'
+traits: [analog, flat, horizontal, silent, lightless, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  h: {input: hi}
+  l: {input: lo}
+  e: {input: e}
+  K: redstone_block
+  N: comparator[facing=west,mode=subtract]
+  G: comparator[facing=north,mode=subtract]
+  A: comparator[facing=west]
+  B: comparator[facing=north]
+  C: comparator[facing=east]
+  D: comparator[facing=south,mode=subtract]
+  V: comparator[facing=east]
+  k: cake[bites=1]
+  T: {output: q_hi, block: 'comparator[facing=north]'}
+  q: {output: q, block: redstone_wire}
+layers:
+  0: |
+    .........
+    ..======.
+    .==......
+    ...=.....
+    .==.=....
+    ...=.....
+    ....=....
+    ....===..
+  1: |
+    ..h......
+    ..------l
+    KNG......
+    .e#A#....
+    .-D.B....
+    ..#C#....
+    ....q....
+    ....TVk..
+tests:
+- name: starts empty and follows d while open
+  steps:
+  - expect: {q: 0, q_hi: 0}
+  - drive: {e: 1}
+  - wait: 20
+  - drive: {hi: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 4
+  - expect: {q_hi: 1}
+  - drive: {lo: 1}
+  - drive: {hi: 0}
+  - wait: 20
+  - expect: {q: 1, q_hi: 0}
+  - drive: {lo: 0}
+  - wait: 5
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: stores 15, 10, 0 and 15 again
+  steps:
+  - drive: {hi: 1}
+  - wait: 6
+  - drive: {e: 1}
+  - wait: 7
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 4
+  - drive: {e: 0}
+  - wait: 6
+  - drive: {hi: 0}
+  - drive: {lo: 1}
+  - wait: 20
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - drive: {e: 1}
+  - wait: 20
+  - drive: {e: 0}
+  - wait: 6
+  - drive: {lo: 0}
+  - drive: {hi: 1}
+  - wait: 20
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - drive: {hi: 0}
+  - wait: 20
+  - drive: {e: 1}
+  - wait: 20
+  - drive: {e: 0}
+  - wait: 6
+  - drive: {hi: 1}
+  - wait: 20
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - drive: {e: 1}
+  - wait: 20
+  - drive: {e: 0}
+  - drive: {hi: 0}
+  - wait: 20
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+- name: setup 6 ticks writing down
+  steps:
+  - drive: {e: 1, hi: 1}
+  - wait: 20
+  - drive: {lo: 1}
+  - drive: {hi: 0}
+  - wait: 6
+  - drive: {e: 0}
+  - wait: 20
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+- name: setup 6 ticks writing up
+  steps:
+  - drive: {e: 1, lo: 1}
+  - wait: 20
+  - drive: {hi: 1}
+  - wait: 6
+  - drive: {e: 0}
+  - wait: 20
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+- name: setup 6 ticks writing zero
+  steps:
+  - drive: {e: 1, hi: 1}
+  - wait: 20
+  - drive: {hi: 0}
+  - wait: 6
+  - drive: {e: 0}
+  - wait: 20
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+  - expect: {q: 0, q_hi: 0}
+  - wait: 1
+- name: minimum enable pulse 8 ticks
+  steps:
+  - drive: {hi: 1}
+  - wait: 10
+  - drive: {e: 1}
+  - wait: 8
+  - drive: {e: 0}
+  - wait: 20
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - expect: {q: 1, q_hi: 1}
+  - wait: 1
+  - drive: {hi: 0}
+  - drive: {lo: 1}
+  - wait: 10
+  - drive: {e: 1}
+  - wait: 8
+  - drive: {e: 0}
+  - wait: 20
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1
+  - expect: {q: 1, q_hi: 0}
+  - wait: 1

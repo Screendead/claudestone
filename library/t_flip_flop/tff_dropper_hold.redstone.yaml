@@ -1,0 +1,148 @@
+name: tff_dropper_hold
+description: >-
+  Two droppers facing each other pass one item back and forth, and each dropper is held
+  powered while the other one has the item, so a rising edge can only fire the one that
+  holds it. A dropper fires only when it goes from unpowered to powered (its TRIGGERED
+  flag, decompiled), so a held dropper ignores t. Without the hold, both would fire 4 gt
+  after the edge in one tick and the item would cross and come straight back. Dropper A
+  (x1,y1,z2, facing east) and dropper B (x2,y1,z2, facing west); t is the cell west of
+  the dust on top of them (x0,y2,z2), which powers both. The comparator reading A
+  (x1,y1,z1, facing south) hard-powers block (x1,y1,z0); the cross of dust beside it
+  (x2,y1,z0) points into block (x2,y1,z1), which powers B. Mirror image on the south:
+  q, the comparator reading B (x2,y1,z3, facing north), powers block (x2,y1,z4), dust
+  (x1,y1,z4) and block (x1,y1,z3), which holds A. The comparators give strength 1 (one
+  item in nine slots), just enough for one dust, which is why the path is block-dust-
+  block. q powers (x2,y1,z4) and anything beside it. 2x3x5 of blocks. Delay exactly 6 gt
+  (4 gt dropper, 2 gt comparator). Any pulse of 1 gt or more counts, and rising edges
+  must be at least 6 gt apart. Trade-off: the smallest lightless flip-flop in the
+  family and the easiest to read for timing, but droppers click, so it is not silent (use
+  tff_lightless_lock or a hopper version for that). Its state is an item, so it
+  survives power loss and chunk unloads.
+traits: [compact, container_based, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '+': 'redstone_wire[north=side,south=side,east=side,west=side]'
+  S: smooth_stone
+  X: smooth_stone
+  A: 'dropper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'
+  B: dropper[facing=west]
+  c: comparator[facing=south]
+  t: {input: t}
+  q: {output: q, block: 'comparator[facing=north]'}
+layers:
+  0: |
+    ..=
+    .=.
+    ...
+    ..=
+    .=.
+  1: |
+    .S+
+    .cX
+    .AB
+    .Xq
+    .+S
+  2: |
+    ...
+    ...
+    t--
+    ...
+    ...
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 6
+- name: output flips exactly 6 gt after each rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 30
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+- name: 1 gt pulses with 5 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 5
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 5
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: 3 gt pulses with 3 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 3
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 3
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: 5 gt pulses with 1 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 5
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 5
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 5
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 5
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}

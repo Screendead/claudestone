@@ -1,0 +1,268 @@
+name: cross_flat_comparator
+description: 'A true single-layer crossing: every component on one layer over a base, 5x2x3, 18 blocks, 2 ticks on both lines. Both lines pass through the same block X, which by itself would OR them; the design un-ORs X using two facts. First, A reaches X through a comparator, so X is strongly powered at A''s strength, always 14 or less because A arrives through dust; B reaches X as dust, which only weakly powers it at 15. Dust reads only strong power, so the dust A'' on X''s far side sees A alone. Second, B'' is a compare-mode comparator reading X with a side input from a repeater tapped off A: when A is on, the side is 15 and only a full-strength B (15) gets through, while A''s own 14 does not. The tap repeater and A''s comparator switch on the same tick, so B'' re-evaluates after both have settled: the glitch test toggles each line every tick-window and checks the other never flickers. Interface (all at y1): A enters the westmost dust cell at strength 3 or more (that cell keeps the fork
+  cell at 14 or less even when a repeater feeds it) and leaves east from a_out; B enters from the north as dust that must be at full strength 15 in the cell touching X (feed it from a repeater or source directly behind), and leaves south out of the comparator b_out. Versus the bridge and underpass crossings it needs no second layer at all, at the cost of two comparators and the strength conditions on its inputs.'
+traits:
+- flat
+- horizontal
+- comparator_based
+- fast
+- lightless
+- silent
+- pistonless
+- entityless
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  b: {input: b}
+  '-': redstone_wire
+  a: {input: a}
+  A: comparator[facing=west,mode=compare]
+  '#': white_concrete
+  B: {output: a_out, block: redstone_wire}
+  '>': repeater[facing=west]
+  C: {output: b_out, block: 'comparator[facing=north,mode=compare]'}
+layers:
+  0: |
+    ......
+    ....=.
+    .=====
+    ..===.
+  1: |
+    ....b.
+    ....-.
+    a--A#B
+    ..->C.
+tests:
+- name: independent
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 2
+- name: no glitches
+  steps:
+  - drive: {a: 0, b: 0}
+  - {wait: 10}
+  - drive: {a: 1}
+  - {wait: 1}
+  - expect: {b_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - drive: {a: 0}
+  - {wait: 1}
+  - expect: {b_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - drive: {a: 1}
+  - {wait: 1}
+  - expect: {b_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 1}
+  - drive: {a: 0}
+  - {wait: 1}
+  - expect: {b_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 0, a_out: 0}
+  - drive: {a: 0, b: 1}
+  - {wait: 10}
+  - drive: {a: 1}
+  - {wait: 1}
+  - expect: {b_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - drive: {a: 0}
+  - {wait: 1}
+  - expect: {b_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - drive: {a: 1}
+  - {wait: 1}
+  - expect: {b_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 1}
+  - drive: {a: 0}
+  - {wait: 1}
+  - expect: {b_out: 1}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - {wait: 1}
+  - expect: {b_out: 1, a_out: 0}
+  - drive: {b: 0, a: 0}
+  - {wait: 10}
+  - drive: {b: 1}
+  - {wait: 1}
+  - expect: {a_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - drive: {b: 0}
+  - {wait: 1}
+  - expect: {a_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - drive: {b: 1}
+  - {wait: 1}
+  - expect: {a_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 1}
+  - drive: {b: 0}
+  - {wait: 1}
+  - expect: {a_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 0, b_out: 0}
+  - drive: {b: 0, a: 1}
+  - {wait: 10}
+  - drive: {b: 1}
+  - {wait: 1}
+  - expect: {a_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - drive: {b: 0}
+  - {wait: 1}
+  - expect: {a_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - drive: {b: 1}
+  - {wait: 1}
+  - expect: {a_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 1}
+  - drive: {b: 0}
+  - {wait: 1}
+  - expect: {a_out: 1}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}
+  - {wait: 1}
+  - expect: {a_out: 1, b_out: 0}

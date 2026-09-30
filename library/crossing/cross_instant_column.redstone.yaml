@@ -1,0 +1,70 @@
+name: cross_instant_column
+description: 'Both lines instant (0 ticks) in a 1x4x3 column, 8 blocks. A runs along x as dust on the base at y1; directly above it sits block X at y2, and B runs along z as dust on top of X at y3, with a support block either side of X. B''s dust only weakly powers X, which never powers dust, and A''s dust never powers the block above it, so neither line sees the other. Interface: A enters the west face and leaves the east face at y1 (the probed A cell is the one under X); B enters from the north and leaves to the south at y3, two layers above A. Copies tile along x at pitch 2 (B dust at pitch 1 would merge) with A a continuous wire below (see cross_instant_bus). Versus cross_underpass it is one layer taller but B is instant too; versus cross_instant_bridge it does not bring B back down to A''s layer.'
+traits:
+- ultrafast
+- instant
+- compact
+- lightless
+- silent
+- pistonless
+- entityless
+- one_wide
+- tileable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  A: {output: a_out, block: redstone_wire}
+  '#': white_concrete
+  b: {input: b}
+  '-': redstone_wire
+  B: {output: b_out, block: redstone_wire}
+layers:
+  0: |
+    ..
+    ..
+    .=
+    ..
+  1: |
+    ..
+    ..
+    aA
+    ..
+  2: |
+    ..
+    .#
+    .#
+    .#
+  3: |
+    .b
+    .-
+    .-
+    .B
+tests:
+- name: independent
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 0
+- name: a alone is instant
+  truth_table: |
+    a | a_out
+    0 | 0
+    1 | 1
+  delay: 0
+- name: b alone is instant
+  truth_table: |
+    b | b_out
+    0 | 0
+    1 | 1
+  delay: 0

@@ -1,0 +1,223 @@
+name: clock_hopper_ring
+description: 'Silent, lightless long-period clock with no pistons, torches or entities: one item circulating round a 2x2 ring of hoppers. Hoppers at y=1: A (x=0, z=0, facing east, holds 1 redstone dust) -> B (x=1, z=0, facing south) -> C (x=1, z=1, facing west) -> D (x=0, z=1, facing north) -> A. Each hop takes 7 game ticks in this ring (not 8: the receiving hopper''s cooldown starts in the same tick), so a lap is 28 ticks; the comparator out (x=1, z=2, facing north, on a support block) reads C and is on for the 7 ticks the item sits there: 7 on, 21 off. Input stop is the cell above A (x=0, y=2, z=0): a redstone block locks A, the other hoppers still push into it, so the item parks in A, the output rests at 0, and on release out rises exactly 10 ticks later wherever the item was when stop came (the same as from placement). Size 2x2x3 including the comparator. A bigger ring should add 7 ticks per hopper (inferred, only the 2x2 ring is tested). Trade-off: the silent, lightless way to get periods
+  of tens of ticks in a few blocks, with an asymmetric duty cycle; hoppers are block entities (more server work than diodes) and the period only comes in 7-tick steps. For minutes-long periods use clock_hopper_cascade (silent) or clock_hopper_piston, where the period grows with the item count, not the hopper count.'
+traits:
+- compact
+- container_based
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- lockable
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  s: {input: stop}
+  A: hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}
+  B: hopper[facing=south]
+  D: hopper[facing=west]
+  E: hopper[facing=north]
+  o: {output: out, block: 'comparator[facing=north]'}
+layers:
+  0: |
+    ..
+    ..
+    .=
+  1: |
+    AB
+    ED
+    .o
+  2: |
+    s.
+    ..
+    ..
+tests:
+- name: 'runs from placement: 7 on, 21 off, period 28'
+  settle: 0
+  steps:
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 8}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+- name: 'stop with the item past A: the lap finishes, parks, resumes 10 ticks after release'
+  settle: 0
+  steps:
+  - {wait: 120}
+  - drive: {stop: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 51}
+  - expect: {out: 0}
+  - drive: {stop: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 8}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+- name: 'stop with the item in A: nothing more comes out'
+  settle: 0
+  steps:
+  - {wait: 110}
+  - drive: {stop: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 79}
+  - expect: {out: 0}
+  - drive: {stop: 0}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 8}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 6}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 20}
+  - expect: {out: 0}

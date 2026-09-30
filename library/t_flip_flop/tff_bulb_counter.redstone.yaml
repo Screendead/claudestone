@@ -1,0 +1,96 @@
+name: tff_bulb_counter
+description: >-
+  Three copper-bulb T flip-flops chained into a 1-wide ripple counter at 2 blocks per
+  bit: each comparator reads its bulb and points straight into the next bulb, so a bit
+  toggles the next one whenever it turns on. Because bulbs toggle on rising edges, the
+  chain counts down: from 000 the first pulse gives q2q1q0 = 111, then 110 (read q0 as
+  the least significant bit: 7, 6, 5, ... 0, 7), so the inverted outputs count up. To
+  count up directly, trigger each stage on the falling edge instead (tff_bulb_falling).
+  Interface (side view, west on the left): t is the cell west of the first bulb
+  (x0,y1,z0); bulbs at x1, x3, x5 and comparators q0, q1, q2 at x2, x4, x6, all on
+  y1,z0 and facing west (reading west, powering east), each on a support block at y0.
+  q2 powers x7, so a longer counter just continues the row. 6x2x1 of blocks (4 per bit, the per-bit
+  volume of a single tff_copper_bulb, hence ultracompact). Ripple
+  delay is exactly 2 gt per stage (q0 at 2 gt, q1 at 4 gt, q2 at 6 gt worst case), and
+  it counts every edge of an input with 1 gt pulses and 1 gt gaps. Every stage is 1 wide
+  with nothing leaking sideways, so counters sit side by side at a 1-block pitch.
+  Trade-off: bulbs click and emit light; a silent counter needs one of the
+  comparator-lock or hopper flip-flops per bit, at 10 to 19 times the volume (40-75
+  blocks per bit against 4 here, counting supports).
+traits: [ultracompact, ultrafast, flat, horizontal, one_wide, tileable, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  B: waxed_copper_bulb
+  t: {input: t}
+  a: {output: q0, block: 'comparator[facing=west]'}
+  b: {output: q1, block: 'comparator[facing=west]'}
+  c: {output: q2, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    ..=.=.=
+  1: |
+    tBaBbBc
+tests:
+- name: placed reset
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0}
+- name: counts down modulo 8
+  truth_table: |
+    t | q0 q1 q2
+    1 | 1 1 1
+    0 | 1 1 1
+    1 | 0 1 1
+    0 | 0 1 1
+    1 | 1 0 1
+    0 | 1 0 1
+    1 | 0 0 1
+    0 | 0 0 1
+    1 | 1 1 0
+    0 | 1 1 0
+    1 | 0 1 0
+    0 | 0 1 0
+    1 | 1 0 0
+    0 | 1 0 0
+    1 | 0 0 0
+    0 | 0 0 0
+  delay: 6
+- name: ripples 2 gt per stage
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - expect: {q0: 0, q1: 0, q2: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 0, q2: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 0, q2: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 1, q2: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 1, q2: 0}
+  - wait: 1
+  - expect: {q0: 1, q1: 1, q2: 1}
+- name: counts 1 gt pulses with 1 gt gaps
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1}
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0}

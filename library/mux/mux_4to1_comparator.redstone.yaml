@@ -1,0 +1,188 @@
+name: mux_4to1_comparator
+description: |-
+  Lightless, silent, analog 4:1 multiplexer with every data path one comparator deep: out = d[2*s1 + s0].
+  Four subtract-mode comparators (gate0..gate3) sit in a ring around a white concrete collector, backs outward, each pointing into it; the output dust on top of the collector carries the strongest gate. A comparator subtracts the larger of its two side inputs, so a gate only needs one select line per bit on its sides, and the ring's four corner cells are each shared by two neighbouring gates: in gray-code order the corners carry s0 (north-west), s1 (north-east), not s0 (south-east) and not s1 (south-west), giving gate0 = d0 - max(s0, s1), gate1 = d1 - max(not s0, s1), gate3 = d3 - max(not s0, not s1), gate2 = d2 - max(s0, not s1).
+  A select corner must be at full strength or the deselected data leaks, and opposite corners (s0 / not s0, s1 / not s1) cannot both sit next to the driver, so each bit reaches both of its corners through exactly one diode: the s0 pair is fed from the layer below (not_s0, a redstone-block inverter, strongly powers the block under the south-east corner; s0 runs round the west side to rep_s0, which strongly powers the block under the north-west corner) and the s1 pair from the layer above (not_s1 powers the block over the south-west corner, rep_s1 the block over the north-east one), so the two routes never cross.
+  Interface (top view, north up; ring on the middle layer): d0 enters gate0 from the north, d1 gate1 from the east, d2 gate2 from the west, d3 gate3 from the south; s0 is the cell under d3's, s1 the cell over it; out is the dust on top of the collector, centre of the top layer, and leaves upward. Selects need full strength at their cells (they feed a comparator side directly).
+  7x4x5 of blocks. Delay: every data path 2 ticks, every select path 4 ticks (tested); strengths pass unchanged (tested). A tree of three 2:1 muxes would cost 4 data ticks and 6 on s0.
+traits:
+- ultrafast
+- lightless
+- silent
+- pistonless
+- entityless
+- vertical
+- comparator_based
+- analog
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  r: {name: rep_s0, block: 'repeater[facing=west]'}
+  s: {input: s0}
+  A: {name: not_s0, block: 'comparator[facing=south,mode=subtract]'}
+  R: redstone_block
+  d: {input: d0}
+  B: {name: sel_nw, block: redstone_wire}
+  g: {name: gate0, block: 'comparator[facing=north,mode=subtract]'}
+  C: {name: sel_ne, block: redstone_wire}
+  D: {input: d2}
+  E: {name: gate2, block: 'comparator[facing=west,mode=subtract]'}
+  '#': white_concrete
+  F: {name: gate1, block: 'comparator[facing=east,mode=subtract]'}
+  G: {input: d1}
+  H: {name: sel_sw, block: redstone_wire}
+  I: {name: gate3, block: 'comparator[facing=south,mode=subtract]'}
+  J: {name: sel_se, block: redstone_wire}
+  K: {input: d3}
+  M: {name: rep_s1, block: 'repeater[facing=east]'}
+  o: {output: out, block: redstone_wire}
+  N: {name: not_s1, block: 'comparator[facing=south,mode=subtract]'}
+  O: {input: s1}
+layers:
+  0: |
+    .......
+    ==.....
+    =......
+    =......
+    ===.=..
+    .......
+  1: |
+    .......
+    -r===..
+    -.=.=..
+    -.===..
+    ---sA..
+    ....R..
+  2: |
+    ...d...
+    ..BgC==
+    .DE#FG=
+    ..HIJ.=
+    ..=K===
+    .......
+  3: |
+    .......
+    ....#M-
+    ...o..-
+    ..#.#.-
+    ..NO---
+    ..R....
+tests:
+- name: logic
+  truth_table: |
+    s1 s0 d0 d1 d2 d3 | out
+    0 0 1 0 0 0 | 1
+    0 1 1 0 0 0 | 0
+    1 1 1 0 0 0 | 0
+    1 0 1 0 0 0 | 0
+    0 0 1 0 0 0 | 1
+    1 1 1 0 0 0 | 0
+    0 1 1 0 0 0 | 0
+    1 0 1 0 0 0 | 0
+    0 0 1 0 0 0 | 1
+    0 0 0 1 1 1 | 0
+    0 1 0 1 1 1 | 1
+    0 0 0 1 1 1 | 0
+    1 1 0 1 1 1 | 1
+    0 0 0 1 1 1 | 0
+    0 0 0 1 0 0 | 0
+    0 1 0 1 0 0 | 1
+    1 1 0 1 0 0 | 0
+    1 0 0 1 0 0 | 0
+    0 0 0 1 0 0 | 0
+    1 1 0 1 0 0 | 0
+    0 1 0 1 0 0 | 1
+    1 0 0 1 0 0 | 0
+    0 1 0 1 0 0 | 1
+    0 1 1 0 1 1 | 0
+    1 0 1 0 1 1 | 1
+    0 1 1 0 1 1 | 0
+    1 0 1 0 1 1 | 1
+    0 1 1 0 1 1 | 0
+    0 0 0 0 1 0 | 0
+    0 1 0 0 1 0 | 0
+    1 1 0 0 1 0 | 0
+    1 0 0 0 1 0 | 1
+    0 0 0 0 1 0 | 0
+    1 1 0 0 1 0 | 0
+    0 1 0 0 1 0 | 0
+    1 0 0 0 1 0 | 1
+    1 0 0 0 1 0 | 1
+    1 0 1 1 0 1 | 0
+    1 1 1 1 0 1 | 1
+    1 0 1 1 0 1 | 0
+    0 1 1 1 0 1 | 1
+    1 0 1 1 0 1 | 0
+    0 0 0 0 0 1 | 0
+    0 1 0 0 0 1 | 0
+    1 1 0 0 0 1 | 1
+    1 0 0 0 0 1 | 0
+    0 0 0 0 0 1 | 0
+    1 1 0 0 0 1 | 1
+    0 1 0 0 0 1 | 0
+    1 0 0 0 0 1 | 0
+    1 1 0 0 0 1 | 1
+    1 1 1 1 1 0 | 0
+    0 0 1 1 1 0 | 1
+    1 1 1 1 1 0 | 0
+    0 0 1 1 1 0 | 1
+    1 1 1 1 1 0 | 0
+    0 0 0 0 0 0 | 0
+    0 0 1 0 0 0 | 1
+    0 0 1 1 1 1 | 1
+    0 0 0 1 1 1 | 0
+    0 1 0 0 0 0 | 0
+    0 1 0 1 0 0 | 1
+    0 1 1 1 1 1 | 1
+    0 1 1 0 1 1 | 0
+    1 0 0 0 0 0 | 0
+    1 0 0 0 1 0 | 1
+    1 0 1 1 1 1 | 1
+    1 0 1 1 0 1 | 0
+    1 1 0 0 0 0 | 0
+    1 1 0 0 0 1 | 1
+    1 1 1 1 1 1 | 1
+    1 1 1 1 1 0 | 0
+    0 0 0 0 0 0 | 0
+  delay: 4
+- name: data path is 2 ticks
+  steps:
+  - drive: {s0: 1, s1: 1}
+  - {wait: 10}
+  - drive: {d3: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {d3: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - drive: {s0: 0}
+  - {wait: 10}
+  - drive: {d2: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {d2: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+- name: analog strengths pass
+  steps:
+  - {run: setblock ~3 ~1 ~0 smooth_stone}
+  - {run: 'setblock ~3 ~2 ~0 cake[bites=3]'}
+  - {run: setblock ~5 ~1 ~2 smooth_stone}
+  - {run: 'setblock ~5 ~2 ~2 cake[bites=1]'}
+  - {wait: 10}
+  - {check: 'if block ~3 ~3 ~2 redstone_wire[power=8]'}
+  - {run: setblock ~3 ~1 ~4 redstone_block}
+  - {wait: 10}
+  - {check: 'if block ~3 ~3 ~2 redstone_wire[power=12]'}

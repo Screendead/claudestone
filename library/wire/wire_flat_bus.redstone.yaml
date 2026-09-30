@@ -1,0 +1,57 @@
+name: wire_flat_bus
+description: >-
+  A 2-tall bus with one line per block of width. Side-by-side dust always joins, but dust never
+  connects to the side of a repeater, so lines alternate repeater, dust, repeater, and each
+  neighbour is offset by one (its repeaters sit beside this line's dust). Every other block is a
+  repeater, so each line costs 1 game tick per block (2 ticks per 2 blocks), both edges.
+  Shown as 4 lines, 16 blocks long: inputs a,b,c,d at x=0 on z=0..3 (y=1), outputs A (dust),
+  B (repeater), C (dust), D (repeater) at x=16. Every repeater faces west (input from the west).
+  Size 17x2x4. Delay 16 ticks over 16 blocks. Tile sideways by repeating the two-line pattern.
+  Trade-off: the only flat pitch-1 level bus, but 8x slower than wire_checker_bus, which needs
+  3+ levels; for edges only, wire_rail_pulse_bus is flat, pitch 1 and much faster.
+traits: [flat, tileable, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  A: {output: A, block: redstone_wire}
+  B: {output: B, block: 'repeater[facing=west]'}
+  C: {output: C, block: redstone_wire}
+  D: {output: D, block: 'repeater[facing=west]'}
+layers:
+  0: |
+    .================
+    .================
+    .================
+    .================
+  1: |
+    a>->->->->->->->A
+    b->->->->->->->-B
+    c>->->->->->->->C
+    d->->->->->->->-D
+tests:
+- name: no crosstalk
+  truth_table: |
+    a b c d | A B C D
+    0 0 0 0 | 0 0 0 0
+    0 0 0 1 | 0 0 0 1
+    0 0 1 0 | 0 0 1 0
+    0 0 1 1 | 0 0 1 1
+    0 1 0 0 | 0 1 0 0
+    0 1 0 1 | 0 1 0 1
+    0 1 1 0 | 0 1 1 0
+    0 1 1 1 | 0 1 1 1
+    1 0 0 0 | 1 0 0 0
+    1 0 0 1 | 1 0 0 1
+    1 0 1 0 | 1 0 1 0
+    1 0 1 1 | 1 0 1 1
+    1 1 0 0 | 1 1 0 0
+    1 1 0 1 | 1 1 0 1
+    1 1 1 0 | 1 1 1 0
+    1 1 1 1 | 1 1 1 1
+  delay: 16

@@ -1,0 +1,133 @@
+name: tff_lightless_lock
+description: >-
+  Master-slave T flip-flop made only of repeaters, comparators, dust and redstone
+  blocks: no torches, so no light updates, no sounds and nothing to burn out. Master
+  repeater M (x1,y1,z3) and slave repeater q (x2,y1,z3) face west, so data flows east.
+  t sits directly behind lock repeater (x1,y1,z2), which freezes M while t is high, and
+  on the side of a subtract comparator (x2,y1,z1) whose rear is a redstone block
+  (x2,y1,z0): it outputs 15 - t, i.e. not-t, into lock repeater (x2,y1,z2), which
+  freezes the slave while t is low. The slave's output enters the side of a second
+  subtract comparator (x3,y1,z3) whose rear is a redstone block (x3,y1,z2); its 15 - q
+  output runs back along the dust at z4 and x0 into M's input. On a rising edge the
+  master locks at 2 gt, the slave unlocks at 4 gt and q flips at 6 gt; the new not-q
+  reaches M at 8 gt, after it has locked. Interface (top view, north up): t is at
+  (x1,y1,z1); q is the slave repeater (x2,y1,z3, facing west); not-q is the comparator
+  (x3,y1,z3, facing north, powering the dust at z4). 4x2x5 of blocks. Delay exactly
+  6 gt. Rising edges must be at least 8 gt apart (the new not-q needs 8 gt to reach the master), with pulses of at least 2 gt and gaps of at least 2 gt; a 1 gt pulse is ignored. Trade-off: the
+  smallest flip-flop that is both silent and lightless (40 blocks of volume against 60
+  and 75 for the hopper versions); tff_hopper_fast is 2 gt faster, and the hopper
+  versions keep their state as an item, which survives any power loss. It has the same
+  footprint and delay as the torch version.
+traits: [silent, lightless, pistonless, entityless, comparator_based, fast, compact, flat, horizontal, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  K: redstone_block
+  C: 'comparator[facing=north,mode=subtract,powered=true]{OutputSignal:15}'
+  v: repeater[facing=north]
+  L: repeater[facing=north,powered=true]
+  M: repeater[facing=west,powered=true]
+  t: {input: t}
+  q: {output: q, block: 'repeater[facing=west,locked=true]'}
+layers:
+  0: |
+    ....
+    ..=.
+    .==.
+    ====
+    ====
+  1: |
+    ..K.
+    .tC.
+    .vLK
+    -MqC
+    ----
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 6
+- name: output flips exactly 6 gt after each rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - wait: 30
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 5
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+- name: 2 gt pulses with 6 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 6
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 6
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: 6 gt pulses with 2 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 2
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 2
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+- name: a 1 gt pulse is too short and is ignored
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 0}
+  - drive: {t: 1}
+  - wait: 10
+  - drive: {t: 0}
+  - wait: 40
+  - expect: {q: 1}

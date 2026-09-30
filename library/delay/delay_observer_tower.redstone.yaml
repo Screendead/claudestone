@@ -1,0 +1,65 @@
+name: delay_observer_tower
+description: 'Edge delay that runs straight down (or up, flipped): a column of observers all facing up, each watching the one above, 2 game ticks per block. Every change of input a, rising or falling, comes out of the bottom observer 8 ticks later as a 2-tick pulse on its bottom face (it strong-powers the block below, y=0). Input a sits on top (y=5), the observers fill y=1 to 4, no support blocks: 1x4x1, the smallest vertical line in the library and the only lightless, silent way down without a dust staircase. It carries edges, not levels: feed it into a T flip-flop or a pulse-triggered block, or take the level from delay_repeater_line. Face them all down (facing=down) to go up instead. Trade-off: 2 ticks per block, pulses only, and edges closer than 4 ticks apart merge; but it is 1x1 in plan, needs no supports, makes no light or sound, and each block is its own tap point.'
+traits: [vertical, one_wide, tileable, ultracompact, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly]
+palette:
+  .: air
+  a: {input: a}
+  v: observer[facing=up]
+  o: {output: out, block: 'observer[facing=up]'}
+layers:
+  1: |
+    o
+  2: |
+    v
+  3: |
+    v
+  4: |
+    v
+  5: |
+    a
+tests:
+- name: each edge becomes a 2 tick pulse 8 ticks later
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 20
+  - expect: {out: 0}
+- name: edges 4 ticks apart stay separate
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}

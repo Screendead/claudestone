@@ -1,0 +1,118 @@
+name: seg_lamp_3x5
+description: 'Tiny 3x5 lamp digit drawn the way a 3x5 pixel font draws it: 13 lamps with shared corner pixels (the two inner holes are black concrete). How: each segment has one driven lamp (a top-middle, b upper-right, c lower-right, d bottom-middle, e lower-left, f upper-left, g centre) with one redstone dust straight behind it. Dust pointing into a lamp powers it as a conductor, so it also lights the lamps touching it, which completes the segment and its corners; lamps lit that way pass nothing on, and the inner holes stop the bleed at the next segment. The corner OR is free: a corner lamp lights when either segment that touches it is driven. The layer behind the face is dust on the seven driven cells and black concrete on every other cell: that holds the dust up and sits over each dust, cutting the diagonal dust links that would short the feeds together. Interface: the face is the z=0 plane looking north (x=0 is the viewer''s right, so b/c are at x=0, e/f at x=2); power the dust at z=1
+  from the cell behind it at z=2 (tested with a redstone block; dust or a repeater pointing in should act the same): a (1,5), b (0,4), c (0,2), d (1,1), e (2,2), f (2,4), g (1,3). Size 3 wide x 6 tall x 2 deep (the bottom row only holds d''s dust), 31 blocks. Delay: on in 0 game ticks, off after 4 (the lamp''s own turn-off delay); the truth table over every digit and every lone segment measures 4. Tiles at a 4-block pitch with a black column between digits (seg_lamp_3x5_x2) and stacks at a 6-block pitch. Trade-off: the smallest lamp display and the only small one with a full font; seg_lamp_5x9 is bigger and more readable, seg_bulb_3x5 is brighter with no off tail but one pixel per segment.'
+traits:
+- compact
+- fast
+- silent
+- entityless
+- pistonless
+- vertical
+- tileable
+- stackable
+- reset_safe
+- survival_friendly
+- tick_accurate
+palette:
+  .: air
+  A: black_concrete
+  b: {name: br, block: redstone_lamp}
+  B: {name: bm, block: redstone_lamp}
+  C: {name: bl, block: redstone_lamp}
+  '-': redstone_wire
+  d: {input: d}
+  l: {name: lr, block: redstone_lamp}
+  D: {name: ll, block: redstone_lamp}
+  c: {input: c}
+  e: {input: e}
+  m: {name: mr, block: redstone_lamp}
+  E: {name: mm, block: redstone_lamp}
+  F: {name: ml, block: redstone_lamp}
+  g: {input: g}
+  G: {name: ur, block: redstone_lamp}
+  H: {name: ul, block: redstone_lamp}
+  I: {input: b}
+  f: {input: f}
+  t: {name: tr, block: redstone_lamp}
+  J: {name: tm, block: redstone_lamp}
+  K: {name: tl, block: redstone_lamp}
+  a: {input: a}
+layers:
+  0: |
+    ...
+    .A.
+    ...
+  1: |
+    bBC
+    A-A
+    .d.
+  2: |
+    lAD
+    -A-
+    c.e
+  3: |
+    mEF
+    A-A
+    .g.
+  4: |
+    GAH
+    -A-
+    I.f
+  5: |
+    tJK
+    A-A
+    .a.
+tests:
+- name: every digit and every lone segment
+  truth_table: |
+    a b c d e f g | tl tm tr ul ur ml mm mr ll lr bl bm br
+    1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 0 | 1 1 1 1 1 1 0 1 1 1 1 1 1
+    0 1 1 0 0 0 0 | 0 0 1 0 1 0 0 1 0 1 0 0 1
+    1 1 0 1 1 0 1 | 1 1 1 0 1 1 1 1 1 0 1 1 1
+    1 1 1 1 0 0 1 | 1 1 1 0 1 1 1 1 0 1 1 1 1
+    0 1 1 0 0 1 1 | 1 0 1 1 1 1 1 1 0 1 0 0 1
+    1 0 1 1 0 1 1 | 1 1 1 1 0 1 1 1 0 1 1 1 1
+    1 0 1 1 1 1 1 | 1 1 1 1 0 1 1 1 1 1 1 1 1
+    1 1 1 0 0 0 0 | 1 1 1 0 1 0 0 1 0 1 0 0 1
+    1 1 1 1 0 1 1 | 1 1 1 1 1 1 1 1 0 1 1 1 1
+    1 0 0 0 0 0 0 | 1 1 1 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 | 0 0 1 0 1 0 0 1 0 0 0 0 0
+    0 0 1 0 0 0 0 | 0 0 0 0 0 0 0 1 0 1 0 0 1
+    0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 0 0 1 1 1
+    0 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0 1 0 1 0 0
+    0 0 0 0 0 1 0 | 1 0 0 1 0 1 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 | 0 0 0 0 0 1 1 1 0 0 0 0 0
+    0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0
+  delay: 4
+- name: on in 0 ticks, off after 4
+  steps:
+  - drive: {g: 1}
+  - expect:
+      ml: 1
+      mm: 1
+      mr: 1
+      ul: 0
+      ll: 0
+  - {wait: 10}
+  - drive: {g: 0}
+  - {wait: 3}
+  - expect: {mm: 1, ml: 1}
+  - {wait: 1}
+  - expect: {mm: 0, ml: 0, mr: 0}
+  - drive: {f: 1, e: 1}
+  - expect:
+      tl: 1
+      ul: 1
+      ml: 1
+      ll: 1
+      bl: 1
+      mm: 0
+  - drive: {f: 0}
+  - {wait: 4}
+  - expect:
+      tl: 0
+      ul: 0
+      ml: 1
+      ll: 1
+      bl: 1

@@ -1,0 +1,63 @@
+name: delay_selectable
+description: 'Runtime-selectable delay with no torches: input sel picks a 4-tick or a 26-tick path for a, a lightless two-way multiplexer. The long path runs west to east along the north row (a at x=0, three repeaters on delay 4, then comparator long_gate in subtract mode with sel on its south side), the short path is dust round the south edge into comparator short_gate (x=5, z=2, subtract mode, facing south) whose side is not_sel, a subtract comparator computing 15 minus sel from the redstone block behind it. A repeater carries short_gate north into out (dust, x=5, z=0, the east end of the long row). sel is a driver cell at x=4, z=1: it touches only comparator sides and a repeater side, which ignores redstone blocks. sel off: out follows a 26 ticks later on both edges; sel on: 4 ticks. Retune the long row''s repeaters for any 8-to-26-tick long delay. 6x2x5. Switching sel while a is on: to long, out stays on; to short, out drops for 4 ticks (the short gate opens 2 ticks after the long one closes). Trade-off: picks a delay at run time, where every other variant is fixed at build time, but costs a 6x5 footprint; delay_hopper_timer is the build-time-tunable long delay.'
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  s: {input: sel}
+  '4': repeater[facing=west,delay=4]
+  C: {name: long_gate, block: 'comparator[facing=west,mode=subtract]'}
+  o: {output: out, block: redstone_wire}
+  P: repeater[facing=south]
+  R: redstone_block
+  N: {name: not_sel, block: 'comparator[facing=west,mode=subtract]'}
+  K: {name: short_gate, block: 'comparator[facing=south,mode=subtract]'}
+  '-': redstone_wire
+layers:
+  0: |
+    .=====
+    =....=
+    =...==
+    =....=
+    ======
+  1: |
+    a444Co
+    -...sP
+    -..RNK
+    -....-
+    ------
+traits: [flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+tests:
+- name: sel off is 26 ticks
+  truth_table: |
+    a sel | out
+    0 0   | 0
+    1 0   | 1
+  delay: 26
+- name: sel on is 4 ticks
+  truth_table: |
+    a sel | out
+    0 1   | 0
+    1 1   | 1
+  delay: 4
+- name: switching sel while a is on
+  steps:
+  - drive: {a: 1, sel: 1}
+  - wait: 30
+  - expect: {out: 1, short_gate: 1, long_gate: 0}
+  - drive: {sel: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1, short_gate: 0, long_gate: 1}
+  - drive: {sel: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 3
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

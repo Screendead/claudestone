@@ -1,0 +1,100 @@
+name: wire_piston_instant
+description: >-
+  The Java instant wire: one edge crosses any length in a single game tick. Each stage is a
+  sticky piston facing east with a redstone block on its face; extended, the block sits against
+  the back of the next piston and powers it. When a piston loses power it retracts, and
+  retraction takes the block away from the next piston immediately, not after the 2-tick move,
+  so the next piston's retract goes into the same block-event queue and the whole chain unwinds
+  within one tick's block-event phase. Here the input is placed between ticks, so the fall lands on
+  the next tick (delay 1). With a redstone-driven input it lands on the same tick: with a repeater between the driver and
+  the first piston, the output falls exactly 2 ticks after the drive, the repeater's own delay
+  (measured).
+  The rising edge is slow: each stage waits 2 ticks for its block to finish moving plus 1 for the
+  next block event, 3 ticks per stage, 24 over this 25-block line.
+  Interface: input driver a at x=0 (west end, behind the first piston); 8 stages of
+  piston-block-gap along x=1..24 at y=1, no base needed; output dust at x=25 on a block.
+  Size 26x2x1. Stage pitch 3; add stages to lengthen it, the fall still takes 1 tick.
+  Limits (tested): hold the input high for at least 3 ticks per stage. A shorter pulse makes
+  the piston at the rising front spit its block, and the rest of the chain then extends with
+  the input low, so the line is stuck on until the next full-length pulse clears it. A new
+  rise right after a fall costs 2 extra ticks while the blocks finish sliding back.
+  Trade-off: the fastest falling edge in the library and 1 wide, but loud, it causes light
+  updates, and the rising edge is 8x slower per block than wire_repeater_line. Use it where one edge
+  is time-critical (resets, cancels, emergency stops) and the input is a held level.
+traits: [ultrafast, piston_based, one_wide, horizontal, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  P: sticky_piston[facing=east]
+  R: redstone_block
+  a: {input: a}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .........................=
+  1: |
+    aPR.PR.PR.PR.PR.PR.PR.PR.o
+tests:
+- name: falling edge crosses 25 blocks in 1 tick
+  steps:
+  - drive: {a: 1}
+  - wait: 30
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 30
+  - expect: {out: 0}
+- name: rising edge takes 3 ticks per stage
+  steps:
+  - drive: {a: 1}
+  - wait: 23
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 30
+  - expect: {out: 1}
+- name: repeated full toggles
+  steps:
+  - drive: {a: 1}
+  - wait: 30
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 29
+  - drive: {a: 1}
+  - wait: 23
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 6
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+- name: re-rise straight after a fall costs 2 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 30
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 25
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: short pulse sticks on until a full pulse
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 40
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 30
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 30
+  - expect: {out: 0}

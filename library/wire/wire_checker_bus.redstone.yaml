@@ -1,0 +1,66 @@
+name: wire_checker_bus
+description: >-
+  The densest full-speed level bus: dust lines and blocks in a checkerboard cross-section, so a
+  line has a line beside it and a line above it with no gap. Each block is both the support of
+  the line above it and the cover of the line below it. A solid block above a dust stops it
+  climbing to the diagonal-up dust next door, and the same block stops the upper dust stepping
+  down, so neighbouring lines never join. Dust only weakly powers the block under it, and weak
+  power never reaches another dust. Each line is the wire_repeater_line pattern (repeater, then
+  15 dust, 16 blocks per 2 ticks). Cross-section per line: 1 wide x 2 tall (plus one cap block
+  per column). Shown as 2 columns x 2 rows = 4 lines, 33 long: inputs a,b,c,d at x=0 (a at z=0
+  y=1, b at z=1 y=2, c at z=0 y=3, d at z=1 y=4), outputs A,B,C,D at x=32 in the same cells.
+  Size 33x5x2. Delay 4 ticks over 32 blocks. Extend sideways or upward by continuing the
+  checkerboard; repeaters can sit at the same x in every line. Trade-off: 8x the speed of
+  wire_flat_bus, but one row of lines needs 3 levels (base, low line, high line with its cap
+  under the next row) against wire_flat_bus's 2, and each extra row adds 2.
+traits: [ultracompact, fast, tileable, stackable, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  A: {output: A, block: redstone_wire}
+  B: {output: B, block: redstone_wire}
+  C: {output: C, block: redstone_wire}
+  D: {output: D, block: redstone_wire}
+layers:
+  0: |
+    .================================
+    .................................
+  1: |
+    a>--------------->--------------A
+    .================================
+  2: |
+    .================================
+    b>--------------->--------------B
+  3: |
+    c>--------------->--------------C
+    .================================
+  4: |
+    .================================
+    d>--------------->--------------D
+tests:
+- name: no crosstalk
+  truth_table: |
+    a b c d | A B C D
+    0 0 0 0 | 0 0 0 0
+    0 0 0 1 | 0 0 0 1
+    0 0 1 0 | 0 0 1 0
+    0 0 1 1 | 0 0 1 1
+    0 1 0 0 | 0 1 0 0
+    0 1 0 1 | 0 1 0 1
+    0 1 1 0 | 0 1 1 0
+    0 1 1 1 | 0 1 1 1
+    1 0 0 0 | 1 0 0 0
+    1 0 0 1 | 1 0 0 1
+    1 0 1 0 | 1 0 1 0
+    1 0 1 1 | 1 0 1 1
+    1 1 0 0 | 1 1 0 0
+    1 1 0 1 | 1 1 0 1
+    1 1 1 0 | 1 1 1 0
+    1 1 1 1 | 1 1 1 1
+  delay: 4

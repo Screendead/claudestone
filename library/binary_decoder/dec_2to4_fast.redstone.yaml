@@ -1,0 +1,204 @@
+name: dec_2to4_fast
+description: >-
+  Hazard-free 2-to-4 decoder in exactly 4 game ticks, lightless, built as a NOR ring:
+  four subtract comparators around one redstone block, each reading the block behind it
+  and the two corners beside it, so each output is NOT (corner OR corner). The corners
+  carry a (NW, dust at (2,3)), b (NE, (4,3)), NOT a (SE, (4,5)) and NOT b (SW, (2,5)),
+  arranged so every output sits between the two literals it must see off: o0 (3,3) =
+  NOR(a, b), o1 (4,4) = NOR(b, NOT a) = a AND NOT b, o2 (2,4) = NOR(a, NOT b), o3 (3,5)
+  = NOR(NOT a, NOT b) = a AND b. The positive corners are fed through repeaters (2
+  ticks) and the negative ones through subtract-comparator inverters (2 ticks), so all
+  four corners change on the same tick and every output changes exactly 4 ticks after
+  any input change, never blipping, even when a and b flip together (the transitions
+  test checks every tick of every change). a sits beside its inverter (SE) but must
+  also reach the NW repeater, and b the reverse, which forces the two input wires to
+  cross: b's wire runs round the west and north at ground level, a's goes up a step
+  and over the top of the ring on floating stone at layer 3 and drops onto the block
+  its repeater reads, with stone roofs where a lower wire would otherwise join an upper
+  one. Interface (x east, z south, base layer 0, logic layer 1): inputs a (5,6) and b
+  (1,6), strong sources (a lever or redstone block; a dust wire feeding them must end
+  in a repeater); outputs o0 (3,3) leaving north into (3,2), o1 (4,4) east into (5,4),
+  o2 (2,4) west into (1,4), o3 (3,5) south into (3,6), each at strength 15. Read o2 and
+  o3 through a repeater, not dust: (1,4) touches b's wire and (3,6) touches both
+  inverters' sides. 7x4x8. Trade-off: seven times the volume of dec_2to4_compact, in
+  exchange for 4 ticks instead of 6, full-strength outputs and no glitches.
+traits: [ultrafast, fast, lightless, silent, pistonless, entityless, comparator_based, tick_accurate, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  S: stone
+  R: redstone_block
+  r: 'repeater[facing=north]'
+  n: 'comparator[facing=south,mode=subtract]'
+  m: 'comparator[facing=south,mode=subtract]'
+  a: {input: a}
+  b: {input: b}
+  A: {output: o0, block: 'comparator[facing=south,mode=subtract]'}
+  B: {output: o1, block: 'comparator[facing=west,mode=subtract]'}
+  C: {output: o2, block: 'comparator[facing=east,mode=subtract]'}
+  D: {output: o3, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+  1: |
+    -----..
+    -.S.-..
+    -.r.r..
+    -.-A-..
+    -.CRB..
+    -.-D-.S
+    -bn.ma-
+    ..R.R..
+  2: |
+    ..S....
+    ..-SSS.
+    .....S.
+    .....S.
+    .....S.
+    .....S-
+    .......
+    .......
+  3: |
+    .......
+    ...---.
+    .....-.
+    .....-.
+    .....-.
+    .....-.
+    .......
+    .......
+tests:
+- name: logic
+  truth_table: |
+    a b | o0 o1 o2 o3
+    0 0 | 1 0 0 0
+    1 0 | 0 1 0 0
+    0 1 | 0 0 1 0
+    1 1 | 0 0 0 1
+    0 0 | 1 0 0 0
+    1 1 | 0 0 0 1
+    1 0 | 0 1 0 0
+    0 1 | 0 0 1 0
+    1 1 | 0 0 0 1
+    0 0 | 1 0 0 0
+  delay: 4
+- name: transitions
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 6
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 6
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 6
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 6
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 6
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 6
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 6
+  - drive: {a: 1, b: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 6
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 6
+  - drive: {a: 1, b: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 6
+  - drive: {a: 0, b: 0}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+  - wait: 1
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - wait: 6

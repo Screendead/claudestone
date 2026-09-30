@@ -1,0 +1,105 @@
+name: and_torch_1wide
+description: >-
+  One block wide and dust-free, so copies tile at pitch 1 for a bitwise bus AND
+  (proved by and_torch_1wide_x2). A's repeater powers a block whose south wall
+  torch hard-powers the middle block above it; B's repeater powers a block whose
+  north wall torch feeds a repeater pointing into the middle block from the
+  south. The middle block is powered unless both torches are off, and the output
+  wall torch on its north face is lit only when A and B are both on. Only
+  repeaters, torches and solid blocks touch the neighbouring column, and none of
+  them reach sideways, so neighbours don't interact. Interface: A enters from
+  the north at y=1 into a repeater facing south; B enters from the south at y=2
+  into a repeater facing north; the output torch (out) faces north at y=2 and
+  hard-powers the cell above it. 1x3x7. Delay A 6gt, B 8gt (tested), input
+  repeaters included: slower and longer than and_torch_flat, the price of
+  having no dust.
+  Like every torch design it burns out if a torch toggles 8 times within
+  60gt (then it stays dark for 160gt), so inputs must not toggle faster than
+  that; the comparator variants have no such limit.
+traits: [one_wide, tileable, vertical, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  b: {input: b}
+  v: repeater[facing=north]
+  '^': repeater[facing=south]
+  s: redstone_wall_torch[facing=south]
+  n: redstone_wall_torch[facing=north]
+  o: {output: out, block: 'redstone_wall_torch[facing=north]'}
+layers:
+  0: |
+    .
+    =
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+  1: |
+    a
+    v
+    #
+    s
+    =
+    .
+    .
+    =
+    .
+  2: |
+    .
+    .
+    o
+    #
+    ^
+    n
+    #
+    ^
+    b
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+    0 0 | 0
+    1 0 | 0
+    1 1 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+  delay: 8
+- name: a path is 6 ticks
+  steps:
+  - drive: {b: 1}
+  - wait: 20
+  - drive: {a: 1}
+  - wait: 5
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 5
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: tiles at pitch 1
+  tile: [1, 0, 0]
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+    0 0 | 0
+    1 0 | 0
+    1 1 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 1
+  delay: 8

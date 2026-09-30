@@ -1,0 +1,110 @@
+name: dl_dff_dual_edge
+description: 'Double-edge D flip-flop: q takes d on every clk edge, rising and falling, so it runs at half the clock frequency of a single-edge flip-flop for the same data rate. clk enters as a redstone block (or any signal) at x=4, z=1 powering one dust at x=3; an observer at x=2 facing east watches that dust and fires a 2-tick pulse into the side of a subtract comparator at x=1, z=1 whose rear reads a redstone block (x=1, z=2). The comparator normally outputs 15 into the south side of the data repeater q (x=1, z=0, facing west, d enters from x=0), locking it; the pulse drops the lock for 2 ticks. q changes exactly 6 ticks after either edge. It is a pulsed latch, so d is sampled late: a rising d up to 3 ticks after the edge and a falling d up to 4 ticks after are still captured, changes from 5 ticks on are ignored. Chained copies still shift correctly because q itself moves 6 ticks after the edge. Blocks (WxHxD) 3x2x3 (18). Lightless, silent, observer-based. Trade-off: double-edge in the same volume as the single-edge master-slave designs, but 2 ticks slower and with a late sampling window instead of a clean setup time.'
+traits: [compact, flat, horizontal, silent, lightless, pistonless, entityless, observer_based, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  d: {input: d}
+  c: {input: clk}
+  q: {output: q, block: 'repeater[facing=west]'}
+  C: comparator[facing=south,mode=subtract]
+  K: redstone_block
+  O: observer[facing=east]
+layers:
+  0: |
+    .=...
+    .===.
+    .....
+  1: |
+    dq...
+    .CO-c
+    .K...
+tests:
+- name: captures on both edges in 6 ticks
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 5
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 5
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 5
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 5
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q: 1}
+- name: d is sampled 3 to 4 ticks after the edge
+  steps:
+  - drive: {clk: 1}
+  - wait: 3
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 4
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 4
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+- name: shift chain timing, d flipped right after q moves
+  steps:
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 6
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {clk: 1}
+  - wait: 6
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 6
+  - drive: {clk: 0}
+  - wait: 6
+  - expect: {q: 0}
+  - wait: 20
+  - expect: {q: 0}

@@ -1,0 +1,61 @@
+name: and_torch_3input
+description: >-
+  Three-input torch AND, flat. Each input dust points into its own block and the
+  wall torch on the block's east face inverts it; all three torches feed one
+  north-south dust line, which powers every base block under it, and the output
+  torch hangs on the east face of the middle base block at ground level. Add
+  inputs by extending the column two blocks per input; the delay stays 4gt.
+  Interface: A, B, C enter as dust from the west at z=0, 2, 4, y=1; the output
+  torch (out) faces east at y=0 and hard-powers the cell above it. 5x2x5.
+  Delay 4gt on every input (tested). No redstone blocks, so cheaper in survival
+  than and_comparator_3input, which is a fifth of the volume and lightless.
+  Like every torch design it burns out if a torch toggles 8 times within
+  60gt (then it stays dark for 160gt), so inputs must not toggle faster than
+  that; the comparator variants have no such limit.
+traits: [flat, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a}
+  b: {input: b}
+  k: {input: c}
+  '-': redstone_wire
+  ): redstone_wall_torch[facing=east]
+  m: {name: nand, block: redstone_wire}
+  o: {output: out, block: 'redstone_wall_torch[facing=east]'}
+layers:
+  0: |
+    .=..=.
+    ....=.
+    .=..=o
+    ....=.
+    .=..=.
+  1: |
+    a-#)-.
+    ....-.
+    b-#)m.
+    ....-.
+    k-#)-.
+tests:
+- name: logic
+  truth_table: |
+      a b c | out
+      0 0 0 | 0
+      0 0 1 | 0
+      0 1 1 | 0
+      0 1 0 | 0
+      1 1 0 | 0
+      1 1 1 | 1
+      1 0 1 | 0
+      1 0 0 | 0
+      1 1 1 | 1
+      0 0 0 | 0
+      1 1 1 | 1
+      0 1 1 | 0
+      1 1 1 | 1
+      1 0 1 | 0
+      1 1 1 | 1
+      1 1 0 | 0
+      1 1 1 | 1
+  delay: 4

@@ -1,0 +1,80 @@
+name: delay_hopper_timer
+description: 'Long on-delay timer in 3x2x6 with no torches, pistons, entities or sound: an item-count clock. Hopper A (x=0, z=2, facing east) holds 16 redstone dust and hopper B (x=1, z=2, facing west) points back into it. Input a (x=1, z=1) locks B directly and, through comparator lock (x=0, z=1, subtract mode, back fed by the redstone block at z=0), unlocks A: a lightless NOT, 15 minus a. While a is on, A pushes one item into B every 8 ticks; the comparator full reads A, a repeater makes that a clean 15, and comparator gate (x=2, z=4, subtract mode) computes a minus it, so out (dust, x=2, z=5, south end) rises when A runs dry and falls 2 ticks after a falls. Measured delay is exactly 8 game ticks per item in A: 128 ticks here, 8 ticks with 1 item, 2560 ticks (128 s) with 5 full stacks, set by the item count in A''s palette entry. It is retentive: while a is off, B pushes items back at the same 8 ticks each, so a run that is cut short resumes from where the refill left it, and after an off time at least as long as the on time the full delay is back. Trade-off: huge delay per block (about 21 ticks per block of volume here, 70 with full stacks) with only 8-tick resolution and an output that stays on until a falls; for exact short delays use delay_repeater_line, for a delay that also passes the falling edge late use a repeater line.'
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  R: redstone_block
+  N: {name: lock, block: 'comparator[facing=north,mode=subtract]'}
+  A: 'hopper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:16}]}'
+  B: hopper[facing=west]
+  C: {name: full, block: 'comparator[facing=north]'}
+  '-': redstone_wire
+  P: repeater[facing=west]
+  O: {name: gate, block: 'comparator[facing=north,mode=subtract]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ...
+    =.=
+    ..=
+    =.=
+    ===
+    ..=
+  1: |
+    R..
+    Na-
+    AB-
+    C.-
+    -PO
+    ..o
+traits: [compact, container_based, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly]
+tests:
+- name: on-delay is 8 ticks per item, off in 2
+  steps:
+  - drive: {a: 1}
+  - wait: 127
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 50
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+- name: full delay again after refill
+  steps:
+  - drive: {a: 1}
+  - wait: 140
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 140
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 127
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+- name: short input never fires
+  steps:
+  - drive: {a: 1}
+  - wait: 120
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 8
+  - expect: {out: 0}
+  - wait: 200
+  - expect: {out: 0}
+- name: retentive, 64 on then 16 off leaves 80 to go
+  steps:
+  - drive: {a: 1}
+  - wait: 64
+  - drive: {a: 0}
+  - wait: 16
+  - drive: {a: 1}
+  - wait: 79
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

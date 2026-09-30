@@ -1,0 +1,93 @@
+name: dl_subtract_lock
+description: 'Active-high gated D latch with no torch. The data repeater q (facing west: d enters from x=0, q drives x=2) is locked by a comparator in subtract mode pointing into its south side. The comparator''s rear reads a redstone block (constant 15) and its west side reads e, so it outputs 15 - e: it locks q exactly when e is off, a lightless one-tick inverter. e=1: q follows d in 2 ticks. e=0: q holds; the lock lands 2 ticks after e falls, so d must settle at least 1 tick before e falls; a d change in the same tick as e falls is a race decided by update order, and one a tick later is ignored. Raising e with d different from q updates q after 4 ticks. Blocks (WxHxD): 1x2x3 (q, comparator, redstone block, two supports); d is west of q, e is west of the comparator. Lightless and silent, as fast as dl_lock_pair but with an active-high enable, at the cost of one extra block. The redstone block can be swapped for any constant source at the comparator rear (a full cake gives 14, still locking).'
+traits: [compact, fast, flat, horizontal, silent, lightless, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  d: {input: d}
+  e: {input: e}
+  q: {output: q, block: 'repeater[facing=west]'}
+  c: comparator[facing=south,mode=subtract]
+  K: redstone_block
+layers:
+  0: |
+    .=
+    .=
+    ..
+  1: |
+    dq
+    ec
+    .K
+tests:
+- name: transparent in 2 ticks
+  truth_table: |
+    e d | q
+    1 0 | 0
+    1 1 | 1
+  delay: 2
+- name: enable gates d
+  truth_table: |
+    e d | q
+    0 0 | 0
+    0 1 | 0
+    1 1 | 1
+    0 1 | 1
+    0 0 | 1
+    1 0 | 0
+  delay: 4
+- name: starts at 0 and holds both values
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {e: 1}
+  - wait: 3
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {e: 0}
+  - wait: 4
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {e: 1}
+  - wait: 3
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+  - drive: {e: 0}
+  - wait: 4
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+- name: setup time is one tick
+  steps:
+  - drive: {e: 1}
+  - wait: 4
+  - drive: {d: 1}
+  - wait: 1
+  - drive: {e: 0}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {e: 1}
+  - wait: 10
+  - drive: {d: 0}
+  - wait: 1
+  - drive: {e: 0}
+  - wait: 10
+  - expect: {q: 0}
+- name: one tick after is not captured
+  steps:
+  - drive: {e: 1}
+  - wait: 10
+  - drive: {e: 0}
+  - wait: 1
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}

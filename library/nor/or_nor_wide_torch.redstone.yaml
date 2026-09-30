@@ -1,0 +1,85 @@
+name: or_nor_wide_torch
+description: >-
+  n-input NOR with a full-strength output: the zero-tick glass bus of or_wide_instant
+  ends in a dust that points into a block, and a wall torch on the block's east face
+  inverts. Interface: input k arrives on layer 1 at column k, from the north for even k
+  (a, c) and from the south for odd k (b, d); out is the torch on layer 2 at the east
+  end, output 15. The last bus dust must have no input stub so it points straight into
+  the block. 4 inputs: 7x3x3; one column per extra input. Delay 2 game ticks for any
+  width (bus limit: 14 columns). Trade-off versus or_nor_wide_lightless: output 15, but
+  the torch causes light updates and can burn out (with a fizz) under fast toggling.
+traits: [fast, ultrafast, compact, tileable, torch_based, silent, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  S: stone
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  i: {name: ia, block: redstone_wire}
+  j: {name: ib, block: redstone_wire}
+  k: {name: ic, block: redstone_wire}
+  l: {name: id, block: redstone_wire}
+  t: {output: out, block: 'redstone_wall_torch[facing=east]'}
+layers:
+  0: |
+    .......
+    =.=....
+    .......
+    .=.=...
+    .......
+  1: |
+    a.c....
+    i.k....
+    GGGGG..
+    .j.l...
+    .b.d...
+  2: |
+    .......
+    .......
+    -----St
+    .......
+    .......
+tests:
+- name: logic
+  truth_table: |
+    a b c d | out ia ib ic id
+    0 0 0 0 | 1 0 0 0 0
+    0 0 0 1 | 0 0 0 0 1
+    0 0 1 0 | 0 0 0 1 0
+    0 0 1 1 | 0 0 0 1 1
+    0 1 0 0 | 0 0 1 0 0
+    0 1 0 1 | 0 0 1 0 1
+    0 1 1 0 | 0 0 1 1 0
+    0 1 1 1 | 0 0 1 1 1
+    1 0 0 0 | 0 1 0 0 0
+    1 0 0 1 | 0 1 0 0 1
+    1 0 1 0 | 0 1 0 1 0
+    1 0 1 1 | 0 1 0 1 1
+    1 1 0 0 | 0 1 1 0 0
+    1 1 0 1 | 0 1 1 0 1
+    1 1 1 0 | 0 1 1 1 0
+    1 1 1 1 | 0 1 1 1 1
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

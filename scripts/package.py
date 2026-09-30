@@ -15,13 +15,14 @@ from pathlib import Path
 
 from redstone.build import write_datapack
 from redstone.fileformat import load
+from redstone.library import path_of
 
 ROOT = Path(__file__).resolve().parent.parent
 FILL_LIMIT = 32768
 
 
 def package(name: str, front: tuple[int, int, int] | None = None) -> Path:
-    spec = load(ROOT / "library" / f"{name}.redstone.yaml")
+    spec = load(path_of(name))
     (lo_x, lo_y, lo_z), (hi_x, hi_y, hi_z) = spec.build.bounds()
     # Put the player at the middle of the build's north edge, one block in front of it,
     # with the base one block below their feet.

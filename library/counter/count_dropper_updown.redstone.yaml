@@ -1,0 +1,179 @@
+name: count_dropper_updown
+description: 'Saturating up/down decimal counter in 4x2x1: the count is the number of unstackable items (nine wooden swords to start with) in dropper B. Dropper A (x0,y1,z0, facing east) holds all nine and faces dropper B (x1,y1,z0, facing west). A rising edge on up (the cell south of A, x0,y1,z1) fires A, which moves one sword into B; a rising edge on down (south of B, x1,y1,z1) fires B, which moves one back. A dropper fires only on a rising edge (its TRIGGERED flag), so a held input counts once. Comparator k (x2,y1,z0, facing west) reads B and the dust n (x3) east of it carries the count as signal strength: with 9 slots of unstackables the strength is floor(14 n / 9) + 1 for n > 0, so 0-9 give 0, 2, 4, 5, 7, 8, 10, 11, 13, 15, all distinct; k itself is the nonzero flag. Up at 9 and down at 0 do nothing (the source dropper is empty); up and down together cancel. Delay 6 gt (dropper 4 + comparator 2). Trade-off: the smallest counter here with a decimal range and both directions, and lightless,
+  but droppers click, the output is a nonlinear strength (decode it with comparators), and it saturates where count_bcd_sync wraps with a borrow.'
+traits:
+- compact
+- analog
+- container_based
+- tick_accurate
+- lightless
+- pistonless
+- entityless
+- flat
+- horizontal
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  u: {input: up}
+  d: {input: down}
+  A: dropper[facing=east]{Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1},{Slot:2b,id:"minecraft:wooden_sword",count:1},{Slot:3b,id:"minecraft:wooden_sword",count:1},{Slot:4b,id:"minecraft:wooden_sword",count:1},{Slot:5b,id:"minecraft:wooden_sword",count:1},{Slot:6b,id:"minecraft:wooden_sword",count:1},{Slot:7b,id:"minecraft:wooden_sword",count:1},{Slot:8b,id:"minecraft:wooden_sword",count:1}]}
+  B: dropper[facing=west]
+  K: {name: k, block: 'comparator[facing=west]'}
+  o: {output: n, block: redstone_wire}
+layers:
+  0: |
+    ..==
+    ....
+  1: |
+    ABKo
+    ud..
+tests:
+- name: counts up 0 to 9 in ten distinct strengths and saturates
+  steps:
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=0]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=2]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=4]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=5]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=7]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=8]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=10]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=11]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=13]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=15]'}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=15]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=13]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=11]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=10]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=8]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=7]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=5]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=4]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=2]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=0]'}
+  - {drive: {down: 1}}
+  - {wait: 6}
+  - {drive: {down: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=0]'}
+- name: one step per rising edge, 6 ticks to the output
+  steps:
+  - {expect: {k: 0}}
+  - {drive: {up: 1}}
+  - {wait: 5}
+  - {expect: {k: 0}}
+  - {wait: 1}
+  - {expect: {k: 1}}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=2]'}
+  - {wait: 60}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=2]'}
+  - {drive: {up: 0}}
+  - {wait: 60}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=2]'}
+  - {drive: {down: 1}}
+  - {wait: 5}
+  - {expect: {k: 1}}
+  - {wait: 1}
+  - {expect: {k: 0}}
+  - {drive: {down: 0}}
+  - {wait: 10}
+  - {drive: {down: 1}}
+  - {wait: 10}
+  - {expect: {k: 0}}
+- name: up and down together cancel
+  steps:
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {drive: {up: 1}}
+  - {wait: 6}
+  - {drive: {up: 0}}
+  - {wait: 6}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=4]'}
+  - {drive: {up: 1, down: 1}}
+  - {wait: 10}
+  - {drive: {up: 0, down: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~0 redstone_wire[power=4]'}

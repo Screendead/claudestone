@@ -1,0 +1,550 @@
+name: analog_min
+description: 'Lossless min(a, b) in 4 game ticks from three comparators, by De Morgan: min(a, b) = 15 - max(15 - a, 15 - b). I (x=1, z=1) and J (x=3, z=1) are analog inverters (subtract mode, redstone block behind each at x=0 and x=4, a and b on their south sides at x=1, z=2 and x=3, z=2); they face into both sides of F (x=2, z=1), and a comparator''s two side inputs already take their max. F, in subtract mode with a redstone block behind it (x=2, z=0), outputs 15 - max(15 - a, 15 - b) = min(a, b) southwards (towards x=2, z=2, which is left empty here because the input dusts flank it; put a repeater or comparator there). Core 5x2x3 (x=0..4, z=0..2). Fixtures: hopper and comparator per input (z=3..4), drivers above the input dusts. Tests: exact min for all 16 a against b = 0, 1, 5, 7, 8, 14, 15, and both edges of each input exactly 4 ticks. Trade-off: each input feeds one comparator side, so no lossless fan-out is needed (the textbook a - (a - b) needs a at a rear and a side at once); 4 ticks,
+  twice analog_max_block. With the redstone blocks swapped for a constant k it computes the min against k-inverted inputs.'
+traits:
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+- compact
+- fast
+- flat
+- horizontal
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  P: redstone_block
+  Q: redstone_block
+  I: comparator[facing=west,mode=subtract]
+  J: comparator[facing=east,mode=subtract]
+  F: {output: min, block: 'comparator[facing=north,mode=subtract]'}
+  A: {name: a, block: redstone_wire}
+  B: {name: b, block: redstone_wire}
+  f: comparator[facing=south]
+  g: comparator[facing=south]
+  H: hopper[facing=down]
+  h: hopper[facing=down]
+  a: {input: a_max}
+  b: {input: b_max}
+layers:
+  0: |
+    .....
+    .===.
+    .=.=.
+    .=.=.
+    .....
+  1: |
+    ..R..
+    PIFJQ
+    .A.B.
+    .f.g.
+    .H.h.
+  2: |
+    .....
+    .....
+    .a.b.
+    .....
+    .....
+tests:
+- name: both high
+  truth_table: |
+    a_max b_max | min
+    0 0 | 0
+    1 0 | 0
+    0 1 | 0
+    1 1 | 1
+  delay: 4
+- name: min exact after 4 ticks, both edges
+  steps:
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {wait: 10}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - drive: {b_max: 1}
+  - {wait: 3}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {wait: 1}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - {wait: 10}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - drive: {b_max: 0}
+  - {wait: 3}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - {wait: 1}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {wait: 10}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 10}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - drive: {a_max: 1}
+  - {wait: 3}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {wait: 1}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - {wait: 10}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - drive: {a_max: 0}
+  - {wait: 3}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - {wait: 1}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {wait: 10}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+- name: min for all a against b
+  steps:
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:2}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:2}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:2}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:2}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:2}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:3}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:3}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:3}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:3}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:3}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:4}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:6}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:6}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:6}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:6}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:9}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:10}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:10}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:11}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:11}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:12}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:12}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:13}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:13}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:14}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:14}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:0}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:1}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:5}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:7}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:8}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:14}'}
+  - {run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {run: 'data merge block ~3 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 8}
+  - {check: 'if data block ~2 ~1 ~1 {OutputSignal:15}'}

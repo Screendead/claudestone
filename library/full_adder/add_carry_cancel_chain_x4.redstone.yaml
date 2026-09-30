@@ -1,0 +1,119 @@
+name: add_carry_cancel_chain_x4
+description: >-
+  Four add_carry_cancel_cell bits side by side at a pitch of 3, bit 0 at the west
+  (x 0-3) and bit 3 at the east, carry-in at (13,2,2) flowing west to cout at dust
+  (0,2,2). Each bit has its own gen (g0-g3, dust at (3i+1,3,4)) and kill (k0-k3,
+  dust at (3i+2,3,0)) and exposes its carry-in copy cp0-cp3 at (3i+3,2,5). The
+  truth table mixes propagate, kill and generate in every bit, including rows that
+  change several bits at once, and checks every bit's carry-in. This is the proof
+  that the cell tiles without crosstalk and that the carry keeps full strength
+  across bits. 13x4x6. Delay: carry-in to cout 8 ticks (2 per bit); worst case over
+  the table 10, a kill in the easternmost bit (4 to enter its comparator, then 2 per
+  bit to the west end). Exact, tested.
+traits: [lightless, silent, pistonless, entityless, tileable, horizontal, comparator_based, fast, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  v: repeater[facing=north]
+  c: {output: cout, block: redstone_wire}
+  A: comparator[facing=east,mode=subtract]
+  '-': redstone_wire
+  B: {input: cin}
+  ^: repeater[facing=south]
+  C: comparator[facing=north,mode=compare]
+  D: {output: cp0, block: redstone_wire}
+  E: {output: cp1, block: redstone_wire}
+  F: {output: cp2, block: redstone_wire}
+  G: {output: cp3, block: redstone_wire}
+  k: {input: k0}
+  H: {input: k1}
+  I: {input: k2}
+  J: {input: k3}
+  g: {input: g0}
+  K: {input: g1}
+  M: {input: g2}
+  N: {input: g3}
+layers:
+  0: |
+    .============.
+    .============.
+    =============.
+    .============.
+    .============.
+    .============.
+  1: |
+    .############.
+    .############.
+    #############.
+    .############.
+    .############.
+    .############.
+  2: |
+    .############.
+    .#v##v##v##v#.
+    c#A-#A-#A-#A-B
+    .^#C^#C^#C^#C.
+    .############.
+    .##D##E##F##G.
+  3: |
+    ..-..-..-..-..
+    ..............
+    ..............
+    ..............
+    .-..-..-..-...
+    ..............
+  4: |
+    ..k..H..I..J..
+    ..............
+    ..............
+    ..............
+    .g..K..M..N...
+    ..............
+tests:
+- name: ripple
+  truth_table: |
+    cin g0 k0 g1 k1 g2 k2 g3 k3 | cout cp0 cp1 cp2 cp3
+    0 1 0 0 0 0 0 0 0 | 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 | 0 0 0 0 0
+    0 0 0 1 0 0 0 0 0 | 1 1 0 0 0
+    0 0 0 0 0 0 0 0 0 | 0 0 0 0 0
+    0 0 0 0 0 1 0 0 0 | 1 1 1 0 0
+    0 0 0 0 0 0 0 0 0 | 0 0 0 0 0
+    0 0 0 0 0 0 0 1 0 | 1 1 1 1 0
+    0 0 0 0 0 0 0 0 0 | 0 0 0 0 0
+    1 0 1 0 0 0 0 0 0 | 0 1 1 1 1
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+    1 0 0 0 1 0 0 0 0 | 0 0 1 1 1
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+    1 0 0 0 0 0 1 0 0 | 0 0 0 1 1
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+    1 0 0 0 0 0 0 0 1 | 0 0 0 0 1
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+    0 0 0 0 0 0 0 0 0 | 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+    0 0 1 1 0 0 1 1 0 | 0 1 0 1 0
+    0 1 1 1 0 0 0 1 0 | 1 1 1 1 0
+    0 0 0 1 0 1 1 1 1 | 1 1 1 1 0
+    1 1 0 1 0 0 0 1 0 | 1 1 1 1 1
+    1 1 1 1 1 1 1 0 1 | 1 1 1 0 1
+    0 1 0 1 0 0 1 1 0 | 1 1 0 1 0
+    0 1 1 0 1 0 1 0 0 | 1 0 0 0 0
+    1 1 1 0 0 0 1 1 1 | 1 0 0 1 1
+    0 0 1 0 0 0 0 0 1 | 0 0 0 0 0
+    1 1 0 0 1 1 1 0 1 | 1 0 1 0 1
+    1 1 1 0 1 1 0 1 1 | 1 0 1 1 1
+    1 1 1 0 1 1 0 1 0 | 1 0 1 1 1
+    0 1 1 1 1 1 1 0 0 | 1 1 1 0 0
+    0 1 1 1 1 1 0 1 0 | 1 1 1 1 0
+    1 0 0 0 0 0 0 0 0 | 1 1 1 1 1
+  delay: 10
+- name: cin to cout through 4 bits
+  truth_table: |
+    cin g0 k0 g1 k1 g2 k2 g3 k3 | cout
+    0 0 0 0 0 0 0 0 0 | 0
+    1 0 0 0 0 0 0 0 0 | 1
+    0 0 0 0 0 0 0 0 0 | 0
+    1 0 0 0 0 0 0 0 0 | 1
+  delay: 8

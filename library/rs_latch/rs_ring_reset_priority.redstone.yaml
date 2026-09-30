@@ -1,0 +1,104 @@
+name: rs_ring_reset_priority
+description: >-
+  Reset-dominant twin of rs_comparator_ring: the same lightless, silent 3x2 ring of dust
+  closed by a repeater (north row, flowing east) and a comparator (south row, flowing
+  west), but s enters on the east column, upstream of the comparator, so every path from
+  s to q runs through the comparator that r switches off. While r is held q is 0
+  whatever s does; use it where a clear or power-on reset must override a stuck set.
+  Interface (top view, north up): s is the cell east of the south-east dust (x3,y1,z1),
+  r the cell south of the comparator (x1,y1,z2), q the south-west dust (x0,y1,z1),
+  strength 13-14. Set and reset both take 2 gt (one comparator delay), and a 2 gt pulse
+  of either input is enough. The comparator is in subtract mode: with s held its rear
+  sees a full 15, and in compare mode 15 against r's 15 would still pass. 3x2x2 of
+  blocks, same stacking rules as the set-dominant ring. Trade-off: symmetric 2 gt
+  instead of the set-dominant ring's 0 gt set.
+traits: [lightless, silent, pistonless, entityless, comparator_based, flat, horizontal, compact, fast, stackable, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  C: comparator[facing=east,mode=subtract]
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: redstone_wire}
+layers:
+  0: |
+    ===.
+    ===.
+    ....
+  1: |
+    ->-.
+    qC-s
+    .r..
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 1 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 0
+    0 0 | 0
+  delay: 2
+- name: set and reset take 2 gt
+  steps:
+  - drive: {s: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 2}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - {wait: 1}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: reset held overrides a held set
+  steps:
+  - drive: {r: 1}
+  - {wait: 5}
+  - drive: {s: 1}
+  - {wait: 20}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 20}
+  - expect: {q: 0}
+  - drive: {s: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: two gt pulses latch, one gt pulses do not
+  steps:
+  - drive: {s: 1}
+  - {wait: 1}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {s: 1}
+  - {wait: 2}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 2}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 0}

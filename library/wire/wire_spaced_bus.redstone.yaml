@@ -1,0 +1,49 @@
+name: wire_spaced_bus
+description: >-
+  The flat full-speed bus: wire_repeater_line copies at a pitch of 2 (one empty column between
+  lines). Dust joins only orthogonally adjacent dust on the same level, so a single air gap
+  isolates the lines, and nothing in a line powers sideways (dust powers only along its own
+  run and the block under it; repeaters only forward). Each line is a repeater then 15 dust,
+  repeated, so 16 blocks per 2 game ticks, both edges. Shown as 3 lines, 33 long: inputs a,b,c
+  at x=0 on z=0,2,4 (y=1), repeaters facing west at x=1 and x=17, outputs A,B,C (dust, strength 1)
+  at x=32. Size 33x2x5. Delay 4. Trade-off: flat and as fast as a single line, at twice the
+  width of wire_flat_bus (which is pitch 1 but 8x slower); wire_checker_bus reaches pitch 1 at
+  full speed by adding height.
+traits: [fast, flat, tileable, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  A: {output: A, block: redstone_wire}
+  B: {output: B, block: redstone_wire}
+  C: {output: C, block: redstone_wire}
+layers:
+  0: |
+    .================================
+    .................................
+    .================================
+    .................................
+    .================================
+  1: |
+    a>--------------->--------------A
+    .................................
+    b>--------------->--------------B
+    .................................
+    c>--------------->--------------C
+tests:
+- name: no crosstalk
+  truth_table: |
+    a b c | A B C
+    0 0 0 | 0 0 0
+    0 0 1 | 0 0 1
+    0 1 0 | 0 1 0
+    0 1 1 | 0 1 1
+    1 0 0 | 1 0 0
+    1 0 1 | 1 0 1
+    1 1 0 | 1 1 0
+    1 1 1 | 1 1 1
+  delay: 4

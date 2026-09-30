@@ -1,0 +1,126 @@
+name: count_hopper_reset
+description: 'Silent, lightless counter with reset, 0-5 as a signal strength. The count is the number of unstackable items (wooden swords) in hopper B (x3,y1,z2, facing west), taken one per rising edge from hopper A (x2,y1,z2, facing east), which starts with five. Both hoppers are held locked by subtract comparators pointing into them from the north (x2 and x3, y1, z1, facing north, rear on the redstone blocks at z0), which output 15 minus their side input. A rising edge on in (x0,y1,z1) drops A''s lock 2 gt later, and in also reaches A through a 4 gt repeater (x1,y1,z2) that locks it again 4 gt after the edge: a 2 gt unlock window in which a hopper moves exactly one item (HopperBlockEntity sets an 8 gt cooldown after a move, and the cooldown keeps counting down while locked). A held input still counts once. reset (x4,y1,z1) is the side of B''s lock, so holding it unlocks B, which drains back into A at one item per 8 gt (40 gt from full). Output n is the dust (x3,y1,z4) beyond comparator
+  k (x3,y1,z3, facing north), which reads B: 0, 3, 6, 9, 12, 15 for 0-5 items (floor(14 n / 5) + 1). Saturates at 5. Delay 4 gt from the rising edge to n; at most one count per 8 gt (tested at an 8 gt period). The lock comparators are placed already outputting 15 (block-entity OutputSignal) so nothing moves at placement. 4x2x5. Trade-off: the only resettable and the only silent, lightless analog counter; the range is only 0-5 (a hopper has 5 slots) and reset takes 8 gt per item. Use stackable items to count further in coarser strength steps.'
+traits:
+- analog
+- container_based
+- comparator_based
+- tick_accurate
+- silent
+- lightless
+- pistonless
+- entityless
+- flat
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  i: {input: in}
+  r: {input: reset}
+  R: redstone_block
+  '-': redstone_wire
+  D: repeater[facing=west,delay=2]
+  a: comparator[facing=north,mode=subtract,powered=true]{OutputSignal:15}
+  b: comparator[facing=north,mode=subtract,powered=true]{OutputSignal:15}
+  A: hopper[facing=east,enabled=false]{Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1},{Slot:2b,id:"minecraft:wooden_sword",count:1},{Slot:3b,id:"minecraft:wooden_sword",count:1},{Slot:4b,id:"minecraft:wooden_sword",count:1}]}
+  B: hopper[facing=west,enabled=false]
+  K: {name: k, block: 'comparator[facing=north]'}
+  o: {output: n, block: redstone_wire}
+layers:
+  0: |
+    .....
+    .===.
+    ==...
+    ...=.
+    ...=.
+  1: |
+    ..RR.
+    i-abr
+    -DAB.
+    ...K.
+    ...o.
+tests:
+- name: one item per rising edge up to 5, reset drains
+  steps:
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=0]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=3]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=6]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=9]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=12]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=15]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=15]'}
+  - {drive: {reset: 1}}
+  - {wait: 60}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=0]'}
+  - {drive: {reset: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=0]'}
+  - {drive: {in: 1}}
+  - {wait: 10}
+  - {drive: {in: 0}}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=3]'}
+- name: a long high input still counts once
+  steps:
+  - {drive: {in: 1}}
+  - {wait: 100}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=3]'}
+  - {drive: {in: 0}}
+  - {wait: 30}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=3]'}
+  - {drive: {in: 1}}
+  - {wait: 3}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=3]'}
+  - {wait: 1}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=6]'}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=6]'}
+  - {wait: 40}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=6]'}
+  - {drive: {in: 0}}
+  - {wait: 12}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=6]'}
+- name: counts at an 8-tick period
+  steps:
+  - {drive: {in: 1}}
+  - {wait: 4}
+  - {drive: {in: 0}}
+  - {wait: 4}
+  - {drive: {in: 1}}
+  - {wait: 4}
+  - {drive: {in: 0}}
+  - {wait: 4}
+  - {drive: {in: 1}}
+  - {wait: 4}
+  - {drive: {in: 0}}
+  - {wait: 4}
+  - {drive: {in: 1}}
+  - {wait: 4}
+  - {drive: {in: 0}}
+  - {wait: 4}
+  - {wait: 10}
+  - {check: 'if block ~3 ~1 ~4 redstone_wire[power=12]'}

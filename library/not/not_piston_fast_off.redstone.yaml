@@ -1,0 +1,63 @@
+name: not_piston_fast_off
+description: |
+  An inverter whose falling edge takes 1 tick. A sticky piston holds a redstone block that
+  powers the output dust. When the input arrives the piston's block event runs in the next
+  tick and turns the redstone block into a moving block at once, so the dust loses its source
+  1 tick after the input, faster than any torch or comparator (2). Releasing the input pulls
+  the block back, and it only becomes a power source again when the move finishes, so the
+  rising edge is slow.
+  Interface: sticky piston at (0,1,0) facing east; redstone block at (1,1,0); input: any
+  signal into the piston or its quasi-connected cell, here the driver above it at (0,2,0).
+  Output: dust at (1,1,1) on a support (1,0,1), south of the redstone block. The cell east of
+  the redstone block (2,1,0) must stay air: the block moves there. Delays: falling 1 tick,
+  rising 3 ticks (the truth table's delay is the slower edge).
+  Trade-off: the fastest possible turn-off, for when a NOT must kill something before a
+  2-tick path can react; the price is a slow turn-on, noise and light updates from the moving
+  block. Keep input pulses and gaps at least 3 ticks: the tests only cover changes made after
+  the previous move has finished. Pair with not_piston_fast_on when the other edge matters.
+traits: [piston_based, compact, entityless, survival_friendly, reset_safe, tick_accurate, flat]
+palette:
+  .: air
+  '=': smooth_stone
+  P: 'sticky_piston[facing=east]'
+  R: redstone_block
+  o: {output: out, block: redstone_wire}
+  a: {input: a}
+layers:
+  0: |
+    ..
+    .=
+  1: |
+    PR
+    .o
+  2: |
+    a.
+    ..
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+  delay: 3
+- name: edges
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 5
+  - drive: {a: 0}
+  - wait: 3
+  - expect: {out: 1}

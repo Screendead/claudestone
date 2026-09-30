@@ -1,0 +1,91 @@
+name: rs_piston_block
+description: >-
+  Piston memory: two ordinary (non-sticky) pistons face each other across a redstone
+  block that can sit in one of two cells. s fires the west piston, which shoves the
+  block one cell east next to the q dust; r fires the east piston, which shoves it back.
+  Pistons do not take power through their face, so the block never re-triggers the
+  piston it rests against, and an ordinary piston leaves the block where it pushed it
+  when it retracts. Interface (top view, north up): west piston (x0,y1,z0, facing east),
+  redstone block (x1,y1,z0) in the reset position, east piston (x3,y1,z0, facing west).
+  s is the cell under the west piston (x0,y0,z0) and r the cell under the east piston
+  (x3,y0,z0). q is the dust south of the set position (x2,y1,z1). 4x2x2 of blocks. Reset
+  is the fastest in the family at 1 gt: the pushed block turns into a moving block the
+  moment the piston's block event fires, so q drops on the very next tick. Set takes 3
+  gt, until the block lands. Either input only needs to be held until its piston has
+  fired (a single rising edge). While one input is held its piston head blocks the other
+  piston, and that other edge is lost, not deferred: it must be given again after
+  release. s and r must not rise in the same tick. Trade-off: pistons are loud, change
+  light and can be jammed by 0-tick pulses; the stored block is a real redstone block,
+  so the state survives power loss and chunk unloads. Starts reset.
+traits: [piston_based, fast, flat, horizontal, entityless, reset_safe, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  P: piston[facing=east]
+  Q: piston[facing=west]
+  R: redstone_block
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: redstone_wire}
+layers:
+  0: |
+    s..r
+    ..=.
+  1: |
+    PR.Q
+    ..q.
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    0 1 | 0
+    0 0 | 0
+  delay: 3
+- name: set lands at 3 gt, reset clears at 1 gt
+  steps:
+  - drive: {s: 1}
+  - {wait: 2}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: an edge is lost while the other piston is held out
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {r: 0}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 0}

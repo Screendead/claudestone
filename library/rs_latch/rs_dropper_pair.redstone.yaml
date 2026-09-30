@@ -1,0 +1,86 @@
+name: rs_dropper_pair
+description: >-
+  Ultracompact edge-triggered RS latch from two droppers facing each other with a single
+  item between them; the item's position is the state. A rising edge on s fires dropper
+  A, which moves the item into dropper B; a rising edge on r fires B, which moves it
+  back. Firing an empty dropper does nothing, so repeated sets or resets are harmless
+  and a held input only fires once. q is a comparator reading B (strength 1, since one
+  item of a 64-stack is the minimum fullness); put a repeater after it to carry the
+  signal further. Interface (top view, north up): A (x0,y1,z0, facing east), B
+  (x1,y1,z0, facing west), q comparator (x2,y1,z0) outputting east; s is the cell under
+  A (x0,y0,z0) and r the cell under B (x1,y0,z0). Feeding from below keeps the cell 1
+  wide with nothing on its north or south faces, so copies tile at a 1-block pitch along
+  z (a bus of latches); feeding from above would not work, because droppers are
+  quasi-connected and a block on top of A also powers the cell above B. 3x2x1 of blocks
+  (three blocks and the comparator's support), the smallest latch in the family. Set and
+  reset each take 6 gt (4 gt dropper delay plus 2 gt comparator); the inputs need rising
+  edges, not levels, and s and r must not rise in the same tick. Trade-off: droppers
+  click, so it is not silent, but it has no light, no torches to burn out and keeps its
+  state when unloaded or unpowered. Starts reset (item in A).
+traits: [ultracompact, tileable, container_based, lightless, pistonless, entityless, flat, horizontal, one_wide, reset_safe, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  A: 'dropper[facing=east]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'
+  B: dropper[facing=west]
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: 'comparator[facing=west]'}
+layers:
+  0: |
+    sr=
+  1: |
+    ABq
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    0 1 | 0
+    0 0 | 0
+  delay: 6
+- name: set and reset timing
+  steps:
+  - drive: {s: 1}
+  - {wait: 5}
+  - expect: {q: 0}
+  - {wait: 1}
+  - expect: {q: 1}
+  - drive: {s: 0}
+  - {wait: 20}
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - {wait: 5}
+  - expect: {q: 1}
+  - {wait: 1}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+- name: the later edge wins while the other input is held
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {r: 1}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 10}
+  - expect: {q: 1}

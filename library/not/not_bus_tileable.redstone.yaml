@@ -1,0 +1,48 @@
+name: not_bus_tileable
+description: |
+  Three copies of a one-wide inverter lane laid side by side at a pitch of 1, proving the
+  lane tiles with no crosstalk. Each lane is repeater -> block -> wall torch, 3x2x1 plus its input cell. The
+  input repeater isolates the lane (a repeater only reads its back, and parallel repeaters
+  do not lock each other because neither faces into the other), a strongly powered block does
+  not pass power sideways to the next lane's block, and the lane ends on the torch itself,
+  not on dust, so neighbouring outputs never join.
+  Interface per lane k (z = 0, 1, 2): input driver at (0,1,k) behind the repeater (1,1,k,
+  facing west, input on the west); block at (2,1,k); output: wall torch at (3,1,k) facing east.
+  Feed the next stage with a repeater or a block east of each torch, never with dust across
+  lanes. Delay 4 ticks (repeater 2 + torch 2).
+  Trade-off: 2 ticks slower than not_torch_compact because of the isolating repeater; that
+  repeater is what makes a 1-pitch bus possible. Torch burnout limit applies per lane.
+traits: [tileable, horizontal, flat, torch_based, silent, pistonless, entityless, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '>': repeater[facing=west]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  x: {output: x, block: 'redstone_wall_torch[facing=east]'}
+  y: {output: y, block: 'redstone_wall_torch[facing=east]'}
+  z: {output: z, block: 'redstone_wall_torch[facing=east]'}
+layers:
+  0: |
+    .=..
+    .=..
+    .=..
+  1: |
+    a>#x
+    b>#y
+    c>#z
+tests:
+- name: lanes independent
+  truth_table: |
+    a b c | x y z
+    0 0 0 | 1 1 1
+    1 0 0 | 0 1 1
+    0 1 0 | 1 0 1
+    0 0 1 | 1 1 0
+    1 1 0 | 0 0 1
+    0 1 1 | 1 0 0
+    1 0 1 | 0 1 0
+    1 1 1 | 0 0 0
+  delay: 4

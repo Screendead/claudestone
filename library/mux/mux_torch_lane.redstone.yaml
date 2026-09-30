@@ -1,0 +1,127 @@
+name: mux_torch_lane
+description: |-
+  Bus-lane 2:1 multiplexer, one block wide, so lanes tile side by side at pitch 1 into an n-bit bus mux sharing one select: out = s ? b : a.
+  Pitch 1 rules out everything the other muxes use: comparator side inputs face the tiling axis (they would read the neighbouring lane), and dust joins across lanes. So the lane is repeaters, blocks and torches only, and the select arrives on two dust rows that run across the whole bus (s under the front, s_rear at the back), fed from the bus's side; in a lane they touch only repeaters and the block under them, because a gate block strongly powered by a repeater or torch would pour power back into any select dust next to it.
+  Logic is NOR of NORs: t1 = NOR(a, s) (a and s each enter the front gate block through a repeater), not_s = NOT s_rear (wall torch under the back gate block), t2 = NOR(b, not s) (b through a repeater), and the output torch out = NOR(t1, t2) sits on the block that t1 powers from below and t2 feeds through one repeater.
+  Interface (side view along the lane, north = front): a enters the front repeater from the north on layer 1; b enters the back repeater from the south on layer 3; s and s_rear are the two select rows (layer 1 and layer 2), driven together, entering from the +x side (in a bus, from the trunk at the end of the row); out is the standing torch on top (layer 4). Read out through the block above it or a repeater, never dust across lanes.
+  1x5x9 of blocks. Delay (tested): a 6 ticks, b 8 ticks, select 10 ticks worst case. That is the price of pitch 1; when lanes can be 3 wide, place mux_comparator_2to1 copies instead (4 ticks, analog) and feed each copy's select cell. mux_torch_lane_x2 proves two lanes tile without crosstalk.
+traits:
+- one_wide
+- tileable
+- vertical
+- torch_based
+- silent
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  v: repeater[facing=north]
+  '#': white_concrete
+  ^: repeater[facing=south]
+  '-': redstone_wire
+  s: {input: s}
+  t: {name: t1, block: redstone_torch}
+  A: {name: not_s, block: 'redstone_wall_torch[facing=north]'}
+  B: {input: s_rear}
+  C: {name: t2, block: 'redstone_wall_torch[facing=north]'}
+  b: {input: b}
+  o: {output: out, block: redstone_torch}
+layers:
+  0: |
+    ..
+    =.
+    ..
+    =.
+    =.
+    ..
+    ..
+    ..
+    ..
+  1: |
+    a.
+    v.
+    #.
+    ^.
+    -s
+    ..
+    ..
+    =.
+    =.
+  2: |
+    ..
+    ..
+    t.
+    #.
+    ..
+    A.
+    #.
+    ^.
+    -B
+  3: |
+    ..
+    ..
+    #.
+    ^.
+    C.
+    #.
+    ^.
+    b.
+    ..
+  4: |
+    ..
+    ..
+    o.
+    ..
+    ..
+    ..
+    ..
+    ..
+    ..
+tests:
+- name: logic
+  truth_table: |
+    s s_rear a b | out
+    0 0 0 0 | 0
+    0 0 1 0 | 1
+    1 1 1 0 | 0
+    0 0 1 0 | 1
+    0 0 0 1 | 0
+    1 1 0 1 | 1
+    0 0 0 1 | 0
+    0 0 1 1 | 1
+    1 1 1 1 | 1
+    1 1 0 1 | 1
+    1 1 0 0 | 0
+    1 1 1 0 | 0
+    1 1 1 1 | 1
+    0 0 1 1 | 1
+  delay: 10
+- name: a path 6 ticks, b path 8 ticks
+  steps:
+  - drive: {a: 1}
+  - {wait: 5}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - {wait: 5}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}
+  - drive: {s: 1, s_rear: 1}
+  - {wait: 20}
+  - drive: {b: 1}
+  - {wait: 7}
+  - expect: {out: 0}
+  - {wait: 1}
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - {wait: 7}
+  - expect: {out: 1}
+  - {wait: 1}
+  - expect: {out: 0}

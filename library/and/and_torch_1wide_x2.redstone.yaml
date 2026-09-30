@@ -1,0 +1,80 @@
+name: and_torch_1wide_x2
+description: >-
+  Two copies of and_torch_1wide side by side at pitch 1 (x=0 and x=1), with
+  independent inputs and outputs: the proof that the design tiles into a bitwise
+  bus AND with no crosstalk between bits. Every combination of the four inputs
+  is tested. Build a wider bus by repeating the column. 2x3x7, delay 8gt as for
+  one copy (tested).
+traits: [tileable, vertical, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  a: {input: a0}
+  b: {input: b0}
+  A: {input: a1}
+  B: {input: b1}
+  v: repeater[facing=north]
+  '^': repeater[facing=south]
+  s: redstone_wall_torch[facing=south]
+  n: redstone_wall_torch[facing=north]
+  o: {output: out0, block: 'redstone_wall_torch[facing=north]'}
+  O: {output: out1, block: 'redstone_wall_torch[facing=north]'}
+layers:
+  0: |
+    ..
+    ==
+    ..
+    ..
+    ..
+    ..
+    ..
+    ..
+    ..
+  1: |
+    aA
+    vv
+    ##
+    ss
+    ==
+    ..
+    ..
+    ==
+    ..
+  2: |
+    ..
+    ..
+    oO
+    ##
+    ^^
+    nn
+    ##
+    ^^
+    bB
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 | out0 out1
+    0 0 0 0 | 0 0
+    0 0 0 1 | 0 0
+    0 0 1 1 | 0 1
+    0 0 1 0 | 0 0
+    0 1 1 0 | 0 0
+    0 1 1 1 | 0 1
+    0 1 0 1 | 0 0
+    0 1 0 0 | 0 0
+    1 1 0 0 | 1 0
+    1 1 0 1 | 1 0
+    1 1 1 1 | 1 1
+    1 1 1 0 | 1 0
+    1 0 1 0 | 0 0
+    1 0 1 1 | 0 1
+    1 0 0 1 | 0 0
+    1 0 0 0 | 0 0
+    1 1 1 1 | 1 1
+    1 1 0 0 | 1 0
+    1 1 1 1 | 1 1
+    0 0 1 1 | 0 1
+    1 1 1 1 | 1 1
+    0 0 0 0 | 0 0
+  delay: 8
