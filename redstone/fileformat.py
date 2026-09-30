@@ -22,6 +22,7 @@
           a b | out
           0 0 | 0
         delay: 6                 # optional: worst-case ticks from input change to output
+        max_delay: 8             # optional: upper bound instead of an exact delay
       - name: pulse
         steps:                   # run in order
           - drive: {a: 1}        # set input drivers

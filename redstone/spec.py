@@ -51,6 +51,8 @@ def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
             result["delay"] = _truth_table(rig, spec, test, rec)
             if "delay" in test and result["delay"] != test["delay"]:
                 raise AssertionError(f"measured delay {result['delay']} ticks, spec says {test['delay']}")
+            if "max_delay" in test and result["delay"] > test["max_delay"]:
+                raise AssertionError(f"measured delay {result['delay']} ticks exceeds bound {test['max_delay']}")
         for step in test.get("steps", []):
             _step(rig, spec, step, rec)
     finally:
