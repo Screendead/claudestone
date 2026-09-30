@@ -30,6 +30,7 @@ python -m scripts.remote_keep -- <cmd> [args]...   # rerun a resumable desktop j
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
 python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
 python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched
+git config core.hooksPath githooks       # once per clone: pre-commit lints staged library specs and checks library/INDEX.md
 ```
 
 Test ids for the library are `test_spec[<spec name>::<test name>]`; spec names are unique
@@ -53,6 +54,9 @@ designer's claim. `docs/AUTHORING.md` is the
 self-contained brief for designing a variant; keep it in step with the format and tools.
 `docs/MECHANICS.md` catalogues verified 26.3 mechanics, each proven by a spec in
 `library/mechanics/`. `docs/WINS.md` banks true wins, where we beat the community best against rebuilt `ref_<author>_<design>` specs.
+`githooks/pre-commit` (enabled by `git config core.hooksPath githooks`) runs `scripts.lint` on
+staged library specs and fails if regenerating `library/INDEX.md` (`python -m scripts.index`)
+changes it, so stage the regenerated index with the spec.
 
 ## Plots
 
@@ -224,7 +228,10 @@ trace → `package` data pack.
   drives it from the laptop (`RemoteRig`); see the Docker satellite paragraphs above.
 - `redstone/rcon.py`: the server writes every RCON client's output into one shared buffer
   (`DedicatedServer.runCommand`), so two clients' commands at once get each other's replies.
-  `Rcon.cmd` takes `server/rcon.<port>.lock` for each command, across processes.
+  `Rcon.cmd` takes `server/rcon.<port>.lock` for each command, across processes. Anything
+  that sets state with one command and reads it with the next (a probe function, then
+  `data get storage`) wraps them in `with rcon.sequence():`, which holds that lock across the
+  whole sequence (reentrant); `Rig.snapshot`, `Rig.command` and `Rig.level` do.
 - `redstone/docker_sats.py`: `DockerSatellite`, a `Server` whose world is a container on the
   desktop; `servers.take_idle`/`take` choose and lock a server for conftest.
 - `redstone/pla.py`: generators for sum-of-products logic as two NOR planes of torches
