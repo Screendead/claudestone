@@ -110,9 +110,25 @@ def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
         result = rig.run_spec(spec, test, trace) if hasattr(rig, "run_spec") else _run(rig, spec, test, trace)
     except BaseException:
         _event(rig, "result", spec, test, passed=False)
+        _idle(rig, spec, test, passed=False)
         raise
     _event(rig, "result", spec, test, passed=True, delay=result.get("delay"))
+    _idle(rig, spec, test, passed=True)
     return result
+
+
+def _idle(rig: Rig, spec: Spec, test: dict, passed: bool) -> None:
+    """A plot's status sign keeps only the last result once its test ends."""
+    if rig.plot == MAIN.name:
+        return
+    body = [{"text": "idle\n", "color": "gray"},
+            {"text": f"last: {spec.name}\n{test['name']} ", "color": "dark_gray"},
+            {"text": "pass" if passed else "fail", "color": "green" if passed else "red"}]
+    try:
+        checked(rig.display, f"data merge entity @e[type=text_display,tag=plot_status,tag={rig.plot},limit=1] "
+                             f"{{text:{json.dumps({'text': '', 'extra': body})}}}")
+    except Exception:
+        pass  # a sign must not turn a finished test's result into an error
 
 
 def _event(rig, kind: str, spec: Spec, test: dict, **fields) -> None:
