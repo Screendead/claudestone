@@ -1,5 +1,9 @@
+import re
 import socket
 import struct
+from pathlib import Path
+
+PROPERTIES = Path(__file__).resolve().parent.parent / "server" / "server.properties"
 
 AUTH, EXEC = 3, 2
 
@@ -9,7 +13,9 @@ class RconError(Exception):
 
 
 class Rcon:
-    def __init__(self, host="127.0.0.1", port=25575, password="redstone", timeout=10.0):
+    def __init__(self, host="127.0.0.1", port=25575, password=None, timeout=10.0):
+        if password is None:
+            password = re.search(r"^rcon\.password=(.*)$", PROPERTIES.read_text(), re.M).group(1)
         self.sock = socket.create_connection((host, port), timeout=timeout)
         self._id = 0
         if self._request(AUTH, password)[0] == -1:
