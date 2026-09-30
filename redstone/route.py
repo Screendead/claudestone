@@ -1,8 +1,8 @@
 """Compose tested parts into a circuit and route wires between them.
 
-Wires are dust on odd layers (y = 1, 3, 5, ...) with a support block underneath, so a
-wire two layers up can pass over another one: the lower wire's dust ignores the weak
-power in the block above it. A wire changes layer with a two-step dust staircase.
+Wires are dust on a support block. A wire two layers up can pass over another one: the
+lower wire's dust ignores the weak power in the block above it. Wires climb or descend
+one block per step.
 
 A wire cell is only placed where it cannot interact with anything that isn't its own:
   - nothing foreign orthogonally beside it on its own layer;
@@ -25,7 +25,7 @@ from .harness import parse_state
 
 REFRESH_AT = 4
 REPEATER_TICKS = 2
-VIA_COST = 6
+STEP_COST = 3
 DIRS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 FACING_FROM = {(1, 0): "west", (-1, 0): "east", (0, 1): "north", (0, -1): "south"}  # repeater facing for flow
 COMPONENT_WORDS = ("redstone", "repeater", "comparator", "torch", "lever", "button", "lamp", "observer", "piston")
@@ -282,17 +282,14 @@ class Circuit:
                     came[nxt] = (cur, False)
                     heapq.heappush(frontier, (g + 1 + h(nxt), next(counter), nxt))
                 for dy in (1, -1):
-                    mid = _add(cur, dx, dy, dz)
-                    end = _add(cur, 2 * dx, 2 * dy, 2 * dz)
-                    if end in best or mid in best:
+                    step = _add(cur, dx, dy, dz)
+                    if step in best:
                         continue
-                    own = allow if end == goal else set()
-                    if self._via_ok(cur, mid, end, dy, me, own):
-                        best[mid] = g + VIA_COST // 2
-                        came[mid] = (cur, True)
-                        best[end] = g + VIA_COST
-                        came[end] = (mid, True)
-                        heapq.heappush(frontier, (g + VIA_COST + h(end), next(counter), end))
+                    own = allow if step == goal else set()
+                    if self._climb_ok(cur, step, me, own):
+                        best[step] = g + STEP_COST
+                        came[step] = (cur, True)
+                        heapq.heappush(frontier, (g + STEP_COST + h(step), next(counter), step))
         return None
 
     def _step_ok(self, cur: Pos, nxt: Pos, me: str, allow: set[Pos]) -> bool:
@@ -304,15 +301,14 @@ class Circuit:
         return any(self.owner.get(n) == me and n != came_from and _is_component(self.world.blocks[n])
                    for dx, dz in DIRS for n in [_add(c, dx, 0, dz)])
 
-    def _via_ok(self, cur: Pos, mid: Pos, end: Pos, dy: int, me: str, allow: set[Pos]) -> bool:
-        # Staircase: the higher dust of each step needs clear air above the lower one.
-        low, high = (cur, mid) if dy == 1 else (mid, cur)
-        low2, high2 = (mid, end) if dy == 1 else (end, mid)
-        for p in (_add(low, 0, 1, 0), _add(low2, 0, 1, 0)):
-            if p in self.world.blocks or p in self.keepout:
-                return False
-        return (self._cell_ok(mid, me, allow | {cur}) and self._cell_ok(end, me, allow | {mid})
-                and not self._touches_own(mid, cur, me) and not self._touches_own(end, mid, me))
+    def _climb_ok(self, cur: Pos, step: Pos, me: str, allow: set[Pos]) -> bool:
+        # Dust climbs one block per step; the lower dust needs clear air above it or the
+        # block there cuts the connection.
+        lower = cur if step[1] > cur[1] else step
+        gap = _add(lower, 0, 1, 0)
+        if gap in self.world.blocks or gap in self.keepout or step[1] < 1:
+            return False
+        return self._cell_ok(step, me, allow | {cur}) and not self._touches_own(step, cur, me)
 
     # --- result -----------------------------------------------------------------------
     def _spec(self, description: str, truth) -> Spec:
@@ -348,26 +344,35 @@ class Circuit:
         return max(arrive(p) for p in self.parts)
 
 
+def _pick(cells: list, i: int, j: int) -> Pos:
+    # Ban the earlier of the two clashing cells: the later one is nearer the sink,
+    # where there may be no other way in.
+    return cells[min(i, j)] if min(i, j) > 0 else cells[max(i, j)]
+
+
 def _self_conflict(path: list) -> Pos | None:
     """The search checks cells against what is already built, not against the rest of
-    its own path. Find the first cell that collides with an earlier one: sitting where
-    another needs its support or clear air, or running beside a non-adjacent step."""
+    its own path. Find a cell that collides with another part of the path: sitting where
+    another needs its support or clear air, a support where another needs clear air, or
+    running beside a non-adjacent step."""
     cells = [path[0]] + [c for c, _ in path[1:]]
-    needs: dict[Pos, int] = {}  # position -> index of the cell that needs it
-    for i, c in enumerate(cells):
-        needs.setdefault(_add(c, 0, -1, 0), i)
+    support = {_add(c, 0, -1, 0): i for i, c in enumerate(cells)}
+    air: dict[Pos, int] = {}
     for i in range(1, len(cells)):
         prev, c = cells[i - 1], cells[i]
         if c[1] != prev[1]:
-            lower = prev if c[1] > prev[1] else c
-            needs.setdefault(_add(lower, 0, 1, 0), i)
+            air[_add(prev if c[1] > prev[1] else c, 0, 1, 0)] = i
     for i, c in enumerate(cells):
-        j = needs.get(c)
-        if j is not None and j != i:
-            return cells[max(i, j)]
+        for need in (support, air):
+            j = need.get(c)
+            if j is not None and j != i:
+                return _pick(cells, i, j)
         for k, other in enumerate(cells):
             if abs(k - i) > 1 and other[1] == c[1] and abs(other[0] - c[0]) + abs(other[2] - c[2]) == 1:
-                return cells[max(i, k)]
+                return _pick(cells, i, k)
+    for pos, i in air.items():
+        if pos in support:
+            return _pick(cells, i, support[pos])
     return None
 
 
