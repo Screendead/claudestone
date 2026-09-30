@@ -24,6 +24,7 @@
         delay: 6                 # optional: worst-case ticks from input change to output
         max_delay: 8             # optional: upper bound instead of an exact delay
       - name: pulse
+        settle: 200              # optional: ticks to wait after loading (default 20)
         steps:                   # run in order
           - drive: {a: 1}        # set input drivers
           - use: lever           # click a named lever or button

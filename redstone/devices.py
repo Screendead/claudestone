@@ -7,15 +7,24 @@ FRAME = "black_concrete"
 LAMP = "redstone_lamp"
 
 # Segment -> its three lamps (x, y) on a 5 x 9 face, middle lamp first. Rows are y up.
+# The digit faces north, so the viewer looks south and sees +x on their LEFT: the
+# right-hand segments b and c are at x = 0.
 SEGMENTS = {
-    "a": [(2, 9), (1, 9), (3, 9)],
-    "b": [(4, 7), (4, 8), (4, 6)],
-    "c": [(4, 3), (4, 4), (4, 2)],
-    "d": [(2, 1), (1, 1), (3, 1)],
-    "e": [(0, 3), (0, 4), (0, 2)],
-    "f": [(0, 7), (0, 8), (0, 6)],
-    "g": [(2, 5), (1, 5), (3, 5)],
+    "a": [(2, 9), (3, 9), (1, 9)],
+    "b": [(0, 7), (0, 8), (0, 6)],
+    "c": [(0, 3), (0, 4), (0, 2)],
+    "d": [(2, 1), (3, 1), (1, 1)],
+    "e": [(4, 3), (4, 4), (4, 2)],
+    "f": [(4, 7), (4, 8), (4, 6)],
+    "g": [(2, 5), (3, 5), (1, 5)],
 }
+
+
+def front_view(lit: set[tuple[int, int]]) -> str:
+    """The 5 x 9 face as the viewer sees it: # for a lit lamp position."""
+    return "\n".join("".join("#" if (x, y) in lit else "." for x in range(4, -1, -1))
+                     for y in range(9, 0, -1))
+
 
 DIGITS = {0: "abcdef", 1: "bc", 2: "abdeg", 3: "abcdg", 4: "bcfg",
           5: "acdfg", 6: "acdefg", 7: "abc", 8: "abcdefg", 9: "abcdfg"}

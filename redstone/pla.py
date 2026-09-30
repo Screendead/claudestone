@@ -23,6 +23,7 @@ TORCH_TICKS = 2
 REPEATER_TICKS = 2  # delay=1
 FIRST_ROW = 5  # z rows 0-4 hold input drivers, head repeaters and complement heads
 REFRESH_AT = 4  # place a repeater once the signal has decayed to this strength
+OUT_SPACING = 4  # output rows this far apart leave the router room to lead wires away
 
 Literal = tuple[str, bool]
 Term = frozenset[Literal]
@@ -88,7 +89,7 @@ def pla(name: str, inputs: list[str], outputs: dict[str, list[dict[str, bool]]],
 
     plane2_x = max(col_x.values()) + 4
     term_x = [plane2_x + 3 * t for t in range(len(terms))]
-    out_z = {name: row_z[-1] + 2 + 2 * k for k, name in enumerate(outputs)}
+    out_z = {name: row_z[-1] + 2 + OUT_SPACING * k for k, name in enumerate(outputs)}
     end_x = term_x[-1] + 2
 
     term_repeaters = []
@@ -148,7 +149,7 @@ def or_plane(name: str, inputs: list[str], outputs: dict[str, list[str]], descri
     b = Build()
     spec_inputs: dict[str, Pos] = {}
     col_x = {v: 1 + 2 * i for i, v in enumerate(inputs)}
-    out_z = {o: FIRST_ROW + 2 * k for k, o in enumerate(outputs)}
+    out_z = {o: FIRST_ROW + OUT_SPACING * k for k, o in enumerate(outputs)}
     col_reps = {}
     for v, x in col_x.items():
         spec_inputs[v] = (x, 3, 0)

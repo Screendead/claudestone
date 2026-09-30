@@ -64,6 +64,11 @@ class RoutingError(Exception):
     pass
 
 
+class _NetFailed(Exception):
+    def __init__(self, index: int, error: RoutingError):
+        self.index, self.error = index, error
+
+
 class Circuit:
     def __init__(self, name: str, size: Pos = (64, 32, 64)):
         self.name = name
@@ -88,7 +93,20 @@ class Circuit:
         table = spec.inputs if kind == "input" else spec.outputs
         return _add(table[pin], *at)
 
-    def build(self, description: str = "", truth=None) -> Spec:
+    def build(self, description: str = "", truth=None, attempts: int = 12) -> Spec:
+        order = list(range(len(self.nets)))
+        for _ in range(attempts):
+            try:
+                self._attempt(order)
+                return self._spec(description, truth)
+            except _NetFailed as failed:
+                # Rip everything up and route the net that failed first next time.
+                order.remove(failed.index)
+                order.insert(0, failed.index)
+                last = failed.error
+        raise last
+
+    def _attempt(self, order: list[int]) -> None:
         world = Build()
         owner: dict[Pos, str] = {}
         for name, (spec, at) in self.parts.items():
@@ -114,9 +132,24 @@ class Circuit:
                 for p in [pin] + [_add(pin, dx, 0, dz) for dx, dz in DIRS]:
                     if p not in world.blocks:
                         self.reserved[p] = f"net{i}"
-        for i, net in enumerate(self.nets):
-            self._route(i, net)
-        return self._spec(description, truth)
+        starts = {}
+        for i in order:
+            starts[i] = self._start(i, self.nets[i])
+            c0, (dx, dz) = starts[i]
+            first = _add(c0, dx, 0, dz)
+            # Keep a way out: nothing of another net's may go within a block of the
+            # first two dust cells, including diagonally above, where foreign dust would
+            # forbid our own next step.
+            for base in (first, _add(first, dx, 0, dz)):
+                for off in itertools.product((-1, 0, 1), (0, 1, 2), (-1, 0, 1)):
+                    p = _add(base, *off)
+                    if p not in self.world.blocks:
+                        self.reserved.setdefault(p, f"net{i}")
+        for i in order:
+            try:
+                self._route(i, self.nets[i], starts[i])
+            except RoutingError as e:
+                raise _NetFailed(i, e)
 
     def _state(self, pos: Pos) -> str | None:
         return self.world.blocks.get(pos)
@@ -134,7 +167,7 @@ class Circuit:
         s = _add(c, 0, -1, 0)
         if any(v < 0 or v >= lim for v, lim in zip(c, self.size)) or s[1] < 0:
             return False
-        if c in getattr(self, "banned", ()) or self.reserved.get(c, me) != me:
+        if c in getattr(self, "banned", ()) or self.reserved.get(c, me) != me or self.reserved.get(s, me) != me:
             return False
         for p in (c, s):
             if p in self.keepout and p not in allow:
@@ -155,27 +188,28 @@ class Circuit:
         return not (under is not None and _is_torch(under))
 
     # --- search -----------------------------------------------------------------------
-    def _route(self, index: int, net: Net) -> None:
+    def _start(self, index: int, net: Net) -> tuple[Pos, tuple[int, int]]:
+        """Claim the isolating repeater and the dust after it. Done for every net before
+        any routing, so no wire can take the only way out of another net's source."""
         me = f"net{index}"
         src = self._pin(*net.source, "output")
-        src_part = net.source[0]
-        start = None
         for dx, dz in DIRS:
             c = _add(src, dx, 0, dz)
             if self._cell_ok(c, me, allow={src}) and self._cell_ok(_add(c, dx, 0, dz), me, allow=set()):
-                start = (c, (dx, dz))
-                break
-        if start is None:
-            raise RoutingError(f"no room to leave {net.source}")
-        (c0, d0) = start
+                self._claim(c, me, "repeater[facing=%s]" % FACING_FROM[(dx, dz)])
+                self._claim(_add(c, dx, 0, dz), me, "redstone_wire")
+                return c, (dx, dz)
+        raise RoutingError(f"no room to leave {net.source}")
+
+    def _route(self, index: int, net: Net, start: tuple[Pos, tuple[int, int]]) -> None:
+        me = f"net{index}"
+        c0, d0 = start
         parent: dict[Pos, Pos | None] = {c0: None}
         via: set[Pos] = set()
         kind: dict[Pos, str] = {c0: "repeater[facing=%s]" % FACING_FROM[d0]}
-        self._claim(c0, me, kind[c0])
         first = _add(c0, d0[0], 0, d0[1])
         parent[first] = c0
         kind[first] = "redstone_wire"
-        self._claim(first, me, "redstone_wire")
         tree_dust = [first]
 
         for sink in net.sinks:
@@ -212,27 +246,37 @@ class Circuit:
             if p is not None:
                 children.setdefault(p, []).append(c)
         sinks = {self._pin(*s, "input"): s for s in net.sinks}
+        parent_of = {c: p for c, p in parent.items()}
+
+        def slot(c: Pos) -> bool:
+            p, nxt = parent_of[c], children.get(c, [])
+            straight = (len(nxt) == 1 and c[1] == p[1] == nxt[0][1]
+                        and (c[0] - p[0], c[2] - p[2]) == (nxt[0][0] - c[0], nxt[0][2] - c[2]))
+            return straight and c not in via and p not in via and c not in sinks and p != c0
+
+        # gap[c]: cells from c to the next repeater slot (or the end of a branch),
+        # worst case over branches.
+        gap: dict[Pos, int] = {}
+        for c in reversed(list(_preorder(c0, children))):
+            gap[c] = max([1 if slot(ch) else 1 + gap[ch] for ch in children.get(c, [])], default=0)
         strength = {c0: 16}
         reps_on_path = {c0: 1}
-        stack = [c0]
-        while stack:
-            p = stack.pop()
-            for c in children.get(p, []):
-                nxt = children.get(c, [])
-                straight = (len(nxt) == 1 and c[1] == p[1] == nxt[0][1]
-                            and (c[0] - p[0], c[2] - p[2]) == (nxt[0][0] - c[0], nxt[0][2] - c[2]))
-                ok = straight and c not in via and p not in via and c not in sinks and p != c0
-                if ok and strength[p] - 1 <= REFRESH_AT:
-                    d = (c[0] - p[0], c[2] - p[2])
-                    kind[c] = f"repeater[facing={FACING_FROM[d]}]"
-                    strength[c] = 16
-                    reps_on_path[c] = reps_on_path[p] + 1
-                else:
-                    strength[c] = strength[p] - 1
-                    reps_on_path[c] = reps_on_path[p]
-                    if strength[c] <= 0:
-                        raise RoutingError(f"signal dies at {c} on {net.source}")
-                stack.append(c)
+        for c in _preorder(c0, children):
+            if c == c0:
+                continue
+            p = parent_of[c]
+            here = strength[p] - 1
+            # Refresh here if the signal would not reach the next place a repeater fits.
+            if slot(c) and (here <= REFRESH_AT or here - gap[c] < 2):
+                d = (c[0] - p[0], c[2] - p[2])
+                kind[c] = f"repeater[facing={FACING_FROM[d]}]"
+                strength[c] = 16
+                reps_on_path[c] = reps_on_path[p] + 1
+            else:
+                strength[c] = here
+                reps_on_path[c] = reps_on_path[p]
+                if here <= 0:
+                    raise RoutingError(f"signal dies at {c} on {net.source}: no repeater slot in reach")
         for c, k in kind.items():
             self.world.blocks[c] = "minecraft:" + k
         for goal, sink in sinks.items():
@@ -322,7 +366,12 @@ class Circuit:
             for pin, pos in spec.outputs.items():
                 if (name, pin) not in routed_sources:
                     outputs[f"{name}.{pin}"] = _add(pos, *at)
-        spec = Spec(self.name, self.world, inputs=inputs, outputs=outputs, named=dict(outputs),
+        named = dict(outputs)
+        for name, (spec, at) in self.parts.items():
+            for cell, pos in spec.named.items():
+                if cell not in spec.outputs:
+                    named[f"{name}.{cell}"] = _add(pos, *at)
+        spec = Spec(self.name, self.world, inputs=inputs, outputs=outputs, named=named,
                     description=description)
         if truth:
             spec.tests = [_truth_test(list(inputs), list(outputs), truth, self._delay_bound())]
@@ -342,6 +391,14 @@ class Circuit:
                     default=0)
             return memo[part]
         return max(arrive(p) for p in self.parts)
+
+
+def _preorder(root: Pos, children: dict[Pos, list[Pos]]):
+    stack = [root]
+    while stack:
+        c = stack.pop()
+        yield c
+        stack.extend(children.get(c, []))
 
 
 def _pick(cells: list, i: int, j: int) -> Pos:

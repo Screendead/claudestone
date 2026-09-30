@@ -52,10 +52,15 @@ def status(rig: Rig, text: str) -> None:
 
 def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
     _announce(rig, spec.name, test["name"])
-    rig.load(spec.build)
+    with rig.fast():
+        return _run(rig, spec, test, trace)
+
+
+def _run(rig: Rig, spec: Spec, test: dict, trace: bool) -> dict:
+    rig.load(spec.build, probe=None if trace else set(spec.named.values()))
     rec = Recorder(rig, trace)
     rec.frame("loaded")
-    rec.wait(max(SETTLE, test.get("max_delay", test.get("delay", 0)) + 4))
+    rec.wait(test.get("settle", max(SETTLE, test.get("max_delay", test.get("delay", 0)) + 4)))
     result = {}
     try:
         if "truth_table" in test:

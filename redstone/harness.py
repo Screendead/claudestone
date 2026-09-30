@@ -40,10 +40,16 @@ def signal_property(state: str) -> str | None:
     return None
 
 
-def probe_function(build: Build) -> tuple[str, list[Pos]]:
-    """A function that writes each signal-carrying block's level into storage as bN."""
-    lines = [f"data modify storage {PACK}:probe s set value {{}}"]
-    probed = [p for p in sorted(build.blocks) if signal_property(build.blocks[p])]
+# Minecraft stops a function after 65536 commands (maxCommandChainLength), so probes
+# are split into functions of at most this many commands.
+PROBE_CHUNK = 60000
+WARP_RATE = 10000  # the maximum /tick rate
+
+
+def probe_functions(build: Build, only: set[Pos] | None = None) -> tuple[list[str], list[Pos]]:
+    """Functions that write each probed block's signal level into storage as bN."""
+    probed = [p for p in sorted(build.blocks) if signal_property(build.blocks[p]) and (only is None or p in only)]
+    lines = []
     for i, (x, y, z) in enumerate(probed):
         block = parse_state(build.blocks[(x, y, z)])[0]
         prop = signal_property(build.blocks[(x, y, z)])
@@ -51,7 +57,8 @@ def probe_function(build: Build) -> tuple[str, list[Pos]]:
         for predicate, value in checks:
             lines.append(f"execute if block ~{x} ~{y} ~{z} {block}[{predicate}] run "
                          f"data modify storage {PACK}:probe s.b{i} set value {value}")
-    return "\n".join(lines) + "\n", probed
+    chunks = [lines[i:i + PROBE_CHUNK] for i in range(0, len(lines), PROBE_CHUNK)] or [[]]
+    return ["\n".join(c) + "\n" for c in chunks], probed
 
 
 def attached_to(pos: Pos, props: dict[str, str]) -> Pos:
@@ -104,6 +111,8 @@ class Rig:
         self.build = Build()
         self.pending: list[tuple[int, Pos]] = []
         self.probed: list[Pos] = []
+        self.probe_count = 0
+        self.fast_depth = 0
         self.datapacks = SERVER_DIR / self.level_name() / "datapacks"
         self.r.cmd("tick freeze")
         ox, _, oz = origin
@@ -136,13 +145,28 @@ class Rig:
         if n <= 0:
             return
         target = self.gametime() + n
-        # Only step fast: frozen or not, login and connection timeouts count ticks at this
-        # rate, so leaving it high kicks players who are joining.
-        self.r.cmd("tick rate 1000")
         self.r.cmd(f"tick step {n}")
         while self.gametime() < target:
             time.sleep(0.002)
-        self.r.cmd("tick rate 20")
+
+    def fast(self):
+        """Run stepped ticks as fast as the server can compute them for the duration of
+        a with-block. Nests: only the outermost block restores the normal rate. Login and
+        connection timeouts count ticks at this rate, so it must go back to normal after:
+        left high, it kicks players who are joining."""
+        rig = self
+
+        class _Fast:
+            def __enter__(self):
+                if rig.fast_depth == 0:
+                    rig.r.cmd(f"tick rate {WARP_RATE}")
+                rig.fast_depth += 1
+
+            def __exit__(self, *exc):
+                rig.fast_depth -= 1
+                if rig.fast_depth == 0:
+                    rig.r.cmd("tick rate 20")
+        return _Fast()
 
     def run(self, command: str) -> str:
         out = self.r.cmd(command)
@@ -159,9 +183,12 @@ class Rig:
                 # pop off as items.
                 self.run(f"fill {x} {oy} {z} {min(x + 31, ox + sx - 1)} {oy + sy - 1} "
                          f"{min(z + 31, oz + sz - 1)} air strict")
-        self._advance(FLUSH_TICKS)
+        with self.fast():
+            self._advance(FLUSH_TICKS)
 
-    def load(self, build: Build) -> None:
+    def load(self, build: Build, probe: set[Pos] | None = None) -> None:
+        """Place a build. `probe` limits snapshots to those cells (default: every
+        signal-carrying block)."""
         (lo, hi) = build.bounds()
         for a, b, s in zip(lo, hi, self.size):
             if a < 0 or b >= s:
@@ -169,8 +196,10 @@ class Rig:
         self.clear()
         self.build = Build(dict(build.blocks))
         self.pending = []
-        probe, self.probed = probe_function(self.build)
-        write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction(), "probe": probe})
+        probes, self.probed = probe_functions(self.build, probe)
+        self.probe_count = len(probes)
+        write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction(),
+                                              **{f"probe{i}": body for i, body in enumerate(probes)}})
         self.run("reload")
         if f"file/{PACK}" not in self.run("datapack list enabled"):
             self.run(f'datapack enable "file/{PACK}"')
@@ -180,7 +209,9 @@ class Rig:
 
     def snapshot(self) -> dict[Pos, int]:
         """Signal level of every probed block: dust power 0-15, otherwise 1 or 0."""
-        self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:probe")
+        self.run(f"data modify storage {PACK}:probe s set value {{}}")
+        for i in range(self.probe_count):
+            self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:probe{i}")
         out = self.run(f"data get storage {PACK}:probe s")
         found = {int(i): int(v) for i, v in re.findall(r"b(\d+): (\d+)", out)}
         return {pos: found.get(i, 0) for i, pos in enumerate(self.probed)}
@@ -210,11 +241,10 @@ class Rig:
         if name == "redstone_wire":
             level = next(p for p in range(16) if self.is_(pos, f"redstone_wire[power={p}]"))
             return f"{name} power={level}"
-        for prop in ("powered", "lit"):
-            if self.is_(pos, f"{block}[{prop}=true]"):
-                return f"{name} {prop}"
-            if self.is_(pos, f"{block}[{prop}=false]"):
-                return f"{name} un{prop}"
+        prop = signal_property(block)
+        if prop:
+            on = self.is_(pos, f"{block}[{prop}=true]")
+            return f"{name} {prop if on else 'un' + prop}"
         return name
 
     def dump(self) -> str:
