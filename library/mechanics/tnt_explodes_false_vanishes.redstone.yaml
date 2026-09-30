@@ -35,6 +35,8 @@ tests:
   - check: if block ~1 ~1 ~0 tnt[unstable=false]
   - check: positioned ~1 ~1 ~0 unless entity @e[type=tnt,distance=..8]
   - check: if data block ~4 ~1 ~1 {last_vibration_frequency:0}
+  finally:
+  - gamerule tnt_explodes true
 - name: control rule true primes it, fuse 79 one tick later, and a prime_fuse vibration
   settle: 20
   steps:
@@ -67,6 +69,8 @@ tests:
   - check: if block ~1 ~0 ~0 smooth_stone
   - check: if block ~0 ~0 ~0 smooth_stone
   - check: if data block ~4 ~1 ~1 {last_vibration_frequency:10}
+  finally:
+  - gamerule tnt_explodes true
 - name: rule false still lights a burning TNT minecart, which then vanishes without exploding
   settle: 20
   steps:
@@ -84,6 +88,8 @@ tests:
   - check: if score m7c2 m7 matches 0
   - check: if block ~1 ~1 ~3 rail
   - check: if block ~1 ~0 ~3 smooth_stone
+  finally:
+  - gamerule tnt_explodes true
 - name: control rule true a burning TNT minecart gets a 0-38 tick fuse
   settle: 20
   steps:
@@ -95,6 +101,8 @@ tests:
   - run: execute positioned ~0 ~1 ~3 run kill @e[type=tnt_minecart,dx=2,dy=1,dz=0]
   - run: gamerule tnt_explodes true
   - check: if score m7c1 m7 matches 0..38
+  finally:
+  - gamerule tnt_explodes true
 - name: rule false leaves a TNT minecart on a powered activator rail unlit
   settle: 20
   steps:
@@ -113,6 +121,8 @@ tests:
   - run: gamerule tnt_explodes true
   - run: setblock ~0 ~1 ~2 air
   - check: if score m7r m7 matches -1
+  finally:
+  - gamerule tnt_explodes true
 - name: control rule true the powered activator rail lights it, fuse 78 two ticks after it appears
   settle: 20
   steps:
@@ -130,3 +140,5 @@ tests:
   - run: gamerule tnt_explodes true
   - run: setblock ~0 ~1 ~2 air
   - check: if score m7r m7 matches 78
+  finally:
+  - gamerule tnt_explodes true

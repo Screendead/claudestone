@@ -1,0 +1,38 @@
+name: dust_emits_no_light
+description: 'Powered redstone dust gives no light: dust at 15 and 14 sealed in a stone box leaves light level 0 at its own cells, while a lit redstone torch sealed the same way reads 7 at its cell. Dust power changes never change light emission or dampening, so they queue no light checks; torches do. The input cell is inside the box. Use: dust, repeaters and comparators are the lightless way to carry a signal.'
+traits: [pistonless, entityless, lightless, silent]
+palette:
+  .: air
+  S: stone
+  a: {input: a}
+  D: {name: d15, block: 'redstone_wire[east=side,west=side]'}
+  d: {name: d14, block: 'redstone_wire[east=side,west=side]'}
+  T: {block: redstone_torch, fixture: true}
+layers:
+  0: |
+    SSSSS.SSS
+    SSSSS.SSS
+    SSSSS.SSS
+  1: |
+    SSSSS.SSS
+    SaDdS.STS
+    SSSSS.SSS
+  2: |
+    SSSSS.SSS
+    SSSSS.SSS
+    SSSSS.SSS
+tests:
+- name: dust at 15 and 14 in a sealed box leaves light level 0
+  settle: 20
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - level: {d15: 15, d14: 14}
+  - check: positioned ~2 ~1 ~1 unless predicate {type:"location_check",predicate:{light:{light:{min:1}}}}
+  - check: positioned ~3 ~1 ~1 unless predicate {type:"location_check",predicate:{light:{light:{min:1}}}}
+- name: control a lit torch sealed the same way reads 7 at its cell
+  settle: 20
+  steps:
+  - check: if block ~7 ~1 ~1 redstone_torch[lit=true]
+  - check: positioned ~7 ~1 ~1 if predicate {type:"location_check",predicate:{light:{light:{min:7,max:7}}}}
+  - check: positioned ~2 ~1 ~1 unless predicate {type:"location_check",predicate:{light:{light:{min:1}}}}

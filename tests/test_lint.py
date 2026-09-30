@@ -186,6 +186,16 @@ def test_log_and_finally_count_the_success_wrapper():
     assert len(found) == 2 and found[0].startswith("test 't': log command is") and "finally command is" in found[1]
 
 
+def test_gamerule_change_needs_a_finally_restore():
+    steps = [{"run": "gamerule random_tick_speed 4096"}, {"repeat": {"times": 1, "steps": [{"run": "gamerule tnt_explodes false"}]}},
+             {"log": "gamerule advance_time"}, {"run": "gamerule random_tick_speed 3"}]
+    s = spec({(0, 0, 0): "stone"}, tests=[{"name": "t", "steps": steps, "finally": ["gamerule tnt_explodes true"]}])
+    assert lint(s) == ["test 't': run changes gamerule random_tick_speed but finally does not restore it "
+                       "(a failed or killed test leaves it, and the world saves it)"]
+    s.tests[0]["finally"].append("gamerule random_tick_speed 3")
+    assert lint(s) == []
+
+
 def test_truth_table_options():
     cells = {(0, 0, 0): "stone", (0, 1, 0): "redstone_wire"}
     base = {"name": "t", "truth_table": "a | o\n0 | 0\n1 | x"}

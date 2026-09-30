@@ -97,8 +97,7 @@ def _sign(rig: Rig, text: str) -> None:
 
 def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
     _announce(rig, spec.name, test["name"])
-    with rig.fast():
-        return _run(rig, spec, test, trace)
+    return _run(rig, spec, test, trace)
 
 
 def _run(rig: Rig, spec: Spec, test: dict, trace: bool) -> dict:

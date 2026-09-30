@@ -7,6 +7,7 @@ cells or test references the harness cannot use. No style advice.
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -134,7 +135,27 @@ def _test_problems(spec, test, plot):
     out += _step_problems(spec, test.get("steps", []), at)
     for command in test.get("finally", []):
         out += _command_problems("finally", command, at)
+    restored = {m.group(1) for c in test.get("finally", []) if isinstance(c, str) for m in GAMERULE_SET.finditer(c)}
+    out += [f"run changes gamerule {r} but finally does not restore it (a failed or killed test leaves it, "
+            "and the world saves it)" for r in sorted(_gamerules(test.get("steps", [])) - restored)]
     return out
+
+
+GAMERULE_SET = re.compile(r"\bgamerule\s+(?:minecraft:)?(\w+)\s+\S")
+
+
+def _gamerules(steps) -> set[str]:
+    """Gamerules the `run`/`log` steps set, repeat bodies included."""
+    rules = set()
+    for step in steps:
+        if not isinstance(step, dict) or len(step) != 1:
+            continue
+        (kind, arg), = step.items()
+        if kind in ("run", "log") and isinstance(arg, str):
+            rules |= {m.group(1) for m in GAMERULE_SET.finditer(arg)}
+        elif kind == "repeat" and isinstance(arg, dict) and isinstance(arg.get("steps"), list):
+            rules |= _gamerules(arg["steps"])
+    return rules
 
 
 TABLE_OPTIONS = ("delays", "max_delays", "glitch_free", "reset", "tile")

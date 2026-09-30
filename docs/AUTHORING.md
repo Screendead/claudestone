@@ -104,7 +104,9 @@ tests:
   `log: <command>` runs a command the same way and records its reply in the trace; `try`
   prints each one under the test's result line (use it to read contents, NBT or strengths).
   A test's `finally: [<command>, ...]` runs after its steps even when they fail, e.g. to
-  restore a gamerule or the time. E.g.
+  restore a gamerule or the time. A test whose `run`/`log` steps set a gamerule must restore
+  it in `finally` (lint enforces it): a failed step or killed server otherwise leaves it set,
+  and the world saves it. E.g.
   `run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'`,
   `check: if block ~3 ~1 ~0 comparator[powered=true]`,
   `check: positioned ~2 ~1.5 ~0 if entity @e[type=item_frame,distance=..1,nbt={ItemRotation:3b}]`.
@@ -192,6 +194,9 @@ existed are listed in `redstone/traits.UNTILED` until they gain one; add no new 
 there. The rest are your claim; only claim
 ultracompact/ultrafast if nothing in the family beats it (`library/INDEX.md`).
 
+`lightless` means the design queues no light checks: no block in it changes light emission
+or dampening, or is shape-occluding (daylight detectors, lecterns, sculk, pistons), when it
+changes state. Dust, repeaters and comparators are fine; see `redstone/traits.LIGHT`.
 `silent` is about normal operation; the fizz of a torch burning out doesn't count. Sizes
 and `one_wide` leave out driver cells, so they assume inputs arrive from outside the
 footprint; when an input cell sits inside it, say so in the description.
@@ -222,6 +227,13 @@ footprint; when an input cell sits inside it, say so in the description.
   `use` covers levers and buttons), and container contents as a named cell (read them with
   `log` or `check`).
 - Gamerules in 26.3 are snake_case (`advance_time`).
+- Inline predicates in 26.3 dispatch on `type:`, not `condition:`:
+  `check: positioned ~2 ~1 ~1 unless predicate {type:"location_check",predicate:{light:{light:{min:1}}}}`.
+  `condition:` fails to parse ("No key type").
+- To assert that a command is refused (a `run` fails on the error reply), fork it and store
+  its success: `run: execute as @e[type=X,distance=..1,limit=1] store success score r obj run damage @s ...`
+  then `check: if score r obj matches 0`. A forked command's error is silent and stores 0; if
+  nothing matched, the score stays unset and the check fails. `library/mechanics/sulfur_cube_tnt_priming`.
 - YAML: quote anything starting with `#` (block tags, `#fake` score holders) or it becomes a
   comment, and don't name cells `on`/`off`/`yes`/`no` (they load as booleans).
 - A bad block id in the palette fails as `Unknown function redstone_ai:build`; check ids

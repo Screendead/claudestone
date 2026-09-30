@@ -7,7 +7,9 @@ from .harness import parse_state
 VOCABULARY = {
     # checked
     "silent": "no block or entity in it makes a sound when the circuit runs",
-    "lightless": "no light level changes while it runs: no torches, lamps, bulbs or moving blocks",
+    "lightless": "queues no light checks while it runs: no block changes state in a way that changes its light "
+                 "emission or dampening, or is shape-occluding (torches, lamps, bulbs, daylight detectors, lecterns, "
+                 "sculk, pistons and the blocks they move)",
     "pistonless": "no pistons",
     "entityless": "no entities",
     "uses_entities": "relies on entities (minecarts, item frames, ...)",
@@ -36,12 +38,18 @@ VOCABULARY = {
     "survival_friendly": "every block is obtainable and placeable in survival",
 }
 
+# A state change queues a light check when emission or dampening differs, or when either state
+# uses its shape for light occlusion (LightEngine.hasDifferentLightProperties). Stairs and
+# single slabs are shape-occluding too, but nothing in redstone changes their state.
 LIGHT = {"redstone_torch", "redstone_wall_torch", "redstone_lamp", "redstone_ore", "deepslate_redstone_ore",
-         "sculk_sensor", "calibrated_sculk_sensor", "piston", "sticky_piston", "moving_piston"}
+         "sculk_sensor", "calibrated_sculk_sensor", "sculk_shrieker", "daylight_detector", "lectern",
+         "piston", "sticky_piston", "piston_head", "moving_piston",
+         "furnace", "blast_furnace", "smoker", "campfire", "soul_campfire", "respawn_anchor", "sea_pickle",
+         "trial_spawner", "vault", "light"}
 SOUND = {"piston", "sticky_piston", "moving_piston", "dispenser", "dropper", "note_block", "bell", "crafter",
          "sculk_sensor", "calibrated_sculk_sensor", "sculk_shrieker", "tripwire", "tripwire_hook", "lever"}
 SOUND_SUFFIXES = ("_door", "_trapdoor", "_fence_gate", "_button", "_pressure_plate", "copper_bulb")
-LIGHT_SUFFIXES = ("copper_bulb",)
+LIGHT_SUFFIXES = ("copper_bulb", "_shelf", "candle", "candle_cake")
 NOISY_ENTITIES = ("minecart",)
 
 

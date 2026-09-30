@@ -81,6 +81,11 @@ def _checks(prop: str, kind: str) -> list[tuple[str, int]]:
 # are split into functions of at most this many commands.
 PROBE_CHUNK = 60000
 WARP_RATE = 10000  # the maximum /tick rate
+# The rate between step batches. Logging in times out after 600 ticks at the current rate
+# (30 s here), and the first tick of each batch waits out the idle tick period (50 ms here).
+IDLE_RATE = 20
+# Gamerules library tests change (and restore in `finally`), at their vanilla values.
+BASELINE_GAMERULES = {"random_tick_speed": 3, "tnt_explodes": "true"}
 
 
 def probe_functions(build: Build, only: set[Pos] | None = None) -> tuple[list[str], list[Pos]]:
@@ -207,10 +212,13 @@ class Rig:
         self.probed: list[Pos] = []
         self.levels: dict[Pos, int] = {}
         self.probe_count = 0
-        self.fast_depth = 0
         self.datapacks = server.dir / server.level_name() / "datapacks"
         ox, _, oz = origin
         sx, _, sz = size
+        # A test that died mid-run can leave these changed, and the world saves them.
+        self.r.cmd(f"tick rate {IDLE_RATE}")
+        for rule, value in BASELINE_GAMERULES.items():
+            self.r.cmd(f"gamerule {rule} {value}")
         if server == servers.MAIN:
             self.r.cmd("tick freeze")
             self.r.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
@@ -244,31 +252,19 @@ class Rig:
         self._advance(target - self.gametime())
 
     def _advance(self, n: int) -> None:
+        """Step n ticks as fast as the server can compute them. The login timeout counts
+        ticks at the current rate, so the rate is raised only for the batch: left high
+        between steps, it kicks joining players."""
         if n <= 0:
             return
         target = self.gametime() + n
-        self.r.cmd(f"tick step {n}")
-        while self.gametime() < target:
-            time.sleep(0.002)
-
-    def fast(self):
-        """Run stepped ticks as fast as the server can compute them for the duration of
-        a with-block. Nests: only the outermost block restores the normal rate. Login and
-        connection timeouts count ticks at this rate, so it must go back to normal after:
-        left high, it kicks players who are joining."""
-        rig = self
-
-        class _Fast:
-            def __enter__(self):
-                if rig.fast_depth == 0:
-                    rig.r.cmd(f"tick rate {WARP_RATE}")
-                rig.fast_depth += 1
-
-            def __exit__(self, *exc):
-                rig.fast_depth -= 1
-                if rig.fast_depth == 0:
-                    rig.r.cmd("tick rate 20")
-        return _Fast()
+        self.r.cmd(f"tick rate {WARP_RATE}")
+        try:
+            self.r.cmd(f"tick step {n}")
+            while self.gametime() < target:
+                time.sleep(0.002)
+        finally:
+            self.r.cmd(f"tick rate {IDLE_RATE}")
 
     def run(self, command: str) -> str:
         return checked(self.r, command)
@@ -282,8 +278,7 @@ class Rig:
     def clear(self) -> None:
         for command in clear_commands(self.origin, self.size):
             self.run(command)
-        with self.fast():
-            self._advance(FLUSH_TICKS)
+        self._advance(FLUSH_TICKS)
         # A chunk's entities load after its blocks, so the first kill can miss them.
         self.run(kill_command(self.origin, self.size))
 

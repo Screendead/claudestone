@@ -2,7 +2,6 @@
 without a server."""
 
 import json
-from contextlib import nullcontext
 
 import pytest
 
@@ -21,9 +20,6 @@ class FakeRig:
         self.plot, self.heading, self.levels = MAIN.name, [], {}
         self.tick, self.script, self.replies = 0, script, replies or {}
         self.log: list[tuple[int, str]] = []
-
-    def fast(self):
-        return nullcontext()
 
     def load(self, build, probe=None, drivers=frozenset()):
         self.loaded, self.drivers = build, drivers

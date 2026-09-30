@@ -75,7 +75,11 @@ are in `server/showroom/<plot>.json`, errors in `server/showroom.log`;
 from here), `harness.log`, and `rig.lock`. `ensure_server()` launches it with Java 25+.
 Settings that must stay: `pause-when-empty-seconds=-1` (otherwise the game clock stops
 with no players), RCON enabled, and `broadcast-rcon-to-ops=false` and `broadcast-console-to-ops=false` (test commands
-stay out of chat). Changing properties
+stay out of chat). `simulation-distance=8` with `view-distance=32`: every plot is
+forceloaded and ticks anyway, so a player's simulation distance only adds empty chunks to
+every stepped tick (at 32, about 4000, which with a raised `random_tick_speed` crashed main).
+`max-tick-time=300000`: the watchdog measures how far the loop runs behind its schedule, not
+one tick, and stepping at `WARP_RATE` makes 60 s of lag easy to reach. Changing properties
 needs a restart, which kicks any player watching. After each test the world is unfrozen
 for players.
 
@@ -107,7 +111,10 @@ trace → `package` data pack.
   item drops), kills non-player entities in it, 2 blocks around it and up to the build
   height, waits `FLUSH_TICKS` so burnt-out torches recover, kills again (entity sections
   load after their chunk), loads a build, and steps with `tick freeze`/`tick step`, polling game time.
-  `fast()` is a reentrant context that raises the tick rate while stepping. Inputs are
+  Each step batch raises the tick rate to `WARP_RATE` and drops it back to `IDLE_RATE` (20)
+  right after, even on an error: the login timeout counts 600 ticks at the current rate, so a
+  rate left high kicks joining players. The cost is up to one idle tick period (~40 ms) per
+  batch. `Rig()` also resets the tick rate and `BASELINE_GAMERULES`. Inputs are
   redstone blocks placed/removed at driver cells; levers and buttons are toggled with
   `setblock` then a `clone` of the block they hang on (setblock alone doesn't update it),
   and the harness schedules button release itself. Reads use a generated probe function

@@ -44,3 +44,17 @@ def test_untiled_list_only_shrinks():
     stale = [n for n in UNTILED if n not in specs or not {"tileable", "stackable"} & set(specs[n].traits)
              or any("tile" in t for t in specs[n].tests)]
     assert not stale, f"remove from traits.UNTILED: {stale}"
+
+
+@pytest.mark.parametrize("block", ["daylight_detector", "lectern", "piston_head", "acacia_shelf", "furnace",
+                                   "white_candle", "candle_cake", "sea_pickle", "light"])
+def test_lightless_rejects_blocks_whose_state_changes_queue_light_checks(block):
+    s = _spec(["lightless"])
+    s.build.place((2, 1, 0), block)
+    assert violations(s)
+
+
+def test_lightless_allows_dust_repeaters_and_comparators():
+    s = _spec(["lightless"])
+    s.build.place((2, 1, 0), "comparator").place((3, 1, 0), "redstone_wire").place((4, 1, 0), "observer")
+    assert violations(s) == []
