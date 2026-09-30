@@ -1,0 +1,16 @@
+#!/bin/sh
+# Enable once per clone: git config core.hooksPath githooks
+# Lints staged library specs and checks library/INDEX.md is current. Offline; no server.
+cd "$(git rev-parse --show-toplevel)" || exit 1
+specs=$(git diff --cached --name-only --diff-filter=ACM -- 'library/*.redstone.yaml')
+[ -z "$specs" ] && exit 0
+if [ -n "$PYTHON" ]; then py=$PYTHON
+elif [ -x .venv/bin/python ]; then py=.venv/bin/python
+else py=python3; fi
+# shellcheck disable=SC2086
+"$py" -m scripts.lint $specs || { echo "pre-commit: lint failed" >&2; exit 1; }
+"$py" -m scripts.index || exit 1
+if ! git diff --quiet -- library/INDEX.md; then
+    echo "pre-commit: library/INDEX.md was out of date and is regenerated; run 'git add library/INDEX.md' and commit again" >&2
+    exit 1
+fi

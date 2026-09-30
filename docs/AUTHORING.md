@@ -33,6 +33,10 @@ have no plot of their own, so `try` runs them in `$REDSTONE_PLOT`, or in main on
 server when it is unset; set `REDSTONE_PLOT=<plot>` (one the build fits) to run them on a
 satellite instead.
 
+Run a CPU-heavy offline search (pysat, brute force) on the desktop, not the laptop:
+`python -m scripts.remote_run <dir> --jobs N -- python3 script.py`. Its container has python3,
+pyyaml and python-sat; anything else goes in a `requirements.txt` in `<dir>`.
+
 ## File
 
 `library/<family>/<name>.redstone.yaml`; `name` is unique across the library.
