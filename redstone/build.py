@@ -19,6 +19,24 @@ class Build:
         self.blocks[pos] = state
         return self
 
+    def merge(self, other: "Build", offset: Pos = (0, 0, 0)) -> "Build":
+        for pos, state in other.shifted(offset).blocks.items():
+            if pos in self.blocks and self.blocks[pos] != state:
+                raise ValueError(f"overlap at {pos}: {self.blocks[pos]} vs {state}")
+            self.blocks[pos] = state
+        return self
+
+    def shifted(self, offset: Pos) -> "Build":
+        dx, dy, dz = offset
+        return Build({(x + dx, y + dy, z + dz): s for (x, y, z), s in self.blocks.items()})
+
+    def with_base(self, material: str = "minecraft:smooth_stone") -> "Build":
+        """Add a support block under every block in layer y=1 that lacks one."""
+        for x, y, z in list(self.blocks):
+            if y == 1 and (x, 0, z) not in self.blocks:
+                self.blocks[(x, 0, z)] = material
+        return self
+
     def bounds(self) -> tuple[Pos, Pos]:
         xs, ys, zs = zip(*self.blocks)
         return (min(xs), min(ys), min(zs)), (max(xs), max(ys), max(zs))

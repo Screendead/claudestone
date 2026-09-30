@@ -9,8 +9,10 @@ from .rcon import Rcon
 
 SERVER_DIR = Path(__file__).resolve().parent.parent / "server"
 PACK = "redstone_ai"
-# Longest scheduled tick a vanilla component can leave behind (wooden button: 30 ticks).
-FLUSH_TICKS = 40
+# Covers the longest scheduled tick a component can leave behind and the torch burnout
+# memory (RedstoneTorchBlock: 8 toggles within 60 ticks burns a torch out for 160 ticks),
+# which is kept per position and would otherwise carry into the next test.
+FLUSH_TICKS = 170
 BUTTON_TICKS = {"minecraft:stone_button": 20, "minecraft:polished_blackstone_button": 20}
 PLAIN_SUPPORTS = ("stone", "cobblestone", "smooth_stone", "stone_bricks", "white_concrete", "white_wool")
 OPPOSITE = {"north": (0, 0, 1), "south": (0, 0, -1), "east": (-1, 0, 0), "west": (1, 0, 0)}
@@ -150,6 +152,39 @@ class Rig:
     def is_(self, pos: Pos, predicate: str) -> bool:
         out = self.run(f"execute if block {self.abs(pos)} {predicate}")
         return out.startswith("Test passed")
+
+    def drive(self, pos: Pos, on: bool) -> None:
+        """Place or remove a redstone block. Unlike a lever, a redstone block powers its
+        neighbours directly, so setblock's update of those neighbours is the whole effect."""
+        if any(p < 0 or p >= s for p, s in zip(pos, self.size)):
+            raise ValueError(f"driver {pos} outside rig")
+        if pos in self.build.blocks:
+            raise ValueError(f"driver {pos} overlaps the build")
+        self.run(f"setblock {self.abs(pos)} {'redstone_block' if on else 'air'}")
+
+    def powered(self, pos: Pos) -> bool:
+        if not self.is_(pos, "redstone_wire"):
+            raise ValueError(f"{pos} is not redstone dust")
+        return not self.is_(pos, "redstone_wire[power=0]")
+
+    def describe(self, pos: Pos) -> str:
+        """The live value of whatever property carries signal at pos, for failure reports."""
+        block = parse_state(self.build.blocks.get(pos, "minecraft:air"))[0]
+        name = block.removeprefix("minecraft:")
+        if name == "redstone_wire":
+            level = next(p for p in range(16) if self.is_(pos, f"redstone_wire[power={p}]"))
+            return f"{name} power={level}"
+        for prop in ("powered", "lit"):
+            if self.is_(pos, f"{block}[{prop}=true]"):
+                return f"{name} {prop}"
+            if self.is_(pos, f"{block}[{prop}=false]"):
+                return f"{name} un{prop}"
+        return name
+
+    def dump(self) -> str:
+        interesting = [p for p, s in sorted(self.build.blocks.items()) if any(
+            k in s for k in ("redstone", "repeater", "comparator", "lever", "button", "lamp", "observer", "piston"))]
+        return "\n".join(f"  {p}: {self.describe(p)}" for p in interesting)
 
     def use(self, pos: Pos) -> None:
         """Flip a lever or press a button the way a player's click does.
