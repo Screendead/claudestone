@@ -29,7 +29,8 @@ python -m scripts.remote_run <dir> [--jobs N] -- <cmd> [args]...   # a CPU-heavy
 python -m scripts.remote_keep -- <cmd> [args]...   # rerun a resumable desktop job after each desktop drop
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
 python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
-python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched
+python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched (in game: /trigger watch_off, /trigger watch_on)
+python -m scripts.watch poses [--seconds N]   # read-only: each watch camera's steps, reversals, jerk
 git config core.hooksPath githooks       # once per clone: pre-commit lints staged library specs and checks library/INDEX.md
 ```
 
@@ -87,7 +88,10 @@ are in `server/showroom/<plot>.json`, errors in `server/showroom.log`;
 
 Players on main watch hands-off: a single director process (`redstone/watch.py`,
 `python -m scripts.watch run`) puts every online player in spectator (tag `watch`; the old
-gamemode is kept in `server/watch/state.json` and restored by `scripts.watch off`) and cuts
+gamemode is kept in `server/watch/state.json` and restored by `scripts.watch off` or by `/trigger watch_off` in game (`watch_on` opts back in):
+the director polls the two trigger objectives over RCON and enables them again after each poll,
+with no data-pack tick function; the opt-out list is matched without case and kept in
+`state.json`, so it holds across director and server restarts) and cuts
 between shots, each held at least `dwell` seconds: a test building on main (the main plot, or
 any plot a test runs in on the main server), the main plot's result, a showroom slot placed;
 failures first, then new variants, then the newest; when nothing happens it tours recent
@@ -108,6 +112,9 @@ start the director if none holds `server/watch/director.lock`; it outlives pytes
 starting it. Settings (`orbit`, `dwell`, `camera`, ...) are in `server/watch/config.json`,
 set by `scripts.watch start --no-orbit` etc. and reread live; its log is `director.log`. It
 uses plain RCON commands on main, never a rig lock, and nothing goes to chat.
+`scripts.watch poses` samples each camera entity's server-side pose (the teleport targets, not
+the client's interpolation) and prints per-axis steps, reversals and jerk, flagging a camera
+shaking in place.
 
 ## Server
 
