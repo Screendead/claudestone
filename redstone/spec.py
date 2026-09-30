@@ -40,7 +40,18 @@ def _on(spec: Spec, snap: dict, name: str) -> bool:
     return snap[spec.named[name]] > 0
 
 
+def _announce(rig: Rig, title: str, subtitle: str) -> None:
+    rig.run("title @a times 5 40 10")
+    rig.run("title @a subtitle " + json.dumps({"text": subtitle, "color": "gray"}))
+    rig.run("title @a title " + json.dumps({"text": title, "color": "red"}))
+
+
+def status(rig: Rig, text: str) -> None:
+    rig.run("title @a actionbar " + json.dumps({"text": text, "color": "yellow"}))
+
+
 def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
+    _announce(rig, spec.name, test["name"])
     rig.load(spec.build)
     rec = Recorder(rig, trace)
     rec.frame("loaded")
@@ -65,7 +76,8 @@ def _truth_table(rig, spec, test, rec) -> int:
     _, _, rows = parse_truth_table(test["truth_table"])
     settle = max(SETTLE, test.get("max_delay", test.get("delay", 0)) + 4)
     worst = 0
-    for inputs, expected in rows + [rows[0]]:  # end on the first row to check it resets
+    for i, (inputs, expected) in enumerate(rows + [rows[0]], 1):  # end on the first row to check it resets
+        status(rig, f"{spec.name}: row {i}/{len(rows) + 1}  {_fmt(inputs)}")
         for name, on in inputs.items():
             rig.drive(spec.inputs[name], on)
         snap = rec.frame(f"drive {_fmt(inputs)}")
@@ -87,6 +99,8 @@ def _truth_table(rig, spec, test, rec) -> int:
 
 def _step(rig, spec, step, rec):
     (kind, arg), = step.items()
+    if kind != "wait":
+        status(rig, f"{spec.name}: {kind} {arg if isinstance(arg, str) else _fmt(arg)}")
     if kind == "drive":
         for name, on in arg.items():
             rig.drive(spec.inputs[name], bool(on))

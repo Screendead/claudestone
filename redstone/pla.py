@@ -138,3 +138,66 @@ def _evaluator(inputs, outputs) -> Callable[[dict[str, bool]], dict[str, bool]]:
         return {o: any(all(values[v] == pol for v, pol in term.items()) for term in sop)
                 for o, sop in outputs.items()}
     return fn
+
+
+def or_plane(name: str, inputs: list[str], outputs: dict[str, list[str]], description: str = "",
+             one_hot: bool = False) -> Spec:
+    """Each output is the OR of some inputs. Only the second plane of a PLA: each input
+    line starts with a torch, so it is on while the input is off, and a tap lights its
+    output row while the line is off."""
+    b = Build()
+    spec_inputs: dict[str, Pos] = {}
+    col_x = {v: 1 + 2 * i for i, v in enumerate(inputs)}
+    out_z = {o: FIRST_ROW + 2 * k for k, o in enumerate(outputs)}
+    col_reps = {}
+    for v, x in col_x.items():
+        spec_inputs[v] = (x, 3, 0)
+        b.place((x, 2, 1), SOLID).place((x, 3, 1), "repeater[facing=north]")
+        b.place((x, 3, 2), SOLID).place((x, 3, 3), "redstone_wall_torch[facing=south]")
+        tapped = {out_z[o] for o, srcs in outputs.items() if v in srcs}
+        path = [((x, 3, z), None if z in tapped else "repeater[facing=north]")
+                for z in range(4, max(tapped, default=4) + 1)]
+        col_reps[v] = _lay(b, path)
+        for z in tapped:
+            b.place((x + 1, 2, z), "redstone_wall_torch[facing=east]")
+    end_x = max(col_x.values()) + 2
+    spec_outputs, bound = {}, 0
+    for o, srcs in outputs.items():
+        z = out_z[o]
+        taps = {col_x[v] + 1 for v in srcs}
+        path = [((x, 1, z), None if x in taps or x == end_x else "repeater[facing=west]")
+                for x in range(min(taps), end_x + 1)]
+        reps = _lay(b, path)
+        spec_outputs[o] = (end_x, 1, z)
+        for v in srcs:
+            bound = max(bound, REPEATER_TICKS * (1 + col_reps[v] + reps) + 2 * TORCH_TICKS)
+    b.with_base()
+    lines = [" ".join(inputs) + " | " + " ".join(outputs)]
+    rows = ([tuple(int(i == k) for i in range(len(inputs))) for k in range(-1, len(inputs))] if one_hot
+            else itertools.product([0, 1], repeat=len(inputs)))
+    for row in rows:
+        vals = dict(zip(inputs, row))
+        lines.append(" ".join(map(str, row)) + " | " + " ".join(str(int(any(vals[v] for v in outputs[o]))) for o in outputs))
+    return Spec(name, b, inputs=spec_inputs, outputs=spec_outputs, named=dict(spec_outputs), description=description,
+                tests=[{"name": "logic", "truth_table": "\n".join(lines) + "\n", "max_delay": bound}])
+
+
+def minimise(variables: list[str], on: set[int], dont_care: set[int]) -> list[dict[str, bool]]:
+    """Quine-McCluskey: prime implicants of on+dont_care, then a greedy cover of on.
+    Bit i of a value is variables[i]."""
+    n = len(variables)
+    allowed = on | dont_care
+    primes = []
+    # A cube is (mask of fixed bits, value of fixed bits); enumerate from largest.
+    cubes = sorted(((m, v) for m in range(1 << n) for v in range(1 << n) if v & ~m == 0),
+                   key=lambda c: bin(c[0]).count("1"))
+    for mask, val in cubes:
+        members = {x for x in range(1 << n) if x & mask == val}
+        if members <= allowed and members & on and not any(members <= p[2] for p in primes):
+            primes.append((mask, val, members))
+    cover, left = [], set(on)
+    while left:
+        mask, val, members = max(primes, key=lambda p: (len(p[2] & left), -bin(p[0]).count("1")))
+        cover.append({variables[i]: bool(val >> i & 1) for i in range(n) if mask >> i & 1})
+        left -= members
+    return cover

@@ -1,0 +1,84 @@
+name: digit_one
+description: Seven-segment digit showing segments bc; input per segment.
+palette:
+  .: air
+  A: black_concrete
+  c: {name: c2, block: redstone_lamp}
+  '#': white_concrete
+  B: {name: c0, block: redstone_lamp}
+  ^: repeater[facing=south]
+  C: {input: c}
+  D: {name: c1, block: redstone_lamp}
+  b: {name: b2, block: redstone_lamp}
+  E: {name: b0, block: redstone_lamp}
+  F: {input: b}
+  G: {name: b1, block: redstone_lamp}
+layers:
+  1: |
+    AAAAA
+    .....
+    .....
+  2: |
+    AAAAc
+    ....#
+    .....
+  3: |
+    AAAAB
+    ....^
+    ....C
+  4: |
+    AAAAD
+    .....
+    .....
+  5: |
+    AAAAA
+    .....
+    .....
+  6: |
+    AAAAb
+    ....#
+    .....
+  7: |
+    AAAAE
+    ....^
+    ....F
+  8: |
+    AAAAG
+    .....
+    .....
+  9: |
+    AAAAA
+    .....
+    .....
+tests:
+- name: each segment lights only itself
+  steps:
+  - drive: {b: 1}
+  - {wait: 8}
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 1
+      c0: 0
+      c1: 0
+      c2: 0
+  - drive: {b: 0}
+  - {wait: 8}
+  - drive: {c: 1}
+  - {wait: 8}
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      c0: 1
+      c1: 1
+      c2: 1
+  - drive: {c: 0}
+  - {wait: 8}
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      c0: 0
+      c1: 0
+      c2: 0

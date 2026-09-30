@@ -97,7 +97,7 @@ class CommandFailed(Exception):
 class Rig:
     """Places a build in a tick-frozen world and advances it tick by tick."""
 
-    def __init__(self, rcon: Rcon, origin: Pos = (128, -63, 128), size: Pos = (64, 32, 64)):
+    def __init__(self, rcon: Rcon, origin: Pos = (128, -63, 128), size: Pos = (192, 24, 192)):
         self.r = rcon
         self.origin = origin
         self.size = size
@@ -151,13 +151,14 @@ class Rig:
         return out
 
     def clear(self) -> None:
-        # Fill is capped at 32768 blocks per command, so clear in horizontal slabs.
+        # Fill is capped at 32768 blocks per command, so clear in 32 x 32 columns.
         (ox, oy, oz), (sx, sy, sz) = self.origin, self.size
-        layers = max(1, 32768 // (sx * sz))
-        for y in range(oy, oy + sy, layers):
-            top = min(y + layers, oy + sy) - 1
-            # strict: no neighbour updates, so attached torches and levers don't pop off as items.
-            self.run(f"fill {ox} {y} {oz} {ox + sx - 1} {top} {oz + sz - 1} air strict")
+        for x in range(ox, ox + sx, 32):
+            for z in range(oz, oz + sz, 32):
+                # strict: no neighbour updates, so attached torches and levers don't
+                # pop off as items.
+                self.run(f"fill {x} {oy} {z} {min(x + 31, ox + sx - 1)} {oy + sy - 1} "
+                         f"{min(z + 31, oz + sz - 1)} air strict")
         self._advance(FLUSH_TICKS)
 
     def load(self, build: Build) -> None:

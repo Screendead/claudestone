@@ -3,7 +3,8 @@
 from pathlib import Path
 
 from redstone.fileformat import dump, load
-from redstone.pla import pla
+from redstone.devices import DIGITS, seven_segment, switch
+from redstone.pla import or_plane, pla
 from redstone.route import Circuit
 
 LIBRARY = Path(__file__).resolve().parent.parent / "library"
@@ -11,6 +12,8 @@ LIBRARY = Path(__file__).resolve().parent.parent / "library"
 
 def generated():
     yield from generated_plas()
+    yield from generated_stages()
+    yield from generated_devices()
     yield from generated_circuits()
 
 
@@ -23,6 +26,34 @@ def generated_plas():
         "sum": odd,
         "carry": [{"a": True, "b": True}, {"a": True, "c": True}, {"b": True, "c": True}],
     }, "One-bit full adder (c = carry in) from the sum-of-products generator.")
+
+
+SUM_BITS = ["s0", "s1", "s2", "s3", "s4"]
+
+
+def minterm(value: int) -> dict[str, bool]:
+    return {v: bool(value >> i & 1) for i, v in enumerate(SUM_BITS)}
+
+
+def generated_stages():
+    """The stages of the two-digit adder."""
+    yield or_plane("encoder", [f"d{i}" for i in range(10)],
+                   {f"bit{k}": [f"d{i}" for i in range(10) if i >> k & 1] for k in range(4)},
+                   "One lever per digit 0-9 to a 4-bit number. Tested with one lever on at a time.",
+                   one_hot=True)
+    yield pla("half_adder", ["a", "b"], {"sum": [{"a": True, "b": False}, {"a": False, "b": True}],
+                                         "carry": [{"a": True, "b": True}]}, "One-bit half adder.")
+    outputs = {seg: [minterm(v) for v in range(19) if seg in DIGITS[v % 10]] for seg in "abcdefg"}
+    outputs["tens"] = [minterm(v) for v in range(10, 19)]
+    yield pla("decoder", SUM_BITS, outputs,
+              "A sum 0-18 (s0 = least significant bit) to units-digit segments a-g and a tens flag.")
+
+
+def generated_devices():
+    yield seven_segment("digit")
+    yield seven_segment("digit_one", "bc")
+    yield switch("lever_switch", "lever")
+    yield switch("button_switch", "stone_button")
 
 
 def generated_circuits():
