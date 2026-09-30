@@ -268,6 +268,25 @@ def test_tile_runs_copy_b_one_row_ahead_and_checks_both():
         run(Stuck(), s)
 
 
+def test_the_owner_is_on_the_status_sign():
+    class Display:
+        sent = []
+
+        def cmd(self, command):
+            self.sent.append(command)
+            return ""
+
+    rig = FakeRig()
+    rig.plot, rig.display = "not", Display()
+    run(rig, make_spec())
+    assert rig.display.sent and not any("wf-42" in c for c in rig.display.sent)
+    rig.owner, rig.display.sent = "wf-42", []
+    run(rig, make_spec())
+    first, *_, last = rig.display.sent
+    assert '{"text": "t", "color": "#DDDDDD"}, {"text": " \\u00b7 wf-42"' in first
+    assert "idle" in last and "wf-42" in last
+
+
 def test_truth_table_failure_is_in_the_trace(traces):
     with pytest.raises(AssertionError, match="expected out=1"):
         run(FakeRig(), make_spec(truth_table=BUFFER))

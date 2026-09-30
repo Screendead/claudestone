@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from redstone import docker_sats, fileformat, remote, showroom, watch
+from redstone import docker_sats, remote, showroom, watch
 from redstone.harness import Rig, _rcon_up, ensure_server, mirror
 from redstone.plots import MAIN as MAIN_PLOT, PLOTS, plot_for
 from redstone.rcon import Rcon
@@ -15,6 +15,9 @@ from redstone.servers import MAIN, PLOT_RECORDS, SATELLITES, SERVERS, answers, t
 # satellite; main only if no satellite is up or startable. "main" or a satellite's name
 # (sat1, dsat1, ...) pins every test to that server.
 SERVER = os.environ.get("REDSTONE_SERVER", "auto")
+# Who is testing (a workflow id, say): kept in the plot record and the showroom entry, and
+# shown on the plot's status sign.
+OWNER = os.environ.get("REDSTONE_OWNER") or None
 
 
 @pytest.fixture(scope="session")
@@ -70,16 +73,11 @@ def pytest_runtest_makereport(item, call):
 
 
 def _plot(request):
-    """$REDSTONE_PLOT, else main, unless the library build under test does not fit main."""
+    """$REDSTONE_PLOT, else the plot of the library file under test, else main."""
     if "REDSTONE_PLOT" in os.environ:
         return PLOTS[os.environ["REDSTONE_PLOT"]]
     path = getattr(request.node, "callspec", None) and request.node.callspec.params.get("path")
-    build = fileformat.load(path).build if path else None
-    if build and build.blocks:
-        lo, hi = build.bounds()
-        if any(a < 0 or b >= s for a, b, s in zip(lo, hi, MAIN_PLOT.size)):
-            return plot_for(path) or MAIN_PLOT
-    return MAIN_PLOT
+    return (plot_for(path) if path else None) or MAIN_PLOT
 
 
 @pytest.fixture
@@ -100,7 +98,8 @@ def rig(connect, request):
                 lock = take(server)
             except RuntimeError as e:
                 pytest.fail(str(e))
-        (PLOT_RECORDS / f"{plot.name}.json").write_text(json.dumps({"server": server.name}))
+        record = {"server": server.name} | ({"owner": OWNER} if OWNER else {})
+        (PLOT_RECORDS / f"{plot.name}.json").write_text(json.dumps(record))
         in_container = _in_container(server)
         try:
             r = None if in_container else connect(server)
@@ -113,6 +112,7 @@ def rig(connect, request):
                 rig = remote.RemoteRig(server, plot, connect(MAIN), lambda: connect(server))
             else:
                 rig = Rig(r, plot.origin, plot.size, plot.name, server=server, display=connect(MAIN))
+            rig.owner = OWNER
             yield rig
         finally:
             # Tests freeze the world; let it run again for anyone watching.
@@ -142,5 +142,5 @@ def rig(connect, request):
         if tested and rep:
             # The spec's own build, not rig.loaded: a tile test loads two copies.
             showroom.show(connect(MAIN), plot.name, tested["spec"], tested["spec"].build,
-                          {"test": tested["test"], "passed": rep.passed, "delay": tested["delay"]},
+                          {"test": tested["test"], "passed": rep.passed, "delay": tested["delay"], "owner": OWNER},
                           full=server == MAIN)

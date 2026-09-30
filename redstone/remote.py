@@ -143,7 +143,7 @@ def serve(job: dict, out=None, rcon_factory=None, server_dir: Path = Path("/srv"
                 server = Server(job["server"], server_dir, 25565, 25575, "1G")
                 rig = Rig(_rcon(rcon_factory or Rcon), tuple(job["origin"]), tuple(job["size"]), job["plot"],
                           server=server, display=Display(send))
-                rig.heading = job["heading"]
+                rig.heading, rig.owner = job["heading"], job.get("owner")
                 report["result"] = spec_module._run(rig, spec, test, job["trace"])
             except BaseException as e:
                 report["error"], report["traceback"] = _portable(e), traceback.format_exc()
@@ -195,6 +195,7 @@ class RemoteRig:
         self.server, self.plot, self.display = server, plot.name, display
         self.origin, self.size = plot.origin, plot.size
         self.heading: list[dict] = []
+        self.owner: str | None = None
         self.loaded = Build()
         self._connect = connect  # the server's RCON through the forward, for the fallback
         self._local: Rig | None = None
@@ -202,7 +203,8 @@ class RemoteRig:
 
     def job(self, spec, test: dict, trace: bool) -> dict:
         return {"spec": spec, "test": test, "trace": trace, "plot": self.plot, "origin": self.origin,
-                "size": self.size, "server": self.server.name, "heading": self.heading}
+                "size": self.size, "server": self.server.name, "heading": self.heading,
+                "owner": self.owner}
 
     def run_spec(self, spec, test: dict, trace: bool) -> dict:
         if self.server.name in NO_PYTHON:
@@ -226,7 +228,7 @@ class RemoteRig:
 
     def _run_here(self, spec, test: dict, trace: bool) -> dict:
         self._local = Rig(self._connect(), self.origin, self.size, self.plot, server=self.server, display=self.display)
-        self._local.heading = self.heading
+        self._local.heading, self._local.owner = self.heading, self.owner
         try:
             return spec_module._run(self._local, spec, test, trace)
         finally:

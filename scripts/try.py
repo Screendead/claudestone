@@ -10,61 +10,17 @@ its test's result line.
 """
 
 import argparse
-import io
 import json
 import os
 import sys
 import time
-from contextlib import redirect_stdout
-
-import pytest
 
 from redstone import fileformat, library, spec as spec_module
 from redstone.plots import plot_for
 from redstone.traits import design_blocks, dimensions, violations
 from scripts import look
 from scripts.lint import lint
-
-
-class Collect:
-    def __init__(self):
-        self.results = {}  # test name -> (ok, message)
-        self.delays = {}
-
-    def pytest_runtest_logreport(self, report):
-        if report.when == "call" or (report.when == "setup" and report.failed):
-            name = report.nodeid.split("::", 2)[-1].removeprefix("test_spec[").removesuffix("]").split("::", 1)[-1]
-            msg = ""
-            if report.failed:
-                crash = report.longrepr.reprcrash
-                msg = " ".join(crash.message.removeprefix("AssertionError: ").split()) if crash else str(report.longrepr)
-            self.results[name] = (report.passed, msg)
-
-
-def run_tests(s, tests) -> tuple[Collect, bool]:
-    c = Collect()
-    real = spec_module.run
-
-    def run(rig, sp, test, trace=False):
-        result = real(rig, sp, test, trace)
-        c.delays[(sp.name, test["name"])] = result.get("delay"), result.get("delays")
-        return result
-
-    spec_module.run = run
-    ids = [f"tests/test_library.py::test_spec[{s.name}::{t['name']}]" for t in tests]
-    try:
-        with redirect_stdout(io.StringIO()):
-            pytest.main(["-p", "no:terminal", "-p", "no:cacheprovider", "-W", "ignore", *ids], plugins=[c])
-    finally:
-        spec_module.run = real
-    return c, all(c.results.get(t["name"], (False,))[0] for t in tests)
-
-
-def _fmt_delays(delay: int, delays: dict) -> str:
-    """`delay 4; sum rise 4 fall 2, cout rise 2`: the worst case per output and edge."""
-    per = ", ".join(f"{o} " + " ".join(f"{e} {w}" for e, w in sorted(edges.items(), key=lambda e: e[0] != "rise"))
-                    for o, edges in (delays or {}).items())
-    return f"delay {delay}" + (f"; {per}" if per else "")
+from scripts.retest import outcome, run_tests
 
 
 def logged(spec: str, test: str, since: float) -> list[str]:
@@ -103,13 +59,11 @@ def main(argv) -> int:
         if a.trace:
             os.environ["REDSTONE_TRACE"] = "1"
         started = time.time()
-        c, ok = run_tests(s, tests)
-        bad |= not ok
+        session = run_tests([(s.name, t["name"]) for t in tests])
         for t in tests:
-            passed, msg = c.results.get(t["name"], (False, "did not run"))
-            delay, delays = c.delays.get((s.name, t["name"]), (None, None))
-            print(f"PASS {t['name']}" + (f" ({_fmt_delays(delay, delays)})" if delay is not None else "") if passed
-                  else f"FAIL {t['name']}: {msg}")
+            passed, msg = session.results.get((s.name, t["name"]), (False, "did not run"))
+            bad |= not passed
+            print(outcome(t["name"], passed, msg, session.measured.get((s.name, t["name"]))))
             for line in logged(s.name, t["name"], started):
                 print(line)
             if not passed and a.trace:

@@ -1,7 +1,7 @@
 """Runs every test declared in library/**/*.redstone.yaml, writing a trace of each into
-traces/ for the viewer. Set REDSTONE_TRACE=1 to make the traces per-tick with every cell, and
-REDSTONE_PLOT=<plot> to build in that plot of the world (redstone/plots.py) instead of the
-main area."""
+traces/ for the viewer. Each builds in its file's plot (redstone.plots.plot_for), or main if
+it has none. Set REDSTONE_TRACE=1 to make the traces per-tick with every cell, and
+REDSTONE_PLOT=<plot> to build every test in that plot instead (main included)."""
 
 import os
 

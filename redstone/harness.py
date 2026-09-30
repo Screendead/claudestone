@@ -206,6 +206,7 @@ class Rig:
         self.server = server
         self.plot = plot
         self.heading: list[dict] = []
+        self.owner: str | None = None
         self.origin = origin
         self.size = size
         self.build = Build()

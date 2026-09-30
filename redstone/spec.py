@@ -77,9 +77,14 @@ def _on(spec: Spec, snap: dict, name: str) -> bool:
 def _announce(rig: Rig, title: str, subtitle: str) -> None:
     if rig.plot != MAIN.name:
         rig.heading = [{"text": title + "\n", "color": "red", "bold": True},
-                       {"text": subtitle + "\n", "color": "#DDDDDD"}]
+                       {"text": subtitle, "color": "#DDDDDD"}, *_owner(rig), {"text": "\n"}]
         return _sign(rig, "")
     status(rig, subtitle)
+
+
+def _owner(rig) -> list[dict]:
+    owner = getattr(rig, "owner", None)
+    return [{"text": f" · {owner}", "color": "#BBBBBB"}] if owner else []
 
 
 def status(rig: Rig, text: str) -> None:
@@ -125,7 +130,7 @@ def _idle(rig: Rig, spec: Spec, test: dict, passed: bool) -> None:
         return
     body = [{"text": "idle\n", "color": "#DDDDDD"},
             {"text": f"last: {spec.name}\n{test['name']} ", "color": "#BBBBBB"},
-            {"text": "pass" if passed else "fail", "color": "green" if passed else "red"}]
+            {"text": "pass" if passed else "fail", "color": "green" if passed else "red"}, *_owner(rig)]
     try:
         checked(rig.display, f"data merge entity @e[type=text_display,tag=plot_status,tag={rig.plot},limit=1] "
                              f"{{text:{json.dumps({'text': '', 'extra': body})}}}")
@@ -141,6 +146,8 @@ def _event(rig, kind: str, spec: Spec, test: dict, **fields) -> None:
         box = watch.world_box(rig.origin, rig.loaded) if rig.loaded.blocks else None
     except Exception:
         pass
+    if getattr(rig, "owner", None):
+        fields["owner"] = rig.owner
     watch.emit(kind, plot=rig.plot, server=rig.server.name, spec=spec.name, test=test["name"], box=box, **fields)
 
 

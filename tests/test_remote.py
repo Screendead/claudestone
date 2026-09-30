@@ -61,13 +61,13 @@ class Sat:
     name = "dsat1"
 
 
-def serve_lines(monkeypatch, s, script) -> tuple[list[bytes], Rig]:
+def serve_lines(monkeypatch, s, script, owner=None) -> tuple[list[bytes], Rig]:
     """serve()'s stdout for spec s run on a fake Rig."""
     rig = Rig(script)
     monkeypatch.setattr(remote, "Rig", made(rig))
     out = io.StringIO()
     rr = remote.RemoteRig(Sat, PLOT, Display(), None)
-    rr.heading = [{"text": "fake\n"}]
+    rr.heading, rr.owner = [{"text": "fake\n"}], owner
     with monkeypatch.context() as m:  # serve's own rewiring stays inside
         for mod, name in ((watch, "emit"), (watch, "set_status"), (sys, "stdout"), (spec_module, "TRACE_DIR")):
             m.setattr(mod, name, getattr(mod, name))
@@ -161,6 +161,17 @@ def test_watch_events_are_replayed_here(monkeypatch, isolated):
     rr = remote.RemoteRig(Sat, PLOT, Display(), None)
     rr.run_spec(s, s.tests[0], False)
     assert [e[0] for e in isolated] == ["test"] and isolated[0][1]["server"] == "dsat1"
+    assert "owner" not in isolated[0][1]
+
+
+def test_the_owner_reaches_the_container(monkeypatch, isolated):
+    s = make_spec([{"wait": 1}])
+    lines, rig = serve_lines(monkeypatch, s, lambda tick: {}, owner="wf-42")
+    assert rig.owner == "wf-42"
+    monkeypatch.setattr(remote, "popen", FakeProc(lines))
+    isolated.clear()
+    remote.RemoteRig(Sat, PLOT, Display(), None).run_spec(s, s.tests[0], False)
+    assert isolated[0][1]["owner"] == "wf-42"
 
 
 def test_an_error_setting_up_is_reported(monkeypatch):

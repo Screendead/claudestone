@@ -4,7 +4,8 @@ each under a floating label with its name, size, delay and traits.
 State per plot is server/showroom/<plot>.json: {"specs": {name: entry}}, where an entry
 holds its slot (x, z inside the plot), size (w, h, d of the build bounds), box (the w, d
 reserved on the floor: the build, widened to fit its label's name), per-test results,
-traits and the time it was last tested. Callers hold server/plots/<plot>.lock.
+traits, the time it was last tested and, if that test had one ($REDSTONE_OWNER), its owner.
+Callers hold server/plots/<plot>.lock.
 """
 
 import hashlib
@@ -252,6 +253,10 @@ def _record(state: dict, spec, result: dict) -> dict:
     entry["results"] = {t: v for t, v in entry["results"].items() if t in {x["name"] for x in spec.tests}}
     entry["traits"] = list(spec.traits)
     entry["tested"] = time.time()
+    if result.get("owner"):
+        entry["owner"] = result["owner"]
+    else:
+        entry.pop("owner", None)
     return entry
 
 
