@@ -14,6 +14,8 @@ def rcon():
         fcntl.flock(lock, fcntl.LOCK_EX)
         r = Rcon()
         yield r
+        # Tests freeze the world; let it run again for anyone playing on the server.
+        r.cmd("tick unfreeze")
         r.close()
 
 
