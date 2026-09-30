@@ -127,7 +127,8 @@ class Rig:
         layers = max(1, 32768 // (sx * sz))
         for y in range(oy, oy + sy, layers):
             top = min(y + layers, oy + sy) - 1
-            self.run(f"fill {ox} {y} {oz} {ox + sx - 1} {top} {oz + sz - 1} air")
+            # strict: no neighbour updates, so attached torches and levers don't pop off as items.
+            self.run(f"fill {ox} {y} {oz} {ox + sx - 1} {top} {oz + sz - 1} air strict")
         self._advance(FLUSH_TICKS)
 
     def load(self, build: Build) -> None:
