@@ -1101,9 +1101,10 @@ def parse_pose(reply: str) -> tuple | None:
     return values if len(values) == 5 else None
 
 
-def sample_poses(rcon, seconds: float, every: float = 0.01, clock=time.monotonic, sleep=time.sleep) -> dict:
+def sample_poses(rcon, seconds: float, every: float = 0.05, clock=time.monotonic, sleep=time.sleep) -> dict:
     """{player: [(game tick, pose, teleport_duration)]} of each watcher's camera entity, read
-    as often as RCON answers, for `seconds`. Sends only `list`, `time query` and `data get`.
+    about once a tick for `seconds`: faster gains nothing, and each command holds the RCON
+    lock the director's glides wait on. Sends only `list`, `time query` and `data get`.
     These are the server's poses, which a glide's `tp` sets at once: the targets the client
     interpolates towards, not what it draws in between."""
     out: dict[str, list] = {}
