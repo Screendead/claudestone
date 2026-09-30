@@ -1,0 +1,113 @@
+name: piston_qc_shared_side_input
+description: 'A piston T directly under piston S (both facing up) is QC-powered by any block that powers S from the side, so whichever of the two is updated first fires once their shared line is free: T first shoves S up, S first blocks T.'
+traits: [piston_based, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  r: {block: 'repeater[facing=north]', fixture: true}
+  F: stone
+  S: sticky_piston[facing=up]
+  T: sticky_piston[facing=up]
+  K: stone
+  P: piston[facing=south]
+  A: piston[facing=down]
+layers:
+  0: |
+    =====
+    =====
+    =====
+    =====
+    =====
+  1: |
+    .....
+    ..=..
+    ...b.
+    ..TP.
+    .....
+  2: |
+    ..a..
+    ..r..
+    ..F..
+    ..S..
+    .....
+  3: |
+    .....
+    .....
+    .....
+    ..K..
+    .....
+  4: |
+    .....
+    .....
+    .....
+    .....
+    .....
+  5: |
+    .....
+    .....
+    .....
+    ..A..
+    .....
+  6: |
+    .....
+    .....
+    .....
+    ..c..
+    .....
+tests:
+- name: side input on, T updated first fires and shoves S up
+  initial: {b: 1, c: 1}
+  steps:
+  - check: if block ~2 ~4 ~3 piston_head[facing=down]
+  - check: if block ~3 ~1 ~4 piston_head[facing=south]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~2 ~2 ~1 repeater[powered=true]
+  - check: if block ~2 ~2 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~3 sticky_piston[extended=false]
+  - drive: {c: 0}
+  - wait: 4
+  - check: if block ~2 ~4 ~3 air
+  - check: if block ~2 ~3 ~3 stone
+  - check: if block ~2 ~2 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~3 sticky_piston[extended=false]
+  - drive: {b: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~3 sticky_piston[extended=true]
+  - check: if block ~2 ~2 ~3 moving_piston
+  - check: if block ~2 ~3 ~3 moving_piston
+  - check: if block ~2 ~4 ~3 moving_piston
+  - wait: 2
+  - check: if block ~2 ~2 ~3 piston_head[facing=up,type=sticky]
+  - check: if block ~2 ~3 ~3 sticky_piston[facing=up,extended=false]
+  - check: if block ~2 ~4 ~3 stone
+- name: side input off, the same update leaves T still (control)
+  initial: {b: 1, c: 1}
+  steps:
+  - drive: {c: 0}
+  - wait: 4
+  - drive: {b: 0}
+  - wait: 4
+  - check: if block ~2 ~1 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~2 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~3 ~3 stone
+- name: side input on, S updated first fires and blocks T
+  initial: {b: 1, c: 1}
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {c: 0}
+  - wait: 4
+  - run: setblock ~1 ~2 ~3 stone
+  - wait: 1
+  - check: if block ~2 ~2 ~3 sticky_piston[extended=true]
+  - check: if block ~2 ~1 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~4 ~3 moving_piston
+  - drive: {b: 0}
+  - wait: 4
+  - check: if block ~2 ~1 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~2 ~3 sticky_piston[extended=true]
+  - check: if block ~2 ~4 ~3 stone

@@ -1,0 +1,146 @@
+name: piston_moved_source_zero_tick_depower
+description: 'A piston that extends is depowered later in the same block-event phase when another piston moves its power source: a lit observer (its removal updates its output as off) or a redstone block; the victim then 0-tick pulls from 2 cells away. The second mover is a QC-armed BUD piston, woken by the first piston''s base update (observer case) or by the cell whose vacating unblocks it (redstone-block case).'
+traits: [piston_based, observer_based, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  O: 'observer[facing=west,powered=true]'
+  F: stone
+  Z: piston[facing=north]
+  z: piston[facing=west]
+  X: sticky_piston[facing=east]
+  K: stone
+  R: redstone_block
+  o: obsidian
+  A: sticky_piston[facing=north]
+layers:
+  0: |
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+  1: |
+    .......
+    .......
+    .aOF...
+    ..ZX.K.
+    .......
+    .......
+    .......
+    .......
+    ...Rz..
+    ...XKKo
+    .......
+    ....A..
+    ....b..
+  2: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+  3: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+tests:
+- name: moved lit observer depowers X in the tick X extends
+  steps:
+  - check: if block ~5 ~1 ~3 stone
+  - check: if block ~3 ~1 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~2 observer[powered=false]
+  - run: setblock ~2 ~3 ~3 redstone_block
+  - wait: 1
+  - check: if block ~2 ~1 ~3 piston[extended=false]
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~2 observer[powered=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~3 piston[extended=true]
+  - check: if block ~2 ~1 ~2 moving_piston
+  - check: if block ~2 ~1 ~1 moving_piston
+  - check: if block ~3 ~1 ~3 moving_piston
+  - check: if block ~4 ~1 ~3 moving_piston
+  - check: if block ~5 ~1 ~3 air
+  - wait: 2
+  - check: if block ~4 ~1 ~3 stone
+  - check: if block ~3 ~1 ~3 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~1 observer
+  - wait: 4
+  - check: if block ~3 ~1 ~3 sticky_piston[extended=false]
+- name: observer left in place, X holds for the 2 gt pulse (control)
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~2 ~1 ~2 observer[powered=true]
+  - check: if block ~3 ~1 ~3 sticky_piston[extended=true]
+  - check: if block ~4 ~1 ~3 moving_piston
+  - check: if block ~5 ~1 ~3 stone
+  - check: if block ~2 ~1 ~3 piston[extended=false]
+- name: moved redstone block depowers X in the tick a pull unblocks it
+  initial: {b: 1}
+  steps:
+  - check: if block ~4 ~1 ~10 piston_head[facing=north,type=sticky]
+  - check: if block ~4 ~1 ~9 stone
+  - check: if block ~3 ~1 ~9 sticky_piston[extended=false]
+  - run: setblock ~4 ~3 ~8 redstone_block
+  - wait: 1
+  - check: if block ~4 ~1 ~8 piston[extended=false]
+  - drive: {b: 0}
+  - wait: 1
+  - check: if block ~4 ~1 ~11 moving_piston
+  - check: if block ~4 ~1 ~10 moving_piston
+  - check: if block ~4 ~1 ~8 piston[extended=true]
+  - check: if block ~3 ~1 ~8 moving_piston
+  - check: if block ~2 ~1 ~8 moving_piston
+  - check: if block ~3 ~1 ~9 moving_piston
+  - check: if block ~4 ~1 ~9 moving_piston
+  - check: if block ~5 ~1 ~9 air
+  - wait: 2
+  - check: if block ~4 ~1 ~10 stone
+  - check: if block ~4 ~1 ~9 stone
+  - check: if block ~3 ~1 ~9 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~8 redstone_block
+  - wait: 4
+  - check: if block ~3 ~1 ~9 sticky_piston[extended=false]
+- name: redstone block left in place, X extends and stays (control)
+  initial: {b: 1}
+  steps:
+  - drive: {b: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~9 sticky_piston[extended=true]
+  - check: if block ~4 ~1 ~9 moving_piston
+  - check: if block ~5 ~1 ~9 stone
+  - wait: 2
+  - check: if block ~4 ~1 ~9 piston_head[facing=east,type=sticky]
+  - check: if block ~5 ~1 ~9 stone

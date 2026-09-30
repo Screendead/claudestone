@@ -1,0 +1,69 @@
+name: pull_origin_air_at_event
+description: A sticky piston's pull empties the pulled block's cell in the retract event's own tick R; the block is moving_piston in the head cell at R and R+1 and real there at R+2. Held pull and 1 gt pull from 2 cells away.
+traits: [piston_based, flat, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  r: {block: 'repeater[facing=west]', fixture: true}
+  P: sticky_piston[facing=east]
+  S: stone
+layers:
+  0: |
+    ======
+    ======
+    ======
+  1: |
+    arPS..
+    ......
+    bP.S..
+tests:
+- name: held pull by a repeater empties the origin at the event tick
+  initial: {a: 1}
+  steps:
+  - check: if block ~4 ~1 ~0 stone
+  - check: if block ~3 ~1 ~0 piston_head[facing=east,type=sticky]
+  - check: if block ~2 ~1 ~0 sticky_piston[extended=true]
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 repeater[powered=true]
+  - check: if block ~4 ~1 ~0 stone
+  - check: if block ~3 ~1 ~0 piston_head
+  - check: if block ~2 ~1 ~0 sticky_piston[extended=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 repeater[powered=false]
+  - check: if block ~4 ~1 ~0 air
+  - check: if block ~3 ~1 ~0 moving_piston
+  - check: if block ~2 ~1 ~0 moving_piston
+  - log: data get block ~3 ~1 ~0 progress
+  - wait: 1
+  - check: if block ~4 ~1 ~0 air
+  - check: if block ~3 ~1 ~0 moving_piston
+  - check: if block ~2 ~1 ~0 moving_piston
+  - log: data get block ~3 ~1 ~0 progress
+  - wait: 1
+  - check: if block ~4 ~1 ~0 air
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~2 ~1 ~0 sticky_piston[extended=false]
+- name: 1 gt pulse pulls a block from 2 cells away, origin empty at the retract tick
+  steps:
+  - check: if block ~3 ~1 ~2 stone
+  - check: if block ~2 ~1 ~2 air
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~2 sticky_piston[extended=true]
+  - check: if block ~2 ~1 ~2 moving_piston
+  - check: if block ~3 ~1 ~2 stone
+  - drive: {b: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~2 air
+  - check: if block ~2 ~1 ~2 moving_piston
+  - check: if block ~1 ~1 ~2 moving_piston
+  - wait: 1
+  - check: if block ~3 ~1 ~2 air
+  - check: if block ~2 ~1 ~2 moving_piston
+  - wait: 1
+  - check: if block ~2 ~1 ~2 stone
+  - check: if block ~3 ~1 ~2 air
+  - check: if block ~1 ~1 ~2 sticky_piston[extended=false]

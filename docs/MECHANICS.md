@@ -204,6 +204,85 @@ Contents: 1 Dust shape and connection; 2 Power delivery and through-block reads;
 **Behaviour:** Glazed terracotta beside a slime block stays put while the slime moves +1; a stone control moves with the slime. Honey beside slime also stays put. A sticky piston pushes glazed terracotta to +2 and leaves it on retraction; stone is pulled back. Heavy core does NOT behave this way (claimed push-only): a sticky piston pulls it back to +1 and a slime block carries it along (moved to +2 beside the slime).
 **Use:** Glazed terracotta, or a honey/slime boundary, separates two slime/honey structures, or a structure and a fixed wall, with no air gap, saving a block in flying machines, doors and sequencers. Heavy core cannot be used for this.
 
+### pull_origin_air_at_event
+**Verdict:** confirmed
+**Behaviour:** A sticky piston facing east is held extended by a delay-1 repeater, with a stone on its face. The input is removed at t:
+- at +1 the repeater is still on and nothing has moved;
+- at +2 the repeater is off, and in that same tick the stone's cell is air while the head cell and the base are moving_piston. `data get` reads progress 0.0 at +2 and 0.5 at +3, because the saved value lags one tick;
+- at +4 the stone is real in the head cell and the piston is retracted.
+
+So the retract event R is the repeater's own off tick: the origin is air at R and the block is real at R+2. A second variant uses a retracted sticky piston with a stone 2 cells ahead and a 1 gt direct pulse. The piston extends at +1 and the stone is untouched. At +2 the retract event empties the stone's cell and pulls the stone into the head cell, where it is moving_piston at +2 and +3 and real at +4.
+**Use:** A block pulled out of a door frame leaves its frame cell empty in the event tick, 2 gt before it lands in the wall. A timer that scores "frame cell empty" reads R; one that scores "block landed" reads R+2. A repeater-driven piston acts in the repeater's own tick.
+
+### piston_zero_tick_chain_same_tick
+**Verdict:** confirmed
+**Behaviour:** The layout:
+- Sticky piston Q (east) is powered only through stone B, which a delay-1 repeater hard-powers.
+- Stone K sits 2 cells in front of Q.
+- Piston Z faces B and is powered by a comparator on the same input.
+- Piston Y (north) has K and then obsidian in its line and is powered by a redstone block, so it is blocked.
+
+Both inputs are driven at t. Nothing has moved at +1. At +2:
+- Z is extended, with its arm in B's old cell and B moving;
+- Q's base is moving_piston and K is moving into Q's head cell;
+- K's old cell holds Y's moving arm, and Y is extended.
+
+At +4 K is real in Q's head cell, Q is retracted and Y's head is in K's old cell. Control: with the repeater alone, Q is extended at +2, K has not moved and Y is still.
+
+The mechanism, read from source and consistent with the result:
+- The repeater turning on (HIGH) queues Q's extension in the scheduled-tick phase, before the comparator (NORMAL) queues Z's.
+- In the block-event phase Q extends, then Z pushes B. B's vacated cell updates Q, which is now unpowered.
+- Q's retract event runs in the same phase and pulls K. It is event 1 because the cell 2 ahead holds a real block.
+- K's vacated cell updates Y, and Y's extension also runs in that phase.
+**Use:** A 0-tick pull: both of the piston's edges fall in one tick, and a block 2 cells away is moved that tick. A chain of piston events can run inside one tick, ordered by when each event was queued. The depower must be queued after the victim's extension; if it runs first, the extension re-checks its power and is dropped (piston_same_tick_pulse_ignored). Scheduled-tick priority (repeater before comparator) is one way to get that order.
+
+### spat_piston_fires_same_tick
+**Verdict:** confirmed
+**Behaviour:** A sticky piston pushes a retracted piston W (facing north) toward a cell beside a redstone block.
+- With a 1 gt pulse (on at t, off at t+1), W is moving at +1. At +2 the sticky piston's base is moving_piston and its head cell is air, and W is real at the far cell, `extended=true`, with its own arm moving_piston. W was spat and extended in the same tick.
+- With an in-tick 0-tick (the piston_zero_tick_chain_same_tick arrangement), W is already extended at the far cell in the event tick E, and the sticky piston's head cell is air.
+- Control: without the depower, W is still moving_piston at E.
+**Use:** A spat piston acts in the spit tick, so a carrier that 0-ticks costs 0 gt per extender stage, against 3 gt when the moved piston lands (piston_landed_powered_extends_next_tick). This allows 0-2 gt door closings by spit chains. Hazard: any piston spat onto a powered cell fires at once.
+
+### piston_landed_powered_extends_next_tick
+**Verdict:** confirmed
+**Behaviour:** A sticky piston pushes a retracted piston onto a cell beside a redstone block, with an event at +1. The moved piston is moving_piston at +1 and +2, real and unextended at +3 (event + 2), and extended with its arm moving_piston at +4 (event + 3). The same holds when it is pulled back onto a powered cell: it lands unextended at R+2 and extends at R+3. One landed on an unpowered cell stays retracted for the next 10 gt.
+**Use:** An extender stage costs 3 gt from event to event when the moved piston lands. Every piston a door moves must land unpowered, or it fires 1 gt after landing.
+
+### piston_moved_source_zero_tick_depower
+**Verdict:** confirmed
+**Behaviour:** In both cases a piston X is depowered in the same block-event phase in which it extends. It then 0-tick pulls a stone from 2 cells ahead. The second mover Z is a BUD piston armed by a redstone block set two cells above it; no update reaches Z when that block is placed.
+- **Lit observer.** X (sticky, east) is powered through stone F by an observer's output. Z sits behind X, facing the observer. The observer is triggered at t. At +2, its on tick:
+  - Z is extended and the observer is moving;
+  - X's base is moving_piston and the stone is moving into X's head cell.
+
+  At +4 the stone is real and X is retracted. Control without arming: X is extended at +2 and holds for the observer's 2 gt pulse.
+- **Redstone block.** X is powered by a redstone block beside it, but its line (stone, stone, obsidian) is blocked. Sticky piston A pulls the first stone out sideways at +1 (input removed at t). In that tick:
+  - X extends into the gap;
+  - Z, armed beside the gap and facing the redstone block, pushes the redstone block away;
+  - X retracts and pulls the second stone into the gap.
+
+  Everything is real by +3. Control without arming: X extends and holds.
+
+Mechanism, read from source; the results agree:
+- Observer case: Z is woken by X's own extension (the base's neighbour update), so the order is causal. A lit observer with a pending tick that is moved updates its output side as if off, which reaches X through F.
+- Redstone-block case: X and Z are both woken by the vacated gap cell, whose neighbours update in order W, E, D, U, N, S. X is west of the gap and Z north, so X is queued first. That order is directional. [inferred; the build was not tested rotated]
+- Both cases passed in two plots (mechanics_3 and mechanics_6).
+**Use:** Depowers a door's slot pistons within the same phase. A QC-armed BUD piston beside a piston's base is a relay that always runs after that piston. An observer is the reusable power source for a piston whose only free input is below a floor block.
+
+### piston_qc_shared_side_input
+**Verdict:** confirmed
+**Behaviour:** The layout:
+- Sticky pistons S and T face up, with T directly under S.
+- Stone F beside S is hard-powered by a repeater.
+- S's line is a stone and then a gate piston's head.
+
+With F on, the gate is removed without updating either piston, and both stay retracted. Then:
+- An update to T alone, from a neighbouring piston retracting, makes T extend at +1 and push S and the stone up. S lands unpowered 2 gt later.
+- Control, F off: the same update leaves T still.
+- Updating S first (a block set beside it) makes S fire. T, updated by S's base, finds an extended piston in its line and stays retracted, even after its own update.
+**Use:** In a stacked column of two pistons, T's quasi-connectivity reads every side input of S. Once their shared line clears, whichever is updated first fires. A door that powers the upper piston from the side must make sure the lower one is not updated first, or it shoves the upper piston and its line.
+
 ---
 
 ## 8. Quasi-connectivity, crafter, copper bulb
@@ -472,3 +551,4 @@ Combinations below are assembled from the entries above. An idea marked "unteste
 18. **Item-count threshold detector.** Oak shelf (1-64 -> 1, 65-128 -> 3, 129+ -> 7) or decorated pot (about 4.6 items per level) behind a hidden comparator, filled by hopper. Relies on: shelf_slot_bitmask_comparator, decorated_pot_single_slot_fullness, comparator_nonstackable_item_steps (swords for widely spaced levels).
 19. **Power-free BUD and phantom-safe autocrafter arrays.** Floating sand (placed with setblock strict) falls 2 gt after any update; a quasi-connected dropper fires 4 gt after any update; crafters in the same array ignore QC, so they can sit under power lines. Relies on: falling_block_update_and_break, dropper_qc_crafter_no_qc, piston_quasi_connectivity_bud. Untested as a mixed array.
 20. **Dust-only hopper-lock and tap rows.** A dust line laid on a row of hoppers locks all of them; dot dust taps one block below; glass or top slabs under the dust keep neighbouring lamps and pistons off. Relies on: dust_powers_block_below, dust_dot_vs_cross_isolated, hopper_lock_instant_accepts_input. Untested as a bus.
+21. **In-tick slot-piston chain for fast doors.** A held pull clears a slot cell; the blocked slot piston behind it, already powered, extends in the same tick. A BUD piston woken by it then moves its observer or redstone block, so it 0-tick pulls the next block 2 cells in. That block's vacated cell wakes the next slot piston, all in one tick. Closing uses spits, and spat pistons fire in the same tick. Relies on: pull_origin_air_at_event, piston_zero_tick_chain_same_tick, piston_moved_source_zero_tick_depower, spat_piston_fires_same_tick, piston_landed_powered_extends_next_tick (moved pistons must land unpowered), piston_qc_shared_side_input (update order in stacked columns). Untested as a door.

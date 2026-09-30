@@ -1,0 +1,80 @@
+name: spat_piston_fires_same_tick
+description: 'A retracted piston spat by a sticky piston''s short pulse, onto a cell where it is powered, extends in the spit''s own tick: after a between-ticks 1 gt pulse, and after an in-tick 0-tick where the spit and the new extension share one block-event phase.'
+traits: [piston_based, flat, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  c: {input: c}
+  d: {input: d}
+  r: {block: 'repeater[facing=north]', fixture: true}
+  k: {block: 'comparator[facing=west]', fixture: true}
+  Z: piston[facing=east]
+  B: stone
+  P: sticky_piston[facing=east]
+  W: piston[facing=north]
+  R: redstone_block
+layers:
+  0: |
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+    =======
+  1: |
+    .......
+    aPW....
+    ...R...
+    .......
+    ...c...
+    ...r...
+    dkZB...
+    ...PW..
+    .....R.
+tests:
+- name: 1 gt pulse spit, the spat piston extends in the spit tick
+  steps:
+  - check: if block ~2 ~1 ~1 piston[extended=false]
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~1 sticky_piston[extended=true]
+  - check: if block ~2 ~1 ~1 moving_piston
+  - check: if block ~3 ~1 ~1 moving_piston
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~1 ~1 ~1 moving_piston
+  - check: if block ~2 ~1 ~1 air
+  - check: if block ~3 ~1 ~1 piston[facing=north,extended=true]
+  - check: if block ~3 ~1 ~0 moving_piston
+  - wait: 2
+  - check: if block ~3 ~1 ~0 piston_head[facing=north,type=normal]
+  - check: if block ~1 ~1 ~1 sticky_piston[extended=false]
+- name: in-tick 0-tick spit, the spat piston extends in the same tick
+  steps:
+  - check: if block ~4 ~1 ~7 piston[extended=false]
+  - drive: {c: 1, d: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~7 sticky_piston[extended=false]
+  - check: if block ~4 ~1 ~7 piston[extended=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~6 piston[extended=true]
+  - check: if block ~3 ~1 ~7 moving_piston
+  - check: if block ~4 ~1 ~7 air
+  - check: if block ~5 ~1 ~7 piston[facing=north,extended=true]
+  - check: if block ~5 ~1 ~6 moving_piston
+  - wait: 2
+  - check: if block ~5 ~1 ~6 piston_head[facing=north,type=normal]
+  - check: if block ~3 ~1 ~7 sticky_piston[extended=false]
+  - check: if block ~4 ~1 ~7 air
+- name: without the depower the piston is carried, not spat (control)
+  steps:
+  - drive: {c: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~7 sticky_piston[extended=true]
+  - check: if block ~4 ~1 ~7 moving_piston
+  - check: if block ~5 ~1 ~7 moving_piston
+  - check: if block ~5 ~1 ~6 air
