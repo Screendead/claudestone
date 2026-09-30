@@ -11,7 +11,7 @@ live; when the command ends, the files it created or changed are copied back int
 its exit code is this one's. `$REMOTE_RUN_JOBS` there is N.
 
 The container may use N CPUs and N GB (--memory to change). All runs together hold at most
-$REDSTONE_SEARCH_CPUS (default 8) of the desktop's 14 Docker CPUs, so the dsats keep
+$REDSTONE_SEARCH_CPUS (default 12) of the desktop's 14 Docker CPUs, so the dsats keep
 headroom; a run waits here for its CPUs. Ctrl-C or a killed process stops the container
 (its stdin closes). An unreachable desktop is an error: nothing runs locally.
 """
@@ -41,7 +41,7 @@ WORKER = Path(__file__).with_name("remote_run_worker.py")
 # The desktop's shell is cmd.exe: nothing on the command line may need quoting.
 BOOT = "exec(__import__('base64').b64decode(__import__('sys').stdin.buffer.readline()))"
 SLOTS = ROOT / "remote_run"
-TOTAL_CPUS = int(os.environ.get("REDSTONE_SEARCH_CPUS", "8"))
+TOTAL_CPUS = int(os.environ.get("REDSTONE_SEARCH_CPUS", "12"))
 SKIP = {"__pycache__", ".git", ".venv", "venv", "node_modules"}
 SILENCE = 30  # the worker sends a heartbeat every 5 s
 # A few seconds for a small dir. Now and then the container never sees stdin that was

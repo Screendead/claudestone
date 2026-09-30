@@ -167,7 +167,7 @@ Docker volume (`rr-src-*`, older snapshots of the same dir dropped), a `requirem
 there is pip-installed once per content (`rr-pip-*`), output streams back live, the exit
 code is the command's, and new or changed files are copied back into the dir. `--jobs N`
 gives the container N CPUs and N GB; all runs together hold at most `REDSTONE_SEARCH_CPUS`
-(default 8) of the desktop VM's 14 CPUs, via slot locks in `server/remote_run/`. Ctrl-C,
+(default 12) of the desktop VM's 14 CPUs, via slot locks in `server/remote_run/`. Ctrl-C,
 SIGTERM or a killed process stops the container (its stdin closes); an unreachable desktop
 is an error, never a local run.
 
