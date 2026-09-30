@@ -59,7 +59,7 @@ self-contained brief for designing a variant; keep it in step with the format an
 `docs/MECHANICS.md` catalogues verified 26.3 mechanics, each proven by a spec in
 `library/mechanics/`. `docs/WINS.md` banks true wins, where we beat the community best against rebuilt `ref_<author>_<design>` specs.
 `githooks/pre-commit` (enabled by `git config core.hooksPath githooks`) runs `scripts.lint` on
-staged library specs and fails if regenerating `library/INDEX.md` (`python -m scripts.index`)
+staged library specs and fails if regenerating `library/INDEX.md` (`python -m scripts.index --tracked`, committed and staged specs only)
 changes it, so stage the regenerated index with the spec.
 
 ## Plots

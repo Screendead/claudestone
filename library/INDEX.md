@@ -139,7 +139,6 @@ and subtracts, so it passes A only when B is on |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
-| delay_1gt_both_edges | 4x2x2 | 16 | 9 | - | flat, horizontal, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | DRAFT: exact 1 game tick delay on both edges with a real dust output, from one sticky piston and a dust whose shape the moving block sets |
 | delay_comparator_analog | 6x2x3 | 36 | 16 | 6 | flat, horizontal, analog, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Analog delay line: comparators chained back to front copy their input strength exactly, 2 game ticks per comparator, so a 0-15 signal comes out delayed but unchanged (a repeater chain would restore it to 15) |
 | delay_fall_only | 7x2x2 | 28 | 26 | - | flat, horizontal, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Off-delay (TOF) timer: out rises the same tick as a and falls 24 ticks after a falls |
 | delay_hopper_timer | 3x2x6 | 36 | 21 | - | compact, container_based, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Long on-delay timer in 3x2x6 with no torches, pistons, entities or sound: an item-count clock |
@@ -169,7 +168,6 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
-| door_lever_sticky_input | 3x7x3 | 63 | 16 | - | piston_based, tick_accurate, vertical | Door part 1 (input) for the design B / design_c 3x3 seamless door: a lever on top of K_in and I_A made sticky, so the lever works on both edges (Door_Rules.md:480) |
 | pulse_dual_edge_instant | 5x3x3 | 45 | 23 | - | ultrafast, horizontal, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | Zero-latency dual-edge detector: out comes on in the same game tick as either edge of a and stays on 1 tick after a rise, 2 ticks after a fall (pulse_dual_observer answers 2 ticks late) |
 | pulse_dual_observer | 1x1x1 | 1 | 1 | - | ultracompact, ultrafast, flat, horizontal, one_wide, tileable, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly | One observer (x=1) facing west, watching the input cell a (x=0); both on one layer, no base: 1x1x1 plus the input |
 | pulse_dual_observer_repeater | 2x2x1 | 4 | 3 | - | compact, flat, horizontal, one_wide, tileable, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly | Dual-edge detector with a longer pulse: an observer (x=1) facing west watches input a (x=0) and fires into a delay-2 repeater (x=2, facing west, on a single base block), which stretches the observer's 2 tick pulse to 4 ticks |
@@ -183,7 +181,6 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 | dec_enc_analog | 10x2x4 | 80 | 52 | 2 | ultracompact, ultrafast, flat, horizontal, analog, lightless, silent, pistonless, entityless, comparator_based, container_based, survival_friendly, reset_safe, tick_accurate | Priority encoder to signal strength: of inputs 1-8, the highest one on sets the output strength to its number (none = 0), in 2 game ticks, from one dust line and two comparators |
 | dec_enc_bcd_instant | 6x2x5 | 60 | 40 | 0 | ultracompact, ultrafast, instant, flat, horizontal, lightless, silent, pistonless, entityless, survival_friendly, reset_safe | Zero-tick one-hot to BCD encoder (keys 1-9 to a 4-bit number; no key = 0), made of nothing but dust on one layer |
 | dec_prio_4to2 | 4x2x3 | 24 | 17 | 2 | ultracompact, ultrafast, flat, stackable, horizontal, lightless, silent, pistonless, entityless, comparator_based, survival_friendly, reset_safe | Lightless 4-to-2 priority encoder (inputs 1-3, highest wins; none = 0) from one subtract comparator and five dust |
-| dec_prio_8to3 | 10x2x7 | 140 | 112 | - | flat, horizontal, lightless, silent, pistonless, entityless, comparator_based | WORK IN PROGRESS: lightless 8-to-3 priority encoder, compact layout |
 | encoder | 21x4x17 | 1428 | 365 | - |  | One lever per digit 0-9 to a 4-bit number |
 
 ## falling_edge
@@ -321,8 +318,6 @@ to up (9,2,7) |
 |---|---|---|---|---|---|---|
 | mux_4to1_comparator | 7x4x5 | 140 | 55 | 4 | ultrafast, lightless, silent, pistonless, entityless, vertical, comparator_based, analog, tick_accurate, reset_safe, survival_friendly | Lightless, silent, analog 4:1 multiplexer with every data path one comparator deep: out = d[2*s1 + s0].
 Four subtract-mode comparators (gate0..gate3) sit in a ring around a white concrete collector, backs outward, each pointing into it; the output dust on top of the collector carries the strongest gate |
-| mux_4to1_instant | 3x4x7 | 84 | 32 | 0 | instant, ultrafast, compact, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | 4:1 multiplexer whose data paths are plain dust, so every data input reaches out in 0 ticks: out = d[2*s1 + s0].
-A tree of three dust-cut stages (the mechanism of mux_dustcut_instant): a dust step only connects while the cell above its lower dust is not a conductor, and a sticky piston slides one concrete block between two adjacent cut cells |
 | mux_comparator_2to1 | 3x2x3 | 18 | 10 | 4 | ultracompact, lightless, silent, pistonless, entityless, flat, horizontal, comparator_based, analog, fast, tick_accurate, reset_safe, survival_friendly | Lightless, silent, analog 2:1 multiplexer from three subtract-mode comparators and a redstone block: out = s ? b : a.
 gate_a has a at its back and s on its side, so it outputs a - s: a while s is off |
 | mux_dustcut_instant | 3x3x3 | 27 | 10 | 0/3 | ultrafast, instant, compact, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | 2:1 multiplexer in a 3x3x3 cube whose data paths are plain dust, so a and b reach out in 0 ticks: out = s ? b : a.
@@ -417,7 +412,6 @@ east face |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
-| door_close_spit_relay | 22x6x10 | 1320 | 260 | - | piston_based, entityless, tick_accurate | Door close primitive: a held spit and a spat-piston spit, each in the close tick c0 (drive in:0, wait 2) with the 0 gt pair (spit targets air at c-1, real quartz at c0) |
 | pulse_limiter_comparator | 4x2x2 | 16 | 15 | - | compact, flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Pulse limiter (monostable) with a long, adjustable limit and no torches: comparator out (x=3, z=0, subtract mode, facing west) reads input a (x=2, z=0) on its back; a also runs through dust (x=1..0) and two delay-4 repeaters (x=1..2, z=1, facing west) into the side dust (x=3, z=1) |
 | pulse_limiter_instant_piston | 1x4x6 | 24 | 16 | - | ultrafast, one_wide, piston_based, entityless, tick_accurate, survival_friendly | Zero-latency pulse limiter, one block wide (all cells at x=0, running south) |
 | t2_a_qc_breaker | 2x3x1 | 6 | 4 | - | one_wide, piston_based, entityless | Circuit breaker pulse limiter in 1x2x3 (6): the wiki circuit breaker without its dust column, because the input line quasi-powers the piston |
@@ -516,12 +510,6 @@ east face |
 | analog_peak_hold | 4x2x6 | 48 | 21 | - | analog, comparator_based, silent, lightless, pistonless, entityless, compact, flat, tick_accurate, reset_safe, survival_friendly | Analog peak detector: q holds the largest strength its input d has had since the last reset, losslessly and indefinitely |
 | analog_subtract | 4x2x4 | 32 | 13 | 2 | analog, comparator_based, ultracompact, ultrafast, silent, lightless, pistonless, entityless, flat, horizontal, tick_accurate, reset_safe, survival_friendly | Saturating subtraction out = max(a - b, 0) in one comparator: S (x=2, z=3) in subtract mode, facing east, reads a from the dust at x=3, z=3 behind it and b from the dust on its north side (x=2, z=2); its output strength (block entity OutputSignal) is a - b, and it is powered exactly when a > b, so the same block is also the strict a > b test |
 
-## storage
-
-| variant | size | volume | blocks | delay | traits | summary |
-|---|---|---|---|---|---|---|
-| corner_cart_unloader_4x | 5x5x6 | 150 | 47 | - | survival_friendly, container_based, uses_entities, compact | Shulker box unloader at 4x hopper speed |
-
 ## survival
 
 | variant | size | volume | blocks | delay | traits | summary |
@@ -612,11 +600,6 @@ east face |
 | ref_wiki_subtraction_xor_basic_in3 | 3x2x4 | 24 | 19 | - | comparator_based, silent, lightless, pistonless, entityless | Input-strength probe for ref_wiki_subtraction_xor_basic: fixture dust so input a enters the design at strength 3 and b at 3, the weakest equal pair that still works (2 and 2 give no output) |
 | ref_wiki_subtraction_xor_basic_rep_in | 3x2x4 | 24 | 19 | - | comparator_based, silent, lightless, pistonless, entityless | Input convention probe for ref_wiki_subtraction_xor_basic: each input reaches the design through a fixture repeater (as in ref_properinglish_xor_2wide, whose inputs are strongly powered blocks), and the repeaters are fed from fixture dust at strength 11 (a) and 3 (b) |
 | xor_comparator_bridge | 2x4x4 | 32 | 18 | 2 | compact, ultrafast, comparator_based, analog, vertical, stackable, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless | Two subtract-mode comparators read the same two dust cells crosswise |
-| xor_comparator_bridge_bus4 | 2x16x4 | 128 | 72 | 2 | stackable, tileable, comparator_based, silent, lightless, pistonless, entityless | Four copies of xor_comparator_bridge stacked at a pitch of 4 (a 4-bit bus, a from the east and b from the west on every level), tested together, and the whole stack tiled again 5 blocks south for 8 bits |
-| xor_comparator_bridge_in11_15 | 2x4x4 | 32 | 18 | - | comparator_based, silent, lightless, pistonless, entityless | Input-strength probe for xor_comparator_bridge: fixture dust so input a enters the design at strength 11 and b at 15 |
-| xor_comparator_bridge_in15_11 | 2x4x4 | 32 | 18 | - | comparator_based, silent, lightless, pistonless, entityless | Input-strength probe for xor_comparator_bridge: fixture dust so input a enters the design at strength 15 and b at 11 |
-| xor_comparator_bridge_in5 | 2x4x4 | 32 | 18 | - | comparator_based, silent, lightless, pistonless, entityless | Input-strength probe for xor_comparator_bridge: the same blocks, with the drivers moved outward through fixture dust so input a enters the design at strength 5 and b at 5, the weakest equal pair that still works (4 and 4 lose the b-only output) |
-| xor_comparator_bridge_rep_in | 2x4x4 | 32 | 18 | - | comparator_based, silent, lightless, pistonless, entityless | Input convention probe for xor_comparator_bridge: each input reaches the design through a fixture repeater (as in ref_properinglish_xor_2wide, whose inputs are strongly powered blocks), and the repeaters are fed from fixture dust at strength 11 (a) and 3 (b) |
 | xor_comparator_bridge_stack2 | 2x8x4 | 64 | 36 | 2 | stackable, comparator_based, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless | Proof that xor_comparator_bridge stacks at a pitch of 4 (its own height): two copies, tested over all 16 input combinations |
 | xor_comparator_flat | 4x2x5 | 40 | 34 | 2 | compact, ultrafast, flat, comparator_based, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless | The crosswise subtract pair of xor_comparator_bridge, laid flat |
 | xor_gate | 9x4x5 | 180 | 58 | 6 | horizontal, comparator_based, silent, lightless, pistonless, tick_accurate, reset_safe, survival_friendly, entityless | (a and not b) or (b and not a), each half a subtract-mode comparator |
