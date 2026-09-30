@@ -1,3 +1,4 @@
+import os
 """scripts.status offline: nothing here asks a server or the desktop."""
 
 import fcntl
@@ -41,12 +42,24 @@ def test_plots_show_busy_owner_and_quiet(tmp_path, monkeypatch):
     for name in ("xor", "and"):
         (records / f"{name}.lock").touch()
         (records / f"{name}.json").write_text(json.dumps({"server": "dsat1"}))
+    os.utime(records / "and.json", (0, 0))
     (st / "xor.json").write_text(json.dumps({"text": "xor_a: step 3", "time": 1e12, "owner": "agent-7"}))
     with open(records / "xor.lock", "a") as f:
         fcntl.flock(f, fcntl.LOCK_EX)
         lines = status.plot_lines()
     assert lines[0].startswith("BUSY xor on dsat1 [agent-7]: xor_a: step 3")
     assert lines[1].endswith(": and")
+
+
+def test_a_plot_without_a_status_file_is_dated_by_its_record(tmp_path, monkeypatch):
+    records, st = tmp_path / "plots", tmp_path / "status"
+    records.mkdir()
+    st.mkdir()
+    monkeypatch.setattr(status, "PLOT_RECORDS", records)
+    monkeypatch.setattr(status, "STATUS", st)
+    (records / "storage.lock").touch()
+    (records / "storage.json").write_text(json.dumps({"server": "dsat1"}))
+    assert status.plot_lines()[0].startswith("idle storage on dsat1: last run (")
 
 
 def test_usage_reads_the_cache(tmp_path):
