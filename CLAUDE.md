@@ -57,10 +57,11 @@ self-contained brief for designing a variant; keep it in step with the format an
 ## Plots
 
 The world is a redstone-preset superflat (surface y=56), daylight, weather and mob spawning
-off. `redstone/plots.py` divides it into a 192x24x192 `main` plot and 48x32x48 plots, one
-per building block (`wire` is 104x32x48, grown west), plus a black-ringed 104x32x48
-`references` plot west of `not`, each with a coloured concrete ring, glass corner posts and
-a floating name drawn two blocks outside it. `plot_for(path)` maps a `ref_*` file (a rebuilt
+off. `redstone/plots.py` divides it into a 192x24x192 `main` plot and, north of it, a grid
+of 72x32x72 plots (five a row, pitch 80, each forceloading exactly 5 x 5 chunks): one per
+building block, eight mechanics workbenches, a black-ringed `references` plot and
+`survival`, each with a coloured concrete ring, glass corner posts and a floating name
+drawn two blocks outside it. `plot_for(path)` maps a `ref_*` file (a rebuilt
 community design, see `docs/WINS.md`) to `references` and any other library file by folder
 to its plot (`FOLDER_PLOT` for folders sharing one; mechanics, builds and input have none).
 `REDSTONE_PLOT=<name>` makes tests build there; unset, tests build in main unless the build

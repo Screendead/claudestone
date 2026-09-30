@@ -24,31 +24,29 @@ class Plot:
 
 MAIN = Plot("main", (128, SURFACE, 128), (192, 24, 192), "white")
 
-# Building-block plots, north of the main area in rows of four.
-FAMILIES = ["not", "or", "and", "xor",
-            "wire", "vertical_wire", "crossing", "delay",
-            "rs_latch", "d_latch", "t_flip_flop", "pulse",
-            "clock", "adder", "mux", "decoder",
-            "counter", "shift_register", "analog", "seven_segment"]
+# Building-block plots, north of the main area in rows of five, all one square size.
+FAMILIES = ["not", "or", "and", "xor", "wire",
+            "vertical_wire", "crossing", "delay", "rs_latch", "d_latch",
+            "t_flip_flop", "pulse", "clock", "adder", "mux",
+            "decoder", "counter", "shift_register", "analog", "seven_segment"]
 # Workbenches for proving how individual blocks behave (library/mechanics).
 FAMILIES += [f"mechanics_{i}" for i in range(1, 9)]
+# Rebuilt community designs (library/<block>/ref_*), the baselines in docs/WINS.md, stand
+# apart from our own designs; then builds for survival play (library/survival).
+FAMILIES += ["references", "survival"]
 COLOURS = ["red", "orange", "yellow", "lime", "green", "cyan", "light_blue", "blue",
            "purple", "magenta", "pink", "brown", "red", "orange", "yellow", "lime",
-           "green", "cyan", "light_blue", "blue"] + ["white", "light_gray"] * 4
-SIZE = (48, 32, 48)
-PITCH = 56
+           "green", "cyan", "light_blue", "blue"] + ["white", "light_gray"] * 4 + ["black", "lime"]
+SIZE = (72, 32, 72)
+# With its border a plot spans 76 blocks; at a pitch of 80 from x and z origins 2 past a
+# chunk edge, each plot forceloads exactly 5 x 5 chunks.
+PITCH = 80
+COLUMNS = 5
 
 PLOTS = {MAIN.name: MAIN} | {
-    f: Plot(f, (128 + PITCH * (i % 4), SURFACE, 72 - PITCH * (i // 4)), SIZE, COLOURS[i])
+    f: Plot(f, (130 + PITCH * (i % COLUMNS), SURFACE, 50 - PITCH * (i // COLUMNS)), SIZE, COLOURS[i])
     for i, f in enumerate(FAMILIES)}
-# Wire outgrew its square: it keeps its east edge and row and extends west into free ground.
-PLOTS["wire"] = Plot("wire", (72, SURFACE, 16), (104, 32, 48), PLOTS["wire"].colour)
-# Rebuilt community designs (library/<block>/ref_*), the baselines in docs/WINS.md, stand
-# here, apart from our own designs, west of the not plot.
-REFERENCES = Plot("references", (16, SURFACE, 72), (104, 32, 48), "black")
-PLOTS[REFERENCES.name] = REFERENCES
-# Builds for survival play (library/survival), in the square the grid gives it.
-PLOTS["survival"] = Plot("survival", (450, SURFACE, -350), (72, 32, 72), "lime")
+REFERENCES = PLOTS["references"]
 
 # Library folders that share another building block's plot; a folder named after a plot
 # uses it, and the rest (mechanics, builds, input) have none.
