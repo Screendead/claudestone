@@ -77,7 +77,6 @@ class Rig:
         self.pending: list[tuple[int, Pos]] = []
         self.datapacks = SERVER_DIR / self.level_name() / "datapacks"
         self.r.cmd("tick freeze")
-        self.r.cmd("tick rate 1000")
         ox, _, oz = origin
         sx, _, sz = size
         self.r.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
@@ -108,9 +107,13 @@ class Rig:
         if n <= 0:
             return
         target = self.gametime() + n
+        # Only step fast: frozen or not, login and connection timeouts count ticks at this
+        # rate, so leaving it high kicks players who are joining.
+        self.r.cmd("tick rate 1000")
         self.r.cmd(f"tick step {n}")
         while self.gametime() < target:
             time.sleep(0.002)
+        self.r.cmd("tick rate 20")
 
     def run(self, command: str) -> str:
         out = self.r.cmd(command)
