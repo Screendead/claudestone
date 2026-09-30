@@ -24,9 +24,12 @@ def row(spec) -> str:
 
 
 def tracked() -> set[Path]:
-    out = subprocess.run(["git", "ls-files", "--cached", "--", "*.redstone.yaml"], cwd=LIBRARY,
+    # From the repo root: under a commit hook git passes a GIT_INDEX_FILE relative to it, and
+    # ls-files reading a missing index lists nothing rather than failing.
+    root = LIBRARY.parent
+    out = subprocess.run(["git", "ls-files", "--cached", "--", "library/*.redstone.yaml"], cwd=root,
                          capture_output=True, text=True, check=True).stdout
-    return {(LIBRARY / line).resolve() for line in out.splitlines()}
+    return {(root / line).resolve() for line in out.splitlines()}
 
 
 def main(argv: list[str]) -> None:
