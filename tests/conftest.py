@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from redstone import fileformat, showroom
+from redstone import fileformat, showroom, watch
 from redstone.harness import Rig, _rcon_up, ensure_server, mirror
 from redstone.plots import MAIN as MAIN_PLOT, PLOTS, plot_for
 from redstone.rcon import Rcon
@@ -99,7 +99,10 @@ def rig(connect, request):
             yield rig
         finally:
             # Tests freeze the world; let it run again for anyone watching.
-            r.cmd("tick unfreeze")
+            if rig is not None:
+                rig.release()
+            else:
+                r.cmd("tick unfreeze")
             lock.close()
         # Players watch main, so a satellite's build is placed there too, where it runs
         # live. Plain commands only, so this needs no lock on main. In any other plot the
@@ -110,6 +113,9 @@ def rig(connect, request):
         if plot.name == MAIN_PLOT.name:
             if server != MAIN:
                 mirror(connect(MAIN), plot.origin, plot.size, rig.loaded)
+                watch.emit("mirror", plot=plot.name, server=server.name,
+                           spec=getattr(rig, "tested", {}).get("spec", None) and rig.tested["spec"].name,
+                           box=watch.world_box(plot.origin, rig.loaded))
             return
         tested = getattr(rig, "tested", None)
         rep = getattr(request.node, "rep_call", None)

@@ -12,6 +12,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+from redstone import watch
 from redstone.harness import _rcon_up, ensure_server
 from redstone.rcon import Rcon
 from redstone.servers import MAIN, SATELLITES, Server
@@ -83,6 +84,8 @@ def main(argv: list[str]) -> None:
     with ThreadPoolExecutor(len(SATELLITES)) as pool:
         for line in pool.map(action, SATELLITES):
             print(line)
+    if action is start and _rcon_up(MAIN.rcon_port) and watch.autostart():
+        print("watch director started")
 
 
 if __name__ == "__main__":

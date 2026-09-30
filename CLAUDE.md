@@ -23,6 +23,8 @@ python -m scripts.plots                  # redraw plot borders and labels in the
 python -m scripts.lint [<spec>]          # offline checks, whole library by default
 python -m scripts.try <spec> [--test NAME]... [--trace]   # lint + run on a satellite
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
+python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
+python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched
 ```
 
 Test ids for the library are `test_spec[<spec name>::<test name>]`; spec names are unique
@@ -69,6 +71,30 @@ there stands in its own slot under a `text_display` label (tags `showroom`, `<pl
 are in `server/showroom/<plot>.json`, errors in `server/showroom.log`;
 `python -m scripts.showroom rebuild [<plot>]` redraws from those files and the library.
 
+Players on main watch hands-off: a single director process (`redstone/watch.py`,
+`python -m scripts.watch run`) puts every online player in spectator (tag `watch`; the old
+gamemode is kept in `server/watch/state.json` and restored by `scripts.watch off`) and cuts
+between shots, each held at least `dwell` seconds: a test building on main (the main plot, or
+any plot a test runs in on the main server), the main plot's result, a showroom slot placed;
+failures first, then new variants, then the newest; when nothing happens it tours recent
+builds. Each shot frames the build's box in a 70° field of view from the north, about 35° up,
+clear of posts, labels and other slots, and slides slowly sideways (`motion: "dolly"`; an
+`orbit` swing turns in visible 1.4° steps, since entity rotation is sent in 1/256 turns). Each
+watcher spectates its own invisible `item_display` (tags `watch_cam`, `watch_cam_<name>`),
+summoned where the player is and attached once; after that only these entities move, gliding
+by `teleport_duration` and snapping (duration 0) on a cut, because a switch between the
+player's view and an entity's eases the eye height by 1.62 blocks. While main is frozen or
+warping the client can't move them, so the camera holds still; a camera cleared away with a
+plot is summoned again; `camera: "tp"` in the config teleports the players instead (steps).
+The status line is an actionbar. Events come from
+`server/watch/events.jsonl` and `status/<plot>.json` (written by `spec.py`), the showroom
+files and, for a pytest older than those, new traces. `spec.run` and `scripts.servers start`
+start the director if none holds `server/watch/director.lock`; it outlives pytest, and
+`scripts.watch stop` keeps it off until `start`; `REDSTONE_WATCH=0` stops one process from
+starting it. Settings (`orbit`, `dwell`, `camera`, ...) are in `server/watch/config.json`,
+set by `scripts.watch start --no-orbit` etc. and reread live; its log is `director.log`. It
+uses plain RCON commands on main, never a rig lock, and nothing goes to chat.
+
 ## Server
 
 `server/` is gitignored and holds `server.jar`, `server.properties` (RCON password read
@@ -108,26 +134,31 @@ trace → `package` data pack.
   commands). `dump` must round-trip
   what `load` reads; `tests/test_generated.py` fails if a generated file is stale.
 - `redstone/harness.py`: `Rig` owns one plot. It clears with `fill … air strict` (no
-  item drops), kills non-player entities in it, 2 blocks around it and up to the build
-  height, waits `FLUSH_TICKS` so burnt-out torches recover, kills again (entity sections
+  item drops), kills non-player entities in it (but not the watch camera), 2 blocks around
+  it and up to the build height, waits `FLUSH_TICKS` so burnt-out torches recover, kills again (entity sections
   load after their chunk), loads a build, and steps with `tick freeze`/`tick step`, polling game time.
-  Each step batch raises the tick rate to `WARP_RATE` and drops it back to `IDLE_RATE` (20)
-  right after, even on an error: the login timeout counts 600 ticks at the current rate, so a
-  rate left high kicks joining players. The cost is up to one idle tick period (~40 ms) per
-  batch. `Rig()` also resets the tick rate and `BASELINE_GAMERULES`. Inputs are
+  On main each step batch raises the tick rate to `WARP_RATE` and drops it back to
+  `IDLE_RATE` (20) right after, even on an error: the login timeout counts 600 ticks at the
+  current rate, so a rate left high kicks joining players. The cost is up to one idle tick
+  period (~40 ms) per batch, so satellites (no one joins them) stay at `WARP_RATE` for the
+  whole test; `Rig.release()` (conftest teardown) sets 20 again before `tick unfreeze`.
+  `Rig()` also resets the tick rate and `BASELINE_GAMERULES`. Inputs are
   redstone blocks placed/removed at driver cells; levers and buttons are toggled with
   `setblock` then a `clone` of the block they hang on (setblock alone doesn't update it),
   and the harness schedules button release itself. Reads use a generated probe function
   (≤60,000 commands per chunk, because of the 65,536 command-chain limit) that copies
   block states into storage.
-- `redstone/spec.py`: runs one test of a `Spec` on a `Rig`, shows the test name as a
-  title to players, and records traces. Step failures (expect, level, wave, check, a `run`
+- `redstone/spec.py`: runs one test of a `Spec` on a `Rig`, reports it to the watch
+  director (events and a status line; other plots' status signs as before), and records traces. Step failures (expect, level, wave, check, a `run`
   or `log` whose command fails) are collected and the steps run to the end; the test then
   fails with the first. `tests/test_spec_offline.py` checks step semantics on a fake Rig.
 - `scripts/lint.py`: offline checks, including block states and entity types against
   `redstone/blocks.json` (generated by `scripts/blockdata.py` from the server jar's data
   reports; don't hand-edit it), build bounds against the spec's plot, non-string cell names
   (YAML reads unquoted on/off/yes/no as booleans), wave strings, `repeat` bodies, and `run`/`log`/`check`/`finally` length for RCON.
+- `redstone/rcon.py`: the server writes every RCON client's output into one shared buffer
+  (`DedicatedServer.runCommand`), so two clients' commands at once get each other's replies.
+  `Rcon.cmd` takes `server/rcon.<port>.lock` for each command, across processes.
 - `redstone/pla.py`: generators for sum-of-products logic as two NOR planes of torches
   (`pla`), an OR-only plane (`or_plane`), and a Quine–McCluskey `minimise`. Each emits its
   own truth-table test and a computed `max_delay` bound.

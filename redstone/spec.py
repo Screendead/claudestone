@@ -4,6 +4,7 @@ import dataclasses
 import json
 from pathlib import Path
 
+from . import watch
 from .build import Build, Pos
 from .fileformat import Spec, parse_truth_table
 from .harness import Rig, checked
@@ -76,15 +77,20 @@ def _announce(rig: Rig, title: str, subtitle: str) -> None:
         rig.heading = [{"text": title + "\n", "color": "red", "bold": True},
                        {"text": subtitle + "\n", "color": "gray"}]
         return _sign(rig, "")
-    rig.run("title @a times 5 40 10")
-    rig.run("title @a subtitle " + json.dumps({"text": subtitle, "color": "gray"}))
-    rig.run("title @a title " + json.dumps({"text": title, "color": "red"}))
+    status(rig, subtitle)
 
 
 def status(rig: Rig, text: str) -> None:
+    """Progress of a test. In the main plot the watch director shows it (redstone.watch)."""
     if rig.plot != MAIN.name:
         return _sign(rig, text)
-    rig.run("title @a actionbar " + json.dumps({"text": text, "color": "yellow"}))
+    if _watched(rig):
+        watch.set_status(rig.plot, text)
+
+
+def _watched(rig) -> bool:
+    """A rig on a server (not the offline fake) reports to the watch director."""
+    return getattr(rig, "server", None) is not None
 
 
 def _sign(rig: Rig, text: str) -> None:
@@ -96,8 +102,27 @@ def _sign(rig: Rig, text: str) -> None:
 
 
 def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
+    if _watched(rig):
+        watch.autostart()
     _announce(rig, spec.name, test["name"])
-    return _run(rig, spec, test, trace)
+    try:
+        result = _run(rig, spec, test, trace)
+    except BaseException:
+        _event(rig, "result", spec, test, passed=False)
+        raise
+    _event(rig, "result", spec, test, passed=True, delay=result.get("delay"))
+    return result
+
+
+def _event(rig, kind: str, spec: Spec, test: dict, **fields) -> None:
+    if not _watched(rig):
+        return
+    box = None
+    try:
+        box = watch.world_box(rig.origin, rig.loaded) if rig.loaded.blocks else None
+    except Exception:
+        pass
+    watch.emit(kind, plot=rig.plot, server=rig.server.name, spec=spec.name, test=test["name"], box=box, **fields)
 
 
 def _run(rig: Rig, spec: Spec, test: dict, trace: bool) -> dict:
@@ -110,6 +135,7 @@ def _run(rig: Rig, spec: Spec, test: dict, trace: bool) -> dict:
         for p in drivers:
             build.place(p, "redstone_block")
     rig.load(build, probe=None if trace else set(spec.named.values()), drivers=drivers)
+    _event(rig, "test", spec, test)
     rec = Recorder(rig, trace)
     rec.frame("loaded")
     snap = rec.wait(test.get("settle", _settle(test)))

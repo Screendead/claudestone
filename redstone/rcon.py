@@ -1,3 +1,4 @@
+import fcntl
 import re
 import socket
 import struct
@@ -17,6 +18,10 @@ class Rcon:
         if password is None:
             password = re.search(r"^rcon\.password=(.*)$", PROPERTIES.read_text(), re.M).group(1)
         self.sock = socket.create_connection((host, port), timeout=timeout)
+        # The server collects every RCON client's command output in one shared buffer
+        # (DedicatedServer.runCommand), so replies of commands from two clients at once mix.
+        # Commands to one port take turns across processes.
+        self._turn = open(PROPERTIES.parent / f"rcon.{port}.lock", "a")
         self._id = 0
         if self._request(AUTH, password)[0] == -1:
             raise RconError("authentication failed")
@@ -47,6 +52,13 @@ class Rcon:
         return self._recv()
 
     def cmd(self, command):
+        fcntl.flock(self._turn, fcntl.LOCK_EX)
+        try:
+            return self._cmd(command)
+        finally:
+            fcntl.flock(self._turn, fcntl.LOCK_UN)
+
+    def _cmd(self, command):
         # Vanilla reads one packet per socket read, so requests can't be pipelined. A long
         # response arrives as several 4096-char packets with no end marker, so after a full
         # one we send a second request and read until its reply. Replies are matched by id:
@@ -67,3 +79,4 @@ class Rcon:
 
     def close(self):
         self.sock.close()
+        self._turn.close()
