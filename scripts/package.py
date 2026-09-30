@@ -2,8 +2,10 @@
 
     python -m scripts.package two_digit_adder
 
-writes dist/<name>/ (and a .zip). In game, stand where you want the front of the build,
-face south, then run /function <name>:prepare and /function <name>:build.
+writes dist/<name>/ (and a .zip). Copy the folder into <world>/datapacks, run /reload
+(and /datapack enable "file/<name>" if it isn't listed as enabled). Stand where you want
+the front of the build, run /function <name>:prepare, wait a second for the area to load,
+then /function <name>:build. The build extends south of you; placement ignores rotation.
 The placing function is the exact text the tests ran; the wrapper only positions it.
 """
 
@@ -27,7 +29,8 @@ def package(name: str, front: tuple[int, int, int] | None = None) -> Path:
     x0, x1, z0, z1 = ox + lo_x, ox + hi_x, oz + lo_z, oz + hi_z
     y0, y1 = oy + lo_y, oy + hi_y + 2
     prepare = [f"forceload add ~{x0} ~{z0} ~{x1} ~{z1}",
-               'tellraw @s {"text":"Area loaded. Now run /function %s:build" ,"color":"green"}' % name]
+               'tellraw @s {"text":"Area loaded. Stay put and in a second run /function %s:build. '
+               'It builds to your south: face south to see the front." ,"color":"green"}' % name]
     build = []
     for x in range(x0, x1 + 1, 32):
         for z in range(z0, z1 + 1, 32):
