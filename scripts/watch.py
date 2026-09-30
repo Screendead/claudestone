@@ -5,6 +5,7 @@
         --orbit|--no-orbit    move during a shot, or hold still
         --motion dolly|orbit  slide sideways, or swing round the build
         --camera entity|tp    spectate a gliding entity, or teleport the players
+        --glide TICKS         the camera's teleport_duration: longer is smoother and lags more
         --dwell S  --rate HZ
     python -m scripts.watch stop       # stays off until `start`, even when tests run
     python -m scripts.watch status
@@ -32,12 +33,13 @@ def _options(ap):
     ap.add_argument("--orbit", action=argparse.BooleanOptionalAction, default=None)
     ap.add_argument("--motion", choices=["dolly", "orbit"])
     ap.add_argument("--camera", choices=["entity", "tp"])
+    ap.add_argument("--glide", type=int)
     ap.add_argument("--dwell", type=float)
     ap.add_argument("--rate", type=float)
 
 
 def _changes(a) -> dict:
-    return {k: getattr(a, k) for k in ("orbit", "motion", "camera", "dwell", "rate") if getattr(a, k) is not None}
+    return {k: getattr(a, k) for k in ("orbit", "motion", "camera", "glide", "dwell", "rate") if getattr(a, k) is not None}
 
 
 def _players(r: Rcon, names: list[str]) -> tuple[list[str], list[str]]:

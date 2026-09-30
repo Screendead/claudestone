@@ -83,13 +83,20 @@ between shots, each held at least `dwell` seconds: a test building on main (the 
 any plot a test runs in on the main server), the main plot's result, a showroom slot placed;
 failures first, then new variants, then the newest; when nothing happens it tours recent
 builds. Each shot frames the build's box in a 70° field of view from the north, about 35° up,
-clear of posts, labels and other slots, and slides slowly sideways (`motion: "dolly"`; an
-`orbit` swing turns in visible 1.4° steps, since entity rotation is sent in 1/256 turns). Each
+clear of posts, labels and other slots, and swings slowly ±20° round it (`motion: "orbit"`;
+`"dolly"` slides sideways without turning). Each
 watcher spectates its own invisible `item_display` (tags `watch_cam`, `watch_cam_<name>`),
 summoned where the player is and attached once; after that only these entities move, gliding
-by `teleport_duration` and snapping (duration 0) on a cut, because a switch between the
-player's view and an entity's eases the eye height by 1.62 blocks. While main is frozen or
-warping the client can't move them, so the camera holds still; a camera cleared away with a
+by `teleport_duration` (`glide`, 20 ticks) and snapping (duration 0) on a cut, because a switch between the
+player's view and an entity's eases the eye height by 1.62 blocks. While main runs normally
+they are moved by the director's data pack in main's world (`datapacks/watch`, installed and
+reloaded by the director when it changes): its tick function plays one pose a tick from a
+queue in storage `watch:cam` that the director keeps 2-3 s deep, and flips the entity's
+OnGround every tick so each move is sent with exact rotation (otherwise rotation goes out in
+1/256 turns, a visible 1.4° step). The director grants it game ticks as real time passes
+(score `#until` of objective `watch_cam`), so a warp it has not seen yet plays about a second of
+the path at most. While main is frozen or warping the camera holds still and cuts go straight over
+RCON; a camera cleared away with a
 plot is summoned again; `camera: "tp"` in the config teleports the players instead (steps).
 The status line is an actionbar. Events come from
 `server/watch/events.jsonl` and `status/<plot>.json` (written by `spec.py`), the showroom
