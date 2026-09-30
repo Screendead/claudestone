@@ -58,9 +58,11 @@ self-contained brief for designing a variant; keep it in step with the format an
 
 The world is a redstone-preset superflat (surface y=56), daylight, weather and mob spawning
 off. `redstone/plots.py` divides it into a 192x24x192 `main` plot and 48x32x48 plots, one
-per building block, each with a coloured concrete ring, glass corner posts and a floating
-name drawn two blocks outside it. `plot_for(path)` maps a library folder to its plot
-(`FOLDER_PLOT` for folders sharing one; mechanics, builds and input have none).
+per building block (`wire` is 104x32x48, grown west), plus a black-ringed 104x32x48
+`references` plot west of `not`, each with a coloured concrete ring, glass corner posts and
+a floating name drawn two blocks outside it. `plot_for(path)` maps a `ref_*` file (a rebuilt
+community design, see `docs/WINS.md`) to `references` and any other library file by folder
+to its plot (`FOLDER_PLOT` for folders sharing one; mechanics, builds and input have none).
 `REDSTONE_PLOT=<name>` makes tests build there; unset, tests build in main unless the build
 does not fit it, then in `plot_for`'s plot. `scripts.try` sets it from `plot_for`. Ticks
 are global per server, so each test takes one server's `rig.lock`: the `main` plot runs on
@@ -72,7 +74,9 @@ last ran the plot. After a test the `main` plot keeps its last tested build (mir
 satellite if one ran it). Every other plot on main is a showroom (`redstone/showroom.py`,
 called from conftest teardown with plain commands, no main lock): each variant ever tested
 there stands in its own slot under a `text_display` label (tags `showroom`, `<plot>`,
-`sr_<spec>`; green/red/yellow for passed/failed/not fully run). Slots, sizes and results
+`sr_<spec>`; green/red/yellow for passed/failed/not fully run). `ref_*` specs stand only in
+`references`, labelled `<folder>: <spec>`, and nothing else does; a redraw drops misplaced
+entries and those whose file is gone. Slots, sizes and results
 are in `server/showroom/<plot>.json`, errors in `server/showroom.log`;
 `python -m scripts.showroom rebuild [<plot>]` redraws from those files and the library.
 

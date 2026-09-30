@@ -16,7 +16,7 @@ import traceback
 from . import fileformat, library
 from .build import Build
 from .harness import checked, clear_commands, wait_loaded
-from .plots import PLOTS
+from .plots import PLOTS, REFERENCES
 from .rcon import Rcon
 from .servers import ROOT
 
@@ -98,6 +98,22 @@ def status(entry: dict, test_names: list[str] | None) -> str:
     return "untested"
 
 
+def _misplaced(plot: str, name: str) -> bool:
+    """Reference rebuilds stand only in the references plot, and nothing else does."""
+    return name.startswith("ref_") != (plot == REFERENCES.name)
+
+
+def title(plot: str, name: str, path=None) -> str:
+    """The name a slot's label shows: in the references plot, prefixed by the spec's
+    building block (its library folder)."""
+    if plot != REFERENCES.name:
+        return name
+    try:
+        return f"{(path or library.path_of(name)).parent.name}: {name}"
+    except LookupError:
+        return name
+
+
 def label_text(name: str, entry: dict, test_names: list[str] | None) -> dict:
     colour = {"pass": "green", "fail": "red", "untested": "yellow"}[status(entry, test_names)]
     w, h, d = entry["size"]
@@ -130,7 +146,7 @@ def _place(rcon: Rcon, plot: str, name: str, entry: dict, build: Build | None, t
     if build is not None:
         for c in normalised(build).to_commands():
             checked(rcon, f"execute positioned {bx} {y} {z} run {c}")
-    text = json.dumps(label_text(name, entry, test_names), ensure_ascii=False)
+    text = json.dumps(label_text(title(plot, name), entry, test_names), ensure_ascii=False)
     width = int(entry["box"][0] / (PX * SCALE))
     tags = json.dumps([TAG, plot, f"sr_{name}"])
     checked(rcon, f"summon text_display {x + entry['box'][0] / 2} {y + h + 1} {z} "
@@ -194,6 +210,11 @@ def redraw(rcon: Rcon, plot: str, state: dict, current: tuple[str, Build] | None
             _log(f"{plot}: {name} has no library file; removed")
             del state["specs"][name]
             continue
+        if _misplaced(plot, name):
+            _log(f"{plot}: {name} belongs {'in' if name.startswith('ref_') else 'outside'} "
+                 f"{REFERENCES.name}; removed")
+            del state["specs"][name]
+            continue
         if isinstance(s, Exception):
             _log(f"{plot}: {name} did not load ({s}); keeping its slot empty")
             builds[name] = None
@@ -207,7 +228,7 @@ def redraw(rcon: Rcon, plot: str, state: dict, current: tuple[str, Build] | None
         if b is not None and b.blocks:
             entry = state["specs"][name]
             entry["size"] = size_of(b)
-            entry["box"] = box_of(name, entry["size"], size)
+            entry["box"] = box_of(title(plot, name), entry["size"], size)
             entry["blocks"] = _digest(b)
     specs = state["specs"]
     if repack or not all(e.get("slot") and _fits(e["slot"], e["box"], _rects(specs, n), size)
@@ -245,6 +266,8 @@ def show(rcon: Rcon, plot: str, spec, build: Build, result: dict, full: bool = F
 
 
 def _show(rcon, plot, spec, build, result, full):
+    if _misplaced(plot, spec.name):
+        return
     size = PLOTS[plot].size
     path = STATE / f"{plot}.json"
     first = not path.exists()
@@ -258,7 +281,7 @@ def _show(rcon, plot, spec, build, result, full):
         save_state(plot, state)
         return
     entry["size"] = size_of(build)
-    entry["box"] = box_of(spec.name, entry["size"], size)
+    entry["box"] = box_of(title(plot, spec.name, spec.path), entry["size"], size)
     same = (old.get("slot") and old.get("size") == entry["size"] and old.get("box") == entry["box"]
             and old.get("blocks") == _digest(build))
     entry["blocks"] = _digest(build)
@@ -273,7 +296,7 @@ def _show(rcon, plot, spec, build, result, full):
         return
     _forceload(rcon, plot)
     if same:
-        text = json.dumps(label_text(spec.name, entry, tests), ensure_ascii=False)
+        text = json.dumps(label_text(title(plot, spec.name, spec.path), entry, tests), ensure_ascii=False)
         out = rcon.cmd(f"data merge entity @e[type=text_display,tag={TAG},tag=sr_{spec.name},limit=1] "
                        f"{{text:{text}}}")
         if "No entity" not in out and "<--[HERE]" not in out:

@@ -41,6 +41,12 @@ PITCH = 56
 PLOTS = {MAIN.name: MAIN} | {
     f: Plot(f, (128 + PITCH * (i % 4), SURFACE, 72 - PITCH * (i // 4)), SIZE, COLOURS[i])
     for i, f in enumerate(FAMILIES)}
+# Wire outgrew its square: it keeps its east edge and row and extends west into free ground.
+PLOTS["wire"] = Plot("wire", (72, SURFACE, 16), (104, 32, 48), PLOTS["wire"].colour)
+# Rebuilt community designs (library/<block>/ref_*), the baselines in docs/WINS.md, stand
+# here, apart from our own designs, west of the not plot.
+REFERENCES = Plot("references", (16, SURFACE, 72), (104, 32, 48), "black")
+PLOTS[REFERENCES.name] = REFERENCES
 
 # Library folders that share another building block's plot; a folder named after a plot
 # uses it, and the rest (mechanics, builds, input) have none.
@@ -52,7 +58,10 @@ FOLDER_PLOT = {"nand": "and", "nor": "or", "xnor": "xor", "binary_decoder": "dec
 
 
 def plot_for(path) -> Plot | None:
-    """The plot for a library file, from its folder, or None if its folder has none."""
+    """The plot for a library file: references for a ref_* file, else from its folder, or
+    None if its folder has none."""
+    if Path(path).name.startswith("ref_"):
+        return REFERENCES
     folder = Path(path).parent.name
     name = FOLDER_PLOT.get(folder, folder)
     return PLOTS[name] if name in PLOTS and name != MAIN.name else None

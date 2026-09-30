@@ -20,7 +20,8 @@ python -m scripts.look world <plot> [--y N]   # the live blocks as layers, after
 ```
 
 `try` builds in your family's plot (it prints `plot: <name>`; folders such as nand or
-full_adder share a plot, see `redstone/plots.py`; mechanics, builds and input use main). Every
+full_adder share a plot, see `redstone/plots.py`; a `ref_*` rebuild of a community design
+builds in `references`; mechanics, builds and input use main). Every
 run writes a trace: without `--trace` it holds only the named cells at the ticks the test
 read them, which is enough for `look trace` on a truth table. Tests run on satellite servers and
 the passing build is copied into your plot in the main world, where the user watches; the

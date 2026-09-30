@@ -34,6 +34,16 @@ def test_every_building_block_folder_has_a_plot():
     assert set(FOLDER_PLOT.values()) <= set(PLOTS)
     assert plot_for(path_of("seg_dec_bcd")).name == "seven_segment"
     assert plot_for(LIBRARY / "mechanics" / "x.redstone.yaml") is None
+    assert plot_for(path_of("ref_wiki_subtraction_xor_basic")).name == "references"
+
+
+def test_plots_do_not_overlap():
+    # Borders and labels stand 2 blocks outside each plot, so keep 5 clear between plots.
+    boxes = [(p.name, p.origin[0], p.origin[2], p.origin[0] + p.size[0], p.origin[2] + p.size[2])
+             for p in PLOTS.values()]
+    for i, (a, ax0, az0, ax1, az1) in enumerate(boxes):
+        for b, bx0, bz0, bx1, bz1 in boxes[i + 1:]:
+            assert ax1 + 5 <= bx0 or bx1 + 5 <= ax0 or az1 + 5 <= bz0 or bz1 + 5 <= az0, (a, b)
 
 
 class Clock:
