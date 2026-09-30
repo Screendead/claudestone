@@ -12,8 +12,10 @@ fight over them. It reads what happened from files the harness writes anyway:
   (a pytest started before the events existed).
 
 Every online player on main is watched (tag `watch`, spectator mode) unless opted out with
-`python -m scripts.watch off`; the gamemode each had before is kept in state.json and restored
-on opt-out. Settings live in config.json and are reread while the director runs.
+`python -m scripts.watch off` or, in game, `/trigger watch_off` (`/trigger watch_on` opts back
+in); the opt-out list and the gamemode each had before are kept in state.json, so they outlast
+director and server restarts, and the gamemode is restored on opt-out. Settings live in
+config.json and are reread while the director runs.
 
 Writers (`emit`, `set_status`, `autostart`) never raise: a test must not fail or slow because
 the director is missing or broken.
@@ -47,6 +49,7 @@ SHOWROOM = ROOT / "showroom"
 TRACES = ROOT.parent / "traces"
 EVENTS_MAX = 1 << 20
 TAG = "watch"
+TRIGGERS = {"watch_off": True, "watch_on": False}  # trigger objective -> whether it opts out
 EYE = 1.62  # a standing player's eye height; tp places the feet
 GAMEMODES = ["survival", "creative", "adventure", "spectator"]
 
@@ -220,17 +223,32 @@ def gamemode_of(rcon, player: str) -> str | None:
     return GAMEMODES[int(m.group(1))] if m and int(m.group(1)) < len(GAMEMODES) else None
 
 
+def set_optout(state: dict, player: str, out: bool) -> None:
+    """Add `player` to the opt-out list or take them off it. Player names match without case,
+    as the server matches them."""
+    kept = [n for n in state["optout"] if n.casefold() != player.casefold()]
+    state["optout"] = kept + [player] if out else kept
+
+
+def opted_out(state: dict, player: str) -> bool:
+    return player.casefold() in {n.casefold() for n in state["optout"]}
+
+
 def reconcile(rcon, players: list[str], state: dict, fallback: str, seen: set | None = None) -> list[str]:
     """Watch each of `players` that is not opted out; restore those that are and that the
-    director had put in spectator. `seen`: players already handled this session. Returns the
-    watched ones."""
+    director had put in spectator. `seen`: players already handled this session; an opted-out
+    one also loses a `watch` tag and camera left from before (a lost state file, a restart). Returns
+    the watched ones."""
     watched = []
     for p in players:
-        if p in state["optout"]:
-            if p in state["gamemode"]:
+        if opted_out(state, p):
+            if p in state["gamemode"] or seen is not None and p not in seen:
                 rcon.cmd(f"tag {p} remove {TAG}")
                 rcon.cmd(f"kill @e[type=item_display,tag={TAG}_cam_{p}]")
+            if p in state["gamemode"]:
                 rcon.cmd(f"execute as {p} run gamemode {state['gamemode'].pop(p)}")
+            if seen is not None:
+                seen.add(p)
             continue
         if p not in state["gamemode"]:
             mode = gamemode_of(rcon, p)
@@ -926,6 +944,7 @@ class Director:
         self.due = {"players": 0.0, "events": 0.0, "config": 0.0, "text": 0.0, "glide": 0.0, "tick": 0.0}
         self.fixed = fixed_obstacles()
         self.camera = None
+        self.objectives = False  # whether the trigger objectives were added over this connection
         self.rcon = rcon
         self.log = None  # a print function for cuts
 
@@ -936,6 +955,7 @@ class Director:
     @rcon.setter
     def rcon(self, value):
         self._rcon = value
+        self.objectives = False
         if self.camera is not None and isinstance(self.camera, self._camera_kind()):
             self.camera.rcon = value
         else:
@@ -1032,10 +1052,35 @@ class Director:
         players = online_from(reply)
         self.seen &= set(players)
         with State(self.state_path) as state:
+            if players:
+                self.triggers(players, state)
             watched = reconcile(self.rcon, players, state, self.fallback, self.seen)
         if watched != self.watched and self.log:
             self.log(f"{time.strftime('%H:%M:%S')} watching {', '.join(watched) or 'nobody'} ({reply[:80]!r})")
         self.watched = watched
+
+
+    def triggers(self, players: list[str], state: dict) -> None:
+        """`/trigger watch_off` and `/trigger watch_on`, polled here: no data-pack tick
+        function. A trigger locks after one use, so each is enabled again for everyone after
+        every poll (enabling keeps the score). The player sees only their own command's reply
+        and an actionbar line; nothing goes to chat."""
+        if not self.objectives:
+            for name in TRIGGERS:
+                self.rcon.cmd(f"scoreboard objectives add {name} trigger")
+            self.objectives = True
+        for p in players:
+            for name, out in TRIGGERS.items():
+                if not self.rcon.cmd(f"execute if score {p} {name} matches 1..").startswith("Test passed"):
+                    continue
+                self.rcon.cmd(f"scoreboard players set {p} {name} 0")
+                set_optout(state, p, out)
+                note = "not watching: /trigger watch_on to watch again" if out else "watching"
+                self.rcon.cmd(f"title {p} actionbar " + json.dumps({"text": note, "color": "gray"}))
+                if self.log:
+                    self.log(f"{time.strftime('%H:%M:%S')} {p} used /trigger {name}")
+        for name in TRIGGERS:
+            self.rcon.cmd(f"scoreboard players enable @a {name}")
 
 
 def _stop(signum, frame):

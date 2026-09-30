@@ -10,6 +10,7 @@
     python -m scripts.watch status
     python -m scripts.watch off [player...]   # opt out; restores the previous gamemode
     python -m scripts.watch on [player...]    # opt back in
+        (in game: /trigger watch_off, /trigger watch_on)
 
 The harness starts the director by itself whenever it uses main (`REDSTONE_WATCH=0` stops
 that for one process). `start` options are saved to server/watch/config.json. Players
@@ -42,9 +43,9 @@ def _changes(a) -> dict:
 
 def _players(r: Rcon, names: list[str]) -> tuple[list[str], list[str]]:
     """The named players (default: everyone online), and which of them are online."""
-    on = watch.online(r)
-    names = names or on
-    return names, [n for n in names if n in on]
+    on = {n.casefold(): n for n in watch.online(r)}
+    names = [on.get(n.casefold(), n) for n in names] or list(on.values())
+    return names, [n for n in names if n.casefold() in on]
 
 
 def opt(names: list[str], out: bool) -> None:
@@ -53,10 +54,7 @@ def opt(names: list[str], out: bool) -> None:
             sys.exit("main is down: name the players")
         with watch.State() as state:
             for n in names:
-                if out and n not in state["optout"]:
-                    state["optout"].append(n)
-                if not out and n in state["optout"]:
-                    state["optout"].remove(n)
+                watch.set_optout(state, n, out)
         print(f"{'opted out' if out else 'opted in'} {', '.join(names)}; applied when they join")
         return
     r = Rcon(port=MAIN.rcon_port)
@@ -64,10 +62,7 @@ def opt(names: list[str], out: bool) -> None:
         names, present = _players(r, names)
         with watch.State() as state:
             for n in names:
-                if out and n not in state["optout"]:
-                    state["optout"].append(n)
-                if not out and n in state["optout"]:
-                    state["optout"].remove(n)
+                watch.set_optout(state, n, out)
             watch.reconcile(r, present, state, watch.default_gamemode())
     finally:
         r.close()

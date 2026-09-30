@@ -273,9 +273,16 @@ class FakeRcon:
     def __init__(self, players=("Jack",), modes=None):
         self.players, self.modes, self.log = list(players), dict(modes or {}), []
         self.cams, self.frozen = set(), False
+        self.scores = {}  # (player, objective) -> score
 
     def cmd(self, c):
         self.log.append(c)
+        if c.startswith("execute if score "):
+            _, _, _, p, obj, _, rng = c.split()
+            return "Test passed" if self.scores.get((p, obj), 0) >= int(rng.rstrip(".")) else "Test failed"
+        if c.startswith("scoreboard players set "):
+            _, _, _, p, obj, n = c.split()
+            self.scores[(p, obj)] = int(n)
         if c == "list":
             return f"There are {len(self.players)} of a max of 20 players online: " + ", ".join(self.players)
         if c.endswith("playerGameType"):
@@ -341,6 +348,85 @@ def test_director_picks_up_a_player_who_joins(tmp_path):
     rcon.players.append("Late")
     d.tick(1.5)
     assert d.watched == ["Late"] and "execute as Late run gamemode spectator" in rcon.log
+
+
+def _about(rcon, player):
+    """Commands that concern `player`, apart from reading its trigger scores."""
+    return [c for c in rcon.log if player in c and not c.startswith("execute if score ")]
+
+
+def test_an_opted_out_player_who_joins_is_never_taken_over(tmp_path):
+    with w.State(tmp_path / "state.json") as s:
+        s["optout"].append("jack")  # typed in another case
+    rcon = FakeRcon(["Jack"], {"Jack": 1})
+    _showroom(tmp_path, "and", {"a": _entry(10)})
+    d = _director(tmp_path, rcon)
+    _run(d, 0, 5)
+    assert d.watched == []
+    # Only a `watch` tag and camera left from before are cleared, once.
+    assert _about(rcon, "Jack") == ["tag Jack remove watch", "kill @e[type=item_display,tag=watch_cam_Jack]"]
+    assert not rcon.since(0, ("tp", "title", "spectate", "execute at")) and rcon.modes["Jack"] == 1
+
+
+def test_a_restarted_director_restores_an_opted_out_player_once(tmp_path):
+    with w.State(tmp_path / "state.json") as s:
+        s["optout"].append("Jack")
+        s["gamemode"]["Jack"] = "survival"  # opted out while offline, in the spectator we set
+    rcon = FakeRcon(["Jack"], {"Jack": 3})
+    for start in (0, 5):  # a second director over the same state file: a restart
+        _run(_director(tmp_path, rcon), start, start + 3)
+    assert [c for c in rcon.log if " run gamemode " in c] == ["execute as Jack run gamemode survival"]
+    assert json.loads((tmp_path / "state.json").read_text()) == {"optout": ["Jack"], "gamemode": {}}
+
+
+def test_the_cli_opt_out_while_main_is_down_holds_when_the_player_joins(tmp_path, monkeypatch):
+    import scripts.watch as cli
+    monkeypatch.setattr(w, "STATE", tmp_path / "state.json")
+    monkeypatch.setattr(cli, "_rcon_up", lambda port: False)
+    cli.opt(["Jack"], True)
+    rcon = FakeRcon(["Jack"])
+    _run(_director(tmp_path, rcon), 0, 3)
+    assert not [c for c in rcon.log if "spectator" in c or c == "tag Jack add watch"]
+    cli.opt(["jack"], False)
+    assert json.loads((tmp_path / "state.json").read_text())["optout"] == []
+
+
+def test_trigger_opts_a_player_out_and_back_in(tmp_path):
+    rcon = FakeRcon(["Jack"], {"Jack": 0})
+    _showroom(tmp_path, "and", {"a": _entry(10)})
+    d = _director(tmp_path, rcon)
+    _run(d, 0, 2)
+    assert rcon.log.count("scoreboard objectives add watch_off trigger") == 1
+    assert "scoreboard players enable @a watch_off" in rcon.log and "scoreboard players enable @a watch_on" in rcon.log
+    assert d.watched == ["Jack"] and rcon.cams == {"Jack"}
+    rcon.scores[("Jack", "watch_off")] = 1  # /trigger watch_off
+    n = len(rcon.log)
+    _run(d, 2, 4)
+    after = rcon.log[n:]
+    assert d.watched == [] and rcon.modes["Jack"] == 0 and rcon.cams == set()
+    assert "tag Jack remove watch" in after and rcon.scores[("Jack", "watch_off")] == 0
+    # Re-armed after the reset: a trigger locks once used.
+    assert after.index("scoreboard players enable @a watch_off") > after.index("scoreboard players set Jack watch_off 0")
+    assert [c for c in after if c.startswith("title Jack actionbar")]
+    assert json.loads((tmp_path / "state.json").read_text())["optout"] == ["Jack"]
+    assert not [c for c in after if c.startswith("title @a")]
+    n = len(rcon.log)
+    _run(d, 4, 6)
+    assert not rcon.since(n, ("execute at", "tag Jack add"))  # stays out
+    rcon.scores[("Jack", "watch_on")] = 1
+    _run(d, 6, 8)
+    assert d.watched == ["Jack"] and rcon.modes["Jack"] == 3 and rcon.cams == {"Jack"}
+    assert json.loads((tmp_path / "state.json").read_text())["optout"] == []
+    assert rcon.log.count("scoreboard objectives add watch_off trigger") == 1
+    d.rcon = FakeRcon(["Jack"])  # reconnected, perhaps to a new server
+    d.tick(9)
+    assert d.rcon.log.count("scoreboard objectives add watch_on trigger") == 1
+
+
+def test_nobody_online_polls_no_triggers(tmp_path):
+    rcon = FakeRcon([])
+    _run(_director(tmp_path, rcon), 0, 3)
+    assert not rcon.since(0, ("scoreboard", "execute if score"))
 
 
 GLIDE = f"tp {w.CAM_SELECTOR} "
