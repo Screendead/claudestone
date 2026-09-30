@@ -1,0 +1,149 @@
+name: ingot_reserve_bank
+description: A self-compacting ingot store (a vanilla compacting drawer). Farm ingots drop into the reserve hopper you open; above 91 the surplus is crafted into blocks in the chest, and when you take the reserve below 23 a block is crafted back into 9 ingots, so loose ingots are always there and the bulk takes 9x less room. Iron shown; any 9-to-1 item works. No buttons.
+traits: [survival_friendly, container_based, comparator_based, lockable, pistonless, entityless, lightless]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': stone
+  R: {name: reserve, block: 'hopper[facing=east]'}
+  F: {name: feed, block: 'hopper[facing=down]'}
+  '1': {name: compactor, block: 'crafter[orientation=south_up]'}
+  '2': {name: decompactor, block: 'crafter[orientation=up_north]'}
+  L: 'chest[facing=south,type=left]'
+  r: 'chest[facing=south,type=right]'
+  W: {name: withdraw, block: 'hopper[facing=north]'}
+  K: {name: level, block: 'comparator[facing=east]'}
+  I: {name: upper_lock, block: 'comparator[facing=south,mode=subtract]'}
+  U: 'water_cauldron[level=3]'
+  '<': {name: low, block: 'repeater[facing=east]'}
+  C: {name: full, block: 'comparator[facing=west,mode=subtract]'}
+  k: 'comparator[facing=south]'
+  P: 'composter[level=8]'
+  '{': 'repeater[facing=west]'
+  '^': {name: fire, block: 'repeater[facing=north]'}
+  D: {name: busy, block: 'comparator[facing=south]'}
+  v: 'repeater[facing=south]'
+  '}': {name: lock_w, block: 'repeater[facing=west]'}
+  a: redstone_wire[north=none,south=up,west=none,east=side]
+  b: redstone_wire[north=side,south=none,west=none,east=side]
+  c: redstone_wire[north=none,south=none,west=up,east=side]
+  d: redstone_wire[north=none,south=none,west=side,east=side]
+  e: redstone_wire[north=none,south=side,west=none,east=side]
+  f: redstone_wire[north=side,south=none,west=side,east=side]
+  g: redstone_wire[north=side,south=side,west=none,east=none]
+  h: redstone_wire[north=side,south=side,west=side,east=side]
+  j: redstone_wire[north=none,south=none,west=side,east=up]
+  m: redstone_wire[north=none,south=side,west=side,east=none]
+  n: redstone_wire[north=side,south=none,west=side,east=none]
+layers:
+  0: |
+    ...==.....
+    ...=......
+    ...=......
+    .====.....
+    ...==.....
+    ..........
+  1: |
+    ...ej#....
+    ...g.#....
+    ...g.#....
+    #cdhd#....
+    ...b}#....
+    ..........
+  2: |
+    .....m....
+    .....v####
+    .....D#..#
+    a.##.2.###
+    #####W.#..
+    ..........
+  3: |
+    ..........
+    ......eddm
+    ......^..g
+    ..eK#R1C{n
+    b<ffIrLk..
+    ....U..P..
+  4: |
+    ..........
+    ..........
+    ..........
+    .....F....
+    ..........
+    ..........
+tests:
+# Cells: reserve hopper ~5 ~3 ~3, farm feed hopper ~5 ~4 ~3, compactor ~6 ~3 ~3,
+# bank chest ~5 ~3 ~4 (+ ~6 ~3 ~4), withdraw hopper ~5 ~2 ~4, decompactor ~5 ~2 ~3.
+# A hopper cell reads 1 while locked. Hopper reserve: 23+ ingots read 2, 92+ read 5.
+- name: surplus is banked down to the upper level
+  steps:
+  - expect: {reserve: 1}
+  - run: 'data merge block ~5 ~3 ~3 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:64},{Slot:1b,id:"minecraft:iron_ingot",count:64},{Slot:2b,id:"minecraft:iron_ingot",count:22}]}'
+  - wait: 20
+  - expect: {reserve: 0, withdraw: 1}
+  - wait: 600
+  - expect: {reserve: 1, withdraw: 1}
+  - level: {level: 4}
+  - check: if data block ~5 ~3 ~3 Items[{Slot:0b,id:"minecraft:iron_ingot",count:5}]
+  - check: if data block ~5 ~3 ~3 Items[{Slot:1b,count:64}]
+  - check: if data block ~5 ~3 ~3 Items[{Slot:2b,count:22}]
+  - check: if data block ~5 ~3 ~4 Items[{Slot:0b,id:"minecraft:iron_block",count:6}]
+  - check: unless data block ~5 ~3 ~4 Items[1]
+  - check: unless data block ~6 ~3 ~4 Items[0]
+  - check: if data block ~6 ~3 ~3 Items[4]
+  - check: unless data block ~6 ~3 ~3 Items[5]
+  - log: data get block ~5 ~3 ~3 Items
+  - log: data get block ~5 ~3 ~4 Items
+- name: a low reserve draws blocks back out of the bank
+  steps:
+  - run: 'data merge block ~5 ~3 ~3 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:10}]}'
+  - run: 'data merge block ~5 ~3 ~4 {Items:[{Slot:0b,id:"minecraft:iron_block",count:5}]}'
+  - wait: 150
+  - expect: {reserve: 1, withdraw: 1}
+  - level: {level: 2}
+  - check: if data block ~5 ~3 ~3 Items[{Slot:0b,id:"minecraft:iron_ingot",count:28}]
+  - check: unless data block ~5 ~3 ~3 Items[1]
+  - check: if data block ~5 ~3 ~4 Items[{Slot:0b,id:"minecraft:iron_block",count:2}]
+  - check: if data block ~5 ~2 ~4 Items[{id:"minecraft:iron_block",count:1}]
+  - check: unless data block ~5 ~2 ~3 Items[0]
+  - log: data get block ~5 ~3 ~3 Items
+  - log: data get block ~5 ~2 ~4 Items
+- name: inside the band nothing moves
+  steps:
+  - run: 'data merge block ~5 ~3 ~3 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:50}]}'
+  - wait: 6
+  - run: 'data merge block ~5 ~3 ~4 {Items:[{Slot:0b,id:"minecraft:iron_block",count:3}]}'
+  - wait: 300
+  - expect: {reserve: 1, withdraw: 1}
+  - check: if data block ~5 ~3 ~3 Items[{Slot:0b,id:"minecraft:iron_ingot",count:50}]
+  - check: if data block ~5 ~3 ~4 Items[{Slot:0b,id:"minecraft:iron_block",count:3}]
+  - check: unless data block ~5 ~2 ~4 Items[0]
+  - check: unless data block ~6 ~3 ~3 Items[0]
+- name: bank, withdraw, then a farm stream through the feed hopper
+  steps:
+  - run: 'data merge block ~5 ~3 ~3 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:64},{Slot:1b,id:"minecraft:iron_ingot",count:64},{Slot:2b,id:"minecraft:iron_ingot",count:22}]}'
+  - wait: 620
+  - check: if data block ~5 ~3 ~4 Items[{Slot:0b,id:"minecraft:iron_block",count:6}]
+  # a player takes all but 5 ingots
+  - run: 'data merge block ~5 ~3 ~3 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:5}]}'
+  - wait: 150
+  - expect: {reserve: 1, withdraw: 1}
+  - level: {level: 2}
+  - check: if data block ~5 ~3 ~3 Items[{Slot:0b,id:"minecraft:iron_ingot",count:23}]
+  - check: if data block ~5 ~3 ~4 Items[{Slot:0b,id:"minecraft:iron_block",count:3}]
+  - check: if data block ~5 ~2 ~4 Items[{id:"minecraft:iron_block",count:1}]
+  # the farm delivers 84 ingots through the feed hopper
+  - run: 'data merge block ~5 ~4 ~3 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:64},{Slot:1b,id:"minecraft:iron_ingot",count:20}]}'
+  - wait: 800
+  - expect: {reserve: 1, withdraw: 1}
+  - level: {level: 4}
+  - check: unless data block ~5 ~4 ~3 Items[0]
+  - check: if data block ~5 ~3 ~3 Items[{Slot:0b,id:"minecraft:iron_ingot",count:55}]
+  - check: if data block ~5 ~3 ~3 Items[{Slot:1b,id:"minecraft:iron_ingot",count:36}]
+  - check: unless data block ~5 ~3 ~3 Items[2]
+  - check: if data block ~6 ~3 ~3 Items[2]
+  - check: unless data block ~6 ~3 ~3 Items[3]
+  - check: if data block ~5 ~3 ~4 Items[{Slot:0b,id:"minecraft:iron_block",count:5}]
+  - check: if data block ~5 ~2 ~4 Items[{id:"minecraft:iron_block",count:1}]
+  - log: data get block ~5 ~3 ~3 Items
+  - log: data get block ~5 ~3 ~4 Items

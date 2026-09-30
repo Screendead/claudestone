@@ -1,0 +1,162 @@
+name: farm_stall_alarm
+description: Farm watchdog for a storage room. Put it on the last two hoppers of a farm's output line and give it a slow clock. If no item passes for 4 clock pulses, a lamp lights and stays lit, with one bell note on the rising edge. One item passing clears the lamp and restarts the count. The clock input cell is inside the footprint, north of the dropper.
+traits: [container_based, comparator_based, survival_friendly, pistonless, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  g: gold_block
+  '#': stone
+  N: {name: bell, block: 'note_block[instrument=bell]'}
+  c: {input: clock}
+  L: {name: alarm, block: 'redstone_lamp[lit=false]'}
+  t: {name: siren_torch, block: 'redstone_wall_torch[facing=west,lit=false]'}
+  a: {name: pool_cmp, block: 'comparator[facing=east]'}
+  P: 'dropper[facing=east]{Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1},{Slot:2b,id:"minecraft:wooden_sword",count:1},{Slot:3b,id:"minecraft:wooden_sword",count:1}]}'
+  T: {name: counter, block: 'hopper[facing=west,enabled=false]'}
+  m: {name: hold, block: 'comparator[facing=west]'}
+  r: repeater[facing=west]
+  k: {name: lock_torch, block: 'redstone_wall_torch[facing=north,lit=true]'}
+  B: stone
+  '1': redstone_wire[west=side,south=side]
+  '|': redstone_wire[north=side,south=side]
+  '2': redstone_wire[north=side,west=side]
+  '-': redstone_wire[east=side,west=side]
+  '3': redstone_wire[east=side,west=side,south=side]
+  '4': redstone_wire[north=side,east=side,south=side]
+  R: repeater[facing=south]
+  C: comparator[facing=south]
+  H: hopper[facing=east]
+  S: chest[facing=north]
+  F: {block: 'hopper[facing=down]', fixture: true}
+layers:
+  0: |
+    =g=======
+    =========
+    =========
+    =========
+    =========
+    =========
+    =========
+    =========
+    =========
+  1: |
+    .N..c....
+    Lt#aPTmr1
+    .....k2.|
+    .....B..|
+    .....|..|
+    .....43-2
+    .....RR..
+    .....CC..
+    .....HHS.
+  2: |
+    .........
+    .........
+    .........
+    .........
+    .........
+    .........
+    .........
+    .........
+    .....F...
+tests:
+- name: settles quiet with four tokens home
+  steps:
+  - expect: {alarm: 0, siren_torch: 0, counter: 1, lock_torch: 1, bell: 0}
+  - check: if data block ~4 ~1 ~1 Items[3]
+  - check: unless data block ~5 ~1 ~1 Items[0]
+- name: four silent pulses raise a latched alarm
+  steps:
+  - {drive: {clock: 1}}
+  - {wait: 4}
+  - {drive: {clock: 0}}
+  - {wait: 6}
+  - check: if data block ~5 ~1 ~1 Items[0]
+  - expect: {alarm: 0, counter: 1}
+  - repeat: {times: 2, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - check: if data block ~5 ~1 ~1 Items[2]
+  - check: unless data block ~5 ~1 ~1 Items[3]
+  - expect: {alarm: 0}
+  - repeat: {times: 1, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 1, bell: 1, counter: 1, lock_torch: 1}
+  - check: unless data block ~4 ~1 ~1 Items[0]
+  - repeat: {times: 2, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 200
+  - expect: {alarm: 1, counter: 1}
+  - check: if data block ~5 ~1 ~1 Items[3]
+- name: one item clears the alarm and brings every token home
+  steps:
+  - repeat: {times: 4, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 1}
+  - {run: 'data merge block ~5 ~2 ~8 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:1}]}'}
+  - wait: 60
+  - expect: {alarm: 0, bell: 0, counter: 1, lock_torch: 1}
+  - check: if data block ~4 ~1 ~1 Items[3]
+  - check: unless data block ~5 ~1 ~1 Items[0]
+  - check: if data block ~7 ~1 ~8 Items[{id:"minecraft:cobblestone"}]
+  - check: unless data block ~5 ~1 ~8 Items[0]
+  - check: unless data block ~6 ~1 ~8 Items[0]
+- name: an item restarts the count before it fires
+  steps:
+  - repeat: {times: 3, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - {run: 'data merge block ~5 ~2 ~8 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:1}]}'}
+  - wait: 60
+  - expect: {alarm: 0, counter: 1}
+  - check: if data block ~4 ~1 ~1 Items[3]
+  - repeat: {times: 3, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 0}
+  - repeat: {times: 1, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 1}
+- name: an item every pulse never alarms
+  steps:
+  - repeat:
+      times: 8
+      steps:
+      - {drive: {clock: 1}}
+      - {wait: 4}
+      - {drive: {clock: 0}}
+      - {wait: 6}
+      - run: 'data merge block ~5 ~2 ~8 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:1}]}'
+      - wait: 40
+      - expect: {alarm: 0, counter: 1}
+      - check: if data block ~4 ~1 ~1 Items[3]
+- name: re-arms after a reset
+  steps:
+  - repeat: {times: 4, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 1}
+  - {run: 'data merge block ~5 ~2 ~8 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:1}]}'}
+  - wait: 60
+  - expect: {alarm: 0}
+  - repeat: {times: 3, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 0}
+  - repeat: {times: 1, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 1}
+- name: a steady stream with pulses stays quiet and the lock torch survives
+  steps:
+  - run: 'data merge block ~5 ~2 ~8 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:40}]}'
+  - repeat: {times: 6, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}, {wait: 30}, {expect: {alarm: 0}}]}
+  - wait: 200
+  - expect: {alarm: 0, counter: 1, lock_torch: 1}
+  - check: if data block ~4 ~1 ~1 Items[3]
+  - check: if data block ~7 ~1 ~8 Items[{id:"minecraft:cobblestone",count:40}]
+- name: items 18 gt apart (lock torch at 8 toggles per 60 gt) then silence still alarm
+  steps:
+  - repeat:
+      times: 30
+      steps:
+      - run: 'data merge block ~5 ~2 ~8 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:1}]}'
+      - wait: 18
+  - wait: 200
+  - expect: {alarm: 0, counter: 1, lock_torch: 1}
+  - check: if data block ~4 ~1 ~1 Items[3]
+  - check: if data block ~7 ~1 ~8 Items[{id:"minecraft:cobblestone",count:30}]
+  - repeat: {times: 4, steps: [{drive: {clock: 1}}, {wait: 4}, {drive: {clock: 0}}, {wait: 6}]}
+  - wait: 4
+  - expect: {alarm: 1}

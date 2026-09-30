@@ -290,8 +290,9 @@ class Rig:
     def command(self, command: str) -> tuple[bool, str]:
         """Run a command with `~` at the build origin: whether it succeeded, and the
         server's reply. A failed command still replies, often with its reason."""
-        reply = self.run(f"execute positioned {self.abs((0, 0, 0))} {RUN_WRAP}{command}")
-        return int(re.findall(r"(-?\d+)", self.run(f"data get storage {PACK}:probe ok"))[-1]) == 1, reply
+        with self.r.sequence():
+            reply = self.run(f"execute positioned {self.abs((0, 0, 0))} {RUN_WRAP}{command}")
+            return int(re.findall(r"(-?\d+)", self.run(f"data get storage {PACK}:probe ok"))[-1]) == 1, reply
 
     def clear(self) -> None:
         for command in clear_commands(self.origin, self.size):
@@ -331,10 +332,11 @@ class Rig:
     def snapshot(self) -> dict[Pos, int]:
         """Signal level of every probed block: analog power 0-15, otherwise 1 or 0. Sets
         `levels` to the output strength of each probed comparator."""
-        self.run(f"data modify storage {PACK}:probe s set value {{}}")
-        for i in range(self.probe_count):
-            self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:probe{i}")
-        out = self.run(f"data get storage {PACK}:probe s")
+        with self.r.sequence():
+            self.run(f"data modify storage {PACK}:probe s set value {{}}")
+            for i in range(self.probe_count):
+                self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:probe{i}")
+            out = self.run(f"data get storage {PACK}:probe s")
         found = {int(i): int(v) for i, v in re.findall(r"\bb(\d+): (\d+)", out)}
         self.levels = {self.probed[int(i)]: int(v) for i, v in re.findall(r"\bc(\d+): (\d+)", out)}
         return {pos: found.get(i, 0) for i, pos in enumerate(self.probed)}
@@ -346,8 +348,9 @@ class Rig:
             raise ValueError(f"{pos} ({state or 'air'}) has no signal strength to read")
         block = parse_state(state)[0]
         if block == "minecraft:comparator":
-            self.run(f"execute store result storage {PACK}:probe l int 1 run data get block {self.abs(pos)} OutputSignal")
-            return int(re.findall(r"(-?\d+)", self.run(f"data get storage {PACK}:probe l"))[-1])
+            with self.r.sequence():
+                self.run(f"execute store result storage {PACK}:probe l int 1 run data get block {self.abs(pos)} OutputSignal")
+                return int(re.findall(r"(-?\d+)", self.run(f"data get storage {PACK}:probe l"))[-1])
         prop = signal(state)[0]
         return next((n for n in range(16) if self.is_(pos, f"{block}[{prop}={n}]")), 0)
 

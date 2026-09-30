@@ -37,6 +37,10 @@ server when it is unset; set `REDSTONE_PLOT=<plot>` (one the build fits) to run 
 satellite instead. Set `REDSTONE_OWNER=<your id>` and the plot's status sign, its record and
 the showroom entry name you as the one testing.
 
+Run a CPU-heavy offline search (pysat, brute force) on the desktop, not the laptop:
+`python -m scripts.remote_run <dir> --jobs N -- python3 script.py`. Its container has python3,
+pyyaml and python-sat; anything else goes in a `requirements.txt` in `<dir>`.
+
 ## File
 
 `library/<family>/<name>.redstone.yaml`; `name` is unique across the library.

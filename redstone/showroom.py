@@ -29,6 +29,9 @@ GAP_Z = 4
 SCALE = 1.25
 PX = 0.025  # blocks per text pixel at scale 1
 TAG = "showroom"
+# RCON drops a request over about 1446 bytes; a data pack function (how tests load builds)
+# has no such limit, so a container full of items fits a test but not a showroom slot.
+RCON_MAX = 1400
 
 
 def _log(msg: str) -> None:
@@ -140,13 +143,67 @@ def _clear_box(rcon: Rcon, plot: str, name: str, entry: dict) -> None:
             checked(rcon, c)
 
 
+def _split_list(text: str) -> list[str]:
+    """The top-level elements of an SNBT list body."""
+    parts, depth, start, quote = [], 0, 0, None
+    for i, ch in enumerate(text):
+        if quote:
+            if ch == quote and text[i - 1] != "\\":
+                quote = None
+        elif ch in "\"'":
+            quote = ch
+        elif ch in "[{(":
+            depth += 1
+        elif ch in "]})":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append(text[start:i])
+            start = i + 1
+    return parts + [text[start:]] if text[start:].strip() else parts
+
+
+def _cut_list(text: str, key: str) -> tuple[str, list[str]] | None:
+    """`text` with the list after `key` emptied, and that list's elements; None without one."""
+    at = text.find(key)
+    if at < 0:
+        return None
+    start = end = at + len(key)
+    depth = 1
+    while depth:
+        depth += {"[": 1, "]": -1}.get(text[end], 0)
+        end += 1
+    return text[:start] + text[end - 1:], _split_list(text[start:end - 1])
+
+
+def fit_rcon(command: str) -> list[str]:
+    """`command`, or for an over-long setblock of a container, the setblock with its Items
+    emptied and one `data modify ... append` per item (and per stack inside a shulker box)."""
+    head = "setblock "
+    cut = _cut_list(command, "Items:[") if command.startswith(head) else None
+    if len(command) <= RCON_MAX or cut is None:
+        return [command]
+    placed, items = cut
+    pos = " ".join(command[len(head):].split(" ", 3)[:3])
+    out = [placed]
+    for item in items:
+        inner = _cut_list(item, '"minecraft:container":[')
+        if len(item) + 80 <= RCON_MAX or inner is None:
+            out.append(f"data modify block {pos} Items append value {item}")
+            continue
+        out.append(f"data modify block {pos} Items append value {inner[0]}")
+        out += [f'data modify block {pos} Items[-1].components."minecraft:container" append value {e}'
+                for e in inner[1]]
+    return out
+
+
 def _place(rcon: Rcon, plot: str, name: str, entry: dict, build: Build | None, test_names) -> None:
     x, y, z = _abs(plot, entry["slot"])
     w, h, _ = entry["size"]
     bx = x + (entry["box"][0] - w) // 2
     if build is not None:
         for c in normalised(build).to_commands():
-            checked(rcon, f"execute positioned {bx} {y} {z} run {c}")
+            for part in fit_rcon(c):
+                checked(rcon, f"execute positioned {bx} {y} {z} run {part}")
     text = json.dumps(label_text(title(plot, name), entry, test_names), ensure_ascii=False)
     width = int(entry["box"][0] / (PX * SCALE))
     tags = json.dumps([TAG, plot, f"sr_{name}"])

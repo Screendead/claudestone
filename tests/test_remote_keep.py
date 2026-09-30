@@ -1,6 +1,9 @@
 """scripts.remote_keep offline: the job is a local python that exits with scripted codes."""
 
+import signal
+import subprocess
 import sys
+from pathlib import Path
 
 from scripts import remote_keep as rk
 
@@ -31,3 +34,15 @@ def test_quick_repeated_losses_give_up(tmp_path):
     cmd, runs = job(tmp_path, [255] * 5)
     assert rk.keep(cmd, answers=lambda: True, poll=0) == 255
     assert len(runs.read_text().split()) == rk.QUICK_LIMIT
+
+
+def test_sigterm_stops_the_job_and_the_watch():
+    sleeper = [sys.executable, "-c", "import time; print('up', flush=True); time.sleep(60)"]
+    p = subprocess.Popen([sys.executable, "-c", f"import sys; from scripts import remote_keep as rk; sys.exit(rk.keep({sleeper!r}))"],
+                         cwd=Path(__file__).resolve().parent.parent, stdout=subprocess.PIPE, text=True)
+    try:
+        assert p.stdout.readline().strip() == "up"
+        p.terminate()
+        assert p.wait(timeout=10) == 128 + signal.SIGTERM
+    finally:
+        p.kill()

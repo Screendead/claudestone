@@ -1,3 +1,4 @@
+import contextlib
 import fcntl
 import re
 import socket
@@ -14,6 +15,8 @@ class RconError(Exception):
 
 
 class Rcon:
+    _held = 0  # depth of open sequence() blocks
+
     def __init__(self, host="127.0.0.1", port=25575, password=None, timeout=10.0):
         if password is None:
             password = re.search(r"^rcon\.password=(.*)$", PROPERTIES.read_text(), re.M).group(1)
@@ -51,12 +54,23 @@ class Rcon:
         self._send(kind, body)
         return self._recv()
 
-    def cmd(self, command):
-        fcntl.flock(self._turn, fcntl.LOCK_EX)
+    @contextlib.contextmanager
+    def sequence(self):
+        """Hold the port's turn across several commands, for a read that depends on state an
+        earlier command set (a probe function, then the storage it wrote). Reentrant."""
+        if not self._held:
+            fcntl.flock(self._turn, fcntl.LOCK_EX)
+        self._held += 1
         try:
-            return self._cmd(command)
+            yield self
         finally:
-            fcntl.flock(self._turn, fcntl.LOCK_UN)
+            self._held -= 1
+            if not self._held:
+                fcntl.flock(self._turn, fcntl.LOCK_UN)
+
+    def cmd(self, command):
+        with self.sequence():
+            return self._cmd(command)
 
     def _cmd(self, command):
         # Vanilla reads one packet per socket read, so requests can't be pipelined. A long

@@ -27,9 +27,14 @@ python -m redstone.docker_sats {start,stop,status} [dsatN]...   # Docker satelli
 python -m scripts.satellite_image        # rebuild the Docker satellite image on the desktop
 python -m scripts.remote_run <dir> [--jobs N] -- <cmd> [args]...   # a CPU-heavy search, on the desktop
 python -m scripts.remote_keep -- <cmd> [args]...   # rerun a resumable desktop job after each desktop drop
+python -m scripts.jobs start <name> <dir> [--jobs N] [--resume CMD] -- <cmd>...   # a detached desktop job
+python -m scripts.jobs {status [<name>],stop <name>,log <name> [-n N]}
+python -m scripts.status                 # jobs, search CPUs, servers, plots, RAM and plan usage on one screen
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
 python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
-python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched
+python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched (in game: /trigger watch_off, /trigger watch_on)
+python -m scripts.watch poses [--seconds N]   # read-only: each watch camera's steps, reversals, jerk
+git config core.hooksPath githooks       # once per clone: pre-commit lints staged library specs and checks library/INDEX.md
 ```
 
 Test ids for the library are `test_spec[<spec name>::<test name>]`; spec names are unique
@@ -53,6 +58,9 @@ designer's claim. `docs/AUTHORING.md` is the
 self-contained brief for designing a variant; keep it in step with the format and tools.
 `docs/MECHANICS.md` catalogues verified 26.3 mechanics, each proven by a spec in
 `library/mechanics/`. `docs/WINS.md` banks true wins, where we beat the community best against rebuilt `ref_<author>_<design>` specs.
+`githooks/pre-commit` (enabled by `git config core.hooksPath githooks`) runs `scripts.lint` on
+staged library specs and fails if regenerating `library/INDEX.md` (`python -m scripts.index --tracked`, committed and staged specs only)
+changes it, so stage the regenerated index with the spec.
 
 ## Plots
 
@@ -83,7 +91,10 @@ are in `server/showroom/<plot>.json`, errors in `server/showroom.log`;
 
 Players on main watch hands-off: a single director process (`redstone/watch.py`,
 `python -m scripts.watch run`) puts every online player in spectator (tag `watch`; the old
-gamemode is kept in `server/watch/state.json` and restored by `scripts.watch off`) and cuts
+gamemode is kept in `server/watch/state.json` and restored by `scripts.watch off` or by `/trigger watch_off` in game (`watch_on` opts back in):
+the director polls the two trigger objectives over RCON and enables them again after each poll,
+with no data-pack tick function; the opt-out list is matched without case and kept in
+`state.json`, so it holds across director and server restarts) and cuts
 between shots, each held at least `dwell` seconds: a test building on main (the main plot, or
 any plot a test runs in on the main server), the main plot's result, a showroom slot placed;
 failures first, then new variants, then the newest; when nothing happens it tours recent
@@ -104,6 +115,9 @@ start the director if none holds `server/watch/director.lock`; it outlives pytes
 starting it. Settings (`orbit`, `dwell`, `camera`, ...) are in `server/watch/config.json`,
 set by `scripts.watch start --no-orbit` etc. and reread live; its log is `director.log`. It
 uses plain RCON commands on main, never a rig lock, and nothing goes to chat.
+`scripts.watch poses` samples each camera entity's server-side pose (the teleport targets, not
+the client's interpolation) and prints per-axis steps, reversals and jerk, flagging a camera
+shaking in place.
 
 ## Server
 
@@ -178,7 +192,19 @@ SIGTERM or a killed process stops the container (its stdin closes); an unreachab
 is an error, never a local run.
 `scripts.remote_keep` runs a local command (usually a script that rebuilds its resume state from
 the log it streamed, then calls remote_run) and runs it again whenever it exits 255, remote_run's
-code for a lost desktop, once the desktop's Docker answers again. Any other exit ends it.
+code for a lost desktop, once the desktop's Docker answers again. Any other exit ends it (a
+`before` hook may add arguments to each start). A long search is started with `scripts.jobs
+start`, never by hand-made wrappers: it detaches a runner in its own session (it outlives the
+shell and any task time limit) that runs `remote_run <dir> --jobs N -- <cmd>` under remote_keep's
+loop. Output goes to `server/jobs/<name>/log`; pid, cmd, dir, started, restarts and exit to
+`server/jobs/<name>/job.json`. A dropped container copies nothing back, so the log is the
+checkpoint: `--resume CMD` runs through the shell in `<dir>` before every start with `$JOB_NAME`,
+`$JOB_DIR`, `$JOB_LOG` and `$JOB_RESTARTS` set; the words it prints are appended to `<cmd>`, the
+files it writes into `<dir>` are uploaded, a nonzero exit ends the job, and it must not call
+remote_run itself. `jobs status` reports running, stopped, finished, failed, or dead (a stale pid).
+`scripts.status` is read-only and takes a few seconds: it probes locks without waiting, asks the
+desktop one `docker ps` (none while `dsat_unreachable` is set), and reads plan usage only from
+`~/.claude/usage-cache.json`.
 
 ## Architecture
 
@@ -224,7 +250,10 @@ trace → `package` data pack.
   drives it from the laptop (`RemoteRig`); see the Docker satellite paragraphs above.
 - `redstone/rcon.py`: the server writes every RCON client's output into one shared buffer
   (`DedicatedServer.runCommand`), so two clients' commands at once get each other's replies.
-  `Rcon.cmd` takes `server/rcon.<port>.lock` for each command, across processes.
+  `Rcon.cmd` takes `server/rcon.<port>.lock` for each command, across processes. Anything
+  that sets state with one command and reads it with the next (a probe function, then
+  `data get storage`) wraps them in `with rcon.sequence():`, which holds that lock across the
+  whole sequence (reentrant); `Rig.snapshot`, `Rig.command` and `Rig.level` do.
 - `redstone/docker_sats.py`: `DockerSatellite`, a `Server` whose world is a container on the
   desktop; `servers.take_idle`/`take` choose and lock a server for conftest.
 - `redstone/pla.py`: generators for sum-of-products logic as two NOR planes of torches
