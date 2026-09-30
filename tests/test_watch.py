@@ -273,9 +273,16 @@ class FakeRcon:
     def __init__(self, players=("Jack",), modes=None):
         self.players, self.modes, self.log = list(players), dict(modes or {}), []
         self.cams, self.frozen = set(), False
+        self.scores = {}  # (player, objective) -> score
 
     def cmd(self, c):
         self.log.append(c)
+        if c.startswith("execute if score "):
+            _, _, _, p, obj, _, rng = c.split()
+            return "Test passed" if self.scores.get((p, obj), 0) >= int(rng.rstrip(".")) else "Test failed"
+        if c.startswith("scoreboard players set "):
+            _, _, _, p, obj, n = c.split()
+            self.scores[(p, obj)] = int(n)
         if c == "list":
             return f"There are {len(self.players)} of a max of 20 players online: " + ", ".join(self.players)
         if c.endswith("playerGameType"):
@@ -341,6 +348,85 @@ def test_director_picks_up_a_player_who_joins(tmp_path):
     rcon.players.append("Late")
     d.tick(1.5)
     assert d.watched == ["Late"] and "execute as Late run gamemode spectator" in rcon.log
+
+
+def _about(rcon, player):
+    """Commands that concern `player`, apart from reading its trigger scores."""
+    return [c for c in rcon.log if player in c and not c.startswith("execute if score ")]
+
+
+def test_an_opted_out_player_who_joins_is_never_taken_over(tmp_path):
+    with w.State(tmp_path / "state.json") as s:
+        s["optout"].append("jack")  # typed in another case
+    rcon = FakeRcon(["Jack"], {"Jack": 1})
+    _showroom(tmp_path, "and", {"a": _entry(10)})
+    d = _director(tmp_path, rcon)
+    _run(d, 0, 5)
+    assert d.watched == []
+    # Only a `watch` tag and camera left from before are cleared, once.
+    assert _about(rcon, "Jack") == ["tag Jack remove watch", "kill @e[type=item_display,tag=watch_cam_Jack]"]
+    assert not rcon.since(0, ("tp", "title", "spectate", "execute at")) and rcon.modes["Jack"] == 1
+
+
+def test_a_restarted_director_restores_an_opted_out_player_once(tmp_path):
+    with w.State(tmp_path / "state.json") as s:
+        s["optout"].append("Jack")
+        s["gamemode"]["Jack"] = "survival"  # opted out while offline, in the spectator we set
+    rcon = FakeRcon(["Jack"], {"Jack": 3})
+    for start in (0, 5):  # a second director over the same state file: a restart
+        _run(_director(tmp_path, rcon), start, start + 3)
+    assert [c for c in rcon.log if " run gamemode " in c] == ["execute as Jack run gamemode survival"]
+    assert json.loads((tmp_path / "state.json").read_text()) == {"optout": ["Jack"], "gamemode": {}}
+
+
+def test_the_cli_opt_out_while_main_is_down_holds_when_the_player_joins(tmp_path, monkeypatch):
+    import scripts.watch as cli
+    monkeypatch.setattr(w, "STATE", tmp_path / "state.json")
+    monkeypatch.setattr(cli, "_rcon_up", lambda port: False)
+    cli.opt(["Jack"], True)
+    rcon = FakeRcon(["Jack"])
+    _run(_director(tmp_path, rcon), 0, 3)
+    assert not [c for c in rcon.log if "spectator" in c or c == "tag Jack add watch"]
+    cli.opt(["jack"], False)
+    assert json.loads((tmp_path / "state.json").read_text())["optout"] == []
+
+
+def test_trigger_opts_a_player_out_and_back_in(tmp_path):
+    rcon = FakeRcon(["Jack"], {"Jack": 0})
+    _showroom(tmp_path, "and", {"a": _entry(10)})
+    d = _director(tmp_path, rcon)
+    _run(d, 0, 2)
+    assert rcon.log.count("scoreboard objectives add watch_off trigger") == 1
+    assert "scoreboard players enable @a watch_off" in rcon.log and "scoreboard players enable @a watch_on" in rcon.log
+    assert d.watched == ["Jack"] and rcon.cams == {"Jack"}
+    rcon.scores[("Jack", "watch_off")] = 1  # /trigger watch_off
+    n = len(rcon.log)
+    _run(d, 2, 4)
+    after = rcon.log[n:]
+    assert d.watched == [] and rcon.modes["Jack"] == 0 and rcon.cams == set()
+    assert "tag Jack remove watch" in after and rcon.scores[("Jack", "watch_off")] == 0
+    # Re-armed after the reset: a trigger locks once used.
+    assert after.index("scoreboard players enable @a watch_off") > after.index("scoreboard players set Jack watch_off 0")
+    assert [c for c in after if c.startswith("title Jack actionbar")]
+    assert json.loads((tmp_path / "state.json").read_text())["optout"] == ["Jack"]
+    assert not [c for c in after if c.startswith("title @a")]
+    n = len(rcon.log)
+    _run(d, 4, 6)
+    assert not rcon.since(n, ("execute at", "tag Jack add"))  # stays out
+    rcon.scores[("Jack", "watch_on")] = 1
+    _run(d, 6, 8)
+    assert d.watched == ["Jack"] and rcon.modes["Jack"] == 3 and rcon.cams == {"Jack"}
+    assert json.loads((tmp_path / "state.json").read_text())["optout"] == []
+    assert rcon.log.count("scoreboard objectives add watch_off trigger") == 1
+    d.rcon = FakeRcon(["Jack"])  # reconnected, perhaps to a new server
+    d.tick(9)
+    assert d.rcon.log.count("scoreboard objectives add watch_on trigger") == 1
+
+
+def test_nobody_online_polls_no_triggers(tmp_path):
+    rcon = FakeRcon([])
+    _run(_director(tmp_path, rcon), 0, 3)
+    assert not rcon.since(0, ("scoreboard", "execute if score"))
 
 
 GLIDE = f"tp {w.CAM_SELECTOR} "
@@ -566,6 +652,73 @@ def test_spec_run_reports_to_the_director_and_shows_no_title(watch_dir, monkeypa
     assert events[0]["box"] == [ox, oy, oz, ox + 3, oy + 2, oz + 4] and events[0]["server"] == "main"
     assert json.loads((watch_dir / "status" / "main.json").read_text())["text"].startswith("fake: expect")
     assert started and not [c for c in commands if c.startswith("title")]
+
+
+# ---- camera check --------------------------------------------------------------------------
+
+REPLY = ("Item Display has the following entity data: {Motion: [0.0d, 0.0d, 0.0d], teleport_duration: 6, "
+         "Tags: [\"watch_cam\", \"watch_cam_Jack\"], OnGround: 0b, Rotation: [-12.5f, 35.0f], "
+         "Pos: [131.25d, 70.5d, 99.875d], item: {id: \"minecraft:air\"}}")
+
+
+def test_parse_pose_reads_position_and_rotation():
+    assert w.parse_pose(REPLY) == (131.25, 70.5, 99.875, -12.5, 35.0)
+    assert w.parse_pose("No entity was found") is None
+
+
+def _samples(xs, every=1, yaw=None):
+    return [(1000 + i * every, (x, 70.0, 100.0, (yaw or [0.0] * len(xs))[i], 35.0), 6) for i, x in enumerate(xs)]
+
+
+def test_pose_stats_of_a_steady_dolly():
+    # Moved every 5 ticks, read every tick.
+    xs = [100 + 0.05 * (i // 5) for i in range(100)]
+    st = w.pose_stats(_samples(xs))
+    x = st["axes"]["x"]
+    assert st["changes"] == 19 and st["cadence"] == 5 and st["sampled_ticks"] == 100 and st["durations"] == [6]
+    assert x["moves"] == 19 and x["reversals"] == 0 and not x["shaking"]
+    assert x["step"] == pytest.approx(0.05) and x["speed"] == pytest.approx(0.01)
+    assert x["jerk"] == pytest.approx(0, abs=1e-9)
+    assert x["net"] == pytest.approx(0.95) and x["path"] == pytest.approx(0.95)
+    assert st["axes"]["z"]["moves"] == 0 and st["axes"]["yaw"]["moves"] == 0
+
+
+def test_pose_stats_flags_shaking_in_place():
+    st = w.pose_stats(_samples([100 + 0.1 * (i % 2) for i in range(20)], every=5))
+    x = st["axes"]["x"]
+    assert x["reversals"] == 18 and x["shaking"] and x["net"] < 0.2 < 1.5 < x["path"]
+    assert "SHAKING" in w.format_stats("watch_cam_Jack", st)
+
+
+def test_pose_stats_wraps_yaw():
+    st = w.pose_stats(_samples([100.0] * 3, yaw=[179.5, -179.5, -178.5]))
+    y = st["axes"]["yaw"]
+    assert y["moves"] == 2 and y["max_step"] == pytest.approx(1) and y["reversals"] == 0
+
+
+def test_sample_poses_only_reads():
+    class Clock:
+        t = 0.0
+
+        def __call__(self):
+            return self.t
+
+        def sleep(self, s):
+            self.t += max(s, 0.05)
+
+    clock = Clock()
+    rcon = FakeRcon(["Jack"])
+    real = rcon.cmd
+
+    def cmd(c):
+        got = real(c)
+        if c == "time query gametime":
+            return f"The time is {int(1000 + clock.t * 20)}"
+        return REPLY if c.startswith("data get entity ") else got
+    rcon.cmd = cmd
+    got = w.sample_poses(rcon, 1.0, clock=clock, sleep=clock.sleep)
+    assert list(got) == ["Jack"] and len(got["Jack"]) == 20 and got["Jack"][0] == (1000, w.parse_pose(REPLY), 6)
+    assert all(c.startswith(("list", "time query ", "data get entity ")) for c in rcon.log)
 
 
 def test_offline_fake_rig_reports_nothing(watch_dir, monkeypatch):
