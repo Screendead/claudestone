@@ -1,0 +1,102 @@
+name: add_half_2gt
+description: >-
+  Half adder with sum and carry both in 2 game ticks, every edge, no glitches, for inputs
+  that are redstone blocks arriving in and leaving their cells (the harness driver, or a
+  block moved in by a piston); a lever or dust at a or b is wrong. Layout (x east, z south,
+  logic layer 1): a (1,4), b (3,4). Carry is the dec_2to4_2gt AND: D1 (1,5) and D2 (3,5)
+  are ends of dust fed at strength 14 from dust on redstone blocks at (0,5) and (4,5), so
+  they point into the stone Z (2,5) until a or b lands north of them and bends them; Z is
+  NAND at 0 ticks and the wall torch T (2,4) between a and b, hung on Z, is a AND b. The
+  feed must be below 15: the jump to 15 from the arriving block is what updates Z's
+  neighbours (with D1, D2 standing on redstone blocks the torch never relit). Sum: two
+  subtract comparators (1,2) and (3,2) face each other into the sum dust (2,2); their
+  sides are dusts (1,3) and (3,3) touching a and b (15 when that input is there), their
+  rears (0,2) and (4,2) are on a dust ring round the north that picks up a at (1,3) and b
+  at (3,3), so each rear sees the other input and each side beats its own. The sum leaves
+  at strength 2 (the ring reaches a comparator's side 2 steps after its rear), so take it
+  out by a repeater within one block; the carry torch strongly powers the block above it.
+  Keep (0,4), (4,4), (2,3), (1,5)-(3,5) south faces free of power readers. Not lightless:
+  one comparator stage cannot AND two levels, so the carry needs the torch. Against
+  add_half_comparator_flat (sum 2, carry 4 gt, 6x2x5 = 60, lightless, any full-strength
+  source): carry in half the time in the same 60 volume, but a torch and block-only
+  inputs.
+traits: [ultrafast, fast, silent, pistonless, entityless, flat, torch_based, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  Z: stone
+  '-': redstone_wire
+  W: 'comparator[facing=west,mode=subtract]'
+  E: 'comparator[facing=east,mode=subtract]'
+  a: {input: a}
+  b: {input: b}
+  s: {output: sum, block: redstone_wire}
+  T: {output: carry, block: 'redstone_wall_torch[facing=north]'}
+layers:
+  0: |
+    =====
+    =====
+    =====
+    =====
+    =====
+    R=.=R
+  1: |
+    -----
+    -...-
+    -WsE-
+    --.--
+    .aTb.
+    --Z--
+tests:
+- name: logic
+  truth_table: |
+    a b | sum carry
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 1 0
+    1 1 | 0 1
+    0 0 | 0 0
+    1 1 | 0 1
+    1 0 | 1 0
+    0 1 | 1 0
+    1 1 | 0 1
+    0 0 | 0 0
+  delay: 2
+  glitch_free: true
+  delays: {sum: {rise: 2, fall: 2}, carry: {rise: 2, fall: 2}}
+- name: transitions
+  steps:
+  - wave: {sum: '0000', carry: '0000'}
+  - drive: {a: 1}
+  - wave: {sum: '001111', carry: '000000'}
+  - drive: {b: 1}
+  - wave: {sum: '110000', carry: '001111'}
+  - drive: {a: 0}
+  - wave: {sum: '001111', carry: '110000'}
+  - drive: {a: 1, b: 0}
+  - wave: {sum: '111111', carry: '000000'}
+  - drive: {a: 0, b: 1}
+  - wave: {sum: '111111', carry: '000000'}
+  - drive: {a: 1}
+  - wave: {sum: '110000', carry: '001111'}
+  - drive: {a: 0, b: 0}
+  - wave: {sum: '000000', carry: '110000'}
+  - drive: {b: 1, a: 1}
+  - wave: {sum: '000000', carry: '001111'}
+  - drive: {b: 0}
+  - wave: {sum: '001111', carry: '110000'}
+  - drive: {a: 0}
+  - wave: {sum: '110000', carry: '000000'}
+- name: sum strength
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - log: data get block ~1 ~1 ~2 OutputSignal
+  - log: data get block ~3 ~1 ~2 OutputSignal
+  - level: {sum: 2}
+  - drive: {a: 0, b: 1}
+  - wait: 4
+  - log: data get block ~1 ~1 ~2 OutputSignal
+  - log: data get block ~3 ~1 ~2 OutputSignal
+  - level: {sum: 2}

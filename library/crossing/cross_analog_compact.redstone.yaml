@@ -1,0 +1,282 @@
+name: cross_analog_compact
+description: 'A crossing that keeps both strengths: every level 1-15 leaves each line exactly as it arrived, 2 ticks on both, in 3x3x4 with 13 blocks. It is the underpass with a compare-mode comparator on each line: A (y1, west to east) is dust into comparator ca under block X and out as dust; B (y2, north to south) is dust into X, read by comparator cb standing on a support beside ca, and out as dust. ca reads only its back, so X above it and the support at its north side, weakly powered by b_in on top of it (a solid block is no side input), never reach A; X is powered only by B''s dust, so cb sees B alone. Interface: A arrives at a_in (dust at strength n) and a_out carries n; B arrives at b_in (dust pointing into X, at strength n) and b_out carries n. Test scaffolding (fixtures): a hopper read by a comparator behind each input sets its strength by item count; drivers a (beside a_in) and b (on top of b_in, so b_in keeps pointing into X) give 15 for the timing test. Versus cross_analog_underpass: A keeps its strength too instead of losing 1 a block, at 2 ticks instead of 0 on A.'
+traits:
+- analog
+- comparator_based
+- fast
+- lightless
+- silent
+- pistonless
+- entityless
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '+': {block: smooth_stone, fixture: true}
+  H: {block: 'hopper[facing=down]', fixture: true}
+  S: {block: 'comparator[facing=west,mode=compare]', fixture: true}
+  T: {block: 'comparator[facing=north,mode=compare]', fixture: true}
+  i: {name: a_in, block: 'redstone_wire[east=side,west=side]'}
+  C: {name: ca, block: 'comparator[facing=west,mode=compare]'}
+  o: {output: a_out, block: 'redstone_wire[east=side,west=side]'}
+  j: {name: b_in, block: 'redstone_wire[north=side,south=side]'}
+  '#': white_concrete
+  K: {name: cb, block: 'comparator[facing=north,mode=compare]'}
+  p: {output: b_out, block: 'redstone_wire[north=side,south=side]'}
+  a: {input: a}
+  b: {input: b}
+layers:
+  0: |
+    .....
+    .....
+    .....
+    .+===
+    .....
+    .....
+  1: |
+    .....
+    ...+.
+    ...=.
+    HSiCo
+    ..a=.
+    ...=.
+  2: |
+    ...H.
+    ...T.
+    ...j.
+    ...#.
+    ...K.
+    ...p.
+  3: |
+    .....
+    .....
+    ...b.
+    .....
+    .....
+    .....
+tests:
+- name: independent at 15
+  glitch_free: true
+  truth_table: |
+    a b | a_out b_out
+    0 0 | 0 0
+    0 1 | 0 1
+    1 1 | 1 1
+    1 0 | 1 0
+    1 1 | 1 1
+    0 0 | 0 0
+    1 0 | 1 0
+    0 1 | 0 1
+  delay: 2
+- name: A strengths 1-15, B off
+  steps:
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 1, ca: 1, a_out: 1, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:23}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 2, ca: 2, a_out: 2, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:46}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 3, ca: 3, a_out: 3, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:5}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 4, ca: 4, a_out: 4, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:28}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 5, ca: 5, a_out: 5, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:51}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 6, ca: 6, a_out: 6, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:10}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 7, ca: 7, a_out: 7, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:32}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 8, ca: 8, a_out: 8, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:55}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 9, ca: 9, a_out: 9, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:14}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 10, ca: 10, a_out: 10, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:37}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 11, ca: 11, a_out: 11, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:60}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 12, ca: 12, a_out: 12, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:19}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 13, ca: 13, a_out: 13, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:42}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 14, ca: 14, a_out: 14, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 15, ca: 15, a_out: 15, b_in: 0, cb: 0, b_out: 0}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 0, cb: 0, b_out: 0}
+- name: B strengths 1-15, A off
+  steps:
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 1, cb: 1, b_out: 1}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:23}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 2, cb: 2, b_out: 2}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:46}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 3, cb: 3, b_out: 3}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:5}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 4, cb: 4, b_out: 4}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:28}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 5, cb: 5, b_out: 5}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:51}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 6, cb: 6, b_out: 6}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:10}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 7, cb: 7, b_out: 7}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:32}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 8, cb: 8, b_out: 8}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:55}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 9, cb: 9, b_out: 9}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:14}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 10, cb: 10, b_out: 10}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:37}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 11, cb: 11, b_out: 11}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:60}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 12, cb: 12, b_out: 12}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:19}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 13, cb: 13, b_out: 13}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:42}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 14, cb: 14, b_out: 14}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 15, cb: 15, b_out: 15}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 0, cb: 0, b_out: 0}
+- name: both lines, every strength against its complement
+  steps:
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}'
+  - wait: 6
+  - level: {a_in: 1, ca: 1, a_out: 1, b_in: 15, cb: 15, b_out: 15}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:23}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:42}]}'
+  - wait: 6
+  - level: {a_in: 2, ca: 2, a_out: 2, b_in: 14, cb: 14, b_out: 14}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:46}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:19}]}'
+  - wait: 6
+  - level: {a_in: 3, ca: 3, a_out: 3, b_in: 13, cb: 13, b_out: 13}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:5}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:60}]}'
+  - wait: 6
+  - level: {a_in: 4, ca: 4, a_out: 4, b_in: 12, cb: 12, b_out: 12}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:28}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:37}]}'
+  - wait: 6
+  - level: {a_in: 5, ca: 5, a_out: 5, b_in: 11, cb: 11, b_out: 11}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:51}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:14}]}'
+  - wait: 6
+  - level: {a_in: 6, ca: 6, a_out: 6, b_in: 10, cb: 10, b_out: 10}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:10}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:55}]}'
+  - wait: 6
+  - level: {a_in: 7, ca: 7, a_out: 7, b_in: 9, cb: 9, b_out: 9}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:32}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:32}]}'
+  - wait: 6
+  - level: {a_in: 8, ca: 8, a_out: 8, b_in: 8, cb: 8, b_out: 8}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:55}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:10}]}'
+  - wait: 6
+  - level: {a_in: 9, ca: 9, a_out: 9, b_in: 7, cb: 7, b_out: 7}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:14}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:51}]}'
+  - wait: 6
+  - level: {a_in: 10, ca: 10, a_out: 10, b_in: 6, cb: 6, b_out: 6}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:37}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:28}]}'
+  - wait: 6
+  - level: {a_in: 11, ca: 11, a_out: 11, b_in: 5, cb: 5, b_out: 5}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:60}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:5}]}'
+  - wait: 6
+  - level: {a_in: 12, ca: 12, a_out: 12, b_in: 4, cb: 4, b_out: 4}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:19}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:46}]}'
+  - wait: 6
+  - level: {a_in: 13, ca: 13, a_out: 13, b_in: 3, cb: 3, b_out: 3}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:42}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:23}]}'
+  - wait: 6
+  - level: {a_in: 14, ca: 14, a_out: 14, b_in: 2, cb: 2, b_out: 2}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 6
+  - level: {a_in: 15, ca: 15, a_out: 15, b_in: 1, cb: 1, b_out: 1}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 6
+  - level: {a_in: 1, ca: 1, a_out: 1, b_in: 1, cb: 1, b_out: 1}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:10}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:10}]}'
+  - wait: 6
+  - level: {a_in: 7, ca: 7, a_out: 7, b_in: 7, cb: 7, b_out: 7}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}'
+  - wait: 6
+  - level: {a_in: 15, ca: 15, a_out: 15, b_in: 15, cb: 15, b_out: 15}
+  - run: 'data merge block ~0 ~1 ~3 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~0 {Items:[]}'
+  - wait: 6
+  - level: {a_in: 0, ca: 0, a_out: 0, b_in: 0, cb: 0, b_out: 0}

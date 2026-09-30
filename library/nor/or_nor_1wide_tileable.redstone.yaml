@@ -1,0 +1,90 @@
+name: or_nor_1wide_tileable
+description: >-
+  A lightless, silent two-input NOR bus at pitch 1 in z, 2 ticks per lane: or_nor_comparator
+  turned to face along the bus on the staircase of not_comparator_1wide_bus. Each lane is a
+  subtract comparator facing south whose west side is input a and east side input b, and whose
+  back is a redstone block in the next lane's column; lanes climb a 3-step staircase (lane k
+  at y = 1 + k mod 3), so each redstone block is also the support of the next lane's
+  comparator and no comparator side touches another lane. Interface per lane k (z = k,
+  h = 1 + k mod 3): a at (0,h,k), b at (2,h,k), comparator at (1,h,k), redstone block at
+  (1,h,k+1). Output: the comparator, driving north into the air cell (1,h,k-1), strength
+  15 - max(a, b). Lane 0 stands on smooth stone at (1,0,0). Three lanes fill 1x4x4 between
+  the two input columns (16 cells, 7 blocks); an unbounded bus is 1x4 per lane (4 cells) and
+  2 blocks per lane plus one support per three lanes. Delay 2 ticks. Trade-off versus
+  or_nor_comparator (1x2x2, same speed, not tileable because its inputs are on the sides):
+  lanes pack at pitch 1 with the inputs on both faces of the bus, at the price of a
+  staircase interface; inputs must arrive at strength 15 (analog subtract).
+traits: [tileable, one_wide, compact, fast, lightless, silent, pistonless, entityless, comparator_based, analog, survival_friendly, reset_safe]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  a: {input: a0}
+  b: {input: b0}
+  c: {input: a1}
+  d: {input: b1}
+  e: {input: a2}
+  f: {input: b2}
+  x: {output: n0, block: 'comparator[facing=south,mode=subtract]'}
+  y: {output: n1, block: 'comparator[facing=south,mode=subtract]'}
+  z: {output: n2, block: 'comparator[facing=south,mode=subtract]'}
+layers:
+  0: |
+    .=.
+    ...
+    ...
+    ...
+  1: |
+    axb
+    .R.
+    ...
+    ...
+  2: |
+    ...
+    cyd
+    .R.
+    ...
+  3: |
+    ...
+    ...
+    ezf
+    .R.
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 a2 b2 | n0 n1 n2
+    0  0  0  0  0  0  | 1  1  1
+    0  1  0  0  0  0  | 0  1  1
+    1  1  0  1  0  0  | 0  0  1
+    1  0  1  1  0  1  | 0  0  0
+    0  0  1  0  1  1  | 1  0  0
+    0  1  0  0  1  0  | 0  1  0
+    1  1  0  1  0  0  | 0  0  1
+    1  0  1  1  0  1  | 0  0  0
+    0  0  1  0  1  1  | 1  0  0
+    0  0  0  0  1  0  | 1  1  0
+  delay: 2
+- name: handover
+  steps:
+  - drive: {a0: 1}
+  - wait: 2
+  - expect: {n0: 0}
+  - drive: {a0: 0, b0: 1}
+  - wave: {n0: '00000'}
+  - drive: {b0: 0}
+  - wave: {n0: '0011'}
+- name: tiles at pitch 1
+  tile: [0, 0, 3]
+  truth_table: |
+    a0 b0 a1 b1 a2 b2 | n0 n1 n2
+    0  0  0  0  0  0  | 1  1  1
+    0  1  0  0  0  0  | 0  1  1
+    1  1  0  1  0  0  | 0  0  1
+    1  0  1  1  0  1  | 0  0  0
+    0  0  1  0  1  1  | 1  0  0
+    0  1  0  0  1  0  | 0  1  0
+    1  1  0  1  0  0  | 0  0  1
+    1  0  1  1  0  1  | 0  0  0
+    0  0  1  0  1  1  | 1  0  0
+    0  0  0  0  1  0  | 1  1  0
+  delay: 2

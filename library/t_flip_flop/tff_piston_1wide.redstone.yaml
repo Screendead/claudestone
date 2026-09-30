@@ -1,0 +1,140 @@
+name: tff_piston_1wide
+description: >-
+  One-wide, dust-free T flip-flop with no copper bulb, so copies tile at a 1-block pitch
+  (tested). State is a redstone block that a sticky piston spits back and forth; a rising
+  edge is told from a falling one by a stone bridge that t itself slides into place. t
+  drives two cells: (x0,y0,z2), beside sticky piston S (x0,y0,z3, facing up), and
+  (x0,y2,z0), which observer O1 (x0,y2,z1, facing north) watches; observer O2 (x0,y2,z2,
+  facing north) watches O1, so it fires a 2 gt pulse 4 gt after either edge, into the
+  bridge cell (x0,y2,z3). While t is high S holds the stone (rest x0,y1,z3) in that cell,
+  where O2's pulse hard-powers it and it powers sticky piston P (x0,y2,z4, facing south)
+  for 2 gt; after a falling edge S has already pulled the stone down and the pulse goes
+  into air. A 2 gt pulse makes P spit: the redstone block goes from (x0,y2,z5) to
+  (x0,y2,z6) and stays, and the next pulse pulls it back. q is the note block
+  (x0,y1,z6) under the far position. Delay exactly 6 gt on both output edges (S 3 gt to
+  land, O1 and O2 4 gt, P 2 gt), rising edges only. Input timing (tested): pulses of at
+  least 3 gt and gaps of at least 4 gt; a gap of 3 gt or less loses the next edge, and
+  a train of 2 gt pulses miscounts. Nothing reaches sideways (observers, pistons and a
+  note block; the redstone block and the powered stone only touch the same cells of the
+  neighbouring copy), hence tileable. 1x3x6, volume 18, 7 blocks; the t cell at
+  (x0,y0,z2) is inside that footprint. Trade-off: the smallest rising-edge flip-flop here
+  without a bulb (tff_dropper_hold 30, tff_sticky_spit 36, both 6 gt) and the only
+  bulb-free one-wide one, but it is loud, moves blocks and is 3 times slower than
+  tff_copper_bulb (volume 4, 2 gt).
+traits: [one_wide, tileable, compact, vertical, piston_based, observer_based, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  t: {input: t}
+  S: sticky_piston[facing=up]
+  X: stone
+  o: observer[facing=north]
+  P: sticky_piston[facing=south]
+  R: redstone_block
+  _: {reserve: true}
+  q: {output: q, block: note_block}
+layers:
+  0: |
+    .
+    .
+    t
+    S
+    .
+    .
+    .
+  1: |
+    .
+    .
+    .
+    X
+    .
+    .
+    q
+  2: |
+    t
+    o
+    o
+    _
+    P
+    R
+    _
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on rising edges
+  truth_table: |
+    t | q
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 6
+- name: output flips exactly 6 gt after each rising edge and never on a falling one
+  steps:
+  - drive: {t: 1}
+  - wave: {q: '00000011111111111111'}
+  - drive: {t: 0}
+  - wave: {q: '11111111111111111111'}
+  - drive: {t: 1}
+  - wave: {q: '11111100000000000000'}
+  - drive: {t: 0}
+  - wave: {q: '00000000000000000000'}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+- name: tiles at pitch 1
+  tile: [1, 0, 0]
+  truth_table: |
+    t | q
+    0 | 0
+    1 | 1
+    0 | 1
+    1 | 0
+    0 | 0
+  delay: 6
+- name: 3 gt pulses with 4 gt gaps all count
+  steps:
+  - repeat:
+      times: 3
+      steps:
+      - drive: {t: 1}
+      - wait: 3
+      - drive: {t: 0}
+      - wait: 4
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 0}
+- name: 6 gt pulses with 4 gt gaps all count
+  steps:
+  - repeat:
+      times: 3
+      steps:
+      - drive: {t: 1}
+      - wait: 6
+      - drive: {t: 0}
+      - wait: 4
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 6
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 0}
+- name: a 3 gt gap loses the second rising edge
+  steps:
+  - drive: {t: 1}
+  - wait: 20
+  - drive: {t: 0}
+  - wait: 3
+  - drive: {t: 1}
+  - wait: 30
+  - expect: {q: 1}

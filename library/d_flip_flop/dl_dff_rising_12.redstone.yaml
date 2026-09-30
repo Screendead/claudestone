@@ -1,0 +1,176 @@
+name: dl_dff_rising_12
+description: "Rising-edge D flip-flop in 3x2x2 (12 cells), wiki design H: two repeater-lock latches in series, the slave's lock inverted by a torch. d enters the master repeater m (delay 2) from the north; m feeds the slave repeater q, which outputs south. Clk must arrive as power into the block B (a dust line, repeater or lever on it, as in the wiki); here a fixture repeater from the clk driver does that, so measured times include its 2 gt. B feeds the master lock M (locked while clk is high) and holds the wall torch T, which feeds the slave lock S (locked while clk is low). By the repeater delays (not measured cell by cell), from B the master locks at 2 gt and the slave unlocks at 4 gt on the rise, and on the fall the slave locks at 4 gt while m's new value cannot reach q before 6 gt; m has delay 2 to give that 2 gt margin. Measured from the clk driver: q follows d 8 gt after the rising edge; a d change on the edge tick itself (in either order with clk) is captured and one from the next tick on is ignored, so setup and hold are both 0 ticks. Not lightless (the torch), and the torch toggles twice per clock cycle, so 4 cycles within 60 gt (8 toggles) burn it out. Trade-off against dl_dff_rising (18 cells, 4 gt, lightless, bare redstone block as clk): 12 cells, slower, and clk must power a block."
+traits: [ultracompact, flat, horizontal, silent, pistonless, entityless, torch_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  d: {input: d}
+  c: {input: clk}
+  m: repeater[facing=north,delay=2]
+  q: {output: q, block: 'repeater[facing=north]'}
+  M: repeater[facing=east]
+  S: repeater[facing=east]
+  B: white_concrete
+  T: redstone_wall_torch[facing=south]
+  R: {block: 'repeater[facing=east]', fixture: true}
+  f: {block: smooth_stone, fixture: true}
+layers:
+  0: |
+    .....
+    ==.f.
+    ==...
+  1: |
+    d....
+    mMBRc
+    qST..
+tests:
+- name: captures on the rising edge in 8 ticks
+  steps:
+  - expect: {q: 0}
+  - drive: {d: 1}
+  - wait: 10
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wait: 7
+  - expect: {q: 0}
+  - wait: 1
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {clk: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {d: 0}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {clk: 1}
+  - wait: 7
+  - expect: {q: 1}
+  - wait: 1
+  - expect: {q: 0}
+- name: d on the edge tick is captured, one tick later is ignored
+  steps:
+  - drive: {d: 1}
+  - wait: 1
+  - drive: {clk: 1}
+  - wave: {q: '0000000011111111111111111111'}
+  - drive: {clk: 0}
+  - wait: 20
+  - drive: {d: 0, clk: 1}
+  - wave: {q: '111111110000000000000000'}
+  - drive: {clk: 0}
+  - wait: 20
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {d: 1}
+  - wave: {q: '000000000000000000000000'}
+  - drive: {clk: 0}
+  - wait: 20
+  - expect: {q: 0}
+  - drive: {clk: 1}
+  - wave: {q: '0000000011111111111111111111'}
+  - drive: {clk: 0}
+  - wait: 20
+  - drive: {clk: 1}
+  - wait: 1
+  - drive: {d: 0}
+  - wave: {q: '111111111111111111111111'}
+  - drive: {clk: 0}
+  - wait: 20
+  - expect: {q: 1}
+- name: clk first then d in the same tick is captured
+  steps:
+  - drive: {clk: 1, d: 1}
+  - wave: {q: '000000001111111111111111'}
+  - drive: {clk: 0}
+  - wait: 20
+  - drive: {clk: 1, d: 0}
+  - wave: {q: '111111110000000000000000'}
+- name: falling edge never passes d
+  steps:
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 10
+  - expect: {q: 1}
+  - drive: {d: 0}
+  - wait: 10
+  - drive: {clk: 0}
+  - wave: {q: '111111111111111111111111'}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 1}
+  - wait: 20
+  - drive: {clk: 0, d: 0}
+  - wave: {q: '111111111111111111111111'}
+  - drive: {d: 1}
+  - wait: 20
+  - drive: {clk: 1}
+  - wait: 20
+  - drive: {clk: 0}
+  - wait: 1
+  - drive: {d: 0}
+  - wave: {q: '111111111111111111111111'}
+  - drive: {clk: 1}
+  - wave: {q: '1111111100000000'}
+- name: seven cycles with d flipped after each edge
+  steps:
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '0000000011111111'}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '111111111111'}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '1111111111111111'}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '111111111111'}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '1111111100000000'}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '000000000000'}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '0000000011111111'}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '111111111111'}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '1111111100000000'}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '000000000000'}
+  - drive: {d: 0}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '0000000000000000'}
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '000000000000'}
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {clk: 1}
+  - wave: {q: '0000000011111111'}
+  - drive: {d: 0}
+  - wait: 4
+  - drive: {clk: 0}
+  - wave: {q: '111111111111'}

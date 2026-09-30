@@ -1,0 +1,64 @@
+name: not_rail_redirect_instant
+description: |
+  An inverter with no delay on either edge: its output, a powered rail, turns off in the same
+  game tick the input turns on and back on in the same tick it turns off. A redstone block
+  feeds two dust; the second (bend) is a straight line pointing east into the rail, so the
+  rail is powered. The input's redstone block beside the bend makes it connect north and
+  turn the corner, so it stops pointing into the rail. A shape change alone sends no block
+  update (seen in pulse_dual_edge_instant), so the bend sits one dust from the source (14): the input lifts it to 15, and
+  that power change updates the rail in the same pass (back to 14 on release).
+  Interface: source redstone block at (0,1,1), dust (1,1,1) and bend (2,1,1) on supports,
+  output powered_rail[shape=east_west] at (3,1,1). Input: a redstone block, or anything
+  dust connects to that raises the bend's power, at (2,1,0) north of the bend; it must not
+  touch the rail. Delay 0 both edges.
+  Trade-off: the fastest NOT possible (not_piston_fast_off falls in 1 tick and rises in 3,
+  and no piston can act before the next tick's block events), but the output is a rail's
+  powered state, not a redstone signal: it drives a powered-rail line (up to 8 more rails,
+  also in 0 ticks), minecarts, or an observer (2 ticks) to get back into dust logic. Only
+  the rail is tested as a consumer: a lamp or piston in its place would see the same power
+  but add its own delay.
+traits: [instant, pistonless, entityless, silent, lightless, flat, compact, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  '-': redstone_wire
+  d: {name: bend, block: redstone_wire}
+  o: {output: out, block: 'powered_rail[shape=east_west]'}
+  a: {input: a}
+layers:
+  0: |
+    ....
+    .===
+  1: |
+    ..a.
+    R-do
+tests:
+- name: logic
+  truth_table: |
+    a | out
+    0 | 1
+    1 | 0
+    0 | 1
+    1 | 0
+  delay: 0
+  glitch_free: true
+- name: both edges in the drive's own tick
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - level: {bend: 15}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - level: {bend: 14}
+  - wait: 1
+  - drive: {a: 1}
+  - expect: {out: 0}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}

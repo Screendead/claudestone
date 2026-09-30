@@ -1,0 +1,168 @@
+name: rs_copper_bulb_compact
+description: >-
+  One-wide copper-bulb RS latch in 3x4x1 (9 blocks): q is the bulb's lit state, set in
+  0 gt and reset in 4 gt. A subtract comparator C reads the bulb O and hard-powers the
+  stone in front of it; dust on that stone climbs onto an observer sitting on C, runs
+  flat onto a stone on top of O and powers it, so a lit bulb keeps itself powered and a
+  further set edge is masked. The observer watches C: when r (C's side) cuts C, the loop
+  drops and O is left unpowered but lit, then 2 gt later the observer's pulse drives the
+  loop dust from below and that fresh rising edge toggles O off. An unlit bulb leaves C
+  off, so r does nothing there and the observer stays quiet. Power must run up the step
+  onto the observer, not down: an observer is not a conductor, so dust stepping down off
+  it gets nothing (the first try, dust coming down onto O, never lit). Interface (side
+  view, north = z0): O at (x0,y1,z0); s is the cell under O (x0,y0,z0), inside the
+  footprint; r is the cell south of C (x1,y1,z1), outside it. Hold s at least 2 gt; a 2
+  gt reset pulse is enough. Reset acts on r's rising edge; r's falling edge does nothing.
+  s held through a reset keeps O powered, so set wins; s rising during a held r and held
+  past r's fall also ends set. s and r rising in the same tick is untested. Starts set:
+  the data pack's clone pass makes the observer fire once after placement; a build
+  placed reset (bulb unlit, observer powered=true) was lit by that pulse and fell into
+  the oscillation below, so the build is placed in its settled set state, where the
+  pulse is harmless. Built by hand the state is unknown and may be the oscillation, which r cannot end:
+  drive s for 10 gt once after building (see the hazard).
+  Hazard: a set pulse that starts and ends inside a reset leaves O lit but unpowered, and
+  when r falls C and the observer toggle O every 2 gt (a 4 gt clock); a further reset
+  only pauses it, and a 10 gt set pulse ended it set in the tested phase. Keep s and r
+  apart, or hold s past r's fall. The bulb lights and clicks, so not lightless or
+  silent. one_wide only in footprint: r must reach C's side from z1, so copies cannot
+  tile at a 1-block pitch. Against rs_copper_bulb (2x4x5 = 40, 15 blocks, reset 10 gt): 12, 9 blocks,
+  set 0 gt, reset 4 gt.
+traits: [observer_based, comparator_based, vertical, pistonless, entityless, one_wide, compact, fast, reset_safe, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  X: stone
+  C: 'comparator[facing=west,mode=subtract,powered=true]{OutputSignal:15}'
+  W: observer[facing=down]
+  Y: stone
+  e: redstone_wire[west=up,east=side,north=none,south=none,power=15]
+  f: redstone_wire[east=side,west=side,north=none,south=none,power=14]
+  g: redstone_wire[east=side,west=side,north=none,south=none,power=13]
+  s: {input: s}
+  r: {input: r}
+  q: {output: q, block: 'waxed_copper_bulb[lit=true,powered=true]'}
+layers:
+  0: |
+    s=.
+    ...
+  1: |
+    qCX
+    .r.
+  2: |
+    YWe
+    ...
+  3: |
+    gf.
+    ...
+tests:
+- name: placed set
+  steps:
+  - wave: {q: '11111111111111111111'}
+- name: sequence
+  truth_table: |
+    s r | q
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+  delays: {q: {rise: 0, fall: 4}}
+  glitch_free: true
+- name: reset 4 gt after the rising edge, set 0 gt
+  steps:
+  - drive: {r: 1}
+  - wave: {q: '11110000000000000000'}
+  - drive: {r: 0}
+  - wave: {q: '00000000000000000000'}
+  - drive: {s: 1}
+  - wave: {q: '1111'}
+  - drive: {s: 0}
+  - wave: {q: '11111111111111111111'}
+- name: two gt set pulse latches
+  steps:
+  - drive: {r: 1}
+  - {wait: 10}
+  - drive: {r: 0}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {s: 1}
+  - {wait: 2}
+  - drive: {s: 0}
+  - wave: {q: '11111111111111111111'}
+- name: two gt reset pulse clears
+  steps:
+  - drive: {r: 1}
+  - {wait: 2}
+  - drive: {r: 0}
+  - wave: {q: '11000000000000000000'}
+- name: set held through a reset wins
+  steps:
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {r: 1}
+  - wave: {q: '11111111111111111111'}
+  - drive: {r: 0}
+  - {wait: 20}
+  - drive: {s: 0}
+  - wave: {q: '11111111111111111111'}
+- name: repeated sets and resets are idempotent
+  steps:
+  - drive: {r: 1}
+  - {wait: 20}
+  - drive: {r: 0}
+  - {wait: 20}
+  - drive: {r: 1}
+  - {wait: 20}
+  - drive: {r: 0}
+  - {wait: 20}
+  - expect: {q: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+- name: a set pulse inside a reset leaves a 4 gt oscillation
+  steps:
+  - drive: {r: 1}
+  - {wait: 10}
+  - expect: {q: 0}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - {wait: 10}
+  - expect: {q: 1}
+  - drive: {r: 0}
+  - wave: {q: '110011001100110011001100'}
+  - drive: {r: 1}
+  - wave: {q: '11111111111111111111'}
+  - drive: {r: 0}
+  - wave: {q: '110011001100110011001100'}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {s: 0}
+  - wave: {q: '11111111111111111111'}
+  - drive: {r: 1}
+  - {wait: 10}
+  - drive: {r: 0}
+  - wave: {q: '00000000000000000000'}
+- name: set rising under a held reset and held past its fall ends set
+  steps:
+  - drive: {r: 1}
+  - {wait: 10}
+  - drive: {s: 1}
+  - {wait: 10}
+  - drive: {r: 0}
+  - {wait: 10}
+  - drive: {s: 0}
+  - wave: {q: '11111111111111111111'}

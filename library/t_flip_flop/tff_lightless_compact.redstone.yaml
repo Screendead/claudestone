@@ -1,0 +1,135 @@
+name: tff_lightless_compact
+description: >-
+  Falling-edge T flip-flop from two hoppers that share one item, with no delay loop.
+  Hopper A (x0,y1,z2, facing east) and hopper B (x1,y1,z2, facing west) sit under a lock
+  line of two dust (y2). The lock is t OR not-t: t itself powers the dust at (x0,y2,z2),
+  and the subtract comparator L (x1,y2,z1, facing north, rear on the redstone block at
+  x1,y2,z0, side = t) feeds 15 - t into the dust at (x1,y2,z2). While t is high the driver
+  holds the lock; when t falls, L still outputs 0 for its 2 gt delay, so both hoppers are
+  unlocked for that window, the holder pushes the item across, and the receiver's
+  transfer cooldown (about 8 gt) outlasts the window. A rising edge never unlocks
+  anything, so no delayed copy of t is needed. q is the comparator (x0,y1,z1, facing
+  south, on smooth stone) reading A at strength 1; it powers the cell north of it, (x0,y1,z0), inside the
+  build. t is the cell (x0,y2,z1), inside the footprint: it must be a redstone block (the
+  comparator under it cannot hold dust), because it has to power the lock dust as well as
+  L's side; a hard-powered solid block there would drive the dust but not L's side. 2x3x3 of blocks, 9 blocks, floor
+  included. Delay exactly 3 gt after the falling edge. High pulses must last at least 2 gt
+  (a 1 gt pulse never drops L, so the next fall does nothing); a low pulse of 1 gt counts;
+  falling edges must be at least 7 gt apart (at 6 the receiver is still cooling down and
+  the second edge is lost). Trade-off: volume 18 against 40 for tff_lightless_lock and 75
+  for tff_hopper_fast, and 3 gt against their 6 and 4, still silent and lightless with
+  its state in an item; but it toggles on the falling edge, and its input cell sits
+  inside the build.
+traits: [silent, lightless, pistonless, entityless, container_based, comparator_based, compact, fast, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  K: redstone_block
+  L: 'comparator[facing=north,mode=subtract,powered=true]{OutputSignal:15}'
+  A: 'hopper[facing=east,enabled=false]'
+  B: 'hopper[facing=west,enabled=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}],TransferCooldown:20}'
+  t: {input: t}
+  q: {output: q, block: 'comparator[facing=south]'}
+layers:
+  0: |
+    ..
+    =.
+    ..
+  1: |
+    ..
+    q=
+    AB
+  2: |
+    .K
+    tL
+    --
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: toggles on falling edges
+  truth_table: |
+    t | q
+    1 | 0
+    0 | 1
+    1 | 1
+    0 | 0
+  delay: 3
+- name: output flips exactly 3 gt after each falling edge and never on a rising one
+  steps:
+  - drive: {t: 1}
+  - wave: {q: '00000000000000000000'}
+  - drive: {t: 0}
+  - wave: {q: '00011111111111111111'}
+  - drive: {t: 1}
+  - wave: {q: '11111111111111111111'}
+  - drive: {t: 0}
+  - wave: {q: '11100000000000000000'}
+- name: holding the input high or low never re-toggles
+  steps:
+  - drive: {t: 1}
+  - wait: 80
+  - drive: {t: 0}
+  - wait: 80
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 80
+  - expect: {q: 1}
+- name: 2 gt pulses with 5 gt gaps all count
+  steps:
+  - repeat:
+      times: 3
+      steps:
+      - drive: {t: 1}
+      - wait: 2
+      - drive: {t: 0}
+      - wait: 5
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 0}
+- name: 6 gt pulses with 1 gt gaps all count
+  steps:
+  - drive: {t: 1}
+  - wait: 6
+  - repeat:
+      times: 3
+      steps:
+      - drive: {t: 0}
+      - wait: 1
+      - drive: {t: 1}
+      - wait: 6
+  - wait: 30
+  - expect: {q: 1}
+  - drive: {t: 0}
+  - wait: 1
+  - drive: {t: 1}
+  - wait: 30
+  - expect: {q: 0}
+- name: a 1 gt high pulse is ignored
+  steps:
+  - drive: {t: 1}
+  - wait: 1
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 0}
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}
+- name: falling edges 6 gt apart lose the second edge
+  steps:
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 3
+  - drive: {t: 1}
+  - wait: 3
+  - drive: {t: 0}
+  - wait: 30
+  - expect: {q: 1}

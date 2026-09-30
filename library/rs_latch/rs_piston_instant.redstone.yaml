@@ -1,0 +1,96 @@
+name: rs_piston_instant
+description: >-
+  RS latch whose output changes in the same game tick as either input: 0 gt set, 0 gt
+  reset. The state is rs_piston_block's redstone block, shoved between two cells by two
+  ordinary pistons facing each other; the output q is a powered rail, as in
+  not_rail_redirect_instant. In the set cell the block powers dust F (15), which steps
+  down to the bend dust B (14); B is a straight line pointing east into the rail. Reset:
+  r's block beside B turns B's corner so it stops pointing into the rail, and lifts B to
+  15, a power change that updates the rail in the same tick; Q's piston then moves the
+  block away before r is released. Set: s's block feeds the same net from the west end
+  (X, G, F, B at 12), so the rail lights in the drive's own tick, and the west piston
+  lands the block 3 gt later. Holding rules: hold s at least 3 gt (until the block lands;
+  a shorter s pulse leaves q off from +1 to +2 before the block arrives), hold r at least
+  1 gt (a piston ignores a 0-tick pulse), s and r never together. Interface (x east, y up,
+  z south): west piston (0,2,0) facing east, block (1,2,0) in the reset cell, east
+  piston (3,2,0) facing west; s is the cell under the west piston (0,1,0), r the cell
+  under the east piston (3,1,0), both inside the box; q is the powered rail (4,1,1). 5x3x2,
+  13 blocks. Trade-off against rs_piston_block (4x2x2, set 3 gt, reset 1 gt): 0 gt both
+  ways for about twice the volume, and the output is a rail's powered state, not a
+  redstone signal: it drives up to 8 more powered rails at once, or an observer (2 gt)
+  back into dust logic. Starts reset.
+traits: [instant, ultrafast, piston_based, entityless, horizontal, reset_safe, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  P: piston[facing=east]
+  Q: piston[facing=west]
+  R: redstone_block
+  _: {reserve: true}
+  X: {name: x_dust, block: 'redstone_wire[east=side,west=side]'}
+  G: {name: g_dust, block: 'redstone_wire[east=up,west=side]'}
+  F: {name: f_dust, block: 'redstone_wire[east=side,west=side]'}
+  B: {name: bend, block: 'redstone_wire[east=side,west=up]'}
+  o: {output: q, block: 'powered_rail[shape=east_west]'}
+  s: {input: s}
+  r: {input: r}
+layers:
+  0: |
+    .....
+    ==.==
+  1: |
+    s..r.
+    XG=Bo
+  2: |
+    PR_Q.
+    ._F_.
+tests:
+- name: placed reset
+  steps:
+  - expect: {q: 0}
+- name: sequence
+  truth_table: |
+    s r | q
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    1 0 | 1
+    0 0 | 1
+    1 0 | 1
+    0 0 | 1
+    0 1 | 0
+    0 0 | 0
+    0 1 | 0
+    0 0 | 0
+  delay: 0
+  glitch_free: true
+- name: both edges in the drive's own tick
+  steps:
+  - drive: {s: 1}
+  - expect: {q: 1}
+  - level: {bend: 12}
+  - wave: {q: '111'}
+  - drive: {s: 0}
+  - expect: {q: 1}
+  - level: {bend: 14, f_dust: 15}
+  - wait: 20
+  - expect: {q: 1}
+  - drive: {r: 1}
+  - expect: {q: 0}
+  - level: {bend: 15}
+  - wait: 1
+  - drive: {r: 0}
+  - expect: {q: 0}
+  - level: {bend: 0, f_dust: 0}
+  - wait: 20
+  - expect: {q: 0}
+- name: a 1 gt s pulse drops q until the block lands
+  steps:
+  - drive: {s: 1}
+  - expect: {q: 1}
+  - wait: 1
+  - drive: {s: 0}
+  - wave: {q: '0011111'}
+  - wait: 20
+  - expect: {q: 1}

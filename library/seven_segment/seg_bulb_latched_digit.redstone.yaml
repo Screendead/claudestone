@@ -1,0 +1,913 @@
+name: seg_bulb_latched_digit
+description: 'A 3x9 digit of waxed copper bulbs that keeps what it shows after its inputs drop, with a
+  clear input: seven set/clear latches whose memory is the pixel bulb itself. Each segment is one bulb
+  in a flat 3x3 ring at its own row: a comparator beside the bulb in the face reads it (15 when lit) and
+  feeds five dust around the ring into a repeater behind the bulb, so a lit bulb keeps itself powered.
+  A set pulse powers the ring dust: an unlit bulb sees a rising edge and toggles on, a lit one is already
+  powered and ignores it, so set is idempotent. Clear is the comparator''s side (subtract mode): it cuts
+  the ring, the repeater drops, and on release the ring re-powers the still-lit bulb, whose rising edge
+  toggles it off; unlit bulbs have no ring power and stay dark. Tested: every lone segment and every digit
+  held after the inputs drop and cleared; a second set of a lit segment leaves it lit; lit 2 game ticks
+  after set rises; dark 4 ticks after clear is released (not on press); a set pulse needs 3 ticks (2 leaves
+  it dark) and a clear pulse 2 ticks (1 does nothing). Don''t set while clear is held (untested). Why
+  so big: in the 3x5 diamond every bulb has only one private neighbour (behind it), but a latch needs
+  a reader and a power entry, whose loop must U-turn; flat rings in adjacent rows collide on their support
+  blocks, so the bulbs sit two rows apart (a 3x9 face, rows 9/7/5/3/1) and the rings stick out two columns
+  each side. Interface: face at z=1 looking north, low x is the viewer''s right; bulbs a (4,9) b (3,7) f
+  (5,7) g (4,5) c (3,3) e (5,3) d (4,1); set inputs are the cells beside each ring''s middle dust at z=2:
+  a (1,9) b (0,7) f (8,7) g (1,5) c (0,3) e (8,3) d (1,1); clear is seven driver cells in front of the
+  reader comparators at z=0: (3,9) (2,7) (6,7) (3,5) (2,3) (6,3) (3,1), so a real build feeds them from
+  a clear bus in front or re-routes it. Size 7x10x3 = 210, 120 blocks (driver cells excluded), well over
+  the 40 the brief aimed for. Trade-off: the only display in the family that remembers; seg_bulb_3x5 (3x5x2,
+  22 blocks) follows its input level and forgets.'
+traits:
+- entityless
+- pistonless
+- vertical
+- survival_friendly
+palette:
+  .: air
+  A:
+    name: pa
+    block: waxed_copper_bulb[lit=false,powered=false]
+  B:
+    name: pb
+    block: waxed_copper_bulb[lit=false,powered=false]
+  C:
+    name: pc
+    block: waxed_copper_bulb[lit=false,powered=false]
+  D:
+    name: pd
+    block: waxed_copper_bulb[lit=false,powered=false]
+  E:
+    name: pe
+    block: waxed_copper_bulb[lit=false,powered=false]
+  F:
+    name: pf
+    block: waxed_copper_bulb[lit=false,powered=false]
+  G:
+    name: pg
+    block: waxed_copper_bulb[lit=false,powered=false]
+  K: black_concrete
+  S: smooth_stone
+  q:
+    input: clr
+  H:
+    name: ea
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  I:
+    name: eb
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  J:
+    name: ec
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  L:
+    name: ed
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  M:
+    name: ee
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  N:
+    name: ef
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  O:
+    name: eg
+    block: repeater[facing=south,delay=1,locked=false,powered=false]
+  P:
+    name: ra
+    block: comparator[facing=east,mode=subtract,powered=false]
+  Q:
+    name: rb
+    block: comparator[facing=east,mode=subtract,powered=false]
+  R:
+    name: rc
+    block: comparator[facing=east,mode=subtract,powered=false]
+  T:
+    name: rd
+    block: comparator[facing=east,mode=subtract,powered=false]
+  U:
+    name: re
+    block: comparator[facing=west,mode=subtract,powered=false]
+  V:
+    name: rf
+    block: comparator[facing=west,mode=subtract,powered=false]
+  W:
+    name: rg
+    block: comparator[facing=east,mode=subtract,powered=false]
+  X: redstone_wire[east=side,north=none,south=side,west=none,power=0]
+  Y: redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  Z: redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  a: redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  b: redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  c: redstone_wire[east=side,north=none,south=side,west=none,power=0]
+  d: redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  e: redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  f: redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  g: redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  h: redstone_wire[east=side,north=none,south=side,west=none,power=0]
+  i: redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  j: redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  k: redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  l: redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  m: redstone_wire[east=side,north=none,south=side,west=none,power=0]
+  n: redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  o: redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  p: redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  r: redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  s: redstone_wire[east=none,north=none,south=side,west=side,power=0]
+  t: redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  u: redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  v: redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  w: redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  x: redstone_wire[east=none,north=none,south=side,west=side,power=0]
+  y: redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  z: redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  '0': redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  '1': redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  '2': redstone_wire[east=side,north=none,south=side,west=none,power=0]
+  '3': redstone_wire[east=none,north=side,south=side,west=none,power=0]
+  '4': redstone_wire[east=side,north=side,south=none,west=none,power=0]
+  '5': redstone_wire[east=side,north=none,south=none,west=side,power=0]
+  '6': redstone_wire[east=none,north=side,south=none,west=side,power=0]
+  '7':
+    input: a
+  '8':
+    input: b
+  '9':
+    input: c
+  '!':
+    input: d
+  '@':
+    input: e
+  $:
+    input: f
+  '%':
+    input: g
+layers:
+  0: |
+    .........
+    ..SS.....
+    ..S.S....
+    ..SSS....
+  1: |
+    ...q.....
+    ..mTDK...
+    .!n.L....
+    ..opr....
+  2: |
+    .........
+    .SSKKKSS.
+    .S.S.S.S.
+    .SSS.SSS.
+  3: |
+    ..q...q..
+    .hRCKEUs.
+    9i.J.M.t@
+    .jkl.wvu.
+  4: |
+    .........
+    ..SSKK...
+    ..S.S....
+    ..SSS....
+  5: |
+    ...q.....
+    ..2WGK...
+    .%3.O....
+    ..456....
+  6: |
+    .........
+    .SSKKKSS.
+    .S.S.S.S.
+    .SSS.SSS.
+  7: |
+    ..q...q..
+    .cQBKFVx.
+    8d.I.N.y$
+    .efg.10z.
+  8: |
+    .........
+    ..SSKK...
+    ..S.S....
+    ..SSS....
+  9: |
+    ...q.....
+    ..XPAK...
+    .7Y.H....
+    ..Zab....
+tests:
+- name: each segment latches alone and clears
+  steps:
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+  - wait: 4
+  - drive:
+      a: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      b: 1
+  - wait: 4
+  - drive:
+      b: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 1
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      c: 1
+  - wait: 4
+  - drive:
+      c: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 1
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      d: 1
+  - wait: 4
+  - drive:
+      d: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 1
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      e: 1
+  - wait: 4
+  - drive:
+      e: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 1
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      f: 1
+  - wait: 4
+  - drive:
+      f: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 1
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      g: 1
+  - wait: 4
+  - drive:
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+- name: every digit holds after its inputs drop, then clears
+  steps:
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      b: 1
+      c: 1
+  - wait: 4
+  - drive:
+      b: 0
+      c: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 1
+      pc: 1
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      b: 1
+      d: 1
+      e: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      d: 0
+      e: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 0
+      pd: 1
+      pe: 1
+      pf: 0
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 0
+      pf: 0
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      b: 1
+      c: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      b: 0
+      c: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 1
+      pc: 1
+      pd: 0
+      pe: 0
+      pf: 1
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      c: 1
+      d: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      c: 0
+      d: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 0
+      pc: 1
+      pd: 1
+      pe: 0
+      pf: 1
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 0
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 0
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 0
+      pf: 1
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 10
+  - expect:
+      pa: 0
+      pb: 0
+      pc: 0
+      pd: 0
+      pe: 0
+      pf: 0
+      pg: 0
+- name: setting a lit segment again leaves it lit
+  steps:
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 1
+  - drive:
+      a: 1
+      b: 1
+      c: 1
+      d: 1
+      e: 1
+      f: 1
+      g: 1
+  - wait: 4
+  - drive:
+      a: 0
+      b: 0
+      c: 0
+      d: 0
+      e: 0
+      f: 0
+      g: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 1
+  - drive:
+      b: 1
+  - wait: 30
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 1
+  - drive:
+      b: 0
+  - wait: 10
+  - expect:
+      pa: 1
+      pb: 1
+      pc: 1
+      pd: 1
+      pe: 1
+      pf: 1
+      pg: 1
+- name: lit 2 ticks after set, dark 4 ticks after clear is released
+  steps:
+  - drive:
+      g: 1
+  - wave:
+      pg: '0011111111'
+  - drive:
+      g: 0
+  - wave:
+      pg: '1111111111'
+  - drive:
+      clr: 1
+  - wave:
+      pg: '1111111111'
+  - drive:
+      clr: 0
+  - wave:
+      pg: '1111000000'
+- name: a 3 tick set latches, a 2 tick set does not
+  steps:
+  - drive:
+      g: 1
+  - wait: 3
+  - drive:
+      g: 0
+  - wait: 20
+  - expect:
+      pg: 1
+  - drive:
+      clr: 1
+  - wait: 6
+  - drive:
+      clr: 0
+  - wait: 20
+  - expect:
+      pg: 0
+  - drive:
+      g: 1
+  - wait: 2
+  - drive:
+      g: 0
+  - wait: 20
+  - expect:
+      pg: 0
+- name: a 2 tick clear clears, a 1 tick clear does not
+  steps:
+  - drive:
+      g: 1
+  - wait: 6
+  - drive:
+      g: 0
+  - wait: 10
+  - drive:
+      clr: 1
+  - wait: 2
+  - drive:
+      clr: 0
+  - wait: 20
+  - expect:
+      pg: 0
+  - drive:
+      g: 1
+  - wait: 6
+  - drive:
+      g: 0
+  - wait: 10
+  - drive:
+      clr: 1
+  - wait: 1
+  - drive:
+      clr: 0
+  - wait: 20
+  - expect:
+      pg: 1

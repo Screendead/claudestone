@@ -1,0 +1,79 @@
+name: not_comparator_1wide_bus
+description: |
+  A lightless, silent inverter bus at pitch 1 in z and 2 ticks per lane. Each lane is the
+  not_comparator_subtract cell turned to face along the bus: a subtract comparator whose side
+  (west) is the lane's own input cell and whose back is a redstone block in the next lane's
+  column. Lanes climb a 3-step staircase (lane k at y = 1 + k mod 3), so every column holds its
+  own comparator, the previous lane's redstone block (which is also the support its own
+  comparator stands on) and, one level up, the next lane's output cell; no comparator's side
+  touches another lane's block, and every block only feeds the comparator behind it.
+  Interface per lane k (z = k, h = 1 + k mod 3): input at (0,h,k); comparator at (1,h,k) facing
+  south; redstone block at (1,h,k+1). Output: the comparator, driving north into (1,h,k-1),
+  strength 15 - input. Lane 0 stands on smooth stone at (1,0,0). Three lanes fill 1x4x4 plus
+  the input column; an unbounded bus is 1x4 per lane (4 cells) and 2 blocks per lane plus one
+  support per three lanes. Delay 2 ticks.
+  Trade-off: against not_bus_tileable (repeater + block + torch, 3x2 per lane, 4 ticks, lit,
+  burnout) and not_bus_staggered (torches, 2x3 per lane, 2 ticks, lit): 2 ticks, dark, silent,
+  no burnout, 4 cells per lane. The price is the interface: inputs arrive on a 3-step staircase
+  from the west, each output leaves sideways (north) into the air cell of the previous lane's
+  column (a solid block there, read from its east face at (2,h,k-1), would put the outputs back
+  on a pitch-1 staircase; not tested here), and it is analog, so only a full-strength input
+  turns a lane off.
+traits: [tileable, compact, fast, lightless, silent, pistonless, entityless, comparator_based, analog, survival_friendly, reset_safe, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  x: {output: x, block: 'comparator[facing=south,mode=subtract]'}
+  y: {output: y, block: 'comparator[facing=south,mode=subtract]'}
+  z: {output: z, block: 'comparator[facing=south,mode=subtract]'}
+layers:
+  0: |
+    .=
+    ..
+    ..
+    ..
+  1: |
+    ax
+    .R
+    ..
+    ..
+  2: |
+    ..
+    by
+    .R
+    ..
+  3: |
+    ..
+    ..
+    cz
+    .R
+tests:
+- name: lanes independent
+  truth_table: |
+    a b c | x y z
+    0 0 0 | 1 1 1
+    1 0 0 | 0 1 1
+    0 1 0 | 1 0 1
+    0 0 1 | 1 1 0
+    1 1 0 | 0 0 1
+    0 1 1 | 1 0 0
+    1 0 1 | 0 1 0
+    1 1 1 | 0 0 0
+  delay: 2
+- name: tiles at pitch 1
+  tile: [0, 0, 3]
+  truth_table: |
+    a b c | x y z
+    0 0 0 | 1 1 1
+    1 0 0 | 0 1 1
+    0 1 0 | 1 0 1
+    0 0 1 | 1 1 0
+    1 1 0 | 0 0 1
+    0 1 1 | 1 0 0
+    1 0 1 | 0 1 0
+    1 1 1 | 0 0 0
+  delay: 2

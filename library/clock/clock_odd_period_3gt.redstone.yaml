@@ -1,0 +1,140 @@
+name: clock_odd_period_3gt
+description: 'Toggleable clock with an odd period of 3 game ticks (1 on, 2 off), the same rate as clock_piston_carousel from one moving piston instead of four: 4x4x5 (80) and 24 blocks against 6x4x7 (168) and 89. Sticky piston p (x=1, y=1, z=2, facing east) shuttles a redstone block between home (x=2, z=2) and far (x=3, z=2). Pistons ignore their front face, so home feeds p through dust fh (x=2, z=1) climbing onto the smooth stone beside p (x=1, z=1) and its dust fx; the block leaving home depowers p mid-push, but p stays extended until its head lands (2 gt), retracts 1 gt later, and the pulled block lands home 2 gt after that and fires p 1 gt later (landings are in the block-entity phase, so each event waits for the next tick): 3 gt per hop, period 6 per cell. fx rises through a glass step (x=0, y=2, z=1) and the far cell''s dust ff (x=3, z=3) through two glass steps into one y=3 ring, both one-way, so the far block never powers p; out (x=1, y=3, z=4) reads 12 for far pulses and 9 for home pulses. en (x=3, y=2, z=0) extends the gate sticky piston (x=2, y=2, z=0, facing south), which slides the stone (x=2, y=2, z=1) out of the fh-fx climb; with en off the stone cuts it, so after the block''s next far pulse it parks at home with out 0: the last pulse comes 0 to 5 gt after en falls, and all six phases are tested. First pulse 3 gt after en rises; tested steady for 600 gt. Hold en at least 3 gt: a 1 or 2 gt en pulse spits the gate stone out of the cut (sticky short-pulse drop) and the clock runs on until the next full en cycle, which pulls the stone back. When building by hand, place the gate stone before the redstone block (untested: otherwise it should start by itself). Noisy and light-updating (pistons).'
+traits:
+- ultrafast
+- piston_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  w: redstone_wire
+  s: stone
+  B: smooth_stone
+  h: {name: fh, block: redstone_wire}
+  f: {name: ff, block: redstone_wire}
+  x: {name: fx, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+  P: {name: p, block: 'sticky_piston[facing=east]'}
+  T: {name: gate, block: 'sticky_piston[facing=south]'}
+  R: redstone_block
+  _: {reserve: true}
+  e: {input: en}
+layers:
+  0: |
+    ....
+    ..=.
+    ....
+    ...=
+    ....
+  1: |
+    ....
+    .Bh.
+    .PR_
+    ...f
+    ...G
+  2: |
+    ..Te
+    Gxs.
+    G...
+    G...
+    GGGw
+  3: |
+    ....
+    w...
+    w...
+    w...
+    wow.
+tests:
+- name: quiet after placement, first pulse 3 gt after en, then period 3
+  settle: 0
+  steps:
+  - wave: {out: '00000000000000000000'}
+  - drive: {en: 1}
+  - wave: {out: '0001001001001001001001001001001001001001001001001001001001001'}
+- name: steady period 3 for 600 gt, then stops low
+  steps:
+  - drive: {en: 1}
+  - wave: {out: '000'}
+  - repeat:
+      times: 200
+      steps:
+      - wave: {out: '100'}
+  - drive: {en: 0}
+  - wave: {out: '1000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+- name: 'stop at gt 30 (block just landed home): last pulse within 5 gt, parks low, restarts clean'
+  steps:
+  - drive: {en: 1}
+  - {wait: 30}
+  - drive: {en: 0}
+  - wave: {out: '1001000000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+  - drive: {en: 1}
+  - wave: {out: '000100100100100100100100100100'}
+- name: 'stop at gt 31 (block leaving home): last pulse within 5 gt, parks low, restarts clean'
+  steps:
+  - drive: {en: 1}
+  - {wait: 31}
+  - drive: {en: 0}
+  - wave: {out: '0010000000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+  - drive: {en: 1}
+  - wave: {out: '000100100100100100100100100100'}
+- name: 'stop at gt 32 (block in flight out): last pulse within 5 gt, parks low, restarts clean'
+  steps:
+  - drive: {en: 1}
+  - {wait: 32}
+  - drive: {en: 0}
+  - wave: {out: '0100000000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+  - drive: {en: 1}
+  - wave: {out: '000100100100100100100100100100'}
+- name: 'stop at gt 33 (block just landed far): last pulse within 5 gt, parks low, restarts clean'
+  steps:
+  - drive: {en: 1}
+  - {wait: 33}
+  - drive: {en: 0}
+  - wave: {out: '1000000000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+  - drive: {en: 1}
+  - wave: {out: '000100100100100100100100100100'}
+- name: 'stop at gt 34 (block leaving far): last pulse within 5 gt, parks low, restarts clean'
+  steps:
+  - drive: {en: 1}
+  - {wait: 34}
+  - drive: {en: 0}
+  - wave: {out: '0010010000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+  - drive: {en: 1}
+  - wave: {out: '000100100100100100100100100100'}
+- name: 'stop at gt 35 (block in flight home): last pulse within 5 gt, parks low, restarts clean'
+  steps:
+  - drive: {en: 1}
+  - {wait: 35}
+  - drive: {en: 0}
+  - wave: {out: '0100100000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+  - drive: {en: 1}
+  - wave: {out: '000100100100100100100100100100'}
+- name: a 1 gt en pulse spits the gate stone and latches the clock on until a full en cycle
+  steps:
+  - drive: {en: 1}
+  - {wait: 1}
+  - drive: {en: 0}
+  - wave: {out: '0010010010010010010010010010010010010010'}
+  - drive: {en: 1}
+  - {wait: 10}
+  - drive: {en: 0}
+  - wave: {out: '1000000000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}
+- name: a 3 gt en pulse gives one pulse and parks
+  steps:
+  - drive: {en: 1}
+  - {wait: 3}
+  - drive: {en: 0}
+  - wave: {out: '1000000000000000000000000000000000000000'}
+  - expect: {p: 0, gate: 0}

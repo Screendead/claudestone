@@ -1,0 +1,123 @@
+name: xor_xnor_bridge_2gt
+description: "xor_xnor_observer_bulb without its comparator: the waxed copper bulb itself is the output, read as its light. The observer below the bulb watches a's cell and the one above watches b's cell; each pulses the bulb 2 game ticks after any change of its input, and the bulb toggles in that same tick, so it is lit exactly when a = b. Interface: a is the cell directly below the column, (0,0,0); b is the cell directly above, (0,4,0); either can be any block whose state changes with the signal. The output is the bulb at (0,2,0). Size 1x3x1 (3 blocks), 1 wide, tiling at a pitch of 1. Delay 2 game ticks on every edge, but only as light: the bulb is not a power source, so a circuit reading it through a comparator or observer gets the signal at 4 game ticks, the same as every other XNOR here. Why not a 2 tick signal XNOR, as the name first aimed for with a comparator bridge: dust, powered blocks and redstone blocks are all monotone in a and b, so any one comparator stage that is off at 10 and 01 is also off at 11, and every inverting part (comparator, repeater, torch, observer) costs 2 ticks itself; pistons move a source away in 1 tick but bring one back only in 2 or 3. Trade-offs: the same edge-counting limits as xor_xnor_observer_bulb. Inputs must change at least 2 ticks apart (edges 0 or 1 tick apart merge into one pulse and leave the output inverted, pinned by the hazard test), and both must be off when it is built; the observers are placed powered so their placement does not toggle the bulb. The bulb lights and clicks. Use it as a display, e.g. a match lamp."
+traits: [ultracompact, ultrafast, one_wide, tileable, vertical, observer_based, pistonless, tick_accurate, survival_friendly, entityless]
+palette:
+  .: air
+  U: observer[facing=up,powered=true]
+  D: observer[facing=down,powered=true]
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: 'waxed_copper_bulb[lit=true]'}
+layers:
+  0: |
+    a
+  1: |
+    D
+  2: |
+    o
+  3: |
+    U
+  4: |
+    b
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+  delay: 2
+- name: tiled at pitch 1
+  tile: [1, 0, 0]
+  truth_table: |
+    a b | out
+    0 0 | 1
+    0 1 | 0
+    1 1 | 1
+    1 0 | 0
+  delay: 2
+- name: edges
+  steps:
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 10
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 10
+  - expect: {out: 1}
+- name: edges 2 ticks apart
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {b: 1}
+  - wait: 12
+  - expect: {out: 1}
+  - drive: {b: 0}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 12
+  - expect: {out: 1}
+- name: hazard, edges 0 or 1 tick apart
+  steps:
+  - drive: {a: 1, b: 1}
+  - wait: 12
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 12
+  - expect: {out: 1}
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {b: 0}
+  - wait: 12
+  - expect: {out: 0}

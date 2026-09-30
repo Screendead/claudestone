@@ -1,0 +1,132 @@
+name: dec_2to4_2gt
+description: >-
+  A 2-to-4 decoder with every output edge in 2 game ticks and no glitches, in 5x2x4, for
+  inputs that are redstone blocks arriving in and leaving their cells (the harness driver,
+  or in play a block moved in by a piston); a lever at a or b bends its dust for good, so
+  o3 follows the other input alone, and a dust line there is wrong too. One stage of comparators or torches cannot AND two levels (each reads only maxima
+  of its inputs), so o3 uses dust_redirect_by_signal_sources: D1 (1,2) is the end of a
+  dust line fed from the west by dust on a redstone block (0,2), so it points east into
+  the stone Z (2,2) at strength 14; the block a appearing north of D1 bends it so it no
+  longer points into Z, and D2 (3,2), fed from the east, does the same for b. So Z is
+  powered by NOT a OR NOT b at 0 ticks, and the wall torch on its south face, o3 (2,3),
+  is a AND b. The feed must be weaker than 15: a bend alone updates nothing, only the
+  jump to 15 from the arriving block makes the dust update Z's neighbours (a version with
+  D1 and D2 standing on redstone blocks never lit o3). The dust M (2,1) between a and b
+  carries a OR b: it powers the stone under it, on which hangs the wall torch o0 (1,1,
+  base layer, under a), so o0 = NOR; and it feeds the dust (2,0), the shared rear of two
+  subtract comparators whose sides are a and b themselves: o1 (3,0) = (a OR b) - b = a AND
+  NOT b, o2 (1,0) = (a OR b) - a = b AND NOT a. Every output is one stage from the inputs,
+  so all four change on the same tick, 2 gt after any change, including both inputs
+  flipping at once in either order (the transitions test reads every tick). Interface (x
+  east, z south, base layer 0, logic layer 1): inputs a (1,1) and b (3,1), redstone
+  blocks; outputs o1 (3,0) leaving east into (4,0) and o2 (1,0) leaving west into (0,0),
+  both at strength 14; o3 the torch (2,3) on layer 1, taken south from (2,4); o0 the torch
+  (1,1) on layer 0, taken west from (0,1) on layer 0 with a repeater, not dust (the
+  redstone block at (0,2) on layer 0 would power dust there). Keep anything that reads
+  power out of (1,3) and (3,3) on layer 1, beside the o3 torch, and west of (0,2) and east
+  of (4,2), where the feed dusts point. Against dec_2to4_fast (4 gt, 7x4x8 = 224, 103 blocks, lightless, any
+  strong source): half the delay in 40 blocks of volume and 19 blocks, but two torches
+  (not lightless) and block-only inputs.
+traits: [ultrafast, fast, compact, flat, silent, pistonless, entityless, torch_based, comparator_based, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  R: redstone_block
+  S: stone
+  a: {input: a}
+  b: {input: b}
+  A: {output: o0, block: 'redstone_wall_torch[facing=west]'}
+  B: {output: o1, block: 'comparator[facing=west,mode=subtract]'}
+  C: {output: o2, block: 'comparator[facing=east,mode=subtract]'}
+  D: {output: o3, block: 'redstone_wall_torch[facing=south]'}
+layers:
+  0: |
+    .===.
+    .A=..
+    R=.=R
+    .....
+  1: |
+    .C-B.
+    .a-b.
+    --S--
+    ..D..
+tests:
+- name: logic
+  truth_table: |
+    a b | o0 o1 o2 o3
+    0 0 | 1 0 0 0
+    1 0 | 0 1 0 0
+    0 1 | 0 0 1 0
+    1 1 | 0 0 0 1
+    0 0 | 1 0 0 0
+    1 1 | 0 0 0 1
+    1 0 | 0 1 0 0
+    0 1 | 0 0 1 0
+    1 1 | 0 0 0 1
+    0 0 | 1 0 0 0
+  delay: 2
+  glitch_free: true
+  delays: {o0: {rise: 2, fall: 2}, o1: {rise: 2, fall: 2}, o2: {rise: 2, fall: 2}, o3: {rise: 2, fall: 2}}
+- name: transitions
+  steps:
+  - wave: {o0: '1111', o1: '0000', o2: '0000', o3: '0000'}
+  - drive: {a: 1}
+  - wave: {o0: '110000', o1: '001111', o2: '000000', o3: '000000'}
+  - wait: 4
+  - level: {o1: 14}
+  - drive: {a: 0}
+  - wave: {o0: '001111', o1: '110000', o2: '000000', o3: '000000'}
+  - wait: 4
+  - drive: {b: 1}
+  - wave: {o0: '110000', o1: '000000', o2: '001111', o3: '000000'}
+  - wait: 4
+  - level: {o2: 14}
+  - drive: {a: 1}
+  - wave: {o0: '000000', o1: '000000', o2: '110000', o3: '001111'}
+  - wait: 4
+  - drive: {b: 0}
+  - wave: {o0: '000000', o1: '001111', o2: '000000', o3: '110000'}
+  - wait: 4
+  - drive: {b: 1}
+  - wave: {o0: '000000', o1: '110000', o2: '000000', o3: '001111'}
+  - wait: 4
+  - drive: {a: 0}
+  - wave: {o0: '000000', o1: '000000', o2: '001111', o3: '110000'}
+  - wait: 4
+  - drive: {a: 1, b: 0}
+  - wave: {o0: '000000', o1: '001111', o2: '110000', o3: '000000'}
+  - wait: 4
+  - drive: {a: 0, b: 1}
+  - wave: {o0: '000000', o1: '110000', o2: '001111', o3: '000000'}
+  - wait: 4
+  - drive: {b: 0}
+  - wave: {o0: '001111', o1: '000000', o2: '110000', o3: '000000'}
+  - wait: 4
+  - drive: {a: 1, b: 1}
+  - wave: {o0: '110000', o1: '000000', o2: '000000', o3: '001111'}
+  - wait: 4
+  - drive: {a: 0, b: 0}
+  - wave: {o0: '001111', o1: '000000', o2: '000000', o3: '110000'}
+  - wait: 4
+  - drive: {b: 1, a: 1}
+  - wave: {o0: '110000', o1: '000000', o2: '000000', o3: '001111'}
+  - wait: 4
+  - drive: {b: 0, a: 0}
+  - wave: {o0: '001111', o1: '000000', o2: '000000', o3: '110000'}
+  - wait: 4
+  - drive: {b: 1}
+  - wave: {o0: '110000', o1: '000000', o2: '001111', o3: '000000'}
+  - wait: 4
+  - drive: {b: 0, a: 1}
+  - wave: {o0: '000000', o1: '001111', o2: '110000', o3: '000000'}
+  - wait: 4
+  - drive: {b: 1, a: 0}
+  - wave: {o0: '000000', o1: '110000', o2: '001111', o3: '000000'}
+  - wait: 4
+  - drive: {a: 1}
+  - wave: {o0: '000000', o1: '000000', o2: '110000', o3: '001111'}
+  - wait: 4
+  - drive: {a: 0, b: 0}
+  - wave: {o0: '001111', o1: '000000', o2: '000000', o3: '110000'}
+  - wait: 4

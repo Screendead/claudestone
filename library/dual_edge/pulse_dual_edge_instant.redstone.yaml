@@ -1,0 +1,101 @@
+name: pulse_dual_edge_instant
+description: 'Zero-latency dual-edge detector: out comes on in the same game tick as either edge of a and stays on 1 tick after a rise, 2 ticks after a fall (pulse_dual_observer answers 2 ticks late). Rising path: a (x=2, y=1, z=1) powers dust e1 east of it, a straight line pointing into the output rail. A sticky piston on a (x=2, y=2, facing east) pushes the concrete cap off e1 (x=3, y=2) at +1, so e1 also climbs to dust up on glass (x=3, y=2, z=0), bends away from the rail and out falls. Falling path: dust e2 (x=2, z=2) is fed by a delay-1 repeater on its west (x=1, fed by three dust from a); while a is on, e2 bends toward it, and when a is removed e2 straightens at once and points east into concrete (x=3, z=2), which powers the rail beside it until the repeater drops 2 ticks later. The output is a line of three powered rails (x=4, z=0..2, out in the middle): a dust that only changes shape sends no block update (tested while designing: a lone rail stayed powered after the bend), so each rail end sits within two blocks of a dust whose power changes in that tick and the rail line carries the change to the rest [inferred mechanism; the timing is tested]. Nothing is tested reading the pulse other than the rails (no piston or dust consumer), so a door must be triggered from the rail line''s cells. Limits (tested): a must stay on and off for at least 3 ticks. After an input of 1 or 2 ticks the piston drops its cap, the next rise gives no pulse and the following fall resets it; a 1 tick input gives its falling pulse 1 tick late. A low gap of 1 or 2 ticks also loses the next rise. Quiet on placement. 5x3x3. Trade-off: the only zero-tick dual edge here, but 45 blocks of volume against 1, loud, and a piston that updates light.'
+traits: [ultrafast, horizontal, piston_based, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  g: glass
+  a: {input: a}
+  '-': redstone_wire
+  r: {name: r2, block: 'repeater[facing=west,delay=1]'}
+  E: {name: e1, block: 'redstone_wire[north=side,south=side,east=side,west=side]'}
+  D: {name: e2, block: 'redstone_wire[east=side,west=side]'}
+  u: {name: up, block: redstone_wire}
+  P: {name: piston, block: 'sticky_piston[facing=east]'}
+  _: {reserve: true}
+  R: 'powered_rail[shape=north_south]'
+  N: {name: railn, block: 'powered_rail[shape=north_south]'}
+  S: {name: rails, block: 'powered_rail[shape=north_south]'}
+  o: {output: out, block: 'powered_rail[shape=north_south]'}
+layers:
+  0: |
+    ....=
+    ==.==
+    ===.=
+  1: |
+    ...gN
+    --aEo
+    -rD#S
+  2: |
+    ...u.
+    ..P#_
+    .....
+tests:
+- name: each edge gives a pulse in the same tick
+  settle: 30
+  steps:
+  - repeat:
+      times: 2
+      steps:
+      - drive: {a: 1}
+      - wave: {out: '10000000000', railn: '10000000000', rails: '10000000000'}
+      - drive: {a: 0}
+      - wave: {out: '1100000000', railn: '1100000000', rails: '1100000000'}
+- name: quiet on placement
+  settle: 0
+  steps:
+  - wave: {out: '000000000000', railn: '000000000000', rails: '000000000000'}
+- name: a 3 tick input gives both pulses
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '100'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+  - drive: {a: 1}
+  - wave: {out: '1000000000'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+- name: a 1 or 2 tick input loses the next rise then recovers
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '10'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+  - drive: {a: 1}
+  - wave: {out: '1'}
+  - drive: {a: 0}
+  - wave: {out: '0110000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+  - drive: {a: 1}
+  - wave: {out: '1000000000'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+- name: a low gap under 3 ticks loses the rise
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '1000000000'}
+  - drive: {a: 0}
+  - wave: {out: '1'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '11'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '110'}
+  - drive: {a: 1}
+  - wave: {out: '1000000000'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}

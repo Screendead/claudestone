@@ -1,0 +1,473 @@
+name: count_bulb_sync_compact
+description: 'Synchronous 4-bit down counter in half the volume of count_bulb_sync: every bit changes exactly 2 gt after the rising edge. As there, bulb n is clocked and masked by P_n = q0 OR ... OR q(n-1), so on a rising edge exactly the unmasked bulbs toggle. The masks here need no dust and no repeaters: a comparator reading a bulb through a solid block outputs 15 when that block is hard-powered and the bulb''s level otherwise, so it is an OR gate. Each mask block M_n (stone) is hard-powered by the previous comparator and touches bulb n, so it both masks bulb n and is read through by the next comparator: P(n+1) = P_n OR q_n. Clock: dust on the y2 layer over all four bulbs and the stones beside them (bulbs are not conductors, and a comparator side ignores a powered stone). Interface (top view, north up): clk (x0,y2,z4) feeds the clock dust from the south; bulbs at (x0,z2), (x2,z3), (x1,z0), (x4,z1) (y1); outputs q0 (x1,y1,z2, facing west, also the first mask comparator), q1 (x2,y1,z4, facing north), q2 (x0,y1,z0, facing east), q3 (x3,y1,z1, facing east); p2 and p3 are the mask comparators. 5x3x5. Delay exactly 2 gt for all four bits (traced on 0 to 15 and 15 down to 11). Loads at 0 and counts 15, 14, .... Clock: passes the whole 16-count with 4 gt high, 2 gt low (period 6 gt, as count_bulb_sync''s 2+4); 3 gt high miscounts at 12 to 11: the mask comparator p3 drops at edge+2 (bulb 2 went out) and returns at edge+4 (p2 rose), so a clock that falls in between toggles bulb 3 again (traced). Trade-off vs count_bulb_sync: 75 volume and 37 blocks instead of 150 and 78, for a 4 gt minimum clock pulse instead of 2 gt.'
+traits:
+- ultrafast
+- fast
+- tick_accurate
+- entityless
+- pistonless
+- comparator_based
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': stone
+  M: stone
+  '-': redstone_wire
+  c: {input: clk}
+  B: waxed_copper_bulb
+  w: {name: p3, block: 'comparator[facing=west]'}
+  s: {name: p2, block: 'comparator[facing=south]'}
+  '0': {output: q0, block: 'comparator[facing=west]'}
+  '1': {output: q1, block: 'comparator[facing=north]'}
+  '2': {output: q2, block: 'comparator[facing=east]'}
+  '3': {output: q3, block: 'comparator[facing=east]'}
+layers:
+  0: |
+    =..=.
+    ..==.
+    .=...
+    .....
+    ..=..
+  1: |
+    2BMwM
+    ##s3B
+    B0M##
+    ##B#.
+    ..1..
+  2: |
+    .-...
+    --..-
+    -..--
+    ----.
+    c....
+tests:
+- name: counts down through all 16 states and wraps
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+- name: 4-tick clock pulses with 2 ticks low are enough
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 4}
+  - drive: {clk: 0}
+  - {wait: 2}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+- name: every bit changes exactly 2 ticks after the rising edge
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+- name: holds through long high and low phases
+  steps:
+  - drive: {clk: 1}
+  - {wait: 100}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 100}
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1}
+  - drive: {clk: 1}
+  - {wait: 8}
+  - drive: {clk: 0}
+  - {wait: 100}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1}

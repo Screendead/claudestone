@@ -1,0 +1,138 @@
+name: cross_instant_bus_dense
+description: 'Two instant buses crossing at pitch 1 both ways, 6 blocks of volume and 4.5 blocks per crossing: the cross_bus_pitch1_2d volume with 18% fewer blocks, because one bus reuses the other''s cover blocks as its floor. A lines (along x) alternate two layers: a0, a2 at y1 on a base; a1, a3 at y2 on blocks, with a block over each low line. Odd B lanes (b1, b3, along z) run straight at y5 on blocks at y4. Even B lanes (b0, b2) zigzag between y3, standing on the covers over the low A lines, and y4, on a block that is also the next line''s cover, with a block over each y4 step. No two dust cells of different lines are level neighbours, and every one-layer step between lines has a block above the lower dust, so each line is plain dust, 0 ticks. 4x6x4 including the base for 16 crossings, 40 solid blocks and 32 dust. A SAT model of dust connection with full blocks (scratch work, not in the repo) found no pitch-1 grid under 6 layers for periods up to 6x6, and none at 6 layers with under 2.5 solids per crossing for periods up to 4x4 (6x2 too). Interface: A lines enter the west face and leave east (a0, a2 at y1; a1, a3 at y2); B lanes enter the north face (b0, b2 at y3; b1, b3 at y5) and leave south (b0, b2 at y4; b1, b3 at y5). Copies stack at a pitch of 6 layers (the stacked test); copies side by side along either bus would put one copy''s drivers on the other''s outputs, so a wider bus extends the grid.'
+traits:
+- ultrafast
+- instant
+- compact
+- lightless
+- silent
+- pistonless
+- entityless
+- stackable
+- survival_friendly
+- reset_safe
+- tick_accurate
+palette:
+  .: air
+  '#': white_concrete
+  '-': redstone_wire
+  b: {input: b0}
+  c: {input: b1}
+  d: {input: b2}
+  e: {input: b3}
+  a: {input: a0}
+  f: {input: a1}
+  g: {input: a2}
+  h: {input: a3}
+  P: {output: b0_out, block: redstone_wire}
+  Q: {output: b1_out, block: redstone_wire}
+  R: {output: b2_out, block: redstone_wire}
+  S: {output: b3_out, block: redstone_wire}
+  T: {output: a0_out, block: redstone_wire}
+  U: {output: a1_out, block: redstone_wire}
+  V: {output: a2_out, block: redstone_wire}
+  W: {output: a3_out, block: redstone_wire}
+layers:
+  0: |
+    .....
+    .####
+    .....
+    .####
+    .....
+  1: |
+    .....
+    a---T
+    .####
+    g---V
+    .####
+  2: |
+    .....
+    .####
+    f---U
+    .####
+    h---W
+  3: |
+    .b.d.
+    .-.-.
+    .#.#.
+    .-.-.
+    .#.#.
+  4: |
+    .....
+    ..#.#
+    .-#-#
+    ..#.#
+    .P#R#
+  5: |
+    ..c.e
+    ..-.-
+    .#-#-
+    ..-.-
+    .#Q#S
+tests:
+- name: independent
+  glitch_free: true
+  truth_table: |
+    b0 b1 b2 b3 a0 a1 a2 a3 | b0_out b1_out b2_out b3_out a0_out a1_out a2_out a3_out
+    0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0
+    0 0 1 0 0 0 0 0 | 0 0 1 0 0 0 0 0
+    0 0 0 1 0 0 0 0 | 0 0 0 1 0 0 0 0
+    0 0 0 0 1 0 0 0 | 0 0 0 0 1 0 0 0
+    0 0 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0
+    0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 1
+    1 1 0 0 0 0 0 0 | 1 1 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 | 0 1 1 0 0 0 0 0
+    0 0 1 1 0 0 0 0 | 0 0 1 1 0 0 0 0
+    0 0 0 0 1 1 0 0 | 0 0 0 0 1 1 0 0
+    0 0 0 0 0 1 1 0 | 0 0 0 0 0 1 1 0
+    0 0 0 0 0 0 1 1 | 0 0 0 0 0 0 1 1
+    1 0 1 0 0 0 0 0 | 1 0 1 0 0 0 0 0
+    0 1 0 1 0 0 0 0 | 0 1 0 1 0 0 0 0
+    0 0 0 0 1 0 1 0 | 0 0 0 0 1 0 1 0
+    0 0 0 0 0 1 0 1 | 0 0 0 0 0 1 0 1
+    1 0 1 0 1 0 1 0 | 1 0 1 0 1 0 1 0
+    0 1 0 1 0 1 0 1 | 0 1 0 1 0 1 0 1
+    1 1 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0
+    0 0 0 0 1 1 1 1 | 0 0 0 0 1 1 1 1
+    1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1
+    1 0 0 1 1 0 0 1 | 1 0 0 1 1 0 0 1
+    0 1 1 0 0 1 1 0 | 0 1 1 0 0 1 1 0
+    1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1
+    0 0 1 1 1 1 0 0 | 0 0 1 1 1 1 0 0
+  delay: 0
+- name: stacked
+  tile: [0, 6, 0]
+  truth_table: |
+    b0 b1 b2 b3 a0 a1 a2 a3 | b0_out b1_out b2_out b3_out a0_out a1_out a2_out a3_out
+    0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0
+    0 0 1 0 0 0 0 0 | 0 0 1 0 0 0 0 0
+    0 0 0 1 0 0 0 0 | 0 0 0 1 0 0 0 0
+    0 0 0 0 1 0 0 0 | 0 0 0 0 1 0 0 0
+    0 0 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0
+    0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 1
+    1 1 0 0 0 0 0 0 | 1 1 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 | 0 1 1 0 0 0 0 0
+    0 0 1 1 0 0 0 0 | 0 0 1 1 0 0 0 0
+    0 0 0 0 1 1 0 0 | 0 0 0 0 1 1 0 0
+    0 0 0 0 0 1 1 0 | 0 0 0 0 0 1 1 0
+    0 0 0 0 0 0 1 1 | 0 0 0 0 0 0 1 1
+    1 0 1 0 0 0 0 0 | 1 0 1 0 0 0 0 0
+    0 1 0 1 0 0 0 0 | 0 1 0 1 0 0 0 0
+    0 0 0 0 1 0 1 0 | 0 0 0 0 1 0 1 0
+    0 0 0 0 0 1 0 1 | 0 0 0 0 0 1 0 1
+    1 0 1 0 1 0 1 0 | 1 0 1 0 1 0 1 0
+    0 1 0 1 0 1 0 1 | 0 1 0 1 0 1 0 1
+    1 1 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0
+    0 0 0 0 1 1 1 1 | 0 0 0 0 1 1 1 1
+    1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1
+    1 0 0 1 1 0 0 1 | 1 0 0 1 1 0 0 1
+    0 1 1 0 0 1 1 0 | 0 1 1 0 0 1 1 0
+    1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1
+    0 0 1 1 1 1 0 0 | 0 0 1 1 1 1 0 0
+  delay: 0

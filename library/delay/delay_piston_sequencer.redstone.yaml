@@ -1,0 +1,46 @@
+name: delay_piston_sequencer
+description: 'Door driver: one input raises three outputs exactly 1 game tick apart (t0 at 2, t1 at 3, t2 at 4 game ticks), the odd middle step coming from a sticky piston that moves a redstone block next to t1 (a moved block powers only once the move finishes, 3 ticks). Input a (x=0, middle row) feeds a 1-tick repeater north (t0), a 2-tick repeater south (t2) and the sticky piston east. 5x3x2. Falls are not a sequence: t1 drops after 1 tick, t0 after 2, t2 after 4. Needs an input pulse of at least 3 ticks, or the piston spits its block and t1 stays on until the next fall (see delay_piston_odd_tick).'
+traits: [flat, horizontal, compact, piston_based, entityless, tick_accurate, reset_safe, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  P: sticky_piston[facing=east]
+  R: redstone_block
+  n: {output: t0, block: 'repeater[facing=south,delay=1]'}
+  s: {output: t2, block: 'repeater[facing=north,delay=2]'}
+  o: {output: t1, block: redstone_wire}
+layers:
+  0: |
+    =....
+    ....=
+    =....
+  1: |
+    n....
+    aPR.o
+    s....
+tests:
+- name: logic
+  truth_table: |
+    a | t0 t1 t2
+    0 | 0  0  0
+    1 | 1  1  1
+  delays: {t0: {rise: 2, fall: 2}, t1: {rise: 3, fall: 1}, t2: {rise: 4, fall: 4}}
+- name: rises 1 tick apart
+  settle: 20
+  steps:
+  - drive: {a: 1}
+  - wave: {t0: '0011111111', t1: '0001111111', t2: '0000111111'}
+  - drive: {a: 0}
+  - wave: {t0: '1100000000', t1: '1000000000', t2: '1111000000'}
+  - drive: {a: 1}
+  - wave: {t0: '0011111111', t1: '0001111111', t2: '0000111111'}
+- name: button pulse of 20 ticks
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - drive: {a: 0}
+  - wait: 6
+  - expect: {t0: 0, t1: 0, t2: 0}
+  - drive: {a: 1}
+  - wave: {t0: '0011', t1: '0001', t2: '0000111'}

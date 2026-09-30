@@ -1,0 +1,86 @@
+name: vwire_observer_bulb_up
+description: 'A level carried up a 1x1 column without torches in the shaft, the upward mirror of vwire_observer_bulb_down: the observer riser (vwire_observer_up) turns each input edge into a pulse, and a copper bulb on top toggles on every pulse, so its state follows the input; a comparator reads the bulb. Interface: input driver a north of the dust at the foot (y1); output o is the comparator at (y9, z2) facing north, beside the bulb, on a stone. 1x10x2 (the column is 1x1, the comparator and its stone stick out at the top), 8 up, 16 ticks (14 through seven observers, 2 through the comparator). Input edges must be at least 4 ticks apart (an edge 1-3 ticks after another is swallowed by the bottom observer, which leaves the bulb out of step; the 4-tick case is tested here). The bulb holds state, so it must start in step with the input: built by hand, place the bulb last, unlit, with the input off.
+  Versus the others: the only 1x1 way to bring a level up without torches; slower than vwire_torch_tower_up (16 ticks against 10) and the bulb clicks and lights, but the shaft itself is lightless.'
+traits:
+- vertical
+- observer_based
+- one_wide
+- compact
+- tick_accurate
+- pistonless
+- entityless
+- survival_friendly
+palette:
+  .: air
+  S: stone
+  A: copper_bulb
+  o: {output: o, block: 'comparator[facing=north]'}
+  B: observer[facing=down]
+  a: {input: a}
+  '-': redstone_wire
+layers:
+  0: |
+    .
+    S
+    .
+  1: |
+    a
+    -
+    .
+  2: |
+    .
+    B
+    .
+  3: |
+    .
+    B
+    .
+  4: |
+    .
+    B
+    .
+  5: |
+    .
+    B
+    .
+  6: |
+    .
+    B
+    .
+  7: |
+    .
+    B
+    .
+  8: |
+    .
+    B
+    S
+  9: |
+    .
+    A
+    o
+tests:
+- name: logic
+  truth_table: |
+    a | o
+    0 | 0
+    1 | 1
+    0 | 0
+    1 | 1
+  delay: 16
+- name: toggles 4 ticks apart
+  steps:
+  - drive: {a: 1}
+  - {wait: 4}
+  - drive: {a: 0}
+  - {wait: 4}
+  - drive: {a: 1}
+  - {wait: 40}
+  - expect: {o: 1}
+  - drive: {a: 0}
+  - {wait: 4}
+  - drive: {a: 1}
+  - {wait: 4}
+  - drive: {a: 0}
+  - {wait: 40}
+  - expect: {o: 0}

@@ -1,0 +1,121 @@
+name: and_comparator_1wide_bus
+description: |
+  A lightless, silent AND bus at pitch 1 in z, 4 ticks per lane, every gate in one x plane.
+  Each lane is and_comparator_lightless folded into that plane: a subtract comparator facing
+  south (not_b) with a redstone block at its back and B on its west side gives 15 - B and
+  drives north into the side of the output comparator, which faces west, reads A at its back
+  and subtracts, so it passes A only when B is on. Lane k (z = k + 1, height h) has not_b at
+  (1,h,k+1), its redstone block at (1,h,k+2), the output at (1,h,k), supports under both
+  comparators, B at (0,h,k+1) and A at (0,h,k). Heights repeat 1,4,2,5 every four lanes, so no
+  redstone block sits beside another lane's output comparator (its sides are in z), and in two
+  of every four lanes the output comparator stands on the redstone block of the lane two
+  before instead of on a support.
+  Four lanes fill 1x6x6 plus the input column; an unbounded bus is 1x6 per lane (6 cells) with
+  two comparators, one redstone block and 1.5 supports per lane. Output: the west-facing
+  comparator, driving east at (2,h,k). Delay A 2 ticks, B 4 ticks (tested).
+  Trade-off: against and_torch_1wide (1x3x7 = 21 cells, 8 ticks, torches that light and burn
+  out): 6 cells a lane, 4 ticks, dark, silent, no burnout. The price is the interface: each
+  lane's inputs arrive from the west on the 1,4,2,5 staircase, and B must come from a direct
+  source (repeater, comparator, dust, redstone block) since it drives a comparator side.
+traits: [one_wide, tileable, compact, fast, lightless, silent, pistonless, entityless, comparator_based, survival_friendly, reset_safe, tick_accurate, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  n: 'comparator[facing=south,mode=subtract]'
+  a: {input: a0}
+  A: {input: b0}
+  b: {input: a1}
+  B: {input: b1}
+  c: {input: a2}
+  C: {input: b2}
+  d: {input: a3}
+  D: {input: b3}
+  w: {output: out0, block: 'comparator[facing=west,mode=subtract]'}
+  x: {output: out1, block: 'comparator[facing=west,mode=subtract]'}
+  y: {output: out2, block: 'comparator[facing=west,mode=subtract]'}
+  z: {output: out3, block: 'comparator[facing=west,mode=subtract]'}
+layers:
+  0: |
+    .=
+    .=
+    ..
+    ..
+    ..
+    ..
+  1: |
+    aw
+    An
+    .R
+    .=
+    ..
+    ..
+  2: |
+    ..
+    ..
+    cy
+    Cn
+    .R
+    ..
+  3: |
+    ..
+    .=
+    .=
+    ..
+    ..
+    ..
+  4: |
+    ..
+    bx
+    Bn
+    .R
+    .=
+    ..
+  5: |
+    ..
+    ..
+    ..
+    dz
+    Dn
+    .R
+tests:
+- name: lanes independent
+  truth_table: &table |
+    a0 b0 a1 b1 a2 b2 a3 b3 | out0 out1 out2 out3
+    0 0 0 0 0 0 0 0 | 0 0 0 0
+    0 0 0 1 1 1 1 0 | 0 0 1 0
+    0 1 1 1 1 0 0 0 | 0 1 0 0
+    1 1 1 0 0 0 0 1 | 1 0 0 0
+    1 0 0 0 0 1 1 1 | 0 0 0 1
+    0 0 1 1 0 0 1 1 | 0 1 0 1
+    0 1 1 0 0 1 1 0 | 0 0 0 0
+    1 1 0 0 1 1 0 0 | 1 0 1 0
+    1 0 0 1 1 0 0 1 | 0 0 0 0
+    1 1 1 1 1 1 1 1 | 1 1 1 1
+    1 1 0 0 1 1 0 0 | 1 0 1 0
+    0 0 1 1 0 0 1 1 | 0 1 0 1
+    1 0 1 1 0 1 1 1 | 0 1 0 1
+    1 1 1 0 1 1 0 1 | 1 0 1 0
+    0 1 1 0 0 1 1 0 | 0 0 0 0
+    1 1 1 1 1 1 1 1 | 1 1 1 1
+  delay: 4
+- name: a path is 2 ticks
+  steps:
+  - drive: {b1: 1}
+  - wait: 10
+  - drive: {a1: 1}
+  - wave: {out1: '001111'}
+  - drive: {a1: 0}
+  - wave: {out1: '110000'}
+- name: b path is 4 ticks
+  steps:
+  - drive: {a2: 1}
+  - wait: 10
+  - drive: {b2: 1}
+  - wave: {out2: '00001111'}
+  - drive: {b2: 0}
+  - wave: {out2: '11110000'}
+- name: tiles at pitch 1
+  tile: [0, 0, 4]
+  truth_table: *table
+  delay: 4

@@ -1,0 +1,82 @@
+name: clock_piston_carousel
+description: 'Period 3 game ticks (1 on, 2 off), faster than the library''s previous best (clock_comparator_dust, period 4): one redstone block is carried round a 2x2 (y=1, x=2..3, z=2..3) by four normal pistons, each fed by dust from the cell in front of it, so each fires 1 gt after the block lands there (landing is in the block-entity phase, so the extension waits for the next tick''s block events) and the block moves 2 gt; a pusher is depowered mid-push, stays extended until its head lands and retracts on the tick the next pusher fires, which is why the ring needs four cells (a two-piston shuttle jams on the head). The four feed nets rise through glass steps (one-way) into a dust ring at y=3 read at out (strength 6 to 12). en slides a stone out of the diagonal step of the east-facing pusher''s feed; with en off the block runs on to that corner and stops there with out 0: 3 gt after the last pulse when stopped mid-lap, one more lap (last pulse 9 gt after en falls) when en falls on the tick the block reaches the corner. First pulse 3 gt after en rises. Noisy and light-updating (pistons).'
+traits:
+- ultrafast
+- piston_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  G: glass
+  w: redstone_wire
+  s: stone
+  a: {name: fa, block: redstone_wire}
+  b: {name: fb, block: redstone_wire}
+  c: {name: fc, block: redstone_wire}
+  d: {name: fd, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+  A: {name: pa, block: 'piston[facing=east]'}
+  B: {name: pb, block: 'piston[facing=north]'}
+  C: {name: pc, block: 'piston[facing=west]'}
+  D: {name: pd, block: 'piston[facing=south]'}
+  H: {name: gate, block: 'sticky_piston[facing=north]'}
+  R: redstone_block
+  e: {input: en}
+layers:
+  0: |
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+  1: |
+    ......
+    .=Dc=.
+    .d..C.
+    .AR.b.
+    .=aB=.
+    ......
+    ......
+  2: |
+    GGGGGG
+    Gw..wG
+    G....G
+    G....G
+    Gws.wG
+    ..H...
+    ..e...
+  3: |
+    wwowww
+    w....w
+    w....w
+    w....w
+    w....w
+    ......
+    ......
+tests:
+- name: quiet after placement, first pulse 3 gt after en, then period 3
+  steps:
+  - {wait: 20}
+  - wave: {out: '00000000000000000000'}
+  - drive: {en: 1}
+  - wave: {out: '0001001001001001001001001001001001001001001001001001001001001001001001001001'}
+- name: stop mid-lap, one last pulse, restart
+  steps:
+  - drive: {en: 1}
+  - {wait: 30}
+  - drive: {en: 0}
+  - wave: {out: '1001000000000000000000000000000000000000'}
+  - drive: {en: 1}
+  - wave: {out: '0001001001001001001001001001'}
+- name: stop on the tick the block reaches the gated corner, one more lap
+  steps:
+  - drive: {en: 1}
+  - {wait: 36}
+  - drive: {en: 0}
+  - wave: {out: '1001001001000000000000000000000000000000'}
+  - expect: {pa: 0, pb: 0, pc: 0, pd: 0, gate: 0}

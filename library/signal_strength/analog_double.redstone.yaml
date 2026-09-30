@@ -1,0 +1,210 @@
+name: analog_double
+description: 'Analog doubler out = min(2a, 15), lightless, silent, exact for every a, from three subtract comparators and 15 - ((15 - a) - a), analog_add with both inputs fed from one: I (x=1, z=3, facing west, redstone block P behind it at x=0) outputs 15 - a into the stone B (x=2, z=3); C (x=3, z=3, facing west) reads B from behind and subtracts a, giving max(15 - 2a, 0); S (x=4, z=3, facing south, redstone block Q behind it at x=4, z=4) takes C on its side and outputs 15 - that. The input is the stone X (x=2, z=2), strongly powered at a (here by the fixture comparator north of it reading a hopper); the dusts on either side of X (x=1 and x=3, z=2) both read exactly a and feed the side inputs of I and C, so neither path loses a level. Output: S, leaving north into x=4, z=2, kept empty beside the C input dust; put a repeater there (a comparator would take that dust as a side input). Core 5x2x3 (x=0..4, z=2..4). Delay 4 game ticks for every rise and most falls, 6 for a fall from a_old to a_new < 8 with a_old + a_new >= 15 (C is still 0 after 2 ticks, so the change has to come through I); tested 3 -> 5 -> 3, 10 -> 6, 10 -> 2 and 0 <-> 15, and in each the output steps once straight to the new value (the trace shows the second change of C and the change of S in the same tick, so S reads the final value of C). Tested for every a from 0 to 15 and on the 15 driver. No 4 game tick form was found; by our (untested) argument, with two comparator stages a rear that rises with a is at most a, so every +2 step needs its own threshold element and a decay path, well over this size.'
+traits:
+- analog
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+- compact
+- flat
+- horizontal
+palette:
+  .: air
+  '=': smooth_stone
+  f: {block: smooth_stone, fixture: true}
+  H: {block: 'hopper[facing=down]', fixture: true}
+  F: {name: fa, block: 'comparator[facing=north]', fixture: true}
+  X: stone
+  B: stone
+  A: {name: a, block: redstone_wire}
+  w: redstone_wire
+  P: redstone_block
+  Q: redstone_block
+  I: comparator[facing=west,mode=subtract]
+  C: comparator[facing=west,mode=subtract]
+  S: {output: out, block: 'comparator[facing=south,mode=subtract]'}
+  d: {input: a_max}
+layers:
+  0: |
+    .....
+    ..f..
+    .=.=.
+    .=.==
+    .....
+  1: |
+    ..H..
+    ..F..
+    .AXw.
+    PIBCS
+    ....Q
+  2: |
+    .....
+    .....
+    .d.d.
+    .....
+    .....
+tests:
+- name: full swing
+  truth_table: |
+    a_max | out
+    0 | 0
+    1 | 1
+  delays: {out: {rise: 4, fall: 6}}
+- name: min(2a, 15) for every a
+  steps:
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[]}'}
+  - {wait: 12}
+  - level: {fa: 0, out: 0}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 12}
+  - level: {fa: 1, out: 2}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {wait: 12}
+  - level: {fa: 2, out: 4}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {wait: 12}
+  - level: {fa: 3, out: 6}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {wait: 12}
+  - level: {fa: 4, out: 8}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 12}
+  - level: {fa: 5, out: 10}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {wait: 12}
+  - level: {fa: 6, out: 12}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 12}
+  - level: {fa: 7, out: 14}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 12}
+  - level: {fa: 8, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 12}
+  - level: {fa: 9, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {wait: 12}
+  - level: {fa: 10, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {wait: 12}
+  - level: {fa: 11, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {wait: 12}
+  - level: {fa: 12, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {wait: 12}
+  - level: {fa: 13, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 12}
+  - level: {fa: 14, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 12}
+  - level: {fa: 15, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 12}
+  - level: {fa: 7, out: 14}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[]}'}
+  - {wait: 12}
+  - level: {fa: 0, out: 0}
+- name: 3 to 5 and back, 4 ticks each way with no step between
+  steps:
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {wait: 12}
+  - level: {fa: 3, out: 6}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 10}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+  - {wait: 1}
+  - level: {out: 6}
+- name: a fall from 10 takes 6 ticks to 6 and 4 ticks to 2
+  steps:
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {wait: 12}
+  - level: {fa: 10, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 12}
+  - {wait: 1}
+  - level: {out: 12}
+  - {wait: 1}
+  - level: {out: 12}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {wait: 12}
+  - level: {fa: 10, out: 15}
+  - {run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 15}
+  - {wait: 1}
+  - level: {out: 4}
+  - {wait: 1}
+  - level: {out: 4}
+  - {wait: 1}
+  - level: {out: 4}
+  - {wait: 1}
+  - level: {out: 4}
+  - {wait: 1}
+  - level: {out: 4}
