@@ -1,5 +1,7 @@
 import pytest
 
+from redstone import servers
+from redstone.docker_sats import DOCKER_SATELLITES
 from redstone.harness import IDLE_RATE, WARP_RATE, CommandFailed, Rig, checked, clear_commands
 from redstone.plots import FOLDER_PLOT, PLOTS, plot_for
 from redstone.library import LIBRARY, path_of
@@ -22,7 +24,7 @@ def test_checked_raises_on_unloaded_position():
 def test_clear_kills_around_and_above_the_plot():
     *fills, kill = clear_commands((100, 56, 200), (48, 32, 48))
     assert all(f.startswith("fill ") and f.endswith("air strict") for f in fills)
-    assert kill == ("kill @e[type=!player,tag=!plot_label,tag=!plot_status,"
+    assert kill == ("kill @e[type=!player,tag=!plot_label,tag=!plot_status,tag=!watch_cam,"
                     "x=98,y=56,z=198,dx=51,dy=263,dz=51]")
 
 
@@ -52,9 +54,10 @@ class Clock:
         return ""
 
 
-def _rig(clock):
+def _rig(clock, server=servers.MAIN):
     rig = Rig.__new__(Rig)
     rig.r = clock
+    rig.rate, rig.idle_rate = IDLE_RATE, IDLE_RATE if server == servers.MAIN else WARP_RATE
     return rig
 
 
@@ -75,3 +78,24 @@ def test_advance_restores_the_tick_rate_when_polling_fails():
     with pytest.raises(ConnectionError):
         _rig(clock)._advance(3)
     assert clock.log[-1] == f"tick rate {IDLE_RATE}"
+
+
+@pytest.mark.parametrize("server", [servers.SATELLITES[0], DOCKER_SATELLITES[0]], ids=lambda s: s.name)
+def test_satellites_stay_at_warp_rate_between_batches(server):
+    clock = Clock()
+    rig = _rig(clock, server)
+    for n in (5, 3, 170):
+        rig._advance(n)
+    assert [c for c in clock.log if c.startswith("tick rate")] == [f"tick rate {WARP_RATE}"]
+    assert clock.time == 178
+    rig.release()
+    assert clock.log[-2:] == [f"tick rate {IDLE_RATE}", "tick unfreeze"]
+
+
+def test_main_releases_without_a_second_rate_change():
+    clock = Clock()
+    rig = _rig(clock)
+    rig._advance(2)
+    clock.log.clear()
+    rig.release()
+    assert clock.log == ["tick unfreeze"]

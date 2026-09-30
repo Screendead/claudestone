@@ -81,8 +81,9 @@ def _checks(prop: str, kind: str) -> list[tuple[str, int]]:
 # are split into functions of at most this many commands.
 PROBE_CHUNK = 60000
 WARP_RATE = 10000  # the maximum /tick rate
-# The rate between step batches. Logging in times out after 600 ticks at the current rate
-# (30 s here), and the first tick of each batch waits out the idle tick period (50 ms here).
+# The rate between step batches on main, where players log in: logging in times out after
+# 600 ticks at the current rate (30 s here). The first tick of each batch waits out the idle
+# tick period (50 ms here), so satellites, which no one joins, stay at WARP_RATE for a test.
 IDLE_RATE = 20
 # Gamerules library tests change (and restore in `finally`), at their vanilla values.
 BASELINE_GAMERULES = {"random_tick_speed": 3, "tnt_explodes": "true"}
@@ -153,10 +154,11 @@ def clear_commands(origin: Pos, size: Pos) -> list[str]:
 
 def kill_command(origin: Pos, size: Pos) -> str:
     """Remove the entities of a plot, with those that have left it sideways or upwards
-    (projectiles, minecarts), but not the plot's own labels and status sign."""
+    (projectiles, minecarts), but not the plot's own labels and status sign, nor the watch
+    director's camera (redstone.watch), which players on main spectate."""
     (ox, oy, oz), (sx, _, sz) = origin, size
     m = KILL_MARGIN
-    return (f"kill @e[type=!player,tag=!plot_label,tag=!plot_status,x={ox - m},y={oy},z={oz - m},"
+    return (f"kill @e[type=!player,tag=!plot_label,tag=!plot_status,tag=!watch_cam,x={ox - m},y={oy},z={oz - m},"
             f"dx={sx - 1 + 2 * m},dy={BUILD_TOP - oy},dz={sz - 1 + 2 * m}]")
 
 
@@ -217,6 +219,8 @@ class Rig:
         sx, _, sz = size
         # A test that died mid-run can leave these changed, and the world saves them.
         self.r.cmd(f"tick rate {IDLE_RATE}")
+        self.rate = IDLE_RATE
+        self.idle_rate = IDLE_RATE if server == servers.MAIN else WARP_RATE
         for rule, value in BASELINE_GAMERULES.items():
             self.r.cmd(f"gamerule {rule} {value}")
         if server == servers.MAIN:
@@ -252,19 +256,32 @@ class Rig:
         self._advance(target - self.gametime())
 
     def _advance(self, n: int) -> None:
-        """Step n ticks as fast as the server can compute them. The login timeout counts
-        ticks at the current rate, so the rate is raised only for the batch: left high
-        between steps, it kicks joining players."""
+        """Step n ticks as fast as the server can compute them. On main the login timeout
+        counts ticks at the current rate, so the rate is raised only for the batch: left
+        high between steps, it kicks joining players."""
         if n <= 0:
             return
         target = self.gametime() + n
-        self.r.cmd(f"tick rate {WARP_RATE}")
+        self._rate(WARP_RATE)
         try:
             self.r.cmd(f"tick step {n}")
             while self.gametime() < target:
                 time.sleep(0.002)
         finally:
-            self.r.cmd(f"tick rate {IDLE_RATE}")
+            self._rate(self.idle_rate)
+
+    def _rate(self, rate: int) -> None:
+        if self.rate != rate:
+            # Set first: if the command fails, the next call sends it again.
+            self.rate = None
+            self.r.cmd(f"tick rate {rate}")
+            self.rate = rate
+
+    def release(self) -> None:
+        """Let the world run again at the normal rate, for anyone watching; an unfrozen
+        satellite left at WARP_RATE would spin a core."""
+        self._rate(IDLE_RATE)
+        self.r.cmd("tick unfreeze")
 
     def run(self, command: str) -> str:
         return checked(self.r, command)
