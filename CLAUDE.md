@@ -27,6 +27,9 @@ python -m redstone.docker_sats {start,stop,status} [dsatN]...   # Docker satelli
 python -m scripts.satellite_image        # rebuild the Docker satellite image on the desktop
 python -m scripts.remote_run <dir> [--jobs N] -- <cmd> [args]...   # a CPU-heavy search, on the desktop
 python -m scripts.remote_keep -- <cmd> [args]...   # rerun a resumable desktop job after each desktop drop
+python -m scripts.jobs start <name> <dir> [--jobs N] [--resume CMD] -- <cmd>...   # a detached desktop job
+python -m scripts.jobs {status [<name>],stop <name>,log <name> [-n N]}
+python -m scripts.status                 # jobs, search CPUs, servers, plots, RAM and plan usage on one screen
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
 python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
 python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched (in game: /trigger watch_off, /trigger watch_on)
@@ -189,7 +192,19 @@ SIGTERM or a killed process stops the container (its stdin closes); an unreachab
 is an error, never a local run.
 `scripts.remote_keep` runs a local command (usually a script that rebuilds its resume state from
 the log it streamed, then calls remote_run) and runs it again whenever it exits 255, remote_run's
-code for a lost desktop, once the desktop's Docker answers again. Any other exit ends it.
+code for a lost desktop, once the desktop's Docker answers again. Any other exit ends it (a
+`before` hook may add arguments to each start). A long search is started with `scripts.jobs
+start`, never by hand-made wrappers: it detaches a runner in its own session (it outlives the
+shell and any task time limit) that runs `remote_run <dir> --jobs N -- <cmd>` under remote_keep's
+loop. Output goes to `server/jobs/<name>/log`; pid, cmd, dir, started, restarts and exit to
+`server/jobs/<name>/job.json`. A dropped container copies nothing back, so the log is the
+checkpoint: `--resume CMD` runs through the shell in `<dir>` before every start with `$JOB_NAME`,
+`$JOB_DIR`, `$JOB_LOG` and `$JOB_RESTARTS` set; the words it prints are appended to `<cmd>`, the
+files it writes into `<dir>` are uploaded, a nonzero exit ends the job, and it must not call
+remote_run itself. `jobs status` reports running, stopped, finished, failed, or dead (a stale pid).
+`scripts.status` is read-only and takes a few seconds: it probes locks without waiting, asks the
+desktop one `docker ps` (none while `dsat_unreachable` is set), and reads plan usage only from
+`~/.claude/usage-cache.json`.
 
 ## Architecture
 
