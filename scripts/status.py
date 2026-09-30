@@ -110,12 +110,13 @@ def plot_lines() -> list[str]:
     names = sorted({p.stem for p in PLOT_RECORDS.glob("*.lock")} | {p.stem for p in STATUS.glob("*.json")})
     busy, recent, quiet = [], [], []
     for name in names:
-        server = read_json(PLOT_RECORDS / f"{name}.json").get("server", "?")
+        ran = read_json(PLOT_RECORDS / f"{name}.json")
+        server = ran.get("server", "?")
         status = read_json(STATUS / f"{name}.json")
         record = PLOT_RECORDS / f"{name}.json"
         # Only main has a status file; the plot record is rewritten at each run in any plot.
         if record.exists() and record.stat().st_mtime > status.get("time", 0):
-            status = {**status, "time": record.stat().st_mtime, "text": "last run"}
+            status = {**status, "time": record.stat().st_mtime, "text": "last run", "owner": ran.get("owner")}
         text = status.get("text", "")
         owner = f" [{status['owner']}]" if status.get("owner") else ""
         when = f" ({ago(status['time'])})" if status.get("time") else ""

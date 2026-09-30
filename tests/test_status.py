@@ -60,6 +60,8 @@ def test_a_plot_without_a_status_file_is_dated_by_its_record(tmp_path, monkeypat
     (records / "storage.lock").touch()
     (records / "storage.json").write_text(json.dumps({"server": "dsat1"}))
     assert status.plot_lines()[0].startswith("idle storage on dsat1: last run (")
+    (records / "storage.json").write_text(json.dumps({"server": "dsat1", "owner": "wf-42"}))
+    assert status.plot_lines()[0].startswith("idle storage on dsat1 [wf-42]: last run (")
 
 
 def test_usage_reads_the_cache(tmp_path):
