@@ -89,8 +89,9 @@ def program(job: dict) -> bytes:
     return base64.b64encode(text.encode()) + b"\n"
 
 
-def take_cpus(n: int, total: int = TOTAL_CPUS, slots: Path = SLOTS, say=print) -> list:
+def take_cpus(n: int, total: int = TOTAL_CPUS, slots: Path | None = None, say=print) -> list:
     """Hold n of the `total` CPU slot locks, waiting until they are free."""
+    slots = slots or SLOTS
     if n > total:
         raise SystemExit(f"remote_run: --jobs {n} is more than the {total} desktop CPUs searches may use "
                          f"($REDSTONE_SEARCH_CPUS)")
