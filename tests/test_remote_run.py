@@ -324,3 +324,18 @@ def test_the_worker_never_aborts_at_exit(desk, work, tmp_path):
         err = p.stderr.read()
         p.stdout.read()
         assert p.wait(30) == want and b"Fatal Python error" not in err, err.decode()
+
+
+def test_an_upload_the_container_never_reads_is_retried(desk, work, monkeypatch):
+    monkeypatch.setattr(rr, "UPLOAD_TIMEOUT", 1)
+    hung = []
+
+    def popen(argv, **kw):
+        if not hung and any(a.startswith("rr-up-") for a in argv):
+            hung.append(argv)
+            return subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"], **kw)
+        return desk(argv, **kw)
+
+    monkeypatch.setattr(rr, "popen", popen)
+    got, out, _ = run(work)
+    assert got == 0 and b"out line" in out and hung

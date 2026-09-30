@@ -44,6 +44,9 @@ SLOTS = ROOT / "remote_run"
 TOTAL_CPUS = int(os.environ.get("REDSTONE_SEARCH_CPUS", "8"))
 SKIP = {"__pycache__", ".git", ".venv", "venv", "node_modules"}
 SILENCE = 30  # the worker sends a heartbeat every 5 s
+# A few seconds for a small dir. Now and then the container never sees stdin that was
+# written and closed at once, and waits for its first line for ever.
+UPLOAD_TIMEOUT = 90
 LABEL = "redstone.remote_run=1"
 CONTAINER = {"src": "/src", "work": "/work", "pip": "/pip"}  # paths inside the container
 
@@ -204,11 +207,19 @@ class Session:
 
 def upload(host: str, root: Path, content: str, data: bytes) -> None:
     prefix, volume = volume_names(root, content)
-    s = Session(host, docker_run_argv(host, f"rr-up-{uuid.uuid4().hex[:12]}", [f"{volume}:{CONTAINER['src']}"]),
-                program({"mode": "upload", "src": CONTAINER["src"]}), data)
-    ok = any("ok" in f for f in s)
-    code = s.close()
-    if not ok:
+    for attempt in range(3):
+        s = Session(host, docker_run_argv(host, f"rr-up-{uuid.uuid4().hex[:12]}", [f"{volume}:{CONTAINER['src']}"]),
+                    program({"mode": "upload", "src": CONTAINER["src"]}), data)
+        timer = threading.Timer(UPLOAD_TIMEOUT, s.kill)
+        timer.start()
+        try:
+            ok = any("ok" in f for f in s)
+        finally:
+            timer.cancel()
+        code = s.close()
+        if ok:
+            break
+    else:
         raise Unreachable(f"upload of {root} failed (exit {code}): {s.failure()}")
     # Earlier snapshots of the same dir; a volume a run still uses refuses removal.
     listed = ssh(host, "docker", "volume", "ls", "-q", "--filter", f"name={prefix}")
