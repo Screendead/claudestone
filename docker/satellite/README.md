@@ -17,3 +17,9 @@ Run (RCON only on the desktop's loopback), then tunnel from the laptop:
 Level `testworld`; the data pack dir is `/srv/testworld/datapacks` (`docker cp` into it,
 then `reload`). A TCP connect through the tunnel succeeds even with the server down, so
 wait for an RCON login, not an open port. `MEMORY` (default 1G) and `JAVA_OPTS` are optional.
+
+The harness (`redstone/docker_sats.py`) reaches the desktop as `REDSTONE_DOCKER_HOST`, else
+the one line `user@host` in `server/docker_host` (gitignored, like the rest of `server/`).
+With neither, the Docker backend is unavailable and the laptop satellites are used. The
+`desktop` Docker context must point at the same host (`docker context create desktop
+--docker host=ssh://<user>@<desktop-host>`), and `~/.ssh/config` needs `ControlMaster` for it.

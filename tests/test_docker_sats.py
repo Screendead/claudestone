@@ -40,16 +40,18 @@ class Fake:
         return [c["argv"] for c in self.calls if tuple(c["argv"][:len(prefix)]) == prefix]
 
 
+HOST = "user@desktop.invalid"
 D = ("docker", "--context", ds.CONTEXT)
-EXIT = ["ssh", "-O", "exit", ds.HOST]
-CHECK = ("ssh", "-O", "check", ds.HOST)
-PROBE = tuple(ds.PROBE)
+EXIT = ["ssh", "-O", "exit", HOST]
+CHECK = ("ssh", "-O", "check", HOST)
+PROBE = ("ssh", "-o", "ConnectTimeout=5", HOST, "exit")
 MASTER = (0, b"", b"Master running (pid=4242)\r\n")
 
 
 @pytest.fixture
 def fake(monkeypatch):
     f = Fake({CHECK: [MASTER]})
+    monkeypatch.setattr(ds, "HOST", HOST)
     monkeypatch.setattr(ds, "run", f)
     monkeypatch.setattr(ds, "_listeners", lambda port: None)
     monkeypatch.setattr(ds, "_password", lambda: "s3cret")
@@ -78,6 +80,26 @@ def test_importing_registers_the_dsats_without_a_cycle():
     subprocess.run([sys.executable, "-c", code], cwd=ds.ROOT.parent, check=True)
 
 
+def test_host_comes_from_the_environment_then_the_file(monkeypatch, tmp_path):
+    path = tmp_path / "docker_host"
+    monkeypatch.delenv("REDSTONE_DOCKER_HOST", raising=False)
+    assert ds.configured_host(path) is None
+    path.write_text("a@file\n")
+    assert ds.configured_host(path) == "a@file"
+    monkeypatch.setenv("REDSTONE_DOCKER_HOST", "b@env")
+    assert ds.configured_host(path) == "b@env"
+
+
+def test_no_host_means_unavailable_without_running_anything(fake, sat, monkeypatch):
+    monkeypatch.setattr(ds, "HOST", None)
+    assert not ds.reachable()
+    assert not sat.is_up()
+    with pytest.raises(ds.DesktopError, match="REDSTONE_DOCKER_HOST"):
+        ds.running()
+    assert ds.main(["status"]) == 1
+    assert not fake.calls
+
+
 def test_start_runs_the_container_with_the_password_in_env_only(fake, sat, monkeypatch):
     ready = iter([False, False, True])  # is_up, first poll, second poll
     monkeypatch.setattr(ds, "rcon_ready", lambda port, timeout=3: next(ready))
@@ -88,7 +110,7 @@ def test_start_runs_the_container_with_the_password_in_env_only(fake, sat, monke
                            "-p", "127.0.0.1:25676:25575", ds.IMAGE]
     assert run["env"]["RCON_PASSWORD"] == "s3cret"
     assert not any("s3cret" in " ".join(c["argv"]) for c in fake.calls)
-    assert ["ssh", "-O", "forward", "-L", "25676:127.0.0.1:25676", ds.HOST] in fake.argvs("ssh")
+    assert ["ssh", "-O", "forward", "-L", "25676:127.0.0.1:25676", HOST] in fake.argvs("ssh")
     assert sat.lock.exists()
 
 
@@ -341,7 +363,7 @@ def test_cli_accepts_only_its_actions(fake):
 @pytest.fixture(scope="module")
 def live():
     if not ds.reachable():
-        pytest.skip(f"desktop {ds.HOST} not reachable")
+        pytest.skip(f"desktop {ds.HOST or '(no host configured)'} not reachable")
     sat = ds.BY_NAME["dsat6"]
     if sat.name in ds.running():
         pytest.skip("dsat6 is already running")

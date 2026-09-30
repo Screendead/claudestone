@@ -10,6 +10,10 @@ adds dsat1..dsat6 to servers.SERVERS.
 A forward accepts TCP whether or not the container is up, so readiness is always an RCON
 login and a command, never a port check.
 
+The desktop's SSH login (user@host) comes from REDSTONE_DOCKER_HOST, else the one line
+in server/docker_host (gitignored). With neither, the backend is unavailable: reachable()
+is False and every ssh or docker call raises DesktopError.
+
     python -m redstone.docker_sats {start,stop,status,reap} [dsatN...]
 """
 
@@ -31,7 +35,20 @@ from . import servers
 from .rcon import PROPERTIES, Rcon
 from .servers import ROOT, Server
 
-HOST = "<user>@<desktop-host>"
+HOST_FILE = ROOT / "docker_host"
+
+
+def configured_host(path: Path = HOST_FILE) -> str | None:
+    host = os.environ.get("REDSTONE_DOCKER_HOST", "").strip()
+    if not host:
+        try:
+            host = path.read_text().strip()
+        except FileNotFoundError:
+            pass
+    return host or None
+
+
+HOST = configured_host()
 CONTEXT = "desktop"
 IMAGE = "redstone-satellite:26.3"
 LEVEL = "testworld"
@@ -40,8 +57,6 @@ REMOTE_CRASHES = "/srv/crash-reports"
 IDLE_MINUTES = 8
 REAPER_GIVE_UP = 24 * 3600  # seconds of an unreachable desktop before the reaper exits
 REAPER_LOCK = ROOT / "satellites" / "dsat_reaper.lock"
-# The desktop's sshd runs cmd.exe, which has no `true`; `exit` is a builtin there and in sh.
-PROBE = ["ssh", "-o", "ConnectTimeout=5", HOST, "exit"]
 # stderr of an ssh or docker call that failed because the connection to the desktop did,
 # rather than because of the command.
 TRANSPORT_ERRORS = ("control socket", "mux_client", "muxclient", "read from master", "broken pipe",
@@ -61,6 +76,8 @@ def _password() -> str:
 
 def _once(argv: list[str], timeout: float, stdin: bytes | None = None, merge: bool = False,
           env: dict | None = None):
+    if HOST is None and argv[0] in ("ssh", "docker"):
+        raise DesktopError("no Docker host: set REDSTONE_DOCKER_HOST or write user@host to server/docker_host")
     return run(argv, input=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merge else subprocess.PIPE,
                timeout=timeout, env=env)
 
@@ -86,7 +103,8 @@ def _probe() -> bool:
     """A no-op ssh command: through the master when there is one, else a fresh connection
     (which leaves a master behind)."""
     try:
-        return _once(PROBE, 8).returncode == 0
+        # The desktop's sshd runs cmd.exe, which has no `true`; `exit` is a builtin there and in sh.
+        return _once(["ssh", "-o", "ConnectTimeout=5", HOST, "exit"], 8).returncode == 0
     except subprocess.TimeoutExpired:
         return False
 
@@ -401,7 +419,7 @@ def main(argv: list[str]) -> int:
         return 2
     sats = [BY_NAME[n] for n in argv[1:]] or DOCKER_SATELLITES
     if not reachable():
-        print(f"desktop {HOST} unreachable")
+        print(f"desktop {HOST} unreachable" if HOST else "no Docker host: set REDSTONE_DOCKER_HOST or server/docker_host")
         return 1
     with ThreadPoolExecutor(len(sats)) as pool:
         for line in pool.map(lambda s: getattr(s, action)(), sats):
