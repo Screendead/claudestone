@@ -1,0 +1,112 @@
+name: shelf_auto_label
+description: A storage chest that labels itself. A hopper under the chest copies the first item in it onto a shelf below as a one-item sample, and a comparator behind the shelf then locks the hopper. Take the sample off the shelf to relabel. Keeps storage halls whose chests change contents readable without hand-placed item frames; the hold input (in front of the hopper) pauses it.
+traits: [survival_friendly, container_based, lockable, one_wide, compact, pistonless, entityless, tileable, silent]
+palette:
+  .: air
+  '=': smooth_stone
+  S: {name: shelf, block: 'oak_shelf[facing=north]'}
+  K: {name: cmp, block: 'comparator[facing=north]'}
+  '#': stone
+  H: {name: feed, block: 'hopper[facing=down]'}
+  d: redstone_wire[north=up,south=side]
+  u: redstone_wire[north=side,south=side]
+  C: 'chest[facing=north]'
+  h: {input: hold}
+layers:
+  0: |
+    .
+    =
+    =
+    =
+  1: |
+    .
+    S
+    K
+    #
+  2: |
+    h
+    H
+    #
+    d
+  3: |
+    .
+    C
+    u
+    .
+tests:
+- name: labels itself with the first item and locks
+  steps:
+  - expect: {feed: 0, cmp: 0}
+  - run: 'data merge block ~0 ~3 ~1 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:10}]}'
+  - wait: 40
+  - expect: {feed: 1}
+  - level: {cmp: 1}
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:1}]
+  - check: unless data block ~0 ~1 ~1 Items[1]
+  - check: if data block ~0 ~2 ~1 Items[{id:"minecraft:cobblestone",count:1}]
+  - check: if data block ~0 ~3 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:8}]
+  - log: data get block ~0 ~1 ~1 Items
+  - wait: 200
+  - expect: {feed: 1}
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:1}]
+  - check: unless data block ~0 ~1 ~1 Items[1]
+  - check: if data block ~0 ~3 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:8}]
+- name: samples the chest's first occupied slot
+  steps:
+  - run: 'data merge block ~0 ~3 ~1 {Items:[{Slot:4b,id:"minecraft:diamond",count:3},{Slot:9b,id:"minecraft:oak_log",count:64}]}'
+  - wait: 40
+  - expect: {feed: 1}
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:diamond",count:1}]
+  - check: unless data block ~0 ~1 ~1 Items[1]
+  - check: if data block ~0 ~3 ~1 Items[{Slot:4b,id:"minecraft:diamond",count:1}]
+  - check: if data block ~0 ~3 ~1 Items[{Slot:9b,id:"minecraft:oak_log",count:64}]
+- name: taking the sample relabels it
+  steps:
+  - run: 'data merge block ~0 ~3 ~1 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:10}]}'
+  - wait: 40
+  - expect: {feed: 1}
+  - run: item replace block ~0 ~1 ~1 container.0 with air
+  - wait: 40
+  - expect: {feed: 1}
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:1}]
+  - check: if data block ~0 ~3 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:7}]
+  # the chest's contents change: the hopper still holds one cobblestone, so the
+  # first take shows that, and the second shows the new contents
+  - run: 'data merge block ~0 ~3 ~1 {Items:[{Slot:0b,id:"minecraft:diamond",count:5}]}'
+  - run: item replace block ~0 ~1 ~1 container.0 with air
+  - wait: 40
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:1}]
+  - check: if data block ~0 ~2 ~1 Items[{id:"minecraft:diamond",count:1}]
+  - run: item replace block ~0 ~1 ~1 container.0 with air
+  - wait: 40
+  - expect: {feed: 1}
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:diamond",count:1}]
+  - check: unless data block ~0 ~1 ~1 Items[1]
+  - check: if data block ~0 ~3 ~1 Items[{Slot:0b,id:"minecraft:diamond",count:3}]
+- name: neighbouring chests label independently
+  tile: [1, 0, 0]
+  truth_table: |
+    hold | feed
+    0    | 0
+    1    | 1
+  delay: 0
+  steps:
+  # the table ends with the second copy's hold still on
+  - run: setblock ~1 ~2 ~0 air
+  - wait: 4
+  - expect: {feed: 0}
+  - check: if block ~1 ~2 ~1 hopper[enabled=true]
+  - run: 'data merge block ~0 ~3 ~1 {Items:[{Slot:0b,id:"minecraft:cobblestone",count:10}]}'
+  - wait: 40
+  - expect: {feed: 1}
+  - check: if block ~1 ~2 ~1 hopper[enabled=true]
+  - check: unless data block ~1 ~1 ~1 Items[0]
+  - run: 'data merge block ~1 ~3 ~1 {Items:[{Slot:0b,id:"minecraft:diamond",count:4}]}'
+  - wait: 40
+  - expect: {feed: 1}
+  - check: if block ~1 ~2 ~1 hopper[enabled=false]
+  - check: if data block ~0 ~1 ~1 Items[{Slot:0b,id:"minecraft:cobblestone",count:1}]
+  - check: if data block ~1 ~1 ~1 Items[{Slot:0b,id:"minecraft:diamond",count:1}]
+  - check: unless data block ~0 ~1 ~1 Items[1]
+  - check: unless data block ~1 ~1 ~1 Items[1]
+  - check: if data block ~1 ~3 ~1 Items[{Slot:0b,id:"minecraft:diamond",count:2}]
