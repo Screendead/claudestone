@@ -1,0 +1,237 @@
+name: dec_dial_onehot
+description: >-
+  An 8-way rotary selector: the item in an item frame picks exactly one of eight
+  outputs, one output per click of rotation. A comparator reads an item frame through
+  the block behind it as rotation + 1 (1-8; 0 when the frame is empty), so the frame on
+  the west face of the stone at (1,1,2) turns one block face into an eight-position
+  switch that would otherwise take eight levers and an encoder; the comparator k at
+  (2,1,2), facing west, starts the dust line of dec_analog_onehot, which decodes the
+  strength to one-hot. Interface (x east, z south, layer 1 on a 12x6 base): the frame
+  at (0,1,2) facing west (click it to rotate); outputs are comparators o1 (3,1,4), o4
+  (6,1,4), o7 (9,1,4) leaving south into (x,1,5), o2 (4,1,5), o5 (7,1,5), o8 (10,1,5)
+  leaving south, o3 (5,1,0), o6 (8,1,0) leaving north; rotation r lights o(r+1), an
+  empty frame lights nothing (tested). 12x2x6 plus the frame. Delay: 6 game ticks from
+  the rotation (tested). Nothing lights and no block moves; rotating a frame by hand
+  plays the frame's click and updates the comparator, while the tests, which set the
+  rotation by NBT, touch a block beside k to deliver the update a click would have.
+  Trade-off versus dec_analog_onehot: the same decoder with its input built in; the
+  entity is the volume trick (one face instead of eight levers), and it is a manual
+  control, not a signal input.
+traits:
+- uses_entities
+- analog
+- lightless
+- silent
+- pistonless
+- flat
+- horizontal
+- comparator_based
+- compact
+- survival_friendly
+- tick_accurate
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  S: stone
+  k: comparator[facing=west]
+  v: repeater[facing=north]
+  ^: repeater[facing=south]
+  A: {output: o3, block: 'comparator[facing=south,mode=subtract]'}
+  B: {output: o6, block: 'comparator[facing=south,mode=subtract]'}
+  C: {output: o1, block: 'comparator[facing=north,mode=subtract]'}
+  D: {output: o4, block: 'comparator[facing=north,mode=subtract]'}
+  E: {output: o7, block: 'comparator[facing=north,mode=subtract]'}
+  F: {output: o2, block: 'comparator[facing=north,mode=subtract]'}
+  G: {output: o5, block: 'comparator[facing=north,mode=subtract]'}
+  H: {output: o8, block: 'comparator[facing=north,mode=subtract]'}
+layers:
+  0: |
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+  1: |
+    .....A-.B-..
+    .....^^.^^..
+    .Sk---------
+    ...vvvvvvvvv
+    ...C-SD-SE-S
+    ....F-.G-.H-
+entities:
+- type: item_frame
+  pos: [0.0, 1.5, 2.0]
+  nbt: '{Facing:4b,Item:{id:"minecraft:stick",count:1},ItemRotation:0b}'
+tests:
+- name: every rotation lights its own output
+  steps:
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:0b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect:
+      o1: 1
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:1b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 1
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:2b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 1
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:3b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 1
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:4b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 1
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:5b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 1
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:6b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 1
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:7b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 1
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:3b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 1
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:0b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 1
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:7b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 1
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:5b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 1
+      o7: 0
+      o8: 0
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run item replace entity @s contents with air'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 10}
+  - expect:
+      o1: 0
+      o2: 0
+      o3: 0
+      o4: 0
+      o5: 0
+      o6: 0
+      o7: 0
+      o8: 0
+- name: six ticks from the dial
+  steps:
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:2b}'}
+  - {run: setblock ~2 ~1 ~1 stone}
+  - {wait: 10}
+  - expect: {o3: 1, o4: 0}
+  - {run: 'execute positioned ~0.5 ~1.5 ~2.5 as @e[type=item_frame,distance=..0.8] run data merge entity @s {ItemRotation:3b}'}
+  - {run: setblock ~2 ~1 ~1 air}
+  - {wait: 5}
+  - expect: {o3: 1, o4: 0}
+  - {wait: 1}
+  - expect: {o3: 0, o4: 1}

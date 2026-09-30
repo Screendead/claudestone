@@ -1,0 +1,158 @@
+name: dust_redirect_by_signal_sources
+description: Line-end dust bends toward an adjacent signal source (not a crafter), powered or not, and stops powering the block ahead; repeater sides and observer non-output faces do not bend it, a comparator side does and becomes a side input.
+traits: [survival_friendly, analog]
+palette:
+  .: air
+  '=': stone
+  a: {input: a}
+  b: {input: b}
+  p: {name: d1, block: redstone_wire}
+  d: {name: d2, block: redstone_wire}
+  e: {name: end, block: redstone_wire}
+  L: {name: lamp, block: redstone_lamp}
+  R: redstone_block
+  C: {name: cmp, block: 'comparator[facing=west,mode=subtract]'}
+  M: {name: cmp_lamp, block: redstone_lamp}
+  s: {name: side, block: redstone_wire}
+  r: repeater[facing=east]
+layers:
+  0: |
+    .===..
+    ...=..
+    ......
+    ...==.
+    ...=..
+  1: |
+    apdeL.
+    ......
+    ......
+    ...srb
+    ..RCM.
+tests:
+- name: control nothing beside the end lights the lamp
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wire[power=13,east=side,west=side,north=none,south=none] if block ~4 ~1 ~0 redstone_lamp[lit=true]
+- name: lightning rod bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 lightning_rod[facing=up]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false] if block ~3 ~1 ~1 lightning_rod[powered=false]
+- name: redstone block bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 redstone_block
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[power=15,east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: lever bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 lever[face=floor,facing=north,powered=false]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: stone button bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 stone_button[face=floor,facing=north,powered=false]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: trapped chest bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 trapped_chest[facing=south]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: inverted daylight detector bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 daylight_detector[inverted=true]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: target block bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 target
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: redstone torch bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 redstone_torch
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: tripwire hook bends the end away from the lamp
+  steps:
+  - run: setblock ~2 ~1 ~1 stone
+  - run: setblock ~3 ~1 ~1 tripwire_hook[facing=east]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: observer output face bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 observer[facing=south]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: repeater axis end bends the end away from the lamp
+  steps:
+  - run: setblock ~3 ~1 ~1 repeater[facing=north]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=none,west=side,south=side] if block ~4 ~1 ~0 redstone_lamp[lit=false]
+- name: repeater side does not bend the end
+  steps:
+  - run: setblock ~3 ~1 ~1 repeater[facing=east]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=side,west=side,south=none] if block ~4 ~1 ~0 redstone_lamp[lit=true] if block ~3 ~1 ~1 repeater[powered=false,locked=false]
+- name: observer side face does not bend the end
+  steps:
+  - run: setblock ~3 ~1 ~1 observer[facing=east]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=side,west=side,south=none] if block ~4 ~1 ~0 redstone_lamp[lit=true] 
+- name: observer front face does not bend the end
+  steps:
+  - run: setblock ~3 ~1 ~1 observer[facing=north]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=side,west=side,south=none] if block ~4 ~1 ~0 redstone_lamp[lit=true] 
+- name: crafter does not bend the end
+  steps:
+  - run: setblock ~3 ~1 ~1 crafter
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[east=side,west=side,south=none] if block ~4 ~1 ~0 redstone_lamp[lit=true]
+- name: dust past a comparator side bends in and subtracts
+  steps:
+  - check: if block ~3 ~1 ~3 redstone_wire[power=0,south=side,east=side] if block ~4 ~1 ~4 redstone_lamp[lit=true]
+  - drive: {b: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~3 redstone_wire[power=15,south=side,east=side,west=none,north=none] if block ~3 ~1 ~4 comparator[powered=true]
+  - wait: 2
+  - check: if block ~3 ~1 ~4 comparator[powered=false]
+  - wait: 6
+  - check: if block ~4 ~1 ~4 redstone_lamp[lit=false]
+- name: control compare mode keeps output with equal side
+  steps:
+  - run: setblock ~3 ~1 ~4 comparator[facing=west,mode=compare]
+  - drive: {b: 1}
+  - wait: 10
+  - check: if block ~3 ~1 ~3 redstone_wire[power=15,south=side] if block ~3 ~1 ~4 comparator[powered=true] if block ~4 ~1 ~4 redstone_lamp[lit=true]

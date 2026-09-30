@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import * as path from "node:path";
 import { bodyMarkup } from "./webview/markup";
 import { applyModel, Model, parseModel } from "./model";
+import { parseTrace } from "./trace";
 
 const VIEW_TYPE = "redstone.viewer";
 
@@ -42,9 +43,9 @@ class Panel {
     let specName = "";
     try { specName = parseModel(this.doc.getText()).name; } catch { return; }
     const p = tracePath(this.root, specName, this.test);
-    let frames: unknown = null;
-    try { frames = JSON.parse(fs.readFileSync(p, "utf8")).frames; } catch { /* no trace yet */ }
-    this.post({ type: "trace", test: this.test, frames, path: p });
+    let text: string | null = null;
+    try { text = fs.readFileSync(p, "utf8"); } catch { /* no trace yet */ }
+    this.post({ type: "trace", test: this.test, ...parseTrace(text), path: p });
   }
 
   async edit(model: Model) {

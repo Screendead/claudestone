@@ -1,0 +1,250 @@
+name: shift_pulse_lock
+description: 'Serial-in parallel-out shift register with ONE latch (a locked repeater) per bit and one lock line: each rising clock edge unlocks every data repeater for 6 ticks, just longer than one repeater delay, so each bit moves one stage and no further. Data runs west to east on the north row (z=0): d is the cell at x=2; the data repeaters q0..q3 (x=3,5,7,9, facing west, delay 2) are the parallel outputs, separated by concrete blocks, and q3 powers whatever is east of it (serial out). Each data repeater is locked from the south by a repeater (z=1) fed by the lock line (dust, z=2), which is normally on: it comes from a subtract comparator L (x=2, z=2) whose rear reads a redstone block and whose side takes a 6-tick rising-edge pulse from a second subtract comparator (rear = clk, the cell at x=2, z=4; side = clk delayed by the two repeaters in the west corner). All data repeaters fire in the same game tick; the concrete between them is what makes that safe: a repeater facing straight into
+  another gets the top tick priority, so a turning-on stage could fire before the stage downstream of it reads its old value, whereas a repeater facing a block turns off (priority VERY_HIGH) before any repeater turns on (HIGH). Timing: q changes exactly 10 ticks after the rising edge; d is sampled 6 ticks after the edge, so change it at least 9 ticks after one edge and at most 5 ticks after the next (a change 6-8 ticks after the edge is unreliable: a rise is caught, a fall is not). The falling edge does nothing. Clock: at least 5 ticks high and 6 low (11-tick period, tested). Size 10x2x5 including the 3x2x3 clock corner; each bit is 2x2x3 (data repeater, block; lock repeater; lock dust), up to 7 bits before the lock dust needs a repeater. Lightless, silent, no entities, starts cleared. Trade-off: one lock line, 3 wide instead of shift_master_slave''s 5, but a 10-tick latency, a 9-tick hold time and an 11-tick period.'
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  d: {input: d}
+  k: {input: clk}
+  a: {output: q0, block: 'repeater[facing=west,delay=2]'}
+  b: {output: q1, block: 'repeater[facing=west,delay=2]'}
+  c: {output: q2, block: 'repeater[facing=west,delay=2]'}
+  e: {output: q3, block: 'repeater[facing=west,delay=2]'}
+  v: repeater[facing=south]
+  B: redstone_block
+  L: comparator[facing=west,mode=subtract]
+  C: comparator[facing=south,mode=subtract]
+  A: repeater[facing=east,delay=1]
+  D: repeater[facing=west,delay=2]
+  '#': white_concrete
+layers: {0: '...=======
+
+    ...=======
+
+    ..========
+
+    ===.......
+
+    ===.......
+
+    ', 1: '..da#b#c#e
+
+    ...v.v.v.v
+
+    .BL-------
+
+    -DC.......
+
+    -Ak.......
+
+    '}
+tests:
+- name: shifts 1011 through, q moves 10 ticks after each rising edge
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+- name: clock held high or low and the falling edge do not shift
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 40}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 0}
+  - {wait: 40}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 40}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 40}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 1}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 20}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+- name: d is sampled between 5 and 9 ticks after the edge
+  steps:
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {d: 1}
+  - {wait: 15}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {d: 0}
+  - {wait: 15}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - drive: {d: 1}
+  - {wait: 11}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 9}
+  - drive: {d: 0}
+  - {wait: 11}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {clk: 0}
+  - {wait: 10}
+  - drive: {clk: 1}
+  - {wait: 20}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+- name: shifts at the 11-tick minimum period (5 high, 6 low)
+  steps:
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 5}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - drive: {d: 1}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0}
+  - {wait: 1}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - drive: {d: 0}
+  - {wait: 1}
+  - drive: {clk: 1}
+  - {wait: 5}
+  - drive: {clk: 0}
+  - {wait: 4}
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1}
+  - {wait: 1}
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0}
+  - {wait: 1}
+traits: [compact, flat, horizontal, lightless, silent, pistonless, entityless, comparator_based, tick_accurate, reset_safe, survival_friendly]

@@ -28,7 +28,8 @@ export function bodyMarkup(): string {
     <div id="playback">
       <div id="playbackEmpty"></div>
       <div id="playbackBody" style="display:none">
-        <div id="eventLabel"></div><div id="tickLabel"></div>
+        <div id="failures"></div>
+        <div id="eventLabel"></div><div id="tickLabel"></div><div id="traceNote" class="dim"></div>
         <input type="range" id="slider" min="0" max="0" value="0">
         <div class="row"><button id="toStart">|&lt;</button><button id="stepBack">&lt;</button><button id="playBtn">Play</button><button id="stepFwd">&gt;</button><button id="toEnd">&gt;|</button>
           <select id="speed"><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option></select>
@@ -37,7 +38,7 @@ export function bodyMarkup(): string {
       </div>
     </div>
   </section>
-  <aside id="right"><h3>Tests</h3><div id="tests"></div></aside>
+  <aside id="right"><h3>Spec</h3><div id="specInfo"></div><h3>Tests</h3><div id="tests"></div></aside>
 </div></div>
 <div id="tip"></div>`;
 }

@@ -1,14 +1,15 @@
 import {
-  Model, Test, CellSpec, LabelKind, canon, clone, entryAt, entryLabel, entryState, formatState, height, layerAt,
+  Model, Test, CellSpec, LabelKind, canon, clone, entryAt, entryFixture, entryLabel, entryState, formatState, height, layerAt,
   parseState, setCell, rotateState, addLayer, removeLayer, resize, renameLabel, width, Edge,
 } from "../model";
-import { drawLayer, Theme } from "../render";
+import { cellTrace, drawLayer, infoTable, Theme } from "../render";
+import { Frame, parseFailures } from "../trace";
+import { testFlags } from "./text";
 
 declare function acquireVsCodeApi(): { postMessage(m: unknown): void; getState(): any; setState(s: unknown): void };
 const vscode = acquireVsCodeApi();
 
-interface Frame { tick: number; event: string; signals: Record<string, number> }
-interface Trace { test: string; frames: Frame[] | null; path: string }
+interface Trace { test: string; frames: Frame[] | null; path: string; sparse: boolean; failures: string[] }
 
 const COMMON: string[] = [
   "air", "redstone_wire", "repeater[facing=west]", "comparator[facing=west]", "comparator[facing=west,mode=subtract]",
@@ -65,7 +66,7 @@ const frame = (): Frame | null => (trace?.frames && trace.frames.length ? trace.
 const currentEvent = (): { text: string; tick: number } | null => {
   const fr = trace?.frames;
   if (!fr) return null;
-  for (let i = Math.min(frameIdx, fr.length - 1); i >= 0; i--) if (fr[i].event) return { text: fr[i].event, tick: fr[i].tick };
+  for (let i = Math.min(frameIdx, fr.length - 1); i >= 0; i--) if (fr[i].event) return { text: fr[i].event + (fr[i].reply ? ` -> ${fr[i].reply}` : ""), tick: fr[i].tick };
   return null;
 };
 function drivenInputs(): Record<string, boolean> {
@@ -78,6 +79,8 @@ function drivenInputs(): Record<string, boolean> {
   }
   return out;
 }
+
+const traceOpts = () => ({ signals: frame()?.signals ?? null, sparse: !!trace?.sparse, levels: frame()?.levels ?? null });
 
 // ---------- rendering ----------
 
@@ -107,7 +110,7 @@ function renderMain() {
   const c = $<HTMLCanvasElement>("canvas");
   const ctx = sizeCanvas(c, width(m) * s, height(m) * s);
   drawLayer(ctx, m, {
-    y, S: s, signals: frame()?.signals ?? null, inputs: drivenInputs(), showBelow, theme: theme(), hover, selected,
+    y, S: s, ...traceOpts(), inputs: drivenInputs(), showBelow, theme: theme(), hover, selected,
   });
 }
 
@@ -119,7 +122,7 @@ function renderMinis() {
     const cv = el("canvas", { cls: "mini" + (l.y === y ? " active" : ""), title: `layer y=${l.y}` });
     const ms = 8;
     const ctx = sizeCanvas(cv, width(model) * ms, height(model) * ms);
-    drawLayer(ctx, model, { y: l.y, S: ms, signals: frame()?.signals ?? null, inputs: drivenInputs(), showBelow: false, compass: false, theme: theme() });
+    drawLayer(ctx, model, { y: l.y, S: ms, ...traceOpts(), inputs: drivenInputs(), showBelow: false, compass: false, theme: theme() });
     cv.onclick = () => { y = l.y; renderAll(); };
     box.append(el("div", { cls: "miniWrap" }, el("span", { textContent: `y=${l.y}` }), cv));
   }
@@ -127,7 +130,7 @@ function renderMinis() {
 
 function swatch(state: string, label?: { kind: LabelKind; name: string }): HTMLCanvasElement {
   const e = label ? (label.kind === "input" ? { input: label.name } : label.kind === "output" ? { output: label.name, block: state } : { name: label.name, block: state }) : state;
-  const mini: Model = { name: "", description: "", tests: [], palette: [["p", e]], layers: [{ y: 0, rows: ["p"] }] };
+  const mini: Model = { name: "", description: "", traits: [], tests: [], palette: [["p", e]], layers: [{ y: 0, rows: ["p"] }] };
   const cv = el("canvas");
   const ctx = sizeCanvas(cv, 40, 40);
   drawLayer(ctx, mini, { y: 0, S: 40, signals: null, showBelow: false, compass: false, theme: { ...theme(), grid: "transparent" } });
@@ -202,6 +205,15 @@ function parseTable(text: string): { head: string[]; ins: number; rows: string[]
   return { head: [...l, ...(r ?? [])], ins: l.length, rows };
 }
 
+function renderSpec() {
+  const box = $("specInfo");
+  box.replaceChildren();
+  if (!model) return;
+  box.append(el("div", { cls: "specName", textContent: model.name }));
+  if (model.traits.length) box.append(el("div", { cls: "traits" }, ...model.traits.map((t) => el("span", { cls: "trait", textContent: t }))));
+  if (model.description) box.append(el("div", { cls: "dim desc", textContent: model.description }));
+}
+
 function renderTests() {
   const box = $("tests");
   box.replaceChildren();
@@ -214,7 +226,9 @@ function renderTests() {
       title: "Run pytest with REDSTONE_TRACE=1" });
     runBtn.onclick = (e) => { e.stopPropagation(); selectedTest = t.name; running = true; vscode.postMessage({ type: "run", test: t.name }); renderTests(); };
     const head = el("div", { cls: "testHead" }, el("b", { textContent: t.name }),
-      (t.delay ?? t.max_delay) !== undefined ? el("span", { cls: "dim", textContent: ` delay ${t.delay ?? t.max_delay}t` }) : "", runBtn);
+      (t.delay ?? t.max_delay) !== undefined ? el("span", { cls: "dim", textContent: ` delay ${t.delay ?? t.max_delay}t` }) : "",
+      testFlags(t) ? el("span", { cls: "dim", textContent: ` ${testFlags(t)}` }) : "",
+      active && trace?.failures.length ? el("span", { cls: "failTag", textContent: "failed" }) : "", runBtn);
     const card = el("div", { cls: "test" + (active ? " active" : "") }, head);
     card.onclick = () => selectTest(t.name);
     if (t.truth_table) {
@@ -230,18 +244,26 @@ function renderTests() {
         card.append(table);
       }
     }
-    if (t.steps) {
-      const ol = el("ol", { cls: "steps" });
-      for (const st of t.steps) {
-        const [k, v] = Object.entries(st)[0] ?? ["?", ""];
-        const body = typeof v === "object" && v !== null
-          ? Object.entries(v as Record<string, unknown>).map(([a, b]) => `${a}=${b}`).join(" ") : String(v);
-        ol.append(el("li", {}, el("span", { cls: "kw " + k, textContent: k }), " ", body));
-      }
-      card.append(ol);
-    }
+    if (t.steps) card.append(stepList(t.steps));
+    if (t.finally?.length) card.append(stepList(t.finally.map((c) => ({ finally: c }))));
     box.append(card);
   }
+}
+
+function stepList(steps: Record<string, unknown>[]): HTMLElement {
+  const ol = el("ol", { cls: "steps" });
+  for (const st of steps) {
+    const [k, v] = Object.entries(st)[0] ?? ["?", ""];
+    if (k === "repeat" && typeof v === "object" && v !== null) {
+      const r = v as { times?: number; steps?: Record<string, unknown>[] };
+      ol.append(el("li", {}, el("span", { cls: "kw " + k, textContent: k }), ` x${r.times ?? "?"}`, stepList(r.steps ?? [])));
+      continue;
+    }
+    const body = typeof v === "object" && v !== null
+      ? Object.entries(v as Record<string, unknown>).map(([a, b]) => `${a}=${b}`).join(" ") : String(v);
+    ol.append(el("li", {}, el("span", { cls: "kw " + k, textContent: k }), " ", body));
+  }
+  return ol;
 }
 
 function renderPlayback() {
@@ -253,6 +275,15 @@ function renderPlayback() {
     : "Select a test to load its trace.";
   if (!has) return;
   const fr = trace!.frames!;
+  $("traceNote").textContent = trace!.sparse ? "Sparse trace: only named cells were recorded; other cells show their placed state." : "";
+  const fails = $("failures");
+  if (fails.dataset.for !== trace!.path + trace!.failures.join("\n")) {
+    fails.dataset.for = trace!.path + trace!.failures.join("\n");
+    fails.replaceChildren(...parseFailures(trace!.failures, fr).map((f) => el("button", {
+      cls: "fail", title: "Go to this tick", onclick: () => { stopPlay(); frameIdx = f.frame; renderFrame(); },
+      textContent: `Test failed${f.tick === null ? "" : ` at tick ${f.tick}`}: ${f.message}`,
+    })));
+  }
   const slider = $<HTMLInputElement>("slider");
   slider.max = String(fr.length - 1);
   slider.value = String(frameIdx);
@@ -266,7 +297,7 @@ function renderPlayback() {
     chips.dataset.for = `${trace!.path}:${fr.length}`;
     fr.forEach((f, i) => {
       if (!f.event) return;
-      chips.append(el("button", { cls: "chip", textContent: `${f.tick}: ${f.event}`, onclick: () => { frameIdx = i; renderAll(); } }));
+      chips.append(el("button", { cls: "chip", textContent: `${f.tick}: ${f.event}`, title: f.reply ?? "", onclick: () => { frameIdx = i; renderAll(); } }));
     });
   }
 }
@@ -286,6 +317,7 @@ function renderAll() {
   if (!model) return;
   if (!layerAt(model, y)) y = model.layers[0]?.y ?? 0;
   renderBar();
+  renderSpec();
   renderMain();
   renderMinis();
   renderPalette();
@@ -333,13 +365,15 @@ function tip(e: MouseEvent, c: { x: number; z: number } | null) {
   const t = $("tip");
   if (!c || !model) { t.style.display = "none"; return; }
   const at = entryAt(model, y, c.x, c.z);
-  const lev = frame() ? (frame()!.signals[`${c.x},${y},${c.z}`] ?? 0) : null;
+  const info = at && infoTable(model).get(at.glyph);
+  const ct = frame() && info ? cellTrace(info, `${c.x},${y},${c.z}`, traceOpts()) : null;
   const lab = at && entryLabel(at.entry);
   t.replaceChildren(
     el("div", { textContent: `x=${c.x} y=${y} z=${c.z}` }),
     el("div", { textContent: at ? `minecraft:${entryState(at.entry).replace(/^minecraft:/, "")}` : "?" }),
     el("div", { cls: "dim", textContent: `glyph '${at?.glyph ?? ""}'${lab ? `   ${lab.kind}: ${lab.name}` : ""}` }),
-    el("div", { textContent: lev === null ? "no trace" : `trace level ${lev}` }),
+    el("div", { textContent: !ct ? "no trace" : !ct.traced ? `not recorded${trace?.sparse ? " (sparse trace)" : ""}`
+      : `trace level ${ct.level}${ct.strength !== undefined ? `, output strength ${ct.strength}` : ""}` }),
   );
   t.style.display = "block";
   t.style.left = `${Math.min(e.clientX + 14, window.innerWidth - 240)}px`;
@@ -386,7 +420,7 @@ function rotateHovered() {
   const at = hover && entryAt(model, y, hover.x, hover.z);
   if (hover && at) {
     const rot = rotateState(entryState(at.entry));
-    if (rot) { mutate((m) => setCell(m, y, hover!.x, hover!.z, { state: rot, label: entryLabel(at.entry) })); return; }
+    if (rot) { mutate((m) => setCell(m, y, hover!.x, hover!.z, { state: rot, label: entryLabel(at.entry), fixture: entryFixture(at.entry) })); return; }
   }
   const b = rotateState(brush);
   if (b) { brush = b; renderPalette(); }
@@ -395,11 +429,11 @@ function cycleDelay() {
   if (!model || !hover) return;
   const at = entryAt(model, y, hover.x, hover.z);
   if (!at) return;
-  const { id, props } = parseState(entryState(at.entry));
+  const { id, props, nbt } = parseState(entryState(at.entry));
   if (id !== "repeater") return;
   const d = (Number(props.delay ?? 1) % 4) + 1;
-  const st = formatState(id, { ...props, delay: String(d) });
-  mutate((m) => setCell(m, y, hover!.x, hover!.z, { state: st, label: entryLabel(at.entry) }));
+  const st = formatState(id, { ...props, delay: String(d) }, nbt);
+  mutate((m) => setCell(m, y, hover!.x, hover!.z, { state: st, label: entryLabel(at.entry), fixture: entryFixture(at.entry) }));
 }
 function pick() {
   if (!model || !hover) return;
@@ -522,7 +556,7 @@ function wire() {
     } else if (msg.type === "trace") {
       if (msg.test !== selectedTest) return;
       const had = trace?.frames?.length ?? 0;
-      trace = { test: msg.test, frames: msg.frames, path: msg.path };
+      trace = { test: msg.test, frames: msg.frames, path: msg.path, sparse: !!msg.sparse, failures: msg.failures ?? [] };
       if (!msg.frames || frameIdx >= msg.frames.length || !had) frameIdx = 0;
       $("eventChips").dataset.for = "";
       renderAll();

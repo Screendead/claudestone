@@ -1,10 +1,13 @@
 import { isMap, isScalar, parseDocument, Scalar, YAMLMap, Pair } from "yaml";
 
-export type Entry = string | { input: string } | { output: string; block: string } | { name: string; block: string };
+/** A fixture is placed and tested but left out of the design's size; reserve is air that belongs to it. */
+export type Entry = string | { input: string } | { reserve: true } |
+  { block: string; output?: string; name?: string; fixture?: boolean };
 export interface Layer { y: number; rows: string[] }
 export interface Model {
   name: string;
   description: string;
+  traits: string[];
   palette: [string, Entry][];
   layers: Layer[];
   tests: Test[];
@@ -14,12 +17,20 @@ export interface Test {
   truth_table?: string;
   delay?: number;
   max_delay?: number;
+  delays?: Record<string, number | { rise?: number; fall?: number }>;
+  max_delays?: Record<string, number | { rise?: number; fall?: number }>;
+  glitch_free?: boolean;
+  reset?: boolean;
+  settle?: number;
+  initial?: Record<string, number>;
+  tile?: [number, number, number];
   steps?: Record<string, unknown>[];
+  finally?: string[];
 }
 export type LabelKind = "input" | "output" | "name";
 export interface Label { kind: LabelKind; name: string }
 /** What to put in a cell: a block state plus an optional name. Inputs ignore the state (air). */
-export interface CellSpec { state: string; label?: Label }
+export interface CellSpec { state: string; label?: Label; fixture?: boolean }
 
 // Preferred glyphs; mirrors GLYPHS in redstone/fileformat.py.
 export const GLYPHS: Record<string, string> = {
@@ -42,28 +53,31 @@ export const GLYPHS: Record<string, string> = {
 };
 const FREE = "ABCDEFGHIJKMNOPQSTUVWXYZbcdefghijklmpqrstwxyz0123456789";
 
-export function parseState(state: string): { id: string; props: Record<string, string> } {
-  const m = /^([^[]*)(?:\[(.*)\])?$/.exec(state.trim())!;
-  const id = m[1].replace(/^minecraft:/, "");
+/** `nbt` is the block-entity data suffix, e.g. `{Items:[...]}`, kept verbatim. */
+export function parseState(state: string): { id: string; props: Record<string, string>; nbt?: string } {
+  const s = state.trim();
+  const m = /^([^[{]*)(?:\[([^\]]*)\])?(\{.*\})?$/s.exec(s);
+  if (!m) return { id: s.replace(/^minecraft:/, ""), props: {} };
+  const id = m[1].trim().replace(/^minecraft:/, "");
   const props: Record<string, string> = {};
   if (m[2]) for (const kv of m[2].split(",")) {
     const [k, v] = kv.split("=");
     if (k) props[k.trim()] = (v ?? "").trim();
   }
-  return { id, props };
+  return m[3] ? { id, props, nbt: m[3] } : { id, props };
 }
 
-export function formatState(id: string, props: Record<string, string>): string {
+export function formatState(id: string, props: Record<string, string>, nbt?: string): string {
   const keys = Object.keys(props);
-  return keys.length ? `${id}[${keys.map((k) => `${k}=${props[k]}`).join(",")}]` : id;
+  return (keys.length ? `${id}[${keys.map((k) => `${k}=${props[k]}`).join(",")}]` : id) + (nbt ?? "");
 }
 
-/** Canonical form for equality: no namespace, properties sorted. */
+/** Canonical form for equality: no namespace, properties sorted, block-entity data as written. */
 export function canon(state: string): string {
-  const { id, props } = parseState(state);
+  const { id, props, nbt } = parseState(state);
   const sorted: Record<string, string> = {};
   for (const k of Object.keys(props).sort()) sorted[k] = props[k];
-  return formatState(id, sorted);
+  return formatState(id, sorted, nbt);
 }
 
 export function entryState(e: Entry): string {
@@ -71,17 +85,21 @@ export function entryState(e: Entry): string {
   return "block" in e ? e.block : "air";
 }
 export function entryLabel(e: Entry): Label | undefined {
-  if (typeof e === "string") return undefined;
+  if (typeof e === "string" || "reserve" in e) return undefined;
   if ("input" in e) return { kind: "input", name: e.input };
-  if ("output" in e) return { kind: "output", name: e.output };
-  return { kind: "name", name: e.name };
+  if (e.output) return { kind: "output", name: e.output };
+  return e.name ? { kind: "name", name: e.name } : undefined;
+}
+export function entryFixture(e: Entry): boolean {
+  return typeof e !== "string" && "block" in e && !!e.fixture;
 }
 export function makeEntry(spec: CellSpec): Entry {
   const l = spec.label;
-  if (!l) return spec.state;
+  const fixture = spec.fixture && l?.kind !== "input" ? { fixture: true } : {};
+  if (!l) return spec.fixture ? { block: spec.state, fixture: true } : spec.state;
   if (l.kind === "input") return { input: l.name };
-  if (l.kind === "output") return { output: l.name, block: spec.state };
-  return { name: l.name, block: spec.state };
+  if (l.kind === "output") return { output: l.name, block: spec.state, ...fixture };
+  return { name: l.name, block: spec.state, ...fixture };
 }
 
 export function parseModel(text: string): Model {
@@ -115,13 +133,14 @@ export function parseModel(text: string): Model {
   return {
     name: String(js.name ?? ""),
     description: String(js.description ?? ""),
+    traits: Array.isArray(js.traits) ? js.traits.map(String) : [],
     palette,
     layers,
     tests: Array.isArray(js.tests) ? js.tests : [],
   };
 }
 
-const STRINGIFY = { lineWidth: 0, flowCollectionPadding: false, indentSeq: false } as const;
+const STRINGIFY = { lineWidth: 0, flowCollectionPadding: false, indentSeq: false, singleQuote: true } as const;
 
 function scalarFor(s: string, isKey: boolean): Scalar {
   const sc = new Scalar(s);
@@ -142,20 +161,22 @@ export function applyModel(text: string, model: Model): string {
   const doc = parseDocument(text);
   if (doc.errors.length) throw new Error(doc.errors[0].message);
   const before = parseModel(text);
-  let changed = false;
+  const changed = new Set<"palette" | "layers">();
 
   if (JSON.stringify(before.palette) !== JSON.stringify(model.palette)) {
-    changed = true;
+    changed.add("palette");
     const pal = doc.get("palette", true) as YAMLMap;
+    const glyph = (p: unknown) => String(isScalar((p as Pair).key) ? ((p as Pair).key as Scalar).value : (p as Pair).key);
     const want = new Map(model.palette);
-    pal.items = pal.items.filter((p) => want.has(String(isScalar(p.key) ? p.key.value : p.key)));
-    const have = new Map<string, Pair>();
-    for (const p of pal.items) have.set(String(isScalar(p.key) ? p.key.value : p.key), p as Pair);
+    pal.items = pal.items.filter((p) => want.has(glyph(p)));
+    const have = new Map(pal.items.map((p) => [glyph(p), p as Pair]));
     for (const [g, e] of model.palette) {
       const old = have.get(g);
       if (!old) pal.items.push(new Pair(scalarFor(g, true), entryNode(e)));
       else if (JSON.stringify((old.value as any)?.toJSON?.() ?? old.value) !== JSON.stringify(e)) old.value = entryNode(e);
     }
+    const order = new Map(model.palette.map(([g], i) => [g, i]));
+    pal.items.sort((a, b) => order.get(glyph(a))! - order.get(glyph(b))!);
   }
 
   const layerText = (l: Layer) => l.rows.join("\n") + "\n";
@@ -163,13 +184,16 @@ export function applyModel(text: string, model: Model): string {
   const beforeL = new Map(before.layers.map((l) => [l.y, layerText(l)]));
   const keyOf = (p: Pair) => Number(isScalar(p.key) ? p.key.value : p.key);
   if (beforeL.size !== model.layers.length || model.layers.some((l) => beforeL.get(l.y) !== layerText(l))) {
-    changed = true;
+    changed.add("layers");
     const want = new Map(model.layers.map((l) => [l.y, l]));
     lay.items = lay.items.filter((p) => want.has(keyOf(p as Pair)));
     const have = new Map(lay.items.map((p) => [keyOf(p as Pair), p as Pair]));
+    // A flow mapping can't hold block literals; an edited one becomes the usual block form.
+    const wasFlow = !!lay.flow;
+    lay.flow = false;
     for (const l of model.layers) {
       const old = have.get(l.y);
-      if (old && isScalar(old.value)) {
+      if (old && isScalar(old.value) && !wasFlow) {
         if (String(old.value.value) !== layerText(l)) old.value.value = layerText(l);
       } else {
         const sc = new Scalar(layerText(l));
@@ -180,7 +204,25 @@ export function applyModel(text: string, model: Model): string {
     }
     lay.items.sort((a, b) => keyOf(a as Pair) - keyOf(b as Pair));
   }
-  return changed ? doc.toString(STRINGIFY) : text;
+  if (!changed.size) return text;
+  // Only a changed section takes the stringifier's layout; everything else keeps its bytes.
+  const out = doc.toString(STRINGIFY);
+  const spans = (src: string) => {
+    const items = (parseDocument(src).contents as YAMLMap).items as Pair<Scalar, YAMLMap>[];
+    return [...changed].map((key): [number, number] => {
+      const pair = items.find((p) => isScalar(p.key) && p.key.value === key)!;
+      const a = pair.key!.range![0];
+      let e = pair.value!.range![1];
+      // A block map's range takes its line break, a flow map's doesn't: splice the lines without it.
+      while (e > a && src[e - 1] === "\n") e--;
+      return [a, e];
+    });
+  };
+  const to = spans(out);
+  const cuts = spans(text).map((from, i) => ({ from, to: to[i] })).sort((a, b) => b.from[0] - a.from[0]);
+  let result = text;
+  for (const { from, to } of cuts) result = result.slice(0, from[0]) + out.slice(to[0], to[1]) + result.slice(from[1]);
+  return result;
 }
 
 // ---- editing operations (mutate the model in place) ----
@@ -202,7 +244,9 @@ function sameEntry(a: Entry, b: Entry): boolean {
     return typeof a === "string" && typeof b === "string" && canon(a) === canon(b);
   }
   if ("input" in a || "input" in b) return "input" in a && "input" in b && a.input === b.input;
-  return entryLabel(a)!.kind === entryLabel(b)!.kind && entryLabel(a)!.name === entryLabel(b)!.name &&
+  if ("reserve" in a || "reserve" in b) return "reserve" in a && "reserve" in b;
+  const la = entryLabel(a), lb = entryLabel(b);
+  return la?.kind === lb?.kind && la?.name === lb?.name && entryFixture(a) === entryFixture(b) &&
     canon(entryState(a)) === canon(entryState(b));
 }
 
@@ -242,7 +286,8 @@ function canonNs(state: string): string {
 export function setCell(m: Model, y: number, x: number, z: number, spec: CellSpec): boolean {
   const layer = layerAt(m, y);
   if (!layer || z < 0 || z >= layer.rows.length || x < 0 || x >= layer.rows[0].length) return false;
-  if (spec.label) clearName(m, spec.label.name, y, x, z);
+  // Inputs may span several cells, driven as one signal.
+  if (spec.label && spec.label.kind !== "input") clearName(m, spec.label.name, y, x, z);
   const g = glyphFor(m, spec);
   const row = layer.rows[z];
   if (row[x] === g) return false;
@@ -265,29 +310,29 @@ function clearName(m: Model, name: string, ky: number, kx: number, kz: number) {
   });
 }
 
-/** Drop label entries no cell uses any more; plain block entries stay so they remain in the palette. */
+/** Drop label, fixture and reserve entries no cell uses any more; plain block entries stay so they remain in the palette. */
 export function pruneLabels(m: Model) {
   const used = usedGlyphs(m);
-  m.palette = m.palette.filter(([g, e]) => used.has(g) || !entryLabel(e));
+  m.palette = m.palette.filter(([g, e]) => used.has(g) || typeof e === "string");
 }
 
 export function renameLabel(m: Model, y: number, x: number, z: number, name: string, kind?: LabelKind): boolean {
   const at = entryAt(m, y, x, z);
   const lab = at && entryLabel(at.entry);
   if (!at || !lab || !name) return false;
-  return setCell(m, y, x, z, { state: entryState(at.entry), label: { kind: kind ?? lab.kind, name } });
+  return setCell(m, y, x, z, { state: entryState(at.entry), label: { kind: kind ?? lab.kind, name }, fixture: entryFixture(at.entry) });
 }
 
 const ROT: Record<string, string[]> = { facing: ["north", "east", "south", "west"] };
 /** Rotate the facing of a directional block clockwise (viewed from above); undefined if it has none. */
 export function rotateState(state: string): string | undefined {
-  const { id, props } = parseState(state);
+  const { id, props, nbt } = parseState(state);
   const f = props.facing;
   if (!f) return undefined;
   const order = ROT.facing;
   const i = order.indexOf(f);
   if (i < 0) return undefined;
-  return formatState(id, { ...props, facing: order[(i + 1) % 4] });
+  return formatState(id, { ...props, facing: order[(i + 1) % 4] }, nbt);
 }
 
 export function addLayer(m: Model, where: "above" | "below"): number {

@@ -1,0 +1,50 @@
+name: steps_probe
+description: Harness check for run, check, wave, repeat, log and finally steps.
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  '-': redstone_wire
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .===
+  1: |
+    a--o
+tests:
+- name: run and check
+  steps:
+  - check: if block ~3 ~1 ~0 redstone_wire[power=0]
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 redstone_wire[power=13]
+  - run: setblock ~2 ~1 ~0 air
+  - wait: 2
+  - check: unless block ~3 ~1 ~0 redstone_wire[power=13]
+  - expect: {out: 0}
+- name: wave repeat and log
+  settle: 0
+  steps:
+  - wave: {out: '0000'}
+  - run: setblock ~2 ~1 ~0 repeater[facing=west]
+  - repeat:
+      times: 2
+      steps:
+      - drive: {a: 1}
+      - wave: {out: '0011x'}
+      - drive: {a: 0}
+      - wave: {out: '1100'}
+  - run: setblock ~0 ~1 ~2 hopper{Items:[{Slot:0b,id:"minecraft:redstone",count:3}]}
+  - log: data get block ~0 ~1 ~2 Items
+  finally:
+  - setblock ~0 ~1 ~2 air
+- name: initial driver
+  settle: 0
+  initial: {a: 1}
+  steps:
+  - check: if block ~0 ~1 ~0 redstone_block
+  - check: if block ~3 ~1 ~0 redstone_wire[power=13]
+  - drive: {a: 0}
+  - wait: 2
+  - check: if block ~0 ~1 ~0 air
+  - expect: {out: 0}

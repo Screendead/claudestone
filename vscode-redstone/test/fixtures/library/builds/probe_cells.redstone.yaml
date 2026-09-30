@@ -1,0 +1,63 @@
+name: probe_cells
+description: Harness check for the readable cell kinds (rail, copper bulb, piston, hopper lock, daylight detector) and exact strengths of a comparator, a daylight detector and dust.
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  e: {input: e}
+  r: powered_rail[shape=east_west]
+  R: {name: rail, block: 'powered_rail[shape=east_west]'}
+  B: {name: bulb, block: waxed_copper_bulb}
+  P: {name: piston, block: 'sticky_piston[facing=east]'}
+  H: {name: hopper, block: 'hopper[facing=down]'}
+  D: {name: sun, block: daylight_detector}
+  h: 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:22}]}'
+  C: {name: cmp, block: 'comparator[facing=west]'}
+  '-': redstone_wire
+  W: {name: dust, block: redstone_wire}
+layers:
+  0: |
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+    .===
+  1: |
+    arrR
+    ....
+    bB..
+    ....
+    cP..
+    ....
+    dH..
+    ....
+    .D..
+    ....
+    .hC.
+    ....
+    e--W
+tests:
+- name: cells
+  settle: 40
+  steps:
+  - expect: {rail: 0, bulb: 0, piston: 0, hopper: 0, sun: 1, cmp: 1, dust: 0}
+  - level: {cmp: 7, sun: 15, dust: 0}
+  - drive: {a: 1, b: 1, c: 1, d: 1, e: 1}
+  - wait: 6
+  - expect: {rail: 1, bulb: 1, piston: 1, hopper: 1, dust: 1}
+  - level: {dust: 13}
+  - drive: {a: 0, b: 0, c: 0, d: 0, e: 0}
+  - wait: 6
+  - expect: {rail: 0, bulb: 1, piston: 0, hopper: 0, dust: 0}
+  - level: {cmp: 7}

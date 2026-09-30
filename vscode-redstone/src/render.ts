@@ -6,6 +6,10 @@ export interface DrawOpts {
   y: number;
   S: number;
   signals: Signals | null;
+  /** A sparse trace records only the named cells; every other cell is drawn as placed. */
+  sparse?: boolean;
+  /** Comparator output strengths, from a dense trace. */
+  levels?: Signals | null;
   /** Driver state inferred from trace events; inputs are air, so the trace has no signal for them. */
   inputs?: Record<string, boolean>;
   showBelow: boolean;
@@ -37,6 +41,18 @@ export function infoTable(model: Model): Map<string, Info> {
     t.set(glyph, { glyph, state, id, props, label: entryLabel(e) });
   }
   return t;
+}
+
+/** What the trace says about one cell: `traced` is false for cells the trace did not record. */
+export function cellTrace(info: Info, key: string, o: Pick<DrawOpts, "signals" | "sparse" | "levels">):
+  { level: number; traced: boolean; strength?: number } {
+  // The harness probes only signal blocks; a plain torch is drawn like one but never recorded.
+  const probed = info.id !== "torch" && info.id !== "wall_torch";
+  const recorded = !!o.signals && probed && (!o.sparse || (!!info.label && info.label.kind !== "input"));
+  // A dense frame's levels cover every comparator; zero strengths are left out of the file.
+  const strength = recorded && o.levels && info.id === "comparator" ? o.levels[key] ?? 0 : undefined;
+  const level = recorded ? o.signals![key] ?? 0 : 0;
+  return strength === undefined ? { level, traced: recorded } : { level, traced: recorded, strength };
 }
 
 export function infoAt(model: Model, table: Map<string, Info>, x: number, y: number, z: number): Info | undefined {
@@ -130,6 +146,7 @@ interface Cell {
   px: number; py: number; S: number;
   level: number;
   traced: boolean;
+  strength?: number;
   driven?: boolean;
 }
 
@@ -202,7 +219,8 @@ function drawDiode(c: Ctx, k: Cell) {
   c.closePath();
   c.fill();
   c.restore();
-  const tag = cmp ? (info.props.mode === "subtract" ? "SUB" : "CMP") : `${info.props.delay ?? 1}t`;
+  const tag = cmp ? `${info.props.mode === "subtract" ? "SUB" : "CMP"}${k.strength !== undefined ? ` ${k.strength}` : ""}`
+    : `${info.props.delay ?? 1}t`;
   text(c, tag, k.px + S * 0.9, k.py + S * 0.9, S * 0.2, "#111", "right");
 }
 
@@ -399,9 +417,7 @@ export function drawLayer(c: Ctx, model: Model, o: DrawOpts): void {
     for (let z = 0; z < h; z++) for (let x = 0; x < w; x++) {
       const info = infoAt(model, t, x, y, z);
       if (!info) continue;
-      const key = `${x},${y},${z}`;
-      const level = o.signals?.[key] ?? 0;
-      const k: Cell = { info, x, y, z, px: x * S, py: z * S, S, level, traced: !!o.signals,
+      const k: Cell = { info, x, y, z, px: x * S, py: z * S, S, ...cellTrace(info, `${x},${y},${z}`, o),
         driven: info.label?.kind === "input" && !!o.inputs?.[info.label.name] };
       drawBlock(c, k, model, t);
     }

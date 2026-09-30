@@ -1,21 +1,22 @@
 // Builds out/harness/index.html: the real webview bundle with a stubbed VS Code API, one library file and its trace.
 // Open it in a browser (or headless Chrome --screenshot / --dump-dom) to inspect the UI.
 //   npm run build && npm run harness -- and_gate logic 110
-import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { bodyMarkup } from "../src/webview/markup";
 import { parseModel } from "../src/model";
+import { parseTrace } from "../src/trace";
+import { ext, findSpec, fixtures, repo as root } from "./lib/paths";
 
-const root = resolve(__dirname, "../../..");
-const ext = resolve(__dirname, "../..");
 const [file = "and_gate", testName = "logic", tickArg = "110"] = process.argv.slice(2);
 const out = join(ext, "out/harness");
 mkdirSync(out, { recursive: true });
 copyFileSync(join(ext, "dist/webview.js"), join(out, "webview.js"));
 copyFileSync(join(ext, "media/style.css"), join(out, "style.css"));
-const model = parseModel(readFileSync(join(root, "library", `${file}.redstone.yaml`), "utf8"));
-let frames: unknown = null;
-try { frames = JSON.parse(readFileSync(join(root, "traces", file, `${testName}.json`), "utf8")).frames; } catch { /* no trace */ }
+const model = parseModel(readFileSync(findSpec(file, [join(root, "library"), join(fixtures, "library")]), "utf8"));
+const tp = [root, fixtures].map((d) => join(d, "traces", file, `${testName}.json`)).find(existsSync);
+const trace = parseTrace(tp ? readFileSync(tp, "utf8") : null);
+const frames = trace.frames;
 const vars = `
 :root { --vscode-editor-background:#1e1e1e; --vscode-foreground:#cccccc; --vscode-font-family:sans-serif; --vscode-font-size:13px;
  --vscode-panel-border:#444; --vscode-button-secondaryBackground:#3a3d41; --vscode-button-secondaryForeground:#fff;
@@ -23,14 +24,14 @@ const vars = `
  --vscode-editor-font-family:monospace; --vscode-editorHoverWidget-background:#252526; --vscode-editorHoverWidget-border:#454545; }`;
 const script = `
 window.__posted = [];
-window.acquireVsCodeApi = () => ({ postMessage: (m) => window.__posted.push(m), getState: () => null, setState: () => {} });
+window.acquireVsCodeApi = () => ({ postMessage: (m) => window.__posted.push(m), getState: () => ({ test: ${JSON.stringify(testName)} }), setState: () => {} });
 `;
 const drive = `
 const model = ${JSON.stringify(model)}, frames = ${JSON.stringify(frames)};
 window.addEventListener('load', () => {
   const send = (m) => window.dispatchEvent(new MessageEvent('message', { data: m }));
   send({ type: 'doc', model });
-  send({ type: 'trace', test: ${JSON.stringify(testName)}, frames, path: 'x' });
+  send({ type: 'trace', test: ${JSON.stringify(testName)}, ...${JSON.stringify(trace)}, path: 'x' });
   const slider = document.getElementById('slider');
   slider.value = String(frames ? frames.findIndex((f) => f.tick >= ${Number(tickArg)}) : 0);
   slider.dispatchEvent(new Event('input'));

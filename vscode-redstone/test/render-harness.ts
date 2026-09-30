@@ -5,8 +5,9 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseModel } from "../src/model";
 import { drawLayer, Theme } from "../src/render";
+import { parseTrace } from "../src/trace";
+import { findSpec, fixtures, repo as root } from "./lib/paths";
 
-const root = resolve(__dirname, "../../..");
 const outDir = process.argv[2] ?? resolve(__dirname, "../render");
 mkdirSync(outDir, { recursive: true });
 const theme: Theme = { bg: "#1e1e1e", cell: "#262626", grid: "#3a3a3a", fg: "#ccc", hover: "#fff", select: "#0af" };
@@ -24,19 +25,19 @@ const jobs: Job[] = [
   { file: "latch", test: "x", frameTick: null, y: 1, below: true, tag: "latch_notrace" },
   { file: "full_adder", test: "x", frameTick: null, y: 1, below: true, tag: "full_adder_notrace" },
   { file: "or_gate", test: "logic", frameTick: 100, y: 1, below: true, tag: "or_gate" },
+  { file: "rs_hopper_pair", test: "x", frameTick: null, y: 1, below: true, tag: "rs_hopper_pair_nbt" },
+  { file: "analog_dac", test: "every code gives its value", frameTick: 40, y: 1, below: true, tag: "analog_dac_levels" },
 ];
 for (const j of jobs) {
-  const model = parseModel(readFileSync(join(root, "library", `${j.file}.redstone.yaml`), "utf8"));
-  const tp = join(root, "traces", j.file, `${j.test}.json`);
-  let signals: Record<string, number> | null = null;
-  if (j.frameTick !== null && existsSync(tp)) {
-    const frames = JSON.parse(readFileSync(tp, "utf8")).frames as { tick: number; signals: Record<string, number> }[];
-    signals = (frames.filter((f) => f.tick <= j.frameTick!).pop() ?? frames[0]).signals;
-  }
+  // Fixtures first: the live traces/ are rewritten, dense or sparse, by every test run.
+  const model = parseModel(readFileSync(findSpec(j.file, [join(fixtures, "library"), join(root, "library")]), "utf8"));
+  const tp = [fixtures, root].map((d) => join(d, "traces", j.file, `${j.test}.json`)).find(existsSync);
+  const tr = parseTrace(j.frameTick !== null && tp ? readFileSync(tp, "utf8") : null);
+  const fr = tr.frames && (tr.frames.filter((f) => f.tick <= j.frameTick!).pop() ?? tr.frames[0]);
   const S = 64, w = model.layers[0].rows[0].length, h = model.layers[0].rows.length;
   const cv = createCanvas(w * S, h * S);
   drawLayer(cv.getContext("2d") as unknown as CanvasRenderingContext2D, model,
-    { y: j.y, S, signals, showBelow: j.below, theme });
+    { y: j.y, S, signals: fr?.signals ?? null, sparse: tr.sparse, levels: fr?.levels ?? null, showBelow: j.below, theme });
   writeFileSync(join(outDir, `${j.tag}.png`), cv.toBuffer("image/png"));
   console.log("wrote", j.tag);
 }
