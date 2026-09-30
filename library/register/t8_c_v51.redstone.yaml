@@ -1,0 +1,748 @@
+name: t8_c_v51
+description: 'Addressable RAM at 51 blocks per bit, stackable in three directions (ORE 4x4x4 Tileable RAM Cube rules: repeater-lock memory, no pistons, data-in/out lines parallel, hold/read control lines parallel, the two sets perpendicular, no diodes in any line), but the cell is not a box: it is the unit of a skewed lattice with basis (51,0,0), (2,1,0), (14,0,1), index 51 (x east, y up, z south). Found by a SAT search over periodic lattices (scratchpad t8b, found_v51.jsonl), same model and cell topology as t8_b_lock3_444: s (memory) reads din through the block under it and is side-locked by k (reads hold); o reads rd, is side-locked by s and powers dout. s stores the inverted bit, so din carries the inverted bit and hold is active-low (1 keeps, 0 writes); rd=1 puts the bit on dout. Data lines run along (1,-2,4) per cell, control lines along (2,1,0), dot product 0; planes stack along (-1,4,3). Per cell a data line has 5 dust and a control line 2, so a longer array needs a signal-extension repeater in each data line every 3 cells (none in this spec). This spec is a 3x3x2 array (words ik = hold ik/rd ik, bits j = din jk/dout jk; k is the plane): 18 cells in a 13x16x18 box, covering every lattice neighbour up to L1 length 8. Data lines are fed right at their first cell and read right after their last: 14 dust over 3 cells leaves strength 2 at the far din end and 4 at dout when the far cell reads, so 3 cells is the most one 15-strength data line serves. Write: k drops 2 gt after hold falls, s changes 4 gt after; read: dout 2 gt after rd. Reading and writing one word at the same time is not supported.'
+traits: [pistonless, entityless, silent, lightless]
+palette:
+  '.': air
+  'a': 'redstone_wire[north=side,east=side,south=none,west=none]'
+  'b': 'redstone_wire[north=up,east=none,south=side,west=none]'
+  'c': 'redstone_wire[north=side,east=none,south=side,west=none]'
+  'd': 'redstone_wire[north=none,east=none,south=side,west=side]'
+  'e': 'redstone_wire[north=none,east=side,south=none,west=side]'
+  'f': {output: dout00, block: 'redstone_wire[north=side,east=none,south=side,west=none]'}
+  'g': {output: dout10, block: 'redstone_wire[north=side,east=none,south=side,west=none]'}
+  'h': {output: dout20, block: 'redstone_wire[north=side,east=none,south=side,west=none]'}
+  'i': 'redstone_wire[north=none,east=up,south=none,west=side]'
+  'j': 'redstone_wire[north=side,east=up,south=none,west=side]'
+  'k': 'redstone_wire[north=side,east=none,south=none,west=side]'
+  'l': {output: dout01, block: 'redstone_wire[north=side,east=none,south=side,west=none]'}
+  'm': {output: dout11, block: 'redstone_wire[north=side,east=none,south=side,west=none]'}
+  'n': {output: dout21, block: 'redstone_wire[north=side,east=none,south=side,west=none]'}
+  'o': {name: s000, block: 'repeater[facing=west]'}
+  'p': {name: k000, block: 'repeater[facing=north]'}
+  'q': {name: o000, block: 'repeater[facing=south]'}
+  'r': {name: s001, block: 'repeater[facing=west]'}
+  's': 'repeater[facing=north]'
+  't': 'repeater[facing=south]'
+  'u': {name: s010, block: 'repeater[facing=west]'}
+  'v': {name: s011, block: 'repeater[facing=west]'}
+  'w': {name: s020, block: 'repeater[facing=west]'}
+  'x': {name: s021, block: 'repeater[facing=west]'}
+  'y': {name: s100, block: 'repeater[facing=west]'}
+  'z': {name: s101, block: 'repeater[facing=west]'}
+  'A': {name: s110, block: 'repeater[facing=west]'}
+  'B': {name: s111, block: 'repeater[facing=west]'}
+  'C': {name: s120, block: 'repeater[facing=west]'}
+  'D': {name: s121, block: 'repeater[facing=west]'}
+  'E': {name: s200, block: 'repeater[facing=west]'}
+  'F': {name: s201, block: 'repeater[facing=west]'}
+  'G': {name: s210, block: 'repeater[facing=west]'}
+  'H': {name: s211, block: 'repeater[facing=west]'}
+  'I': {name: s220, block: 'repeater[facing=west]'}
+  'J': {name: s221, block: 'repeater[facing=west]'}
+  'K': smooth_stone
+  'L': glass
+  'M': {input: din00}
+  'N': {input: din01}
+  'O': {input: din10}
+  'P': {input: din11}
+  'Q': {input: din20}
+  'R': {input: din21}
+  'S': {input: hold00}
+  'T': {input: hold01}
+  'U': {input: hold10}
+  'V': {input: hold11}
+  'W': {input: hold20}
+  'X': {input: hold21}
+  'Y': {input: rd00}
+  'Z': {input: rd01}
+  '0': {input: rd10}
+  '1': {input: rd11}
+  '2': {input: rd20}
+  '3': {input: rd21}
+layers:
+  0: |
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    ........K....
+    .......L.....
+    .......KL....
+    ......L......
+    .............
+    .............
+    .............
+    .............
+  1: |
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    ......KK.....
+    ......KK..K..
+    ....KL.b.L...
+    ....KKKc.KL..
+    ...K...KL....
+    .............
+    .............
+    .............
+    .............
+  2: |
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .......K.....
+    ......L......
+    ...K..KL.....
+    ....KL.cKK...
+    ...K.KLcKK..K
+    ...K2.KL.b.L.
+    ...LaiKKKc.KL
+    ...KKK...KL..
+    .............
+    .............
+    .............
+    .............
+  3: |
+    .............
+    .............
+    .............
+    .............
+    .............
+    .....KK......
+    .....KK..K...
+    ...KL.b.L....
+    ...KKKadKL...
+    ..KWeiKL.cKK.
+    ...K.KsKLcKK.
+    .....KEtKL.b.
+    ....KLejKKKc.
+    .....KKK...KL
+    ....L........
+    .............
+    .............
+    .............
+  4: |
+    .............
+    .............
+    ......K......
+    .....L.......
+    ..K..KL......
+    ...KL.cKK....
+    ..K.KLcKK..K.
+    ..K0.KL.b.L..
+    ..LaiKKKadKL.
+    ..KKK.eiKL.cK
+    .....K.KsKLcK
+    .....b.KGtKL.
+    ....KcKLejKKK
+    ....KaeKKK...
+    ......L......
+    ......KL.....
+    .....L.......
+    .............
+  5: |
+    .............
+    ....KK.......
+    ....KK..K....
+    ..KL.b.L.....
+    ..KKKadKL....
+    .KUeiKL.cKK..
+    ..K.KsKLcKK..
+    ....KytKL.b.L
+    ...KLejKKKadK
+    ....KKK.eiKL.
+    ...L.b.K.KsKL
+    ....L..b.KItK
+    .....KKcKLekK
+    .....KKaeKKK.
+    ...KL.b.L....
+    ...KKKc.KL...
+    ..K...KL.....
+    .............
+  6: |
+    .K..KL.......
+    ..KL.fKK.....
+    .K.KLcKK..K..
+    .KY.KL.b.L...
+    .LaiKKKadKL..
+    .KKK.eiKL.cK.
+    ....K.KsKLcK.
+    ....b.KAtKL..
+    ...KcKLejKKK.
+    ...KadKKK.eeK
+    .....L.b.K.K.
+    ..K..KL..b.K.
+    ...KL.cKKcKL.
+    ..K.KLcKKaeKK
+    ..K3.KL.b.L..
+    ..LaiKKKc.KL.
+    ..KKK...KL...
+    .............
+  7: |
+    .KKK..KL.....
+    .SeiKL.gKK...
+    .K.KpKLcKK...
+    ...KoqKL.b.L.
+    ..KLejKKKadK.
+    ...KKK.eiKL..
+    ..L.b.K.KsKL.
+    ...L..b.KCtK.
+    ....KKcKLekKK
+    ....KKadKKK..
+    ..KL.b.L.b.K.
+    ..KKKadKL....
+    .KXeiKL.cKK..
+    ..K.KsKLcKK..
+    ....KFtKL.b..
+    ...KLejKKKc..
+    ....KKK...KL.
+    ...L.........
+  8: |
+    ...KKK..KL...
+    .KK.eiKL.hK..
+    ...K.KsKLcK..
+    ...c.KutKL...
+    ..KcKLejKKK..
+    ..KadKKK.eeK.
+    ....L.b.K.K..
+    .K..KL..b.K..
+    ..KL.cKKcKL..
+    .K.KLcKKadKK.
+    .K1.KL.b.L...
+    .LaiKKKadKL..
+    .KKK.eiKL.cK.
+    ....K.KsKLcK.
+    ....b.KHtKL..
+    ...KcKLejKKK.
+    ...KaeKKK....
+    .....L.......
+  9: |
+    .....KKK..K..
+    ...KK.eiKL...
+    .....K.KsKL..
+    ..LM.c.KwtK..
+    ...KKcKLekKK.
+    ...KKadKKK...
+    .KL.b.L.b.K..
+    .KKKadKL.....
+    KVeiKL.cKK...
+    .K.KsKLcKK...
+    ...KztKL.b.L.
+    ..KLejKKKadK.
+    ...KKK.eiKL..
+    ..L.b.K.KsKL.
+    ...L..b.KJtK.
+    ....KKcKLekK.
+    ....KKaeKKK..
+    ...L...L.....
+  10: |
+    .......KKK...
+    .....KK.eeK..
+    .......K.K...
+    K..KLO.c.K...
+    .KL.lKKcKL...
+    K.KLcKKadKK..
+    KZ.KL.b.L....
+    LaiKKKadKL...
+    KKK.eiKL.cK..
+    ...K.KsKLcK..
+    ...b.KBtKL...
+    ..KcKLejKKK..
+    ..KadKKK.eeK.
+    ....L.b.K.K..
+    ....KL..b.K..
+    ......KKcKL..
+    ......KKaeKK.
+    .....L...L...
+  11: |
+    .........KK..
+    .......KK....
+    .........K...
+    KKK..KLQ.....
+    TeiKL.mKK....
+    K.KsKLcKK....
+    ..KrtKL.b.L..
+    .KLejKKKadK..
+    ..KKK.eiKL...
+    .L.b.K.KsKL..
+    ..L..b.KDtK..
+    ...KKcKLekKK.
+    ...KKadKKK...
+    ..L...L.b.K..
+    ......KL.....
+    ........KK...
+    ........KK...
+    .......L.....
+  12: |
+    .............
+    .............
+    .............
+    ..KKK..KL....
+    KK.eiKL.nK...
+    ..K.KsKLcK...
+    ..c.KvtKL....
+    .KcKLejKKK...
+    .KadKKK.eeK..
+    ...L.b.K.K...
+    ...KL..b.K...
+    .....KKcKL...
+    .....KKadKK..
+    ....L...L....
+    ........KL...
+    .............
+    .............
+    .............
+  13: |
+    .............
+    .............
+    .............
+    ....KKK..K...
+    ..KK.eiKL....
+    ....K.KsKL...
+    .LN.c.KxtK...
+    ..KKcKLekKK..
+    ..KKadKKK....
+    .L...L.b.K...
+    .....KL......
+    .......KK....
+    .......KK....
+    ......L......
+    .............
+    .............
+    .............
+    .............
+  14: |
+    .............
+    .............
+    .............
+    ......KKK....
+    ....KK.eeK...
+    ......K.K....
+    ...LP.c.K....
+    ....KKcKL....
+    ....KKadKK...
+    ...L...L.....
+    .......KL....
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+  15: |
+    .............
+    .............
+    .............
+    ........KK...
+    ......KK.....
+    ........K....
+    .....LR......
+    ......KK.....
+    ......KK.....
+    .....L.......
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+    .............
+tests:
+- name: write and read every word
+  initial: {hold00: 1, hold10: 1, hold20: 1, hold01: 1, hold11: 1, hold21: 1}
+  settle: 30
+  steps:
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - wait: 2
+  - drive: {hold00: 0}
+  - wait: 6
+  - drive: {hold00: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - wait: 2
+  - drive: {hold10: 0}
+  - wait: 6
+  - drive: {hold10: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - wait: 2
+  - drive: {hold20: 0}
+  - wait: 6
+  - drive: {hold20: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - wait: 2
+  - drive: {hold01: 0}
+  - wait: 6
+  - drive: {hold01: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - wait: 2
+  - drive: {hold11: 0}
+  - wait: 6
+  - drive: {hold11: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - wait: 2
+  - drive: {hold21: 0}
+  - wait: 6
+  - drive: {hold21: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 1, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 1}
+  - wait: 6
+  - expect: {dout00: 1, dout10: 0, dout20: 1, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 1, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd01: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 1, dout11: 0, dout21: 1}
+  - drive: {rd01: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd11: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 1, dout21: 0}
+  - drive: {rd11: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd21: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 1, dout11: 0, dout21: 1}
+  - drive: {rd21: 0}
+  - wait: 6
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - wait: 2
+  - drive: {hold00: 0}
+  - wait: 6
+  - drive: {hold00: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - wait: 2
+  - drive: {hold10: 0}
+  - wait: 6
+  - drive: {hold10: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - wait: 2
+  - drive: {hold20: 0}
+  - wait: 6
+  - drive: {hold20: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - wait: 2
+  - drive: {hold01: 0}
+  - wait: 6
+  - drive: {hold01: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - wait: 2
+  - drive: {hold11: 0}
+  - wait: 6
+  - drive: {hold11: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - wait: 2
+  - drive: {hold21: 0}
+  - wait: 6
+  - drive: {hold21: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 1}
+  - wait: 6
+  - expect: {dout00: 1, dout10: 0, dout20: 1, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 1, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 1}
+  - wait: 6
+  - expect: {dout00: 1, dout10: 0, dout20: 1, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd01: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 1, dout21: 0}
+  - drive: {rd01: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd11: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 1, dout11: 0, dout21: 1}
+  - drive: {rd11: 0}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd21: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 1, dout21: 0}
+  - drive: {rd21: 0}
+  - wait: 6
+- name: write and read latency, word 00 bit 0
+  initial: {hold00: 1, hold10: 1, hold20: 1, hold01: 1, hold11: 1, hold21: 1}
+  settle: 30
+  steps:
+  - drive: {din00: 1}
+  - wait: 4
+  - drive: {hold00: 0}
+  - wave: {k000: '11000000', s000: '00001111'}
+  - drive: {hold00: 1}
+  - wait: 6
+  - drive: {din00: 0}
+  - wait: 6
+  - expect: {s000: 1, dout00: 0}
+  - drive: {rd00: 1}
+  - wave: {dout00: '00000000'}
+  - drive: {rd00: 0}
+  - wait: 4
+  - drive: {hold00: 0}
+  - wave: {k000: '11000000', s000: '11110000'}
+  - drive: {hold00: 1}
+  - wait: 6
+  - drive: {rd00: 1}
+  - wave: {dout00: '00111111'}
+  - drive: {rd00: 0}
+  - wave: {dout00: '11000000'}
+- name: 3d checkerboard, neighbours undisturbed
+  initial: {hold00: 1, hold10: 1, hold20: 1, hold01: 1, hold11: 1, hold21: 1}
+  settle: 30
+  steps:
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - wait: 2
+  - drive: {hold00: 0}
+  - wait: 6
+  - drive: {hold00: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - expect: {s000: 1, s010: 0, s020: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - wait: 2
+  - drive: {hold10: 0}
+  - wait: 6
+  - drive: {hold10: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - expect: {s000: 1, s010: 0, s020: 1, s100: 0, s110: 1, s120: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - wait: 2
+  - drive: {hold20: 0}
+  - wait: 6
+  - drive: {hold20: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - expect: {s000: 1, s010: 0, s020: 1, s100: 0, s110: 1, s120: 0, s200: 1, s210: 0, s220: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - wait: 2
+  - drive: {hold01: 0}
+  - wait: 6
+  - drive: {hold01: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s110: 1, s120: 0, s200: 1, s210: 0, s220: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - wait: 2
+  - drive: {hold11: 0}
+  - wait: 6
+  - drive: {hold11: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s210: 0, s220: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - wait: 2
+  - drive: {hold21: 0}
+  - wait: 6
+  - drive: {hold21: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 1, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 0}
+  - wait: 6
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 1}
+  - wait: 6
+  - expect: {dout00: 1, dout10: 0, dout20: 1, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 0}
+  - wait: 6
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 1, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 0}
+  - wait: 6
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd01: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 1, dout11: 0, dout21: 1}
+  - drive: {rd01: 0}
+  - wait: 6
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd11: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 1, dout21: 0}
+  - drive: {rd11: 0}
+  - wait: 6
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd21: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 1, dout11: 0, dout21: 1}
+  - drive: {rd21: 0}
+  - wait: 6
+  - expect: {s000: 1, s001: 0, s010: 0, s011: 1, s020: 1, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - wait: 2
+  - drive: {hold00: 0}
+  - wait: 6
+  - drive: {hold00: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - expect: {s000: 0, s001: 0, s010: 1, s011: 1, s020: 0, s021: 0, s100: 0, s101: 1, s110: 1, s111: 0, s120: 0, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - wait: 2
+  - drive: {hold10: 0}
+  - wait: 6
+  - drive: {hold10: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - expect: {s000: 0, s001: 0, s010: 1, s011: 1, s020: 0, s021: 0, s100: 1, s101: 1, s110: 0, s111: 0, s120: 1, s121: 1, s200: 1, s201: 0, s210: 0, s211: 1, s220: 1, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - wait: 2
+  - drive: {hold20: 0}
+  - wait: 6
+  - drive: {hold20: 1}
+  - wait: 6
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - wait: 4
+  - expect: {s000: 0, s001: 0, s010: 1, s011: 1, s020: 0, s021: 0, s100: 1, s101: 1, s110: 0, s111: 0, s120: 1, s121: 1, s200: 0, s201: 0, s210: 1, s211: 1, s220: 0, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - wait: 2
+  - drive: {hold01: 0}
+  - wait: 6
+  - drive: {hold01: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 1, s110: 0, s111: 0, s120: 1, s121: 1, s200: 0, s201: 0, s210: 1, s211: 1, s220: 0, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - wait: 2
+  - drive: {hold11: 0}
+  - wait: 6
+  - drive: {hold11: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 0, s210: 1, s211: 1, s220: 0, s221: 0, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - wait: 2
+  - drive: {hold21: 0}
+  - wait: 6
+  - drive: {hold21: 1}
+  - wait: 6
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - wait: 4
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 1}
+  - wait: 6
+  - expect: {dout00: 1, dout10: 0, dout20: 1, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd00: 0}
+  - wait: 6
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 1, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd10: 0}
+  - wait: 6
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 1}
+  - wait: 6
+  - expect: {dout00: 1, dout10: 0, dout20: 1, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd20: 0}
+  - wait: 6
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd01: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 1, dout21: 0}
+  - drive: {rd01: 0}
+  - wait: 6
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd11: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 1, dout11: 0, dout21: 1}
+  - drive: {rd11: 0}
+  - wait: 6
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
+  - drive: {rd21: 1}
+  - wait: 6
+  - expect: {dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 1, dout21: 0}
+  - drive: {rd21: 0}
+  - wait: 6
+  - expect: {s000: 0, s001: 1, s010: 1, s011: 0, s020: 0, s021: 1, s100: 1, s101: 0, s110: 0, s111: 1, s120: 1, s121: 0, s200: 0, s201: 1, s210: 1, s211: 0, s220: 0, s221: 1, dout00: 0, dout10: 0, dout20: 0, dout01: 0, dout11: 0, dout21: 0}
