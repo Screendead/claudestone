@@ -1,18 +1,19 @@
 import fcntl
 import json
 import os
-import time
 
 import pytest
 
-from redstone import fileformat, showroom, watch
+from redstone import docker_sats, fileformat, showroom, watch
 from redstone.harness import Rig, _rcon_up, ensure_server, mirror
 from redstone.plots import MAIN as MAIN_PLOT, PLOTS, plot_for
 from redstone.rcon import Rcon
-from redstone.servers import MAIN, PLOT_RECORDS, SATELLITES, SERVERS
+from redstone.servers import MAIN, PLOT_RECORDS, SATELLITES, SERVERS, take, take_idle
 
-# "auto": a plot other than main runs on the first free satellite that is up (main if
-# none is); "main" or a satellite's name pins every test to that server.
+# "auto": a plot other than main runs on the first idle Docker satellite, else laptop
+# satellite, else one more Docker satellite started for it, else waits for a busy
+# satellite; main only if no satellite is up or startable. "main" or a satellite's name
+# (sat1, dsat1, ...) pins every test to that server.
 SERVER = os.environ.get("REDSTONE_SERVER", "auto")
 
 
@@ -21,10 +22,18 @@ def connect():
     opened: dict[str, Rcon] = {}
 
     def get(server):
+        if server.name in opened and hasattr(server, "is_up"):
+            # A dsat may have been stopped by the reaper and restarted since.
+            try:
+                opened[server.name].cmd("time query gametime")
+            except Exception:
+                opened.pop(server.name).close()
         if server.name not in opened:
-            # Satellites are started by scripts.servers only.
+            # Laptop satellites are started by scripts.servers only.
             if server == MAIN:
                 ensure_server(server)
+            elif hasattr(server, "is_up") and not server.is_up():  # also restores its forward
+                raise RuntimeError(f"{server.name} is not up")
             opened[server.name] = Rcon(port=server.rcon_port)
         return opened[server.name]
 
@@ -39,19 +48,9 @@ def rcon(connect):
 
 
 def _take_satellite():
-    """The lock file of the first satellite that is up and idle, and that satellite."""
-    up = [s for s in SATELLITES if _rcon_up(s.rcon_port)]
-    if not up:
-        return None, None
-    while True:
-        for sat in up:
-            lock = open(sat.lock, "w")
-            try:
-                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                return lock, sat
-            except BlockingIOError:
-                lock.close()
-        time.sleep(0.1)
+    """The held lock file of a satellite for this test, and that satellite."""
+    return take_idle(docker_sats.available() + [s for s in SATELLITES if _rcon_up(s.rcon_port)],
+                     docker_sats.start_spare)
 
 
 @pytest.hookimpl(wrapper=True, tryfirst=True)
@@ -89,21 +88,30 @@ def rig(connect, request):
             # The tick clock, tick rate and test data pack are global to a server, so one
             # test at a time runs on it, whatever its plot; other runs wait here.
             server = MAIN if SERVER == "auto" else SERVERS[SERVER]
-            lock = open(server.lock, "w")
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                lock = take(server)
+            except RuntimeError as e:
+                pytest.fail(str(e))
         (PLOT_RECORDS / f"{plot.name}.json").write_text(json.dumps({"server": server.name}))
-        r = connect(server)
+        try:
+            r = connect(server)
+        except Exception:
+            lock.close()
+            raise
         rig = None
         try:
             rig = Rig(r, plot.origin, plot.size, plot.name, server=server, display=connect(MAIN))
             yield rig
         finally:
             # Tests freeze the world; let it run again for anyone watching.
-            if rig is not None:
-                rig.release()
-            else:
-                r.cmd("tick unfreeze")
-            lock.close()
+            try:
+                if rig is not None:
+                    rig.release()
+                else:
+                    r.cmd("tick unfreeze")
+            finally:
+                os.utime(lock.name)  # a dsat's idle time counts from the end of use
+                lock.close()
         # Players watch main, so a satellite's build is placed there too, where it runs
         # live. Plain commands only, so this needs no lock on main. In any other plot the
         # build joins the plot's showroom beside the family's other variants; a test run on

@@ -17,6 +17,9 @@ from redstone.build import write_datapack
 from redstone.servers import Server
 
 
+_real_spawn_reaper = ds._spawn_reaper
+
+
 class Fake:
     """Stands in for subprocess.run. `rules` maps an argv prefix to a list of results
     used in turn (the last repeats): (returncode, stdout, stderr) or an exception."""
@@ -41,7 +44,7 @@ class Fake:
 
 
 HOST = "user@desktop.invalid"
-D = ("docker", "--context", ds.CONTEXT)
+D = ("docker", "-H", f"ssh://{HOST}")
 EXIT = ["ssh", "-O", "exit", HOST]
 CHECK = ("ssh", "-O", "check", HOST)
 PROBE = ("ssh", "-o", "ConnectTimeout=5", HOST, "exit")
@@ -354,9 +357,285 @@ def test_reaper_outlasts_an_unreachable_desktop(fake, monkeypatch, tmp_path):
     assert sleeps == [60, 120, 240, 480]
 
 
+def test_a_start_racing_the_reaper_s_exit_still_gets_a_reaper(fake, monkeypatch, tmp_path):
+    monkeypatch.setattr(ds, "REAPER_LOCK", tmp_path / "reaper.lock")
+    monkeypatch.setattr(ds, "_spawn_reaper", _real_spawn_reaper)
+    spawned = []
+    monkeypatch.setattr(ds.subprocess, "Popen", lambda *a, **k: spawned.append(a))
+    monkeypatch.setattr(ds.time, "sleep", lambda s: None)
+    monkeypatch.setattr(ds, "stop_idle", lambda minutes: [])
+    # The reaper's last look finds nothing; a start then runs dsat1 and, finding the
+    # reaper's lock still held, spawns none.
+    looks = iter([set(), {"dsat1"}])
+
+    def running(timeout=30):
+        names = next(looks)
+        if not names:
+            ds._spawn_reaper()
+        return names
+
+    monkeypatch.setattr(ds, "running", running)
+    ds.reap(every=0)
+    assert len(spawned) == 1
+
+
 def test_cli_accepts_only_its_actions(fake):
     assert ds.main(["forward"]) == 2 and ds.main(["stop", "sat1"]) == 2
     assert not fake.calls
+
+
+# Choosing a server: redstone.servers.take_idle/take, and the dsat side of it.
+
+class Laptop(Server):
+    pass
+
+
+class Docker(Server):
+    up = True
+
+    def is_up(self):
+        return self.up
+
+
+def _free(path) -> bool:
+    with open(path, "a") as f:
+        try:
+            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return True
+        except BlockingIOError:
+            return False
+
+
+@pytest.fixture
+def pool(tmp_path):
+    d = [Docker(f"dsat{i}", tmp_path / f"dsat{i}", 0, 25675 + i, "1G") for i in (1, 2)]
+    lap = [Laptop(f"sat{i}", tmp_path / f"sat{i}", 25565 + i, 25575 + i, "1G") for i in (1, 2)]
+    return d, lap
+
+
+def _hold(server):
+    server.dir.mkdir(parents=True, exist_ok=True)
+    f = open(server.lock, "w")
+    fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    return f
+
+
+def test_an_idle_dsat_comes_before_an_idle_laptop_satellite(pool):
+    from redstone.servers import take_idle
+    d, lap = pool
+    lock, got = take_idle([*d, *lap])
+    assert got is d[0] and not _free(d[0].lock)
+    lock.close()
+
+
+def test_a_busy_dsat_is_passed_over(pool):
+    from redstone.servers import take_idle
+    d, lap = pool
+    held = [_hold(s) for s in d]
+    lock, got = take_idle([*d, *lap])
+    assert got is lap[0]
+    lock.close()
+    for h in held:
+        h.close()
+
+
+def test_a_dsat_found_down_after_its_lock_is_won_is_dropped_and_freed(pool):
+    from redstone.servers import take_idle
+    d, lap = pool
+    d[0].up = False
+    lock, got = take_idle([*d, *lap])
+    assert got is d[1] and _free(d[0].lock)
+    lock.close()
+    d[1].up = False
+    lock, got = take_idle(d, spare=lambda: None)
+    assert (lock, got) == (None, None) and _free(d[0].lock) and _free(d[1].lock)
+
+
+def test_all_busy_asks_for_a_spare_once(pool, tmp_path):
+    from redstone.servers import take_idle
+    d, lap = pool
+    held = [_hold(s) for s in [*d, *lap]]
+    spare = Docker("dsat3", tmp_path / "dsat3", 0, 25678, "1G")
+    asked = []
+
+    def start_spare():
+        asked.append(1)
+        return _hold(spare), spare
+
+    lock, got = take_idle([*d, *lap], start_spare)
+    assert got is spare and asked == [1]
+    lock.close()
+    # No spare: waits for the first busy one to come free, without asking again.
+    asked.clear()
+    import threading
+    threading.Timer(0.3, held[2].close).start()
+    lock, got = take_idle([*d, *lap], lambda: asked.append(1))
+    assert got is lap[0] and asked == [1]
+    lock.close()
+    for h in held:
+        h.close()
+
+
+def test_nothing_up_and_no_spare_means_main(pool):
+    from redstone.servers import take_idle
+    assert take_idle([], lambda: None) == (None, None)
+
+
+def test_a_down_dsat_s_idle_time_survives_being_tried(pool):
+    from redstone.servers import take, take_idle
+    d, lap = pool
+    d[0].up = False
+    d[0].dir.mkdir(parents=True)
+    d[0].lock.touch()
+    os.utime(d[0].lock, (1, 1))
+    assert take_idle([d[0]], lambda: None) == (None, None)
+    with pytest.raises(RuntimeError):
+        take(d[0])
+    assert d[0].lock.stat().st_mtime == 1
+    d[0].up = True
+    lock, got = take_idle([d[0]])
+    assert got is d[0] and d[0].lock.stat().st_mtime > time.time() - 60
+    lock.close()
+
+
+def test_a_pinned_server_waits_for_its_lock_then_must_be_up(pool):
+    from redstone.servers import take
+    d, lap = pool
+    lock = take(lap[0])  # a laptop satellite is not asked
+    assert not _free(lap[0].lock)
+    lock.close()
+    d[0].up = False
+    with pytest.raises(RuntimeError, match="dsat1 is not up"):
+        take(d[0])
+    assert _free(d[0].lock)
+
+
+def test_pinning_accepts_the_dsat_names():
+    code = ("import os; os.environ['REDSTONE_SERVER'] = 'dsat2'; import sys; sys.path.insert(0, 'tests'); "
+            "import conftest; from redstone.servers import SERVERS; "
+            "assert conftest.SERVER == 'dsat2' and SERVERS[conftest.SERVER].rcon_port == 25677")
+    subprocess.run([sys.executable, "-c", code], cwd=ds.ROOT.parent, check=True)
+
+
+@pytest.fixture
+def down_file(fake, monkeypatch, tmp_path):
+    monkeypatch.setattr(ds, "DOWN_FILE", tmp_path / "dsat_unreachable")
+    return ds.DOWN_FILE
+
+
+def test_available_lists_the_running_dsats(fake, down_file):
+    fake.rules[(*D, "ps")] = [(0, b"dsat3\ndsat1\n", b"")]
+    assert [s.name for s in ds.available()] == ["dsat1", "dsat3"]
+    assert not down_file.exists()
+
+
+def test_an_unreachable_desktop_is_remembered_across_processes(fake, down_file, monkeypatch):
+    fail = (255, b"", b"ssh: Could not resolve hostname desktop.invalid")
+    fake.rules.update({(*D, "ps"): [fail], CHECK: [fail], PROBE: [fail]})
+    assert ds.available() == [] and down_file.read_text() == HOST
+    fake.calls.clear()
+    assert ds.available() == [] and ds.start_spare() is None
+    assert not fake.calls
+    # Another host's failure does not count against this one.
+    down_file.write_text("other@host")
+    fake.rules[(*D, "ps")] = [(0, b"dsat1\n", b"")]
+    assert [s.name for s in ds.available()] == ["dsat1"]
+    # An old mark is probed again in the background, not on the test's time.
+    down_file.write_text(HOST)
+    old = time.time() - ds.DOWN_SECONDS - 1
+    os.utime(down_file, (old, old))
+    assert ds.available() == []
+    ds._rechecking.join(5)
+    assert not down_file.exists()
+    assert [s.name for s in ds.available()] == ["dsat1"]
+
+
+def test_a_desktop_still_down_is_marked_again_by_the_background_probe(fake, down_file, monkeypatch):
+    fail = (255, b"", b"ssh: connect to host desktop.invalid port 22: Operation timed out")
+    fake.rules.update({(*D, "ps"): [fail], CHECK: [fail], PROBE: [fail]})
+    down_file.write_text(HOST)
+    old = time.time() - ds.DOWN_SECONDS - 1
+    os.utime(down_file, (old, old))
+    assert ds.available() == [] and ds.start_spare() is None
+    ds._rechecking.join(5)
+    assert down_file.read_text() == HOST and time.time() - down_file.stat().st_mtime < 5
+    fake.calls.clear()
+    assert ds.available() == [] and not fake.calls
+
+
+def test_one_process_probes_an_old_mark_at_a_time(fake, down_file):
+    down_file.write_text(HOST)
+    old = time.time() - ds.DOWN_SECONDS - 1
+    os.utime(down_file, (old, old))
+    with open(down_file.parent / f"{down_file.name}.lock", "a") as held:
+        fcntl.flock(held, fcntl.LOCK_EX)
+        ds._recheck()
+    assert not fake.calls and down_file.exists()
+
+
+def test_no_docker_cli_means_unavailable_not_an_error(fake, down_file, monkeypatch):
+    def missing(argv, **kw):
+        raise FileNotFoundError(2, "No such file or directory", argv[0])
+
+    monkeypatch.setattr(ds, "run", missing)
+    assert ds.available() == [] and ds.start_spare() is None and not ds.reachable()
+    assert down_file.read_text() == HOST
+
+
+def test_no_host_offers_no_dsats_without_running_anything(fake, down_file, monkeypatch):
+    monkeypatch.setattr(ds, "HOST", None)
+    assert ds.available() == [] and ds.start_spare() is None
+    assert not fake.calls
+
+
+def test_start_spare_starts_the_first_stopped_dsat_whose_lock_is_free(fake, down_file, monkeypatch, tmp_path):
+    sats = [ds.DockerSatellite(f"dsat{i}", tmp_path / f"dsat{i}", 0, 25675 + i, "1G") for i in (1, 2, 3)]
+    monkeypatch.setattr(ds, "DOCKER_SATELLITES", sats)
+    fake.rules[(*D, "ps")] = [(0, b"dsat1\n", b"")]
+    started = []
+    monkeypatch.setattr(ds.DockerSatellite, "start", lambda self: started.append(self.name))
+    held = _hold(sats[1])  # another process is starting dsat2
+    lock, got = ds.start_spare()
+    assert got is sats[2] and started == ["dsat3"] and not _free(sats[2].lock)
+    lock.close()
+    held.close()
+
+
+def test_a_failed_spare_start_releases_its_lock(fake, down_file, monkeypatch, tmp_path):
+    sats = [ds.DockerSatellite("dsat1", tmp_path / "dsat1", 0, 25676, "1G")]
+    monkeypatch.setattr(ds, "DOCKER_SATELLITES", sats)
+    fake.rules[(*D, "ps")] = [(0, b"", b"")]
+
+    def start(self):
+        raise TimeoutError("slow")
+
+    monkeypatch.setattr(ds.DockerSatellite, "start", start)
+    assert ds.start_spare() is None and _free(sats[0].lock)
+
+
+def _conftest(monkeypatch):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("conftest_copy", ds.ROOT.parent / "tests" / "conftest.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_conftest_offers_dsats_then_laptop_satellites_that_are_up(monkeypatch, pool):
+    c = _conftest(monkeypatch)
+    d, lap = pool
+    monkeypatch.setattr(c.docker_sats, "available", lambda: list(d))
+    monkeypatch.setattr(c, "SATELLITES", lap)
+    monkeypatch.setattr(c, "_rcon_up", lambda port: port == lap[1].rcon_port)
+    seen = {}
+
+    def take_idle(candidates, spare):
+        seen["candidates"], seen["spare"] = candidates, spare
+        return None, None
+
+    monkeypatch.setattr(c, "take_idle", take_idle)
+    assert c._take_satellite() == (None, None)
+    assert seen["candidates"] == [*d, lap[1]] and seen["spare"] is c.docker_sats.start_spare
 
 
 # Live: only when the desktop answers. Uses dsat6, which scripts and tests pick last.
@@ -409,5 +688,5 @@ def test_image_build_streams_the_context_without_mac_metadata():
     assert tar[:3] == ["tar", "--no-xattrs", "--no-mac-metadata"]
     assert tar[-3:] == ["-C", tar[-2], "server.jar"] and tar[-2].endswith("/server")
     assert {"Dockerfile", "start.sh", "pregen.sh", "server.properties"} <= set(tar)
-    assert build == ["docker", "--context", ds.CONTEXT, "build", "-t", ds.IMAGE, "-"]
+    assert build == [*ds.docker_argv("build"), "-t", ds.IMAGE, "-"]
     assert "--no-cache" in commands(no_cache=True)[1]

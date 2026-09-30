@@ -1,9 +1,12 @@
 """Create, start, stop and list the satellite test servers:
 
-    python -m scripts.servers {start,stop,status}
+    python -m scripts.servers {start,stop,status,idle} [laptop|docker|all]
 
-`start` is idempotent: it creates missing satellite directories from the main server's
-files and starts any satellite whose RCON is down. The main server is never touched.
+`laptop` is sat1..sat6, `docker` dsat1..dsat6 on the desktop (redstone/docker_sats.py);
+start and stop default to laptop, status to all. `start` is idempotent: it creates
+missing satellite directories from the main server's files and starts any satellite
+whose RCON is down. The main server is never touched. `idle` stops the dsats unused for
+docker_sats.IDLE_MINUTES.
 """
 
 import re
@@ -12,7 +15,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from redstone import watch
+from redstone import docker_sats, watch
 from redstone.harness import _rcon_up, ensure_server
 from redstone.rcon import Rcon
 from redstone.servers import MAIN, SATELLITES, Server
@@ -79,12 +82,32 @@ def status(sat: Server) -> str:
     return f"{sat.name}: {'up' if _rcon_up(sat.rcon_port) else 'down'}  rcon {sat.rcon_port}  {sat.dir}"
 
 
+ACTIONS = {"start": start, "stop": stop, "status": status}
+KINDS = ("laptop", "docker", "all")
+
+
 def main(argv: list[str]) -> None:
-    action = {"start": start, "stop": stop, "status": status}[argv[0] if argv else "status"]
-    with ThreadPoolExecutor(len(SATELLITES)) as pool:
-        for line in pool.map(action, SATELLITES):
+    name = argv[0] if argv else "status"
+    which = argv[1] if len(argv) > 1 else "all" if name == "status" else "laptop"
+    if name not in (*ACTIONS, "idle") or which not in KINDS:
+        raise SystemExit(f"usage: python -m scripts.servers {{{','.join(ACTIONS)},idle}} [{'|'.join(KINDS)}]")
+    if name == "idle":
+        print("\n".join(docker_sats.stop_idle()) or "no idle docker satellites")
+        return
+    jobs = []
+    if which in ("laptop", "all"):
+        jobs += [lambda sat=sat: ACTIONS[name](sat) for sat in SATELLITES]
+    if which in ("docker", "all"):
+        if docker_sats.HOST is None:
+            print("docker: no host (REDSTONE_DOCKER_HOST or server/docker_host)")
+        elif docker_sats.reachable():
+            jobs += [getattr(sat, name) for sat in docker_sats.DOCKER_SATELLITES]
+        else:
+            print("docker: desktop unreachable")
+    with ThreadPoolExecutor(max(1, len(jobs))) as pool:
+        for line in pool.map(lambda job: job(), jobs):
             print(line)
-    if action is start and _rcon_up(MAIN.rcon_port) and watch.autostart():
+    if name == "start" and which != "docker" and _rcon_up(MAIN.rcon_port) and watch.autostart():
         print("watch director started")
 
 

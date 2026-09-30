@@ -22,6 +22,9 @@ python -m scripts.package two_digit_adder   # dist/<name>/ + .zip data pack
 python -m scripts.plots                  # redraw plot borders and labels in the world
 python -m scripts.lint [<spec>]          # offline checks, whole library by default
 python -m scripts.try <spec> [--test NAME]... [--trace]   # lint + run on a satellite
+python -m scripts.servers {start,stop,status} [laptop|docker|all]   # satellites
+python -m redstone.docker_sats {start,stop,status} [dsatN]...   # Docker satellites only
+python -m scripts.satellite_image        # rebuild the Docker satellite image on the desktop
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
 python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
 python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched
@@ -47,7 +50,7 @@ against the blocks, fixtures excluded, by `tests/test_traits.py`; the rest are t
 designer's claim. `docs/AUTHORING.md` is the
 self-contained brief for designing a variant; keep it in step with the format and tools.
 `docs/MECHANICS.md` catalogues verified 26.3 mechanics, each proven by a spec in
-`library/mechanics/`.
+`library/mechanics/`. `docs/WINS.md` banks true wins, where we beat the community best against rebuilt `ref_<author>_<design>` specs.
 
 ## Plots
 
@@ -59,7 +62,7 @@ name drawn two blocks outside it. `plot_for(path)` maps a library folder to its 
 `REDSTONE_PLOT=<name>` makes tests build there; unset, tests build in main unless the build
 does not fit it, then in `plot_for`'s plot. `scripts.try` sets it from `plot_for`. Ticks
 are global per server, so each test takes one server's `rig.lock`: the `main` plot runs on
-the main server; any other plot runs on the first idle satellite (main if none is up), so
+the main server; any other plot runs on the first idle satellite, Docker ones first (main if none is up), so
 runs in different plots proceed at once. A per-plot lock (`server/plots/<plot>.lock`)
 serialises runs of the same plot. Satellites keep plot coordinates; the plot's status sign
 on main is updated whichever server runs. `server/plots/<plot>.json` records which server
@@ -113,8 +116,34 @@ Satellites `sat1..sat6` (`redstone/servers.py`) live in `server/satellites/<name
 ports 25566+/RCON 25576+, `-Xmx1G`, sharing main's jar, `libraries/` and `versions/` by
 symlink and its properties (view/simulation distance 2, max-players 1). A satellite
 force-loads only the plot under test. `python -m scripts.servers {start,stop,status}`
-creates/starts (idempotent) or stops them; pytest never starts one. `REDSTONE_SERVER=main`
-(or `sat3`, ...) pins every test to that server.
+creates/starts (idempotent) or stops them (`laptop` by default; status shows both kinds);
+pytest never starts a laptop satellite. `REDSTONE_SERVER=main` (or `sat3`, `dsat2`, ...)
+pins every test to that server; a pinned dsat that is down fails the test.
+
+Docker satellites `dsat1..dsat6` (`redstone/docker_sats.py`, which adds them to `SERVERS`
+when imported) are containers of image `redstone-satellite:26.3` (`docker/satellite/`,
+rebuilt by `scripts.satellite_image`) on the desktop, reached as `docker -H ssh://<host>`,
+the host from `REDSTONE_DOCKER_HOST` or the gitignored `server/docker_host` (never write it
+into a tracked file); the desktop's shell is cmd.exe. RCON is published on the desktop's
+loopback at 25676..25681 and forwarded to the same port here through the shared SSH
+ControlMaster (`ssh -O forward`), so the per-port RCON lock keeps them apart from laptop
+satellites. A forward accepts TCP with the container down, so "up" means an RCON login plus
+a command (`is_up()`), never a port check. `rig.lock`, `harness.log` (the container's
+`docker logs`) and `crash-reports/`, saved when it is removed, live in
+`server/satellites/dsatN/`; the data pack Rig writes there is pushed into the container
+(`push_datapack`, ~0.4 s a test). For a non-main plot pytest takes, in order: an idle
+running dsat, an idle laptop satellite, a dsat it starts for the test (~6 s; only when
+every running satellite is busy), the first busy satellite to come free; main only if no
+satellite is up or startable. A dsat is listed from one `docker ps` and asked `is_up()`
+only once its lock is won. With no host configured nothing is tried; a desktop that fails
+to answer (or no `docker`/`ssh` on PATH) is written to `server/satellites/dsat_unreachable`
+and skipped by every process, so tests fall back to the laptop satellites; every 2 minutes
+one background thread (one process at a time) probes it again and clears or renews the
+mark, so only the first failure costs a test (up to ~10 s). A detached reaper stops dsats
+whose `rig.lock` is free and untouched for 8 minutes; winning the lock of a dsat that turns
+out to be down does not count as use. After a hung or dropped SSH/docker
+call the master is probed and closed (`ssh -O exit`, dropping every forward) only if it
+no longer answers; the call is then retried once.
 
 ## Architecture
 
@@ -159,6 +188,8 @@ trace → `package` data pack.
 - `redstone/rcon.py`: the server writes every RCON client's output into one shared buffer
   (`DedicatedServer.runCommand`), so two clients' commands at once get each other's replies.
   `Rcon.cmd` takes `server/rcon.<port>.lock` for each command, across processes.
+- `redstone/docker_sats.py`: `DockerSatellite`, a `Server` whose world is a container on the
+  desktop; `servers.take_idle`/`take` choose and lock a server for conftest.
 - `redstone/pla.py`: generators for sum-of-products logic as two NOR planes of torches
   (`pla`), an OR-only plane (`or_plane`), and a Quine–McCluskey `minimise`. Each emits its
   own truth-table test and a computed `max_delay` bound.

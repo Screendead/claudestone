@@ -26,6 +26,7 @@ import socket
 import subprocess
 import sys
 import tarfile
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -49,7 +50,6 @@ def configured_host(path: Path = HOST_FILE) -> str | None:
 
 
 HOST = configured_host()
-CONTEXT = "desktop"
 IMAGE = "redstone-satellite:26.3"
 LEVEL = "testworld"
 REMOTE_PACKS = f"/srv/{LEVEL}/datapacks"
@@ -57,6 +57,11 @@ REMOTE_CRASHES = "/srv/crash-reports"
 IDLE_MINUTES = 8
 REAPER_GIVE_UP = 24 * 3600  # seconds of an unreachable desktop before the reaper exits
 REAPER_LOCK = ROOT / "satellites" / "dsat_reaper.lock"
+# Holds the host whose desktop last failed. Choosing a server skips that host, in every
+# process, until a probe in the background (one at a time, every DOWN_SECONDS) finds it
+# again: a probe of a desktop that is off takes 10-20 s, too long to stall a test for.
+DOWN_FILE = ROOT / "satellites" / "dsat_unreachable"
+DOWN_SECONDS = 120
 # stderr of an ssh or docker call that failed because the connection to the desktop did,
 # rather than because of the command.
 TRANSPORT_ERRORS = ("control socket", "mux_client", "muxclient", "read from master", "broken pipe",
@@ -78,8 +83,11 @@ def _once(argv: list[str], timeout: float, stdin: bytes | None = None, merge: bo
           env: dict | None = None):
     if HOST is None and argv[0] in ("ssh", "docker"):
         raise DesktopError("no Docker host: set REDSTONE_DOCKER_HOST or write user@host to server/docker_host")
-    return run(argv, input=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merge else subprocess.PIPE,
-               timeout=timeout, env=env)
+    try:
+        return run(argv, input=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merge else subprocess.PIPE,
+                   timeout=timeout, env=env)
+    except OSError as e:  # no docker or ssh on PATH (launchd, cron): the backend is unavailable
+        raise DesktopError(f"{argv[0]}: {e}") from e
 
 
 def _transport_failed(p) -> bool:
@@ -144,8 +152,13 @@ def call(argv: list[str], timeout: float = 30, stdin: bytes | None = None, merge
     return p
 
 
+def docker_argv(*args: str) -> list[str]:
+    # -H rather than a docker context, so HOST alone decides where both ssh and docker go.
+    return ["docker", "-H", f"ssh://{HOST}", *args]
+
+
 def docker(*args: str, **kw):
-    return call(["docker", "--context", CONTEXT, *args], **kw)
+    return call(docker_argv(*args), **kw)
 
 
 def reachable(timeout: float = 5) -> bool:
@@ -169,6 +182,93 @@ def running_satellites(timeout: float = 5) -> list["DockerSatellite"]:
     if names:
         _spawn_reaper()
     return [s for s in DOCKER_SATELLITES if s.name in names]
+
+
+def _mark_age() -> float | None:
+    """Seconds since HOST was marked down, or None if it is not."""
+    try:
+        if DOWN_FILE.read_text() != HOST:
+            return None
+        return time.time() - DOWN_FILE.stat().st_mtime
+    except FileNotFoundError:
+        return None
+
+
+def _recheck() -> None:
+    with open(DOWN_FILE.parent / f"{DOWN_FILE.name}.lock", "a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        age = _mark_age()
+        if age is None or age < DOWN_SECONDS:  # another process has just probed
+            return
+        try:
+            running(5)
+        except Exception:
+            _mark_down()
+        else:
+            DOWN_FILE.unlink(missing_ok=True)
+
+
+_rechecking: threading.Thread | None = None
+
+
+def _marked_down() -> bool:
+    global _rechecking
+    age = _mark_age()
+    if age is None:
+        return False
+    if age >= DOWN_SECONDS and not (_rechecking and _rechecking.is_alive()):
+        _rechecking = threading.Thread(target=_recheck, daemon=True)
+        _rechecking.start()
+    return True
+
+
+def _mark_down() -> None:
+    DOWN_FILE.parent.mkdir(parents=True, exist_ok=True)
+    DOWN_FILE.write_text(HOST)
+
+
+def available(timeout: float = 5) -> list["DockerSatellite"]:
+    """The running dsats, for choosing a server: [] with no host configured, or when the
+    desktop does not answer (remembered for DOWN_SECONDS)."""
+    if HOST is None or _marked_down():
+        return []
+    try:
+        return running_satellites(timeout)
+    except DesktopError:
+        _mark_down()
+        return []
+
+
+def start_spare(timeout: float = 5):
+    """Start a dsat that is not running and hold its rig.lock: (lock, sat), the lock the
+    caller's to close, or None when every dsat runs or the desktop fails."""
+    if HOST is None or _marked_down():
+        return None
+    try:
+        names = running(timeout)
+    except DesktopError:
+        _mark_down()
+        return None
+    for sat in DOCKER_SATELLITES:
+        if sat.name in names:
+            continue
+        sat.dir.mkdir(parents=True, exist_ok=True)
+        lock = open(sat.lock, "w")
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            lock.close()  # another process is starting it
+            continue
+        try:
+            sat.start()
+        except Exception:
+            lock.close()
+            return None
+        return lock, sat
+    return None
 
 
 def rcon_ready(port: int, timeout: float = 3) -> bool:
@@ -251,6 +351,7 @@ class DockerSatellite(Server):
             # someone else's test: wait for it, never replace it.
             if self.name not in running():
                 self._remove()  # a crashed or stopped container of the same name
+                _spawn_reaper()  # before the run, in case this process dies during it
                 self._run()
         _spawn_reaper()  # also stops one that never answers, once its lock is stale
         self.forward()
@@ -384,13 +485,19 @@ def reap(minutes: float = IDLE_MINUTES, every: float = 60) -> None:
             try:
                 stop_idle(minutes)
                 if not running():
-                    return
+                    break
                 delay, lost = every, None
             except DesktopError:
                 lost = lost or time.time()
                 if time.time() - lost > REAPER_GIVE_UP:
                     return
                 delay = min(delay * 2, 600)
+    # A start between that check and the lock's release found this reaper and spawned none.
+    try:
+        if running():
+            _spawn_reaper()
+    except DesktopError:
+        pass
 
 
 def _spawn_reaper() -> None:

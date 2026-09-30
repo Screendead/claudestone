@@ -12,7 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from redstone.docker_sats import CONTEXT, IMAGE
+from redstone.docker_sats import IMAGE, docker_argv
 
 REPO = Path(__file__).resolve().parent.parent
 FILES = ("Dockerfile", "server.properties", "pregen.sh", "start.sh")
@@ -21,7 +21,7 @@ FILES = ("Dockerfile", "server.properties", "pregen.sh", "start.sh")
 def commands(no_cache: bool = False) -> tuple[list[str], list[str]]:
     tar = ["tar", "--no-xattrs", "--no-mac-metadata", "-cf", "-", "-C", str(REPO / "docker" / "satellite"),
            *FILES, "-C", str(REPO / "server"), "server.jar"]
-    build = ["docker", "--context", CONTEXT, "build", *(["--no-cache"] if no_cache else []), "-t", IMAGE, "-"]
+    build = docker_argv("build", *(["--no-cache"] if no_cache else []), "-t", IMAGE, "-")
     return tar, build
 
 

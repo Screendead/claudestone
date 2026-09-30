@@ -15,6 +15,7 @@ from pathlib import Path
 
 from redstone import fileformat, library
 from redstone.build import namespaced
+from redstone import docker_sats  # noqa: F401  registers dsat1..6 in SERVERS
 from redstone.servers import PLOT_RECORDS, SERVERS
 from redstone.plots import PLOTS
 from redstone.rcon import Rcon
@@ -80,7 +81,10 @@ def connect(server: str | None, plot: str) -> Rcon:
         server = json.loads(pinned.read_text())["server"] if pinned.exists() else "main"
     if server not in SERVERS:
         raise SystemExit(f"unknown server {server!r}; one of {', '.join(SERVERS)}")
-    return Rcon(port=SERVERS[server].rcon_port)
+    target = SERVERS[server]
+    if hasattr(target, "is_up") and not target.is_up():  # is_up restores a dsat's forward
+        raise SystemExit(f"{server} is not up")
+    return Rcon(port=target.rcon_port)
 
 
 def yes(r: Rcon, cmd: str) -> bool:

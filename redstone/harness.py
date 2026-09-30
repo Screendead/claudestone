@@ -315,8 +315,11 @@ class Rig:
         self.pending = []
         probes, self.probed = probe_functions(self.build, probe)
         self.probe_count = len(probes)
-        write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction(),
-                                              **{f"probe{i}": body for i, body in enumerate(probes)}})
+        root = write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction(),
+                                                     **{f"probe{i}": body for i, body in enumerate(probes)}})
+        if hasattr(self.server, "push_datapack"):
+            # A Docker satellite's world is in its container; this folder is only staging.
+            self.server.push_datapack(root, reload=False)
         self.run("reload")
         if f"file/{PACK}" not in self.run("datapack list enabled"):
             self.run(f'datapack enable "file/{PACK}"')
