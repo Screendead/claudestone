@@ -29,7 +29,7 @@ def draw(r: Rcon) -> None:
         if p.name != MAIN.name:
             r.cmd(f"summon text_display {ox + sx / 2} {oy + sy + 2} {oz + sz / 2} "
                   f"{{Tags:[plot_status,{p.name}],billboard:\"center\",line_width:300,background:-1442840576,"
-                  f"text:{{text:\"idle\",color:\"gray\"}},"
+                  f"text:{{text:\"idle\",color:\"#DDDDDD\"}},"
                   f"transformation:{{scale:[7f,7f,7f],translation:[0f,0f,0f],"
                   f"left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}}}")
 

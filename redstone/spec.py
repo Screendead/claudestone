@@ -75,7 +75,7 @@ def _on(spec: Spec, snap: dict, name: str) -> bool:
 def _announce(rig: Rig, title: str, subtitle: str) -> None:
     if rig.plot != MAIN.name:
         rig.heading = [{"text": title + "\n", "color": "red", "bold": True},
-                       {"text": subtitle + "\n", "color": "gray"}]
+                       {"text": subtitle + "\n", "color": "#DDDDDD"}]
         return _sign(rig, "")
     status(rig, subtitle)
 
@@ -121,8 +121,8 @@ def _idle(rig: Rig, spec: Spec, test: dict, passed: bool) -> None:
     """A plot's status sign keeps only the last result once its test ends."""
     if rig.plot == MAIN.name:
         return
-    body = [{"text": "idle\n", "color": "gray"},
-            {"text": f"last: {spec.name}\n{test['name']} ", "color": "dark_gray"},
+    body = [{"text": "idle\n", "color": "#DDDDDD"},
+            {"text": f"last: {spec.name}\n{test['name']} ", "color": "#BBBBBB"},
             {"text": "pass" if passed else "fail", "color": "green" if passed else "red"}]
     try:
         checked(rig.display, f"data merge entity @e[type=text_display,tag=plot_status,tag={rig.plot},limit=1] "

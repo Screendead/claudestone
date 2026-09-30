@@ -120,9 +120,9 @@ def label_text(name: str, entry: dict, test_names: list[str] | None) -> dict:
     delays = [r["delay"] for t, r in entry.get("results", {}).items()
               if r.get("delay") is not None and (test_names is None or t in test_names)]
     line = f"{w}x{h}x{d}" + (f" · {max(delays)} ticks" if delays else "")
-    extra = [{"text": name, "bold": True, "color": colour}, {"text": "\n" + line, "color": "gray"}]
+    extra = [{"text": name, "bold": True, "color": colour}, {"text": "\n" + line, "color": "#DDDDDD"}]
     if entry.get("traits"):
-        extra.append({"text": "\n" + ", ".join(entry["traits"]), "color": "gray"})
+        extra.append({"text": "\n" + ", ".join(entry["traits"]), "color": "#DDDDDD"})
     return {"text": "", "extra": extra}
 
 
