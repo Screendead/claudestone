@@ -47,6 +47,8 @@ PLOTS["wire"] = Plot("wire", (72, SURFACE, 16), (104, 32, 48), PLOTS["wire"].col
 # here, apart from our own designs, west of the not plot.
 REFERENCES = Plot("references", (16, SURFACE, 72), (104, 32, 48), "black")
 PLOTS[REFERENCES.name] = REFERENCES
+# Builds for survival play (library/survival), in the square the grid gives it.
+PLOTS["survival"] = Plot("survival", (450, SURFACE, -350), (72, 32, 72), "lime")
 
 # Library folders that share another building block's plot; a folder named after a plot
 # uses it, and the rest (mechanics, builds, input) have none.
