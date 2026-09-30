@@ -1,0 +1,84 @@
+name: target_block_accuracy_strength
+description: 'A projectile on a target gives max(1, ceil(15*(0.5-d)/0.5)) by offset d from the face centre, for exactly 8 gt (snowball) or 20 gt (arrow), and pulls dust in: an aim-set analog pulse input.'
+traits:
+- compact
+- flat
+- pistonless
+- lightless
+- analog
+- tick_accurate
+palette:
+  .: air
+  '=': stone
+  S: stone
+  '-': redstone_wire
+  T: target
+layers:
+  0: '========
+
+    '
+  1: 'T-.T-.S-
+
+    '
+tests:
+- name: dust points into the target but not into stone
+  steps:
+  - check: if block ~1 ~1 ~0 redstone_wire[west=side,east=side]
+  - check: if block ~7 ~1 ~0 redstone_wire[west=none,east=none,north=none,south=none]
+- name: snowball dead centre gives 15 for exactly 8 gt
+  steps:
+  - run: summon snowball ~0 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - check: if block ~0 ~1 ~0 target[power=0]
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=15]
+  - check: if block ~1 ~1 ~0 redstone_wire[power=15]
+  - wait: 7
+  - check: if block ~0 ~1 ~0 target[power=15]
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=0]
+  - check: if block ~1 ~1 ~0 redstone_wire[power=0]
+- name: arrow dead centre gives 15 for exactly 20 gt, though it stays stuck
+  steps:
+  - run: kill @e[type=arrow,distance=..300]
+  - run: summon arrow ~3 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 target[power=15]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=15]
+  - wait: 19
+  - check: if block ~3 ~1 ~0 target[power=15]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 target[power=0]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+  - check: if entity @e[type=arrow,distance=..300,nbt={inGround:1b}]
+  - wait: 40
+  - check: if block ~3 ~1 ~0 target[power=0]
+- name: strength falls with distance from the face centre
+  steps:
+  - run: summon snowball ~0.15 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=11]
+  - wait: 10
+  - run: summon snowball ~0.25 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=8]
+  - wait: 10
+  - run: summon snowball ~-0.3 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=6]
+  - wait: 10
+  - run: summon snowball ~0.4 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=3]
+  - wait: 10
+  - run: summon snowball ~-0.49 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~0 ~1 ~0 target[power=1]
+  - check: if block ~1 ~1 ~0 redstone_wire[power=1]
+- name: 'control: snowball on stone powers nothing'
+  steps:
+  - run: summon snowball ~6 ~2.2 ~0 {Motion:[0.0,-0.5,0.0]}
+  - wait: 1
+  - check: if block ~7 ~1 ~0 redstone_wire[power=0]
+  - check: unless entity @e[type=snowball,distance=..300]
+  - wait: 8
+  - check: if block ~7 ~1 ~0 redstone_wire[power=0]

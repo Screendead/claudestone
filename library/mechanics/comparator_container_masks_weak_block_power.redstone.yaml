@@ -1,0 +1,82 @@
+name: comparator_container_masks_weak_block_power
+description: A comparator reading through a block with a chest behind it outputs the chest's level instead of the block's power when that power is under 15 (even if lower); at 15 the chest is ignored.
+traits: [horizontal, analog, comparator_based, container_based]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  C: comparator[facing=north]
+  e: chest[facing=south]
+  k: 'chest[facing=south]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  f: {input: f}
+  o: {name: out_empty, block: redstone_wire}
+  p: {name: out_one, block: redstone_wire}
+  q: {name: out_none, block: redstone_wire}
+  r: {name: out_hard, block: redstone_wire}
+  s: {name: out_dust15, block: redstone_wire}
+layers:
+  0: |
+    ........
+    .=======
+    .......=
+    .......=
+    ........
+    .=======
+    .......=
+    .......=
+    ........
+    .=======
+    .......=
+    .......=
+    ........
+    .=======
+    .......=
+    .......=
+    ........
+    ......==
+    .......=
+    .......=
+  1: |
+    .......e
+    a------S
+    .......C
+    .......o
+    .......k
+    b------S
+    .......C
+    .......p
+    ........
+    c------S
+    .......C
+    .......q
+    .......k
+    d----->S
+    .......C
+    .......r
+    .......e
+    .....f-S
+    .......C
+    .......s
+tests:
+- name: chest reading replaces weak block power
+  steps:
+  - check: if block ~7 ~1 ~3 redstone_wire[power=0]
+  - check: if block ~7 ~1 ~7 redstone_wire[power=1]
+  - check: if block ~7 ~1 ~11 redstone_wire[power=0]
+  - drive: {a: 1, b: 1, c: 1, d: 1, f: 1}
+  - wait: 8
+  - check: if block ~6 ~1 ~1 redstone_wire[power=10]
+  - check: if block ~6 ~1 ~5 redstone_wire[power=10]
+  - check: if block ~6 ~1 ~9 redstone_wire[power=10]
+  - check: if block ~7 ~1 ~3 redstone_wire[power=0]
+  - check: if block ~7 ~1 ~7 redstone_wire[power=1]
+  - check: if block ~7 ~1 ~11 redstone_wire[power=10]
+  - check: if block ~7 ~1 ~15 redstone_wire[power=15]
+  - check: if block ~6 ~1 ~17 redstone_wire[power=15]
+  - check: if block ~7 ~1 ~19 redstone_wire[power=15]

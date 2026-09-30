@@ -1,0 +1,29 @@
+name: redstone_block_corner_feeds_diagonal
+description: A redstone block in the corner of a diagonal dust step does not cut it and feeds both levels at 15, unlike a stone cap.
+traits: [lightless, silent, pistonless, entityless, one_wide, vertical, analog, survival_friendly]
+palette:
+  .: air
+  '=': stone
+  p: {name: lead, block: redstone_wire}
+  l: {name: low, block: redstone_wire}
+  u: {name: up, block: redstone_wire}
+  q: {name: tail, block: redstone_wire}
+layers:
+  0: |
+    .==...
+  1: |
+    .pl==.
+  2: |
+    ...uq.
+tests:
+- name: redstone block in corner powers both levels and keeps the step
+  steps:
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0,east=up] if block ~3 ~2 ~0 redstone_wire[power=0]
+  - run: setblock ~2 ~2 ~0 redstone_block
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=15,east=up,west=side] if block ~3 ~2 ~0 redstone_wire[power=15,west=side] if block ~1 ~1 ~0 redstone_wire[power=14] if block ~4 ~2 ~0 redstone_wire[power=14]
+- name: control stone in corner cuts the step and gives no power
+  steps:
+  - run: setblock ~2 ~2 ~0 stone
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0,east=side] if block ~3 ~2 ~0 redstone_wire[power=0]

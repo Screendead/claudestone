@@ -1,0 +1,105 @@
+name: detector_rail_reads_cart_container
+description: A comparator behind a detector rail reads a container cart's fill level (or a command block cart's SuccessCount), 0 for other carts; a mobile analog memory read by one comparator.
+traits: [analog, comparator_based, pistonless, lightless]
+palette:
+  .: air
+  '=': stone
+  D: detector_rail[shape=east_west]
+  C: comparator[facing=west]
+  o: {name: out, block: redstone_wire}
+  s: {name: under, block: redstone_wire}
+layers:
+  0: |
+    =====
+    =====
+  1: |
+    .===.
+    .s...
+  2: |
+    .DCo.
+    .....
+tests:
+- name: full chest cart reads 15
+  steps:
+  - check: if block ~1 ~2 ~0 detector_rail[powered=false]
+  - check: if block ~3 ~2 ~0 redstone_wire[power=0]
+  - run: 'summon chest_minecart ~1 ~2 ~0'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.0 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.1 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.2 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.3 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.4 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.5 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.6 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.7 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.8 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.9 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.10 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.11 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.12 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.13 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.14 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.15 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.16 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.17 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.18 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.19 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.20 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.21 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.22 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.23 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.24 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.25 with stone 64'
+  - run: 'execute positioned ~1 ~2 ~0 run item replace entity @e[type=chest_minecart,distance=..0.5] container.26 with stone 64'
+  - wait: 1
+  - check: if block ~1 ~2 ~0 detector_rail[powered=true]
+  - expect: {under: 1}
+  - check: if block ~3 ~2 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=15]
+- name: one item reads 1
+  steps:
+  - run: 'summon chest_minecart ~1 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~1 ~2 ~0 detector_rail[powered=true]
+  - check: if block ~3 ~2 ~0 redstone_wire[power=1]
+- name: hopper cart with a full slot reads 3
+  steps:
+  - run: 'summon hopper_minecart ~1 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:64}]}'
+  - wait: 4
+  - check: if block ~1 ~2 ~0 detector_rail[powered=true]
+  - check: if block ~3 ~2 ~0 redstone_wire[power=3]
+- name: command block cart reads SuccessCount
+  steps:
+  - run: 'summon command_block_minecart ~1 ~2 ~0 {SuccessCount:7}'
+  - wait: 4
+  - check: if block ~1 ~2 ~0 detector_rail[powered=true]
+  - check: if block ~3 ~2 ~0 redstone_wire[power=7]
+- name: plain cart powers the rail but comparator reads 0
+  steps:
+  - run: 'summon minecart ~1 ~2 ~0 {}'
+  - wait: 4
+  - check: if block ~1 ~2 ~0 detector_rail[powered=true]
+  - check: if block ~3 ~2 ~0 redstone_wire[power=0]
+  - expect: {under: 1}
+- name: armor stand does not trigger
+  steps:
+  - run: 'summon armor_stand ~1 ~2 ~0 {}'
+  - wait: 30
+  - check: if block ~1 ~2 ~0 detector_rail[powered=false]
+  - check: if block ~3 ~2 ~0 redstone_wire[power=0]
+  - expect: {under: 0}
+- name: rail holds after the cart leaves
+  steps:
+  - run: 'summon minecart ~1 ~2 ~0 {}'
+  - wait: 3
+  - run: 'execute positioned ~1 ~2 ~0 run kill @e[type=!player,distance=..0.5]'
+  - check: if block ~1 ~2 ~0 detector_rail[powered=true]
+  - expect: {under: 1}
+  - wait: 17
+  - expect: {under: 1}
+  - wait: 1
+  - check: if block ~1 ~2 ~0 detector_rail[powered=false]
+  - expect: {under: 0}

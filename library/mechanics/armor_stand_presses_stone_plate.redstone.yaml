@@ -1,0 +1,81 @@
+name: armor_stand_presses_stone_plate
+description: 'A summoned armor stand presses a stone plate (a Marker one does not; items press oak but not stone), and a piston can shove it off: a killable, pushable weight.'
+traits:
+- compact
+- piston_based
+palette:
+  .: air
+  '=': stone
+  S: stone
+  '-': redstone_wire
+  s: stone_pressure_plate
+  o: oak_pressure_plate
+  P: piston[facing=east]
+  p:
+    input: p
+layers:
+  0: '=========
+
+    '
+  1: 'Ss-.s-.o-
+
+    '
+  2: 'P........
+
+    '
+  3: 'p........
+
+    '
+tests:
+- name: armor stand presses the stone plate at once
+  steps:
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - run: summon armor_stand ~1 ~1 ~0
+  - wait: 1
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=true]
+  - check: if block ~2 ~1 ~0 redstone_wire[power=15]
+- name: marker armor stand does not press it
+  steps:
+  - run: summon armor_stand ~4 ~1 ~0 {Marker:1b}
+  - wait: 30
+  - check: if block ~5 ~1 ~0 redstone_wire[power=0]
+  - check: positioned ~4 ~1 ~0 if entity @e[type=armor_stand,distance=..0.1]
+- name: an item presses oak but not stone
+  steps:
+  - run: summon item ~4 ~1 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~7 ~1 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - wait: 30
+  - check: if block ~5 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~8 ~1 ~0 redstone_wire[power=15]
+- name: 'kill 1 gt before the 20 gt recheck: off after 1 gt'
+  steps:
+  - run: summon armor_stand ~1 ~1 ~0
+  - wait: 20
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=true]
+  - run: kill @e[type=armor_stand,distance=..20]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=false]
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+- name: 'kill just after a recheck: on for 19 gt, off at 20'
+  steps:
+  - run: summon armor_stand ~1 ~1 ~0
+  - wait: 21
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=true]
+  - run: kill @e[type=armor_stand,distance=..20]
+  - wait: 19
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=false]
+- name: piston shoves the stand one block off, plate releases at the next recheck
+  steps:
+  - run: summon armor_stand ~1 ~1 ~0
+  - wait: 20
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=true]
+  - drive:
+      p: 1
+  - wait: 20
+  - check: positioned ~2 ~1 ~0 if entity @e[type=armor_stand,distance=..0.3]
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 stone_pressure_plate[powered=false]
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]

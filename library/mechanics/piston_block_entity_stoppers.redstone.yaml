@@ -1,0 +1,361 @@
+name: piston_block_entity_stoppers
+description: Block entities (hopper, chest, dropper, shelf, ...) and obsidian-class blocks stop a piston push, a retracted piston is pushed, an iron door breaks and an open trapdoor moves open.
+traits: [piston_based]
+palette:
+  .: air
+  '=': smooth_stone
+  P: 'piston[facing=east]'
+  s: stone
+  R: redstone_block
+  h: 'piston_head[facing=up,type=normal,short=false]'
+  q: 'piston[facing=north]'
+  l: 'iron_door[facing=east,half=lower,hinge=left,open=false,powered=false]'
+  u: 'iron_door[facing=east,half=upper,hinge=left,open=false,powered=false]'
+  t: 'iron_trapdoor[facing=north,half=bottom,open=true,powered=false]'
+  H: 'hopper[facing=down]'
+  C: 'chest[facing=north]'
+  F: 'furnace[facing=north]'
+  D: 'dispenser[facing=up]'
+  d: 'dropper[facing=up]'
+  J: 'jukebox'
+  B: 'beacon'
+  E: 'ender_chest[facing=north]'
+  K: 'crafter'
+  S: 'oak_shelf[facing=north]'
+  b: 'barrel[facing=up]'
+  m: 'spawner'
+  T: 'enchanting_table'
+  O: 'obsidian'
+  o: 'crying_obsidian'
+  X: 'bedrock'
+  r: 'reinforced_deepslate'
+  f: 'end_portal_frame[facing=north]'
+  x: 'piston[facing=up,extended=true]'
+layers:
+  0: |
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .==R==
+    ......
+    .=====
+    ......
+    .=====
+    ......
+    .=====
+  1: |
+    .Ps...
+    ......
+    .PsH..
+    ......
+    .PsC..
+    ......
+    .PsF..
+    ......
+    .PsD..
+    ......
+    .Psd..
+    ......
+    .PsJ..
+    ......
+    .PsB..
+    ......
+    .PsE..
+    ......
+    .PsK..
+    ......
+    .PsS..
+    ......
+    .Psb..
+    ......
+    .Psm..
+    ......
+    .PsT..
+    ......
+    .PsO..
+    ......
+    .Pso..
+    ......
+    .PsX..
+    ......
+    .Psr..
+    ......
+    .Psf..
+    ......
+    .Psx..
+    ......
+    .Psq..
+    ......
+    .Pl...
+    ......
+    .Pt...
+  2: |
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ...h..
+    ......
+    ......
+    ......
+    ..u...
+    ......
+    ......
+tests:
+- name: control, stone with air behind it moves
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~0 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~0 piston[extended=true]
+  - check: if block ~3 ~1 ~0 stone
+- name: hopper stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~2 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~2 piston[extended=false]
+  - check: if block ~2 ~1 ~2 stone
+  - check: if block ~3 ~1 ~2 hopper
+- name: chest stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~4 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~4 piston[extended=false]
+  - check: if block ~2 ~1 ~4 stone
+  - check: if block ~3 ~1 ~4 chest
+- name: furnace stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~6 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~6 piston[extended=false]
+  - check: if block ~2 ~1 ~6 stone
+  - check: if block ~3 ~1 ~6 furnace
+- name: dispenser stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~8 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~8 piston[extended=false]
+  - check: if block ~2 ~1 ~8 stone
+  - check: if block ~3 ~1 ~8 dispenser
+- name: dropper stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~10 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~10 piston[extended=false]
+  - check: if block ~2 ~1 ~10 stone
+  - check: if block ~3 ~1 ~10 dropper
+- name: jukebox stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~12 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~12 piston[extended=false]
+  - check: if block ~2 ~1 ~12 stone
+  - check: if block ~3 ~1 ~12 jukebox
+- name: beacon stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~14 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~14 piston[extended=false]
+  - check: if block ~2 ~1 ~14 stone
+  - check: if block ~3 ~1 ~14 beacon
+- name: ender_chest stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~16 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~16 piston[extended=false]
+  - check: if block ~2 ~1 ~16 stone
+  - check: if block ~3 ~1 ~16 ender_chest
+- name: crafter stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~18 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~18 piston[extended=false]
+  - check: if block ~2 ~1 ~18 stone
+  - check: if block ~3 ~1 ~18 crafter
+- name: oak_shelf stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~20 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~20 piston[extended=false]
+  - check: if block ~2 ~1 ~20 stone
+  - check: if block ~3 ~1 ~20 oak_shelf
+- name: barrel stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~22 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~22 piston[extended=false]
+  - check: if block ~2 ~1 ~22 stone
+  - check: if block ~3 ~1 ~22 barrel
+- name: spawner stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~24 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~24 piston[extended=false]
+  - check: if block ~2 ~1 ~24 stone
+  - check: if block ~3 ~1 ~24 spawner
+- name: enchanting_table stops the push (block entity)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~26 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~26 piston[extended=false]
+  - check: if block ~2 ~1 ~26 stone
+  - check: if block ~3 ~1 ~26 enchanting_table
+- name: obsidian stops the push (immovable)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~28 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~28 piston[extended=false]
+  - check: if block ~2 ~1 ~28 stone
+  - check: if block ~3 ~1 ~28 obsidian
+- name: crying_obsidian stops the push (immovable)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~30 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~30 piston[extended=false]
+  - check: if block ~2 ~1 ~30 stone
+  - check: if block ~3 ~1 ~30 crying_obsidian
+- name: bedrock stops the push (immovable)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~32 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~32 piston[extended=false]
+  - check: if block ~2 ~1 ~32 stone
+  - check: if block ~3 ~1 ~32 bedrock
+- name: reinforced_deepslate stops the push (immovable)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~34 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~34 piston[extended=false]
+  - check: if block ~2 ~1 ~34 stone
+  - check: if block ~3 ~1 ~34 reinforced_deepslate
+- name: end_portal_frame stops the push (immovable)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~36 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~36 piston[extended=false]
+  - check: if block ~2 ~1 ~36 stone
+  - check: if block ~3 ~1 ~36 end_portal_frame
+- name: extended piston stops the push (extended piston)
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~38 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~38 piston[extended=false]
+  - check: if block ~2 ~1 ~38 stone
+  - check: if block ~3 ~1 ~38 piston
+  - check: if block ~3 ~2 ~38 piston_head[facing=up]
+- name: a retracted piston is pushed
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~40 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~40 piston[extended=true]
+  - check: if block ~3 ~1 ~40 stone
+  - check: if block ~4 ~1 ~40 piston[facing=north,extended=false]
+- name: an iron door breaks and drops
+  settle: 6
+  steps:
+  - check: unless entity @e[type=item,dx=6,dy=3,dz=44]
+  - run: setblock ~0 ~1 ~42 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~42 piston[extended=true]
+  - check: if block ~2 ~1 ~42 piston_head[facing=east]
+  - check: if block ~2 ~2 ~42 air
+  - check: if block ~3 ~1 ~42 air
+  - check: if block ~3 ~2 ~42 air
+  - check: if entity @e[type=item,dx=6,dy=3,dz=44,nbt={Item:{id:"minecraft:iron_door"}}]
+- name: an open iron trapdoor moves and stays open
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~44 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~44 piston[extended=true]
+  - check: if block ~3 ~1 ~44 iron_trapdoor[open=true,powered=false]
+  - check: unless entity @e[type=item,dx=6,dy=3,dz=46]

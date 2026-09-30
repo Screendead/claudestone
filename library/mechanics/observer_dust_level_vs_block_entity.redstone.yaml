@@ -1,0 +1,203 @@
+name: observer_dust_level_vs_block_entity
+description: 'Observers see dust power-level and shape changes and repeater lock/unlock (all block states) but not container contents; an analog change detector on comparator-fed dust.'
+traits: [observer_based, analog, container_based, silent, lightless, pistonless, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  H: 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stone",count:64}]}'
+  C: comparator[facing=west]
+  d: {name: d, block: redstone_wire}
+  O: {name: o1, block: 'observer[facing=west]'}
+  s: {name: s, block: redstone_wire}
+  P: {name: o2, block: 'observer[facing=north]'}
+  K: chest[facing=south]
+  Q: {name: o3, block: 'observer[facing=north]'}
+  a: {input: a}
+  l: repeater[facing=north]
+  r: {name: rep, block: 'repeater[facing=west]'}
+  W: {name: o4, block: 'observer[facing=north]'}
+layers:
+  0: |
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+    ======
+  1: |
+    HCdO..
+    ......
+    .s....
+    .P....
+    ......
+    ......
+    .K....
+    .Q....
+    ......
+    ..a...
+    ..l...
+    ..r...
+    ..W...
+    ......
+tests:
+- name: dust level change pulses, same level does not
+  steps:
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+  - run: 'data modify block ~0 ~1 ~0 Items append value {Slot:1b,id:"minecraft:stone",count:64}'
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 1}
+  - wait: 1
+  - expect: {o1: 1}
+  - wait: 1
+  - expect: {o1: 0}
+  - check: if block ~2 ~1 ~0 redstone_wire[power=6]
+  - wait: 4
+  - run: 'data modify block ~0 ~1 ~0 Items append value {Slot:2b,id:"minecraft:stone",count:1}'
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - check: if block ~2 ~1 ~0 redstone_wire[power=6]
+  - run: 'data remove block ~0 ~1 ~0 Items[1]'
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 1}
+  - wait: 1
+  - expect: {o1: 1}
+  - wait: 1
+  - expect: {o1: 0}
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+- name: item replace on a hopper does not update the comparator
+  steps:
+  - run: item replace block ~0 ~1 ~0 container.1 with stone 64
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - wait: 1
+  - expect: {o1: 0}
+  - check: if items block ~0 ~1 ~0 container.1 minecraft:stone
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+- name: dust shape change pulses, non-connecting neighbour does not
+  steps:
+  - check: if block ~1 ~1 ~2 redstone_wire[east=none,west=none,north=none,south=none,power=0]
+  - run: setblock ~2 ~1 ~2 stone
+  - wait: 1
+  - expect: {o2: 0}
+  - wait: 1
+  - expect: {o2: 0}
+  - wait: 1
+  - expect: {o2: 0}
+  - wait: 1
+  - expect: {o2: 0}
+  - wait: 1
+  - expect: {o2: 0}
+  - wait: 1
+  - expect: {o2: 0}
+  - check: if block ~1 ~1 ~2 redstone_wire[east=none,west=none,north=none,south=none,power=0]
+  - run: setblock ~2 ~1 ~2 waxed_lightning_rod
+  - wait: 1
+  - expect: {o2: 0}
+  - wait: 1
+  - expect: {o2: 1}
+  - wait: 1
+  - expect: {o2: 1}
+  - wait: 1
+  - expect: {o2: 0}
+  - check: if block ~1 ~1 ~2 redstone_wire[east=side,power=0]
+- name: chest contents change is invisible
+  steps:
+  - run: item replace block ~1 ~1 ~6 container.0 with stone 1
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - run: 'data modify block ~1 ~1 ~6 Items append value {Slot:5b,id:"minecraft:stone",count:64}'
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - wait: 1
+  - expect: {o3: 0}
+  - check: if items block ~1 ~1 ~6 container.5 minecraft:stone
+- name: repeater lock and unlock each pulse
+  steps:
+  - check: if block ~2 ~1 ~11 repeater[locked=false]
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~11 repeater[locked=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~11 repeater[locked=true,powered=false]
+  - expect: {o4: 0}
+  - wait: 1
+  - expect: {o4: 0}
+  - wait: 1
+  - expect: {o4: 1}
+  - wait: 1
+  - expect: {o4: 1}
+  - wait: 1
+  - expect: {o4: 0}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 2
+  - check: if block ~2 ~1 ~11 repeater[locked=false,powered=false]
+  - expect: {o4: 0}
+  - wait: 1
+  - expect: {o4: 0}
+  - wait: 1
+  - expect: {o4: 1}
+  - wait: 1
+  - expect: {o4: 1}
+  - wait: 1
+  - expect: {o4: 0}

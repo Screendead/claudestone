@@ -1,0 +1,135 @@
+name: comparator_nonstackable_item_steps
+description: Comparators count each item as count/maxStack of a slot, so a few unstackables give widely spaced exact levels (hopper swords 3,6,9,12,15; dropper 2..15).
+traits: [analog, container_based, comparator_based, lightless, pistonless, entityless, flat, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  H: hopper[facing=down]
+  D: dropper[facing=up]
+  c: comparator[facing=west]
+  h: {output: hop, block: redstone_wire}
+  d: {output: drop, block: redstone_wire}
+  s: {output: stk, block: redstone_wire}
+layers:
+  0: |
+    ===
+    ...
+    ===
+    ...
+    ===
+  1: |
+    Hch
+    ...
+    Dcd
+    ...
+    Hcs
+tests:
+- name: hopper swords step by three
+  steps:
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=6]
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1},{Slot:2b,id:"minecraft:wooden_sword",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=9]
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1},{Slot:2b,id:"minecraft:wooden_sword",count:1},{Slot:3b,id:"minecraft:wooden_sword",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=12]
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:wooden_sword",count:1},{Slot:1b,id:"minecraft:wooden_sword",count:1},{Slot:2b,id:"minecraft:wooden_sword",count:1},{Slot:3b,id:"minecraft:wooden_sword",count:1},{Slot:4b,id:"minecraft:wooden_sword",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=15]
+- name: dropper swords
+  steps:
+  - check: if block ~2 ~1 ~2 redstone_wire[power=0]
+  - run: item replace block ~0 ~1 ~2 container.0 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=2]
+  - run: item replace block ~0 ~1 ~2 container.1 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=4]
+  - run: item replace block ~0 ~1 ~2 container.2 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=5]
+  - run: item replace block ~0 ~1 ~2 container.3 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=7]
+  - run: item replace block ~0 ~1 ~2 container.4 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=8]
+  - run: item replace block ~0 ~1 ~2 container.5 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=10]
+  - run: item replace block ~0 ~1 ~2 container.6 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=11]
+  - run: item replace block ~0 ~1 ~2 container.7 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=13]
+  - run: item replace block ~0 ~1 ~2 container.8 with wooden_sword
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[power=15]
+- name: control stackables and 16-stacks
+  steps:
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:1},{Slot:1b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:1},{Slot:1b,id:"minecraft:stone",count:1},{Slot:2b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:1},{Slot:1b,id:"minecraft:stone",count:1},{Slot:2b,id:"minecraft:stone",count:1},{Slot:3b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:1},{Slot:1b,id:"minecraft:stone",count:1},{Slot:2b,id:"minecraft:stone",count:1},{Slot:3b,id:"minecraft:stone",count:1},{Slot:4b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:16}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:snowball",count:16}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=3]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:64}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=3]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:snowball",count:4}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:4}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:snowball",count:5}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:20}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:22}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:snowball",count:6}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=2]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:23}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=2]
+  - run: 'data merge block ~0 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:stone",count:24}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=2]
+- name: item command into a hopper leaves the comparator stale
+  steps:
+  - run: item replace block ~0 ~1 ~0 container.0 with wooden_sword
+  - run: item replace block ~0 ~1 ~2 container.0 with wooden_sword
+  - wait: 20
+  - check: if data block ~0 ~1 ~0 Items[{id:"minecraft:wooden_sword"}]
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~1 ~2 ~0 stone
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]

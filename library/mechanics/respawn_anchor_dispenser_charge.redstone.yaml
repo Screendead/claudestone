@@ -1,0 +1,72 @@
+name: respawn_anchor_dispenser_charge
+description: A dispenser of glowstone charges a respawn anchor one step per pulse; a comparator reads 0/3/7/11/15, a 4-count pulse counter.
+traits: [analog, compact, container_based]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  D: {name: disp, block: 'dispenser[facing=east]{Items:[{Slot:0b,id:"minecraft:glowstone",count:5}]}'}
+  R: {name: anchor, block: 'respawn_anchor[charges=0]'}
+  c: comparator[facing=west]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ======
+  1: |
+    aDRco.
+tests:
+- name: glowstone charges 3 7 11 15 then is kept
+  steps:
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=0]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=1]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=3]
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=2]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=7]
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=3]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=11]
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=4]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=15]
+  - check: 'if block ~1 ~1 ~0 dispenser{Items:[{count:1}]}'
+  - check: positioned ~2.5 ~1.5 ~0.5 unless entity @e[type=item,distance=..6,nbt={Item:{id:"minecraft:glowstone"}}]
+  # full anchor: the fifth pulse fails; the glowstone stays in the dispenser and none is dropped
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=4]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=15]
+  - check: 'if block ~1 ~1 ~0 dispenser{Items:[{id:"minecraft:glowstone",count:1}]}'
+  - check: positioned ~2.5 ~1.5 ~0.5 unless entity @e[type=item,distance=..6,nbt={Item:{id:"minecraft:glowstone"}}]
+- name: control stone is ejected and anchor stays empty
+  steps:
+  - run: 'data merge block ~1 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 respawn_anchor[charges=0]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+  - check: 'unless block ~1 ~1 ~0 dispenser{Items:[{id:"minecraft:stone"}]}'
+  - check: positioned ~2.5 ~1.5 ~0.5 if entity @e[type=item,distance=..6,nbt={Item:{id:"minecraft:stone"}}]
+- name: setblock charges gives constants
+  steps:
+  - run: setblock ~2 ~1 ~0 respawn_anchor[charges=2]
+  - wait: 4
+  - check: if block ~4 ~1 ~0 redstone_wire[power=7]

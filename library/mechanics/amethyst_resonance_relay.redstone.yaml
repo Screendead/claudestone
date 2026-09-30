@@ -1,0 +1,110 @@
+name: amethyst_resonance_relay
+description: 'An amethyst block beside an activating sculk sensor re-emits the same frequency (10 from a note block, 9 from a closing trapdoor) from its own position the same tick, reaching a calibrated sensor 13 blocks further on; stone there relays nothing; use: multi-hop frequency-keeping wireless.'
+traits: [flat, pistonless, entityless, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  N: note_block
+  t: oak_trapdoor[facing=north,half=bottom]
+  M: amethyst_block
+  A: sculk_sensor
+  B: calibrated_sculk_sensor[facing=north]
+  C: comparator[facing=west]
+  s: {name: tune, block: redstone_wire}
+  o: {output: a_out, block: redstone_wire}
+  f: {output: freq, block: redstone_wire}
+  a: {input: a}
+  c: {input: c}
+  p: {input: p}
+  q: {input: q}
+layers:
+  0: |
+    ....=................
+    =...==............===
+    .=................=..
+    ..................=..
+    ..................=..
+    ..................=..
+    ..................=..
+    ..................=..
+    ..................=..
+  1: |
+    a...o................
+    N...AM............BCf
+    .t................s..
+    .c................-..
+    ..................-..
+    ..................-..
+    ..................-..
+    ..................-p.
+    ..................-q.
+tests:
+- name: amethyst beside the first sensor relays frequency 10 to a calibrated sensor tuned to 10
+  settle: 60
+  steps:
+  - drive: {p: 1}
+  - wait: 4
+  - check: if block ~18 ~1 ~2 redstone_wire[power=10]
+  - drive: {a: 1}
+  - wait: 3
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=active]
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 12
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=active,power=3]
+  - wait: 2
+  - check: if block ~20 ~1 ~1 redstone_wire[power=10]
+- name: a calibrated sensor tuned to 9 ignores the relayed note block
+  settle: 60
+  steps:
+  - drive: {q: 1}
+  - wait: 4
+  - check: if block ~18 ~1 ~2 redstone_wire[power=9]
+  - drive: {a: 1}
+  - wait: 3
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=active]
+  - wait: 30
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~20 ~1 ~1 redstone_wire[power=0]
+- name: the relay keeps frequency 9 from a closing trapdoor
+  settle: 60
+  steps:
+  - drive: {q: 1}
+  - wait: 4
+  - drive: {c: 1}
+  - wait: 3
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=active]
+  - wait: 40
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - drive: {c: 0}
+  - wait: 3
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=active]
+  - wait: 12
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=active]
+  - wait: 2
+  - check: if block ~20 ~1 ~1 redstone_wire[power=9]
+- name: control, stone instead of amethyst relays nothing
+  settle: 60
+  steps:
+  - run: setblock ~5 ~1 ~1 stone
+  - wait: 40
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - drive: {p: 1}
+  - wait: 4
+  - drive: {a: 1}
+  - wait: 3
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~4 ~1 ~1 sculk_sensor[sculk_sensor_phase=active]
+  - wait: 40
+  - check: if block ~18 ~1 ~1 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~20 ~1 ~1 redstone_wire[power=0]

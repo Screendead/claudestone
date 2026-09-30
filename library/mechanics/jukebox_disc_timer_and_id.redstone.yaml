@@ -1,0 +1,61 @@
+name: jukebox_disc_timer_and_id
+description: A playing jukebox emits 15 and locks the hoppers beside it until the song ends, so a hopper below ejects the disc on time; a comparator reads a per-disc constant.
+traits: [analog, compact, container_based]
+palette:
+  .: air
+  '=': smooth_stone
+  H: {name: below, block: 'hopper[facing=down]'}
+  T: {name: above, block: 'hopper[facing=down]'}
+  J: {name: jukebox, block: jukebox}
+  c: comparator[facing=west]
+  p: {name: play, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =H==
+  1: |
+    pJco
+  2: |
+    .T..
+tests:
+- name: disc 11 plays then is pulled out
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:music_disc_11",count:1}]}'
+  - wait: 4
+  - check: if block ~1 ~1 ~0 jukebox[has_record=true]
+  - check: if block ~0 ~1 ~0 redstone_wire[power=15]
+  - check: if block ~3 ~1 ~0 redstone_wire[power=11]
+  - check: if block ~1 ~0 ~0 hopper[enabled=false]
+  - wait: 1437
+  - check: if block ~0 ~1 ~0 redstone_wire[power=15]
+  - check: if block ~1 ~1 ~0 jukebox[has_record=true]
+  - check: if block ~1 ~0 ~0 hopper[enabled=false]
+  - wait: 1
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]
+  - wait: 3
+  - check: if block ~1 ~1 ~0 jukebox[has_record=false]
+  - check: if block ~3 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~1 ~0 ~0 hopper[enabled=true]
+  - check: 'if block ~1 ~0 ~0 hopper{Items:[{id:"minecraft:music_disc_11"}]}'
+- name: disc 13 reads 1
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:music_disc_13",count:1}]}'
+  - wait: 4
+  - check: if block ~3 ~1 ~0 redstone_wire[power=1]
+- name: disc 5 reads 15
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:music_disc_5",count:1}]}'
+  - wait: 4
+  - check: if block ~3 ~1 ~0 redstone_wire[power=15]
+- name: control no disc leaves the hopper unlocked
+  steps:
+  - check: if block ~1 ~1 ~0 jukebox[has_record=false]
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~3 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~1 ~0 ~0 hopper[enabled=true]
+- name: control disc set by data is not playing and is pulled out at once
+  steps:
+  - run: 'data merge block ~1 ~1 ~0 {RecordItem:{id:"minecraft:music_disc_11",count:1}}'
+  - wait: 10
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]
+  - check: 'if block ~1 ~0 ~0 hopper{Items:[{id:"minecraft:music_disc_11"}]}'

@@ -1,0 +1,147 @@
+name: moved_observer_pulses
+description: 'A piston-moved idle observer pulses 2 gt at strength 15, 2 gt after it lands; moved while lit or before its pulse it stays dark. A self-made arrived signal.'
+traits: [observer_based, piston_based, entityless, flat, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  P: sticky_piston[facing=east]
+  O: 'observer[facing=north]'
+  r: {name: home, block: 'repeater[facing=north]'}
+  d: {name: dest, block: redstone_wire}
+layers:
+  0: |
+    =====
+    =====
+  1: |
+    aPO..
+    ..rd.
+tests:
+- name: pushed idle observer pulses after landing
+  steps:
+  - expect: {home: 0, dest: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~3 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~3 ~1 ~0 observer[powered=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 observer[powered=false]
+  - expect: {dest: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 observer[powered=true]
+  - check: if block ~3 ~1 ~1 redstone_wire[power=15]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 observer[powered=true]
+  - check: if block ~3 ~1 ~1 redstone_wire[power=15]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 observer[powered=false]
+  - expect: {dest: 0, home: 0}
+  - wait: 5
+  - expect: {dest: 0, home: 0}
+- name: pulled back it pulses again
+  steps:
+  - drive: {a: 1}
+  - wait: 12
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~2 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=true]
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=true]
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 1}
+- name: moved while lit turns off, no pulse at the new spot
+  steps:
+  - drive: {a: 1}
+  - wait: 5
+  - check: if block ~3 ~1 ~0 observer[powered=true]
+  - expect: {dest: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 moving_piston
+  - expect: {dest: 0}
+  - wait: 1
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0}
+- name: moved again before its pulse, the pulse is lost
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~0 observer[powered=false]
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 moving_piston
+  - wait: 1
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 observer[powered=false]
+  - expect: {home: 0, dest: 0}

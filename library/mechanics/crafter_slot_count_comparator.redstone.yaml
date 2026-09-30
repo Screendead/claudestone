@@ -1,0 +1,98 @@
+name: crafter_slot_count_comparator
+description: A comparator reads a crafter as the count of its filled or disabled slots, so it is a 0-9 counter or a constant source.
+traits: [container_based, comparator_based, analog, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  C: {name: craft, block: 'crafter[orientation=west_up]'}
+  D: {name: drop, block: 'dropper[facing=up]'}
+  '>': comparator[facing=west]
+  n: {name: n, block: redstone_wire}
+  m: {name: m, block: redstone_wire}
+layers:
+  0: |
+    .==
+    ...
+    .==
+  1: |
+    C>n
+    ...
+    D>m
+tests:
+- name: disabled slots set a constant
+  steps:
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - run: 'data merge block ~0 ~1 ~0 {disabled_slots:[I;0,1,2]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+  - run: 'data merge block ~0 ~1 ~0 {disabled_slots:[I;1,2,3,4,5,6,7,8]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=8]
+  - run: 'item replace block ~0 ~1 ~0 container.0 with stick 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=9]
+- name: stack size does not count
+  steps:
+  - run: 'item replace block ~0 ~1 ~0 container.4 with stick 64'
+  - run: 'item replace block ~0 ~1 ~2 container.4 with stick 64'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=1]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=2]
+- name: hopper above counts up one slot per item
+  steps:
+  - run: 'setblock ~0 ~2 ~0 hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stick",count:5}]}'
+  - wait: 60
+  - check: if block ~2 ~1 ~0 redstone_wire[power=5]
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:0b,count:1},{Slot:1b,count:1},{Slot:2b,count:1},{Slot:3b,count:1},{Slot:4b,count:1}]}
+- name: dropper control reads 1 for 5 items
+  steps:
+  - run: 'setblock ~0 ~2 ~2 hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stick",count:5}]}'
+  - wait: 60
+  - check: if block ~2 ~1 ~2 redstone_wire[power=1]
+- name: hopper timing up
+  steps:
+  - run: 'setblock ~0 ~2 ~0 hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stick",count:5}]}'
+  - wait: 1
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:0b}]}
+  - check: unless block ~0 ~1 ~0 crafter{Items:[{Slot:1b}]}
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_wire[power=1]
+  - wait: 6
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:1b}]}
+  - check: unless block ~0 ~1 ~0 crafter{Items:[{Slot:2b}]}
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_wire[power=2]
+  - wait: 6
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:2b}]}
+  - check: unless block ~0 ~1 ~0 crafter{Items:[{Slot:3b}]}
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+  - wait: 6
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:3b}]}
+  - check: unless block ~0 ~1 ~0 crafter{Items:[{Slot:4b}]}
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_wire[power=4]
+  - wait: 6
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:4b}]}
+  - check: unless block ~0 ~1 ~0 crafter{Items:[{Slot:5b}]}
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_wire[power=5]
+- name: hopper below counts down
+  steps:
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:stick",count:1},{Slot:1b,id:"minecraft:stick",count:1},{Slot:2b,id:"minecraft:stick",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+  - run: setblock ~0 ~0 ~0 hopper[facing=east]
+  - wait: 3
+  - check: if block ~2 ~1 ~0 redstone_wire[power=2]
+  - wait: 8
+  - check: if block ~2 ~1 ~0 redstone_wire[power=1]
+  - wait: 8
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~0 ~0 ~0 hopper{Items:[{id:"minecraft:stick",count:3}]}
+- name: after nine slots a hopper tops up the smallest stack
+  steps:
+  - run: 'setblock ~0 ~2 ~0 hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stick",count:11}]}'
+  - wait: 100
+  - check: if block ~2 ~1 ~0 redstone_wire[power=9]
+  - check: if block ~0 ~1 ~0 crafter{Items:[{Slot:0b,count:2},{Slot:1b,count:2},{Slot:2b,count:1},{Slot:8b,count:1}]}

@@ -1,0 +1,49 @@
+name: torch_hard_powers_block_above
+description: A standing torch strongly powers only the block above it; blocks beside it and the block it stands on get nothing, so towers and dense layouts work.
+traits: [compact, vertical, torch_based, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  B: stone
+  S: stone
+  U: stone
+  T: {name: torch, block: redstone_torch}
+  b: {name: under, block: 'repeater[facing=east]'}
+  s: {name: beside, block: 'repeater[facing=south]'}
+  d: {name: beside_dust, block: redstone_wire}
+  t: {name: adjacent, block: 'repeater[facing=north]'}
+  u: {name: above_dust, block: redstone_wire}
+  r: {name: above, block: 'repeater[facing=west]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =====
+    =====
+    =====
+    =====
+  1: |
+    ..=..
+    ...=.
+    .bB..
+    ..=..
+  2: |
+    ..s..
+    ..Sd.
+    .=T==
+    ..t..
+  3: |
+    .....
+    .....
+    .uUro
+    .....
+tests:
+- name: lit torch powers only up and adjacent components
+  steps:
+  - expect: {torch: 1, above: 1, above_dust: 1, out: 1, adjacent: 1, beside: 0, beside_dust: 0, under: 0}
+  - check: if block ~1 ~3 ~2 redstone_wire[power=15]
+  - check: if block ~3 ~2 ~1 redstone_wire[power=0]
+- name: removing the torch unpowers the block above
+  steps:
+  - run: setblock ~2 ~2 ~2 air
+  - wait: 4
+  - expect: {above: 0, above_dust: 0, out: 0, adjacent: 0}

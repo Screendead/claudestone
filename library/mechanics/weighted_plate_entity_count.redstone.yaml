@@ -1,0 +1,174 @@
+name: weighted_plate_entity_count
+description: 'Weighted plates count entities (gold N, iron ceil(N/10), stacks count once, recount every 10 gt): an analog entity counter with no comparator.'
+traits:
+- analog
+- compact
+- lightless
+- pistonless
+- flat
+palette:
+  .: air
+  '=': stone
+  '-': redstone_wire
+  g:
+    name: g
+    block: redstone_wire
+  i:
+    name: i
+    block: redstone_wire
+  G: light_weighted_pressure_plate
+  I: heavy_weighted_pressure_plate
+layers:
+  0: '.....===
+
+    ........
+
+    .....===
+
+    '
+  1: '.....Gg-
+
+    ........
+
+    .....Ii-
+
+    '
+tests:
+- name: gold plate outputs one per entity up to 15
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - check: if block ~6 ~1 ~0 redstone_wire[power=0]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~0 redstone_wire[power=1]
+  - check: if block ~7 ~1 ~0 redstone_wire[power=0]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:apple",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:bone",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:clay_ball",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:coal",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]
+  - check: if block ~7 ~1 ~0 redstone_wire[power=4]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:diamond",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:egg",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:feather",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:flint",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:gold_ingot",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:iron_ingot",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:leather",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:paper",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:string",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:sugar",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~0 redstone_wire[power=15]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:wheat",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:bowl",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:brick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:emerald",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:slime_ball",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~0 redstone_wire[power=15]
+- name: a stack of 64 counts as one entity
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:64}}
+  - wait: 12
+  - check: if block ~6 ~1 ~0 redstone_wire[power=1]
+- name: identical mergeable items merge and the count drops
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - run: summon item ~5 ~1.05 ~0 {Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {Item:{id:"minecraft:stick",count:1}}
+  - wait: 2
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]
+  - wait: 60
+  - check: if block ~6 ~1 ~0 redstone_wire[power=1]
+  - check: positioned ~5 ~1 ~ if entity @e[type=item,distance=..0.5,nbt={Item:{count:5}}]
+- name: 'control: identical items with PickupDelay 32767 never merge'
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - wait: 62
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]
+- name: iron plate outputs ceil of N over 10
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - check: if block ~6 ~1 ~2 redstone_wire[power=0]
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~2 redstone_wire[power=1]
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:apple",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:bone",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:clay_ball",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:coal",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:diamond",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:egg",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:feather",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:flint",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:gold_ingot",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~2 redstone_wire[power=1]
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:iron_ingot",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~2 redstone_wire[power=2]
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:leather",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:paper",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:string",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:sugar",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:wheat",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:bowl",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:brick",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:emerald",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:slime_ball",count:1}}
+  - run: summon item ~5 ~1.05 ~2 {PickupDelay:32767s,Item:{id:"minecraft:ink_sac",count:1}}
+  - wait: 12
+  - check: if block ~6 ~1 ~2 redstone_wire[power=3]
+- name: 'kill 1 gt before the 10 gt recheck: off after 1 gt'
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:apple",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:bone",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:clay_ball",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:coal",count:1}}
+  - wait: 30
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]
+  - run: kill @e[type=item,distance=..10]
+  - wait: 1
+  - check: if block ~6 ~1 ~0 redstone_wire[power=0]
+- name: 'kill just after a recheck: still on for 9 gt, off at 10'
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:apple",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:bone",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:clay_ball",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:coal",count:1}}
+  - wait: 31
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]
+  - run: kill @e[type=item,distance=..10]
+  - wait: 9
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]
+  - wait: 1
+  - check: if block ~6 ~1 ~0 redstone_wire[power=0]
+- name: added entities are only counted at the next 10 gt recheck
+  steps:
+  - run: kill @e[type=!player,distance=..8]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:stick",count:1}}
+  - wait: 2
+  - check: if block ~6 ~1 ~0 redstone_wire[power=1]
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:apple",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:bone",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:clay_ball",count:1}}
+  - run: summon item ~5 ~1.05 ~0 {PickupDelay:32767s,Item:{id:"minecraft:coal",count:1}}
+  - wait: 8
+  - check: if block ~6 ~1 ~0 redstone_wire[power=1]
+  - wait: 1
+  - check: if block ~6 ~1 ~0 redstone_wire[power=5]

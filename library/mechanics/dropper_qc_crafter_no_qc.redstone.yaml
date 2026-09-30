@@ -1,0 +1,99 @@
+name: dropper_qc_crafter_no_qc
+description: A dropper whose above-cell is powered (QC) fires 4 ticks after its next update; a crafter ignores that power, so crafters can sit under lines.
+traits: [container_based, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  X: barrel
+  d: {name: drop, block: 'dropper[facing=west]{Items:[{Slot:0b,id:"minecraft:stick",count:2}]}'}
+  c: {name: craft, block: 'crafter[orientation=west_up]{Items:[{Slot:0b,id:"minecraft:oak_log",count:1}]}'}
+  '>': comparator[facing=west]
+  p: {name: qd, block: redstone_wire}
+  q: {name: qc, block: redstone_wire}
+  a: {input: a}
+  b: {input: b}
+layers:
+  0: |
+    ....
+    ====
+    ....
+    ====
+    ....
+  1: |
+    ....
+    Xd>p
+    ....
+    Xc>q
+    ....
+  2: |
+    ....
+    ....
+    ....
+    ....
+    ....
+  3: |
+    ....
+    .a..
+    ....
+    .b..
+    ....
+tests:
+- name: dropper fires on update while quasi powered
+  steps:
+  - check: if block ~3 ~1 ~1 redstone_wire[power=1]
+  - drive: {a: 1}
+  - wait: 10
+  - check: if block ~1 ~1 ~1 dropper[triggered=false]
+  - check: if block ~3 ~1 ~1 redstone_wire[power=1]
+  - run: setblock ~1 ~1 ~0 stone
+  - check: if block ~1 ~1 ~1 dropper[triggered=true]
+  - wait: 3
+  - check: if block ~1 ~1 ~1 dropper{Items:[{id:"minecraft:stick",count:2}]}
+  - wait: 1
+  - check: if block ~1 ~1 ~1 dropper{Items:[{id:"minecraft:stick",count:1}]}
+  - check: if block ~0 ~1 ~1 barrel{Items:[{id:"minecraft:stick",count:1}]}
+  - run: setblock ~1 ~1 ~0 air
+  - wait: 10
+  - check: if block ~1 ~1 ~1 dropper[triggered=true]
+  - check: if block ~1 ~1 ~1 dropper{Items:[{id:"minecraft:stick",count:1}]}
+- name: dropper comparator follows the drop 2 ticks later
+  steps:
+  - drive: {a: 1}
+  - run: setblock ~1 ~1 ~0 stone
+  - run: 'data merge block ~1 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:stick",count:1}]}'
+  - wait: 5
+  - check: if block ~3 ~1 ~1 redstone_wire[power=1]
+  - wait: 1
+  - check: if block ~3 ~1 ~1 redstone_wire[power=0]
+- name: dropper without power above ignores the update
+  steps:
+  - run: setblock ~1 ~1 ~0 stone
+  - wait: 10
+  - check: if block ~1 ~1 ~1 dropper[triggered=false]
+  - check: if block ~3 ~1 ~1 redstone_wire[power=1]
+- name: crafter ignores quasi power even when updated
+  steps:
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+  - drive: {b: 1}
+  - wait: 2
+  - run: setblock ~1 ~1 ~4 stone
+  - wait: 10
+  - check: if block ~1 ~1 ~3 crafter[triggered=false]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~1 ~2 ~3 stone
+  - wait: 10
+  - check: if block ~1 ~1 ~3 crafter[triggered=false]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+- name: crafter powered directly crafts after 4 ticks
+  steps:
+  - run: setblock ~1 ~1 ~4 redstone_block
+  - check: if block ~1 ~1 ~3 crafter[triggered=true]
+  - wait: 3
+  - check: if block ~1 ~1 ~3 crafter{Items:[{id:"minecraft:oak_log"}]}
+  - wait: 1
+  - check: unless block ~1 ~1 ~3 crafter{Items:[{id:"minecraft:oak_log"}]}
+  - wait: 1
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+  - wait: 1
+  - check: if block ~3 ~1 ~3 redstone_wire[power=0]
+  - check: if block ~0 ~1 ~3 barrel{Items:[{id:"minecraft:oak_planks",count:4}]}

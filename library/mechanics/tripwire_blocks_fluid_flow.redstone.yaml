@@ -1,0 +1,62 @@
+name: tripwire_blocks_fluid_flow
+description: Myth check - placed string does not stop fluids; flowing water washes it out (dropping the string) on its first flow tick and lava burns through it, so it is no fluid stopper.
+traits: [flat, pistonless, entityless, survival_friendly]
+palette:
+  .: air
+  S: stone
+  W: water
+  L: lava
+  T: tripwire
+layers:
+  0: |
+    SSSSSS
+    SSSSSS
+    SSSSSS
+    SSSSSS
+    SSSSSS
+    SSSSSS
+    SSSSSS
+    SSSSSS
+    SSSSSS
+  1: |
+    SSSSSS
+    SWT..S
+    SSSSSS
+    SW...S
+    SSSSSS
+    SLT..S
+    SSSSSS
+    SL...S
+    SSSSSS
+tests:
+- name: water washes the string away on its first flow tick
+  settle: 0
+  steps:
+  - wait: 4
+  - check: if block ~2 ~1 ~1 tripwire
+  - check: if block ~3 ~1 ~1 air
+  - wait: 1
+  - check: if block ~2 ~1 ~1 water[level=1]
+  - check: positioned ~2.5 ~1 ~1.5 if entity @e[type=item,distance=..3,nbt={Item:{id:"minecraft:string"}}]
+  - wait: 5
+  - check: if block ~3 ~1 ~1 water[level=2]
+- name: lava replaces the string on its first flow tick
+  settle: 0
+  steps:
+  - wait: 25
+  - check: if block ~2 ~1 ~5 tripwire
+  - wait: 5
+  - check: if block ~2 ~1 ~5 lava[level=2]
+  - wait: 30
+  - check: if block ~3 ~1 ~5 lava[level=4]
+- name: control without string the fluid flows at the same pace
+  settle: 0
+  steps:
+  - wait: 4
+  - check: if block ~2 ~1 ~3 air
+  - wait: 1
+  - check: if block ~2 ~1 ~3 water[level=1]
+  - wait: 20
+  - check: if block ~2 ~1 ~7 air
+  - wait: 5
+  - check: if block ~2 ~1 ~7 lava[level=2]

@@ -1,0 +1,51 @@
+name: sculk_detects_ice_melt
+description: 'Ice melting under block light above 11 (glowstone beside it; daylight alone never melts it) is a block_destroy vibration, frequency 12, that a sculk sensor hears; packed ice never melts; use: mostly a hazard for sculk circuits near ice and lights, marginally a slow light detector.'
+traits: [pistonless, entityless, flat]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  X: {name: s, block: sculk_sensor}
+  I: ice
+  L: stone
+layers:
+  0: |
+    ======
+    ======
+    ======
+  1: |
+    ....S.
+    X..SIL
+    ....S.
+tests:
+- name: ice melts beside glowstone and the sensor hears frequency 12
+  settle: 20
+  steps:
+  - check: if block ~4 ~1 ~1 ice
+  - check: if data block ~0 ~1 ~1 {last_vibration_frequency:0}
+  - run: setblock ~5 ~1 ~1 glowstone
+  - run: gamerule random_tick_speed 4096
+  - wait: 20
+  - run: gamerule random_tick_speed 3
+  - check: if block ~4 ~1 ~1 water[level=0]
+  - check: if data block ~0 ~1 ~1 {last_vibration_frequency:12}
+- name: control no block light, daylight only, the ice stays
+  settle: 20
+  steps:
+  - run: gamerule random_tick_speed 4096
+  - wait: 20
+  - run: gamerule random_tick_speed 3
+  - check: if block ~4 ~1 ~1 ice
+  - check: if block ~0 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if data block ~0 ~1 ~1 {last_vibration_frequency:0}
+- name: control packed ice beside glowstone never melts
+  settle: 20
+  steps:
+  - run: setblock ~4 ~1 ~1 packed_ice
+  - run: setblock ~5 ~1 ~1 glowstone
+  - run: gamerule random_tick_speed 4096
+  - wait: 20
+  - run: gamerule random_tick_speed 3
+  - check: if block ~4 ~1 ~1 packed_ice
+  - check: if block ~0 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if data block ~0 ~1 ~1 {last_vibration_frequency:0}

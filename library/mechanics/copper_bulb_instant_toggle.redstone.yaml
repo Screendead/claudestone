@@ -1,0 +1,137 @@
+name: copper_bulb_instant_toggle
+description: A copper bulb flips lit the instant its input rises and a comparator reads it as 15/0, so bulb plus comparator is a 2-tick T flip-flop and ripple-counter bit.
+traits: [comparator_based, tick_accurate, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  t: {input: t}
+  u: {input: u}
+  v: {input: v}
+  w: {input: w}
+  '<': repeater[facing=west]
+  N: {name: wall, block: waxed_copper_bulb}
+  x: {name: through, block: redstone_wire}
+  A: {name: A, block: waxed_copper_bulb}
+  B: {name: B, block: waxed_copper_bulb}
+  O: {name: ox, block: waxed_oxidized_copper_bulb}
+  L: {name: lamp, block: redstone_lamp}
+  P: {name: placed, block: waxed_copper_bulb}
+  Q: {name: placed_powered, block: 'waxed_copper_bulb[powered=true]'}
+  R: redstone_block
+  '>': comparator[facing=west]
+  p: {name: qb, block: redstone_wire}
+  q: {name: qox, block: redstone_wire}
+  r: {name: qp, block: redstone_wire}
+  s: {name: qq, block: redstone_wire}
+layers:
+  0: |
+    ..=.==
+    ......
+    ......
+    ......
+    ..==..
+    ......
+    ..==..
+    ......
+    ..==..
+    ......
+    .=.=..
+  1: |
+    tA>B>p
+    ......
+    uL....
+    ......
+    vO>q..
+    ......
+    RP>r..
+    ......
+    RQ>s..
+    ......
+    w<Nx..
+tests:
+- name: toggles in the same tick as the rising edge
+  steps:
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=false,powered=false]
+  - drive: {t: 1}
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true,powered=true]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 waxed_copper_bulb[lit=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 waxed_copper_bulb[lit=true]
+  - drive: {t: 0}
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true,powered=false]
+  - wait: 1
+  - check: if block ~5 ~1 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~5 ~1 ~0 redstone_wire[power=15]
+- name: two bulb ripple counter
+  steps:
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 8
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]
+  - check: if block ~3 ~1 ~0 waxed_copper_bulb[lit=true]
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 8
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]
+  - check: if block ~3 ~1 ~0 waxed_copper_bulb[lit=true]
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 8
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]
+  - check: if block ~3 ~1 ~0 waxed_copper_bulb[lit=false]
+  - drive: {t: 1}
+  - wait: 2
+  - drive: {t: 0}
+  - wait: 8
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=false]
+  - check: if block ~3 ~1 ~0 waxed_copper_bulb[lit=false]
+- name: a second rise while powered does nothing
+  steps:
+  - drive: {t: 1}
+  - wait: 20
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true]
+  - run: setblock ~1 ~1 ~1 redstone_block
+  - wait: 4
+  - drive: {t: 0}
+  - wait: 4
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true,powered=true]
+  - run: setblock ~1 ~1 ~1 air
+  - wait: 4
+  - check: if block ~1 ~1 ~0 waxed_copper_bulb[lit=true,powered=false]
+- name: input power does not pass through the bulb
+  steps:
+  - drive: {w: 1}
+  - wait: 6
+  - check: if block ~2 ~1 ~10 waxed_copper_bulb[lit=true,powered=true]
+  - check: if block ~3 ~1 ~10 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~10 stone
+  - wait: 2
+  - check: if block ~3 ~1 ~10 redstone_wire[power=15]
+- name: oxidized bulb still reads 15
+  steps:
+  - check: if block ~3 ~1 ~4 redstone_wire[power=0]
+  - drive: {v: 1}
+  - wait: 1
+  - drive: {v: 0}
+  - wait: 4
+  - check: if block ~1 ~1 ~4 waxed_oxidized_copper_bulb[lit=true]
+  - check: if block ~3 ~1 ~4 redstone_wire[power=15]
+- name: control lamp has no memory
+  steps:
+  - drive: {u: 1}
+  - wait: 1
+  - expect: {lamp: 1}
+  - drive: {u: 0}
+  - wait: 6
+  - expect: {lamp: 0}
+- name: placed beside a powered block
+  steps:
+  - check: if block ~1 ~1 ~6 waxed_copper_bulb[lit=true,powered=true]
+  - check: if block ~3 ~1 ~6 redstone_wire[power=15]
+  - check: if block ~1 ~1 ~8 waxed_copper_bulb[lit=false,powered=true]
+  - check: if block ~3 ~1 ~8 redstone_wire[power=0]

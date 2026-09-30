@@ -1,0 +1,47 @@
+name: lightning_rod_strike_pulse
+description: A lightning bolt striking a lightning rod powers it for exactly 8 gt and hard-powers the block it stands on (dust beside that block gets 15); a bolt on bare stone does nothing. A wireless trigger with no comparator or observer.
+traits: [compact, pistonless, tick_accurate]
+palette:
+  .: air
+  '=': stone
+  S: stone
+  '-': redstone_wire
+  R: 'lightning_rod[facing=up]'
+  r: 'repeater[facing=west]'
+layers:
+  0: |
+    =======
+    =======
+  1: |
+    Sr-.Sr-
+    -...-..
+  2: |
+    R......
+    .......
+tests:
+- name: struck rod is powered for exactly 8 gt and hard-powers its block
+  steps:
+  - run: summon lightning_bolt ~0 ~3 ~0
+  - check: if block ~0 ~2 ~0 lightning_rod[powered=false]
+  - wait: 1
+  - check: if block ~0 ~2 ~0 lightning_rod[powered=true]
+  - check: if block ~0 ~1 ~1 redstone_wire[power=15]
+  - wait: 2
+  - check: if block ~1 ~1 ~0 repeater[powered=true]
+  - check: if block ~2 ~1 ~0 redstone_wire[power=15]
+  - wait: 5
+  - check: if block ~0 ~2 ~0 lightning_rod[powered=true]
+  - wait: 1
+  - check: if block ~0 ~2 ~0 lightning_rod[powered=false]
+  - check: if block ~0 ~1 ~1 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+- name: 'control: the same bolt on bare stone powers nothing'
+  steps:
+  - run: summon lightning_bolt ~4 ~2 ~0
+  - wait: 1
+  - check: positioned ~4 ~2 ~0 if entity @e[type=lightning_bolt,distance=..0.5]
+  - check: if block ~4 ~1 ~1 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~5 ~1 ~0 repeater[powered=false]
+  - check: if block ~6 ~1 ~0 redstone_wire[power=0]

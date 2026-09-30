@@ -1,0 +1,114 @@
+name: lectern_page_signal_and_pulse
+description: A lectern's comparator reads floor(14*page/(pages-1))+1, so a 15-page book is an exact 1..15 selector; a powered lectern strongly powers the block under it.
+traits: [analog, compact, lightless, silent]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  L: {name: lectern, block: 'lectern[facing=north,has_book=true]{Book:{id:"minecraft:writable_book",count:1,components:{"minecraft:writable_book_content":{pages:["p0","p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11","p12","p13","p14"]}}},Page:0}'}
+  c: comparator[facing=west]
+  o: {output: out, block: redstone_wire}
+  q: {name: under, block: redstone_wire}
+layers:
+  0: |
+    ====
+  1: |
+    qS==
+  2: |
+    .Lco
+tests:
+- name: 15-page book gives page plus one
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Page:0}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=1]
+  - run: 'data merge block ~1 ~2 ~0 {Page:1}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=2]
+  - run: 'data merge block ~1 ~2 ~0 {Page:2}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=3]
+  - run: 'data merge block ~1 ~2 ~0 {Page:3}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=4]
+  - run: 'data merge block ~1 ~2 ~0 {Page:4}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=5]
+  - run: 'data merge block ~1 ~2 ~0 {Page:5}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=6]
+  - run: 'data merge block ~1 ~2 ~0 {Page:6}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=7]
+  - run: 'data merge block ~1 ~2 ~0 {Page:7}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=8]
+  - run: 'data merge block ~1 ~2 ~0 {Page:8}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=9]
+  - run: 'data merge block ~1 ~2 ~0 {Page:9}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=10]
+  - run: 'data merge block ~1 ~2 ~0 {Page:10}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=11]
+  - run: 'data merge block ~1 ~2 ~0 {Page:11}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=12]
+  - run: 'data merge block ~1 ~2 ~0 {Page:12}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=13]
+  - run: 'data merge block ~1 ~2 ~0 {Page:13}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=14]
+  - run: 'data merge block ~1 ~2 ~0 {Page:14}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=15]
+- name: 10-page book is rounded down
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Book:{id:"minecraft:writable_book",count:1,components:{"minecraft:writable_book_content":{pages:["p0","p1","p2","p3","p4","p5","p6","p7","p8","p9"]}}},Page:5}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=8]
+  - run: 'data merge block ~1 ~2 ~0 {Page:1}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=2]
+  - run: 'data merge block ~1 ~2 ~0 {Page:8}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=13]
+- name: one-page book gives 15
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Book:{id:"minecraft:writable_book",count:1,components:{"minecraft:writable_book_content":{pages:["p0"]}}},Page:0}'
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=15]
+- name: control empty lectern gives 0
+  steps:
+  - run: setblock ~1 ~2 ~0 lectern[facing=north,has_book=false]
+  - wait: 4
+  - check: if block ~3 ~2 ~0 redstone_wire[power=0]
+- name: data page change sends no pulse
+  steps:
+  - run: 'data merge block ~1 ~2 ~0 {Page:7}'
+  - check: if block ~1 ~2 ~0 lectern[powered=false]
+  - wait: 1
+  - check: if block ~1 ~2 ~0 lectern[powered=false]
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~1 ~2 ~0 lectern[powered=false]
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~3 ~2 ~0 redstone_wire[power=8]
+- name: powered lectern strongly powers the block below
+  steps:
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]
+  - run: 'setblock ~1 ~2 ~0 lectern[facing=north,has_book=true,powered=true]{Book:{id:"minecraft:writable_book",count:1,components:{"minecraft:writable_book_content":{pages:["p0","p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11","p12","p13","p14"]}}},Page:0}'
+  - run: setblock ~0 ~1 ~0 air
+  - run: setblock ~0 ~1 ~0 redstone_wire
+  - wait: 2
+  - check: if block ~1 ~2 ~0 lectern[powered=true]
+  - check: unless block ~0 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~0 ~1 ~0 redstone_wire[power=15]
+  - run: 'setblock ~1 ~2 ~0 lectern[facing=north,has_book=true,powered=false]{Book:{id:"minecraft:writable_book",count:1,components:{"minecraft:writable_book_content":{pages:["p0","p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11","p12","p13","p14"]}}},Page:0}'
+  - run: setblock ~0 ~1 ~0 air
+  - run: setblock ~0 ~1 ~0 redstone_wire
+  - wait: 2
+  - check: if block ~0 ~1 ~0 redstone_wire[power=0]

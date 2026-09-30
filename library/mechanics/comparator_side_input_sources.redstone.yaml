@@ -1,0 +1,146 @@
+name: comparator_side_input_sources
+description: Which blocks a comparator's side input reads; torches, levers and powered blocks beside it are ignored, so they can pack against it.
+traits: [compact, analog, comparator_based, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  C: {name: cmp, block: 'comparator[facing=west,mode=subtract]'}
+  S: {name: side, block: air}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ===
+    ===
+    ===
+    ===
+  1: |
+    ...
+    ...
+    .S.
+    RCo
+tests:
+- name: empty side leaves rear 15
+  steps:
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: redstone block at side subtracts 15
+  steps:
+  - run: setblock ~1 ~1 ~2 redstone_block
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+- name: dust at 15 at side subtracts 15
+  steps:
+  - run: setblock ~1 ~1 ~1 redstone_block
+  - run: setblock ~1 ~1 ~2 redstone_wire[north=side,south=side]
+  - wait: 4
+  - check: if block ~1 ~1 ~2 redstone_wire[power=15]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+- name: repeater into side subtracts 15
+  steps:
+  - run: setblock ~1 ~1 ~2 repeater[facing=north]
+  - run: setblock ~1 ~1 ~1 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~2 repeater[powered=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+- name: strongly powered block at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~2 stone
+  - run: setblock ~1 ~1 ~1 repeater[facing=north]
+  - run: setblock ~0 ~1 ~2 repeater[facing=east]
+  - run: setblock ~1 ~1 ~0 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - check: if block ~0 ~1 ~2 repeater[powered=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: standing torch at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~2 redstone_torch
+  - wait: 4
+  - check: if block ~1 ~1 ~2 redstone_torch[lit=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: wall torch at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~1 stone
+  - run: setblock ~1 ~1 ~2 redstone_wall_torch[facing=south]
+  - wait: 4
+  - check: if block ~1 ~1 ~2 redstone_wall_torch[lit=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: floor lever at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~2 lever[face=floor,facing=north,powered=true]
+  - wait: 4
+  - check: if block ~1 ~1 ~2 lever[powered=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: floor button at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~2 stone_button[face=floor,facing=north,powered=true]
+  - wait: 4
+  - check: if block ~1 ~1 ~2 stone_button[powered=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: daylight detector at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~2 daylight_detector[power=15]
+  - wait: 4
+  - check: unless block ~1 ~1 ~2 daylight_detector[power=0]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: target block at side is ignored
+  steps:
+  - run: setblock ~1 ~1 ~2 target
+  - run: setblock ~1 ~1 ~2 target[power=15]
+  - wait: 4
+  - check: if block ~1 ~1 ~2 target[power=15]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: observer pulse at side swallowed when output feeds dust
+  steps:
+  - run: setblock ~1 ~1 ~2 observer[facing=north]
+  - wait: 6
+  - run: setblock ~1 ~1 ~1 stone
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: observer pulse at side subtracts when output feeds a diode
+  steps:
+  - run: setblock ~2 ~1 ~3 repeater[facing=west]
+  - run: setblock ~1 ~1 ~2 observer[facing=north]
+  - wait: 6
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - run: setblock ~1 ~1 ~1 stone
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 comparator[powered=true]
+- name: torch drives rear but not side
+  steps:
+  - run: setblock ~0 ~1 ~3 redstone_torch
+  - run: setblock ~1 ~1 ~2 redstone_torch
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+  - run: setblock ~1 ~1 ~2 redstone_block
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]

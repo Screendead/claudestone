@@ -1,0 +1,74 @@
+name: weak_powered_block_skips_dust
+description: A block powered only by dust drives a lamp, repeater and torch on its other faces but not dust beside it; a repeater into the same block powers that dust to 15.
+traits: [compact, horizontal]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  '-': redstone_wire
+  '>': repeater[facing=west]
+  a: {input: a}
+  b: {input: b}
+  L: {name: lamp_a, block: redstone_lamp}
+  r: {name: rep_a, block: 'repeater[facing=north]'}
+  o: {name: out_a, block: redstone_wire}
+  D: {name: dust_a, block: redstone_wire}
+  T: {name: torch_a, block: redstone_torch}
+  M: {name: lamp_b, block: redstone_lamp}
+  R: {name: rep_b, block: 'repeater[facing=north]'}
+  O: {name: out_b, block: redstone_wire}
+  E: {name: dust_b, block: redstone_wire}
+  U: {name: torch_b, block: redstone_torch}
+layers:
+  0: |
+    ====
+    ====
+    ====
+    ====
+    ....
+    ====
+    ====
+    ====
+    ====
+  1: |
+    ..L.
+    a-SD
+    ..r.
+    ..o.
+    ....
+    ..M.
+    b>SE
+    ..R.
+    ..O.
+  2: |
+    ....
+    ..T.
+    ....
+    ....
+    ....
+    ....
+    ..U.
+    ....
+    ....
+tests:
+- name: dust into block skips side dust
+  steps:
+  - expect: {lamp_a: 0, rep_a: 0, torch_a: 1, dust_a: 0}
+  - drive: {a: 1}
+  - wait: 6
+  - check: if block ~1 ~1 ~1 redstone_wire[power=15,east=side]
+  - expect: {lamp_a: 1, rep_a: 1, out_a: 1, torch_a: 0}
+  - check: if block ~3 ~1 ~1 redstone_wire[power=0]
+  - drive: {a: 0}
+  - wait: 6
+  - expect: {lamp_a: 0, rep_a: 0, torch_a: 1}
+- name: control repeater into block powers side dust
+  steps:
+  - expect: {lamp_b: 0, rep_b: 0, torch_b: 1, dust_b: 0}
+  - drive: {b: 1}
+  - wait: 6
+  - expect: {lamp_b: 1, rep_b: 1, out_b: 1, torch_b: 0}
+  - check: if block ~3 ~1 ~6 redstone_wire[power=15]
+  - drive: {b: 0}
+  - wait: 6
+  - check: if block ~3 ~1 ~6 redstone_wire[power=0]

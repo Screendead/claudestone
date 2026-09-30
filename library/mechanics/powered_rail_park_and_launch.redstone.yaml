@@ -1,0 +1,68 @@
+name: powered_rail_park_and_launch
+description: An unpowered powered rail brakes a rolling cart to a stop in its cell; powering it launches a parked cart away from a solid block at the rail's end (about 3.9 blocks in 20 gt) and does nothing without that block; an on-command cart station.
+traits: [pistonless, lightless]
+palette:
+  .: air
+  '=': stone
+  W: stone
+  P: powered_rail[shape=east_west]
+  r: rail[shape=east_west]
+  a: {input: a}
+layers:
+  0: |
+    ============
+    ============
+  1: |
+    WPrrrrrrrrrr
+    .a..........
+tests:
+- name: parked cart launches away from the wall
+  steps:
+  - run: scoreboard objectives add hm dummy
+  - run: 'summon marker ~ ~ ~'
+  - run: 'summon minecart ~1 ~1 ~0'
+  - wait: 20
+  - run: 'execute store result score .v hm run data get entity @e[type=minecart,limit=1,sort=nearest] Pos[0] 100'
+  - run: 'execute store result score .o hm run data get entity @e[type=marker,limit=1,sort=nearest] Pos[0] 100'
+  - run: scoreboard players operation .v hm -= .o hm
+  - check: if score .v hm matches 100
+  - drive: {a: 1}
+  - wait: 20
+  - run: 'execute store result score .v hm run data get entity @e[type=minecart,limit=1,sort=nearest] Pos[0] 100'
+  - run: 'execute store result score .o hm run data get entity @e[type=marker,limit=1,sort=nearest] Pos[0] 100'
+  - run: scoreboard players operation .v hm -= .o hm
+  - check: if score .v hm matches 485..489
+- name: without the wall powering does nothing
+  steps:
+  - run: scoreboard objectives add hm dummy
+  - run: 'summon marker ~ ~ ~'
+  - run: setblock ~0 ~1 ~0 air
+  - run: 'summon minecart ~1 ~1 ~0'
+  - wait: 5
+  - drive: {a: 1}
+  - wait: 20
+  - run: 'execute store result score .v hm run data get entity @e[type=minecart,limit=1,sort=nearest] Pos[0] 100'
+  - run: 'execute store result score .o hm run data get entity @e[type=marker,limit=1,sort=nearest] Pos[0] 100'
+  - run: scoreboard players operation .v hm -= .o hm
+  - check: if score .v hm matches 100
+- name: unpowered powered rail brakes a rolling cart
+  steps:
+  - run: scoreboard objectives add hm dummy
+  - run: 'summon marker ~ ~ ~'
+  - run: setblock ~3 ~1 ~0 powered_rail[shape=east_west]
+  - run: 'summon minecart ~9 ~1 ~0 {Motion:[-0.4d,0.0d,0.0d]}'
+  - wait: 40
+  - run: 'execute store result score .v hm run data get entity @e[type=minecart,limit=1,sort=nearest] Pos[0] 100'
+  - run: 'execute store result score .o hm run data get entity @e[type=marker,limit=1,sort=nearest] Pos[0] 100'
+  - run: scoreboard players operation .v hm -= .o hm
+  - check: if score .v hm matches 250..349
+- name: plain rail lets the same cart roll to the end
+  steps:
+  - run: scoreboard objectives add hm dummy
+  - run: 'summon marker ~ ~ ~'
+  - run: 'summon minecart ~9 ~1 ~0 {Motion:[-0.4d,0.0d,0.0d]}'
+  - wait: 40
+  - run: 'execute store result score .v hm run data get entity @e[type=minecart,limit=1,sort=nearest] Pos[0] 100'
+  - run: 'execute store result score .o hm run data get entity @e[type=marker,limit=1,sort=nearest] Pos[0] 100'
+  - run: scoreboard players operation .v hm -= .o hm
+  - check: if score .v hm matches 50..149

@@ -1,0 +1,299 @@
+name: comparator_block_state_constants
+description: Comparators read fixed 0-15 constants from block state alone (cake, end portal frame, beehive, composter, cauldrons, respawn anchor), directly or through a solid block, for item-free subtract-side constants; chiseled bookshelf and crafter need block-entity NBT, and a lone creaking heart reads 0.
+traits: [comparator_based, analog, lightless, silent, pistonless, entityless, flat, compact, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  c: comparator[facing=north]
+  m: {name: sub, block: 'comparator[facing=north,mode=subtract]'}
+  k: comparator[facing=east]
+  K: cake[bites=3]
+  a: {input: a}
+  d: {name: direct, block: redstone_wire}
+  t: {name: through, block: redstone_wire}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =======
+    =======
+    =======
+    =======
+  1: |
+    S...a..
+    c.S.mkK
+    d.c.o..
+    ..t....
+tests:
+- name: read directly
+  steps:
+  - run: setblock ~0 ~1 ~0 stone
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 cake[bites=0]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=14]
+  - run: setblock ~0 ~1 ~0 cake[bites=1]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=12]
+  - run: setblock ~0 ~1 ~0 cake[bites=2]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=10]
+  - run: setblock ~0 ~1 ~0 cake[bites=3]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=8]
+  - run: setblock ~0 ~1 ~0 cake[bites=4]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=6]
+  - run: setblock ~0 ~1 ~0 cake[bites=5]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=4]
+  - run: setblock ~0 ~1 ~0 cake[bites=6]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~0 end_portal_frame[eye=false]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 end_portal_frame[eye=true]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=15]
+  - run: setblock ~0 ~1 ~0 beehive[honey_level=0]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 beehive[honey_level=1]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~0 beehive[honey_level=2]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~0 beehive[honey_level=3]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 beehive[honey_level=4]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=4]
+  - run: setblock ~0 ~1 ~0 beehive[honey_level=5]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=5]
+  - run: setblock ~0 ~1 ~0 bee_nest[honey_level=0]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 bee_nest[honey_level=5]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=5]
+  - run: setblock ~0 ~1 ~0 composter[level=0]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 composter[level=1]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~0 composter[level=2]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~0 composter[level=3]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 composter[level=4]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=4]
+  - run: setblock ~0 ~1 ~0 composter[level=5]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=5]
+  - run: setblock ~0 ~1 ~0 composter[level=6]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=6]
+  - run: setblock ~0 ~1 ~0 composter[level=7]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=7]
+  - run: setblock ~0 ~1 ~0 cauldron
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 water_cauldron[level=1]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~0 water_cauldron[level=2]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~0 water_cauldron[level=3]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 powder_snow_cauldron[level=1]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~0 powder_snow_cauldron[level=2]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~0 powder_snow_cauldron[level=3]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 lava_cauldron
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 respawn_anchor[charges=0]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 respawn_anchor[charges=1]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 respawn_anchor[charges=2]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=7]
+  - run: setblock ~0 ~1 ~0 respawn_anchor[charges=3]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=11]
+  - run: setblock ~0 ~1 ~0 respawn_anchor[charges=4]
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=15]
+- name: read through stone
+  steps:
+  - run: setblock ~2 ~1 ~0 stone
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 cake[bites=0]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=14]
+  - run: setblock ~2 ~1 ~0 cake[bites=1]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=12]
+  - run: setblock ~2 ~1 ~0 cake[bites=2]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=10]
+  - run: setblock ~2 ~1 ~0 cake[bites=3]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=8]
+  - run: setblock ~2 ~1 ~0 cake[bites=4]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=6]
+  - run: setblock ~2 ~1 ~0 cake[bites=5]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=4]
+  - run: setblock ~2 ~1 ~0 cake[bites=6]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=2]
+  - run: setblock ~2 ~1 ~0 end_portal_frame[eye=false]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 end_portal_frame[eye=true]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+  - run: setblock ~2 ~1 ~0 beehive[honey_level=0]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 beehive[honey_level=1]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~2 ~1 ~0 beehive[honey_level=2]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=2]
+  - run: setblock ~2 ~1 ~0 beehive[honey_level=3]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~2 ~1 ~0 beehive[honey_level=4]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=4]
+  - run: setblock ~2 ~1 ~0 beehive[honey_level=5]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=5]
+  - run: setblock ~2 ~1 ~0 bee_nest[honey_level=0]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 bee_nest[honey_level=5]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=5]
+  - run: setblock ~2 ~1 ~0 composter[level=0]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 composter[level=1]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~2 ~1 ~0 composter[level=2]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=2]
+  - run: setblock ~2 ~1 ~0 composter[level=3]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~2 ~1 ~0 composter[level=4]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=4]
+  - run: setblock ~2 ~1 ~0 composter[level=5]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=5]
+  - run: setblock ~2 ~1 ~0 composter[level=6]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=6]
+  - run: setblock ~2 ~1 ~0 composter[level=7]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=7]
+  - run: setblock ~2 ~1 ~0 cauldron
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 water_cauldron[level=1]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~2 ~1 ~0 water_cauldron[level=2]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=2]
+  - run: setblock ~2 ~1 ~0 water_cauldron[level=3]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~2 ~1 ~0 powder_snow_cauldron[level=1]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~2 ~1 ~0 powder_snow_cauldron[level=2]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=2]
+  - run: setblock ~2 ~1 ~0 powder_snow_cauldron[level=3]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~2 ~1 ~0 lava_cauldron
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~2 ~1 ~0 respawn_anchor[charges=0]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=0]
+  - run: setblock ~2 ~1 ~0 respawn_anchor[charges=1]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~2 ~1 ~0 respawn_anchor[charges=2]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=7]
+  - run: setblock ~2 ~1 ~0 respawn_anchor[charges=3]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=11]
+  - run: setblock ~2 ~1 ~0 respawn_anchor[charges=4]
+  - wait: 4
+  - check: if block ~2 ~1 ~3 redstone_wire[power=15]
+- name: cake constant subtracted from a 15 rear
+  steps:
+  - check: if block ~4 ~1 ~2 redstone_wire[power=0]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~4 ~1 ~2 redstone_wire[power=7]
+  - run: setblock ~6 ~1 ~1 stone
+  - wait: 4
+  - check: if block ~4 ~1 ~2 redstone_wire[power=15]
+  - run: setblock ~6 ~1 ~1 cake[bites=0]
+  - wait: 4
+  - check: if block ~4 ~1 ~2 redstone_wire[power=1]
+- name: bookshelf, crafter and creaking heart need block-entity data
+  steps:
+  - run: setblock ~0 ~1 ~0 chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=true,slot_2_occupied=true]
+  - wait: 4
+  - check: if block ~0 ~1 ~0 chiseled_bookshelf[slot_2_occupied=true]
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=true]{Items:[{Slot:0b,id:"minecraft:book",count:1},{Slot:1b,id:"minecraft:book",count:1}],last_interacted_slot:1}
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~0 chiseled_bookshelf[facing=north,slot_0_occupied=true,slot_1_occupied=true]{Items:[{Slot:0b,id:"minecraft:book",count:1},{Slot:1b,id:"minecraft:book",count:1}],last_interacted_slot:4}
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=5]
+  - run: setblock ~0 ~1 ~0 crafter
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+  - run: setblock ~0 ~1 ~0 crafter{disabled_slots:[I;0,1,2]}
+  - wait: 4
+  - check: if block ~0 ~1 ~2 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~0 creaking_heart[creaking_heart_state=awake]
+  - wait: 4
+  - check: if block ~0 ~1 ~0 creaking_heart[creaking_heart_state=uprooted]
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]

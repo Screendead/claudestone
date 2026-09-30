@@ -1,0 +1,128 @@
+name: shelf_slot_bitmask_comparator
+description: A comparator behind a shelf reads its three slots as a bitmask (1, 2, 4), so a shelf is a one-block 3-bit constant.
+traits: [container_based, analog, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  S: {name: shelf, block: 'oak_shelf[facing=north]'}
+  T: {name: shelf2, block: 'oak_shelf[facing=east]'}
+  v: comparator[facing=south]
+  '^': comparator[facing=north]
+  '<': comparator[facing=east]
+  f: {name: front, block: redstone_wire}
+  b: {name: back, block: redstone_wire}
+  s: {name: side, block: redstone_wire}
+  P: piston[facing=east]
+  p: {input: p}
+layers:
+  0: |
+    ..=..
+    ..=..
+    ==...
+    ..=..
+    ..=..
+    .....
+    .=...
+  1: |
+    ..f..
+    ..v..
+    s<S..
+    ..^..
+    ..b..
+    .....
+    pPT..
+tests:
+- name: all eight subsets read as a bitmask
+  steps:
+  - run: 'item replace block ~2 ~1 ~2 container.0 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with air'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=0]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with air'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with air'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=2]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with air'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=3]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with stone 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=4]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with stone 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=5]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with air'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with stone 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=6]
+  - run: 'item replace block ~2 ~1 ~2 container.0 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with stone 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=7]
+- name: stack size does not matter
+  steps:
+  - run: 'item replace block ~2 ~1 ~2 container.1 with stone 64'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=2]
+- name: only the back reads it
+  steps:
+  - run: 'item replace block ~2 ~1 ~2 container.0 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with stone 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=7]
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - check: if block ~0 ~1 ~2 redstone_wire[power=0]
+- name: pistons cannot push it
+  steps:
+  - drive: {p: 1}
+  - wait: 6
+  - check: if block ~2 ~1 ~6 oak_shelf
+  - check: if block ~1 ~1 ~6 piston[extended=false]
+  - run: setblock ~2 ~1 ~6 stone
+  - wait: 4
+  - check: if block ~1 ~1 ~6 piston[extended=true]
+- name: hopper fills a slot to 64 before the next
+  steps:
+  - run: 'setblock ~2 ~2 ~2 hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:cobblestone",count:64},{Slot:1b,id:"minecraft:cobblestone",count:1}]}'
+  - wait: 510
+  - check: if block ~2 ~1 ~2 oak_shelf{Items:[{Slot:0b,count:64}]}
+  - check: unless block ~2 ~1 ~2 oak_shelf{Items:[{Slot:1b}]}
+  - check: if block ~2 ~1 ~4 redstone_wire[power=1]
+  - wait: 8
+  - check: if block ~2 ~1 ~2 oak_shelf{Items:[{Slot:0b,count:64},{Slot:1b,count:1}]}
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=3]
+- name: third slot starts at item 129
+  steps:
+  - run: 'item replace block ~2 ~1 ~2 container.0 with cobblestone 64'
+  - run: 'item replace block ~2 ~1 ~2 container.1 with cobblestone 63'
+  - run: 'setblock ~2 ~2 ~2 hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:cobblestone",count:2}]}'
+  - wait: 20
+  - check: if block ~2 ~1 ~2 oak_shelf{Items:[{Slot:0b,count:64},{Slot:1b,count:64},{Slot:2b,count:1}]}
+  - check: if block ~2 ~1 ~4 redstone_wire[power=7]
+- name: hopper below takes the first slot first
+  steps:
+  - run: 'item replace block ~2 ~1 ~2 container.0 with stone 1'
+  - run: 'item replace block ~2 ~1 ~2 container.2 with dirt 1'
+  - wait: 4
+  - check: if block ~2 ~1 ~4 redstone_wire[power=5]
+  - run: setblock ~2 ~0 ~2 hopper[facing=east]
+  - wait: 4
+  - check: if block ~2 ~0 ~2 hopper{Items:[{id:"minecraft:stone"}]}
+  - check: if block ~2 ~1 ~4 redstone_wire[power=4]

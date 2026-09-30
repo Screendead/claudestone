@@ -1,0 +1,138 @@
+name: repeater_lock_discards_pending_tick
+description: A delay-4 repeater locked before its scheduled output tick fires drops that change for good (it stays off while its input is on), so a lock gives a sample window that ignores late data.
+traits: [compact, flat, entityless, lightless, silent, lockable, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  d: {input: d}
+  l: {input: l}
+  A: {name: rep, block: 'repeater[facing=west,delay=4]'}
+  B: {name: lock, block: 'repeater[facing=south,delay=1]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ===
+    ===
+    ===
+  1: |
+    dAo
+    .B.
+    .l.
+tests:
+- name: lock lands 2 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 28
+  - expect: {out: 0}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+- name: lock lands 4 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - wait: 2
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 26
+  - expect: {out: 0}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+- name: lock lands 6 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - wait: 4
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 24
+  - expect: {out: 0}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+- name: lock lands 7 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - wait: 5
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 23
+  - expect: {out: 0}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+- name: lock lands 8 gt after data rises (same tick as output)
+  steps:
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 22
+  - expect: {out: 0}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+- name: lock lands 9 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - wait: 7
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 21
+  - expect: {out: 1}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=true]
+- name: lock lands 10 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - wait: 8
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 20
+  - expect: {out: 1}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=true]
+- name: lock lands 12 gt after data rises
+  steps:
+  - drive: {d: 1}
+  - wait: 10
+  - drive: {l: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - wait: 18
+  - expect: {out: 1}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=true]
+- name: lock landing on the output tick wins
+  steps:
+  - drive: {d: 1}
+  - wait: 6
+  - drive: {l: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~1 repeater[powered=false]
+  - check: if block ~1 ~1 ~0 repeater[locked=false,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+  - expect: {out: 0}
+- name: lock one tick after the output tick loses
+  steps:
+  - drive: {d: 1}
+  - wait: 7
+  - drive: {l: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~1 repeater[powered=false]
+  - check: if block ~1 ~1 ~0 repeater[locked=false,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=true]
+- name: discarded change is not replayed until unlock
+  steps:
+  - drive: {d: 1}
+  - wait: 2
+  - drive: {l: 1}
+  - wait: 60
+  - expect: {out: 0}
+  - check: if block ~1 ~1 ~0 repeater[locked=true,powered=false]
+  - drive: {l: 0}
+  - wait: 2
+  - check: if block ~1 ~1 ~0 repeater[locked=false,powered=false]
+  - wait: 7
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}

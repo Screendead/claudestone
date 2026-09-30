@@ -1,0 +1,62 @@
+name: piston_redstone_block_chain_instant_off
+description: A chain of sticky pistons each powered by the previous one's redstone block drops all at once in 1 gt when its input falls, but rises 3 gt per stage; a length-independent falling-edge wire.
+traits: [piston_based, flat, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  P: 'sticky_piston[facing=east]'
+  R: redstone_block
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =========
+    =========
+  1: |
+    aPR..PR.o
+    ...PR....
+tests:
+- name: rising edge takes 3 gt per stage (control)
+  steps:
+  - check: if block ~8 ~1 ~0 redstone_wire[power=0]
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_block
+  - check: if block ~3 ~1 ~1 sticky_piston[extended=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~1 sticky_piston[extended=true]
+  - wait: 1
+  - check: if block ~5 ~1 ~1 moving_piston
+  - wait: 1
+  - check: if block ~5 ~1 ~1 redstone_block
+  - check: if block ~5 ~1 ~0 sticky_piston[extended=false]
+  - wait: 2
+  - check: if block ~7 ~1 ~0 moving_piston
+  - check: if block ~8 ~1 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~7 ~1 ~0 redstone_block
+  - check: if block ~8 ~1 ~0 redstone_wire[power=15]
+- name: falling edge drops every stage in 1 gt
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - check: if block ~3 ~1 ~0 redstone_block
+  - check: if block ~5 ~1 ~1 redstone_block
+  - check: if block ~7 ~1 ~0 redstone_block
+  - check: if block ~8 ~1 ~0 redstone_wire[power=15]
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 air
+  - check: if block ~2 ~1 ~0 moving_piston
+  - check: if block ~5 ~1 ~1 air
+  - check: if block ~4 ~1 ~1 moving_piston
+  - check: if block ~7 ~1 ~0 air
+  - check: if block ~6 ~1 ~0 moving_piston
+  - check: if block ~8 ~1 ~0 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~2 ~1 ~0 redstone_block
+  - check: if block ~4 ~1 ~1 redstone_block
+  - check: if block ~6 ~1 ~0 redstone_block
+  - check: if block ~5 ~1 ~0 sticky_piston[extended=false]

@@ -1,0 +1,124 @@
+name: diode_side_input_tick_priority
+description: A repeater locking another repeater's side ticks before it even when scheduled later, so a lock landing on the data repeater's output tick always wins; a comparator lock only ties with a rising output (first scheduled wins) and loses to a falling one.
+traits: [compact, flat, entityless, lightless, silent, lockable, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: d_rep}
+  b: {input: l_rep}
+  A: {name: data_rep, block: 'repeater[facing=west,delay=2]'}
+  B: {name: lock_rep, block: 'repeater[facing=south,delay=1]'}
+  '1': {output: o_rep, block: redstone_wire}
+  c: {input: d_cmp}
+  e: {input: l_cmp}
+  D: {name: data_cmp, block: 'repeater[facing=west,delay=2]'}
+  C: {name: lock_cmp, block: 'comparator[facing=south]'}
+  '2': {output: o_cmp, block: redstone_wire}
+  g: {input: d_tie}
+  h: {input: l_tie}
+  H: {name: data_tie, block: 'repeater[facing=west,delay=1]'}
+  J: {name: lock_tie, block: 'comparator[facing=south]'}
+  '3': {output: o_tie, block: redstone_wire}
+layers:
+  0: |
+    ===========
+    ===========
+    ===========
+  1: |
+    aA1.cD2.gH3
+    .B...C...J.
+    .b...e...h.
+tests:
+- name: repeater lock beats a rising output on the same tick
+  steps:
+  - drive: {d_rep: 1}
+  - wait: 2
+  - drive: {l_rep: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~1 repeater[powered=false]
+  - check: if block ~1 ~1 ~0 repeater[powered=false,locked=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - check: if block ~1 ~1 ~0 repeater[powered=false,locked=true]
+  - wait: 20
+  - expect: {o_rep: 0}
+- name: comparator lock scheduled after the data loses to a rising output on the same tick
+  steps:
+  - drive: {d_cmp: 1}
+  - wait: 2
+  - drive: {l_cmp: 1}
+  - wait: 1
+  - check: if block ~5 ~1 ~1 comparator[powered=false]
+  - check: if block ~5 ~1 ~0 repeater[powered=false,locked=false]
+  - wait: 1
+  - check: if block ~5 ~1 ~1 comparator[powered=true]
+  - check: if block ~5 ~1 ~0 repeater[powered=true,locked=true]
+  - drive: {d_cmp: 0}
+  - wait: 20
+  - expect: {o_cmp: 1}
+- name: repeater lock beats a falling output on the same tick
+  steps:
+  - drive: {d_rep: 1}
+  - wait: 6
+  - expect: {o_rep: 1}
+  - drive: {d_rep: 0}
+  - wait: 2
+  - drive: {l_rep: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 repeater[powered=true]
+  - check: if block ~1 ~1 ~0 repeater[powered=true,locked=true]
+  - wait: 20
+  - expect: {o_rep: 1}
+- name: comparator lock scheduled after the data loses to a falling output on the same tick
+  steps:
+  - drive: {d_cmp: 1}
+  - wait: 6
+  - expect: {o_cmp: 1}
+  - drive: {d_cmp: 0}
+  - wait: 2
+  - drive: {l_cmp: 1}
+  - wait: 2
+  - check: if block ~5 ~1 ~1 comparator[powered=true]
+  - check: if block ~5 ~1 ~0 repeater[powered=false,locked=true]
+  - drive: {d_cmp: 1}
+  - wait: 20
+  - expect: {o_cmp: 0}
+- name: comparator lock one tick before the output tick wins
+  steps:
+  - drive: {d_cmp: 1}
+  - wait: 1
+  - drive: {l_cmp: 1}
+  - wait: 2
+  - check: if block ~5 ~1 ~1 comparator[powered=true]
+  - check: if block ~5 ~1 ~0 repeater[powered=false,locked=true]
+  - wait: 20
+  - expect: {o_cmp: 0}
+- name: comparator lock scheduled first wins a same-tick rising race
+  steps:
+  - drive: {l_tie: 1, d_tie: 1}
+  - wait: 2
+  - check: if block ~9 ~1 ~1 comparator[powered=true]
+  - check: if block ~9 ~1 ~0 repeater[powered=false,locked=true]
+  - wait: 10
+  - expect: {o_tie: 0}
+- name: comparator lock scheduled second loses a same-tick rising race
+  steps:
+  - drive: {d_tie: 1, l_tie: 1}
+  - wait: 2
+  - check: if block ~9 ~1 ~1 comparator[powered=true]
+  - check: if block ~9 ~1 ~0 repeater[powered=true,locked=true]
+  - drive: {d_tie: 0}
+  - wait: 10
+  - expect: {o_tie: 1}
+- name: comparator lock scheduled first still loses to a falling output
+  steps:
+  - drive: {d_tie: 1}
+  - wait: 4
+  - expect: {o_tie: 1}
+  - drive: {l_tie: 1, d_tie: 0}
+  - wait: 2
+  - check: if block ~9 ~1 ~1 comparator[powered=true]
+  - check: if block ~9 ~1 ~0 repeater[powered=false,locked=true]
+  - drive: {d_tie: 1}
+  - wait: 10
+  - expect: {o_tie: 0}

@@ -1,0 +1,43 @@
+name: comparator_through_block_keeps_dust_level
+description: A comparator reading a block that dust at power P points into outputs P (an analog value through a wall); a repeater in its place outputs 15.
+traits: [horizontal, analog, comparator_based]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  '-': redstone_wire
+  C: comparator[facing=west]
+  '>': repeater[facing=west]
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  x: {name: out7, block: redstone_wire}
+  y: {name: out_rep, block: redstone_wire}
+  z: {name: out12, block: redstone_wire}
+layers:
+  0: |
+    .============
+    .............
+    .============
+    .............
+    .=======.....
+  1: |
+    a---------SCx
+    .............
+    b---------S>y
+    .............
+    c----SCz.....
+tests:
+- name: comparator keeps the dust level, repeater restores 15
+  steps:
+  - drive: {a: 1, b: 1, c: 1}
+  - wait: 8
+  - check: if block ~9 ~1 ~0 redstone_wire[power=7]
+  - check: if block ~12 ~1 ~0 redstone_wire[power=7]
+  - check: if block ~9 ~1 ~2 redstone_wire[power=7]
+  - check: if block ~12 ~1 ~2 redstone_wire[power=15]
+  - check: if block ~4 ~1 ~4 redstone_wire[power=12]
+  - check: if block ~7 ~1 ~4 redstone_wire[power=12]
+  - drive: {a: 0, b: 0, c: 0}
+  - wait: 8
+  - expect: {out7: 0, out_rep: 0, out12: 0}

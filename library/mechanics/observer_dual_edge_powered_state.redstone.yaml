@@ -1,0 +1,93 @@
+name: observer_dual_edge_powered_state
+description: 'An observer watching a trapdoor or note block pulses 2 gt on both input edges; on a lamp the falling pulse is 4 gt later; on stone none. A two-block dual-edge detector.'
+traits: [observer_based, pistonless, entityless, flat, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  e: {input: e}
+  T: oak_trapdoor[facing=north,half=bottom]
+  N: note_block
+  L: {name: lamp, block: redstone_lamp}
+  S: stone
+  t: {name: obs_trapdoor, block: 'observer[facing=west]'}
+  n: {name: obs_note, block: 'observer[facing=west]'}
+  l: {name: obs_lamp, block: 'observer[facing=west]'}
+  s: {name: obs_stone, block: 'observer[facing=west]'}
+layers:
+  0: |
+    ===.
+    ===.
+    ===.
+    ===.
+    ===.
+    ===.
+    ===.
+  1: |
+    aTt.
+    ....
+    bNn.
+    ....
+    cLl.
+    ....
+    eSs.
+tests:
+- name: pulses on both edges
+  steps:
+  - drive: {a: 1, b: 1, c: 1, e: 1}
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - check: if block ~1 ~1 ~0 oak_trapdoor[open=true,powered=true]
+  - check: if block ~1 ~1 ~2 note_block[powered=true]
+  - expect: {lamp: 1}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 1, obs_note: 1, obs_lamp: 1, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 1, obs_note: 1, obs_lamp: 1, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - drive: {a: 0, b: 0, c: 0, e: 0}
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - check: if block ~1 ~1 ~0 oak_trapdoor[open=false,powered=false]
+  - check: if block ~1 ~1 ~2 note_block[powered=false]
+  - expect: {lamp: 1}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 1, obs_note: 1, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 1, obs_note: 1, obs_lamp: 0, obs_stone: 0}
+  - expect: {lamp: 1}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - expect: {lamp: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 1, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 1, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}
+  - wait: 1
+  - expect: {obs_trapdoor: 0, obs_note: 0, obs_lamp: 0, obs_stone: 0}

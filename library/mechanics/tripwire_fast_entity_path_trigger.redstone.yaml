@@ -1,0 +1,98 @@
+name: tripwire_fast_entity_path_trigger
+description: An item falling 3.5 blocks per tick, never ending a tick inside the string, still trips it on the tick it passes through (whole-path block checks), giving a 10 game tick pulse.
+traits: [pistonless, lightless, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  E: tripwire_hook[facing=east]
+  W: tripwire_hook[facing=west]
+  T: tripwire[east=true,west=true]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =======
+    =======
+  1: |
+    .......
+    .......
+  2: |
+    .......
+    .......
+  3: |
+    .......
+    .......
+  4: |
+    .......
+    .......
+  5: |
+    .......
+    .......
+  6: |
+    .......
+    .......
+  7: |
+    .......
+    .......
+  8: |
+    .......
+    .......
+  9: |
+    SETTTWS
+    .......
+  10: |
+    o......
+    .......
+tests:
+- name: fast item trips the string it passes through mid-tick
+  steps:
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - run: summon item ~3.5 ~15 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,Motion:[0.0d,-3.5d,0.0d]}
+  - wait: 1
+  - check: positioned ~3 ~10 ~0 if entity @e[type=item,dx=0,dy=3,dz=0]
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - check: if block ~0 ~10 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: positioned ~3 ~7 ~0 if entity @e[type=item,dx=0,dy=0,dz=0]
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=true]
+  - check: if block ~0 ~10 ~0 redstone_wire[power=15]
+  - wait: 9
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - check: if block ~0 ~10 ~0 redstone_wire[power=0]
+- name: control fast item one block beside the line does not trip it
+  steps:
+  - run: summon item ~3.5 ~15 ~1.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,Motion:[0.0d,-3.5d,0.0d]}
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - check: positioned ~3 ~1 ~1 if entity @e[type=item,dx=0,dy=0,dz=0]
+- name: control slow item trips it when a tick ends inside the string
+  steps:
+  - run: summon item ~3.5 ~9.5 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767}
+  - wait: 3
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~9 ~0 tripwire_hook[attached=true,powered=true]

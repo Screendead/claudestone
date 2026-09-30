@@ -1,0 +1,109 @@
+name: composter_pie_counter_ready_delay
+description: A composter counts 100% items (pumpkin pie) exactly one level per item as its comparator output, turns 7 into 8 exactly 20 game ticks later, and a hopper below resets it to 0 taking one bone meal.
+traits: [container_based, comparator_based, analog, lightless, silent, pistonless, entityless, compact, tick_accurate, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  K: composter
+  H: hopper[facing=down]
+  c: comparator[facing=north]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ...
+    ...
+    .=.
+    .=.
+  1: |
+    ...
+    .K.
+    .c.
+    .o.
+  2: |
+    ...
+    .H.
+    ...
+    ...
+tests:
+- name: seven pies count 1 to 7 then 8 after 20 ticks
+  steps:
+  - run: item replace block ~1 ~2 ~1 container.0 with pumpkin_pie 7
+  - check: if block ~1 ~1 ~1 composter[level=0]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=1]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=1]
+  - wait: 5
+  - check: if block ~1 ~1 ~1 composter[level=1]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=2]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=2]
+  - wait: 5
+  - check: if block ~1 ~1 ~1 composter[level=2]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=3]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=3]
+  - wait: 5
+  - check: if block ~1 ~1 ~1 composter[level=3]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=4]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=4]
+  - wait: 5
+  - check: if block ~1 ~1 ~1 composter[level=4]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=5]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=5]
+  - wait: 5
+  - check: if block ~1 ~1 ~1 composter[level=5]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=6]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=6]
+  - wait: 5
+  - check: if block ~1 ~1 ~1 composter[level=6]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=7]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=7]
+  - wait: 17
+  - check: if block ~1 ~1 ~1 composter[level=7]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=8]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 redstone_wire[power=7]
+  - wait: 1
+  - check: if block ~1 ~1 ~3 redstone_wire[power=8]
+  - check: unless data block ~1 ~2 ~1 Items[0]
+  - run: setblock ~1 ~0 ~1 hopper[facing=west]
+  - check: if block ~1 ~1 ~1 composter[level=8]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=0]
+  - check: if data block ~1 ~0 ~1 Items[{id:"minecraft:bone_meal",count:1}]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=0]
+- name: level set by setblock is a constant, but 7 still ripens
+  steps:
+  - run: setblock ~1 ~1 ~1 composter[level=5]
+  - wait: 40
+  - check: if block ~1 ~1 ~1 composter[level=5]
+  - check: if block ~1 ~1 ~3 redstone_wire[power=5]
+  - run: setblock ~1 ~1 ~1 composter[level=7]
+  - wait: 19
+  - check: if block ~1 ~1 ~1 composter[level=7]
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=8]
+  - wait: 2
+  - check: if block ~1 ~1 ~3 redstone_wire[power=8]
+- name: control seeds are random after the first
+  steps:
+  - run: item replace block ~1 ~2 ~1 container.0 with wheat_seeds 7
+  - wait: 1
+  - check: if block ~1 ~1 ~1 composter[level=1]
+  - wait: 60
+  - check: unless data block ~1 ~2 ~1 Items[0]
+  - check: unless block ~1 ~1 ~1 composter[level=7]
+  - check: unless block ~1 ~1 ~1 composter[level=8]

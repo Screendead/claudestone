@@ -1,0 +1,85 @@
+name: sticky_piston_short_pulse_drops_block
+description: A sticky piston given a 1 or 2 gt pulse leaves its block pushed out, and the next short pulse pulls it back; a pulse-length filter and one-piston block toggle.
+traits: [piston_based, one_wide, flat, entityless, tick_accurate]
+palette:
+  .: air
+  a: {input: a}
+  P: {name: piston, block: 'sticky_piston[facing=east]'}
+  S: stone
+layers:
+  0: |
+    .....
+  1: |
+    aPS..
+tests:
+- name: 1 gt pulse drops the block
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 8
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~2 ~1 ~0 air
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+- name: 2 gt pulse drops the block instantly on retract
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=true]
+  - check: if block ~2 ~1 ~0 moving_piston
+  - check: if block ~3 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~3 ~1 ~0 moving_piston
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~2 ~1 ~0 air
+  - check: if block ~1 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~1 ~1 ~0 moving_piston
+  - wait: 1
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+  - wait: 6
+  - check: if block ~3 ~1 ~0 stone
+- name: 3 gt pulse pulls the block back (control)
+  steps:
+  - drive: {a: 1}
+  - wait: 3
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~2 ~1 ~0 piston_head[facing=east,type=sticky]
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 moving_piston
+  - check: if block ~3 ~1 ~0 air
+  - wait: 2
+  - check: if block ~2 ~1 ~0 stone
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+- name: 4 gt pulse pulls the block back
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 8
+  - check: if block ~2 ~1 ~0 stone
+  - check: if block ~3 ~1 ~0 air
+- name: repeated 2 gt pulses toggle the block
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~2 ~1 ~0 air
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~2 ~1 ~0 stone
+  - check: if block ~3 ~1 ~0 air
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 6
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~2 ~1 ~0 air
+  - check: if block ~4 ~1 ~0 air

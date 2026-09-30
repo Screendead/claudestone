@@ -1,0 +1,230 @@
+name: repeater_extends_short_pulses
+description: A repeater stretches any shorter pulse to its own delay (out = max(in, 2*delay) gt; a 2 gt observer pulse through a delay-4 repeater lasts 8 gt), while a comparator passes pulses of 2 gt or more unchanged and drops a 1 gt pulse entirely.
+traits: [compact, flat, entityless, lightless, silent, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: d1}
+  b: {input: d2}
+  c: {input: d3}
+  e: {input: d4}
+  f: {input: dc}
+  g: {input: obs_trigger}
+  A: {name: r1, block: 'repeater[facing=west,delay=1]'}
+  B: {name: r2, block: 'repeater[facing=west,delay=2]'}
+  C: {name: r3, block: 'repeater[facing=west,delay=3]'}
+  D: {name: r4, block: 'repeater[facing=west,delay=4]'}
+  K: {name: cmp, block: 'comparator[facing=west]'}
+  O: {name: obs, block: 'observer[facing=west]'}
+  E: {name: r4obs, block: 'repeater[facing=west,delay=4]'}
+  '1': {output: o1, block: redstone_wire}
+  '2': {output: o2, block: redstone_wire}
+  '3': {output: o3, block: redstone_wire}
+  '4': {output: o4, block: redstone_wire}
+  '5': {output: oc, block: redstone_wire}
+  '6': {output: oobs, block: redstone_wire}
+layers:
+  0: |
+    ===.
+    ....
+    ===.
+    ....
+    ===.
+    ....
+    ===.
+    ....
+    ===.
+    ....
+    ====
+  1: |
+    aA1.
+    ....
+    bB2.
+    ....
+    cC3.
+    ....
+    eD4.
+    ....
+    fK5.
+    ....
+    gOE6
+tests:
+- name: 1 gt input pulse
+  steps:
+  - drive: {d1: 1, d2: 1, d3: 1, d4: 1, dc: 1}
+  - wait: 1
+  - drive: {d1: 0, d2: 0, d3: 0, d4: 0, dc: 0}
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+- name: 2 gt input pulse
+  steps:
+  - drive: {d1: 1, d2: 1, d3: 1, d4: 1, dc: 1, obs_trigger: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0, oobs: 0}
+  - wait: 1
+  - drive: {d1: 0, d2: 0, d3: 0, d4: 0, dc: 0}
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 1, oobs: 0}
+  - check: if block ~1 ~1 ~10 observer[powered=true]
+  - wait: 1
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 1, oobs: 0}
+  - check: if block ~1 ~1 ~10 observer[powered=true]
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 0, o4: 0, oc: 0, oobs: 0}
+  - check: if block ~1 ~1 ~10 observer[powered=false]
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 0, o4: 0, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0, oobs: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0, oobs: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0, oobs: 0}
+- name: 3 gt input pulse
+  steps:
+  - drive: {d1: 1, d2: 1, d3: 1, d4: 1, dc: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - drive: {d1: 0, d2: 0, d3: 0, d4: 0, dc: 0}
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - expect: {o1: 1, o2: 1, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+- name: 5 gt input pulse
+  steps:
+  - drive: {d1: 1, d2: 1, d3: 1, d4: 1, dc: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - expect: {o1: 1, o2: 0, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - expect: {o1: 1, o2: 1, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - drive: {d1: 0, d2: 0, d3: 0, d4: 0, dc: 0}
+  - expect: {o1: 1, o2: 1, o3: 0, o4: 0, oc: 1}
+  - wait: 1
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 0, oc: 1}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 1, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 1, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}
+  - wait: 1
+  - expect: {o1: 0, o2: 0, o3: 0, o4: 0, oc: 0}

@@ -1,0 +1,99 @@
+name: sculk_note_block_frequency_link
+description: 'A sculk sensor hears a note block 5 blocks away after 5 ticks, stays active 30 ticks then cools down 10 (ignoring vibrations meanwhile), its comparator reads frequency 10 for a note block or trapdoor opening and 9 for closing, and range ends at 8; use: wireless link or dual-edge detection through walls.'
+traits: [flat, pistonless, entityless, survival_friendly, tick_accurate, analog]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  N: note_block
+  t: oak_trapdoor[facing=north,half=bottom]
+  C: comparator[facing=east]
+  X: {name: sensor, block: sculk_sensor}
+  d: {output: direct, block: redstone_wire}
+  f: {output: freq, block: redstone_wire}
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  e: {input: e}
+layers:
+  0: |
+    .........=..........
+    .=.....===....=...=.
+    ....................
+    ....................
+    ....................
+    .........=..........
+    ....................
+  1: |
+    .........d..........
+    eN.....fCX....Na..Nb
+    ....................
+    ....................
+    ....................
+    .........t..........
+    .........c..........
+tests:
+- name: note block 5 away fires after 5 ticks, frequency 10, active 30, cooldown 10
+  settle: 60
+  steps:
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=active,power=6]
+  - check: if block ~9 ~1 ~0 redstone_wire[power=6]
+  - check: if block ~7 ~1 ~1 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~7 ~1 ~1 redstone_wire[power=10]
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wait: 24
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=active]
+  - wait: 1
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=cooldown,power=0]
+  - check: if block ~9 ~1 ~0 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~7 ~1 ~1 redstone_wire[power=0]
+  - drive: {a: 0}
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 6
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=cooldown]
+  - wait: 1
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 20
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+- name: trapdoor 4 away, open is frequency 10 and close is 9
+  settle: 60
+  steps:
+  - drive: {c: 1}
+  - wait: 3
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=active,power=8]
+  - wait: 2
+  - check: if block ~7 ~1 ~1 redstone_wire[power=10]
+  - wait: 40
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - drive: {c: 0}
+  - wait: 4
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=active,power=8]
+  - wait: 2
+  - check: if block ~7 ~1 ~1 redstone_wire[power=9]
+- name: range is 8, a note block 9 away is not heard
+  settle: 60
+  steps:
+  - drive: {b: 1}
+  - wait: 30
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~7 ~1 ~1 redstone_wire[power=0]
+  - drive: {e: 1}
+  - wait: 7
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~9 ~1 ~1 sculk_sensor[sculk_sensor_phase=active,power=1]
+  - check: if block ~9 ~1 ~0 redstone_wire[power=1]
+  - wait: 2
+  - check: if block ~7 ~1 ~1 redstone_wire[power=10]

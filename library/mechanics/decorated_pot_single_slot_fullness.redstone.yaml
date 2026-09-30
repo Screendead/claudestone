@@ -1,0 +1,84 @@
+name: decorated_pot_single_slot_fullness
+description: A decorated pot is a one-slot container, so a comparator reads floor(1+14n/64) of one stack (1,5,10,64 stone give 1,2,3,15) and hoppers fill and drain it; a fine-grained analog constant.
+traits: [analog, container_based, comparator_based, lightless, pistonless, entityless, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  P: decorated_pot[facing=north]
+  Q: 'decorated_pot[facing=north]{item:{id:"minecraft:stone",count:5}}'
+  H: hopper[facing=down]
+  F: 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:stone",count:3}]}'
+  E: hopper[facing=east]
+  c: comparator[facing=west]
+  p: {output: pot, block: redstone_wire}
+  h: {output: hop, block: redstone_wire}
+layers:
+  0: |
+    ===
+    ...
+    ===
+    ...
+    =..
+    ...
+    =..
+  1: |
+    Pcp
+    ...
+    Hch
+    ...
+    P..
+    ...
+    E..
+  2: |
+    ...
+    ...
+    ...
+    ...
+    F..
+    ...
+    Q..
+tests:
+- name: pot levels against a hopper control
+  steps:
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:1}}'
+  - run: 'data merge block ~0 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=1]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:5}}'
+  - run: 'data merge block ~0 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:stone",count:5}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=2]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:10}}'
+  - run: 'data merge block ~0 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:stone",count:10}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=3]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=1]
+  - run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:32}}'
+  - run: 'data merge block ~0 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:stone",count:32}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=8]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=2]
+  - run: 'data merge block ~0 ~1 ~0 {item:{id:"minecraft:stone",count:64}}'
+  - run: 'data merge block ~0 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:stone",count:64}]}'
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=15]
+  - check: if block ~2 ~1 ~2 redstone_wire[power=3]
+- name: hopper fills from above and drains from below
+  steps:
+  - wait: 40
+  - check: if data block ~0 ~1 ~4 item{id:"minecraft:stone",count:3}
+  - check: unless data block ~0 ~2 ~4 Items[0]
+  - check: unless data block ~0 ~2 ~6 item.id
+  - check: if data block ~0 ~1 ~6 Items[{id:"minecraft:stone",count:5}]
+- name: item command into a pot leaves the comparator stale
+  steps:
+  - run: item replace block ~0 ~1 ~0 container.0 with stone 64
+  - wait: 20
+  - check: if data block ~0 ~1 ~0 item{id:"minecraft:stone",count:64}
+  - check: if block ~2 ~1 ~0 redstone_wire[power=0]
+  - run: setblock ~1 ~2 ~0 stone
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=15]

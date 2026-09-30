@@ -1,0 +1,106 @@
+name: powered_rail_chain_limit_isolation
+description: A powered rail beside a source passes power along 8 more rails (9 lit) instantly and powers nothing else; used as a lightless 1-wide bus read by observers.
+traits: [pistonless, entityless, flat]
+palette:
+  .: air
+  '=': stone
+  a: {input: a}
+  p: powered_rail[shape=east_west]
+  d: {name: dust, block: redstone_wire}
+  L: {name: lamp, block: redstone_lamp}
+  O: observer[facing=north]
+  o: {name: obs, block: redstone_wire}
+layers:
+  0: |
+    .===========.
+    ============.
+    ..=..........
+    ......=......
+  1: |
+    .ppppppppppp.
+    appppppppppp.
+    ..dL..O......
+    ......o......
+tests:
+- name: nine rails lit at once and nothing else
+  steps:
+  - check: if block ~1 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~2 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~3 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~4 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~5 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~6 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~7 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~8 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~9 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~10 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~11 ~1 ~1 powered_rail[powered=false]
+  - drive: {a: 1}
+  - check: if block ~1 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~2 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~3 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~4 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~5 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~6 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~7 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~8 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~9 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~10 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~11 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~1 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~2 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~3 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~4 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~5 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~6 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~7 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~8 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~9 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~10 ~1 ~0 powered_rail[powered=false]
+  - check: if block ~11 ~1 ~0 powered_rail[powered=false]
+  - expect: {dust: 0, lamp: 0}
+  - wait: 10
+  - check: if block ~1 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~9 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~10 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~11 ~1 ~1 powered_rail[powered=false]
+  - expect: {dust: 0, lamp: 0}
+  - drive: {a: 0}
+  - check: if block ~1 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~2 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~3 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~4 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~5 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~6 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~7 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~8 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~9 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~10 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~11 ~1 ~1 powered_rail[powered=false]
+- name: activator rail isolates the rest
+  steps:
+  - run: setblock ~4 ~1 ~1 activator_rail[shape=east_west]
+  - wait: 4
+  - drive: {a: 1}
+  - wait: 2
+  - check: if block ~1 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~2 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~3 ~1 ~1 powered_rail[powered=true]
+  - check: if block ~4 ~1 ~1 activator_rail[powered=false]
+  - check: if block ~5 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~6 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~7 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~8 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~9 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~10 ~1 ~1 powered_rail[powered=false]
+  - check: if block ~11 ~1 ~1 powered_rail[powered=false]
+- name: observer on a rail pulses
+  steps:
+  - expect: {obs: 0}
+  - drive: {a: 1}
+  - wait: 1
+  - expect: {obs: 0}
+  - wait: 1
+  - expect: {obs: 1}
+  - wait: 2
+  - expect: {obs: 0}

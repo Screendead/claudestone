@@ -1,0 +1,216 @@
+name: tripwire_retrigger_and_chunk_order
+description: 26.3 tripwire timing - a touch gives a 10 tick pulse re-checked every 10 ticks, and a string that just switched off ignores entities for that tick, so the shortest off gap is 1 tick.
+traits: [flat, pistonless, lightless, survival_friendly, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  E: tripwire_hook[facing=east]
+  W: tripwire_hook[facing=west]
+  T: tripwire[east=true,west=true]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =======
+    =......
+  1: |
+    SETTTWS
+    o......
+tests:
+- name: one tick on the string gives a 10 tick pulse
+  steps:
+  - run: summon item ~3.5 ~1.0 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,0.0d,0.0d]}
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - check: if block ~0 ~1 ~1 redstone_wire[power=15]
+  - run: kill @e[type=item]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - check: if block ~0 ~1 ~1 redstone_wire[power=0]
+- name: staying 15 ticks gives a 20 tick pulse
+  steps:
+  - run: summon item ~3.5 ~1.0 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,0.0d,0.0d]}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - run: kill @e[type=item]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+
+- name: an entity arriving after the off tick repowers one tick later
+  steps:
+  - run: summon item ~3.5 ~1.0 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,0.0d,0.0d]}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - run: kill @e[type=item]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - run: summon item ~3.5 ~1.0 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,0.0d,0.0d]}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+
+- name: an entity arriving during the off tick waits one tick
+  steps:
+  - run: summon item ~3.5 ~1.0 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,0.0d,0.0d]}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - run: kill @e[type=item]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - run: summon item ~3.5 ~1.3 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,-0.3d,0.0d]}
+  - check: positioned ~3.5 ~1.3 ~0.5 if entity @e[type=item,distance=..0.01]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=false]
+  - check: positioned ~3.5 ~1.0 ~0.5 if entity @e[type=item,distance=..0.01]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+
+- name: control the same arrival on an idle string powers that tick
+  steps:
+  - run: summon item ~3.5 ~1.3 ~0.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:32767,NoGravity:1b,Motion:[0.0d,-0.3d,0.0d]}
+  - check: positioned ~3.5 ~1.3 ~0.5 if entity @e[type=item,distance=..0.01]
+  - wait: 1
+  - check: if block ~1 ~1 ~0 tripwire_hook[attached=true,powered=true]
+  - check: positioned ~3.5 ~1.0 ~0.5 if entity @e[type=item,distance=..0.01]

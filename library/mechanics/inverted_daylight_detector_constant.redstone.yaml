@@ -1,0 +1,204 @@
+name: inverted_daylight_detector_constant
+description: Daylight detectors read sky light at their own cell and recompute only on game-time multiples of 20; only a fully enclosed inverted one is a constant 15, a roof alone gives 1 by day and 12 at night.
+traits: [analog, compact, lightless, silent]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  A: {name: inv, block: 'daylight_detector[inverted=true]'}
+  B: {name: det, block: 'daylight_detector[inverted=false]'}
+  E: {name: enc, block: 'daylight_detector[inverted=true]'}
+  a: {name: inv_dust, block: redstone_wire}
+  b: {name: det_dust, block: redstone_wire}
+layers:
+  0: |
+    =========
+    =========
+    =========
+  1: |
+    .......S.
+    Aa.Bb.SES
+    .......S.
+  2: |
+    .........
+    S..S...S.
+    .........
+tests:
+- name: noon roofed inverted gives 1 and roofed normal 14
+  steps:
+  - run: time set noon
+  - wait: 42
+  - check: if block ~7 ~1 ~1 daylight_detector[power=15]
+  - check: if block ~1 ~1 ~1 redstone_wire[power=1]
+  - check: if block ~4 ~1 ~1 redstone_wire[power=14]
+- name: control unroofed inverted gives 0 at noon
+  steps:
+  - run: time set noon
+  - run: setblock ~0 ~2 ~1 air
+  - wait: 42
+  - check: if block ~1 ~1 ~1 redstone_wire[power=0]
+  - check: if block ~7 ~1 ~1 daylight_detector[power=15]
+- name: midnight roofed inverted gives 12 and roofed normal 0
+  steps:
+  - run: time set midnight
+  - wait: 42
+  - check: if block ~7 ~1 ~1 daylight_detector[power=15]
+  - check: if block ~1 ~1 ~1 redstone_wire[power=12]
+  - check: if block ~4 ~1 ~1 redstone_wire[power=0]
+  - run: time set noon
+- name: a set power holds until game time is a multiple of 20
+  steps:
+  - run: scoreboard objectives add m6dd dummy
+  - run: 'scoreboard players set #20 m6dd 20'
+  - run: 'scoreboard players set #seen m6dd 0'
+  - run: setblock ~7 ~1 ~1 daylight_detector[inverted=false,power=7]
+  - check: if block ~7 ~1 ~1 daylight_detector[power=7]
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - wait: 1
+  - run: 'execute store result score #t m6dd run time query gametime'
+  - run: 'scoreboard players operation #t m6dd %= #20 m6dd'
+  - run: 'execute if score #t m6dd matches 0 run scoreboard players set #seen m6dd 1'
+  - run: 'execute store success score #p m6dd if block ~7 ~1 ~1 daylight_detector[power=7]'
+  - run: 'scoreboard players operation #p m6dd += #seen m6dd'
+  - check: 'if score #p m6dd matches 1'
+  - check: 'if score #seen m6dd matches 1'
+  - check: if block ~7 ~1 ~1 daylight_detector[power=0]

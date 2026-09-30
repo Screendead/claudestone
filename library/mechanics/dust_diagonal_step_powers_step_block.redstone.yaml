@@ -1,0 +1,45 @@
+name: dust_diagonal_step_powers_step_block
+description: A lamp beside the solid step block of a dust riser lights when the line is powered; a glass step leaves it dark.
+traits: [silent, pistonless, entityless, vertical, survival_friendly]
+palette:
+  .: air
+  '=': stone
+  a: {input: a}
+  S: {name: step, block: stone}
+  L: {name: lamp, block: redstone_lamp}
+  p: {name: lead, block: redstone_wire}
+  l: {name: low, block: redstone_wire}
+  u: {name: up, block: redstone_wire}
+  q: {name: tail, block: redstone_wire}
+layers:
+  0: |
+    .==...
+    ......
+  1: |
+    aplS=.
+    ...L..
+  2: |
+    ...uq.
+    ......
+tests:
+- name: solid step lights the lamp beside it
+  steps:
+  - check: if block ~3 ~1 ~1 redstone_lamp[lit=false]
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14,east=up] if block ~3 ~2 ~0 redstone_wire[power=13] if block ~3 ~1 ~1 redstone_lamp[lit=true]
+- name: solid step with upper dust removed still lights the lamp
+  steps:
+  - run: setblock ~3 ~2 ~0 air
+  - run: setblock ~4 ~2 ~0 air
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14,east=side] if block ~3 ~1 ~1 redstone_lamp[lit=true]
+- name: control glass step leaves the lamp dark
+  steps:
+  - run: setblock ~3 ~1 ~0 glass
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14,east=up] if block ~3 ~2 ~0 redstone_wire[power=13] if block ~3 ~1 ~1 redstone_lamp[lit=false]

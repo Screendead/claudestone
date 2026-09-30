@@ -1,0 +1,70 @@
+name: hopper_minecart_through_floor_and_lock
+description: A hopper minecart picks up items lying on the full block above it (a hopper can't) and pulls 1 item per game tick from a chest above (a hopper 1 per 8); a powered activator rail disables it until an unpowered one; hidden fast pickup under a solid floor.
+traits: [pistonless, lightless]
+palette:
+  .: air
+  '=': stone
+  r: rail[shape=east_west]
+  H: hopper[facing=down]
+  A: activator_rail[shape=east_west]
+  a: {input: a}
+  c: chest[facing=north]
+layers:
+  0: |
+    ===========
+    ===========
+  1: |
+    .r.H.A.r.H.
+    .....a.....
+  2: |
+    .=.=.c.c.c.
+    ...........
+tests:
+- name: picks up items on the full block above, a hopper does not
+  steps:
+  - run: scoreboard objectives add hm dummy
+  - run: 'summon hopper_minecart ~1 ~1 ~0'
+  - run: 'summon item ~1 ~3.2 ~0 {Item:{id:"minecraft:stone",count:10}}'
+  - run: 'summon item ~3 ~3.2 ~0 {Item:{id:"minecraft:stone",count:10}}'
+  - wait: 5
+  - run: 'execute store result score .v hm run data get entity @e[type=hopper_minecart,limit=1,sort=nearest] Items[0].count'
+  - check: if score .v hm matches 10
+  - check: positioned ~1 ~3 ~0 unless entity @e[type=item,distance=..1]
+  - wait: 40
+  - check: positioned ~3 ~3 ~0 if entity @e[type=item,distance=..1]
+  - check: unless data block ~3 ~1 ~0 Items[0]
+- name: pulls 1 item per game tick from a chest, a hopper 1 per 8
+  steps:
+  - run: scoreboard objectives add hm dummy
+  - run: item replace block ~7 ~2 ~0 container.0 with stone 20
+  - run: item replace block ~9 ~2 ~0 container.0 with stone 20
+  - run: 'summon hopper_minecart ~7 ~1 ~0'
+  - wait: 5
+  - run: 'execute store result score .v hm run data get entity @e[type=hopper_minecart,limit=1,sort=nearest] Items[0].count'
+  - check: if score .v hm matches 5
+  - wait: 1
+  - run: 'execute store result score .v hm run data get entity @e[type=hopper_minecart,limit=1,sort=nearest] Items[0].count'
+  - check: if score .v hm matches 6
+  - wait: 34
+  - run: 'execute store result score .v hm run data get entity @e[type=hopper_minecart,limit=1,sort=nearest] Items[0].count'
+  - check: if score .v hm matches 20
+  - check: if data block ~9 ~2 ~0 Items[{count:15}]
+- name: powered activator rail disables it until an unpowered one
+  steps:
+  - drive: {a: 1}
+  - run: item replace block ~5 ~2 ~0 container.0 with stone 20
+  - run: item replace block ~7 ~2 ~0 container.0 with stone 20
+  - run: 'summon hopper_minecart ~5 ~1 ~0'
+  - wait: 20
+  - check: positioned ~5 ~1 ~0 if entity @e[type=hopper_minecart,distance=..0.5,nbt={Enabled:0b}]
+  - check: if data block ~5 ~2 ~0 Items[{count:20}]
+  - run: 'execute positioned ~5 ~1 ~0 as @e[type=hopper_minecart,distance=..0.5] run tp @s ~2 ~ ~'
+  - wait: 20
+  - check: positioned ~7 ~1 ~0 if entity @e[type=hopper_minecart,distance=..0.5,nbt={Enabled:0b}]
+  - check: if data block ~7 ~2 ~0 Items[{count:20}]
+  - run: 'execute positioned ~7 ~1 ~0 as @e[type=hopper_minecart,distance=..0.5] run tp @s ~-2 ~ ~'
+  - drive: {a: 0}
+  - wait: 2
+  - check: positioned ~5 ~1 ~0 if entity @e[type=hopper_minecart,distance=..0.5,nbt={Enabled:1b}]
+  - wait: 20
+  - check: unless data block ~5 ~2 ~0 Items[0]

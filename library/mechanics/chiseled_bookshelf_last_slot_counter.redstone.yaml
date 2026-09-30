@@ -1,0 +1,99 @@
+name: chiseled_bookshelf_last_slot_counter
+description: A chiseled bookshelf reads as last-interacted slot + 1, not a book count; hopper-fed books step it 1 to 6, and a hopper below drains slot 0 first so the reading climbs 1 to 6 again (stays 6 when empty), never back down.
+traits: [container_based, comparator_based, analog, lightless, silent, pistonless, entityless, compact, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  B: chiseled_bookshelf[facing=north]
+  H: hopper[facing=down]
+  c: comparator[facing=north]
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ...
+    ...
+    .=.
+    .=.
+  1: |
+    ...
+    .B.
+    .c.
+    .o.
+  2: |
+    ...
+    .H.
+    ...
+    ...
+tests:
+- name: books fed one at a time step 1 to 6
+  steps:
+  - check: if block ~1 ~1 ~3 redstone_wire[power=0]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=1]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_0_occupied=true]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=2]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_1_occupied=true]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=3]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_2_occupied=true]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=4]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_3_occupied=true]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=5]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_4_occupied=true]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=6]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_5_occupied=true]
+- name: a hopper below drains slot 0 first and the reading climbs
+  steps:
+  - run: setblock ~1 ~1 ~1 chiseled_bookshelf[facing=north,slot_0_occupied=true,slot_1_occupied=true,slot_2_occupied=true,slot_3_occupied=true,slot_4_occupied=true,slot_5_occupied=true]{Items:[{Slot:0b,id:"minecraft:book",count:1},{Slot:1b,id:"minecraft:book",count:1},{Slot:2b,id:"minecraft:book",count:1},{Slot:3b,id:"minecraft:book",count:1},{Slot:4b,id:"minecraft:book",count:1},{Slot:5b,id:"minecraft:book",count:1}],last_interacted_slot:5}
+  - wait: 4
+  - check: if block ~1 ~1 ~3 redstone_wire[power=6]
+  - run: setblock ~1 ~0 ~1 hopper[facing=west]
+  - wait: 4
+  - check: if block ~1 ~1 ~3 redstone_wire[power=1]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_0_occupied=false,slot_1_occupied=true]
+  - wait: 8
+  - check: if block ~1 ~1 ~3 redstone_wire[power=2]
+  - wait: 8
+  - check: if block ~1 ~1 ~3 redstone_wire[power=3]
+  - wait: 8
+  - check: if block ~1 ~1 ~3 redstone_wire[power=4]
+  - wait: 8
+  - check: if block ~1 ~1 ~3 redstone_wire[power=5]
+  - wait: 8
+  - check: if block ~1 ~1 ~3 redstone_wire[power=6]
+  - wait: 16
+  - check: if block ~1 ~1 ~3 redstone_wire[power=6]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_0_occupied=false,slot_1_occupied=false,slot_2_occupied=false,slot_3_occupied=false,slot_4_occupied=false,slot_5_occupied=false]
+- name: a hopper fills the first empty slot
+  steps:
+  - run: setblock ~1 ~1 ~1 chiseled_bookshelf[facing=north,slot_0_occupied=true,slot_2_occupied=true]{Items:[{Slot:0b,id:"minecraft:book",count:1},{Slot:2b,id:"minecraft:book",count:1}],last_interacted_slot:2}
+  - wait: 4
+  - check: if block ~1 ~1 ~3 redstone_wire[power=3]
+  - run: item replace block ~1 ~2 ~1 container.0 with book
+  - wait: 12
+  - check: if block ~1 ~1 ~3 redstone_wire[power=2]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_1_occupied=true,slot_3_occupied=false]
+- name: a full hopper below does not change the reading
+  steps:
+  - run: setblock ~1 ~1 ~1 chiseled_bookshelf[facing=north,slot_0_occupied=true,slot_3_occupied=true]{Items:[{Slot:0b,id:"minecraft:book",count:1},{Slot:3b,id:"minecraft:book",count:1}],last_interacted_slot:0}
+  - wait: 4
+  - check: if block ~1 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~1 ~0 ~1 hopper[facing=west]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64}]}
+  - wait: 30
+  - check: if block ~1 ~1 ~3 redstone_wire[power=1]
+  - check: if block ~1 ~1 ~1 chiseled_bookshelf[slot_0_occupied=true,slot_3_occupied=true]
+- name: control a chest with six books reads 1
+  steps:
+  - run: setblock ~1 ~1 ~1 chest[facing=north]{Items:[{Slot:0b,id:"minecraft:book",count:1},{Slot:1b,id:"minecraft:book",count:1},{Slot:2b,id:"minecraft:book",count:1},{Slot:3b,id:"minecraft:book",count:1},{Slot:4b,id:"minecraft:book",count:1},{Slot:5b,id:"minecraft:book",count:1}]}
+  - wait: 4
+  - check: if block ~1 ~1 ~3 redstone_wire[power=1]

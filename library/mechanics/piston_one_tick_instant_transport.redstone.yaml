@@ -1,0 +1,83 @@
+name: piston_one_tick_instant_transport
+description: A 1 gt pulse makes a sticky piston land its pushed redstone block 1 gt early (at the retract event) but not a normal piston; the origin stops powering the tick motion starts.
+traits: [piston_based, flat, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  b: {input: b}
+  P: {name: piston, block: 'piston[facing=east]'}
+  Q: {name: sticky, block: 'sticky_piston[facing=east]'}
+  R: redstone_block
+  s: {name: src, block: redstone_wire}
+  d: {name: dst, block: redstone_wire}
+  t: {name: src2, block: redstone_wire}
+  e: {name: dst2, block: redstone_wire}
+layers:
+  0: |
+    =====
+    =====
+    =====
+    =====
+    =====
+  1: |
+    aPR.d
+    ..s..
+    .....
+    bQR.e
+    ..t..
+tests:
+- name: normal piston 1 gt pulse lands on the usual tick
+  steps:
+  - check: if block ~2 ~1 ~1 redstone_wire[power=15]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 moving_piston
+  - check: if block ~3 ~1 ~0 moving_piston
+  - check: if block ~2 ~1 ~1 redstone_wire[power=0]
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 moving_piston
+  - check: if block ~2 ~1 ~0 air
+  - check: if block ~3 ~1 ~0 moving_piston
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_block
+  - check: if block ~4 ~1 ~0 redstone_wire[power=15]
+  - wait: 4
+  - check: if block ~1 ~1 ~0 piston[extended=false]
+  - check: if block ~2 ~1 ~0 air
+- name: normal piston held lands 3 gt after the input (control)
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~1 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 moving_piston
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_block
+  - check: if block ~4 ~1 ~0 redstone_wire[power=15]
+- name: sticky piston 1 gt pulse lands 1 gt early
+  steps:
+  - check: if block ~2 ~1 ~4 redstone_wire[power=15]
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~3 moving_piston
+  - check: if block ~2 ~1 ~4 redstone_wire[power=0]
+  - check: if block ~4 ~1 ~3 redstone_wire[power=0]
+  - drive: {b: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~3 redstone_block
+  - check: if block ~4 ~1 ~3 redstone_wire[power=15]
+  - check: if block ~2 ~1 ~3 air
+- name: sticky piston held lands 3 gt after the input (control)
+  steps:
+  - drive: {b: 1}
+  - wait: 2
+  - check: if block ~3 ~1 ~3 moving_piston
+  - check: if block ~4 ~1 ~3 redstone_wire[power=0]
+  - wait: 1
+  - check: if block ~3 ~1 ~3 redstone_block
+  - check: if block ~4 ~1 ~3 redstone_wire[power=15]

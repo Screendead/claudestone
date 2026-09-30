@@ -1,0 +1,137 @@
+name: calibrated_sculk_frequency_filter
+description: 'A calibrated sculk sensor hears only the frequency equal to the signal on its back (0 = everything: 10 for note block or trapdoor open, 9 for close), is active 10 ticks with a 10-tick cooldown, reaches 16 blocks, and outputs nothing into its tuning side; use: frequency-addressed wireless channels.'
+traits: [flat, pistonless, entityless, survival_friendly, tick_accurate, analog]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  N: note_block
+  t: oak_trapdoor[facing=north,half=bottom]
+  C: comparator[facing=east]
+  K: calibrated_sculk_sensor[facing=north]
+  s: {name: tune, block: redstone_wire}
+  d: {output: direct, block: redstone_wire}
+  f: {output: freq, block: redstone_wire}
+  a: {input: a}
+  c: {input: c}
+  e: {input: e}
+  g: {input: g}
+  p: {input: p}
+  q: {input: q}
+layers:
+  0: |
+    ..................=......
+    .........................
+    ..................=......
+    .==.............===....=.
+    ..................=......
+    ..................=......
+    ..................=......
+    ..................=......
+    ..................=......
+    ..................=......
+    ..................=......
+  1: |
+    .................ct......
+    .........................
+    .g................d......
+    .NN.............fCK....Na
+    ..e...............s......
+    ..................-......
+    ..................-......
+    ..................-......
+    ..................-......
+    ..................-p.....
+    ..................-q.....
+tests:
+- name: untuned hears note block, trapdoor open and close; input side stays silent
+  settle: 60
+  steps:
+  - check: if block ~18 ~1 ~4 redstone_wire[power=0]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=11]
+  - check: if block ~18 ~1 ~2 redstone_wire[power=11]
+  - check: if block ~18 ~1 ~4 redstone_wire[power=0]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=10]
+  - wait: 7
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active]
+  - wait: 1
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=cooldown,power=0]
+  - wait: 9
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=cooldown]
+  - wait: 1
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 10
+  - drive: {c: 1}
+  - wait: 3
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=13]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=10]
+  - wait: 25
+  - drive: {c: 0}
+  - wait: 3
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=13]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=9]
+- name: tuned to 10 hears the note block and trapdoor opening, not closing
+  settle: 60
+  steps:
+  - drive: {p: 1}
+  - wait: 4
+  - check: if block ~18 ~1 ~4 redstone_wire[power=10]
+  - drive: {a: 1}
+  - wait: 5
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=11]
+  - check: if block ~18 ~1 ~4 redstone_wire[power=10]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=10]
+  - wait: 25
+  - drive: {c: 1}
+  - wait: 3
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=13]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=10]
+  - wait: 25
+  - drive: {c: 0}
+  - wait: 30
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~16 ~1 ~3 redstone_wire[power=0]
+  - check: if block ~18 ~1 ~2 redstone_wire[power=0]
+- name: tuned to 9 ignores the note block and trapdoor opening, hears closing
+  settle: 60
+  steps:
+  - drive: {q: 1}
+  - wait: 4
+  - check: if block ~18 ~1 ~4 redstone_wire[power=9]
+  - drive: {a: 1}
+  - wait: 30
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~18 ~1 ~2 redstone_wire[power=0]
+  - drive: {c: 1}
+  - wait: 30
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~18 ~1 ~2 redstone_wire[power=0]
+  - drive: {c: 0}
+  - wait: 3
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=13]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=9]
+- name: range is 16, a note block 17 away is not heard
+  settle: 60
+  steps:
+  - drive: {g: 1}
+  - wait: 40
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - check: if block ~18 ~1 ~2 redstone_wire[power=0]
+  - drive: {e: 1}
+  - wait: 15
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=inactive]
+  - wait: 1
+  - check: if block ~18 ~1 ~3 calibrated_sculk_sensor[sculk_sensor_phase=active,power=1]
+  - check: if block ~18 ~1 ~2 redstone_wire[power=1]
+  - wait: 2
+  - check: if block ~16 ~1 ~3 redstone_wire[power=10]

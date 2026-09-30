@@ -1,0 +1,42 @@
+name: wind_charge_toggles_unpowered_only
+description: A wind charge burst flips levers and toggles wooden trapdoors, but not a trapdoor held by a redstone signal nor an iron trapdoor. A wireless one-shot toggle.
+traits: [compact, flat, pistonless]
+palette:
+  .: air
+  '=': stone
+  '-': redstone_wire
+  L: 'lever[face=floor,facing=north,powered=false]'
+  t: 'oak_trapdoor[facing=north,half=bottom,open=false,powered=false]'
+  u: 'oak_trapdoor[facing=north,half=bottom,open=true,powered=false]'
+  T: 'oak_trapdoor[facing=north,half=bottom,open=true,powered=true]'
+  X: redstone_block
+  i: 'iron_trapdoor[facing=north,half=bottom,open=false,powered=false]'
+layers:
+  0: |
+    =======
+    =======
+    =======
+  1: |
+    .....t.
+    L-.XT.u
+    .....i.
+tests:
+- name: a charge flips a lever on, a second flips it off
+  steps:
+  - run: summon wind_charge ~0 ~2.5 ~1 {Motion:[0.0,-0.5,0.0]}
+  - wait: 5
+  - check: if block ~0 ~1 ~1 lever[powered=true]
+  - check: if block ~1 ~1 ~1 redstone_wire[power=15]
+  - run: summon wind_charge ~0 ~2.5 ~1 {Motion:[0.0,-0.5,0.0]}
+  - wait: 5
+  - check: if block ~0 ~1 ~1 lever[powered=false]
+  - check: if block ~1 ~1 ~1 redstone_wire[power=0]
+- name: one burst toggles free oak trapdoors, not the powered one or the iron one
+  steps:
+  - run: summon wind_charge ~5 ~2.5 ~1 {Motion:[0.0,-0.5,0.0]}
+  - wait: 5
+  - check: unless entity @e[type=wind_charge,distance=..300]
+  - check: if block ~5 ~1 ~0 oak_trapdoor[open=true]
+  - check: if block ~6 ~1 ~1 oak_trapdoor[open=false]
+  - check: if block ~4 ~1 ~1 oak_trapdoor[open=true,powered=true]
+  - check: if block ~5 ~1 ~2 iron_trapdoor[open=false]

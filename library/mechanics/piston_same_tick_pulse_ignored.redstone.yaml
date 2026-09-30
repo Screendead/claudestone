@@ -1,0 +1,49 @@
+name: piston_same_tick_pulse_ignored
+description: A piston powered and unpowered between two ticks never moves, because its extend event re-checks power; command 0-tick pulses cannot fire pistons.
+traits: [piston_based, one_wide, flat, entityless, tick_accurate]
+palette:
+  .: air
+  a: {input: a}
+  P: {name: piston, block: 'sticky_piston[facing=east]'}
+  S: stone
+layers:
+  0: |
+    .....
+  1: |
+    aPS..
+tests:
+- name: same-tick pulse does nothing
+  steps:
+  - drive: {a: 1}
+  - drive: {a: 0}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~0 stone
+  - wait: 7
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~0 stone
+  - check: if block ~3 ~1 ~0 air
+- name: same-tick pulse by commands does nothing
+  steps:
+  - run: setblock ~0 ~1 ~0 redstone_block
+  - run: setblock ~0 ~1 ~0 air
+  - wait: 8
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~0 stone
+  - check: if block ~3 ~1 ~0 air
+  - run: setblock ~0 ~1 ~0 redstone_block
+  - wait: 1
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=true]
+  - run: setblock ~0 ~1 ~0 air
+  - wait: 8
+- name: 1 gt pulse fires it (control)
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=true]
+  - check: if block ~2 ~1 ~0 moving_piston
+  - drive: {a: 0}
+  - wait: 8
+  - check: if block ~1 ~1 ~0 sticky_piston[extended=false]
+  - check: if block ~2 ~1 ~0 air
+  - check: if block ~3 ~1 ~0 stone

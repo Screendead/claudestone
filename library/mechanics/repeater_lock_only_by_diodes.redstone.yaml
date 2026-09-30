@@ -1,0 +1,149 @@
+name: repeater_lock_only_by_diodes
+description: Only a powered repeater or comparator facing a repeater's side locks it; dust, a redstone block, hard-powered stone, an observer or a torch beside it do not, so they can sit next to repeater latches safely.
+traits: [compact, flat, entityless, lockable]
+palette:
+  .: air
+  '=': smooth_stone
+  R: repeater[facing=east]
+  C: comparator[facing=east]
+  '-': redstone_wire
+  S: stone
+  '<': repeater[facing=east]
+  O: observer[facing=east]
+  i: redstone_torch
+  a: {input: d_repeater}
+  p: {input: l_repeater}
+  A: {name: rep_repeater, block: 'repeater[facing=north]'}
+  '1': {output: o_repeater, block: redstone_wire}
+  b: {input: d_comparator}
+  q: {input: l_comparator}
+  B: {name: rep_comparator, block: 'repeater[facing=north]'}
+  '2': {output: o_comparator, block: redstone_wire}
+  c: {input: d_dust}
+  r: {input: l_dust}
+  D: {name: rep_dust, block: 'repeater[facing=north]'}
+  '3': {output: o_dust, block: redstone_wire}
+  d: {input: d_block}
+  s: {input: l_block}
+  E: {name: rep_block, block: 'repeater[facing=north]'}
+  '4': {output: o_block, block: redstone_wire}
+  e: {input: d_stone}
+  u: {input: l_stone}
+  F: {name: rep_stone, block: 'repeater[facing=north]'}
+  '5': {output: o_stone, block: redstone_wire}
+  f: {input: d_observer}
+  v: {input: l_observer}
+  G: {name: rep_observer, block: 'repeater[facing=north]'}
+  '6': {output: o_observer, block: redstone_wire}
+  g: {input: d_torch}
+  H: {name: rep_torch, block: 'repeater[facing=north]'}
+  '7': {output: o_torch, block: redstone_wire}
+layers:
+  0: |
+    ===================================
+    ===================================
+    ===================================
+  1: |
+    a....b....c....d....e....f....g....
+    ARp..BCq..D-r..Es...FS<u.GOv..Hi...
+    1....2....3....4....5....6....7....
+tests:
+- name: repeater side lock holds a 1
+  steps:
+  - drive: {d_repeater: 1}
+  - wait: 4
+  - expect: {o_repeater: 1}
+  - check: if block ~0 ~1 ~1 repeater[locked=false,powered=true]
+  - drive: {l_repeater: 1}
+  - wait: 4
+  - check: if block ~0 ~1 ~1 repeater[locked=true,powered=true]
+  - drive: {d_repeater: 0}
+  - wait: 8
+  - expect: {o_repeater: 1}
+  - check: if block ~0 ~1 ~1 repeater[locked=true,powered=true]
+  - drive: {l_repeater: 0}
+  - wait: 8
+  - expect: {o_repeater: 0}
+  - check: if block ~0 ~1 ~1 repeater[locked=false,powered=false]
+- name: repeater side lock holds a 0
+  steps:
+  - drive: {l_repeater: 1}
+  - wait: 4
+  - check: if block ~0 ~1 ~1 repeater[locked=true,powered=false]
+  - drive: {d_repeater: 1}
+  - wait: 8
+  - expect: {o_repeater: 0}
+  - drive: {l_repeater: 0}
+  - wait: 8
+  - expect: {o_repeater: 1}
+- name: comparator side lock holds a 1
+  steps:
+  - drive: {d_comparator: 1}
+  - wait: 4
+  - expect: {o_comparator: 1}
+  - drive: {l_comparator: 1}
+  - wait: 4
+  - check: if block ~5 ~1 ~1 repeater[locked=true,powered=true]
+  - drive: {d_comparator: 0}
+  - wait: 8
+  - expect: {o_comparator: 1}
+  - drive: {l_comparator: 0}
+  - wait: 8
+  - expect: {o_comparator: 0}
+- name: powered dust beside does not lock
+  steps:
+  - drive: {l_dust: 1}
+  - wait: 4
+  - check: if block ~11 ~1 ~1 redstone_wire[power=15,west=side]
+  - check: if block ~10 ~1 ~1 repeater[locked=false]
+  - drive: {d_dust: 1}
+  - wait: 4
+  - expect: {o_dust: 1}
+  - drive: {d_dust: 0}
+  - wait: 4
+  - expect: {o_dust: 0}
+  - check: if block ~10 ~1 ~1 repeater[locked=false]
+- name: redstone block beside does not lock
+  steps:
+  - drive: {l_block: 1}
+  - wait: 4
+  - check: if block ~15 ~1 ~1 repeater[locked=false]
+  - drive: {d_block: 1}
+  - wait: 4
+  - expect: {o_block: 1}
+  - drive: {d_block: 0}
+  - wait: 4
+  - expect: {o_block: 0}
+- name: hard-powered stone beside does not lock
+  steps:
+  - drive: {l_stone: 1}
+  - wait: 4
+  - check: if block ~22 ~1 ~1 repeater[powered=true]
+  - check: if block ~20 ~1 ~1 repeater[locked=false]
+  - drive: {d_stone: 1}
+  - wait: 4
+  - expect: {o_stone: 1}
+  - drive: {d_stone: 0}
+  - wait: 4
+  - expect: {o_stone: 0}
+- name: lit torch beside does not lock
+  steps:
+  - check: if block ~31 ~1 ~1 redstone_torch[lit=true]
+  - check: if block ~30 ~1 ~1 repeater[locked=false]
+  - drive: {d_torch: 1}
+  - wait: 4
+  - expect: {o_torch: 1}
+  - drive: {d_torch: 0}
+  - wait: 4
+  - expect: {o_torch: 0}
+- name: observer pulse beside does not lock
+  steps:
+  - drive: {d_observer: 1}
+  - wait: 4
+  - expect: {o_observer: 1}
+  - drive: {l_observer: 1, d_observer: 0}
+  - wait: 2
+  - check: if block ~26 ~1 ~1 observer[powered=true]
+  - check: if block ~25 ~1 ~1 repeater[locked=false]
+  - wait: 2
+  - expect: {o_observer: 0}

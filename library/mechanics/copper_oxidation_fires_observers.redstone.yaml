@@ -1,0 +1,48 @@
+name: copper_oxidation_fires_observers
+description: 'Unwaxed copper bulbs and lightning rods oxidise on random ticks, keeping lit/powered, and each step pulses a watching observer; waxed never change. Ship waxed copper.'
+traits: [observer_based, pistonless, entityless, flat]
+palette:
+  .: air
+  '=': smooth_stone
+  U: 'weathered_copper_bulb[lit=true,powered=false]'
+  R: 'weathered_lightning_rod[facing=up]'
+  u: 'waxed_weathered_copper_bulb[lit=true,powered=false]'
+  r: 'waxed_weathered_lightning_rod[facing=up]'
+  O: 'observer[facing=west]'
+  B: 'waxed_copper_bulb'
+layers:
+  0: |
+    ===.....===
+    ...........
+    ...........
+    ...........
+    ===.....===
+  1: |
+    UOB.....ROB
+    ...........
+    ...........
+    ...........
+    uOB.....rOB
+tests:
+- name: oxidation step pulses the observer, waxed does not
+  steps:
+  - run: 'fill ~2 ~1 ~0 ~2 ~1 ~0 waxed_copper_bulb[lit=false]'
+  - run: 'fill ~10 ~1 ~0 ~10 ~1 ~0 waxed_copper_bulb[lit=false]'
+  - run: 'fill ~2 ~1 ~4 ~2 ~1 ~4 waxed_copper_bulb[lit=false]'
+  - run: 'fill ~10 ~1 ~4 ~10 ~1 ~4 waxed_copper_bulb[lit=false]'
+  - wait: 2
+  - check: if block ~2 ~1 ~0 waxed_copper_bulb[lit=false]
+  - check: if block ~10 ~1 ~0 waxed_copper_bulb[lit=false]
+  - check: if block ~2 ~1 ~4 waxed_copper_bulb[lit=false]
+  - check: if block ~10 ~1 ~4 waxed_copper_bulb[lit=false]
+  - run: gamerule random_tick_speed 4096
+  - wait: 300
+  - run: gamerule random_tick_speed 3
+  - check: if block ~0 ~1 ~0 oxidized_copper_bulb[lit=true,powered=false]
+  - check: if block ~2 ~1 ~0 waxed_copper_bulb[lit=true]
+  - check: if block ~8 ~1 ~0 oxidized_lightning_rod[facing=up,powered=false]
+  - check: if block ~10 ~1 ~0 waxed_copper_bulb[lit=true]
+  - check: if block ~0 ~1 ~4 waxed_weathered_copper_bulb[lit=true]
+  - check: if block ~2 ~1 ~4 waxed_copper_bulb[lit=false]
+  - check: if block ~8 ~1 ~4 waxed_weathered_lightning_rod
+  - check: if block ~10 ~1 ~4 waxed_copper_bulb[lit=false]

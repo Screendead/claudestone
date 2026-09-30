@@ -1,0 +1,111 @@
+name: dust_diagonal_cut_needs_conductor
+description: A diagonal dust step is cut both ways only by a conductor in the corner above the lower dust; a sticky piston pushing stone there is a non-destructive wire switch.
+traits: [entityless, vertical, analog, survival_friendly]
+palette:
+  .: air
+  '=': stone
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  P: sticky_piston[facing=south]
+  K: {name: cap, block: stone}
+  p: {name: lead, block: redstone_wire}
+  l: {name: low, block: redstone_wire}
+  u: {name: up, block: redstone_wire}
+  q: {name: tail, block: redstone_wire}
+layers:
+  0: |
+    ......
+    ......
+    .==...
+  1: |
+    ......
+    ......
+    apl==.
+  2: |
+    .cP...
+    ..K...
+    ...uqb
+tests:
+- name: control air corner connects both ways
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=14,east=up] if block ~3 ~2 ~2 redstone_wire[power=13,west=side] if block ~4 ~2 ~2 redstone_wire[power=12]
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~2 redstone_wire[power=14] if block ~2 ~1 ~2 redstone_wire[power=13,east=up] if block ~1 ~1 ~2 redstone_wire[power=12]
+- name: stone corner cuts both ways
+  steps:
+  - run: setblock ~2 ~2 ~2 stone
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=14,east=side] if block ~3 ~2 ~2 redstone_wire[power=0,west=side] if block ~4 ~2 ~2 redstone_wire[power=0]
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~2 redstone_wire[power=14,west=side] if block ~2 ~1 ~2 redstone_wire[power=0,east=side] if block ~1 ~1 ~2 redstone_wire[power=0]
+- name: glass corner does not cut
+  steps:
+  - run: setblock ~2 ~2 ~2 glass
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[east=up] if block ~3 ~2 ~2 redstone_wire[power=13]
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=13]
+- name: bottom slab corner does not cut
+  steps:
+  - run: setblock ~2 ~2 ~2 smooth_stone_slab[type=bottom]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[east=up] if block ~3 ~2 ~2 redstone_wire[power=13]
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=13]
+- name: glowstone corner does not cut
+  steps:
+  - run: setblock ~2 ~2 ~2 glowstone
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[east=up] if block ~3 ~2 ~2 redstone_wire[power=13]
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=13]
+- name: leaves corner does not cut
+  steps:
+  - run: setblock ~2 ~2 ~2 oak_leaves[persistent=true]
+  - wait: 1
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[east=up] if block ~3 ~2 ~2 redstone_wire[power=13]
+  - drive: {a: 0, b: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=13]
+- name: piston pushed stone cuts and retract restores
+  steps:
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[power=13]
+  - drive: {c: 1}
+  - wait: 1
+  - check: if block ~2 ~2 ~2 moving_piston if block ~2 ~1 ~2 redstone_wire[power=13,east=up]
+  - wait: 1
+  - check: if block ~2 ~2 ~2 moving_piston if block ~2 ~1 ~2 redstone_wire[power=13,east=up]
+  - wait: 1
+  - check: if block ~2 ~2 ~2 stone if block ~2 ~1 ~2 redstone_wire[power=0,east=side] if block ~3 ~2 ~2 redstone_wire[power=14]
+  - drive: {c: 0}
+  - wait: 1
+  - check: if block ~2 ~2 ~2 air if block ~2 ~1 ~2 redstone_wire[power=13,east=up]
+  - wait: 3
+  - check: if block ~2 ~2 ~1 stone if block ~2 ~2 ~2 air if block ~2 ~1 ~2 redstone_wire[power=13,east=up]
+- name: control piston pushed glass does not cut
+  steps:
+  - run: setblock ~2 ~2 ~1 glass
+  - drive: {b: 1}
+  - drive: {c: 1}
+  - wait: 4
+  - check: if block ~2 ~2 ~2 glass if block ~2 ~1 ~2 redstone_wire[power=13,east=up]

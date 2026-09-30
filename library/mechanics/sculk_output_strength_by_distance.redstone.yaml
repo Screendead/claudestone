@@ -1,0 +1,84 @@
+name: sculk_output_strength_by_distance
+description: 'A sculk sensor''s direct output is max(1, 15 - floor(15*d/8)) for a vibration d blocks away (14, 8, 2 at 1, 4, 7), arriving after d ticks; it strongly powers the block below but leaves a solid block beside it unpowered; use: wireless rangefinder or near/far selector.'
+traits: [pistonless, entityless, survival_friendly, tick_accurate, analog]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  N: note_block
+  '>': repeater[facing=east]
+  '^': repeater[facing=north]
+  X: sculk_sensor
+  d: {output: direct, block: redstone_wire}
+  u: {output: under, block: redstone_wire}
+  r: {output: rep, block: redstone_wire}
+  w: {output: side, block: redstone_wire}
+  v: {output: siderep, block: redstone_wire}
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  e: {input: e}
+layers:
+  0: |
+    ................
+    .....=..........
+    ................
+    .....=..........
+    .....=..........
+  1: |
+    .....=..........
+    ...==u..........
+    ....=S=..=..=.=.
+    .....^..........
+    .....r..........
+  2: |
+    .....w..........
+    ...v>S..........
+    ....dXN..N..N.N.
+    ......a..b..c.e.
+    ................
+tests:
+- name: distance 1 gives strength 14 after 1 ticks, block below strongly powered, side block unpowered
+  settle: 60
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~5 ~2 ~2 sculk_sensor[sculk_sensor_phase=active,power=14]
+  - check: if block ~4 ~2 ~2 redstone_wire[power=14]
+  - check: if block ~5 ~1 ~1 redstone_wire[power=14]
+  - check: if block ~5 ~2 ~0 redstone_wire[power=0]
+  - wait: 2
+  - expect: {rep: 1, siderep: 0}
+- name: distance 4 gives strength 8 after 4 ticks, block below strongly powered, side block unpowered
+  settle: 60
+  steps:
+  - drive: {b: 1}
+  - wait: 3
+  - check: if block ~5 ~2 ~2 sculk_sensor[power=0]
+  - wait: 1
+  - check: if block ~5 ~2 ~2 sculk_sensor[sculk_sensor_phase=active,power=8]
+  - check: if block ~4 ~2 ~2 redstone_wire[power=8]
+  - check: if block ~5 ~1 ~1 redstone_wire[power=8]
+  - check: if block ~5 ~2 ~0 redstone_wire[power=0]
+  - wait: 2
+  - expect: {rep: 1, siderep: 0}
+- name: distance 7 gives strength 2 after 7 ticks, block below strongly powered, side block unpowered
+  settle: 60
+  steps:
+  - drive: {c: 1}
+  - wait: 6
+  - check: if block ~5 ~2 ~2 sculk_sensor[power=0]
+  - wait: 1
+  - check: if block ~5 ~2 ~2 sculk_sensor[sculk_sensor_phase=active,power=2]
+  - check: if block ~4 ~2 ~2 redstone_wire[power=2]
+  - check: if block ~5 ~1 ~1 redstone_wire[power=2]
+  - check: if block ~5 ~2 ~0 redstone_wire[power=0]
+  - wait: 2
+  - expect: {rep: 1, siderep: 0}
+- name: distance 9 is out of range
+  settle: 60
+  steps:
+  - drive: {e: 1}
+  - wait: 30
+  - check: if block ~5 ~2 ~2 sculk_sensor[sculk_sensor_phase=inactive,power=0]
+  - expect: {direct: 0, under: 0, rep: 0}

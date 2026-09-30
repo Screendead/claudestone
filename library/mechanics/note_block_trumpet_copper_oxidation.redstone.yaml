@@ -1,0 +1,89 @@
+name: note_block_trumpet_copper_oxidation
+description: 'A note block on copper plays trumpet, trumpet_exposed, trumpet_weathered or trumpet_oxidized; changing the copper below re-tunes it and pulses a watching observer. A redstone-free oxidation readout.'
+traits: [observer_based, pistonless, entityless, flat, lightless, compact]
+palette:
+  .: air
+  '=': smooth_stone
+  C: waxed_copper_block
+  S: stone
+  N: note_block
+  n: {name: obs_copper, block: 'observer[facing=west]'}
+  m: {name: obs_stone, block: 'observer[facing=west]'}
+layers:
+  0: |
+    C=
+    ..
+    S=
+  1: |
+    Nn
+    ..
+    Nm
+tests:
+- name: each copper stage re-tunes and pulses
+  steps:
+  - check: if block ~0 ~1 ~0 note_block[instrument=trumpet]
+  - run: setblock ~0 ~0 ~0 waxed_exposed_copper
+  - check: if block ~0 ~1 ~0 note_block[instrument=trumpet_exposed]
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 2
+  - run: setblock ~0 ~0 ~0 waxed_weathered_copper
+  - check: if block ~0 ~1 ~0 note_block[instrument=trumpet_weathered]
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 2
+  - run: setblock ~0 ~0 ~0 oxidized_copper
+  - check: if block ~0 ~1 ~0 note_block[instrument=trumpet_oxidized]
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 2
+  - run: setblock ~0 ~0 ~0 copper_block
+  - check: if block ~0 ~1 ~0 note_block[instrument=trumpet]
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 1}
+  - wait: 1
+  - expect: {obs_copper: 0}
+  - wait: 2
+- name: stone to cobblestone keeps basedrum, no pulse
+  steps:
+  - check: if block ~0 ~1 ~2 note_block[instrument=basedrum]
+  - run: setblock ~0 ~0 ~2 cobblestone
+  - wait: 1
+  - expect: {obs_stone: 0}
+  - wait: 1
+  - expect: {obs_stone: 0}
+  - wait: 1
+  - expect: {obs_stone: 0}
+  - wait: 1
+  - expect: {obs_stone: 0}
+  - wait: 1
+  - expect: {obs_stone: 0}
+  - wait: 1
+  - expect: {obs_stone: 0}
+  - check: if block ~0 ~1 ~2 note_block[instrument=basedrum]

@@ -1,0 +1,92 @@
+name: comparator_compare_is_ge
+description: Compare mode passes the rear strength when rear >= side (ties pass) else 0; subtract gives max(rear - side, 0). Decides off-by-one in analog thresholds.
+traits: [flat, analog, comparator_based, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  R: redstone_block
+  '-': redstone_wire[east=side,west=side]
+  '|': redstone_wire[north=side,south=side]
+  C: {name: cmp, block: 'comparator[facing=west,mode=compare]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+    ============
+  1: |
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    ..........|.
+    R---------Co
+tests:
+- name: compare passes rear when rear >= side
+  steps:
+  - check: if block ~9 ~1 ~14 redstone_wire[power=7]
+  - check: if block ~10 ~1 ~13 redstone_wire[power=0]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=7]
+  - run: setblock ~10 ~1 ~4 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=7]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=7]
+  - run: setblock ~10 ~1 ~4 redstone_wire[north=side,south=side]
+  - run: setblock ~10 ~1 ~5 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=8]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=0]
+  - run: setblock ~10 ~1 ~5 redstone_wire[north=side,south=side]
+  - run: setblock ~10 ~1 ~3 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=6]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=7]
+  - run: setblock ~10 ~1 ~3 redstone_wire[north=side,south=side]
+  - wait: 4
+  - check: if block ~11 ~1 ~14 redstone_wire[power=7]
+- name: subtract gives max(rear - side, 0)
+  steps:
+  - run: setblock ~10 ~1 ~14 comparator[facing=west,mode=subtract]
+  - run: setblock ~10 ~1 ~0 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=3]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=4]
+  - run: setblock ~10 ~1 ~0 redstone_wire[north=side,south=side]
+  - run: setblock ~10 ~1 ~3 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=6]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=1]
+  - run: setblock ~10 ~1 ~3 redstone_wire[north=side,south=side]
+  - run: setblock ~10 ~1 ~4 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=7]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=0]
+  - run: setblock ~10 ~1 ~4 redstone_wire[north=side,south=side]
+  - run: setblock ~10 ~1 ~6 redstone_block
+  - wait: 4
+  - check: if block ~10 ~1 ~13 redstone_wire[power=9]
+  - check: if block ~11 ~1 ~14 redstone_wire[power=0]
+  - run: setblock ~10 ~1 ~6 redstone_wire[north=side,south=side]
+  - wait: 4
+  - check: if block ~11 ~1 ~14 redstone_wire[power=7]

@@ -1,0 +1,70 @@
+name: dust_dot_vs_cross_isolated
+description: An isolated dot dust powers only the block below it while a cross powers its four sides too; the dot survives updates until something connects.
+traits: [silent, pistonless, entityless, survival_friendly]
+palette:
+  .: air
+  a: {input: a}
+  '>': repeater[facing=north]
+  '=': stone
+  D: {name: dot, block: 'redstone_wire[north=none,south=none,east=none,west=none]'}
+  B: {name: below, block: redstone_lamp}
+  N: {name: ln, block: redstone_lamp}
+  S: {name: ls, block: redstone_lamp}
+  W: {name: lw, block: redstone_lamp}
+  E: {name: le, block: redstone_lamp}
+layers:
+  0: |
+    .....
+    .....
+    ..B..
+    .....
+    .....
+  1: |
+    .....
+    ..N..
+    .WDE.
+    ..S..
+    .....
+  2: |
+    ..a..
+    ..>..
+    ..=..
+    .....
+    .....
+tests:
+- name: dot powers only the block below
+  steps:
+  - check: if block ~2 ~1 ~2 redstone_wire[north=none,south=none,east=none,west=none,power=0]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[north=none,south=none,east=none,west=none,power=15] if block ~2 ~0 ~2 redstone_lamp[lit=true]
+  - check: if block ~1 ~1 ~2 redstone_lamp[lit=false] if block ~3 ~1 ~2 redstone_lamp[lit=false] if block ~2 ~1 ~1 redstone_lamp[lit=false] if block ~2 ~1 ~3 redstone_lamp[lit=false]
+- name: dot survives neighbour updates while unconnected
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - run: setblock ~1 ~1 ~2 stone
+  - run: setblock ~1 ~1 ~2 redstone_lamp
+  - drive: {a: 0}
+  - wait: 6
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[north=none,south=none,east=none,west=none,power=15] if block ~1 ~1 ~2 redstone_lamp[lit=false] if block ~3 ~1 ~2 redstone_lamp[lit=false]
+- name: control cross powers all four sides
+  steps:
+  - run: setblock ~2 ~1 ~2 redstone_wire[north=side,south=side,east=side,west=side]
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[north=side,south=side,east=side,west=side]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~2 ~1 ~2 redstone_wire[north=side,south=side,east=side,west=side,power=15] if block ~2 ~0 ~2 redstone_lamp[lit=true]
+  - check: if block ~1 ~1 ~2 redstone_lamp[lit=true] if block ~3 ~1 ~2 redstone_lamp[lit=true] if block ~2 ~1 ~1 redstone_lamp[lit=true] if block ~2 ~1 ~3 redstone_lamp[lit=true]
+- name: dot becomes a line once a neighbour connects
+  steps:
+  - run: setblock ~1 ~0 ~2 stone
+  - run: setblock ~1 ~1 ~2 redstone_wire
+  - wait: 1
+  - check: if block ~2 ~1 ~2 redstone_wire[north=none,south=none,east=side,west=side]
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_lamp[lit=true] if block ~2 ~1 ~1 redstone_lamp[lit=false] if block ~2 ~1 ~3 redstone_lamp[lit=false] if block ~1 ~1 ~2 redstone_wire[power=14]

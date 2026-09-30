@@ -1,0 +1,69 @@
+name: dust_powers_block_below
+description: Powered dust powers the block under it whatever its shape (locks a hopper, fires a dropper, lights a lamp); on glass or a top slab it powers nothing, so a line can pass over a lamp's neighbour without lighting it.
+traits: [compact, horizontal]
+palette:
+  .: air
+  g: glass
+  s: stone
+  t: smooth_stone_slab[type=top]
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  c: {input: c}
+  d: {input: d}
+  H: {name: hopper, block: 'hopper[facing=down]'}
+  L: {name: lamp_under, block: redstone_lamp}
+  D: {name: dropper, block: 'dropper[facing=south]'}
+  P: {name: dispenser, block: 'dispenser[facing=south]'}
+  M: {name: lamp_by_glass, block: redstone_lamp}
+  N: {name: lamp_by_stone, block: redstone_lamp}
+  Q: {name: lamp_by_slab, block: redstone_lamp}
+layers:
+  0: |
+    .gHgLgDgPg
+    ..........
+    ..........
+    .ggg......
+    ..M.......
+    ..........
+    .sss......
+    ..N.......
+    ..........
+    .ttt......
+    ..Q.......
+  1: |
+    a---------
+    ..........
+    ..........
+    b---......
+    ..........
+    ..........
+    c---......
+    ..........
+    ..........
+    d---......
+    ..........
+tests:
+- name: dust powers only a conductor below it
+  steps:
+  - check: if block ~2 ~0 ~0 hopper[enabled=true]
+  - check: if block ~6 ~0 ~0 dropper[triggered=false]
+  - check: if block ~8 ~0 ~0 dispenser[triggered=false]
+  - expect: {lamp_under: 0, lamp_by_glass: 0, lamp_by_stone: 0, lamp_by_slab: 0}
+  - drive: {a: 1, b: 1, c: 1, d: 1}
+  - wait: 4
+  # the line over the hopper is straight (east-west) and still locks it
+  - check: if block ~2 ~1 ~0 redstone_wire[east=side,west=side,north=none,south=none,power=14]
+  - check: if block ~2 ~0 ~0 hopper[enabled=false]
+  - check: if block ~6 ~0 ~0 dropper[triggered=true]
+  - check: if block ~8 ~0 ~0 dispenser[triggered=true]
+  - check: if block ~9 ~1 ~0 redstone_wire[power=7]
+  - expect: {lamp_under: 1}
+  # dust on glass/top slab carries full signal but its support stays unpowered
+  - check: if block ~2 ~1 ~3 redstone_wire[power=14]
+  - check: if block ~2 ~1 ~9 redstone_wire[power=14]
+  - expect: {lamp_by_glass: 0, lamp_by_slab: 0, lamp_by_stone: 1}
+  - drive: {a: 0, b: 0, c: 0, d: 0}
+  - wait: 4
+  - check: if block ~2 ~0 ~0 hopper[enabled=true]
+  - expect: {lamp_by_stone: 0}

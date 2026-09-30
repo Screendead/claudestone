@@ -1,0 +1,53 @@
+name: piston_push_limit_breakable_tail
+description: A piston pushes at most 12 blocks, and a break-on-push block at the end of the line is destroyed without counting toward the limit.
+traits: [piston_based]
+palette:
+  .: air
+  '=': smooth_stone
+  P: 'piston[facing=east]'
+  s: stone
+  '-': redstone_wire
+layers:
+  0: |
+    .===============
+    ................
+    .===============
+    ................
+    .===============
+  1: |
+    .Pssssssssssss..
+    ................
+    .Psssssssssssss.
+    ................
+    .Pssssssssssss-.
+tests:
+- name: twelve stone move
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~0 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~0 piston[extended=true]
+  - check: if block ~2 ~1 ~0 piston_head[facing=east]
+  - check: if block ~3 ~1 ~0 stone
+  - check: if block ~14 ~1 ~0 stone
+  - check: if block ~15 ~1 ~0 air
+- name: thirteen stone do not move
+  settle: 6
+  steps:
+  - run: setblock ~0 ~1 ~2 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~2 piston[extended=false]
+  - check: if block ~2 ~1 ~2 stone
+  - check: if block ~14 ~1 ~2 stone
+  - check: if block ~15 ~1 ~2 air
+- name: twelve stone and dust move and the dust breaks
+  settle: 6
+  steps:
+  - check: unless entity @e[type=item,dx=16,dy=3,dz=5]
+  - run: setblock ~0 ~1 ~4 redstone_block
+  - wait: 6
+  - check: if block ~1 ~1 ~4 piston[extended=true]
+  - check: if block ~3 ~1 ~4 stone
+  - check: if block ~14 ~1 ~4 stone
+  - check: if block ~15 ~1 ~4 air
+  - check: if entity @e[type=item,dx=16,dy=3,dz=5,nbt={Item:{id:"minecraft:redstone"}}]

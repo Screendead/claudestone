@@ -1,0 +1,68 @@
+name: hopper_lock_instant_accepts_input
+description: A powered hopper locks in the same tick and stops pushing and pulling but still accepts items from the hopper feeding it; it is not quasi-powered (a piston beside it is). A zero-delay item gate.
+traits: [container_based, lockable, entityless, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  A: hopper[facing=east]
+  B: {name: gate, block: 'hopper[facing=east]'}
+  C: hopper[facing=down]
+  K: barrel[facing=up]
+  P: {name: piston, block: 'piston[facing=south]'}
+  l: {input: lock}
+  q: {input: qc}
+layers:
+  0: |
+    ===
+    ...
+    .=.
+    ...
+  1: |
+    ABC
+    .l.
+    .P.
+    ...
+  2: |
+    .K.
+    .q.
+    ...
+    ...
+tests:
+- name: locks and unlocks in the same tick
+  steps:
+  - check: if block ~1 ~1 ~0 hopper[enabled=true]
+  - drive: {lock: 1}
+  - check: if block ~1 ~1 ~0 hopper[enabled=false]
+  - drive: {lock: 0}
+  - check: if block ~1 ~1 ~0 hopper[enabled=true]
+- name: locked hopper accepts but neither pushes nor pulls
+  steps:
+  - drive: {lock: 1}
+  - run: 'data merge block ~0 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:5}]}'
+  - run: 'data merge block ~1 ~2 ~0 {Items:[{Slot:0b,id:"minecraft:dirt",count:4}]}'
+  - wait: 60
+  - check: unless data block ~0 ~1 ~0 Items[0]
+  - check: if data block ~1 ~1 ~0 Items[{id:"minecraft:stone",count:5}]
+  - check: unless data block ~1 ~1 ~0 Items[{id:"minecraft:dirt"}]
+  - check: unless data block ~2 ~1 ~0 Items[0]
+  - check: if data block ~1 ~2 ~0 Items[{id:"minecraft:dirt",count:4}]
+  - drive: {lock: 0}
+  - wait: 100
+  - check: if data block ~2 ~1 ~0 Items[{id:"minecraft:stone",count:5}]
+  - check: if data block ~2 ~1 ~0 Items[{id:"minecraft:dirt",count:4}]
+  - check: unless data block ~1 ~2 ~0 Items[0]
+- name: not quasi-powered, unlike a piston
+  steps:
+  - drive: {lock: 1}
+  - wait: 4
+  - drive: {lock: 0}
+  - wait: 4
+  - check: if block ~1 ~1 ~2 piston[extended=false]
+  - drive: {qc: 1}
+  - drive: {lock: 1}
+  - wait: 4
+  - drive: {lock: 0}
+  - check: if block ~1 ~1 ~0 hopper[enabled=true]
+  - wait: 4
+  - check: if block ~1 ~1 ~2 piston[extended=true]
+  - check: if block ~1 ~1 ~0 hopper[enabled=true]

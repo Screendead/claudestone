@@ -1,0 +1,68 @@
+name: piston_ignores_power_from_face
+description: A piston ignores a power source against its own face (so a sticky piston can park a redstone block there) but still takes quasi-connected power from the block diagonally above its face.
+traits: [compact, piston_based]
+palette:
+  .: air
+  '=': smooth_stone
+  P: {name: piston, block: 'piston[facing=east]'}
+  R: redstone_block
+layers:
+  0: |
+    ====
+    ====
+    ====
+  1: |
+    ....
+    .PR.
+    ....
+  2: |
+    ....
+    ....
+    ....
+tests:
+- name: redstone block in front does not power it
+  settle: 6
+  steps:
+  - check: if block ~1 ~1 ~1 piston[extended=false]
+  - check: if block ~2 ~1 ~1 redstone_block
+  - run: setblock ~1 ~1 ~0 stone
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=false]
+- name: redstone block behind powers it
+  settle: 6
+  steps:
+  - check: if block ~1 ~1 ~1 piston[extended=false]
+  - run: setblock ~0 ~1 ~1 redstone_block
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=true]
+  - check: if block ~3 ~1 ~1 redstone_block
+- name: redstone block at the side powers it
+  settle: 6
+  steps:
+  - run: setblock ~1 ~1 ~0 redstone_block
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=true]
+- name: redstone block above powers it
+  settle: 6
+  steps:
+  - run: setblock ~1 ~2 ~1 redstone_block
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=true]
+- name: redstone block diagonally above the face powers it by QC
+  settle: 6
+  steps:
+  - run: setblock ~2 ~1 ~1 air
+  - wait: 2
+  - run: setblock ~2 ~2 ~1 redstone_block
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=false]
+  - run: setblock ~1 ~1 ~0 stone
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=true]
+  - check: if block ~2 ~1 ~1 piston_head[facing=east]
+- name: redstone block below powers it
+  settle: 6
+  steps:
+  - run: setblock ~1 ~0 ~1 redstone_block
+  - wait: 4
+  - check: if block ~1 ~1 ~1 piston[extended=true]

@@ -1,0 +1,355 @@
+name: torch_burnout_one_shot
+description: A torch fed by a fast clock burns out on its 8th turn-off within 60 gt, ignores every update for exactly 160 gt, then relights by itself if unpowered, giving a self-limiting burst of 8 low pulses with no counter.
+traits: [compact, flat, entityless, torch_based]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  '>': repeater[facing=west]
+  a: {input: fast}
+  b: {input: slow}
+  T: {name: tf, block: 'redstone_wall_torch[facing=east]'}
+  U: {name: ts, block: 'redstone_wall_torch[facing=east]'}
+  '1': {output: of, block: redstone_wire}
+  '2': {output: os, block: redstone_wire}
+layers:
+  0: |
+    =====
+    .....
+    =====
+  1: |
+    a>ST1
+    .....
+    b>SU2
+tests:
+- name: eighth turn-off in 60 gt burns it out; it relights itself 160 gt later
+  steps:
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 2
+  - drive: {fast: 0}
+  - wait: 3
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 28
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 105
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - expect: {of: 1}
+  - wait: 4
+- name: seven fast turn-offs do not burn it out
+  steps:
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 3
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 57
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 1
+- name: slow 20 gt clock never burns it out
+  steps:
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 6
+  - drive: {slow: 1}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=false]
+  - wait: 6
+  - drive: {slow: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~2 redstone_wall_torch[lit=true]
+  - wait: 16
+- name: updates long after the 60 gt window do not relight it before 160 gt
+  steps:
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 4
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 51
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 7
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 40
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 7
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 45
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 1
+- name: input still on at the 160 gt tick keeps it off until released
+  steps:
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 3
+  - drive: {fast: 1}
+  - wait: 3
+  - drive: {fast: 0}
+  - wait: 145
+  - drive: {fast: 1}
+  - wait: 15
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 9
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 15
+  - drive: {fast: 0}
+  - wait: 3
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=false]
+  - wait: 1
+  - check: if block ~3 ~1 ~0 redstone_wall_torch[lit=true]
+  - wait: 2

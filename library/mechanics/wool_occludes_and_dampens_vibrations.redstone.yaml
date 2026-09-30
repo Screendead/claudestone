@@ -1,0 +1,79 @@
+name: wool_occludes_and_dampens_vibrations
+description: 'Only full wool blocks (#occludes_vibration_signals = #wool) stop a vibration crossing them; carpet on the line does not, but wool and carpet both dampen (breaking them emits nothing); use: one wool block isolates neighbouring sculk links, carpet only silences what happens to it.'
+traits: [pistonless, entityless, flat, one_wide]
+palette:
+  .: air
+  '=': smooth_stone
+  X: {name: s, block: sculk_sensor}
+  W: white_wool
+  N: note_block
+  a: {input: a}
+layers:
+  0: |
+    ======
+  1: |
+    X.W.Na
+tests:
+- name: wool between blocks the note block
+  settle: 40
+  steps:
+  - drive: {a: 1}
+  - wait: 10
+  - check: if block ~0 ~1 ~0 sculk_sensor[sculk_sensor_phase=inactive,power=0]
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+- name: control stone between, the sensor is active at strength 8 four ticks later
+  settle: 40
+  steps:
+  - run: setblock ~2 ~1 ~0 stone
+  - wait: 20
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~0 ~1 ~0 sculk_sensor[sculk_sensor_phase=active,power=8]
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:10}
+- name: carpet between does not block it
+  settle: 40
+  steps:
+  - run: setblock ~2 ~1 ~0 white_carpet
+  - wait: 20
+  - check: 'unless block ~2 ~1 ~0 #minecraft:occludes_vibration_signals'
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+  - drive: {a: 1}
+  - wait: 4
+  - check: if block ~0 ~1 ~0 sculk_sensor[sculk_sensor_phase=active,power=8]
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:10}
+- name: breaking wool makes no vibration
+  settle: 40
+  steps:
+  - run: setblock ~2 ~1 ~0 air
+  - run: setblock ~3 ~1 ~0 white_wool
+  - wait: 20
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+  - run: setblock ~3 ~1 ~0 air destroy
+  - wait: 10
+  - check: if block ~0 ~1 ~0 sculk_sensor[sculk_sensor_phase=inactive,power=0]
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+  - run: execute positioned ~2 ~1 ~0 run kill @e[type=item,distance=..8]
+- name: control breaking stone is a block_destroy vibration
+  settle: 40
+  steps:
+  - run: setblock ~2 ~1 ~0 air
+  - run: setblock ~3 ~1 ~0 stone
+  - wait: 20
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+  - run: setblock ~3 ~1 ~0 air destroy
+  - wait: 3
+  - check: if block ~0 ~1 ~0 sculk_sensor[sculk_sensor_phase=active]
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:12}
+  - run: execute positioned ~2 ~1 ~0 run kill @e[type=item,distance=..8]
+- name: breaking carpet makes no vibration either
+  settle: 40
+  steps:
+  - run: setblock ~2 ~1 ~0 air
+  - run: setblock ~3 ~1 ~0 white_carpet
+  - wait: 20
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+  - run: setblock ~3 ~1 ~0 air destroy
+  - wait: 10
+  - check: if block ~0 ~1 ~0 sculk_sensor[sculk_sensor_phase=inactive,power=0]
+  - check: if data block ~0 ~1 ~0 {last_vibration_frequency:0}
+  - run: execute positioned ~2 ~1 ~0 run kill @e[type=item,distance=..8]

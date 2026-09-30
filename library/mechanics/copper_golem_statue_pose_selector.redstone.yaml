@@ -1,0 +1,87 @@
+name: copper_golem_statue_pose_selector
+description: A waxed copper golem statue's copper_golem_pose reads 1-4 (standing, sitting, running, star) on a comparator, directly or through a block; a 4-position entityless selector that a piston push destroys.
+traits: [comparator_based, analog, flat, compact, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  S: stone
+  P: piston[facing=south]
+  a: {input: a}
+  c: comparator[facing=north]
+  G: 'waxed_copper_golem_statue[copper_golem_pose=standing,facing=north]'
+  H: 'waxed_copper_golem_statue[copper_golem_pose=standing,facing=north]'
+  d: {name: direct, block: redstone_wire}
+  t: {name: through, block: redstone_wire}
+layers:
+  0: |
+    =====
+    =====
+    =====
+    =====
+  1: |
+    Pa.H.
+    G..S.
+    c..c.
+    d..t.
+tests:
+- name: each pose by setblock
+  steps:
+  - check: if block ~0 ~1 ~3 redstone_wire[power=1]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=standing,facing=north]
+  - run: setblock ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=standing,facing=north]
+  - wait: 4
+  - check: if block ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=standing]
+  - check: if block ~0 ~1 ~3 redstone_wire[power=1]
+  - check: if block ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=standing]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=sitting,facing=north]
+  - run: setblock ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=sitting,facing=north]
+  - wait: 4
+  - check: if block ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=sitting]
+  - check: if block ~0 ~1 ~3 redstone_wire[power=2]
+  - check: if block ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=sitting]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=2]
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=running,facing=north]
+  - run: setblock ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=running,facing=north]
+  - wait: 4
+  - check: if block ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=running]
+  - check: if block ~0 ~1 ~3 redstone_wire[power=3]
+  - check: if block ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=running]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=3]
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=star,facing=north]
+  - run: setblock ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=star,facing=north]
+  - wait: 4
+  - check: if block ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=star]
+  - check: if block ~0 ~1 ~3 redstone_wire[power=4]
+  - check: if block ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=star]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=4]
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=standing,facing=north]
+  - run: setblock ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=standing,facing=north]
+  - wait: 4
+  - check: if block ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=standing]
+  - check: if block ~0 ~1 ~3 redstone_wire[power=1]
+  - check: if block ~3 ~1 ~0 waxed_copper_golem_statue[copper_golem_pose=standing]
+  - check: if block ~3 ~1 ~3 redstone_wire[power=1]
+  - run: setblock ~0 ~1 ~1 stone
+  - wait: 4
+  - check: if block ~0 ~1 ~3 redstone_wire[power=0]
+- name: other facings read the same
+  steps:
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=star,facing=east]
+  - wait: 4
+  - check: if block ~0 ~1 ~3 redstone_wire[power=4]
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=sitting,facing=south]
+  - wait: 4
+  - check: if block ~0 ~1 ~3 redstone_wire[power=2]
+- name: piston push destroys it
+  steps:
+  - run: setblock ~0 ~1 ~1 waxed_copper_golem_statue[copper_golem_pose=star,facing=north]
+  - wait: 4
+  - check: if block ~0 ~1 ~3 redstone_wire[power=4]
+  - check: positioned ~0.5 ~1.5 ~1.5 unless entity @e[type=item,distance=..3]
+  - drive: {a: 1}
+  - wait: 6
+  - check: if block ~0 ~1 ~1 piston_head
+  - check: if block ~0 ~1 ~3 redstone_wire[power=0]
+  - check: positioned ~0.5 ~1.5 ~1.5 if entity @e[type=item,distance=..3,nbt={Item:{id:"minecraft:waxed_copper_golem_statue"}}]

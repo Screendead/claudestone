@@ -1,0 +1,86 @@
+name: dust_transparent_step_one_way
+description: Dust climbing onto a transparent step carries power up only, a zero-tick dust-only diode; a solid step carries both ways.
+traits: [instant, lightless, silent, pistonless, entityless, one_wide, vertical, analog, survival_friendly]
+palette:
+  .: air
+  '=': stone
+  a: {input: a}
+  b: {input: b}
+  p: {name: lead, block: redstone_wire}
+  l: {name: low, block: redstone_wire}
+  S: {name: step, block: glass}
+  u: {name: up, block: redstone_wire}
+  q: {name: tail, block: redstone_wire}
+layers:
+  0: |
+    .==...
+  1: |
+    aplS=.
+  2: |
+    ...uqb
+tests:
+- name: diode truth table
+  truth_table: |
+    a b | low up
+    0 0 | 0 0
+    1 0 | 1 1
+    0 1 | 0 1
+    1 1 | 1 1
+  delay: 0
+- name: glass step carries power up
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - check: if block ~1 ~1 ~0 redstone_wire[power=15] if block ~2 ~1 ~0 redstone_wire[power=14,east=up] if block ~3 ~2 ~0 redstone_wire[power=13,west=side] if block ~4 ~2 ~0 redstone_wire[power=12]
+- name: glass step blocks power down though shaped connected
+  steps:
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~4 ~2 ~0 redstone_wire[power=15] if block ~3 ~2 ~0 redstone_wire[power=14,west=side] if block ~2 ~1 ~0 redstone_wire[power=0,east=up] if block ~1 ~1 ~0 redstone_wire[power=0]
+- name: control stone step carries power down
+  steps:
+  - run: setblock ~3 ~1 ~0 stone
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=14] if block ~2 ~1 ~0 redstone_wire[power=13,east=up] if block ~1 ~1 ~0 redstone_wire[power=12]
+- name: glowstone step blocks power down
+  steps:
+  - run: setblock ~3 ~1 ~0 glowstone
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=14] if block ~2 ~1 ~0 redstone_wire[power=0]
+  - drive: {b: 0, a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14] if block ~3 ~2 ~0 redstone_wire[power=13]
+- name: top slab step blocks power down
+  steps:
+  - run: setblock ~3 ~1 ~0 smooth_stone_slab[type=top]
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=14] if block ~2 ~1 ~0 redstone_wire[power=0]
+  - drive: {b: 0, a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14] if block ~3 ~2 ~0 redstone_wire[power=13]
+- name: upside down stairs step blocks power down
+  steps:
+  - run: setblock ~3 ~1 ~0 stone_stairs[half=top,facing=east]
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=14] if block ~2 ~1 ~0 redstone_wire[power=0]
+  - drive: {b: 0, a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14] if block ~3 ~2 ~0 redstone_wire[power=13]
+- name: hopper step blocks power down
+  steps:
+  - run: setblock ~3 ~1 ~0 hopper[facing=down]
+  - wait: 1
+  - drive: {b: 1}
+  - wait: 1
+  - check: if block ~3 ~2 ~0 redstone_wire[power=14] if block ~2 ~1 ~0 redstone_wire[power=0]
+  - drive: {b: 0, a: 1}
+  - wait: 1
+  - check: if block ~2 ~1 ~0 redstone_wire[power=14] if block ~3 ~2 ~0 redstone_wire[power=13]

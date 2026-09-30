@@ -1,0 +1,63 @@
+name: lamp_off_delay_4_ticks
+description: A lamp lights in the tick it is powered but goes dark 4 game ticks after power is removed, and is never a signal source; short glitches don't flash displays.
+traits: [compact, flat, one_wide, tick_accurate, survival_friendly]
+palette:
+  .: air
+  '=': smooth_stone
+  a: {input: a}
+  D: {name: dust, block: redstone_wire}
+  L: {name: lamp, block: redstone_lamp}
+  r: {name: reader, block: 'repeater[facing=west]'}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    =====
+  1: |
+    DaLro
+tests:
+- name: one tick pulse holds the lamp 4 ticks
+  steps:
+  - expect: {lamp: 0, dust: 0, reader: 0, out: 0}
+  - drive: {a: 1}
+  - expect: {lamp: 1, dust: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - expect: {lamp: 1, dust: 0, reader: 0}
+  - wait: 1
+  - expect: {lamp: 1, reader: 0}
+  - wait: 1
+  - expect: {lamp: 1, reader: 0}
+  - wait: 1
+  - expect: {lamp: 1, reader: 0}
+  - wait: 1
+  - expect: {lamp: 0, reader: 0, out: 0}
+- name: long power ends with the same 4 tick tail
+  steps:
+  - drive: {a: 1}
+  - wait: 20
+  - expect: {lamp: 1, dust: 1, reader: 0, out: 0}
+  - drive: {a: 0}
+  - expect: {lamp: 1, dust: 0}
+  - wait: 3
+  - expect: {lamp: 1}
+  - wait: 1
+  - expect: {lamp: 0}
+- name: hard powered lamp drives the reader but its lit tail does not
+  steps:
+  - run: setblock ~1 ~1 ~0 repeater[facing=west]
+  - run: setblock ~0 ~1 ~0 redstone_block
+  - wait: 6
+  - expect: {lamp: 1, reader: 1, out: 1}
+  - run: setblock ~0 ~1 ~0 air
+  - wait: 1
+  - expect: {lamp: 1, reader: 1}
+  - wait: 1
+  - expect: {lamp: 1, reader: 1}
+  - wait: 1
+  - expect: {lamp: 1, reader: 1}
+  - wait: 1
+  - expect: {lamp: 1, reader: 0}
+  - wait: 1
+  - expect: {lamp: 1, reader: 0}
+  - wait: 1
+  - expect: {lamp: 0, reader: 0}

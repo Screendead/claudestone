@@ -1,0 +1,58 @@
+name: arrow_holds_wooden_button
+description: A dispensed arrow stuck in an oak button holds it pressed until the arrow is gone (released at the next 30 gt recheck); a stone button ignores it. A ranged long-pulse input.
+traits: [compact, pistonless, lightless]
+palette:
+  .: air
+  '=': stone
+  '-': redstone_wire
+  e: {input: e}
+  g: {input: g}
+  b: {name: oak, block: 'oak_button[face=floor,facing=north]'}
+  c: {name: stone, block: 'stone_button[face=floor,facing=north]'}
+  V: 'dispenser[facing=down]{Items:[{Slot:0b,id:"minecraft:arrow",count:8}]}'
+layers:
+  0: |
+    =====
+  1: |
+    b-.c-
+  2: |
+    .....
+  3: |
+    V..V.
+  4: |
+    e..g.
+tests:
+- name: arrow holds the oak button, stone button ignores its arrow
+  steps:
+  - run: kill @e[type=arrow,distance=..300]
+  - drive: {e: 1, g: 1}
+  - wait: 4
+  - check: if block ~0 ~1 ~0 oak_button[powered=false]
+  - wait: 1
+  - check: if block ~0 ~1 ~0 oak_button[powered=true]
+  - check: if block ~1 ~1 ~0 redstone_wire[power=15]
+  - wait: 300
+  - check: if block ~0 ~1 ~0 oak_button[powered=true]
+  - check: if block ~1 ~1 ~0 redstone_wire[power=15]
+  - check: positioned ~3 ~ ~ if entity @e[type=arrow,dx=0,dy=1,dz=0,nbt={inGround:1b}]
+  - check: if block ~3 ~1 ~0 stone_button[powered=false]
+  - check: if block ~4 ~1 ~0 redstone_wire[power=0]
+- name: removing the arrow releases at the next 30 gt recheck
+  steps:
+  - run: kill @e[type=arrow,distance=..300]
+  - drive: {e: 1, g: 1}
+  - wait: 10
+  - check: if block ~0 ~1 ~0 oak_button[powered=true]
+  - run: kill @e[type=arrow,dx=5,dy=3,dz=0]
+  - wait: 24
+  - check: if block ~0 ~1 ~0 oak_button[powered=true]
+  - wait: 1
+  - check: if block ~0 ~1 ~0 oak_button[powered=false]
+  - check: if block ~1 ~1 ~0 redstone_wire[power=0]
+- name: 'control: a click without an arrow releases after 30 gt'
+  steps:
+  - use: oak
+  - wait: 29
+  - check: if block ~0 ~1 ~0 oak_button[powered=true]
+  - wait: 1
+  - check: if block ~0 ~1 ~0 oak_button[powered=false]

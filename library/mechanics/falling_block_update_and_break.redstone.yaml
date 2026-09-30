@@ -1,0 +1,71 @@
+name: falling_block_update_and_break
+description: Sand falls 2 game ticks after any placement or update (a plain setblock too; only setblock strict leaves it floating), and landing in a torch or slab cell drops it as an item.
+traits: [pistonless, survival_friendly]
+palette:
+  .: air
+  S: stone
+  t: torch
+  h: smooth_stone_slab[type=bottom]
+layers:
+  0: |
+    SSSSSSS
+  1: |
+    t...h..
+  2: |
+    .......
+  3: |
+    .......
+  4: |
+    .......
+tests:
+- name: plain setblock sand falls after 2 ticks
+  steps:
+  - run: setblock ~2 ~4 ~0 sand
+  - wait: 1
+  - check: if block ~2 ~4 ~0 sand
+  - wait: 1
+  - check: if block ~2 ~4 ~0 air
+  - check: positioned ~2.5 ~4 ~0.5 if entity @e[type=falling_block,distance=..1]
+  - wait: 30
+  - check: if block ~2 ~1 ~0 sand
+  - check: positioned ~2.5 ~1 ~0.5 unless entity @e[type=item,distance=..1.5,nbt={Item:{id:"minecraft:sand"}}]
+- name: setblock strict leaves sand floating until an update
+  steps:
+  - run: setblock ~6 ~4 ~0 sand strict
+  - wait: 40
+  - check: if block ~6 ~4 ~0 sand
+  - run: clone ~6 ~4 ~0 ~6 ~4 ~0 ~6 ~4 ~0 replace force
+  - wait: 1
+  - check: if block ~6 ~4 ~0 sand
+  - wait: 1
+  - check: if block ~6 ~4 ~0 air
+  - wait: 30
+  - check: if block ~6 ~1 ~0 sand
+- name: a neighbour update makes strict floating sand fall
+  steps:
+  - run: setblock ~6 ~4 ~0 sand strict
+  - wait: 10
+  - check: if block ~6 ~4 ~0 sand
+  - run: setblock ~5 ~4 ~0 stone
+  - wait: 1
+  - check: if block ~6 ~4 ~0 sand
+  - wait: 1
+  - check: if block ~6 ~4 ~0 air
+- name: sand landing on a torch or slab breaks into an item
+  steps:
+  - run: setblock ~0 ~4 ~0 sand
+  - run: setblock ~2 ~4 ~0 sand
+  - wait: 40
+  - check: if block ~0 ~1 ~0 torch
+  - check: if block ~0 ~2 ~0 air
+  - check: positioned ~3.5 ~1 ~0.5 if entity @e[type=item,distance=..8,nbt={Item:{id:"minecraft:sand",count:1}}]
+  - check: if block ~2 ~1 ~0 sand
+- name: sand landing on a bottom slab breaks into an item
+  steps:
+  - run: setblock ~2 ~4 ~0 sand
+  - run: setblock ~4 ~4 ~0 sand
+  - wait: 40
+  - check: if block ~4 ~1 ~0 smooth_stone_slab[type=bottom]
+  - check: if block ~4 ~2 ~0 air
+  - check: positioned ~3.5 ~1 ~0.5 if entity @e[type=item,distance=..8,nbt={Item:{id:"minecraft:sand",count:1}}]
+  - check: if block ~2 ~1 ~0 sand
