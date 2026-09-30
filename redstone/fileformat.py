@@ -2,13 +2,20 @@
 
     name: and_gate
     description: Both inputs inverted by torches, merged, inverted again.
+    traits: [compact, silent]    # optional, from redstone.traits.VOCABULARY; the
+                                 # checkable ones are checked by tests/test_traits.py
     palette:                     # one character -> one cell
       ".": air
       "=": smooth_stone
       "-": redstone_wire
       ">": repeater[facing=west]
       a: {input: a}              # driver cell: air in the build, where the harness
-                                 # places or removes a redstone block
+                                 # places or removes a redstone block; several glyphs
+                                 # with one input name are one signal driven at each cell
+      F: {block: redstone_torch, fixture: true}   # placed and tested, but not part of
+                                 # the design: left out of its size and trait checks
+      _: {reserve: true}         # air that belongs to the design (piston travel):
+                                 # counts in its size, and no block may fill it
       o: {output: out, block: redstone_wire}
       L: {name: lamp, block: redstone_lamp}   # a named cell tests can read or use
     layers:                      # keyed by y; row = z from north (top) to south,
@@ -18,18 +25,50 @@
         a>#t-o
     tests:
       - name: logic
-        truth_table: |           # 1/0 per named cell; inputs left of |, checks right
+        truth_table: |           # 1/0 per named cell (x: don't care, outputs only);
+                                 # inputs left of |, checks right
           a b | out
           0 0 | 0
+          1 1 | x
         delay: 6                 # optional: worst-case ticks from input change to output
         max_delay: 8             # optional: upper bound instead of an exact delay
+        delays: {out: {rise: 6, fall: 2}}   # optional: exact worst case per output and edge
+                                 # (a number: over both edges); max_delays: bounds
+        glitch_free: true        # optional: an output may not leave its expected value
+                                 # once matched, nor move at all if the row keeps it
+        reset: false             # optional: don't end by replaying the first row
+        initial: {a: 1}          # optional: drivers placed with the build, before its
+                                 # update pass, so the input is high from placement
+        tile: [1, 0, 0]          # optional: also build a second copy at this offset, fed
+                                 # row i+1 while the first copy gets row i; both checked
       - name: pulse
         settle: 200              # optional: ticks to wait after loading (default 20)
         steps:                   # run in order
           - drive: {a: 1}        # set input drivers
           - use: lever           # click a named lever or button
           - wait: 6              # advance ticks
-          - expect: {lamp: 1}    # 1 = dust powered / lamp or torch lit / diode powered
+          - expect: {lamp: 1}    # 1 = the cell carries signal (see docs/AUTHORING.md)
+          - level: {cmp: 7}      # exact 0-15 strength of dust, a comparator or an analog block
+          - wave: {out: '0011', q: 'x1'}   # 1/0/x (don't care) per tick, from this tick:
+                                 # character i is checked i ticks later; the step
+                                 # advances max(len) ticks
+          - repeat: {times: 3, steps: [{drive: {a: 1}}, {wait: 2}]}   # nests
+          - run: fill ~0 ~1 ~0 ~0 ~1 ~0 hopper   # any command; ~ is the build origin;
+                                 # fails if the command does
+          - log: data get block ~0 ~1 ~0 Items   # like run; the reply goes in the trace
+          - check: if block ~3 ~1 ~0 redstone_wire[power=7]   # execute if/unless chain
+        finally:                 # commands run after the steps, even when a step failed
+          - gamerule advance_time true
+
+    entities:                    # optional, summoned after the blocks are placed
+      - {type: minecart, pos: [2.0, 1.0, 0.0], nbt: '{Invulnerable:1b}'}
+                                 # pos is relative to the centre of the origin cell
+                                 # (the build runs under `execute positioned <int>`,
+                                 # which centres x and z): [2.0, 1.0, 0.0] is the middle
+                                 # of cell (2,1,0), and .5 on x or z is a cell edge
+
+Block states in the palette may carry block-entity NBT, e.g.
+`'hopper[facing=down]{Items:[{id:"minecraft:redstone",count:1}]}'`.
 
 Cell origin is the top-left character of each layer. Every layer grid must have the
 same width and height.
@@ -41,7 +80,7 @@ from pathlib import Path
 
 import yaml
 
-from .build import Build, Pos
+from .build import Build, Pos, namespaced
 
 # Preferred glyphs when writing a file; anything else gets the next free letter.
 GLYPHS = {
@@ -64,8 +103,7 @@ GLYPHS = {
 }
 
 
-def _norm(state: str) -> str:
-    return state if ":" in state.split("[")[0] else "minecraft:" + state
+_norm = namespaced
 
 
 def _short(state: str) -> str:
@@ -82,19 +120,30 @@ class Spec:
     tests: list[dict] = field(default_factory=list)
     description: str = ""
     path: Path | None = None
+    traits: list[str] = field(default_factory=list)
+    fixtures: set[Pos] = field(default_factory=set)
+    reserved: set[Pos] = field(default_factory=set)
+    # Every cell of an input with more than one; `inputs` holds each input's first cell.
+    extra_inputs: dict[str, list[Pos]] = field(default_factory=dict)
 
     def cell(self, name: str) -> Pos:
         if name in self.inputs:
             return self.inputs[name]
         return self.named[name]
 
+    def input_cells(self, name: str) -> list[Pos]:
+        return self.extra_inputs.get(name) or [self.inputs[name]]
+
 
 def load(path: Path | str) -> Spec:
     path = Path(path)
     doc = yaml.safe_load(path.read_text())
     palette = {str(k): v for k, v in doc["palette"].items()}
-    spec = Spec(doc["name"], Build(), description=doc.get("description", ""), tests=doc.get("tests", []), path=path)
-    shape = None
+    spec = Spec(doc["name"], Build(), description=doc.get("description", ""), tests=doc.get("tests", []), path=path,
+                traits=doc.get("traits", []))
+    for e in doc.get("entities", []):
+        spec.build.summon(tuple(e["pos"]), e["type"], e.get("nbt", ""))
+    shape, cells = None, {}
     for y, grid in doc["layers"].items():
         rows = grid.rstrip("\n").split("\n")
         if shape is None:
@@ -112,13 +161,22 @@ def load(path: Path | str) -> Spec:
                         spec.build.place(pos, entry)
                     continue
                 if "input" in entry:
-                    spec.inputs[entry["input"]] = pos
+                    cells.setdefault(entry["input"], []).append(pos)
+                    continue
+                if entry.get("reserve"):
+                    spec.reserved.add(pos)
                     continue
                 spec.build.place(pos, entry["block"])
+                if entry.get("fixture"):
+                    spec.fixtures.add(pos)
                 name = entry.get("output") or entry.get("name")
+                if name is None:
+                    continue
                 spec.named[name] = pos
                 if "output" in entry:
                     spec.outputs[name] = pos
+    spec.inputs = {n: ps[0] for n, ps in cells.items()}
+    spec.extra_inputs = {n: ps for n, ps in cells.items() if len(ps) > 1}
     return spec
 
 
@@ -126,11 +184,16 @@ def dump(spec: Spec) -> str:
     """Serialise a spec, choosing glyphs automatically. Round-trips through load()."""
     cells: dict[Pos, str] = dict(spec.build.blocks)
     labels: dict[Pos, dict] = {}
-    for name, pos in spec.inputs.items():
-        labels[pos] = {"input": name}
+    for name in spec.inputs:
+        for pos in spec.input_cells(name):
+            labels[pos] = {"input": name}
+    for pos in spec.fixtures:
+        labels[pos] = {"block": _short(cells[pos]), "fixture": True}
     for name, pos in spec.named.items():
         key = "output" if name in spec.outputs else "name"
-        labels[pos] = {key: name, "block": _short(cells[pos])}
+        labels[pos] = {key: name, "block": _short(cells[pos])} | ({"fixture": True} if pos in spec.fixtures else {})
+    for pos in spec.reserved:
+        labels[pos] = {"reserve": True}
     everything = list(cells) + list(labels)
     xs, ys, zs = zip(*everything)
     lo_x, lo_z = min(0, min(xs)), min(0, min(zs))
@@ -152,11 +215,16 @@ def dump(spec: Spec) -> str:
             palette[g] = _short(state)
         return by_state[state]
 
+    by_label: dict[str, str] = {}
+
     def glyph_for_label(label: dict) -> str:
-        name = label.get("input") or label.get("output") or label.get("name")
-        g = name[0] if name[0] not in palette and name[0] not in GLYPHS.values() else next_free()
-        palette[g] = label
-        return g
+        key = repr(sorted(label.items()))
+        if key not in by_label:
+            name = label.get("input") or label.get("output") or label.get("name") or ("_" if "reserve" in label else "")
+            g = name[0] if name and name[0] not in palette and name[0] not in GLYPHS.values() else next_free()
+            by_label[key] = g
+            palette[g] = label
+        return by_label[key]
 
     layers = {}
     for y in sorted(set(ys)):
@@ -175,8 +243,13 @@ def dump(spec: Spec) -> str:
     doc = {"name": spec.name}
     if spec.description:
         doc["description"] = spec.description
+    if spec.traits:
+        doc["traits"] = spec.traits
     doc["palette"] = palette
     doc["layers"] = layers
+    if spec.build.entities:
+        doc["entities"] = [{"type": _short(e), "pos": list(p), **({"nbt": n} if n else {})}
+                           for p, e, n in spec.build.entities]
     if spec.tests:
         doc["tests"] = spec.tests
     return yaml.dump(doc, Dumper=_Dumper, sort_keys=False, allow_unicode=True, width=1000)
@@ -203,10 +276,15 @@ _Dumper.add_representer(dict, _dict)
 
 
 def parse_truth_table(text: str) -> tuple[list[str], list[str], list[tuple[dict, dict]]]:
+    """Rows of ({input: bool}, {output: bool, or None for x = don't care})."""
     lines = [l for l in text.strip().split("\n") if l.strip()]
     head_in, head_out = (part.split() for part in lines[0].split("|"))
     rows = []
     for line in lines[1:]:
-        vals_in, vals_out = (list(map(int, re.findall(r"[01]", part))) for part in line.split("|"))
-        rows.append((dict(zip(head_in, map(bool, vals_in))), dict(zip(head_out, map(bool, vals_out)))))
+        part_in, part_out = line.split("|")
+        if "x" in part_in:
+            raise ValueError(f"row {line.strip()!r}: x (don't care) is only allowed in output columns")
+        vals_in = [v == "1" for v in re.findall(r"[01]", part_in)]
+        vals_out = [None if v == "x" else v == "1" for v in re.findall(r"[01x]", part_out)]
+        rows.append((dict(zip(head_in, vals_in)), dict(zip(head_out, vals_out))))
     return head_in, head_out, rows
