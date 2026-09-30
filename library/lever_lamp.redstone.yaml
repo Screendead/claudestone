@@ -1,0 +1,23 @@
+name: lever_lamp
+description: A lever-controlled torch inverter lighting a lamp; checks player-faithful lever input.
+palette:
+  .: air
+  l: {name: lever, block: 'lever[face=wall,facing=west,powered=false]'}
+  A: stone
+  t: {name: torch, block: 'redstone_wall_torch[facing=east]'}
+  B: {name: lamp, block: redstone_lamp}
+layers:
+  1: |
+    lAtB
+tests:
+- name: lamp lit at rest
+  steps:
+  - expect: {torch: 1, lamp: 1}
+- name: lever toggles lamp
+  steps:
+  - {use: lever}
+  - {wait: 6}
+  - expect: {torch: 0, lamp: 0}
+  - {use: lever}
+  - {wait: 6}
+  - expect: {lamp: 1}

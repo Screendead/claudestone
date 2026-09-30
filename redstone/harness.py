@@ -28,6 +28,32 @@ def format_state(block: str, props: dict[str, str]) -> str:
     return block + ("[" + ",".join(f"{k}={v}" for k, v in props.items()) + "]" if props else "")
 
 
+def signal_property(state: str) -> str | None:
+    """The property that says whether a block is carrying signal, if any."""
+    name = parse_state(state)[0].removeprefix("minecraft:")
+    if name == "redstone_wire":
+        return "power"
+    if name in ("redstone_torch", "redstone_wall_torch", "redstone_lamp"):
+        return "lit"
+    if name in ("repeater", "comparator", "lever", "observer") or name.endswith("_button"):
+        return "powered"
+    return None
+
+
+def probe_function(build: Build) -> tuple[str, list[Pos]]:
+    """A function that writes each signal-carrying block's level into storage as bN."""
+    lines = [f"data modify storage {PACK}:probe s set value {{}}"]
+    probed = [p for p in sorted(build.blocks) if signal_property(build.blocks[p])]
+    for i, (x, y, z) in enumerate(probed):
+        block = parse_state(build.blocks[(x, y, z)])[0]
+        prop = signal_property(build.blocks[(x, y, z)])
+        checks = [(f"power={n}", n) for n in range(1, 16)] if prop == "power" else [(f"{prop}=true", 1)]
+        for predicate, value in checks:
+            lines.append(f"execute if block ~{x} ~{y} ~{z} {block}[{predicate}] run "
+                         f"data modify storage {PACK}:probe s.b{i} set value {value}")
+    return "\n".join(lines) + "\n", probed
+
+
 def attached_to(pos: Pos, props: dict[str, str]) -> Pos:
     x, y, z = pos
     face = props.get("face", "wall")
@@ -77,6 +103,7 @@ class Rig:
         self.size = size
         self.build = Build()
         self.pending: list[tuple[int, Pos]] = []
+        self.probed: list[Pos] = []
         self.datapacks = SERVER_DIR / self.level_name() / "datapacks"
         self.r.cmd("tick freeze")
         ox, _, oz = origin
@@ -141,13 +168,21 @@ class Rig:
         self.clear()
         self.build = Build(dict(build.blocks))
         self.pending = []
-        write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction()})
+        probe, self.probed = probe_function(self.build)
+        write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction(), "probe": probe})
         self.run("reload")
         if f"file/{PACK}" not in self.run("datapack list enabled"):
             self.run(f'datapack enable "file/{PACK}"')
         out = self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:build")
         if not out.startswith("Running function"):
             raise CommandFailed(f"build function: {out}")
+
+    def snapshot(self) -> dict[Pos, int]:
+        """Signal level of every probed block: dust power 0-15, otherwise 1 or 0."""
+        self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:probe")
+        out = self.run(f"data get storage {PACK}:probe s")
+        found = {int(i): int(v) for i, v in re.findall(r"b(\d+): (\d+)", out)}
+        return {pos: found.get(i, 0) for i, pos in enumerate(self.probed)}
 
     def is_(self, pos: Pos, predicate: str) -> bool:
         out = self.run(f"execute if block {self.abs(pos)} {predicate}")
