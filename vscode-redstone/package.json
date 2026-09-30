@@ -1,0 +1,43 @@
+{
+  "name": "redstone-viewer",
+  "displayName": "Redstone Build Viewer",
+  "description": "Visual viewer, editor and test-trace player for *.redstone.yaml Minecraft redstone builds",
+  "version": "0.1.0",
+  "publisher": "redstone-ai",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Visualization", "Other"],
+  "repository": { "type": "git", "url": "https://example.invalid/redstone-ai" },
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "redstone.viewer",
+        "displayName": "Redstone Build",
+        "selector": [{ "filenamePattern": "*.redstone.yaml" }],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      { "command": "redstone.openViewer", "title": "Redstone: Open in Viewer" }
+    ]
+  },
+  "scripts": {
+    "build": "tsc --noEmit && node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "test": "node esbuild.mjs --tests && node --test out/test/model.test.cjs",
+    "harness": "node esbuild.mjs --tests && node out/test/webview-harness.cjs",
+    "render": "node esbuild.mjs --tests && node out/test/render-harness.cjs",
+    "package": "npm run build && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^0.1.60",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0",
+    "yaml": "^2.6.0"
+  }
+}
