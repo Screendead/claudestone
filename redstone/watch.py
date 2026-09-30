@@ -1083,6 +1083,106 @@ class Director:
             self.rcon.cmd(f"scoreboard players enable @a {name}")
 
 
+# ---- camera check --------------------------------------------------------------------------
+
+AXES = ("x", "y", "z", "yaw", "pitch")
+
+
+def parse_pose(reply: str) -> tuple | None:
+    """x y z yaw pitch from the reply to `data get entity <one entity>`, or None."""
+    pos = re.search(r"\bPos: \[([^\]]*)\]", reply)
+    rot = re.search(r"\bRotation: \[([^\]]*)\]", reply)
+    if not pos or not rot:
+        return None
+    try:
+        values = tuple(float(v.strip().rstrip("dfDF")) for v in f"{pos.group(1)},{rot.group(1)}".split(","))
+    except ValueError:
+        return None
+    return values if len(values) == 5 else None
+
+
+def sample_poses(rcon, seconds: float, every: float = 0.01, clock=time.monotonic, sleep=time.sleep) -> dict:
+    """{player: [(game tick, pose, teleport_duration)]} of each watcher's camera entity, read
+    as often as RCON answers, for `seconds`. Sends only `list`, `time query` and `data get`.
+    These are the server's poses, which a glide's `tp` sets at once: the targets the client
+    interpolates towards, not what it draws in between."""
+    out: dict[str, list] = {}
+    players, refresh = [], 0.0
+    end = clock() + seconds
+    while (began := clock()) < end:
+        if began >= refresh:
+            players, refresh = online(rcon), began + 1
+        m = re.search(r"The time is (\d+)", rcon.cmd("time query gametime"))
+        for p in players:
+            reply = rcon.cmd(f"data get entity {_cam_of(p)}")
+            pose = parse_pose(reply)
+            if m and pose:
+                d = re.search(r"\bteleport_duration: (\d+)", reply)
+                out.setdefault(p, []).append((int(m.group(1)), pose, int(d.group(1)) if d else None))
+        sleep(max(0.0, every - (clock() - began)))
+    return out
+
+
+def _median(xs: list) -> float:
+    xs = sorted(xs)
+    n = len(xs)
+    return 0.0 if not n else xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) / 2
+
+
+def pose_stats(samples: list) -> dict:
+    """Numbers for a camera that can't be watched from here, from (tick, pose, ...) samples in
+    order. The pose changes only where it was teleported, so steps are taken between changes:
+    per axis the moves, their sizes, speed per tick, reversals (a move against the one before),
+    net and total travel, and jerk (RMS change in speed from one move to the next). A camera
+    shaking in place reverses often and travels far more than it gets anywhere."""
+    changes = []
+    for s in samples:
+        if not changes or s[1] != changes[-1][1]:
+            changes.append((s[0], s[1]))
+    ticks = [b[0] - a[0] for a, b in zip(changes, changes[1:])]
+    out = {"samples": len(samples), "ticks": samples[-1][0] - samples[0][0] if samples else 0,
+           "sampled_ticks": len({s[0] for s in samples}), "changes": len(changes) - 1 if changes else 0,
+           "cadence": _median(ticks), "durations": sorted({s[2] for s in samples if len(s) > 2} - {None}),
+           "axes": {}}
+    for i, axis in enumerate(AXES):
+        moves = []  # (delta, ticks)
+        for (ta, a), (tb, b) in zip(changes, changes[1:]):
+            d = b[i] - a[i]
+            if axis == "yaw":
+                d = (d + 180) % 360 - 180
+            if abs(d) > 1e-6:
+                moves.append((d, tb - ta))
+        signs = [d > 0 for d, _ in moves]
+        speeds = [d / t for d, t in moves if t > 0]
+        net, path = abs(sum(d for d, _ in moves)), sum(abs(d) for d, _ in moves)
+        reversals = sum(a != b for a, b in zip(signs, signs[1:]))
+        jerk = [b - a for a, b in zip(speeds, speeds[1:])]
+        out["axes"][axis] = {
+            "moves": len(moves),
+            "step": _median([abs(d) for d, _ in moves]),
+            "max_step": max((abs(d) for d, _ in moves), default=0.0),
+            "speed": _median([abs(v) for v in speeds]),
+            "reversals": reversals,
+            "net": net,
+            "path": path,
+            "jerk": math.sqrt(sum(j * j for j in jerk) / len(jerk)) if jerk else 0.0,
+            "shaking": reversals >= 3 and path > 3 * net,
+        }
+    return out
+
+
+def format_stats(name: str, st: dict) -> str:
+    lines = [f"{name}: {st['samples']} samples over {st['ticks']} ticks ({st['sampled_ticks']} ticks read), "
+             f"{st['changes']} moves, every {st['cadence']:g} ticks (median), "
+             f"teleport_duration {', '.join(map(str, st['durations'])) or '?'}",
+             f"  {'axis':<6}{'moves':>6}{'step':>9}{'max':>9}{'/tick':>9}{'revs':>6}{'net':>9}{'path':>9}{'jerk':>9}"]
+    for axis, a in st["axes"].items():
+        lines.append(f"  {axis:<6}{a['moves']:>6}{a['step']:>9.4f}{a['max_step']:>9.4f}{a['speed']:>9.4f}"
+                     f"{a['reversals']:>6}{a['net']:>9.3f}{a['path']:>9.3f}{a['jerk']:>9.4f}"
+                     + ("  SHAKING" if a["shaking"] else ""))
+    return "\n".join(lines)
+
+
 def _stop(signum, frame):
     raise SystemExit(0)
 

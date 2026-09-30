@@ -8,6 +8,7 @@
         --dwell S  --rate HZ
     python -m scripts.watch stop       # stays off until `start`, even when tests run
     python -m scripts.watch status
+    python -m scripts.watch poses [--seconds N]   # read-only: each camera's steps, reversals, jitter
     python -m scripts.watch off [player...]   # opt out; restores the previous gamemode
     python -m scripts.watch on [player...]    # opt back in
         (in game: /trigger watch_off, /trigger watch_on)
@@ -97,6 +98,20 @@ def status() -> None:
               f"{', '.join(f'{p} ({m})' for p, m in state['gamemode'].items()) or 'nobody'}")
 
 
+def poses(seconds: float) -> None:
+    if not _rcon_up(MAIN.rcon_port):
+        sys.exit("main is down")
+    r = Rcon(port=MAIN.rcon_port)
+    try:
+        got = watch.sample_poses(r, seconds)
+    finally:
+        r.close()
+    if not got:
+        print("no watch camera found (nobody watched, or the director is not running)")
+    for player, samples in sorted(got.items()):
+        print(watch.format_stats(f"{watch.CAM}_{player}", watch.pose_stats(samples)))
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="watch")
     sub = ap.add_subparsers(dest="action", required=True)
@@ -104,6 +119,7 @@ def main(argv: list[str]) -> int:
     _options(sub.add_parser("start"))
     sub.add_parser("stop")
     sub.add_parser("status")
+    sub.add_parser("poses").add_argument("--seconds", type=float, default=10.0)
     for name in ("on", "off"):
         sub.add_parser(name).add_argument("players", nargs="*")
     a = ap.parse_args(argv)
@@ -118,6 +134,8 @@ def main(argv: list[str]) -> int:
         stop()
     elif a.action == "status":
         status()
+    elif a.action == "poses":
+        poses(a.seconds)
     else:
         opt(a.players, a.action == "off")
     return 0
