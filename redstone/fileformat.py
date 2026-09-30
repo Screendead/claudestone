@@ -57,6 +57,15 @@
                                  # fails if the command does
           - log: data get block ~0 ~1 ~0 Items   # like run; the reply goes in the trace
           - check: if block ~3 ~1 ~0 redstone_wire[power=7]   # execute if/unless chain
+          - insert: {cell: feed, item: cobblestone, count: 10}   # into a container at a named
+                                 # cell or [x, y, z]; items: [{id, count}, ...] fill slots from
+                                 # slot (default 0) on; clear: true empties it first
+          - expect_items: {cell: [7, 1, 8], item: cobblestone, min: 30}   # the total over its
+                                 # slots, of item (default any) in slot (default all): count,
+                                 # min and/or max, or empty: true
+          - throughput: {from: feed, to: [7, 1, 8], item: cobblestone, ticks: 800, min: 90}
+                                 # items that reach `to` (or leave `from`) in the next ticks;
+                                 # the count and rate per hour go in the trace and the result
         finally:                 # commands run after the steps, even when a step failed
           - gamerule advance_time true
 

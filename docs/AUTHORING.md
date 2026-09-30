@@ -14,6 +14,9 @@ python -m scripts.lint [<spec>]        # offline (no args: whole library): unkno
 python -m scripts.try <spec>           # lint, then every test on a free server: one line each
                                        # (log replies under it), traits check and size. Exit 0 = done.
 python -m scripts.try <spec> --test "<test>"   # only that test (repeatable)
+python -m scripts.retest <plot> [--failed] [-k word]   # every spec of a plot (main: those with
+                                       # no plot), or --spec <name>...; --failed: only tests
+                                       # whose last result failed. One line per test.
 python -m scripts.try <spec> --trace   # every cell on every tick; on failure prints the table
 python -m scripts.look trace <spec> "<test>" [--cells a,out] [--from T --to T] [--levels]
 python -m scripts.look world <plot> [--y N]   # the live blocks as layers, after a run
@@ -27,11 +30,12 @@ read them, which is enough for `look trace` on a truth table. Tests run on satel
 the passing build is copied into your plot in the main world, where the user watches; the
 plot's billboard shows what is running. You never need RCON yourself.
 
-Run a spec with `try`, never `pytest -k`: `-k` matches substrings, so `-k xor_` also runs
-other families' specs whose names contain it. Specs in `mechanics/`, `builds/` and `input/`
-have no plot of their own, so `try` runs them in `$REDSTONE_PLOT`, or in main on the main
+Run a spec with `try` (or `retest`), never `pytest -k`: `-k` matches substrings, so `-k xor_`
+also runs other families' specs whose names contain it. Specs in `mechanics/`, `builds/` and
+`input/` have no plot of their own, so they run in `$REDSTONE_PLOT`, or in main on the main
 server when it is unset; set `REDSTONE_PLOT=<plot>` (one the build fits) to run them on a
-satellite instead.
+satellite instead. Set `REDSTONE_OWNER=<your id>` and the plot's status sign, its record and
+the showroom entry name you as the one testing.
 
 ## File
 
@@ -91,9 +95,26 @@ tests:
   settles. Quote the strings (`0011` unquoted is a number).
 - `repeat: {times: N, steps: [...]}` runs the steps N times (it nests); the trace marks
   each iteration (`repeat 2/3`) and failures inside name it.
-- A failing `expect`, `level`, `wave`, `check` or `run` doesn't stop the test: the steps run
-  to the end, so the trace is complete, and the test fails with the first failure and
-  `(and N more)`.
+- Containers (`cell` is a named cell or `[x, y, z]` from the origin; item ids may drop
+  `minecraft:`):
+  - `insert: {cell: feed, item: cobblestone, count: 10}`, or
+    `items: [{id: cobblestone, count: 64}, {id: dirt}]`: stack i goes in slot `slot` + i
+    (`slot` defaults to 0), replacing what was there; other slots keep their items.
+    `clear: true` empties the container first (alone, it only empties it). It writes with
+    `data modify block`, which updates comparators.
+  - `expect_items: {cell: out, item: cobblestone, count: 30}`: the total count over the
+    container's slots, of `item` (default: any) in `slot` (default: all), must equal
+    `count`, or lie within `min`/`max`; `empty: true` is `count: 0` of anything. A failure
+    lists what the container held, and the trace frame keeps it under `items`.
+  - `throughput: {from: feed, to: out, item: cobblestone, ticks: 800, min: 90}`: counts
+    `item` (default: any) in `to` and/or `from`, waits `ticks`, counts again. What arrived
+    in `to` (else what left `from`) must be within `min`/`max`; the measurement
+    (`arrived`, `left`, `per_hour` at 20 ticks a second) goes in the trace frame and the
+    test result, and `try` prints it: `PASS flow (throughput out 100 in 800 ticks (9000/h))`.
+    Start it once the flow is steady: items already in transit count when they arrive.
+- A failing `expect`, `level`, `wave`, `check`, `run`, `insert`, `expect_items` or
+  `throughput` doesn't stop the test: the steps run to the end, so the trace is complete,
+  and the test fails with the first failure and `(and N more)`.
 - Anything else: `run: <command>` runs any command and `check: <if/unless chain>` fails the
   test unless `execute <chain>` passes; `~` is the build origin. A `run` fails when its
   command fails, quoting the server's reply, except when it only did nothing: a reply that
@@ -117,8 +138,8 @@ tests:
   minecart summoned on an edge is off its rail. Selectors can't take `x=~`; use
   `positioned ... dx=`/`distance=`. The clear kills entities in the plot box, 2 blocks
   around it and up to the build height; kill anything that flies further yourself.
-- Set container contents with `data merge block` (or put them in the state): `item replace`
-  into a hopper or decorated pot doesn't update a comparator reading it.
+- Set container contents with `insert` or `data merge block` (or put them in the state):
+  `item replace` into a hopper or decorated pot doesn't update a comparator reading it.
 - Keep each `run`/`log` under ~1 KB (RCON drops a command over 1400 bytes; lint checks this); summon empty and fill with
   `item replace entity`.
 - Inputs in one `drive` apply in the order listed, which decides same-tick scheduling races,
@@ -225,8 +246,8 @@ footprint; when an input cell sits inside it, say so in the description.
 - `composter[level=7]` ripens to 8 on its own; use level 6 or lower for a constant strength.
 - Not possible with commands: player vibrations (use entities), a player's click on a
   repeater, comparator, door and the like (use `run: setblock` with the full new state;
-  `use` covers levers and buttons), and container contents as a named cell (read them with
-  `log` or `check`).
+  `use` covers levers and buttons), and container contents as a named cell in `expect` or a
+  truth table (read them with `expect_items`, `log` or `check`).
 - Gamerules in 26.3 are snake_case (`advance_time`).
 - Inline predicates in 26.3 dispatch on `type:`, not `condition:`:
   `check: positioned ~2 ~1 ~1 unless predicate {type:"location_check",predicate:{light:{light:{min:1}}}}`.

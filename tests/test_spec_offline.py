@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from redstone import spec as spec_module
+from redstone import fileformat, spec as spec_module
 from redstone.build import Build
 from redstone.fileformat import Spec, parse_truth_table
 from redstone.plots import MAIN
@@ -296,6 +296,18 @@ def test_truth_table_failure_is_in_the_trace(traces):
 
 HOPPER = (4, 1, 2)
 GET = "data get block ~4 ~1 ~2 Items"
+ITEM_STEPS = [{"insert": {"cell": "feed", "items": [{"id": "cobblestone", "count": 10}, {"id": "dirt"}], "clear": True}},
+              {"expect_items": {"cell": [0, 2, 0], "item": "minecraft:stick", "min": 1, "max": 3}},
+              {"throughput": {"from": "feed", "to": [0, 2, 0], "ticks": 80, "min": 10}}]
+
+
+def test_item_steps_round_trip(tmp_path):
+    s = item_spec(ITEM_STEPS)
+    for pos in (HOPPER, OUT, Q):
+        s.build.place(pos, "hopper[facing=down]")
+    f = tmp_path / "t.redstone.yaml"
+    f.write_text(fileformat.dump(s))
+    assert fileformat.load(f).tests == s.tests
 
 
 def item_spec(steps):
