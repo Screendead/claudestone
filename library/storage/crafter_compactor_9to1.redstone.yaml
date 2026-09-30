@@ -1,0 +1,289 @@
+name: crafter_compactor_9to1
+description: 'Inline 9-to-1 compactor for a storage slice (ingots, nuggets, slime, bone meal, kelp, redstone): the feed hopper fills a crafter, whose comparator reading must survive 8 dust to reach it, so it crafts only when all 9 slots are full and one ingot never becomes nuggets. Keeps up with a full hopper line: one block every 72 gt (2.5 items/s), the first 71 gt after items arrive. One wide and tileable; the hold input north of the feed hopper pauses it. A wrong item jams it without crafting; a full output container spills the block as an item.'
+traits: [survival_friendly, lockable, reset_safe, tileable, container_based, comparator_based, analog, one_wide, pistonless, entityless, lightless]
+palette:
+  .: air
+  '=': stone
+  '#': stone
+  G: glass
+  h: {input: hold}
+  H: {name: feed, block: 'hopper[facing=south]'}
+  C: {name: craft, block: 'crafter[orientation=down_south]'}
+  b: {block: 'barrel[facing=up]', fixture: true}
+  K: {name: cmp, block: 'comparator[facing=north]'}
+  '1': redstone_wire[north=side,south=side]
+  '2': redstone_wire[north=side,south=side]
+  '3': redstone_wire[north=side,south=up]
+  '4': redstone_wire[north=up,south=side]
+  '5': redstone_wire[north=side,south=side]
+  '6': redstone_wire[north=side,south=side]
+  '7': redstone_wire[north=side,south=side]
+  '8': redstone_wire[north=side,south=side]
+  '9': {name: fire, block: 'redstone_wire[north=side,south=up]'}
+layers:
+  0: |
+    .
+    .
+    b
+    =
+    =
+    =
+    =
+    =
+  1: |
+    h
+    H
+    C
+    K
+    1
+    2
+    3
+    #
+  2: |
+    .
+    .
+    9
+    #
+    #
+    #
+    G
+    4
+  3: |
+    .
+    .
+    .
+    8
+    7
+    6
+    5
+    .
+tests:
+- name: 18 ingots make exactly 2 iron blocks and no nuggets
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:18}]}'
+  - wait: 70
+  - check: unless data block ~0 ~0 ~2 Items[0]
+  - wait: 1
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:1}]
+  - wait: 200
+  - log: data get block ~0 ~0 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:2}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+  - level: {cmp: 0}
+- name: 13 ingots make 1 block and hold 4 ingots without misfiring
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:13}]}'
+  - wait: 400
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:1}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: if data block ~0 ~1 ~2 Items[3]
+  - check: unless data block ~0 ~1 ~2 Items[4]
+  - level: {cmp: 4}
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:iron_nugget"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+- name: a full hopper stack makes one block every 72 gt
+  steps:
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:64}]}'
+  - wave: {fire: '00000000000000000000000000000000000000000000000000000000000000000001111110000000'}
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:1}]
+  - wait: 422
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:6}]
+  - wait: 1
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:7}]
+  - wait: 10
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:7}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: if data block ~0 ~1 ~2 Items[{Slot:0b,id:"minecraft:iron_ingot",count:1}]
+  - check: unless data block ~0 ~1 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - level: {cmp: 1}
+- name: a stray cobblestone blocks without crafting and clears when taken out
+  steps:
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:4},{Slot:1b,id:"minecraft:cobblestone",count:1},{Slot:2b,id:"minecraft:iron_ingot",count:4}]}'
+  - wait: 150
+  - log: data get block ~0 ~1 ~2 Items
+  - check: unless data block ~0 ~0 ~2 Items[0]
+  - check: if data block ~0 ~1 ~2 Items[{Slot:4b,id:"minecraft:cobblestone",count:1}]
+  - check: if data block ~0 ~1 ~2 Items[8]
+  - expect: {fire: 1, craft: 1}
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:16}]}'
+  - wait: 200
+  # a crafter powered with a full grid takes nothing more: the feed hopper backs up
+  - check: unless data block ~0 ~0 ~2 Items[0]
+  - check: if data block ~0 ~1 ~1 Items[{id:"minecraft:iron_ingot",count:16}]
+  - check: if data block ~0 ~1 ~2 Items[{Slot:0b,count:1}]
+  - check: if data block ~0 ~1 ~2 Items[{Slot:4b,id:"minecraft:cobblestone"}]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:iron_nugget"}]
+  - expect: {fire: 1, craft: 1}
+  - level: {fire: 1, cmp: 9}
+  - run: 'data remove block ~0 ~1 ~2 Items[{Slot:4b}]'
+  - wait: 200
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:2}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: if data block ~0 ~1 ~2 Items[5]
+  - check: unless data block ~0 ~1 ~2 Items[6]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:iron_nugget"}]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - level: {cmp: 6}
+  - expect: {fire: 0}
+- name: 18 iron nuggets make 2 ingots
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_nugget",count:18}]}'
+  - wait: 300
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_ingot",count:2}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:iron_ingot"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+- name: 18 slime balls make 2 slime blocks
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:slime_ball",count:18}]}'
+  - wait: 300
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:slime_block",count:2}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:slime_block"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+- name: 13 bone meal make 1 bone block and hold 4 without making dye
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:bone_meal",count:13}]}'
+  - wait: 300
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:bone_block",count:1}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: if data block ~0 ~1 ~2 Items[3]
+  - check: unless data block ~0 ~1 ~2 Items[4]
+  - level: {cmp: 4}
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:white_dye"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+- name: 9 dried kelp make 1 block
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:dried_kelp",count:9}]}'
+  - wait: 300
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:dried_kelp_block",count:1}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:dried_kelp_block"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+- name: 9 redstone make 1 block
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:redstone",count:9}]}'
+  - wait: 300
+  - log: data get block ~0 ~0 ~2 Items
+  - log: data get block ~0 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:redstone_block",count:1}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: unless data block ~0 ~1 ~1 Items[0]
+  - check: unless data block ~0 ~1 ~2 Items[{id:"minecraft:redstone_block"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  - expect: {fire: 0, craft: 0}
+- name: hold stops the feed and releasing it resumes
+  steps:
+  - drive: {hold: 1}
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:18}]}'
+  - wait: 200
+  - expect: {feed: 1, fire: 0}
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: if data block ~0 ~1 ~1 Items[{count:18}]
+  - drive: {hold: 0}
+  - wait: 200
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:2}]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+- name: full output barrel
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  - run: 'data merge block ~0 ~0 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:9}]}'
+  - wait: 150
+  # the crafter does not wait for room: the block is thrown out as an item entity
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: if data block ~0 ~0 ~2 Items[{Slot:26b,id:"minecraft:stone",count:64}]
+  - check: unless data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block"}]
+  - check: positioned ~0 ~0 ~2 if entity @e[type=item,distance=..4,nbt={Item:{id:"minecraft:iron_block",count:1}}]
+  finally: ['execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]']
+
+- name: side by side slices work independently
+  tile: [1, 0, 0]
+  truth_table: |
+    hold | feed
+    0    | 0
+    1    | 1
+  delay: 0
+  steps:
+  # a spill from an earlier run can lie just outside the harness clear
+  - run: execute positioned ~0 ~0 ~2 run kill @e[type=item,distance=..8]
+  # the two slices' dust joins sideways, as in a player-built row
+  - check: if block ~0 ~1 ~4 redstone_wire[east=side]
+  - check: if block ~0 ~3 ~6 redstone_wire[east=side]
+  - check: if block ~0 ~2 ~2 redstone_wire[east=side]
+  - check: if block ~1 ~2 ~2 redstone_wire[west=side]
+  # the table ends with the second copy's hold still on
+  - run: setblock ~1 ~1 ~0 air
+  - wait: 4
+  - check: if block ~1 ~1 ~1 hopper[enabled=true]
+  - run: 'data merge block ~0 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:18}]}'
+  - run: 'data merge block ~1 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:bone_meal",count:13}]}'
+  - wait: 400
+  - log: data get block ~1 ~1 ~2 Items
+  - check: if data block ~0 ~0 ~2 Items[{id:"minecraft:iron_block",count:2}]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - check: unless data block ~0 ~1 ~2 Items[0]
+  - check: if data block ~1 ~0 ~2 Items[{id:"minecraft:bone_block",count:1}]
+  - check: unless data block ~1 ~0 ~2 Items[1]
+  - check: if data block ~1 ~1 ~2 Items[3]
+  - check: unless data block ~1 ~1 ~2 Items[4]
+  - check: unless data block ~1 ~1 ~2 Items[{id:"minecraft:white_dye"}]
+  - check: positioned ~0 ~0 ~2 unless entity @e[type=item,distance=..4]
+  # a neighbour firing at 9 must not lift this slice's dust while it holds 8
+  - run: 'data merge block ~0 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:1},{Slot:1b,id:"minecraft:iron_ingot",count:1},{Slot:2b,id:"minecraft:iron_ingot",count:1},{Slot:3b,id:"minecraft:iron_ingot",count:1},{Slot:4b,id:"minecraft:iron_ingot",count:1},{Slot:5b,id:"minecraft:iron_ingot",count:1},{Slot:6b,id:"minecraft:iron_ingot",count:1},{Slot:7b,id:"minecraft:iron_ingot",count:1}]}'
+  - run: 'data merge block ~1 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:1},{Slot:1b,id:"minecraft:iron_ingot",count:1},{Slot:2b,id:"minecraft:iron_ingot",count:1},{Slot:3b,id:"minecraft:iron_ingot",count:1},{Slot:4b,id:"minecraft:iron_ingot",count:1},{Slot:5b,id:"minecraft:iron_ingot",count:1},{Slot:6b,id:"minecraft:iron_ingot",count:1},{Slot:7b,id:"minecraft:iron_ingot",count:1}]}'
+  - run: 'data merge block ~1 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:iron_ingot",count:1}]}'
+  - wait: 40
+  - check: if data block ~1 ~0 ~2 Items[{id:"minecraft:iron_block",count:1}]
+  - check: unless data block ~1 ~1 ~2 Items[0]
+  - check: if data block ~0 ~1 ~2 Items[7]
+  - check: unless data block ~0 ~1 ~2 Items[8]
+  - check: unless data block ~0 ~0 ~2 Items[1]
+  - level: {cmp: 8, fire: 0}

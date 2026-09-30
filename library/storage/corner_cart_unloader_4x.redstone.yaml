@@ -1,0 +1,441 @@
+name: corner_cart_unloader_4x
+description: Our rebuild of a published mechanism, not a new design (GiorgioJGZ's 4x Hopper Speed Shulker Box Unloader, youtube svv07jrkAEg, uses the same cart over four hoppers in volume 60 against this build's 180). Shulker box unloader for feeding a sorter or furnace array from boxes, measured at 10 items per second (4x one hopper, 36k items/h, a full box of 1728 in 173 s, no gap between boxes). One hopper minecart lies on four bottom slabs over four hoppers, off-centre where all four drain it, and pulls 1 item per game tick from the box two blocks up. An emptied box is broken by a piston and pushed into a return chest, empty (a box of 10 stacks or more; a nearly empty box can be caught by the cart and comes out with the items instead), and a dispenser places the next full box. Output that backs up stalls without spilling items.
+traits: [survival_friendly, container_based, uses_entities, compact]
+entities:
+- {type: hopper_minecart, pos: [2.75, 2.5, 1.75]}
+palette:
+  .: air
+  '=': stone
+  b: barrel[facing=up]
+  H: hopper[facing=down]
+  R: {name: ret, block: 'hopper[facing=down]'}
+  c: chest[facing=north]
+  s: smooth_stone_slab[type=bottom]
+  B: {name: box, block: 'shulker_box[facing=down]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64},{Slot:24b,id:"minecraft:stone",count:64},{Slot:25b,id:"minecraft:stone",count:64},{Slot:26b,id:"minecraft:stone",count:64}]}'}
+  D: {name: disp, block: 'dispenser[facing=south]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:cobblestone",count:64}},{slot:1,item:{id:"minecraft:cobblestone",count:64}},{slot:2,item:{id:"minecraft:cobblestone",count:64}},{slot:3,item:{id:"minecraft:cobblestone",count:64}},{slot:4,item:{id:"minecraft:cobblestone",count:64}},{slot:5,item:{id:"minecraft:cobblestone",count:64}},{slot:6,item:{id:"minecraft:cobblestone",count:64}},{slot:7,item:{id:"minecraft:cobblestone",count:64}},{slot:8,item:{id:"minecraft:cobblestone",count:64}},{slot:9,item:{id:"minecraft:cobblestone",count:64}},{slot:10,item:{id:"minecraft:cobblestone",count:64}},{slot:11,item:{id:"minecraft:cobblestone",count:64}},{slot:12,item:{id:"minecraft:cobblestone",count:64}},{slot:13,item:{id:"minecraft:cobblestone",count:64}},{slot:14,item:{id:"minecraft:cobblestone",count:64}},{slot:15,item:{id:"minecraft:cobblestone",count:64}},{slot:16,item:{id:"minecraft:cobblestone",count:64}},{slot:17,item:{id:"minecraft:cobblestone",count:64}},{slot:18,item:{id:"minecraft:cobblestone",count:64}},{slot:19,item:{id:"minecraft:cobblestone",count:64}},{slot:20,item:{id:"minecraft:cobblestone",count:64}},{slot:21,item:{id:"minecraft:cobblestone",count:64}},{slot:22,item:{id:"minecraft:cobblestone",count:64}},{slot:23,item:{id:"minecraft:cobblestone",count:64}},{slot:24,item:{id:"minecraft:cobblestone",count:64}},{slot:25,item:{id:"minecraft:cobblestone",count:64}},{slot:26,item:{id:"minecraft:cobblestone",count:64}}]}}]}'}
+  C: {name: empty_cmp, block: 'comparator[facing=north,powered=true]{OutputSignal:15}'}
+  T: {name: empty, block: 'redstone_wall_torch[facing=south,lit=false]'}
+  M: {name: edge, block: 'comparator[facing=west,mode=subtract]'}
+  P: {name: breaker, block: 'piston[facing=east]'}
+  r: repeater[facing=south,delay=2]
+  d: {name: place_delay, block: 'repeater[facing=west,delay=4]'}
+  a: redstone_wire[east=up,south=side]
+  e: redstone_wire[north=side,south=side]
+  f: redstone_wire[north=side,south=side,east=side]
+  g: redstone_wire[north=side,south=side,east=side]
+  h: redstone_wire[north=side,east=side]
+  i: redstone_wire[north=side,south=side,west=side]
+  j: redstone_wire[north=side,east=side,west=side]
+  k: redstone_wire[east=side,west=side]
+  l: redstone_wire[west=side,east=side]
+  m: redstone_wire[west=side,south=side]
+  n: redstone_wire[north=side,south=side]
+layers:
+  0: |
+    .....
+    ..bb.
+    ..bb.
+    .....
+    .....
+    .....
+  1: |
+    .....
+    ..HH.
+    ..HH.
+    .....
+    .....
+    .....
+  2: |
+    .....
+    ..ss.
+    ..ssc
+    .....
+    .....
+    .....
+  3: |
+    =....
+    =....
+    ==..R
+    ==.=.
+    ==...
+    ===..
+  4: |
+    a===.
+    e..D.
+    fMPB.
+    er.C.
+    gi.=.
+    hjkT.
+  5: |
+    .ldm.
+    ...n.
+    .....
+    .....
+    .....
+    .....
+tests:
+- name: unloads box after box at 10 items per second
+  settle: 0
+  steps:
+  - run: 'scoreboard objectives add cu dummy'
+  - wait: 1000
+  - run: 'scoreboard players set .out cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - log: 'scoreboard players get .out cu'
+  - check: 'if score .out cu matches 495..497'
+  - wait: 1000
+  - run: 'scoreboard players set .out cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - log: 'scoreboard players get .out cu'
+  - check: 'if score .out cu matches 995..997'
+  - wait: 800
+  - check: 'if block ~3 ~4 ~2 shulker_box'
+  - log: 'data get block ~4 ~2 ~2 Items'
+  - wait: 60
+  - check: 'if data block ~4 ~2 ~2 Items[0]'
+  - check: 'unless data block ~4 ~2 ~2 Items[1]'
+  - check: 'unless data block ~4 ~2 ~2 Items[{id:"minecraft:shulker_box"}].components."minecraft:container"[0]'
+  - check: 'if block ~3 ~4 ~2 shulker_box'
+  - check: 'unless data block ~3 ~4 ~1 Items[0]'
+  - expect: {breaker: 0, empty: 0}
+  - level: {empty_cmp: 15}
+  - check: 'positioned ~2 ~2 ~2 unless entity @e[type=item,distance=..8]'
+  - run: 'execute store result score .c cu if entity @e[type=hopper_minecart]'
+  - check: 'if score .c cu matches 1'
+  - check: 'positioned ~2.75 ~2.5 ~1.75 if entity @e[type=hopper_minecart,distance=..0.01]'
+  - wait: 588
+  - run: 'scoreboard players set .out cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - log: 'scoreboard players get .out cu'
+  - check: 'if score .out cu matches 1716..1724'
+  - wait: 12
+  - run: 'scoreboard players set .out cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - log: 'scoreboard players get .out cu'
+  - check: 'if score .out cu matches 1728..1728'
+  - wait: 540
+  - run: 'scoreboard players set .out cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - log: 'scoreboard players get .out cu'
+  - check: 'if score .out cu matches 1995..1997'
+  - wait: 2400
+  - check: 'if data block ~4 ~2 ~2 Items[1]'
+  - check: 'unless data block ~4 ~2 ~2 Items[2]'
+  - check: 'unless data block ~4 ~2 ~2 Items[{id:"minecraft:shulker_box"}].components."minecraft:container"[0]'
+  - check: 'unless block ~3 ~4 ~2 shulker_box'
+  - expect: {breaker: 0, empty: 1}
+  - wait: 560
+  - run: 'scoreboard players set .out cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .out cu += .t cu'
+  - log: 'scoreboard players get .out cu'
+  - check: 'if score .out cu matches 3456'
+  - run: 'scoreboard players set .rest cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .rest cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .rest cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .rest cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .rest cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* *'
+  - run: 'scoreboard players operation .rest cu += .t cu'
+  - check: 'if score .rest cu matches 0'
+  - check: 'positioned ~2 ~2 ~2 unless entity @e[type=item,distance=..8]'
+  - run: 'execute store result score .c cu if entity @e[type=hopper_minecart]'
+  - check: 'if score .c cu matches 1'
+  - check: 'positioned ~2.75 ~2.5 ~1.75 if entity @e[type=hopper_minecart,distance=..0.01]'
+  finally:
+  - scoreboard objectives remove cu
+- name: a box of 10 stacks comes back empty too
+  settle: 0
+  steps:
+  - run: 'scoreboard objectives add cu dummy'
+  - run: 'data merge block ~3 ~4 ~2 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64}]}'
+  - wait: 700
+  - check: 'if data block ~4 ~2 ~2 Items[0]'
+  - check: 'unless data block ~4 ~2 ~2 Items[1]'
+  - check: 'unless data block ~4 ~2 ~2 Items[{id:"minecraft:shulker_box"}].components."minecraft:container"[0]'
+  - check: 'if block ~3 ~4 ~2 shulker_box'
+  - check: 'positioned ~2 ~2 ~2 unless entity @e[type=item,distance=..8]'
+  finally:
+  - scoreboard objectives remove cu
+- name: a small mixed box leaves its empty box in the output
+  settle: 0
+  steps:
+  - run: 'scoreboard objectives add cu dummy'
+  - run: 'data merge block ~3 ~4 ~2 {Items:[{Slot:0b,id:"minecraft:diamond",count:3},{Slot:1b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:dirt",count:1},{Slot:9b,id:"minecraft:oak_log",count:20},{Slot:26b,id:"minecraft:iron_ingot",count:7}]}'
+  - run: 'scoreboard players set .tot0 cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~3 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~2 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~4 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - check: 'if score .tot0 cu matches 95'
+  - wait: 200
+  - check: 'unless data block ~4 ~2 ~2 Items[0]'
+  - run: 'scoreboard players set .bx cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* shulker_box'
+  - run: 'scoreboard players operation .bx cu += .t cu'
+  - check: 'if score .bx cu matches 1'
+  - run: 'scoreboard players set .bf cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* shulker_box[container~{items:{size:{min:1}}}]'
+  - run: 'scoreboard players operation .bf cu += .t cu'
+  - log: 'scoreboard players get .bf cu'
+  - check: 'if score .bf cu matches 0'
+  - check: 'if block ~3 ~4 ~2 shulker_box'
+  - run: 'scoreboard players set .tot1 cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~3 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~2 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~4 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - log: 'scoreboard players get .tot1 cu'
+  - check: 'if score .tot1 cu matches 1824'
+  - check: 'positioned ~2 ~2 ~2 unless entity @e[type=item,distance=..8]'
+  - run: 'execute store result score .c cu if entity @e[type=hopper_minecart]'
+  - check: 'if score .c cu matches 1'
+  - check: 'positioned ~2.75 ~2.5 ~1.75 if entity @e[type=hopper_minecart,distance=..0.01]'
+  finally:
+  - scoreboard objectives remove cu
+- name: full output backs up without spilling and resumes
+  settle: 0
+  steps:
+  - run: 'scoreboard objectives add cu dummy'
+  - run: 'data merge block ~2 ~0 ~1 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~3 ~0 ~1 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~2 ~0 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~3 ~0 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~2 ~1 ~1 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64}]}'
+  - run: 'data merge block ~3 ~1 ~1 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64}]}'
+  - run: 'data merge block ~2 ~1 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64}]}'
+  - run: 'data merge block ~3 ~1 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64}]}'
+  - run: 'scoreboard players set .tot0 cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~3 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~2 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~4 ~2 container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* *'
+  - run: 'scoreboard players operation .tot0 cu += .t cu'
+  - check: 'if score .tot0 cu matches 9920'
+  - wait: 600
+  - run: 'scoreboard players set .tot1 cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~1 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~1 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~3 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~4 ~2 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~4 ~2 container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* *'
+  - run: 'scoreboard players operation .tot1 cu += .t cu'
+  - check: 'if score .tot1 cu matches 9920'
+  - run: 'scoreboard players set .box cu 0'
+  - run: 'execute store result score .t cu if items block ~3 ~4 ~2 container.* *'
+  - run: 'scoreboard players operation .box cu += .t cu'
+  - check: 'if score .box cu matches 1408'
+  - run: 'scoreboard players set .cart cu 0'
+  - run: 'execute store result score .t cu if items entity @e[type=hopper_minecart,limit=1,sort=nearest] container.* *'
+  - run: 'scoreboard players operation .cart cu += .t cu'
+  - check: 'if score .cart cu matches 320'
+  - check: 'positioned ~2 ~2 ~2 unless entity @e[type=item,distance=..8]'
+  - expect: {breaker: 0, empty: 0}
+  - check: 'if data block ~3 ~4 ~1 Items[0]'
+  - run: 'data merge block ~2 ~0 ~1 {Items:[]}'
+  - wait: 400
+  - run: 'scoreboard players set .b1 cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .b1 cu += .t cu'
+  - log: 'scoreboard players get .b1 cu'
+  - check: 'if score .b1 cu matches 49..51'
+  finally:
+  - scoreboard objectives remove cu
+- name: a cart set on a curved rail then dropped lands in place
+  settle: 0
+  steps:
+  - run: 'scoreboard objectives add cu dummy'
+  - run: 'kill @e[type=hopper_minecart,distance=..10]'
+  - run: 'setblock ~3 ~2 ~2 stone'
+  - run: 'setblock ~3 ~3 ~2 rail[shape=north_west]'
+  - run: 'summon hopper_minecart ~3 ~3.1 ~2'
+  - wait: 5
+  - log: 'data get entity @e[type=hopper_minecart,limit=1] Pos'
+  - check: 'positioned ~2.75 ~3.0625 ~1.75 if entity @e[type=hopper_minecart,distance=..0.01]'
+  - run: 'setblock ~3 ~3 ~2 air'
+  - run: 'setblock ~3 ~2 ~2 air'
+  - wait: 10
+  - run: 'setblock ~3 ~2 ~2 smooth_stone_slab[type=bottom]'
+  - wait: 5
+  - log: 'data get entity @e[type=hopper_minecart,limit=1] Pos'
+  - run: 'execute store result score .c cu if entity @e[type=hopper_minecart]'
+  - check: 'if score .c cu matches 1'
+  - check: 'positioned ~2.75 ~2.5 ~1.75 if entity @e[type=hopper_minecart,distance=..0.01]'
+  - run: 'scoreboard players set .a cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .a cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .a cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .a cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .a cu += .t cu'
+  - wait: 400
+  - run: 'scoreboard players set .b cu 0'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .b cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~1 container.* *'
+  - run: 'scoreboard players operation .b cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~2 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .b cu += .t cu'
+  - run: 'execute store result score .t cu if items block ~3 ~0 ~2 container.* *'
+  - run: 'scoreboard players operation .b cu += .t cu'
+  - run: 'scoreboard players operation .b cu -= .a cu'
+  - log: 'scoreboard players get .b cu'
+  - check: 'if score .b cu matches 199..201'
+  finally:
+  - scoreboard objectives remove cu

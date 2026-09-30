@@ -297,6 +297,7 @@ to up (9,2,7) |
 | sculk_note_block_frequency_link | 18x2x6 | 216 | 16 | - | flat, pistonless, entityless, survival_friendly, tick_accurate, analog | A sculk sensor hears a note block 5 blocks away after 5 ticks, stays active 30 ticks then cools down 10 (ignoring vibrations meanwhile), its comparator reads frequency 10 for a note block or trapdoor opening and 9 for closing, and range ends at 8; use: wireless link or dual-edge detection through walls |
 | sculk_output_strength_by_distance | 12x3x5 | 180 | 25 | - | pistonless, entityless, survival_friendly, tick_accurate, analog | A sculk sensor's direct output is max(1, 15 - floor(15*d/8)) for a vibration d blocks away (14, 8, 2 at 1, 4, 7), arriving after d ticks; it strongly powers the block below but leaves a solid block beside it unpowered; use: wireless rangefinder or near/far selector |
 | shelf_slot_bitmask_comparator | 3x2x7 | 42 | 16 | - | container_based, analog, compact | A comparator behind a shelf reads its three slots as a bitmask (1, 2, 4), so a shelf is a one-block 3-bit constant |
+| shulker_box_loader_mechanics | 8x4x4 | 128 | 17 | - | container_based, comparator_based, piston_based, survival_friendly | Box-loader parts in 26.3 |
 | spat_piston_fires_same_tick | 7x2x9 | 126 | 71 | - | piston_based, flat, entityless, tick_accurate | A retracted piston spat by a sticky piston's short pulse, onto a cell where it is powered, extends in the spit's own tick: after a between-ticks 1 gt pulse, and after an in-tick 0-tick where the spit and the new extension share one block-event phase |
 | sticky_piston_short_pulse_drops_block | 2x1x1 | 2 | 2 | - | piston_based, one_wide, flat, entityless, tick_accurate | A sticky piston given a 1 or 2 gt pulse leaves its block pushed out, and the next short pulse pulls it back; a pulse-length filter and one-piston block toggle |
 | sulfur_cube_tnt_priming | 9x2x7 | 126 | 78 | - | pistonless, flat | A sulfur cube holding TNT stops moving and primes with a 120 tick fuse (fire damage too; explosion damage 15-44) when the block containing its feet gets any redstone signal from a neighbour or is itself an outputting component (powered comparator, the stone plate it presses), so it cannot rest on a stone plate as a weight, but a cube holding stone can; with its block it shrugs off 100 damage, and tnt_explodes false stops it priming; use: a movable, blast-proof charge fired like TNT with a fixed 120 tick fuse |
@@ -511,6 +512,24 @@ east face |
 | analog_min | 5x2x5 | 50 | 19 | 4 | analog, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly, compact, fast, flat, horizontal | Lossless min(a, b) in 4 game ticks from three comparators, by De Morgan: min(a, b) = 15 - max(15 - a, 15 - b) |
 | analog_peak_hold | 4x2x6 | 48 | 21 | - | analog, comparator_based, silent, lightless, pistonless, entityless, compact, flat, tick_accurate, reset_safe, survival_friendly | Analog peak detector: q holds the largest strength its input d has had since the last reset, losslessly and indefinitely |
 | analog_subtract | 4x2x4 | 32 | 13 | 2 | analog, comparator_based, ultracompact, ultrafast, silent, lightless, pistonless, entityless, flat, horizontal, tick_accurate, reset_safe, survival_friendly | Saturating subtraction out = max(a - b, 0) in one comparator: S (x=2, z=3) in subtract mode, facing east, reads a from the dust at x=3, z=3 behind it and b from the dust on its north side (x=2, z=2); its output strength (block entity OutputSignal) is a - b, and it is powered exactly when a > b, so the same block is also the strict a > b test |
+
+## storage
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| box_loader_2x_accessible | 4x4x3 | 48 | 28 | - | container_based, comparator_based, piston_based, survival_friendly | Shulker box loader for a sorter's bulk output that stays open to the player |
+| corner_cart_unloader_4x | 5x6x6 | 180 | 50 | - | survival_friendly, container_based, uses_entities, compact | Our rebuild of a published mechanism, not a new design (GiorgioJGZ's 4x Hopper Speed Shulker Box Unloader, youtube svv07jrkAEg, uses the same cart over four hoppers in volume 60 against this build's 180) |
+| crafter_compactor_9to1 | 1x4x7 | 28 | 22 | 0 | survival_friendly, lockable, reset_safe, tileable, container_based, comparator_based, analog, one_wide, pistonless, entityless, lightless | Inline 9-to-1 compactor for a storage slice (ingots, nuggets, slime, bone meal, kelp, redstone): the feed hopper fills a crafter, whose comparator reading must survive 8 dust to reach it, so it crafts only when all 9 slots are full and one ingot never becomes nuggets |
+| lightless_double_speed_filter | 5x6x13 | 390 | 124 | - | container_based, comparator_based, analog, survival_friendly, pistonless, entityless, silent, lightless, tileable, reset_safe | A torchless item-sorter module for a storage hall: four filter slices side by side, one item
+type per block of width, each draining its filter at 5 items per second (measured: 40 items
+in 160 game ticks per slice, and two slices at once across the seam of two tiled modules).
+Each slice is the wiki double-speed layout (filter hopper F facing down into a full-stack
+hopper M, a second hopper E under M) with the torch replaced by a comparator inverter, so no
+block changes light and nothing can burn out under a steady stream.
+How it works per slice: comparator `sense` reads F (41 target + 64/64/12/1 junk reads 8, the
+42nd target reads 9) and drives a stone block; dust on it carries the level to the `contact`
+dust beside `invert`, a compare-mode comparator whose rear reads a composter (level 3, or 2 on
+the longer variant) |
 
 ## survival
 

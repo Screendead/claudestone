@@ -1,0 +1,210 @@
+name: box_loader_2x_accessible
+description: 'Shulker box loader for a sorter''s bulk output that stays open to the player. Two hoppers fill the box at 5 items a second (twice hopper speed, a full 27-stack box of stone reaches the chest about 6,930 game ticks, 5.8 minutes, after the first item), a comparator that fires only at 27 full stacks unlocks the hopper under the box and, in the same tick, has a sticky piston push a slab down that breaks the box into that hopper and on to the chest; and the dispenser (restocked by a hopper from an empties chest) puts the next one in when the lock torch relights. The box can be opened from the west over the comparator while it loads. Input: any containers above the two feed hoppers.'
+traits: [container_based, comparator_based, piston_based, survival_friendly]
+palette:
+  .: air
+  '#': stone
+  g: glass
+  R: redstone_block
+  S: stone
+  t: 'redstone_wall_torch[facing=south,lit=true]'
+  w: 'repeater[facing=west,delay=3]'
+  r: 'repeater[facing=west,delay=4]'
+  C: 'hopper[facing=south,enabled=false]'
+  O: chest[facing=south]
+  a: 'redstone_wire[south=up,east=side]'
+  b: 'redstone_wire[west=side,east=side]'
+  d: 'redstone_wire[east=side,north=side,south=up]'
+  e: 'redstone_wire[north=up,south=side]'
+  f: 'redstone_wire[south=side,east=side]'
+  s: 'redstone_wire[north=side,south=side]'
+  F: hopper[facing=south]
+  H: hopper[facing=north]
+  B: {name: full, block: 'comparator[facing=east]'}
+  X: shulker_box[facing=up]
+  D: 'dispenser[facing=west]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1}]}'
+  U: {block: 'barrel[facing=up]', fixture: true}
+  T: smooth_stone_slab[type=top]
+  E: hopper[facing=down]
+  K: 'chest[facing=west]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1},{Slot:1b,id:"minecraft:shulker_box",count:1},{Slot:2b,id:"minecraft:shulker_box",count:1},{Slot:3b,id:"minecraft:shulker_box",count:1},{Slot:4b,id:"minecraft:shulker_box",count:1},{Slot:5b,id:"minecraft:shulker_box",count:1},{Slot:6b,id:"minecraft:shulker_box",count:1},{Slot:7b,id:"minecraft:shulker_box",count:1}]}'
+  G: {name: piston, block: 'sticky_piston[facing=down]'}
+layers:
+  0: |
+    ....
+    abwS
+    ##Ct
+    .RO.
+  1: |
+    ....
+    ..F.
+    dBXD
+    #sH.
+  2: |
+    ....
+    ..U.
+    g#TE
+    e#U.
+  3: |
+    ....
+    ....
+    frGK
+    ....
+tests:
+- name: 1728 stone reach the chest as one full box between 6905 and 6940 gt, 5 items a second
+  steps:
+  - run: 'data merge block ~2 ~2 ~1 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:32}]}'
+  - run: 'data merge block ~2 ~2 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:32}]}'
+  - wait: 3456
+  - log: data get block ~2 ~1 ~2 Items
+  - check: if data block ~2 ~1 ~2 Items[{Slot:12b,count:64}]
+  - check: unless data block ~2 ~1 ~2 Items[14]
+  - wait: 3449
+  - check: unless data block ~2 ~0 ~3 Items[0]
+  - check: if data block ~2 ~1 ~2 Items[{Slot:26b}]
+  - wait: 35
+  - log: data get block ~2 ~0 ~3 Items[0].components."minecraft:container"[26]
+  - check: 'if data block ~2 ~0 ~3 Items[{Slot:0b,id:"minecraft:shulker_box",count:1}]'
+  - check: unless data block ~2 ~0 ~3 Items[1]
+  - check: 'if data block ~2 ~0 ~3 Items[0].components."minecraft:container"[{slot:26}].item{id:"minecraft:stone",count:64}'
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: unless data block ~2 ~1 ~2 Items[0]
+  - check: unless data block ~2 ~2 ~1 Items[0]
+  - check: unless data block ~2 ~2 ~3 Items[0]
+  - check: unless data block ~2 ~1 ~1 Items[0]
+  - check: unless data block ~2 ~1 ~3 Items[0]
+  - check: unless data block ~2 ~0 ~2 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+- name: two boxes in a row, the dispenser restocked from the empties chest
+  steps:
+  - run: item replace block ~2 ~2 ~1 container.0 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.1 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.2 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.3 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.4 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.5 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.6 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.7 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.8 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.9 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.10 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.11 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.12 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.13 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.14 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.15 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.16 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.17 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.18 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.19 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.20 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.21 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.22 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.23 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.24 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.25 with stone 64
+  - run: item replace block ~2 ~2 ~1 container.26 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.0 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.1 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.2 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.3 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.4 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.5 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.6 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.7 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.8 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.9 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.10 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.11 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.12 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.13 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.14 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.15 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.16 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.17 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.18 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.19 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.20 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.21 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.22 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.23 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.24 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.25 with stone 64
+  - run: item replace block ~2 ~2 ~3 container.26 with stone 64
+  - wait: 13900
+  - check: 'if data block ~2 ~0 ~3 Items[{Slot:1b,id:"minecraft:shulker_box",count:1}]'
+  - check: unless data block ~2 ~0 ~3 Items[2]
+  - check: 'if data block ~2 ~0 ~3 Items[0].components."minecraft:container"[{slot:26}].item{id:"minecraft:stone",count:64}'
+  - check: 'if data block ~2 ~0 ~3 Items[1].components."minecraft:container"[{slot:26}].item{id:"minecraft:stone",count:64}'
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: unless data block ~2 ~1 ~2 Items[0]
+  - check: unless data block ~2 ~2 ~1 Items[0]
+  - check: unless data block ~2 ~2 ~3 Items[0]
+  - check: if data block ~3 ~1 ~2 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+- name: 1729 stone give one full box and 1 in the next, nothing lost
+  steps:
+  - run: 'data merge block ~2 ~2 ~1 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:33}]}'
+  - run: 'data merge block ~2 ~2 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:32}]}'
+  - wait: 7200
+  - check: 'if data block ~2 ~0 ~3 Items[{Slot:0b,id:"minecraft:shulker_box",count:1}]'
+  - check: unless data block ~2 ~0 ~3 Items[1]
+  - check: 'if data block ~2 ~0 ~3 Items[0].components."minecraft:container"[{slot:26}].item{id:"minecraft:stone",count:64}'
+  - check: 'if data block ~2 ~1 ~2 Items[{Slot:0b,id:"minecraft:stone",count:1}]'
+  - check: unless data block ~2 ~1 ~2 Items[1]
+  - check: unless data block ~2 ~2 ~1 Items[0]
+  - check: unless data block ~2 ~1 ~1 Items[0]
+  - check: unless data block ~2 ~1 ~3 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+- name: a partial box stays put
+  steps:
+  - run: 'data merge block ~2 ~2 ~1 {Items:[{Slot:0b,id:"minecraft:stone",count:50}]}'
+  - run: 'data merge block ~2 ~2 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:50}]}'
+  - wait: 2000
+  - check: 'if data block ~2 ~1 ~2 Items[{Slot:0b,id:"minecraft:stone",count:64}]'
+  - check: 'if data block ~2 ~1 ~2 Items[{Slot:1b,id:"minecraft:stone",count:36}]'
+  - level: {full: 0}
+  - expect: {piston: 0}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: unless data block ~2 ~0 ~3 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+- name: 16-stackables fill at 27 x 16
+  steps:
+  - run: 'data merge block ~2 ~2 ~1 {Items:[{Slot:0b,id:"minecraft:ender_pearl",count:16},{Slot:1b,id:"minecraft:ender_pearl",count:16},{Slot:2b,id:"minecraft:ender_pearl",count:16},{Slot:3b,id:"minecraft:ender_pearl",count:16},{Slot:4b,id:"minecraft:ender_pearl",count:16},{Slot:5b,id:"minecraft:ender_pearl",count:16},{Slot:6b,id:"minecraft:ender_pearl",count:16},{Slot:7b,id:"minecraft:ender_pearl",count:16},{Slot:8b,id:"minecraft:ender_pearl",count:16},{Slot:9b,id:"minecraft:ender_pearl",count:16},{Slot:10b,id:"minecraft:ender_pearl",count:16},{Slot:11b,id:"minecraft:ender_pearl",count:16},{Slot:12b,id:"minecraft:ender_pearl",count:16},{Slot:13b,id:"minecraft:ender_pearl",count:8}]}'
+  - run: 'data merge block ~2 ~2 ~3 {Items:[{Slot:0b,id:"minecraft:ender_pearl",count:16},{Slot:1b,id:"minecraft:ender_pearl",count:16},{Slot:2b,id:"minecraft:ender_pearl",count:16},{Slot:3b,id:"minecraft:ender_pearl",count:16},{Slot:4b,id:"minecraft:ender_pearl",count:16},{Slot:5b,id:"minecraft:ender_pearl",count:16},{Slot:6b,id:"minecraft:ender_pearl",count:16},{Slot:7b,id:"minecraft:ender_pearl",count:16},{Slot:8b,id:"minecraft:ender_pearl",count:16},{Slot:9b,id:"minecraft:ender_pearl",count:16},{Slot:10b,id:"minecraft:ender_pearl",count:16},{Slot:11b,id:"minecraft:ender_pearl",count:16},{Slot:12b,id:"minecraft:ender_pearl",count:16},{Slot:13b,id:"minecraft:ender_pearl",count:8}]}'
+  - wait: 1800
+  - check: 'if data block ~2 ~0 ~3 Items[{Slot:0b,id:"minecraft:shulker_box",count:1}]'
+  - check: 'if data block ~2 ~0 ~3 Items[0].components."minecraft:container"[{slot:26}].item{id:"minecraft:ender_pearl",count:16}'
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: unless data block ~2 ~1 ~2 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+- name: out of empty boxes the input backs up and nothing drops, a hand-placed box restarts it
+  steps:
+  - run: 'data merge block ~3 ~1 ~2 {Items:[]}'
+  - run: 'data merge block ~3 ~3 ~2 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~2 {Items:[]}'
+  - run: 'data merge block ~2 ~2 ~1 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:32}]}'
+  - run: 'data merge block ~2 ~2 ~3 {Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:32}]}'
+  - wait: 7300
+  - check: if block ~2 ~1 ~2 air
+  - check: 'if data block ~2 ~0 ~3 Items[{Slot:0b,id:"minecraft:shulker_box",count:1}]'
+  - check: 'if data block ~2 ~0 ~3 Items[0].components."minecraft:container"[{slot:26}].item{id:"minecraft:stone",count:64}'
+  - check: unless data block ~2 ~0 ~3 Items[1]
+  - check: if data block ~2 ~1 ~1 Items[0]
+  - check: if data block ~2 ~1 ~3 Items[0]
+  - check: if data block ~2 ~2 ~1 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+  - wait: 400
+  - check: if block ~2 ~1 ~2 air
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+  - check: unless data block ~2 ~0 ~2 Items[0]
+  - run: setblock ~2 ~1 ~2 shulker_box[facing=up]
+  - wait: 700
+  - check: 'if data block ~2 ~1 ~2 Items[{Slot:0b,id:"minecraft:stone",count:64}]'
+  - check: 'if data block ~2 ~1 ~2 Items[{Slot:1b,id:"minecraft:stone",count:64}]'
+  - check: unless data block ~2 ~1 ~2 Items[2]
+  - check: unless data block ~2 ~2 ~1 Items[0]
+  - check: unless data block ~2 ~1 ~1 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]

@@ -1,0 +1,153 @@
+name: shulker_box_loader_mechanics
+description: 'Box-loader parts in 26.3. A sticky piston above pushes a top slab down into a shulker box standing on a hopper and breaks it into one item that keeps its contents; if the hopper unlocks in that same tick it takes the item at once, and the slab comes back. A locked hopper leaves the item lying there. A dispenser places a box facing up when a block is under the target, else facing the way the dispenser faces. A hopper inserts from the side under a top slab. A comparator reads 15 only at 27 full stacks (14 at 1727 stone and at 431 pearls).'
+traits: [container_based, comparator_based, piston_based, survival_friendly]
+palette:
+  .: air
+  '#': stone
+  k: {input: lock}
+  b: {input: brk}
+  p: {input: place}
+  q: {input: place2}
+  L: 'repeater[facing=east,powered=true]'
+  C: 'hopper[facing=west,enabled=false]{TransferCooldown:20}'
+  O: chest[facing=north]
+  X: 'shulker_box[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64},{Slot:24b,id:"minecraft:stone",count:64},{Slot:25b,id:"minecraft:stone",count:64},{Slot:26b,id:"minecraft:stone",count:63}]}'
+  F: hopper[facing=south]
+  U: {block: 'barrel[facing=up]', fixture: true}
+  B: {name: full, block: 'comparator[facing=north]'}
+  D: 'dispenser[facing=east]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1},{Slot:1b,id:"minecraft:shulker_box",count:1},{Slot:2b,id:"minecraft:shulker_box",count:1},{Slot:3b,id:"minecraft:shulker_box",count:1},{Slot:4b,id:"minecraft:shulker_box",count:1},{Slot:5b,id:"minecraft:shulker_box",count:1},{Slot:6b,id:"minecraft:shulker_box",count:1},{Slot:7b,id:"minecraft:shulker_box",count:1},{Slot:8b,id:"minecraft:shulker_box",count:1}]}'
+  T: smooth_stone_slab[type=top]
+  G: sticky_piston[facing=down]
+  H: hopper[facing=east]
+  Y: 'shulker_box[facing=up]{Items:[{Slot:0b,id:"minecraft:ender_pearl",count:16},{Slot:1b,id:"minecraft:ender_pearl",count:16},{Slot:2b,id:"minecraft:ender_pearl",count:16},{Slot:3b,id:"minecraft:ender_pearl",count:16},{Slot:4b,id:"minecraft:ender_pearl",count:16},{Slot:5b,id:"minecraft:ender_pearl",count:16},{Slot:6b,id:"minecraft:ender_pearl",count:16},{Slot:7b,id:"minecraft:ender_pearl",count:16},{Slot:8b,id:"minecraft:ender_pearl",count:16},{Slot:9b,id:"minecraft:ender_pearl",count:16},{Slot:10b,id:"minecraft:ender_pearl",count:16},{Slot:11b,id:"minecraft:ender_pearl",count:16},{Slot:12b,id:"minecraft:ender_pearl",count:16},{Slot:13b,id:"minecraft:ender_pearl",count:16},{Slot:14b,id:"minecraft:ender_pearl",count:16},{Slot:15b,id:"minecraft:ender_pearl",count:16},{Slot:16b,id:"minecraft:ender_pearl",count:16},{Slot:17b,id:"minecraft:ender_pearl",count:16},{Slot:18b,id:"minecraft:ender_pearl",count:16},{Slot:19b,id:"minecraft:ender_pearl",count:16},{Slot:20b,id:"minecraft:ender_pearl",count:16},{Slot:21b,id:"minecraft:ender_pearl",count:16},{Slot:22b,id:"minecraft:ender_pearl",count:16},{Slot:23b,id:"minecraft:ender_pearl",count:16},{Slot:24b,id:"minecraft:ender_pearl",count:16},{Slot:25b,id:"minecraft:ender_pearl",count:16},{Slot:26b,id:"minecraft:ender_pearl",count:15}]}'
+  M: {name: pearl, block: 'comparator[facing=west]'}
+  E: 'dispenser[facing=north]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1}]}'
+layers:
+  0: |
+    .........
+    .OCLk.###
+    ..#......
+    .........
+  1: |
+    ..F......
+    pDX...HYM
+    ..B......
+    ......E..
+  2: |
+    ..U......
+    ..T......
+    .........
+    ......q..
+  3: |
+    .........
+    ..G......
+    .........
+    .........
+  4: |
+    .........
+    ..b......
+    .........
+    .........
+tests:
+- name: comparator reads 14 at 1727 stone and 15 at 27 full stacks
+  initial: {lock: 1}
+  steps:
+  - level: {full: 14}
+  - run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+  - wait: 12
+  - level: {full: 15}
+  - check: if data block ~2 ~1 ~1 Items[{Slot:26b,count:64}]
+  - check: unless data block ~2 ~1 ~0 Items[0]
+- name: 16-stackables read 15 only at 27 x 16
+  initial: {lock: 1}
+  steps:
+  - level: {pearl: 14}
+  - run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"minecraft:ender_pearl",count:1}]}'
+  - wait: 12
+  - level: {pearl: 15}
+- name: a slab pushed down breaks the box and the hopper unlocked that tick takes it
+  initial: {lock: 1}
+  steps:
+  - drive: {lock: 0}
+  - wait: 1
+  - drive: {brk: 1}
+  - wait: 4
+  - drive: {brk: 0}
+  - wait: 12
+  - drive: {lock: 1}
+  - check: if block ~2 ~1 ~1 air
+  - check: if block ~2 ~2 ~1 smooth_stone_slab[type=top]
+  - log: data get block ~1 ~0 ~1 Items
+  - check: 'if data block ~1 ~0 ~1 Items[{Slot:0b,id:"minecraft:shulker_box",count:1}]'
+  - check: unless data block ~1 ~0 ~1 Items[1]
+  - check: 'if data block ~1 ~0 ~1 Items[0].components."minecraft:container"[{slot:26}].item{id:"minecraft:stone",count:63}'
+  - check: 'if data block ~1 ~0 ~1 Items[0].components."minecraft:container"[{slot:0}].item{count:64}'
+  - check: positioned ~2 ~1.5 ~1 unless entity @e[type=item,distance=..6]
+- name: a locked hopper leaves the box item lying until it unlocks
+  initial: {lock: 1}
+  steps:
+  - drive: {brk: 1}
+  - wait: 4
+  - drive: {brk: 0}
+  - wait: 20
+  - check: positioned ~2 ~1.5 ~1 if entity @e[type=item,distance=..1]
+  - check: unless data block ~1 ~0 ~1 Items[0]
+  - drive: {lock: 0}
+  - wait: 20
+  - check: 'if data block ~1 ~0 ~1 Items[{Slot:0b,id:"minecraft:shulker_box",count:1}]'
+  - check: positioned ~2 ~1.5 ~1 unless entity @e[type=item,distance=..6]
+- name: a dispenser beside places the new box facing up onto the hopper
+  initial: {lock: 1}
+  steps:
+  - drive: {lock: 0}
+  - wait: 1
+  - drive: {brk: 1}
+  - wait: 4
+  - drive: {brk: 0}
+  - wait: 12
+  - drive: {lock: 1}
+  - drive: {place: 1}
+  - wait: 3
+  - check: if block ~2 ~1 ~1 air
+  - wait: 1
+  - check: if block ~2 ~1 ~1 shulker_box[facing=up]
+  - drive: {place: 0}
+- name: a dispenser over air places the box facing its own way
+  initial: {lock: 1}
+  steps:
+  - drive: {place2: 1}
+  - wait: 6
+  - check: if block ~6 ~1 ~2 shulker_box[facing=north]
+- name: 9 more place, fill and break cycles lose no box and leave no item entity
+  initial: {lock: 1}
+  steps:
+  - drive: {lock: 0}
+  - wait: 1
+  - drive: {brk: 1}
+  - wait: 4
+  - drive: {brk: 0}
+  - wait: 12
+  - drive: {lock: 1}
+  - repeat:
+      times: 9
+      steps:
+      - drive: {place: 1}
+      - wait: 6
+      - drive: {place: 0}
+      - check: if block ~2 ~1 ~1 shulker_box[facing=up]
+      - run: 'data merge block ~2 ~1 ~0 {Items:[{Slot:0b,id:"minecraft:stone",count:1}]}'
+      - wait: 12
+      - drive: {lock: 0}
+      - wait: 1
+      - drive: {brk: 1}
+      - wait: 4
+      - drive: {brk: 0}
+      - wait: 12
+      - drive: {lock: 1}
+      - wait: 4
+      - check: if block ~2 ~1 ~1 air
+      - check: positioned ~2 ~1.5 ~1 unless entity @e[type=item,distance=..6]
+  - log: data get block ~1 ~0 ~1 Items
+  - check: if data block ~1 ~0 ~1 Items[9]
+  - check: unless data block ~1 ~0 ~1 Items[10]
+  - check: 'if data block ~1 ~0 ~1 Items[9].components."minecraft:container"[{slot:0}].item{id:"minecraft:stone"}'
