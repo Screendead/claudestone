@@ -26,6 +26,7 @@ python -m scripts.servers {start,stop,status} [laptop|docker|all]   # satellites
 python -m redstone.docker_sats {start,stop,status} [dsatN]...   # Docker satellites only
 python -m scripts.satellite_image        # rebuild the Docker satellite image on the desktop
 python -m scripts.remote_run <dir> [--jobs N] -- <cmd> [args]...   # a CPU-heavy search, on the desktop
+python -m scripts.remote_keep -- <cmd> [args]...   # rerun a resumable desktop job after each desktop drop
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
 python -m scripts.watch {start,stop,status}   # the camera director on main (starts by itself)
 python -m scripts.watch {off,on} [player]...  # opt players out of / back into being watched
@@ -170,6 +171,9 @@ gives the container N CPUs and N GB; all runs together hold at most `REDSTONE_SE
 (default 12) of the desktop VM's 14 CPUs, via slot locks in `server/remote_run/`. Ctrl-C,
 SIGTERM or a killed process stops the container (its stdin closes); an unreachable desktop
 is an error, never a local run.
+`scripts.remote_keep` runs a local command (usually a script that rebuilds its resume state from
+the log it streamed, then calls remote_run) and runs it again whenever it exits 255, remote_run's
+code for a lost desktop, once the desktop's Docker answers again. Any other exit ends it.
 
 ## Architecture
 
