@@ -233,3 +233,38 @@ def test_initial_and_tile():
         "test 't': tile [1, 0, 0]: input a at (1, 1, 0) is inside the build (minecraft:redstone_wire); the driver cell must be air"]
     assert "test 't': tile [0, 1, 0]: the copies overlap at (0, 1, 0)" in lint_test(tile=[0, 1, 0])[0]
     assert "exceed" in lint_test(tile=[0, 0, -1])[0]
+
+
+def test_item_steps():
+    cells = {(0, 0, 0): "stone", (0, 1, 0): "hopper[facing=down]", (1, 1, 0): "oak_shelf[facing=north]",
+             (2, 1, 0): "stone"}
+    lint_steps = lambda *steps: lint(spec(cells, named={"h": (0, 1, 0), "s": (2, 1, 0)},
+                                          tests=[{"name": "t", "steps": list(steps)}]))
+    assert lint_steps({"insert": {"cell": "h", "items": [{"id": "cobblestone", "count": 10}, {"id": "dirt"}]}},
+                      {"insert": {"cell": [1, 1, 0], "item": "stick", "slot": 2}},
+                      {"insert": {"cell": [5, 1, 0], "clear": True}},
+                      {"expect_items": {"cell": "h", "item": "cobblestone", "min": 1, "max": 9}},
+                      {"expect_items": {"cell": [1, 1, 0], "empty": True}},
+                      {"throughput": {"from": "h", "to": [1, 1, 0], "ticks": 80, "min": 10}}) == []
+    assert lint_steps({"insert": {"cell": "s", "item": "dirt"}},
+                      {"insert": {"cell": "x", "item": "dirt"}},
+                      {"insert": {"cell": "h"}},
+                      {"insert": {"cell": "h", "items": [{"id": "dirt", "count": 0}]}},
+                      {"expect_items": {"cell": [0, 1], "count": 1}},
+                      {"expect_items": {"cell": "h", "item": "dirt"}},
+                      {"expect_items": {"cell": "h", "empty": True, "count": 1, "stacks": 2}},
+                      {"throughput": {"ticks": 0}}) == [
+        "test 't': insert: 's' is stone, which holds no Items",
+        "test 't': insert: unknown cell 'x'",
+        "test 't': insert: needs items, item or clear: true",
+        "test 't': insert: items [{'id': 'dirt', 'count': 0}] is not a list of {id, count}",
+        "test 't': expect_items: [0, 1] is not a cell name or [x, y, z]",
+        "test 't': expect_items: needs count, min, max or empty: true",
+        "test 't': expect_items: unknown key 'stacks'",
+        "test 't': expect_items: empty is true, alone, or left out",
+        "test 't': throughput: needs from or to",
+        "test 't': throughput: ticks 0 is not a positive number of ticks"]
+    many = [{"id": f"minecraft:item_{i}", "count": 64} for i in range(27)]
+    assert lint_steps({"insert": {"cell": "h", "items": many}}) == []
+    long_id = [{"id": "x" * 1400}]
+    assert "run command is" in lint_steps({"insert": {"cell": "h", "items": long_id}})[0]

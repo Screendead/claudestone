@@ -2,10 +2,11 @@
 
 import dataclasses
 import json
+import re
 from pathlib import Path
 
 from . import watch
-from .build import Build, Pos
+from .build import Build, Pos, namespaced
 from .fileformat import Spec, parse_truth_table
 from .harness import Rig, checked
 from .plots import MAIN
@@ -28,6 +29,7 @@ class Recorder:
         self.rig, self.dense, self.frames, self.tick = rig, dense, [], 0
         self.failures: list[str] = []
         self.loops: list[str] = []  # "i/n" of each enclosing repeat
+        self.throughput: list[dict] = []
 
     def frame(self, event: str = "") -> dict:
         snap = self.rig.snapshot()
@@ -163,9 +165,15 @@ def _run(rig: Rig, spec: Spec, test: dict, trace: bool) -> dict:
             _check_delays(test, result["delay"], result["delays"])
         for step in test.get("steps", []):
             _step(rig, spec, step, rec)
+    except Exception as e:
+        # A truth table or harness error stops the test; the trace must still say it failed.
+        rec.fail(str(e) if isinstance(e, AssertionError) else f"{type(e).__name__}: {e}")
+        raise
     finally:
         _cleanup(rig, test, rec)
         _write_trace(spec, test, rec)
+    if rec.throughput:
+        result["throughput"] = rec.throughput
     if rec.failures:
         more = len(rec.failures) - 1
         raise AssertionError(rec.failures[0] + (f" (and {more} more)" if more else ""))
@@ -345,6 +353,12 @@ def _step(rig, spec, step, rec):
     elif kind == "check":
         if not rig.run(f"execute positioned {rig.abs((0, 0, 0))} {arg}").startswith("Test passed"):
             rec.fail(f"check failed: {arg}")
+    elif kind == "insert":
+        _insert(rig, spec, arg, rec)
+    elif kind == "expect_items":
+        _expect_items(rig, spec, arg, rec)
+    elif kind == "throughput":
+        _throughput(rig, spec, arg, rec)
     elif kind == "repeat":
         times = arg["times"]
         for i in range(times):
@@ -357,6 +371,143 @@ def _step(rig, spec, step, rec):
                 rec.loops.pop()
     else:
         raise ValueError(f"unknown step {kind!r}")
+
+
+def container(spec: Spec, where) -> Pos:
+    """A container step's cell: a named cell, or [x, y, z] from the origin."""
+    return spec.named[where] if isinstance(where, str) else tuple(where)
+
+
+def stacks(arg: dict) -> list[tuple[str, int]]:
+    """(id, count) of each stack an insert names: `items: [{id, count}]`, or `item` and `count`."""
+    items = arg.get("items", [{"id": arg["item"], "count": arg.get("count", 1)}] if "item" in arg else [])
+    return [(namespaced(i["id"]), i.get("count", 1)) for i in items]
+
+
+def insert_commands(spec: Spec, arg: dict) -> list[str]:
+    """Stack i goes in slot `slot` + i (default 0), replacing what was there; `clear` empties
+    the container first. Not `item replace`: it does not update a comparator reading a hopper."""
+    x, y, z = container(spec, arg["cell"])
+    at = f"~{x} ~{y} ~{z}"
+    out = [f"data merge block {at} {{Items:[]}}"] if arg.get("clear") else []
+    for i, (item, count) in enumerate(stacks(arg)):
+        slot = arg.get("slot", 0) + i
+        if not arg.get("clear"):
+            out.append(f"data remove block {at} Items[{{Slot:{slot}b}}]")
+        out.append(f'data modify block {at} Items append value {{Slot:{slot}b,id:"{item}",count:{count}}}')
+    return out
+
+
+NOTHING = "Found no elements matching"
+
+
+def _insert(rig, spec, arg, rec):
+    for command in insert_commands(spec, arg):
+        ok, reply = rig.command(command)
+        if _failed(ok, reply) and not (command.startswith("data remove") and NOTHING in reply):
+            rec.fail(f"insert {arg['cell']}: {command}: {reply}")
+            break
+    rec.frame(f"insert {_fmt_levels(arg)}")
+
+
+def contents(rig, pos: Pos) -> list[tuple[int, str, int]]:
+    """(slot, id, count) of each stack in the container at pos. Raises ValueError, quoting the
+    server, when there is no item list to read."""
+    ok, reply = rig.command(f"data get block ~{pos[0]} ~{pos[1]} ~{pos[2]} Items")
+    if not ok and NOTHING in reply:
+        return []
+    _, sep, data = reply.partition("has the following block data: ")
+    if not ok or not sep:
+        raise ValueError(f"no items to read at {list(pos)}: {reply}")
+    items, _ = snbt(data)
+    return [(int(e.get("Slot", 0)), e["id"], int(e.get("count", 1))) for e in items]
+
+
+def count_items(found: list, item: str | None = None, slot: int | None = None) -> int:
+    return sum(n for s, i, n in found if (item is None or i == namespaced(item)) and (slot is None or s == slot))
+
+
+def _expect_items(rig, spec, arg, rec):
+    where = arg["cell"]
+    rec.frame(f"expect_items {_fmt_levels(arg)}")
+    try:
+        found = contents(rig, container(spec, where))
+    except ValueError as e:
+        return rec.fail(f"expect_items {where}: {e}")
+    rec.frames[-1]["items"] = [list(s) for s in found]
+    got = count_items(found, arg.get("item"), arg.get("slot"))
+    want = {"count": 0} if arg.get("empty") else {k: arg[k] for k in ("count", "min", "max") if k in arg}
+    if got != want.get("count", got) or got < want.get("min", got) or got > want.get("max", got):
+        what = " ".join(f"{k} {v}" for k, v in want.items())
+        of = arg.get("item", "items") + (f" in slot {arg['slot']}" if "slot" in arg else "")
+        held = ", ".join(f"{s}: {n} {i.removeprefix('minecraft:')}" for s, i, n in found) or "empty"
+        rec.fail(f"expect_items {where}: expected {what} {of}, got {got} ({held})")
+
+
+def _throughput(rig, spec, arg, rec):
+    """Items that reach `to` (or leave `from`) in `ticks`, as a count and an hourly rate."""
+    ticks, item = arg["ticks"], arg.get("item")
+    ends = {k: container(spec, arg[k]) for k in ("from", "to") if k in arg}
+    rec.frame(f"throughput {_fmt_levels(arg)}")
+    try:
+        before = {k: count_items(contents(rig, p), item) for k, p in ends.items()}
+        rec.wait(ticks)
+        after = {k: count_items(contents(rig, p), item) for k, p in ends.items()}
+    except ValueError as e:
+        return rec.fail(f"throughput: {e}")
+    measured = {k: arg[k] for k in ("from", "to", "item") if k in arg} | {"ticks": ticks}
+    if "from" in ends:
+        measured["left"] = before["from"] - after["from"]
+    if "to" in ends:
+        measured["arrived"] = after["to"] - before["to"]
+    moved = measured["arrived" if "to" in ends else "left"]
+    measured["per_hour"] = round(moved * 72000 / ticks)
+    rec.frames[-1]["throughput"] = measured
+    rec.throughput.append(measured)
+    if moved < arg.get("min", moved) or moved > arg.get("max", moved):
+        bound = " ".join(f"{k} {arg[k]}" for k in ("min", "max") if k in arg)
+        rec.fail(f"throughput: {moved} items in {ticks} ticks ({measured['per_hour']}/h), expected {bound}")
+
+
+_TOKEN = re.compile(r""""(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[-+\w.]+""")
+_NUMBER = re.compile(r"(-?\d+)[bBsSlL]?|(-?\d*\.?\d+(?:[eE][-+]?\d+)?)[fFdD]?")
+
+
+def snbt(s: str, i: int = 0):
+    """The SNBT value at s[i] as the server prints it (compounds, lists, typed arrays, quoted
+    strings, numbers with a type suffix), and the index after it."""
+    i = _skip(s, i)
+    if s[i] in "{[":
+        close = "}" if s[i] == "{" else "]"
+        out, i = ({}, i + 1) if close == "}" else ([], i + 1)
+        if close == "]" and re.match(r"[BIL];", s[i:i + 2]):
+            i += 2
+        while (i := _skip(s, i)) < len(s) and s[i] != close:
+            if close == "}":
+                key, i = snbt(s, i)
+                i = _skip(s, i) + 1  # the colon
+                out[key], i = snbt(s, i)
+            else:
+                value, i = snbt(s, i)
+                out.append(value)
+            i = _skip(s, i)
+            if s[i] == ",":
+                i += 1
+        return out, i + 1
+    token = _TOKEN.match(s, i).group()
+    i += len(token)
+    if token[0] in "\"'":
+        return re.sub(r"\\(.)", r"\1", token[1:-1]), i
+    number = _NUMBER.fullmatch(token)
+    if number:
+        return (int(number.group(1)) if number.group(1) else float(number.group(2))), i
+    return token, i
+
+
+def _skip(s: str, i: int) -> int:
+    while i < len(s) and s[i].isspace():
+        i += 1
+    return i
 
 
 def _wave(spec, arg, rec):
@@ -379,7 +530,7 @@ def _wave(spec, arg, rec):
 def _show(kind, arg) -> str:
     if isinstance(arg, str):
         return arg
-    return _fmt_levels(arg) if kind in ("level", "wave") else _fmt(arg)
+    return _fmt(arg) if kind in ("drive", "expect") else _fmt_levels(arg)
 
 
 def _fmt(d: dict) -> str:

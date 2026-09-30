@@ -256,6 +256,8 @@ def _step_problems(spec, steps, at):
             below = spec.build.blocks.get(held, "")
             if parse_state(below)[0].removeprefix("minecraft:") not in PLAIN_SUPPORTS:
                 out.append(f"use {arg!r}: attached to {below or 'air'}; the harness only emulates plain full blocks")
+        elif kind in ("insert", "expect_items", "throughput"):
+            out += [f"{kind}: {m}" for m in _item_problems(spec, kind, arg, at)]
         elif kind in ("run", "log", "check"):
             out += _command_problems(kind, arg, at)
         elif kind == "wait":
@@ -263,6 +265,75 @@ def _step_problems(spec, steps, at):
                 out.append(f"wait {arg!r} is not a number of ticks")
         else:
             out.append(f"unknown step {kind!r}")
+    return out
+
+
+# Blocks whose block entity keeps an `Items` list, which the item steps read and write.
+CONTAINERS = {"chest", "trapped_chest", "barrel", "hopper", "dropper", "dispenser", "crafter", "furnace",
+              "blast_furnace", "smoker", "brewing_stand", "chiseled_bookshelf", "campfire", "soul_campfire"}
+CONTAINER_SUFFIXES = ("copper_chest", "shulker_box", "_shelf")
+ITEM_KEYS = {"insert": {"cell", "items", "item", "count", "slot", "clear"},
+             "expect_items": {"cell", "item", "slot", "count", "min", "max", "empty"},
+             "throughput": {"from", "to", "item", "ticks", "min", "max"}}
+
+
+def _int(v):
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def _count(v, least=0):
+    return _int(v) and v >= least
+
+
+def _container_problems(spec, where):
+    if isinstance(where, str):
+        if where not in spec.named:
+            return [f"unknown cell {where!r}"]
+        pos = spec.named[where]
+    elif isinstance(where, list) and len(where) == 3 and all(map(_int, where)):
+        pos = tuple(where)
+    else:
+        return [f"{where!r} is not a cell name or [x, y, z]"]
+    # A position that is air in the build may get its container from a `run` step.
+    name = parse_state(spec.build.blocks.get(pos, "air"))[0].removeprefix("minecraft:")
+    if name != "air" and name not in CONTAINERS and not name.endswith(CONTAINER_SUFFIXES):
+        return [f"{where!r} is {name}, which holds no Items"]
+    return []
+
+
+def _item_problems(spec, kind, arg, at):
+    if not isinstance(arg, dict):
+        return [f"{arg!r} is not a map"]
+    out = [f"unknown key {k!r}" for k in arg if k not in ITEM_KEYS[kind]]
+    for k in ("cell",) if kind != "throughput" else [k for k in ("from", "to") if k in arg]:
+        if k not in arg:
+            return out + [f"needs {k}"]
+        out += _container_problems(spec, arg[k])
+    if "item" in arg and not isinstance(arg["item"], str):
+        out.append(f"item {arg['item']!r} is not an item id")
+    out += [f"{k} {arg[k]!r} is not a count" for k in ("count", "min", "max", "slot") if k in arg and not _count(arg[k])]
+    if kind == "insert":
+        items = arg.get("items", [])
+        if not isinstance(items, list) or not all(isinstance(i, dict) and isinstance(i.get("id"), str)
+                                                  and _count(i.get("count", 1), 1) and set(i) <= {"id", "count"}
+                                                  for i in items):
+            return out + [f"items {items!r} is not a list of {{id, count}}"]
+        if "items" in arg and "item" in arg:
+            out.append("give items or item, not both")
+        if not ("items" in arg or "item" in arg or arg.get("clear")):
+            out.append("needs items, item or clear: true")
+        if not out:
+            out += [m for c in spec_module.insert_commands(spec, arg) for m in _command_problems("run", c, at)]
+    elif kind == "expect_items":
+        if not any(k in arg for k in ("count", "min", "max", "empty")):
+            out.append("needs count, min, max or empty: true")
+        if "empty" in arg and (arg["empty"] is not True or {"count", "min", "max"} & set(arg)):
+            out.append("empty is true, alone, or left out")
+    else:
+        if not ("from" in arg or "to" in arg):
+            out.append("needs from or to")
+        if not _count(arg.get("ticks"), 1):
+            out.append(f"ticks {arg.get('ticks')!r} is not a positive number of ticks")
     return out
 
 

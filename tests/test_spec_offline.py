@@ -266,3 +266,109 @@ def test_tile_runs_copy_b_one_row_ahead_and_checks_both():
 
     with pytest.raises(AssertionError, match="B.out=1"):
         run(Stuck(), s)
+
+
+def test_truth_table_failure_is_in_the_trace(traces):
+    with pytest.raises(AssertionError, match="expected out=1"):
+        run(FakeRig(), make_spec(truth_table=BUFFER))
+    trace = json.loads((traces / "fake" / "t.json").read_text())
+    assert len(trace["failures"]) == 1 and "expected out=1" in trace["failures"][0]
+
+
+HOPPER = (4, 1, 2)
+GET = "data get block ~4 ~1 ~2 Items"
+
+
+def item_spec(steps):
+    s = make_spec(steps)
+    s.named["feed"] = HOPPER
+    return s
+
+
+def held(*stacks):
+    """A `data get block ... Items` reply as the server prints it."""
+    body = ", ".join(f'{{count: {n}, Slot: {s}b, id: "minecraft:{i}"}}' for s, i, n in stacks)
+    return True, f"130, 57, 52 has the following block data: [{body}]"
+
+
+def test_insert_fills_slots_by_data_modify():
+    rig = FakeRig(replies={"data remove block ~4 ~1 ~2 Items[{Slot:0b}]":
+                           (False, "Found no elements matching Items[{Slot:0b}]")})
+    run(rig, item_spec([{"insert": {"cell": "feed", "items": [{"id": "cobblestone", "count": 10}, {"id": "minecraft:dirt"}]}},
+                        {"insert": {"cell": [0, 2, 0], "item": "stick", "count": 3, "slot": 4, "clear": True}}]))
+    assert [c for _, c in rig.log] == [
+        "data remove block ~4 ~1 ~2 Items[{Slot:0b}]",
+        'data modify block ~4 ~1 ~2 Items append value {Slot:0b,id:"minecraft:cobblestone",count:10}',
+        "data remove block ~4 ~1 ~2 Items[{Slot:1b}]",
+        'data modify block ~4 ~1 ~2 Items append value {Slot:1b,id:"minecraft:dirt",count:1}',
+        "data merge block ~0 ~2 ~0 {Items:[]}",
+        'data modify block ~0 ~2 ~0 Items append value {Slot:4b,id:"minecraft:stick",count:3}']
+
+
+def test_insert_failure_is_collected():
+    rig = FakeRig(replies={'data modify block ~4 ~1 ~2 Items append value {Slot:0b,id:"minecraft:dirt",count:1}':
+                           (False, "The target block is not a block entity")})
+    with pytest.raises(AssertionError, match="insert feed: .*not a block entity"):
+        run(rig, item_spec([{"insert": {"cell": "feed", "item": "dirt"}}, {"run": "say after"}]))
+    assert rig.log[-1] == (0, "say after")
+
+
+def test_expect_items_counts_by_item_and_slot(traces):
+    rig = FakeRig(replies={GET: held((0, "cobblestone", 8), (3, "cobblestone", 64), (4, "dirt", 1))})
+    run(rig, item_spec([{"expect_items": {"cell": "feed", "item": "cobblestone", "count": 72}},
+                        {"expect_items": {"cell": "feed", "min": 70, "max": 73}},
+                        {"expect_items": {"cell": "feed", "slot": 4, "item": "minecraft:dirt", "count": 1}}]))
+    frames = json.loads((traces / "fake" / "t.json").read_text())["frames"]
+    assert frames[-1]["items"] == [[0, "minecraft:cobblestone", 8], [3, "minecraft:cobblestone", 64],
+                                   [4, "minecraft:dirt", 1]]
+
+
+def test_expect_items_failures_quote_the_contents():
+    rig = FakeRig(replies={GET: held((0, "cobblestone", 8))})
+    with pytest.raises(AssertionError) as e:
+        run(rig, item_spec([{"expect_items": {"cell": "feed", "item": "cobblestone", "count": 7}},
+                            {"expect_items": {"cell": "feed", "empty": True}},
+                            {"expect_items": {"cell": "feed", "min": 9}}]))
+    assert str(e.value) == ("tick 0: expect_items feed: expected count 7 cobblestone, got 8 (0: 8 cobblestone)"
+                            " (and 2 more)")
+
+
+def test_expect_items_empty_and_unreadable():
+    empty = {GET: (False, "Found no elements matching Items")}
+    run(FakeRig(replies=empty), item_spec([{"expect_items": {"cell": "feed", "empty": True}}]))
+    run(FakeRig(replies={GET: held()}), item_spec([{"expect_items": {"cell": "feed", "count": 0}}]))
+    stone = {GET: (False, "The target block is not a block entity")}
+    with pytest.raises(AssertionError, match=r"no items to read at \[4, 1, 2\]: The target block is not a block entity"):
+        run(FakeRig(replies=stone), item_spec([{"expect_items": {"cell": "feed", "empty": True}}]))
+
+
+class Flow(FakeRig):
+    """A hopper chain: the feed hopper gains a cobblestone every 8 ticks, taken from (0, 1, 0)."""
+
+    def command(self, command):
+        self.log.append((self.tick, command))
+        moved = self.tick // 8
+        if command == "data get block ~0 ~1 ~0 Items":
+            return held((0, "cobblestone", 64 - moved))
+        if command == GET:
+            return held((0, "cobblestone", moved), (1, "dirt", 5)) if moved else held((1, "dirt", 5))
+        return True, ""
+
+
+def test_throughput_measures_and_records_the_rate(traces):
+    s = item_spec([{"wait": 4}, {"throughput": {"from": [0, 1, 0], "to": "feed", "item": "cobblestone",
+                                                 "ticks": 80, "min": 10}}])
+    result = run(Flow(), s)
+    want = {"from": [0, 1, 0], "to": "feed", "item": "cobblestone", "ticks": 80, "left": 10, "arrived": 10,
+            "per_hour": 9000}
+    assert result["throughput"] == [want]
+    frames = json.loads((traces / "fake" / "t.json").read_text())["frames"]
+    assert [f["throughput"] for f in frames if "throughput" in f] == [want]
+
+
+def test_throughput_below_min_fails_after_the_window():
+    rig = Flow()
+    with pytest.raises(AssertionError, match=r"throughput: 10 items in 80 ticks \(9000/h\), expected min 11"):
+        run(rig, item_spec([{"throughput": {"to": "feed", "item": "cobblestone", "ticks": 80, "min": 11}},
+                            {"run": "say after"}]))
+    assert rig.log[-1] == (80, "say after")
