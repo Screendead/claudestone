@@ -44,7 +44,7 @@ def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
     rig.load(spec.build)
     rec = Recorder(rig, trace)
     rec.frame("loaded")
-    rec.wait(SETTLE)
+    rec.wait(max(SETTLE, test.get("max_delay", test.get("delay", 0)) + 4))
     result = {}
     try:
         if "truth_table" in test:
@@ -63,6 +63,7 @@ def run(rig: Rig, spec: Spec, test: dict, trace: bool = False) -> dict:
 
 def _truth_table(rig, spec, test, rec) -> int:
     _, _, rows = parse_truth_table(test["truth_table"])
+    settle = max(SETTLE, test.get("max_delay", test.get("delay", 0)) + 4)
     worst = 0
     for inputs, expected in rows + [rows[0]]:  # end on the first row to check it resets
         for name, on in inputs.items():
@@ -70,17 +71,17 @@ def _truth_table(rig, spec, test, rec) -> int:
         snap = rec.frame(f"drive {_fmt(inputs)}")
         ticks = 0
         while not all(_on(spec, snap, o) == v for o, v in expected.items()):
-            if ticks >= SETTLE:
+            if ticks >= settle:
                 raise AssertionError(f"inputs {_fmt(inputs)}: expected {_fmt(expected)}, "
-                                     f"got {_fmt({o: _on(spec, snap, o) for o in expected})} after {SETTLE} ticks")
+                                     f"got {_fmt({o: _on(spec, snap, o) for o in expected})} after {settle} ticks")
             snap = rec.wait(1)
             ticks += 1
         worst = max(worst, ticks)
-        snap = rec.wait(SETTLE - ticks + HOLD)
+        snap = rec.wait(settle - ticks + HOLD)
         got = {o: _on(spec, snap, o) for o in expected}
         if any(got[o] != v for o, v in expected.items()):
             raise AssertionError(f"inputs {_fmt(inputs)}: expected {_fmt(expected)}, got {_fmt(got)} "
-                                 f"{SETTLE + HOLD} ticks after the change")
+                                 f"{settle + HOLD} ticks after the change")
     return worst
 
 

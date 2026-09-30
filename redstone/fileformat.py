@@ -139,21 +139,21 @@ def dump(spec: Spec) -> str:
 
     palette: dict[str, object] = {".": "air"}
     by_state: dict[str, str] = {"minecraft:air": "."}
-    free = iter(c for c in "ABCDEFGHIJKMNOPQSTUVWXYZbcdefghijklmpqrstwxyz0123456789" if c not in GLYPHS.values())
+    spare = [c for c in "ABCDEFGHIJKMNOPQSTUVWXYZbcdefghijklmpqrstwxyz0123456789" if c not in GLYPHS.values()]
+
+    def next_free() -> str:
+        return next(c for c in spare if c not in palette)
 
     def glyph_for_state(state: str) -> str:
         if state not in by_state:
-            g = GLYPHS.get(state) or next(free)
+            g = GLYPHS.get(state) or next_free()
             by_state[state] = g
             palette[g] = _short(state)
         return by_state[state]
 
-    used_names = set()
-
     def glyph_for_label(label: dict) -> str:
         name = label.get("input") or label.get("output") or label.get("name")
-        g = name[0] if len(name) and name[0] not in palette and name[0] not in GLYPHS.values() and name[0] not in used_names else next(free)
-        used_names.add(g)
+        g = name[0] if name[0] not in palette and name[0] not in GLYPHS.values() else next_free()
         palette[g] = label
         return g
 
