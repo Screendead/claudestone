@@ -1,0 +1,68 @@
+name: ref_begamerplays_insta_drop
+description: 'Reference rebuild of the Minecraft Wiki "Insta-drop instant repeater" (Java only), earliest known publication BeGamerPlays, "Dual-Edge InstaWire 1.5", 14 Feb 2013 (https://minecraft.wiki/w/Redstone_circuits/Transmission#insta-drop_instant_repeater). Wiki figures: 1x3x2 (6), 1-wide, circuit delay none. Side view, one wide, running east. Design (x=3..5, y=1..2): block A (x=3,y=1) under sticky piston P (x=3,y=2, facing east) with the redstone block R on its face (x=4,y=2); sticky piston Q (x=5,y=1, facing west) extended, head at x=4,y=1, quasi-powered by R. Input: driver a -> delay-1 repeater (fixture) -> dust in (fixture, x=2,y=1) pointing into A. Output: dust out (fixture) at x=6,y=2 on glass (a fixture that the output dust cannot power, so Q sees only what the wiki draws). Rising: P starts pushing R, Q loses QC and pulls A away, P is depowered in the same block-event phase and drops R at x=5,y=2, which powers out and Q. Falling: P pulls R back.'
+traits: [one_wide, piston_based, entityless]
+palette:
+  .: air
+  a: {input: a}
+  f: {block: smooth_stone, fixture: true}
+  r: {block: 'repeater[facing=west,delay=1]', fixture: true}
+  i: {name: in, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  g: {block: glass, fixture: true}
+  o: {output: out, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  A: white_concrete
+  H: 'piston_head[facing=west,type=sticky]'
+  Q: {name: lo, block: 'sticky_piston[facing=west,extended=true]'}
+  P: {name: up, block: 'sticky_piston[facing=east]'}
+  R: redstone_block
+  _: {reserve: true}
+layers:
+  0: |
+    .ff....
+  1: |
+    ariAHQg
+  2: |
+    ...PR_o
+tests:
+- name: edges follow the input dust in the same tick
+  settle: 30
+  steps:
+  - expect: {out: 0, in: 0, lo: 1}
+  - drive: {a: 1}
+  - wave: {in: '0011111111', out: '0011111111'}
+  - level: {out: 15}
+  - drive: {a: 0}
+  - wave: {in: '1100000000', out: '1100000000'}
+  - drive: {a: 1}
+  - wave: {in: '0011111111', out: '0011111111'}
+  - drive: {a: 0}
+  - wave: {in: '1100000000', out: '1100000000'}
+- name: pulse widths
+  settle: 30
+  steps:
+  - repeat:
+      times: 1
+      steps:
+      - drive: {a: 1}
+      - wait: 1
+      - drive: {a: 0}
+      - wave: {in: 'xxxxxxxxxxxxxxxxxxxx', out: 'xxxxxxxxxxxxxxxxxxxx'}
+      - drive: {a: 1}
+      - wait: 2
+      - drive: {a: 0}
+      - wave: {in: 'xxxxxxxxxxxxxxxxxxxx', out: 'xxxxxxxxxxxxxxxxxxxx'}
+      - drive: {a: 1}
+      - wait: 3
+      - drive: {a: 0}
+      - wave: {in: 'xxxxxxxxxxxxxxxxxxxx', out: 'xxxxxxxxxxxxxxxxxxxx'}
+      - drive: {a: 1}
+      - wait: 4
+      - drive: {a: 0}
+      - wave: {in: 'xxxxxxxxxxxxxxxxxxxx', out: 'xxxxxxxxxxxxxxxxxxxx'}
+      - drive: {a: 1}
+      - wait: 6
+      - drive: {a: 0}
+      - wave: {in: 'xxxxxxxxxxxxxxxxxxxx', out: 'xxxxxxxxxxxxxxxxxxxx'}
+      - drive: {a: 1}
+      - wait: 30
+      - drive: {a: 0}
+      - wave: {in: 'xxxxxxxxxxxxxxxxxxxx', out: 'xxxxxxxxxxxxxxxxxxxx'}

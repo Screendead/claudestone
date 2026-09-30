@@ -1,0 +1,173 @@
+name: ref_properinglish_xor_2wide
+description: "Rebuilt from properinglish (Properinglish19)'s own world download for his video '2-Wide Tileable Redstone Comparator XOR Gate' (https://www.youtube.com/watch?v=yUTDJ6a7qkc, 5 Jan 2013, snapshot 13w01b; world https://www.dropbox.com/s/ldifp7sylzrldhg/ComparatorXOR.rar), four bits at a 2-wide pitch exactly as saved, blocks converted from 2013 ids. Each bit: two compare-mode comparators facing south; each input feeds one comparator's rear by dust and the other's side through a repeater, so a strong side signal cancels the weaker rear (b does not imply a). The two bits of a pair are staggered one block in height. Deviation: each lever is replaced by the harness driver in the block the lever hung on. Not his later '1 tick XOR' (Feb 2013 video, ORE forum Aug 2013), whose world download is gone."
+traits: [comparator_based, silent, lightless, pistonless, entityless]
+palette:
+  '.': air
+  '#': iron_block
+  '-': redstone_wire
+  'h': smooth_stone_slab[type=top]
+  f: {block: iron_block, fixture: true}
+  r: {block: 'repeater[facing=north,delay=1]', fixture: true}
+  'C': comparator[facing=north,mode=compare]
+  'R': repeater[facing=north,delay=1]
+  A: {input: a0}
+  B: {input: b0}
+  D: {input: a1}
+  E: {input: b1}
+  F: {output: out0, block: redstone_wire}
+  G: {output: out1, block: redstone_wire}
+layers:
+  0: |
+    ....
+    f.f.
+    ....
+    #.#.
+    #...
+    ....
+    ##..
+    #...
+    ....
+  1: |
+    A.D.
+    r.r.
+    #.#.
+    -.-.
+    -.#.
+    ##.#
+    C-##
+    -.#.
+    #.#.
+  2: |
+    ....
+    .f.f
+    -.-.
+    h.h.
+    ##-#
+    .R#R
+    ##C-
+    ..G#
+    F#-.
+  3: |
+    .B.E
+    .r.r
+    .#.#
+    -#-#
+    R-#-
+    ##R#
+    -C##
+    .#.-
+    .-#.
+  4: |
+    ....
+    ....
+    .-.-
+    #-#-
+    ....
+    ...-
+    ..-C
+    ...#
+    ....
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 | out0 out1
+    0  0  0  0  | 0    0
+    0  0  0  1  | 0    1
+    0  0  1  1  | 0    0
+    0  0  1  0  | 0    1
+    0  1  1  0  | 1    1
+    0  1  1  1  | 1    0
+    0  1  0  1  | 1    1
+    0  1  0  0  | 1    0
+    1  1  0  0  | 0    0
+    1  1  0  1  | 0    1
+    1  1  1  1  | 0    0
+    1  1  1  0  | 0    1
+    1  0  1  0  | 1    1
+    1  0  1  1  | 1    0
+    1  0  0  1  | 1    1
+    1  0  0  0  | 1    0
+    0  0  0  0  | 0    0
+  max_delay: 8
+- name: tile x2 (4 bits at 2 wide)
+  truth_table: |
+    a0 b0 a1 b1 | out0 out1
+    0  0  0  0  | 0    0
+    0  0  0  1  | 0    1
+    0  0  1  1  | 0    0
+    0  0  1  0  | 0    1
+    0  1  1  0  | 1    1
+    0  1  1  1  | 1    0
+    0  1  0  1  | 1    1
+    0  1  0  0  | 1    0
+    1  1  0  0  | 0    0
+    1  1  0  1  | 0    1
+    1  1  1  1  | 0    0
+    1  1  1  0  | 0    1
+    1  0  1  0  | 1    1
+    1  0  1  1  | 1    0
+    1  0  0  1  | 1    1
+    1  0  0  0  | 1    0
+    0  0  0  0  | 0    0
+  max_delay: 8
+  tile: [4, 0, 0]
+
+
+- name: edges a0 moves, b0=0
+  truth_table: |
+    b0 a0 | out0
+    0 0 | 0
+    0 1 | 1
+  max_delay: 10
+- name: edges a0 moves, b0=1
+  truth_table: |
+    b0 a0 | out0
+    1 0 | 1
+    1 1 | 0
+  max_delay: 10
+- name: edges b0 moves, a0=0
+  truth_table: |
+    a0 b0 | out0
+    0 0 | 0
+    0 1 | 1
+  max_delay: 10
+- name: edges b0 moves, a0=1
+  truth_table: |
+    a0 b0 | out0
+    1 0 | 1
+    1 1 | 0
+  max_delay: 10
+- name: edges a1 moves, b1=0
+  truth_table: |
+    b1 a1 | out1
+    0 0 | 0
+    0 1 | 1
+  max_delay: 10
+- name: edges a1 moves, b1=1
+  truth_table: |
+    b1 a1 | out1
+    1 0 | 1
+    1 1 | 0
+  max_delay: 10
+- name: edges b1 moves, a1=0
+  truth_table: |
+    a1 b1 | out1
+    0 0 | 0
+    0 1 | 1
+  max_delay: 10
+- name: edges b1 moves, a1=1
+  truth_table: |
+    a1 b1 | out1
+    1 0 | 1
+    1 1 | 0
+  max_delay: 10
+- name: simultaneous
+  steps:
+  - drive: {a0: 1, b0: 1, a1: 1, b1: 1}
+  - wave: {out0: 'xxxxxxxxxx', out1: 'xxxxxxxxxx'}
+  - wait: 10
+  - expect: {out0: 0, out1: 0}
+  - drive: {a0: 0, b0: 0, a1: 0, b1: 0}
+  - wave: {out0: 'xxxxxxxxxx', out1: 'xxxxxxxxxx'}
+  - wait: 10
+  - expect: {out0: 0, out1: 0}

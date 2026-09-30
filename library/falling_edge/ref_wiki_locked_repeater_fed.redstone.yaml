@@ -1,0 +1,184 @@
+name: ref_wiki_locked_repeater_fed
+description: 'Reference rebuild of the Minecraft Wiki "Locked-repeater falling edge detector", credited to the wiki editors (Redstone circuits/Pulse, https://minecraft.wiki/w/Redstone_circuits/Pulse#locked-repeater_falling_edge_detector ; schematic from https://minecraft.wiki/w/Redstone_circuits/Pulse/fed, drawn there top-down with the input on). Wiki figures: 2x3x2 (12), flat, silent, delay 2 ticks, output pulse 1 tick. The wiki input line (dust at x=2, z=0) and output line (dust at x=5, z=2) are fixtures on fixture supports; driver a (x=1) powers the input dust (driver b at x=0 is used only by the repeater-fed test, which first sets a delay-1 repeater into the a cell). Two delay-1 repeaters (x=4) take the input: the z=1 one points into the side of repeater rep (x=5, z=1, pointing south), the z=0 one feeds rep through dust x=5, z=0.'
+traits: [flat, silent, lightless, pistonless, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  a: {input: a}
+  b: {input: b}
+  i: {block: redstone_wire, fixture: true}
+  f: {block: smooth_stone, fixture: true}
+  r: 'repeater[facing=west,delay=1]'
+  R: {name: rep, block: 'repeater[facing=north,delay=1]'}
+  o: {output: out, block: redstone_wire, fixture: true}
+layers:
+  0: |
+    ..f===.
+    ...===.
+    .....f.
+  1: |
+    bai-r-.
+    ...-rR.
+    .....o.
+tests:
+- name: widths
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '00000110000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+- name: gaps
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '0'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000'}
+  - drive: {a: 1}
+  - wave: {out: '0111111111'}
+  - drive: {a: 0}
+  - wave: {out: '11110000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '0000'}
+  - drive: {a: 1}
+  - wave: {out: '1111111111'}
+  - drive: {a: 0}
+  - wave: {out: '11110000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001'}
+  - drive: {a: 1}
+  - wave: {out: '1000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000011'}
+  - drive: {a: 1}
+  - wave: {out: '0000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00001100000000000000'}
+- name: repeater fed
+  settle: 30
+  steps:
+  - {run: setblock ~1 ~0 ~0 smooth_stone}
+  - {run: 'setblock ~1 ~1 ~0 repeater[facing=west,delay=1]'}
+  - {wait: 10}
+  - drive: {b: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '0'}
+  - drive: {b: 0}
+  - wave: {out: '00000001100000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '0000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000011000000000000'}

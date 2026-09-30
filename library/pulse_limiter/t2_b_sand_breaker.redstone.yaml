@@ -1,0 +1,410 @@
+name: t2_b_sand_breaker
+description: 'Quasi-connected circuit breaker (the layout of t2_a_qc_breaker, itself the wiki circuit breaker without its dust column) with sand as the moved block, 1x2x3 (6), one wide, running east. The input dust fixture (x=2, on glass) points into sand C (x=3, y=1); the sticky piston under it (x=3, y=0, facing up) is quasi-powered through that cell and lifts C into x=3, y=2 (reserved); a delay-1 repeater (x=4) reads C into the output dust fixture (x=5). 2 gt delay and a 2 gt pulse fed by a placed block or by a repeater. A 1-2 gt input still gives its pulse and makes the piston drop C at y=2, but the sand falls home (a falling_block entity) and the next input works if it comes 10 gt or more later; the stone-block circuit breaker loses the next input at any gap.'
+traits: [one_wide, piston_based]
+palette:
+  .: air
+  '=': smooth_stone
+  _: {reserve: true}
+  a: {input: a}
+  b: {input: b}
+  i: {name: in, block: redstone_wire, fixture: true}
+  f: {block: smooth_stone, fixture: true}
+  g: {block: glass, fixture: true}
+  P: {name: piston, block: 'sticky_piston[facing=up]'}
+  C: sand
+  R: 'repeater[facing=west,delay=1]'
+  o: {output: out, block: redstone_wire, fixture: true}
+layers:
+  0: |
+    ..gP=f
+  1: |
+    baiCRo
+  2: |
+    ...._.
+tests:
+- name: widths
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '01100000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '11000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '001'}
+  - drive: {a: 0}
+  - wave: {out: '10000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '001100'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+- name: gaps
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '0'}
+  - drive: {a: 1}
+  - wave: {out: '0000110000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00'}
+  - drive: {a: 1}
+  - wave: {out: '0001100000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '0000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000'}
+  - drive: {a: 1}
+  - wave: {out: '0011000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+- name: short trains
+  settle: 30
+  steps:
+  - &id001
+    drive: {a: 1}
+  - wave: {out: '0'}
+  - &id002
+    drive: {a: 0}
+  - wave: {out: '01100000000000000000'}
+  - *id001
+  - wave: {out: '0'}
+  - *id002
+  - wave: {out: '01100000000000000000'}
+  - *id001
+  - wave: {out: '0'}
+  - *id002
+  - wave: {out: '01100000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+  - &id003
+    drive: {a: 1}
+  - wave: {out: '00'}
+  - &id004
+    drive: {a: 0}
+  - wave: {out: '11000000000000000000'}
+  - *id003
+  - wave: {out: '00'}
+  - *id004
+  - wave: {out: '11000000000000000000'}
+  - *id003
+  - wave: {out: '00'}
+  - *id004
+  - wave: {out: '11000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '00000000000000000000'}
+- name: repeater fed
+  settle: 30
+  steps:
+  - {run: setblock ~1 ~0 ~0 smooth_stone}
+  - {run: 'setblock ~1 ~1 ~0 repeater[facing=west,delay=1]'}
+  - {wait: 10}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '0'}
+  - drive: {b: 0}
+  - wave: {out: '00011000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00'}
+  - drive: {b: 0}
+  - wave: {out: '00110000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '000'}
+  - drive: {b: 0}
+  - wave: {out: '01100000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '0000'}
+  - drive: {b: 0}
+  - wave: {out: '11000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001'}
+  - drive: {b: 0}
+  - wave: {out: '10000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '000011'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+  - drive: {b: 1}
+  - wave: {out: '00001100000000000000'}
+  - drive: {b: 0}
+  - wave: {out: '00000000000000000000'}
+- name: recovery
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '0'}
+  - drive: {a: 1}
+  - wave: {out: '11000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '01'}
+  - drive: {a: 1}
+  - wave: {out: '10000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '011'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '0110'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '01100'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '011000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '01100000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '0110000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '011000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '01100000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '0'}
+  - drive: {a: 0}
+  - wave: {out: '0110000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '1'}
+  - drive: {a: 1}
+  - wave: {out: '10000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '11'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '110'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '1100'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '11000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '110000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '11000000'}
+  - drive: {a: 1}
+  - wave: {out: '00000000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '110000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '11000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00'}
+  - drive: {a: 0}
+  - wave: {out: '1100000000000000'}
+  - drive: {a: 1}
+  - wave: {out: '00110000000000000000'}
+  - drive: {a: 0}
+  - wave: {out: '000000000000000000000000'}

@@ -1,0 +1,41 @@
+name: ref_begamerplays_insta_drop_flat3
+description: 'Three ref_begamerplays_insta_drop stages in series on one level (wiki insta-drop instant repeater, BeGamerPlays 2013): each stage lifts the signal one block, so a dust step on smooth stone brings it back down into the next stage''s block A. Pitch 5, three blocks high with the step support: 15 cells per stage for a level line (glass cannot be the upper step, since a transparent step passes power only upward).'
+traits: [one_wide, piston_based, entityless]
+palette:
+  .: air
+  a: {input: a}
+  f: {block: smooth_stone, fixture: true}
+  r: {block: 'repeater[facing=west,delay=1]', fixture: true}
+  i: {name: in, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  g: glass
+  G: {block: glass, fixture: true}
+  s: smooth_stone
+  d: 'redstone_wire[east=side,west=side]'
+  o: {output: out, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  A: white_concrete
+  H: 'piston_head[facing=west,type=sticky]'
+  Q: 'sticky_piston[facing=west,extended=true]'
+  P: 'sticky_piston[facing=east]'
+  R: redstone_block
+  _: {reserve: true}
+layers:
+  0: |
+    .ff....s....s....
+  1: |
+    ariAHQsdAHQsdAHQG
+  2: |
+    ...PR_d.PR_d.PR_o
+tests:
+- name: both edges cross three stages in the input's tick
+  settle: 30
+  steps:
+  - expect: {out: 0, in: 0}
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - level: {out: 15}
+  - drive: {a: 0}
+  - wave: {in: '1100000000000000', out: '1100000000000000'}
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - drive: {a: 0}
+  - wave: {in: '1100000000000000', out: '1100000000000000'}

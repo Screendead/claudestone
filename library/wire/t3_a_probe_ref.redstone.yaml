@@ -1,0 +1,184 @@
+name: t3_a_probe_ref
+description: 'Characterisation of ref_begamerplays_insta_drop (identical blocks): the input-pulse length it needs. An input pulse of 7 gt or more is followed on both edges in the same tick; one of 2 to 6 gt makes the output rise and then stay on (the redstone block is dropped at the output and the upper piston has not re-extended to pull it back) until a later long pulse clears it. After a fall the input must stay off 6 gt for the next rise to pass in the same tick; after a shorter gap (2 to 5 gt) the rise is held back to 6 gt after the fall (the lower piston re-arms block A only then).'
+traits: [one_wide, piston_based, entityless]
+palette:
+  .: air
+  a: {input: a}
+  f: {block: smooth_stone, fixture: true}
+  r: {block: 'repeater[facing=west,delay=1]', fixture: true}
+  i: {name: in, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  g: {block: glass, fixture: true}
+  o: {output: out, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  A: white_concrete
+  H: 'piston_head[facing=west,type=sticky]'
+  Q: {name: lo, block: 'sticky_piston[facing=west,extended=true]'}
+  P: {name: up, block: 'sticky_piston[facing=east]'}
+  R: redstone_block
+  _: {reserve: true}
+layers:
+  0: |
+    .ff....
+  1: |
+    ariAHQg
+  2: |
+    ...PR_o
+tests:
+- name: pulse sweep
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - wave: {in: '011000000000000', out: '011111111111111'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wave: {in: '11000000000000', out: '11111111111111'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wave: {in: '1100000000000', out: '1111111111111'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wave: {in: '110000000000', out: '111111111111'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 5
+  - drive: {a: 0}
+  - wave: {in: '11000000000', out: '11111111111'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 6
+  - drive: {a: 0}
+  - wave: {in: '1100000000', out: '1111111111'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 7
+  - drive: {a: 0}
+  - wave: {in: '110000000', out: '110000000'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 8
+  - drive: {a: 0}
+  - wave: {in: '11000000', out: '11000000'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+  - drive: {a: 1}
+  - wait: 9
+  - drive: {a: 0}
+  - wave: {in: '1100000', out: '1100000'}
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 25
+  - expect: {out: 0}
+- name: gap sweep
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 1
+  - drive: {a: 1}
+  - wave: {in: '1111111111111111', out: '1111111111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 2
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0000001111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 3
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0000011111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 4
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0000111111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 5
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0001111111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 6
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 7
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 8
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - drive: {a: 0}
+  - wait: 25
+  - drive: {a: 1}
+  - wait: 25
+  - drive: {a: 0}
+  - wait: 9
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - drive: {a: 0}
+  - wait: 25

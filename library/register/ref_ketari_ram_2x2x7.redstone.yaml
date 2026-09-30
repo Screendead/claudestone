@@ -1,0 +1,402 @@
+name: ref_ketari_ram_2x2x7
+description: 'Ketari_''s ''2x2x7 per bit, 8 bits binary RAM (combinational)'' (schemat.io/schematics/77WUlf, 11x20x7, 859 blocks), rebuilt block for block from the downloaded .schem, barrel contents included (one diamond sword each, comparator strength 1). Changes for the harness only: the magenta/lime wool that the demo levers hang on and the row-lever lamps are white wool (lever emulation needs a plain block); dust power, lit and locked states are left for the game to compute (the schematic''s saved states are stale: every lock comparator reads side 1-14 yet shows output 1). Layout: 16 layers (y4-y19), two cells per layer at x pitch 4, odd layers shifted 2 in x, so 4x1x7 = 28 blocks per bit. Each cell stores in a locked repeater (q<y>_<x>) whose lock is a subtract comparator reading a barrel (1) minus a vertical glass-staircase dust tower (the word line, one tower per word, taps every other layer); the row dust at z6 is the data-in line of a bit, shared by the four words; the read is a subtract comparator (1 minus the bit) into a tower leaf on a barrel, a wall torch on that barrel drives the row output line at z0 (lamps out0-out7). So a tower at 0 holds its word and puts it on the outputs; a tower at 1 or more unlocks the word (it follows the data rows) and hides it. With the demo levers off the towers are at 15, so the whole module is transparent at load. Measured on 26.3: writes and holds all 8 bits through the south (t*s) driver; the north (t*n) driver reaches only bits 0-6 (bit 7''s lock dust is 0); held words are ORed onto the outputs, and there is no tower state that hides a word while keeping it, so reading one word alone overwrites the other three: not an addressable RAM as published.'
+traits: [vertical, comparator_based, container_based, torch_based, lockable, pistonless, entityless, survival_friendly]
+palette:
+  .: air
+  'A': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:diamond_sword",count:1}]}'
+  'B': 'comparator[facing=east,mode=subtract]'
+  'C': 'comparator[facing=west,mode=subtract]'
+  'D': 'gray_stained_glass'
+  'E': 'gray_wool'
+  'F': 'light_blue_stained_glass'
+  'G': 'light_blue_wool'
+  'H': 'lime_stained_glass'
+  'I': 'lime_wool'
+  'J': 'magenta_wool'
+  'K': 'redstone_torch'
+  'L': 'redstone_wall_torch[facing=north]'
+  'M': 'redstone_wire[east=none,north=none,south=side,west=side]'
+  'N': 'redstone_wire[east=none,north=side,south=side,west=none]'
+  'O': 'redstone_wire[east=none,north=up,south=side,west=none]'
+  'P': 'redstone_wire[east=none,north=up,south=up,west=none]'
+  'Q': 'redstone_wire[east=none,north=up,south=up,west=side]'
+  'R': 'redstone_wire[east=side,north=none,south=none,west=side]'
+  'S': 'redstone_wire[east=side,north=none,south=side,west=side]'
+  'T': 'redstone_wire[east=side,north=side,south=none,west=side]'
+  'U': 'redstone_wire[east=up,north=none,south=none,west=up]'
+  'V': 'redstone_wire[east=up,north=none,south=side,west=none]'
+  'W': 'redstone_wire[east=up,north=none,south=side,west=up]'
+  'X': 'repeater[delay=1,facing=east]'
+  'Y': 'repeater[delay=1,facing=south]'
+  'Z': 'white_wool'
+  'a': {name: lk10, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'b': {name: lk12, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'c': {name: lk14, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'd': {name: lk16, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'e': {name: lk18, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  'f': {name: lk4, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'g': {name: lk6, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'h': {name: lk8, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'i': {name: out0, block: 'redstone_lamp'}
+  'j': {name: out1, block: 'redstone_lamp'}
+  'k': {name: out2, block: 'redstone_lamp'}
+  'l': {name: out3, block: 'redstone_lamp'}
+  'm': {name: out4, block: 'redstone_lamp'}
+  'n': {name: out5, block: 'redstone_lamp'}
+  'o': {name: out6, block: 'redstone_lamp'}
+  'p': {name: out7, block: 'redstone_lamp'}
+  'q': {name: q10_1, block: 'repeater[delay=1,facing=south]'}
+  'r': {name: q10_5, block: 'repeater[delay=1,facing=south]'}
+  's': {name: q11_3, block: 'repeater[delay=1,facing=south]'}
+  't': {name: q11_7, block: 'repeater[delay=1,facing=south]'}
+  'u': {name: q12_1, block: 'repeater[delay=1,facing=south]'}
+  'v': {name: q12_5, block: 'repeater[delay=1,facing=south]'}
+  'w': {name: q13_3, block: 'repeater[delay=1,facing=south]'}
+  'x': {name: q13_7, block: 'repeater[delay=1,facing=south]'}
+  'y': {name: q14_1, block: 'repeater[delay=1,facing=south]'}
+  'z': {name: q14_5, block: 'repeater[delay=1,facing=south]'}
+  '0': {name: q15_3, block: 'repeater[delay=1,facing=south]'}
+  '1': {name: q15_7, block: 'repeater[delay=1,facing=south]'}
+  '2': {name: q16_1, block: 'repeater[delay=1,facing=south]'}
+  '3': {name: q16_5, block: 'repeater[delay=1,facing=south]'}
+  '4': {name: q17_3, block: 'repeater[delay=1,facing=south]'}
+  '5': {name: q17_7, block: 'repeater[delay=1,facing=south]'}
+  '6': {name: q18_1, block: 'repeater[delay=1,facing=south]'}
+  '7': {name: q18_5, block: 'repeater[delay=1,facing=south]'}
+  '8': {name: q19_3, block: 'repeater[delay=1,facing=south]'}
+  '9': {name: q19_7, block: 'repeater[delay=1,facing=south]'}
+  '!': {name: q4_1, block: 'repeater[delay=1,facing=south]'}
+  '$': {name: q4_5, block: 'repeater[delay=1,facing=south]'}
+  '%': {name: q5_3, block: 'repeater[delay=1,facing=south]'}
+  '&': {name: q5_7, block: 'repeater[delay=1,facing=south]'}
+  '*': {name: q6_1, block: 'repeater[delay=1,facing=south]'}
+  '+': {name: q6_5, block: 'repeater[delay=1,facing=south]'}
+  '/': {name: q7_3, block: 'repeater[delay=1,facing=south]'}
+  ';': {name: q7_7, block: 'repeater[delay=1,facing=south]'}
+  '<': {name: q8_1, block: 'repeater[delay=1,facing=south]'}
+  '>': {name: q8_5, block: 'repeater[delay=1,facing=south]'}
+  '?': {name: q9_3, block: 'repeater[delay=1,facing=south]'}
+  '@': {name: q9_7, block: 'repeater[delay=1,facing=south]'}
+  '^': {name: row0, block: 'lever[face=wall,facing=east,powered=false]'}
+  '_': {name: row1, block: 'lever[face=wall,facing=east,powered=false]'}
+  '~': {name: row2, block: 'lever[face=wall,facing=east,powered=false]'}
+  '|': {name: row3, block: 'lever[face=wall,facing=east,powered=false]'}
+  '(': {name: row4, block: 'lever[face=wall,facing=east,powered=false]'}
+  ')': {name: row5, block: 'lever[face=wall,facing=east,powered=false]'}
+  '{': {name: row6, block: 'lever[face=wall,facing=east,powered=false]'}
+  '}': {name: row7, block: 'lever[face=wall,facing=east,powered=false]'}
+  '[': {name: t0n, block: 'lever[face=wall,facing=north,powered=false]'}
+  ']': {name: t0s, block: 'lever[face=wall,facing=south,powered=false]'}
+  ',': {name: t1n, block: 'lever[face=wall,facing=north,powered=false]'}
+  ':': {name: t1s, block: 'lever[face=wall,facing=south,powered=false]'}
+  '=': {name: t2n, block: 'lever[face=wall,facing=north,powered=false]'}
+  '-': {name: t2s, block: 'lever[face=wall,facing=south,powered=false]'}
+  '#': {name: t3n, block: 'lever[face=wall,facing=north,powered=false]'}
+  '`': {name: t3s, block: 'lever[face=wall,facing=south,powered=false]'}
+layers:
+  0: |
+    ...........
+    ...........
+    ..[...=....
+    ..Z...Z....
+    ..L...L....
+    ..Z...Z....
+    ..]...-....
+  1: |
+    ...........
+    ...........
+    ....,...#..
+    ..K.Z.K.Z..
+    ..I.L.I.L..
+    ....Z...Z..
+    ....:...`..
+  2: |
+    ..F...F....
+    ...........
+    ...........
+    ..J.K.J.K..
+    ..K.I.K.I..
+    ...........
+    ...........
+  3: |
+    ..VGGGWGGi.
+    ..L...L....
+    .JA..JA....
+    .ZP.JZQ.J..
+    .ZI.KZI.K..
+    .II..II....
+    ....D......
+  4: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YfZIYOZI..
+    .!BAI$BAI..
+    .EEEUEEEE..
+  5: |
+    ..VGGGWGGj.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZQYH..
+    .ZHYOZHYO..
+    .AI%BAI&BA.
+    .RRTDRRTXZ^
+  6: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YgZHYOZH..
+    .*BAI+BAI..
+    .EEEUEEEE..
+  7: |
+    ..VGGGWGGk.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZQYH..
+    .ZHYOZHYO..
+    .AI/BAI;BA.
+    .RRTDRRTXZ_
+  8: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YhZHYOZH..
+    .<BAI>BAI..
+    .EEEUEEEE..
+  9: |
+    ..VGGGWGGl.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZPYH..
+    .ZHYOZHYO..
+    .AI?BAI@BA.
+    .RRTDRRTXZ~
+  10: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YaZHYOZH..
+    .qBAIrBAI..
+    .EEEUEEEE..
+  11: |
+    ..VGGGWGGm.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZPYH..
+    .ZHYOZHYO..
+    .AIsBAItBA.
+    .RRTDRRTXZ|
+  12: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YbZHYOZH..
+    .uBAIvBAI..
+    .EEEUEEEE..
+  13: |
+    ..VGGGWGGn.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZPYH..
+    .ZHYOZHYO..
+    .AIwBAIxBA.
+    .RRTDRRTXZ(
+  14: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YcZHYOZH..
+    .yBAIzBAI..
+    .EEEUEEEE..
+  15: |
+    ..VGGGWGGo.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZPYH..
+    .ZHYOZHYO..
+    .AI0BAI1BA.
+    .RRTDRRTXZ)
+  16: |
+    ..FRSRFRM..
+    ....L...L..
+    ACMJACMJA..
+    .YHZPYHZP..
+    .YdZHYOZH..
+    .2BAI3BAI..
+    .EEEUEEEE..
+  17: |
+    ..VGGGWGGp.
+    ..L...L....
+    .JACMJACM..
+    .ZPYHZPYH..
+    .ZHYOZHYO..
+    .AI4BAI5BA.
+    .RRTDRRTXZ{
+  18: |
+    ...RSR.RM..
+    ....L...L..
+    ACMJACMJA..
+    .Y.ZPY.ZP..
+    .YeZHYNZH..
+    .6BAI7BAI..
+    .EEEUEEEE..
+  19: |
+    ...........
+    ...........
+    ..ACM.ACM..
+    ...Y...Y...
+    ...YN..YN..
+    ...8BA.9BA.
+    .RRT.RRTXZ}
+tests:
+- name: transparent with the demo levers off
+  settle: 40
+  steps:
+  - {use: row0}
+  - {wait: 6}
+  - expect: {q4_1: 1, q5_3: 1, q4_5: 1, q5_7: 1, q6_1: 0}
+  - {use: row0}
+  - {wait: 6}
+  - expect: {q4_1: 0, q5_3: 0, q4_5: 0, q5_7: 0}
+- name: tower levels from each driver
+  settle: 40
+  steps:
+  - level: {lk4: 14, lk6: 12, lk8: 10, lk10: 8, lk12: 6, lk14: 4, lk16: 2, lk18: 0}
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t2n}
+  - {use: t3n}
+  - {wait: 6}
+  - level: {lk4: 0, lk18: 0}
+  - {use: t0s}
+  - {wait: 4}
+  - level: {lk4: 15, lk6: 13, lk8: 11, lk10: 9, lk12: 7, lk14: 5, lk16: 3, lk18: 1}
+- name: south driver writes and holds all eight bits
+  settle: 40
+  steps:
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t2n}
+  - {use: t3n}
+  - {wait: 10}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {use: row7}
+  - {wait: 6}
+  - {use: t0s}
+  - {wait: 10}
+  - expect: {q4_1: 1, q6_1: 1, q8_1: 1, q10_1: 1, q12_1: 1, q14_1: 1, q16_1: 1, q18_1: 1, q4_5: 0}
+  - {use: t0s}
+  - {wait: 6}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {use: row7}
+  - {wait: 10}
+  - expect: {q4_1: 1, q10_1: 1, q18_1: 1, q4_5: 0, out0: 1, out3: 1, out7: 1}
+- name: north driver cannot write bit 7
+  settle: 40
+  steps:
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t2n}
+  - {use: t3n}
+  - {wait: 10}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {use: row7}
+  - {wait: 6}
+  - {use: t0n}
+  - {wait: 10}
+  - {use: t0n}
+  - {wait: 6}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {use: row7}
+  - {wait: 10}
+  - expect: {q4_1: 1, q16_1: 1, q18_1: 0}
+- name: held words are read as an OR
+  settle: 40
+  steps:
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t2n}
+  - {use: t3n}
+  - {wait: 10}
+  - {use: row0}
+  - {use: t0s}
+  - {wait: 10}
+  - {use: t0s}
+  - {wait: 6}
+  - {use: row0}
+  - {use: row1}
+  - {use: t2s}
+  - {wait: 10}
+  - {use: t2s}
+  - {wait: 6}
+  - {use: row1}
+  - {wait: 10}
+  - expect: {q4_1: 1, q6_1: 0, q4_5: 0, q6_5: 1, out0: 1, out1: 1}
+- name: reading one word alone erases the others
+  settle: 40
+  steps:
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t2n}
+  - {use: t3n}
+  - {wait: 10}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {use: t0s}
+  - {wait: 10}
+  - {use: t0s}
+  - {wait: 6}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {wait: 10}
+  - expect: {q4_1: 1, q16_1: 1, q4_5: 0, out0: 1, out6: 1}
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t3n}
+  - {wait: 10}
+  - expect: {out0: 0, out6: 0, q4_1: 0, q16_1: 0}
+  - {use: t0n}
+  - {use: t1n}
+  - {use: t3n}
+  - {wait: 10}
+  - expect: {out0: 0, out6: 0, q4_1: 0, q16_1: 0}

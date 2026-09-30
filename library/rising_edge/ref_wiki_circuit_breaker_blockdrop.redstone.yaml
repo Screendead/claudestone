@@ -1,0 +1,71 @@
+name: ref_wiki_circuit_breaker_blockdrop
+description: 'Block-drop check for ref_wiki_circuit_breaker (same blocks, same fixtures): a fixture sticky
+  piston (x=7, y=1, facing up) on the output line holding a concrete block shows the wiki circuit breaker''s
+  pulse drops it. Reference rebuild of the Minecraft Wiki "Circuit breaker" rising edge detector, credited
+  to the wiki editors (Redstone circuits/Pulse, https://minecraft.wiki/w/Redstone_circuits/Pulse#circuit_breaker
+  ; schematic from https://minecraft.wiki/w/Redstone_circuits/Pulse/red).'
+traits:
+- one_wide
+- piston_based
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  _:
+    reserve: true
+  a:
+    input: a
+  b:
+    input: b
+  i:
+    block: redstone_wire
+    fixture: true
+  f:
+    block: smooth_stone
+    fixture: true
+  P:
+    name: piston
+    block: sticky_piston[facing=up]
+  R:
+    name: rep
+    block: repeater[facing=west,delay=1]
+  o:
+    output: out
+    block: redstone_wire
+    fixture: true
+  S:
+    name: drop
+    block: sticky_piston[facing=up]
+    fixture: true
+  k:
+    block: white_concrete
+    fixture: true
+layers:
+  0: '..f=P=f.
+
+    '
+  1: 'bai-#RoS
+
+    '
+  2: '...._..k
+
+    '
+  3: '........
+
+    '
+tests:
+- name: drops a block
+  settle: 30
+  steps:
+  - check: if block ~7 ~2 ~0 white_concrete
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - check: if block ~7 ~3 ~0 white_concrete if block ~7 ~2 ~0 air if block ~7 ~1 ~0 sticky_piston[extended=false]
+  - drive:
+      a: 0
+  - wait: 10
+  - check: if block ~7 ~3 ~0 white_concrete

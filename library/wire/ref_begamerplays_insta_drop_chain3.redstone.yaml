@@ -1,0 +1,44 @@
+name: ref_begamerplays_insta_drop_chain3
+description: 'Three ref_begamerplays_insta_drop stages (the wiki insta-drop instant repeater, BeGamerPlays 2013) in series, the most compact chaining found: each output dust on glass points straight into the next stage''s block A, so the line climbs one block per stage at a pitch of 4 (stage 3x2 plus a dust-on-glass column: 8 cells per stage). Input and final output dust are fixtures.'
+traits: [one_wide, piston_based, entityless]
+palette:
+  .: air
+  a: {input: a}
+  f: {block: smooth_stone, fixture: true}
+  r: {block: 'repeater[facing=west,delay=1]', fixture: true}
+  i: {name: in, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  g: glass
+  G: {block: glass, fixture: true}
+  d: 'redstone_wire[east=side,west=side]'
+  o: {output: out, block: 'redstone_wire[east=side,west=side]', fixture: true}
+  A: white_concrete
+  H: 'piston_head[facing=west,type=sticky]'
+  Q: 'sticky_piston[facing=west,extended=true]'
+  P: 'sticky_piston[facing=east]'
+  R: redstone_block
+  _: {reserve: true}
+layers:
+  0: |
+    .ff............
+  1: |
+    ariAHQg........
+  2: |
+    ...PR_dAHQg....
+  3: |
+    .......PR_dAHQG
+  4: |
+    ...........PR_o
+tests:
+- name: both edges cross three stages in the input's tick
+  settle: 30
+  steps:
+  - expect: {out: 0, in: 0}
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - level: {out: 15}
+  - drive: {a: 0}
+  - wave: {in: '1100000000000000', out: '1100000000000000'}
+  - drive: {a: 1}
+  - wave: {in: '0011111111111111', out: '0011111111111111'}
+  - drive: {a: 0}
+  - wave: {in: '1100000000000000', out: '1100000000000000'}

@@ -1,0 +1,86 @@
+name: ref_wiki_subtraction_xor_basic
+description: "The Minecraft Wiki's 'Basic Subtraction XOR Gate' (Redstone circuits/Logic, subtraction XOR gallery: https://minecraft.wiki/w/Redstone_circuits/Logic/subtraction_xor_gate, community-edited and undated; page source fetched 2026-09-30 with ?action=raw), rebuilt from the page's schematic: 3x4x2 (24 block volume), flat, silent, 'circuit delay: 1 tick'. Both inputs join one dust column that feeds the rear of two subtract-mode comparators; each comparator's side is fed by the dust nearest one input, so an input cancels itself in its own comparator and not in the far one. The wiki notes the inputs must be at the same power level (or differ by at most 1). Output taken at the OR junction dust (the page's extra output column is left out, as its volume count does). Supports under the dust are the schematic's implied ground layer."
+traits: [comparator_based, silent, lightless, pistonless, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': smooth_stone
+  C: comparator[facing=west,mode=subtract]
+  a: {input: a}
+  b: {input: b}
+  o: {output: out, block: redstone_wire}
+layers:
+  0: |
+    .==.
+    .===
+    .==.
+    .==.
+  1: |
+    a--.
+    .-Co
+    .-C#
+    b--.
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+  max_delay: 10
+- name: stack x2 (pitch 2)
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+  max_delay: 10
+  tile: [0, 2, 0]
+- name: tile x2 (z pitch 5)
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+  max_delay: 10
+  tile: [0, 0, 5]
+- name: edges a moves, b=0
+  truth_table: |
+    b a | out
+    0 0 | 0
+    0 1 | 1
+  max_delay: 10
+- name: edges a moves, b=1
+  truth_table: |
+    b a | out
+    1 0 | 1
+    1 1 | 0
+  max_delay: 10
+- name: edges b moves, a=0
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+  max_delay: 10
+- name: edges b moves, a=1
+  truth_table: |
+    a b | out
+    1 0 | 1
+    1 1 | 0
+  max_delay: 10

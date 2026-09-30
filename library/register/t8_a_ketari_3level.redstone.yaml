@@ -1,0 +1,374 @@
+name: t8_a_ketari_3level
+description: 'Ketari_''s RAM (see register/ref_ketari_ram_2x2x7) made addressable: same blocks and 4x1x7 = 28 blocks per bit pitch, but each word tower now has three levels instead of two. The lock comparators'' barrels are graded by height (stone stacks giving 15, 13, 11, 9, 7, 5, 3 for bits 0-6), exactly the level the south (write) driver puts on that tap, while the north driver''s idle level is one lower at every tap. So a tower at write (t<w>s on: 15 at the bottom) unlocks its word, idle (both levers off: 14) keeps it locked and, being at least 2 at every tap, keeps its read torches off, and read (t<w>n on: 0) keeps it locked and puts it on out0-out6. Ketari''s demo drivers already give 0, 14 and 15, but with every lock barrel at 1 the levels 14 and 15 both unlock, so a word can be hidden only by unlocking it. The top bit layer is dropped: the idle level reaches 0 there, so it could not be hidden. Result: 4 words x 7 bits, idle holds and hides every word, each word reads back alone. Timing from the demo levers: write 8 gt to the stored repeater (4 gt from the tower reaching 15), read 4 gt to the out lamps (2 gt from the tower reaching 0); keep the data rows steady until 6 gt after the write lever goes off. Every threshold is one signal strength apart from the idle level, which is deterministic in vanilla but leaves no margin for a weaker driver. The graded barrels make the 7 layers of a word different, so the array stacks in y only as 7-layer groups with a driver each. Demo lever supports and row-lever lamps are white wool, as in the ref.'
+traits: [vertical, analog, comparator_based, container_based, torch_based, lockable, pistonless, entityless, survival_friendly, reset_safe]
+palette:
+  .: air
+  'A': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:diamond_sword",count:1}]}'
+  'B': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64},{Slot:24b,id:"minecraft:stone",count:64},{Slot:25b,id:"minecraft:stone",count:64},{Slot:26b,id:"minecraft:stone",count:64}]}'
+  'C': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64}]}'
+  'D': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64}]}'
+  'E': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64}]}'
+  'F': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64}]}'
+  'G': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64}]}'
+  'H': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64}]}'
+  'I': 'comparator[facing=east,mode=subtract]'
+  'J': 'comparator[facing=west,mode=subtract]'
+  'K': 'gray_stained_glass'
+  'L': 'gray_wool'
+  'M': 'light_blue_stained_glass'
+  'N': 'light_blue_wool'
+  'O': 'lime_stained_glass'
+  'P': 'lime_wool'
+  'Q': 'magenta_wool'
+  'R': 'redstone_torch'
+  'S': 'redstone_wall_torch[facing=north]'
+  'T': 'redstone_wire[east=none,north=none,south=side,west=side]'
+  'U': 'redstone_wire[east=none,north=up,south=side,west=none]'
+  'V': 'redstone_wire[east=none,north=up,south=up,west=none]'
+  'W': 'redstone_wire[east=none,north=up,south=up,west=side]'
+  'X': 'redstone_wire[east=side,north=none,south=none,west=side]'
+  'Y': 'redstone_wire[east=side,north=none,south=side,west=side]'
+  'Z': 'redstone_wire[east=side,north=side,south=none,west=side]'
+  'a': 'redstone_wire[east=up,north=none,south=none,west=up]'
+  'b': 'redstone_wire[east=up,north=none,south=side,west=none]'
+  'c': 'redstone_wire[east=up,north=none,south=side,west=up]'
+  'd': 'repeater[delay=1,facing=east]'
+  'e': 'repeater[delay=1,facing=south]'
+  'f': 'white_wool'
+  'g': {name: lk10, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'h': {name: lk12, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'i': {name: lk14, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'j': {name: lk16, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'k': {name: lk4, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'l': {name: lk6, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'm': {name: lk8, block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'n': {name: out0, block: 'redstone_lamp'}
+  'o': {name: out1, block: 'redstone_lamp'}
+  'p': {name: out2, block: 'redstone_lamp'}
+  'q': {name: out3, block: 'redstone_lamp'}
+  'r': {name: out4, block: 'redstone_lamp'}
+  's': {name: out5, block: 'redstone_lamp'}
+  't': {name: out6, block: 'redstone_lamp'}
+  'u': {name: q10_1, block: 'repeater[delay=1,facing=south]'}
+  'v': {name: q10_5, block: 'repeater[delay=1,facing=south]'}
+  'w': {name: q11_3, block: 'repeater[delay=1,facing=south]'}
+  'x': {name: q11_7, block: 'repeater[delay=1,facing=south]'}
+  'y': {name: q12_1, block: 'repeater[delay=1,facing=south]'}
+  'z': {name: q12_5, block: 'repeater[delay=1,facing=south]'}
+  '0': {name: q13_3, block: 'repeater[delay=1,facing=south]'}
+  '1': {name: q13_7, block: 'repeater[delay=1,facing=south]'}
+  '2': {name: q14_1, block: 'repeater[delay=1,facing=south]'}
+  '3': {name: q14_5, block: 'repeater[delay=1,facing=south]'}
+  '4': {name: q15_3, block: 'repeater[delay=1,facing=south]'}
+  '5': {name: q15_7, block: 'repeater[delay=1,facing=south]'}
+  '6': {name: q16_1, block: 'repeater[delay=1,facing=south]'}
+  '7': {name: q16_5, block: 'repeater[delay=1,facing=south]'}
+  '8': {name: q17_3, block: 'repeater[delay=1,facing=south]'}
+  '9': {name: q17_7, block: 'repeater[delay=1,facing=south]'}
+  '!': {name: q4_1, block: 'repeater[delay=1,facing=south]'}
+  '$': {name: q4_5, block: 'repeater[delay=1,facing=south]'}
+  '%': {name: q5_3, block: 'repeater[delay=1,facing=south]'}
+  '&': {name: q5_7, block: 'repeater[delay=1,facing=south]'}
+  '*': {name: q6_1, block: 'repeater[delay=1,facing=south]'}
+  '+': {name: q6_5, block: 'repeater[delay=1,facing=south]'}
+  '/': {name: q7_3, block: 'repeater[delay=1,facing=south]'}
+  ';': {name: q7_7, block: 'repeater[delay=1,facing=south]'}
+  '<': {name: q8_1, block: 'repeater[delay=1,facing=south]'}
+  '>': {name: q8_5, block: 'repeater[delay=1,facing=south]'}
+  '?': {name: q9_3, block: 'repeater[delay=1,facing=south]'}
+  '@': {name: q9_7, block: 'repeater[delay=1,facing=south]'}
+  '^': {name: row0, block: 'lever[face=wall,facing=east,powered=false]'}
+  '_': {name: row1, block: 'lever[face=wall,facing=east,powered=false]'}
+  '~': {name: row2, block: 'lever[face=wall,facing=east,powered=false]'}
+  '|': {name: row3, block: 'lever[face=wall,facing=east,powered=false]'}
+  '(': {name: row4, block: 'lever[face=wall,facing=east,powered=false]'}
+  ')': {name: row5, block: 'lever[face=wall,facing=east,powered=false]'}
+  '{': {name: row6, block: 'lever[face=wall,facing=east,powered=false]'}
+  '}': {name: t0n, block: 'lever[face=wall,facing=north,powered=false]'}
+  '[': {name: t0s, block: 'lever[face=wall,facing=south,powered=false]'}
+  ']': {name: t1n, block: 'lever[face=wall,facing=north,powered=false]'}
+  ',': {name: t1s, block: 'lever[face=wall,facing=south,powered=false]'}
+  ':': {name: t2n, block: 'lever[face=wall,facing=north,powered=false]'}
+  '=': {name: t2s, block: 'lever[face=wall,facing=south,powered=false]'}
+  '-': {name: t3n, block: 'lever[face=wall,facing=north,powered=false]'}
+  '#': {name: t3s, block: 'lever[face=wall,facing=south,powered=false]'}
+layers:
+  0: |
+    ...........
+    ...........
+    ..}...:....
+    ..f...f....
+    ..S...S....
+    ..f...f....
+    ..[...=....
+  1: |
+    ...........
+    ...........
+    ....]...-..
+    ..R.f.R.f..
+    ..P.S.P.S..
+    ....f...f..
+    ....,...#..
+  2: |
+    ..M...M....
+    ...........
+    ...........
+    ..Q.R.Q.R..
+    ..R.P.R.P..
+    ...........
+    ...........
+  3: |
+    ..bNNNcNNn.
+    ..S...S....
+    .QA..QA....
+    .fV.QfW.Q..
+    .fP.RfP.R..
+    .PP..PP....
+    ....K......
+  4: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .ekfPeUfP..
+    .!IBP$IBP..
+    .LLLaLLLL..
+  5: |
+    ..bNNNcNNo.
+    ..S...S....
+    .QAJTQAJT..
+    .fVeOfWeO..
+    .fOeUfOeU..
+    .BP%IBP&IB.
+    .XXZKXXZdf^
+  6: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .elfOeUfO..
+    .*ICP+ICP..
+    .LLLaLLLL..
+  7: |
+    ..bNNNcNNp.
+    ..S...S....
+    .QAJTQAJT..
+    .fVeOfWeO..
+    .fOeUfOeU..
+    .CP/ICP;IC.
+    .XXZKXXZdf_
+  8: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .emfOeUfO..
+    .<IDP>IDP..
+    .LLLaLLLL..
+  9: |
+    ..bNNNcNNq.
+    ..S...S....
+    .QAJTQAJT..
+    .fVeOfVeO..
+    .fOeUfOeU..
+    .DP?IDP@ID.
+    .XXZKXXZdf~
+  10: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .egfOeUfO..
+    .uIEPvIEP..
+    .LLLaLLLL..
+  11: |
+    ..bNNNcNNr.
+    ..S...S....
+    .QAJTQAJT..
+    .fVeOfVeO..
+    .fOeUfOeU..
+    .EPwIEPxIE.
+    .XXZKXXZdf|
+  12: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .ehfOeUfO..
+    .yIFPzIFP..
+    .LLLaLLLL..
+  13: |
+    ..bNNNcNNs.
+    ..S...S....
+    .QAJTQAJT..
+    .fVeOfVeO..
+    .fOeUfOeU..
+    .FP0IFP1IF.
+    .XXZKXXZdf(
+  14: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .eifOeUfO..
+    .2IGP3IGP..
+    .LLLaLLLL..
+  15: |
+    ..bNNNcNNt.
+    ..S...S....
+    .QAJTQAJT..
+    .fVeOfVeO..
+    .fOeUfOeU..
+    .GP4IGP5IG.
+    .XXZKXXZdf)
+  16: |
+    ..MXYXMXT..
+    ....S...S..
+    AJTQAJTQA..
+    .eOfVeOfV..
+    .ejfOeUfO..
+    .6IHP7IHP..
+    .LLLaLLLL..
+  17: |
+    ...........
+    ...........
+    .QAJTQAJT..
+    .fVeOfVeO..
+    .fOeUfOeU..
+    .HP8IHP9IH.
+    .XXZKXXZdf{
+tests:
+- name: idle holds and hides every word
+  settle: 40
+  steps:
+  - expect: {out0: 0, out3: 0, out6: 0}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {wait: 10}
+  - expect: {q4_1: 0, q5_3: 0, q16_5: 0, q17_7: 0, out0: 0, out6: 0}
+- name: four words written and read back one at a time
+  settle: 40
+  steps:
+  - {use: row0}
+  - {use: row2}
+  - {use: row4}
+  - {use: row6}
+  - {wait: 4}
+  - {use: t0s}
+  - {wait: 10}
+  - {use: t0s}
+  - {wait: 6}
+  - {use: row0}
+  - {use: row2}
+  - {use: row4}
+  - {use: row6}
+  - {wait: 4}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {wait: 4}
+  - {use: t1s}
+  - {wait: 10}
+  - {use: t1s}
+  - {wait: 6}
+  - {use: row0}
+  - {use: row1}
+  - {use: row2}
+  - {use: row3}
+  - {use: row4}
+  - {use: row5}
+  - {use: row6}
+  - {wait: 4}
+  - {use: row1}
+  - {use: row3}
+  - {use: row5}
+  - {wait: 4}
+  - {use: t2s}
+  - {wait: 10}
+  - {use: t2s}
+  - {wait: 6}
+  - {use: row1}
+  - {use: row3}
+  - {use: row5}
+  - {wait: 4}
+  - {wait: 4}
+  - {use: t3s}
+  - {wait: 10}
+  - {use: t3s}
+  - {wait: 6}
+  - {wait: 4}
+  - expect: {q4_1: 1, q6_1: 0, q16_1: 1, q5_3: 1, q15_3: 1, q4_5: 0, q6_5: 1, q14_5: 1, q16_5: 0, q5_7: 0, q17_7: 0, out0: 0, out6: 0}
+  - {use: t0n}
+  - {wait: 8}
+  - expect: {out0: 1, out1: 0, out2: 1, out3: 0, out4: 1, out5: 0, out6: 1}
+  - {use: t0n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t1n}
+  - {wait: 8}
+  - expect: {out0: 1, out1: 1, out2: 1, out3: 1, out4: 1, out5: 1, out6: 1}
+  - {use: t1n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t2n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 1, out2: 0, out3: 1, out4: 0, out5: 1, out6: 0}
+  - {use: t2n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t3n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t3n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t0n}
+  - {wait: 8}
+  - expect: {out0: 1, out1: 0, out2: 1, out3: 0, out4: 1, out5: 0, out6: 1}
+  - {use: t0n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t2n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 1, out2: 0, out3: 1, out4: 0, out5: 1, out6: 0}
+  - {use: t2n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: row1}
+  - {use: row5}
+  - {wait: 4}
+  - {use: t0s}
+  - {wait: 10}
+  - {use: t0s}
+  - {wait: 6}
+  - {use: row1}
+  - {use: row5}
+  - {wait: 4}
+  - {use: t0n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 1, out2: 0, out3: 0, out4: 0, out5: 1, out6: 0}
+  - {use: t0n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t1n}
+  - {wait: 8}
+  - expect: {out0: 1, out1: 1, out2: 1, out3: 1, out4: 1, out5: 1, out6: 1}
+  - {use: t1n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+  - {use: t2n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 1, out2: 0, out3: 1, out4: 0, out5: 1, out6: 0}
+  - {use: t2n}
+  - {wait: 8}
+  - expect: {out0: 0, out1: 0, out2: 0, out3: 0, out4: 0, out5: 0, out6: 0}
+

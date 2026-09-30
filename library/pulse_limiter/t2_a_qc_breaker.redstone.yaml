@@ -1,0 +1,454 @@
+name: t2_a_qc_breaker
+description: 'Circuit breaker pulse limiter in 1x2x3 (6): the wiki circuit breaker without its dust column,
+  because the input line quasi-powers the piston. Side view, one block wide, running east. The input line
+  (fixture dust at x=2 on a glass fixture, so its support powers nothing) points into concrete block C
+  (x=3, y=1), which a delay-1 repeater (x=4) reads; the sticky piston under C (x=3, y=0, facing up) is
+  powered only through quasi-connectivity, by the input feeding the cell above it, and lifts C into x=3,
+  y=2 (reserved), so the repeater gives one 2 gt pulse. Works fed by dust or by a repeater pointing straight
+  into C. The fixture sticky piston at x=6 shows the pulse drops its block.'
+traits:
+- one_wide
+- piston_based
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  _:
+    reserve: true
+  a:
+    input: a
+  b:
+    input: b
+  i:
+    block: redstone_wire
+    fixture: true
+  g:
+    block: glass
+    fixture: true
+  f:
+    block: smooth_stone
+    fixture: true
+  P:
+    name: piston
+    block: sticky_piston[facing=up]
+  R:
+    name: rep
+    block: repeater[facing=west,delay=1]
+  o:
+    output: out
+    block: redstone_wire
+    fixture: true
+  S:
+    name: drop
+    block: sticky_piston[facing=up]
+    fixture: true
+  k:
+    block: white_concrete
+    fixture: true
+layers:
+  0: '..gP=f.
+
+    '
+  1: 'bai#RoS
+
+    '
+  2: '...._.k
+
+    '
+  3: '.......
+
+    '
+tests:
+- name: widths
+  settle: 30
+  steps:
+  - drive:
+      a: 1
+  - wave:
+      out: '00110000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0'
+  - drive:
+      a: 0
+  - wave:
+      out: '01100000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00'
+  - drive:
+      a: 0
+  - wave:
+      out: '11000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '001'
+  - drive:
+      a: 0
+  - wave:
+      out: '10000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00110000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00110000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00110'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00110000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '001100'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '00110000000000000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+- name: gaps
+  settle: 30
+  steps:
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '0'
+  - drive:
+      a: 1
+  - wave:
+      out: '0000110000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00'
+  - drive:
+      a: 1
+  - wave:
+      out: '0001100000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '0000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '000000'
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - drive:
+      a: 0
+  - wave:
+      out: '00000000000000000000'
+- name: repeater fed
+  settle: 30
+  steps:
+  - run: setblock ~1 ~0 ~0 smooth_stone
+  - run: setblock ~1 ~1 ~0 repeater[facing=west,delay=1]
+  - wait: 10
+  - drive:
+      b: 1
+  - wave: &id001
+      out: '00001100000000000000'
+  - drive:
+      b: 0
+  - wave: &id002
+      out: '00000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id003
+      out: '0'
+  - drive:
+      b: 0
+  - wave: &id004
+      out: '00011000000000000000'
+  - drive:
+      b: 1
+  - wave: &id005
+      out: '00000000000000000000'
+  - drive:
+      b: 0
+  - wave: &id006
+      out: '00000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id007
+      out: '00'
+  - drive:
+      b: 0
+  - wave: &id008
+      out: '00110000000000000000'
+  - drive:
+      b: 1
+  - wave: &id009
+      out: '00000000000000000000'
+  - drive:
+      b: 0
+  - wave: &id010
+      out: '00000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id011
+      out: '000'
+  - drive:
+      b: 0
+  - wave: &id012
+      out: '01100000000000000000'
+  - drive:
+      b: 1
+  - wave: &id013
+      out: '00001100000000000000'
+  - drive:
+      b: 0
+  - wave: &id014
+      out: '00000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id015
+      out: '0000'
+  - drive:
+      b: 0
+  - wave: &id016
+      out: '11000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id017
+      out: '00001100000000000000'
+  - drive:
+      b: 0
+  - wave: &id018
+      out: '00000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id019
+      out: '00001'
+  - drive:
+      b: 0
+  - wave: &id020
+      out: '10000000000000000000'
+  - drive:
+      b: 1
+  - wave: &id021
+      out: '00001100000000000000'
+  - drive:
+      b: 0
+  - wave: &id022
+      out: '00000000000000000000'
+- name: repeater into the block
+  settle: 30
+  steps:
+  - run: setblock ~2 ~1 ~0 repeater[facing=west,delay=1]
+  - wait: 10
+  - drive:
+      a: 1
+  - wave: *id001
+  - drive:
+      a: 0
+  - wave: *id002
+  - drive:
+      a: 1
+  - wave: *id003
+  - drive:
+      a: 0
+  - wave: *id004
+  - drive:
+      a: 1
+  - wave: *id005
+  - drive:
+      a: 0
+  - wave: *id006
+  - drive:
+      a: 1
+  - wave: *id007
+  - drive:
+      a: 0
+  - wave: *id008
+  - drive:
+      a: 1
+  - wave: *id009
+  - drive:
+      a: 0
+  - wave: *id010
+  - drive:
+      a: 1
+  - wave: *id011
+  - drive:
+      a: 0
+  - wave: *id012
+  - drive:
+      a: 1
+  - wave: *id013
+  - drive:
+      a: 0
+  - wave: *id014
+  - drive:
+      a: 1
+  - wave: *id015
+  - drive:
+      a: 0
+  - wave: *id016
+  - drive:
+      a: 1
+  - wave: *id017
+  - drive:
+      a: 0
+  - wave: *id018
+  - drive:
+      a: 1
+  - wave: *id019
+  - drive:
+      a: 0
+  - wave: *id020
+  - drive:
+      a: 1
+  - wave: *id021
+  - drive:
+      a: 0
+  - wave: *id022
+- name: drops a block
+  settle: 30
+  steps:
+  - check: if block ~6 ~2 ~0 white_concrete
+  - drive:
+      a: 1
+  - wave:
+      out: '0011000000'
+  - check: if block ~6 ~3 ~0 white_concrete if block ~6 ~2 ~0 air if block ~6 ~1 ~0 sticky_piston[extended=false]
+  - drive:
+      a: 0
+  - wait: 10
+  - check: if block ~6 ~3 ~0 white_concrete

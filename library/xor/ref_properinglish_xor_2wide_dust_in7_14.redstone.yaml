@@ -1,0 +1,126 @@
+name: ref_properinglish_xor_2wide_dust_in7_14
+description: "Input-strength probe for ref_properinglish_xor_2wide (Properinglish19, https://www.youtube.com/watch?v=yUTDJ6a7qkc): the same blocks, with each input fed by fixture dust instead of the lever, the dust climbing onto the design's first dust cell, so a enters at strength 7 and b at 14; unequal inputs are fine because the cancelling side input always comes through a repeater. Delays here have no fixture repeater in them."
+traits: [comparator_based, silent, lightless, pistonless, entityless]
+palette:
+  '.': air
+  '#': iron_block
+  '-': redstone_wire
+  'h': smooth_stone_slab[type=top]
+  f: {block: iron_block, fixture: true}
+  'C': comparator[facing=north,mode=compare]
+  'R': repeater[facing=north,delay=1]
+  w: {block: redstone_wire, fixture: true}
+  A: {input: a0}
+  B: {input: b0}
+  D: {input: a1}
+  E: {input: b1}
+  F: {output: out0, block: redstone_wire}
+  G: {output: out1, block: redstone_wire}
+layers:
+  0: |
+    ....
+    f.f.
+    f.f.
+    f.f.
+    f.f.
+    f.f.
+    f.f.
+    f.f.
+    f.f.
+    ....
+    #.#.
+    #...
+    ....
+    ##..
+    #...
+    ....
+  1: |
+    A.D.
+    w.w.
+    w.w.
+    w.w.
+    w.w.
+    w.w.
+    w.w.
+    w.w.
+    w.w.
+    #.#.
+    -.-.
+    -.#.
+    ##.#
+    C-##
+    -.#.
+    #.#.
+  2: |
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    .f.f
+    -.-.
+    h.h.
+    ##-#
+    .R#R
+    ##C-
+    ..G#
+    F#-.
+  3: |
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    .B.E
+    .w.w
+    .#.#
+    -#-#
+    R-#-
+    ##R#
+    -C##
+    .#.-
+    .-#.
+  4: |
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    .-.-
+    #-#-
+    ....
+    ...-
+    ..-C
+    ...#
+    ....
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 | out0 out1
+    0  0  0  0  | 0    0
+    0  0  0  1  | 0    1
+    0  0  1  1  | 0    0
+    0  0  1  0  | 0    1
+    0  1  1  0  | 1    1
+    0  1  1  1  | 1    0
+    0  1  0  1  | 1    1
+    0  1  0  0  | 1    0
+    1  1  0  0  | 0    0
+    1  1  0  1  | 0    1
+    1  1  1  1  | 0    0
+    1  1  1  0  | 0    1
+    1  0  1  0  | 1    1
+    1  0  1  1  | 1    0
+    1  0  0  1  | 1    1
+    1  0  0  0  | 1    0
+    0  0  0  0  | 0    0
+  max_delay: 8
