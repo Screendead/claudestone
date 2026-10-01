@@ -528,6 +528,7 @@ east face |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| accessible_loader_2x_slice | 8x6x7 | 336 | 146 | - | container_based, comparator_based, piston_based, survival_friendly | Accessible 2x shulker box loader for a storage hall, tiled along the hall in 3-block periods that hold two boxes (lane A box opened from the west aisle, lane B box from the east aisle, a feed-only lane C between periods) |
 | box_loader_2x_accessible | 4x4x3 | 48 | 28 | - | container_based, comparator_based, piston_based, survival_friendly | Shulker box loader for a sorter's bulk output that stays open to the player |
 | corner_cart_unloader_4x | 5x6x6 | 180 | 50 | - | survival_friendly, container_based, uses_entities, compact | Our rebuild of a published mechanism, not a new design (GiorgioJGZ's 4x Hopper Speed Shulker Box Unloader, youtube svv07jrkAEg, uses the same cart over four hoppers in volume 60 against this build's 180) |
 | crafter_compactor_9to1 | 1x4x7 | 28 | 22 | 0 | survival_friendly, lockable, reset_safe, tileable, container_based, comparator_based, analog, one_wide, pistonless, entityless, lightless | Inline 9-to-1 compactor for a storage slice (ingots, nuggets, slime, bone meal, kelp, redstone): the feed hopper fills a crafter, whose comparator reading must survive 8 dust to reach it, so it crafts only when all 9 slots are full and one ingot never becomes nuggets |
@@ -541,6 +542,10 @@ How it works per slice: comparator `sense` reads F (41 target + 64/64/12/1 junk 
 42nd target reads 9) and drives a stone block; dust on it carries the level to the `contact`
 dust beside `invert`, a compare-mode comparator whose rear reads a composter (level 3, or 2 on
 the longer variant) |
+| ref_obi_al003_thin_accessible_loader | 5x9x3 | 135 | 105 | - | container_based, comparator_based, piston_based, survival_friendly | Rebuild of AL003 5 Thin Composter Accessible Loader by Obi (https://storagecatalog.org/archives/AL003-5-Thin-Composter-Accessible-Loader/, MC 1.21.4, "A simple 5 block wide accessible loader with a zero ticked composter that buffers 16 stacks"), block for block from AL003_thin_accessible_loader.litematic including its stock of lime boxes in the dispenser and the two box hoppers, built as three slices along its 1-block tile axis; all three slices are fed and the middle one is measured |
+| ref_ragdollwilly_sp008_overflow | 6x8x10 | 480 | 208 | - | container_based, comparator_based, piston_based, survival_friendly | Rebuild of SP008 4DC Overflow with Recycle Bin by Ragdoll Willy (https://storagecatalog.org/archives/SP008-4DC-Overflow-with-Recycle-Bin/, MC 1.21.4), block for block from SP008_RW_Overflow_v27.litematic (6x8x10, 208 blocks) |
+| ref_robot_sp006_furnace16 | 2x8x23 | 368 | 206 | - | container_based, entityless, survival_friendly | Rebuild of SP006 Simple Entityless 16 Furnace Array by Robot (Storage Catalog, MC 1.21.4; https://storagecatalog.org/archives/SP006-Simple-Entityless-16-Furnace-Array/), block for block from SP006_Simple_Entityless_16_Furnace_Array_by_Robot.litematic (its Author field says Ragdoll_Willy): 2x8x23, 206 blocks, 16 furnaces, 51 hoppers, 34 droppers |
+| ref_vktec_al001_accessible_loader | 3x6x7 | 126 | 87 | - | container_based, comparator_based, piston_based, survival_friendly | Rebuild of AL001 Bottom-Accessible Shulker Loader by vktec (https://storagecatalog.org/archives/AL001-Bottom-Accessible-Shulker-Loader/, MC 1.16.5, "Single hopper-speed loader", "One wide tileable"), block for block from AL001_accessible_shulker_loader.litematic, built as three slices with slime, honey, slime as the README says to tile it; tests measure the middle slice |
 
 ## survival
 

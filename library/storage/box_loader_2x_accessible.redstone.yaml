@@ -1,5 +1,5 @@
 name: box_loader_2x_accessible
-description: 'Shulker box loader for a sorter''s bulk output that stays open to the player. Two hoppers fill the box at 5 items a second (twice hopper speed, a full 27-stack box of stone reaches the chest about 6,930 game ticks, 5.8 minutes, after the first item), a comparator that fires only at 27 full stacks unlocks the hopper under the box and, in the same tick, has a sticky piston push a slab down that breaks the box into that hopper and on to the chest; and the dispenser (restocked by a hopper from an empties chest) puts the next one in when the lock torch relights. The box can be opened from the west over the comparator while it loads. Input: any containers above the two feed hoppers.'
+description: 'Shulker box loader for a sorter''s bulk output that stays open to the player. Two hoppers fill the box at 5 items a second (twice hopper speed, a full 27-stack box of stone reaches the chest about 6,930 game ticks, 5.8 minutes, after the first item), a comparator that fires only at 27 full stacks unlocks the hopper under the box and, in the same tick, has a sticky piston push a slab down that breaks the box into that hopper and on to the chest; and the dispenser (restocked by a hopper from an empties chest) puts the next one in when the lock torch relights. The box can be opened from the west over the comparator while it loads: in 26.3 a closed shulker box opens only if the lower half of the cell its lid faces is free of collision (ShulkerBoxBlock.canOpen), and this box faces up under a top slab, whose collision is only the upper half; a test checks that state, the slab and the clear west approach at 17 points across two boxes, and found the box gone for 14 gt at the first swap (blocks only; the harness clears entities). Input: any containers above the two feed hoppers.'
 traits: [container_based, comparator_based, piston_based, survival_friendly]
 palette:
   .: air
@@ -207,4 +207,152 @@ tests:
   - check: unless data block ~2 ~1 ~2 Items[2]
   - check: unless data block ~2 ~2 ~1 Items[0]
   - check: unless data block ~2 ~1 ~1 Items[0]
+  - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
+- name: the box stays openable while two boxes load, lid up under a top slab, west face clear
+  steps:
+  - insert: {cell: [2, 2, 1], items: [{id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}]}
+  - insert: {cell: [2, 2, 1], slot: 14, items: [{id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}]}
+  - insert: {cell: [2, 2, 3], items: [{id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}]}
+  - insert: {cell: [2, 2, 3], slot: 14, items: [{id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}, {id: stone, count: 64}]}
+  - wait: 20
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 0, max: 7}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 980
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 225, max: 252}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 475, max: 502}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 725, max: 752}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 975, max: 1002}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1225, max: 1252}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1475, max: 1502}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 880
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1695, max: 1722}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - repeat:
+      times: 70
+      steps:
+      - wait: 1
+      - log: execute if block ~2 ~1 ~2 shulker_box[facing=up] if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - wait: 50
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 1000
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 800
+  - expect_items: {cell: [2, 1, 2], item: stone, min: 1}
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - wait: 150
+  - check: if block ~2 ~1 ~2 shulker_box[facing=up]
+  - check: if block ~2 ~2 ~2 smooth_stone_slab[type=top]
+  - check: if block ~1 ~1 ~2 comparator
+  - check: if block ~0 ~1 ~2 redstone_wire
+  - check: if block ~-1 ~1 ~2 air
+  - check: if block ~-1 ~0 ~2 air
+  - expect_items: {cell: [2, 1, 2], empty: true}
+  - check: 'if data block ~2 ~0 ~3 Items[{Slot:1b,id:"minecraft:shulker_box",count:1}]'
   - check: positioned ~2 ~1 ~2 unless entity @e[type=item,distance=..8]
