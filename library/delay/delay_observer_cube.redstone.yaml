@@ -1,0 +1,95 @@
+name: delay_observer_cube
+description: 'Dense pulse-preserving delay: 27 observers packed into a 3x3x3 cube, each facing the one before it along a serpentine path (rows, then layers), 54 game ticks from input a (x=0, y=0, z=0, watched by the first observer) to out (the last observer, x=3, y=2, z=2; it strong-powers the block east of it). Every cell is a delay element and none needs a support, so it holds 2 game ticks per block against a delay-1 repeater line at 2 ticks per two blocks (repeater plus support), and a 2-tick pulse comes out as one 2-tick pulse, which a delay-4 repeater serpentine (delay_serpentine) would stretch to 8 ticks. Like delay_observer_tower it carries edges: a pulse of 4 ticks or more, or a level, comes out as one pulse per edge (observer_chain_pulse_merge). Any self-avoiding path works, so the same packing fills whatever box a build has free; the compact 16x16 door uses it for its 2 gt kick and spit delays.'
+traits: [compact, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly]
+palette:
+  .: air
+  a: {input: a}
+  D: observer[facing=down]
+  E: observer[facing=east]
+  N: observer[facing=north]
+  S: observer[facing=south]
+  W: observer[facing=west]
+  o: {output: out, block: 'observer[facing=west]'}
+layers:
+  0: |
+    aWWW
+    .EEN
+    .NWW
+  1: |
+    .EES
+    .SWW
+    .EED
+  2: |
+    .DWW
+    .EEN
+    .NWo
+tests:
+- name: a 2 tick pulse comes out as one 2 tick pulse 54 ticks later
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 51
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+- name: a 4 tick pulse comes out as two pulses, one per edge
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 49
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+- name: each edge of a held input comes out as a 2 tick pulse
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 53
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 30
+  - expect: {out: 0}
+  - drive: {a: 0}
+  - wait: 54
+  - expect: {out: 1}
+  - wait: 2
+  - expect: {out: 0}

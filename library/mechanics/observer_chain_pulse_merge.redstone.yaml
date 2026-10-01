@@ -1,0 +1,108 @@
+name: observer_chain_pulse_merge
+description: 'An observer that sees a change while its own 2-tick pulse is pending or on ignores it, so a chain of observers (each watching the one before) turns any input pulse of 1 to 3 game ticks into exactly one 2-tick pulse, 2 ticks per observer, and only a pulse of 4 ticks or more comes out as two pulses (one per edge). Setup: input a (x=0) watched by three observers facing west (x=1..3), out = the third. Measured on 26.3 with 1, 2, 3 and 4 tick pulses from the harness driver (a redstone block placed and removed).'
+traits: [flat, one_wide, observer_based, silent, lightless, pistonless, entityless, tick_accurate]
+palette:
+  .: air
+  a: {input: a}
+  W: observer[facing=west]
+  o: {output: out, block: 'observer[facing=west]'}
+layers:
+  0: |
+    aWWo
+tests:
+- name: a 1 tick pulse comes out as one 2 tick pulse
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 1
+  - drive: {a: 0}
+  - wait: 4
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+- name: a 2 tick pulse comes out as one 2 tick pulse
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 2
+  - drive: {a: 0}
+  - wait: 3
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+- name: a 3 tick pulse comes out as one 2 tick pulse
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 3
+  - drive: {a: 0}
+  - wait: 2
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+- name: a 4 tick pulse comes out as two 2 tick pulses
+  settle: 30
+  steps:
+  - drive: {a: 1}
+  - wait: 4
+  - drive: {a: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 1}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
+  - wait: 1
+  - expect: {out: 0}
