@@ -20,6 +20,7 @@ command by command through the forward.
 """
 
 import base64
+import contextlib
 import fcntl
 import io
 import json
@@ -39,7 +40,7 @@ from pathlib import Path
 from . import spec as spec_module, watch
 from .build import Build
 from .harness import Rig, checked
-from .rcon import Rcon
+from .rcon import Rcon, port_turn
 from .servers import Server
 
 PACKAGE = Path(__file__).resolve().parent
@@ -209,7 +210,9 @@ class RemoteRig:
     def run_spec(self, spec, test: dict, trace: bool) -> dict:
         if self.server.name in NO_PYTHON:
             return self._run_here(spec, test, trace)
-        report = self._exchange(program(self.job(spec, test, trace)))
+        port = getattr(self.server, "rcon_port", None)
+        with port_turn(port) if port else contextlib.nullcontext():
+            report = self._exchange(program(self.job(spec, test, trace)))
         if report is None:
             NO_PYTHON.add(self.server.name)
             return self._run_here(spec, test, trace)

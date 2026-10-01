@@ -179,7 +179,10 @@ fixture yields a `RemoteRig`, and `spec.run` hands it the test: one
 a `Rig` over local RCON and streams back status-sign commands (replayed on main), watch
 events (replayed here), a heartbeat, and at the end the result or exception, the loaded
 build and the trace text, which is written here; traces and failure messages are the ones
-a forwarded run gives. Locks, plot records, showroom and mirroring stay on the laptop. A dsat
+a forwarded run gives. Locks, plot records, showroom and mirroring stay on the laptop. The
+container's RCON lock file is its own, so while a test runs there the laptop holds that port's
+`rcon.<port>.lock` (`rcon.port_turn`) and laptop clients of the dsat (`scripts.look`, say) wait
+instead of mixing their replies into the test's. A dsat
 listed by `docker ps` is taken without an RCON check (the container waits for a server still
 starting). 45 s without a line probes the desktop: gone, it is marked down and the test
 fails; answering, the wait goes on up to 5 minutes. A container of an image without

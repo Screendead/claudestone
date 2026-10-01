@@ -14,6 +14,21 @@ class RconError(Exception):
     pass
 
 
+@contextlib.contextmanager
+def port_turn(port: int):
+    """Hold a port's turn without a connection, as Rcon.sequence does: a test running inside a
+    Docker satellite's container talks to the server with the container's own lock, so the
+    laptop side holds this one meanwhile and laptop clients of that port (scripts.look, say)
+    wait instead of mixing their replies into the test's."""
+    PROPERTIES.parent.mkdir(parents=True, exist_ok=True)
+    with open(PROPERTIES.parent / f"rcon.{port}.lock", "a") as turn:
+        fcntl.flock(turn, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(turn, fcntl.LOCK_UN)
+
+
 class Rcon:
     _held = 0  # depth of open sequence() blocks
 

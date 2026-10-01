@@ -140,6 +140,36 @@ def test_a_passing_test_matches_a_local_run(monkeypatch, tmp_path, isolated):
     rr.release()
 
 
+def test_laptop_clients_of_the_port_wait_while_the_container_runs_a_test(monkeypatch, tmp_path):
+    # Seen live: scripts.look reading dsat3 mixed "Test passed" into a door test's build reply.
+    import fcntl
+
+    class PortSat(Sat):
+        rcon_port = 25678
+
+    s = make_spec([{"wait": 1}])
+    lines, _ = serve_lines(monkeypatch, s, lambda tick: {})
+    monkeypatch.setattr(rcon_module, "PROPERTIES", tmp_path / "server.properties")  # serve() points it at /srv
+    held = []
+
+    class Watching(FakeProc):
+        @property
+        def stdout(self):
+            with open(tmp_path / "rcon.25678.lock", "a") as other:
+                try:
+                    fcntl.flock(other, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    held.append(False)
+                except BlockingIOError:
+                    held.append(True)
+            yield from self.lines
+
+    monkeypatch.setattr(remote, "popen", Watching(lines))
+    remote.RemoteRig(PortSat, PLOT, Display(), None).run_spec(s, s.tests[0], False)
+    assert held == [True]
+    with open(tmp_path / "rcon.25678.lock", "a") as after:
+        fcntl.flock(after, fcntl.LOCK_EX | fcntl.LOCK_NB)  # released once the test is over
+
+
 def test_a_failure_raises_the_same_error_and_keeps_the_trace(monkeypatch, tmp_path):
     s = make_spec([{"expect": {"out": 1}}, {"wait": 2}])
     monkeypatch.setattr(spec_module, "TRACE_DIR", tmp_path / "local")
