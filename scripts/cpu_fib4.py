@@ -4,7 +4,9 @@ The seven parts sit at fixed origins; the decoder is mirrored in x so that its o
 and imm outputs line up with the ROM and the ALU without crossings. The op lines, the
 imm/n comb between decoder and ALU and the stubs at the register file's west face are laid
 by hand; every other net is routed by scripts.alu_route, then dust runs that die out get
-repeaters and the four clock lines are padded to the same number of repeaters.
+repeaters and the four clock lines are padded to the same number of repeaters. START and
+RESET levers at the north edge drive start and rst; every solid block becomes concrete in
+the colour of the part or net that placed it (KEY, repeated on signs beside the levers).
 """
 
 from collections import deque
@@ -26,6 +28,31 @@ CLOCK = ("cape", "come", "capw", "comw")
 # every clock line carries, the part pin repeater, then half a 200 gt cycle.
 SAMPLE = 18 + 2 * 11 + 2 + 100 - 2
 SOLIDS = ("smooth_stone", "white_concrete", "black_concrete")
+PAINTED = ("smooth_stone", "white_concrete")
+# A sample falls about COM + 98 at the PC; rst edges land at COM + RST_AT, clear of CAP
+# (COM + 150 to 160) on both sides.
+RST_AT = 55
+
+KEY = [
+    ("red", "Clock", "and clock lines"),
+    ("orange", "Program", "counter"),
+    ("yellow", "ROM", "program words"),
+    ("purple", "Control", "decoder"),
+    ("blue", "Register A", "+ reg file"),
+    ("cyan", "Register B", ""),
+    ("brown", "Flags Z C", "+ flag lines"),
+    ("green", "ALU", "sum and mux"),
+    ("lime", "ALU", "carry chain"),
+    ("light_gray", "OUT register", "+ display"),
+    ("light_blue", "Data buses", "pc a b y"),
+    ("magenta", "Control lines", "op, writes, jt"),
+    ("pink", "Immediates", "to PC and ALU"),
+    ("white", "START, RESET", "levers + lines"),
+]
+PART_COLOUR = {"clock": "red", "pc": "orange", "rom": "yellow", "ctrl": "purple", "regs": "blue",
+               "alu": "green", "disp": "light_gray", "pstart": "white", "prst": "white"}
+CONTROL_NETS = {"xsel", "sub", "za", "wa", "wb", "wo", "wf", "hlt", "jt", *(f"op{i}" for i in range(4))}
+FLAG_NETS = {"zo", "co", "z", "c"}
 
 
 def mirror_x(spec: Spec, w: int) -> Spec:
@@ -42,6 +69,42 @@ def mirror_x(spec: Spec, w: int) -> Spec:
     return Spec(spec.name, b, inputs=m(spec.inputs), outputs=m(spec.outputs), named=m(spec.named))
 
 
+def sign(*lines):
+    msgs = ",".join(f'"{t}"' for t in (list(lines) + [""] * 4)[:4])
+    return f"oak_wall_sign[facing=north]{{front_text:{{messages:[{msgs}]}}}}"
+
+
+def panel(name, *label):
+    """A wall lever on the north face of a block that powers the source pin south of it;
+    the input cell beside the pin is the harness's driver for the same net."""
+    b = Build()
+    for x in range(3):
+        for z in range(3):
+            b.place((x, 0, z), "white_concrete")
+    b.place((1, 1, 1), "white_concrete")
+    b.place((1, 1, 0), "lever[face=wall,facing=north,powered=false]")
+    b.place((1, 2, 1), "white_concrete")
+    b.place((1, 2, 0), sign(*label))
+    b.place((1, 1, 2), "redstone_wire")
+    spec = Spec(name, b, outputs={"src": (1, 1, 2)}, named={"lever": (1, 1, 0), "src": (1, 1, 2)})
+    spec.fixtures = {(1, 2, 1), (1, 2, 0)}
+    return spec
+
+
+PANEL_DRIVER = (0, 1, 2)
+
+
+def legend():
+    b = Build()
+    for i, (colour, *text) in enumerate(KEY):
+        b.place((2 * i, 0, 1), f"{colour}_concrete")
+        b.place((2 * i, 1, 1), f"{colour}_concrete")
+        b.place((2 * i, 1, 0), sign(*text))
+    spec = Spec("legend", b)
+    spec.fixtures = set(b.blocks)
+    return spec
+
+
 def parts(words):
     part = lambda n: load(LIBRARY / "cpu_parts" / f"{n}{SUFFIX}")
     mx, mz = OX - 12, OZ + 40
@@ -52,7 +115,10 @@ def parts(words):
             "alu": (part("cpu_alu"), (ax, 0, az)),
             "regs": (part("cpu_regs"), (ax - 52, 0, az - 11)),
             "disp": (part("cpu_out_display"), (0, 0, 80)),
-            "clock": (part("cpu_clock"), (140, 0, 166))}
+            "clock": (part("cpu_clock"), (140, 0, 166)),
+            "legend": (legend(), (1, 0, 0)),
+            "pstart": (panel("pstart", "START", "flip on once", "(runs the", "clock)"), (34, 0, 0)),
+            "prst": (panel("prst", "RESET", "on 20 s, then", "off: runs the", "program again"), (40, 0, 0))}
 
 
 def at(off, p):
@@ -73,6 +139,8 @@ NETS = [
     *[(f"out{i}", "regs", f"out{i}", "disp", f"out{i}") for i in range(4)],
     ("c", "regs", "c", "ctrl", "c"), ("z", "regs", "z", "ctrl", "z"),
 ]
+PANEL_NETS = [("start", "pstart", "src", "clock", "start"), ("rst", "prst", "src", "pc", "rst")]
+NETS += PANEL_NETS
 REGS_WEST_SINKS = ("cap", "wf", "zo", "co")
 
 
@@ -87,6 +155,13 @@ def lay(g, cells, net, reps=()):
             g.rep(c, DIR[(n[0] - c[0], n[2] - c[2])], net)
         else:
             g.dust(c, net)
+
+
+def start_row(P, pins):
+    """clock.start faces the plot's south edge: its route has to come along the clock's face row."""
+    coff, cspec = P["clock"][1], P["clock"][0]
+    sz = pins["clock.start"][2]
+    return {(x, y, sz) for x in range(coff[0] - 1, coff[0] + cspec.build.bounds()[1][0] + 2) for y in (1, 2)}
 
 
 def setup(P):
@@ -124,6 +199,7 @@ def setup(P):
     for i in range(4):
         p = at(roff, (42, 3, 30 + 2 * i))
         g.b[p] = WIRE
+        g.net[p] = f"op{i}"
         g.b[at(roff, (42, 2, 30 + 2 * i))] = SOLID
         pins[f"rom.op{i}"] = p
     for x in range(42, 48):
@@ -132,6 +208,9 @@ def setup(P):
                 c = at(roff, (x, y, z))
                 if c not in g.b:
                     R.keep.discard(c)
+    for c in start_row(P, pins):
+        if c not in g.b:
+            R.keep.discard(c)
     for q in pins.values():
         R.keep.discard(q)
     return g, R, pins
@@ -221,8 +300,25 @@ def isolate(g, P, pins):
             g.rep(c, DIR[d], net)
 
 
-def route_all(g, R, pins, entries):
-    for net, sp, spin, kp, kpin in NETS:
+def guard(g, R, P, pins):
+    """Keep the panel lines a cell clear of every part's box (some faces carry dust on the
+    upper levels, which the ordinary keep-out above the box does not cover); the pin stubs
+    stay open."""
+    row = start_row(P, pins)
+    for name, (spec, off) in P.items():
+        lo, hi = (at(off, p) for p in spec.build.bounds())
+        for x in range(lo[0] - 1, hi[0] + 2):
+            for z in range(lo[2] - 1, hi[2] + 2):
+                if lo[0] <= x <= hi[0] and lo[2] <= z <= hi[2]:
+                    continue
+                for y in range(2, min(hi[1] + 2, SIZE[1])):
+                    c = (x, y, z)
+                    if c not in g.b and c not in R.inputs and c not in row and all(0 <= v < m for v, m in zip(c, SIZE)):
+                        R.keep.add(c)
+
+
+def route_all(g, R, pins, entries, nets=NETS):
+    for net, sp, spin, kp, kpin in nets:
         s = pins[f"{sp}.{spin}"]
         g.net[s] = net
         q = entries[int(net[-1])] if kpin == "entry" else pins[f"{kp}.{kpin}"]
@@ -270,25 +366,100 @@ def _pad(g, net, src, need):
         g.rep(p, DIR[d], net)
 
 
+def regs_colour(p):
+    x, y, z = p
+    if x <= 7 and z >= 9:
+        return "brown"            # Z and C latches (cpu_regs XF, ZF)
+    if x <= 13:
+        return "light_gray"       # OUT stack
+    if 23 <= x <= 28:
+        return "cyan"             # B stack
+    return "blue"
+
+
+def part_colour(part, p):
+    if part == "regs":
+        return regs_colour(p)
+    if part == "alu" and p[0] >= 41:
+        return "lime"             # carry chain column (c1..c3, co at x 44)
+    return PART_COLOUR[part]
+
+
+def net_colour(net):
+    base = net.rstrip("0123456789")
+    if net in CLOCK:
+        return "red"
+    if net in ("start", "rst"):
+        return "white"
+    if net in CONTROL_NETS:
+        return "magenta"
+    if net in FLAG_NETS:
+        return "brown"
+    if base in ("pimm", "imm"):
+        return "pink"
+    if base == "out":
+        return "light_gray"
+    if base in ("pc", "a", "b", "y"):
+        return "light_blue"
+    raise ValueError(f"no colour for net {net}")
+
+
+def paint(g, P, part_cells):
+    """Concrete for every routed solid, coloured by the net it carries or supports."""
+    origin = {}
+    for name, (spec, off) in P.items():
+        for p in spec.build.blocks:
+            origin[at(off, p)] = (name, p)
+    out, loose = {}, []
+    for p, s in g.b.items():
+        if p in part_cells or s != SOLID:
+            continue
+        x, y, z = p
+        near = [(x, y + 1, z), (x, y - 1, z), (x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)]
+        net = g.net.get(p) or next((g.net[q] for q in near if q in g.net), None)
+        if net is None:
+            loose.append(p)
+            continue
+        if net.startswith("part:"):
+            name = net[5:]
+            off = P[name][1]
+            out[p] = f"{part_colour(name, (x - off[0], y - off[1], z - off[2]))}_concrete"
+        else:
+            out[p] = f"{net_colour(net)}_concrete"
+    return out, loose
+
+
+def painted(name, spec):
+    b = Build()
+    for p, s in spec.build.blocks.items():
+        blk = parse_state(s)[0].removeprefix("minecraft:")
+        b.place(p, f"{part_colour(name, p)}_concrete" if blk in PAINTED and p not in spec.fixtures else s)
+    return b
+
+
 def cpu_fib4(words=FIB_PROGRAM, name="cpu_fib4") -> Spec:
     P = parts(words)
     g, R, pins = setup(P)
     part_cells = {at(off, p) for spec, off in P.values() for p in spec.build.blocks}
     entries = hand(g, pins)
     reserve(g, R, P, pins)
-    route_all(g, R, pins, entries)
+    route_all(g, R, pins, entries, NETS[:-len(PANEL_NETS)])
+    guard(g, R, P, pins)
+    route_all(g, R, pins, entries, PANEL_NETS)
     isolate(g, P, pins)
     fix(g, rounds=400, fixed={n for n in set(g.net.values()) if n.startswith("part:")})
     most = max(len(_reps(g, n)) for n in CLOCK)
     for n in CLOCK:
         _pad(g, n, pins[f"clock.{n}"], most - len(_reps(g, n)))
     assert len({len(_reps(g, n)) for n in CLOCK}) == 1
+    colours, loose = paint(g, P, part_cells)
+    assert not loose, f"routed solids with no net: {loose}"
     build = Build()
-    for spec, off in P.values():
-        build.merge(spec.build, off)
+    for pname, (spec, off) in P.items():
+        build.merge(painted(pname, spec), off)
     for p, s in g.b.items():
         if p not in part_cells:
-            build.place(p, s)
+            build.place(p, colours.get(p, s))
     spec = Spec(name, build, description=DESCRIPTION)
     pick = {"pc": [f"s{i}" for i in range(4)],
             "regs": [f"sa{i}" for i in range(4)] + [f"sb{i}" for i in range(4)] + ["mz", "mc"] + [f"out{i}" for i in range(4)],
@@ -297,10 +468,17 @@ def cpu_fib4(words=FIB_PROGRAM, name="cpu_fib4") -> Spec:
         pspec, off = P[part]
         for c in cells:
             spec.named[f"{part}.{c}"] = at(off, pspec.named[c])
-    spec.inputs["start"] = at(P["clock"][1], P["clock"][0].inputs["start"])
-    spec.inputs["rst"] = at(P["pc"][1], P["pc"][0].inputs["rst"])
+    for pname, (pspec, off) in P.items():
+        spec.fixtures |= {at(off, p) for p in pspec.fixtures}
+    for pname, net in (("pstart", "start"), ("prst", "rst")):
+        off = P[pname][1]
+        spec.inputs[net] = at(off, PANEL_DRIVER)
+        spec.named[f"{net}_lever"] = at(off, P[pname][0].named["lever"])
+    # Every bus repeater is delay 1 (2 gt); dust adds nothing.
+    lag = {n: 2 * len(_reps(g, n)) for n in ("start", "rst")}
+    assert lag["rst"] < 150, lag
     spec.traits = ["torch_based", "pistonless", "entityless"]
-    spec.tests = [fib_test(words)]
+    spec.tests = [fib_test(words, lag), reset_test(words, lag), rerun_test(words, lag)]
     return spec
 
 
@@ -308,14 +486,17 @@ DIGIT = {0: "abcdef", 1: "bc", 2: "abdeg", 3: "abcdg", 4: "bcfg", 5: "acdfg", 6:
          8: "abcdefg", 9: "abcdfg"}
 
 
-def isa(words, cycles):
-    """State during each cycle (slaves, flags and OUT before the cycle's write)."""
+def isa(words, cycles, rst=()):
+    """State during each cycle (slaves, flags and OUT before the cycle's write); rst holds
+    the cycles whose CAP sees rst, which load PC 0 instead of the next address."""
     pc = a = b = z = c = out = 0
     rows = []
-    for _ in range(cycles):
+    for k in range(cycles):
         op, n = words[pc] >> 4, words[pc] & 15
         rows.append(dict(pc=pc, a=a, b=b, z=z, c=c, out=out))
         npc = n if op == 11 or (op == 12 and z) or (op == 13 and c) else pc if op == 15 else (pc + 1) & 15
+        if k in rst:
+            npc = 0
         y, x = None, (n if op in (1, 7, 14) else b)
         if op in (2, 7):
             y, c = (a + x) & 15, (a + x) >> 4
@@ -337,24 +518,69 @@ def isa(words, cycles):
     return rows
 
 
-def fib_test(words, cycles=41):
-    rows = isa(words, cycles)
-    steps = [{"drive": {"start": 1}}, {"wait": 2}, {"drive": {"start": 0}}, {"wait": SAMPLE}]
-    for k, r in enumerate(rows):
-        e = {}
-        for i in range(4):
-            e.update({f"pc.s{i}": r["pc"] >> i & 1, f"regs.sa{i}": r["a"] >> i & 1,
-                      f"regs.sb{i}": r["b"] >> i & 1, f"regs.out{i}": r["out"] >> i & 1})
-        e["regs.mz"], e["regs.mc"] = r["z"], r["c"]
-        if k == 0 or rows[k - 1]["out"] != r["out"]:
-            on = {f"u_{s}" for s in DIGIT[r["out"] % 10]} | ({"t_b", "t_c"} if r["out"] >= 10 else set())
-            e.update({f"disp.{n}": int(n in on) for n in [f"u_{s}" for s in "abcdefg"] + ["t_b", "t_c"]})
-        steps += [{"expect": e}, {"wait": 200}]
-    return {"name": "fibonacci", "settle": 40, "steps": steps}
+def expect_row(rows, k):
+    r = rows[k]
+    e = {}
+    for i in range(4):
+        e.update({f"pc.s{i}": r["pc"] >> i & 1, f"regs.sa{i}": r["a"] >> i & 1,
+                  f"regs.sb{i}": r["b"] >> i & 1, f"regs.out{i}": r["out"] >> i & 1})
+    e["regs.mz"], e["regs.mc"] = r["z"], r["c"]
+    if k == 0 or rows[k - 1]["out"] != r["out"]:
+        on = {f"u_{s}" for s in DIGIT[r["out"] % 10]} | ({"t_b", "t_c"} if r["out"] >= 10 else set())
+        e.update({f"disp.{n}": int(n in on) for n in [f"u_{s}" for s in "abcdefg"] + ["t_b", "t_c"]})
+    return {"expect": e}
+
+
+def cycle_test(name, words, lag, cycles, start, toggles=(), toggle=None):
+    """Sample every cycle mid-cycle. toggles: (cycle, step) pairs, each step landing at
+    COM + RST_AT of that cycle at the PC; a rise there holds rst through that cycle's CAP."""
+    on, rst = None, set()
+    for k, _ in toggles:
+        if on is None:
+            on = k
+        else:
+            rst |= set(range(on, k))
+            on = None
+    assert on is None
+    rows = isa(words, cycles, rst)
+    w = (RST_AT - (SAMPLE - 2 * 11 - 2 - 18) - lag["rst"]) % 200
+    at_cycle = dict(toggles)
+    steps = [*start, {"wait": SAMPLE + lag["start"]}]
+    for k in range(cycles):
+        steps.append(expect_row(rows, k))
+        if k + 1 in at_cycle:
+            steps += [{"wait": w}, at_cycle[k + 1], {"wait": 200 - w}]
+        else:
+            steps.append({"wait": 200})
+    return {"name": name, "settle": 40, "steps": steps}
+
+
+def fib_test(words, lag, cycles=41):
+    pulse = [{"drive": {"start": 1}}, {"wait": 2}, {"drive": {"start": 0}}]
+    return cycle_test("fibonacci", words, lag, cycles, pulse)
+
+
+def reset_test(words, lag):
+    """DESIGN 9: rst through one CAP after 10 cycles replays the program from PC 0."""
+    pulse = [{"drive": {"start": 1}}, {"wait": 2}, {"drive": {"start": 0}}]
+    return cycle_test("reset", words, lag, 20, pulse,
+                      [(10, {"drive": {"rst": 1}}), (11, {"drive": {"rst": 0}})])
+
+
+def rerun_test(words, lag):
+    """Through the levers: START, run to the halt, RESET on for two cycles and off, run again."""
+    return cycle_test("rerun", words, lag, 86, [{"use": "start_lever"}],
+                      [(41, {"use": "rst_lever"}), (43, {"use": "rst_lever"})])
 
 
 DESCRIPTION = (
     "The whole CPU4 computer running the Fibonacci program (words 10 80 11 A0 90 20 D8 B3 F0): "
     "clock, program counter, 16x8 lever ROM, control decoder (mirrored in x), ALU, register file and "
-    "two-digit display. OUT shows 1, 1, 2, 3, 5, 8, 13, then JC 8 halts it at PC 8. The test samples "
-    "every register mid-cycle for 41 cycles of 200 gt.")
+    "two-digit display. OUT shows 1, 1, 2, 3, 5, 8, 13, then JC 8 halts it at PC 8. "
+    "Player controls at the north edge: START (wall lever at x 35, z 0) starts the clock, flip it on once; "
+    "RESET (x 41, z 0) on for 20 s (two 200 gt cycles) then off sends PC to 0 and the program runs again. "
+    "Colour key (every solid block is concrete; the legend signs along the north edge, x 1-27, repeat it): "
+    + "; ".join(f"{c.replace('_', ' ')} = {' '.join(t for t in text if t)}" for c, *text in KEY)
+    + "; black = display frame. Tests sample every register mid-cycle: fibonacci (41 cycles of 200 gt), "
+    "reset (rst through one CAP at cycle 10, the program replays) and rerun (through the levers: run to "
+    "the halt, RESET for two cycles, the same OUT sequence and halt again).")
