@@ -243,6 +243,13 @@ def problems(spec, plot_size: Pos) -> list[str]:
                 for p in frame if p not in blocks]
     clear = hallway - set(frame) if initial == "closed" else hallway
     out += [f"hallway cell {p} holds {blocks[p]} in the {initial} state" for p in sorted(clear) if p in blocks]
+    # The hallway the door is installed in runs on past `depth`, so the doorway's whole prism must be clear.
+    normal = _axes(way["facing"])[0]
+    lo, hi = spec.build.bounds()
+    fixed = set(getattr(spec, "fixtures", None) or ())
+    corridor = {_add(p, _unit(normal, k)) for p in frame for k in range(lo[normal] - p[normal], hi[normal] - p[normal] + 1)}
+    out += [f"cell {p} holds {blocks[p]} in the hallway beyond depth {door.get('depth', 1)}"
+            for p in sorted(corridor - hallway - fixed) if p in blocks]
     if initial == "closed":
         out += [f"doorway cell {p} holds {blocks[p]}, not door material" for p in frame
                 if p in blocks and door.get("blocks", "closed") != "closed"
