@@ -308,6 +308,11 @@ trace → `package` data pack.
   whole sequence (reentrant); `Rig.snapshot`, `Rig.command` and `Rig.level` do.
 - `redstone/docker_sats.py`: `DockerSatellite`, a `Server` whose world is a container on the
   desktop; `servers.take_idle`/`take` choose and lock a server for conftest.
+- `redstone/circuits.py`: `trace(blocks, seeds, fixed)` floods each named circuit from its
+  seed cells along the signal graph (diodes, observers, torches, dust, strong/weak solid
+  blocks, quasi-connectivity, comparator reads, slime/honey glue), stopping at other circuits'
+  seeds, and gives every block an owner (seed, glue, nearest signal, else the components it
+  supports; ties `shared`, nothing `None`). Generators colour plain stone by it (door16_quart).
 - `redstone/pla.py`: generators for sum-of-products logic as two NOR planes of torches
   (`pla`), an OR-only plane (`or_plane`), and a Quine–McCluskey `minimise`. Each emits its
   own truth-table test and a computed `max_delay` bound.
