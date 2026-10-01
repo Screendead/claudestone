@@ -63,6 +63,7 @@ class Clock:
 
     def __init__(self, fail_at=None):
         self.time, self.log, self.fail_at, self.queries = 0, [], fail_at, 0
+        self.just_frozen = False  # a sprint now runs one tick short, as 26.3's does
 
     def cmd(self, command):
         self.log.append(command)
@@ -71,7 +72,8 @@ class Clock:
             return f"Stepping {command.split()[-1]} tick(s)"
         if command.startswith("tick sprint "):
             n = int(command.split()[-1])
-            self.time += n + 1 if n >= 2 else n
+            self.time += n + 1 if n >= 2 and not self.just_frozen else n
+            self.just_frozen = False
             return "The game is sprinting"
         if command == "tick query":
             return "The game is frozenTarget tick rate: 20.0 per second."
@@ -133,6 +135,15 @@ def test_satellites_sprint_long_waits_to_the_same_tick(server):
         assert clock.time - start == n
     steps = [c for c in clock.log if c.startswith(("tick step", "tick sprint"))]
     assert steps == [f"tick step {SPRINT_MIN - 1}", f"tick sprint {SPRINT_MIN - 1}", "tick sprint 6399"]
+
+
+def test_a_sprint_one_tick_short_after_a_freeze_is_topped_up_with_a_step():
+    clock = Clock()
+    rig = _rig(clock, servers.SATELLITES[0])
+    clock.just_frozen = True
+    rig._advance(170)
+    assert clock.time == 170
+    assert [c for c in clock.log if c.startswith("tick s")] == ["tick sprint 169", "tick step 1"]
 
 
 def test_main_never_sprints():

@@ -87,7 +87,8 @@ WARP_RATE = 10000  # the maximum /tick rate
 # tick period (50 ms here), so satellites, which no one joins, stay at WARP_RATE for a test.
 IDLE_RATE = 20
 # A wait this long on a satellite runs as `tick sprint`, which ignores the tick rate (at
-# WARP_RATE a step still takes 0.1 ms a tick). `tick sprint n` runs n + 1 ticks for n >= 2,
+# WARP_RATE a step still takes 0.1 ms a tick). `tick sprint n` runs n + 1 ticks for n >= 2
+# (n when the world was frozen while running just before; a step then adds the last one),
 # and its end is announced in system chat to every player, so main never sprints.
 # REDSTONE_SPRINT=0 steps every wait instead.
 SPRINT_MIN = 32
@@ -281,6 +282,14 @@ class Rig:
                 # and `tick step` in an unfrozen world fails.
                 while not self.r.cmd("tick query").startswith("The game is frozen"):
                     time.sleep(0.002)
+                if self.gametime() == target - 1:
+                    # Right after `tick freeze` stops a running world a sprint runs n ticks,
+                    # not n + 1; the missing tick is an ordinary one.
+                    out = self.r.cmd("tick step 1")
+                    if not out.startswith("Stepping"):
+                        raise CommandFailed(f"tick step 1: {out}")
+                    while self.gametime() < target:
+                        time.sleep(0.002)
             else:
                 out = self.r.cmd(f"tick step {n}")
                 if not out.startswith("Stepping"):
