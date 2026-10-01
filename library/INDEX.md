@@ -164,6 +164,12 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 | mux_demux_lock_latch | 5x2x5 | 50 | 21 | - | lockable, compact, lightless, silent, pistonless, entityless, flat, horizontal, tick_accurate, reset_safe, survival_friendly | Addressable latch: a 1:2 demultiplexer whose deselected output holds its last value instead of clearing, built on repeater locking |
 | mux_demux_piston_instant | 3x3x5 | 45 | 14 | 0/3 | ultrafast, instant, compact, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | 1:2 demultiplexer with a 0-tick data path: mux_piston_instant driven from its output |
 
+## door
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| door_2x2_flush_harness_check | 12x4x4 | 192 | 56 | - |  | Harness check for door tests |
+
 ## dual_edge
 
 | variant | size | volume | blocks | delay | traits | summary |

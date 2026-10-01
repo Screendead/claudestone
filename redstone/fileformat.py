@@ -69,6 +69,37 @@
         finally:                 # commands run after the steps, even when a step failed
           - gamerule advance_time true
 
+      - name: door
+        door_cycle: {cycles: 2, max_open: 6, max_close: 6, reading: R, tier: FULL, max_volume: 108}
+                                 # needs a door: section (below). Opens and closes the door
+                                 # `cycles` times through its fixture repeater, probing the
+                                 # hallway every tick; times under each reading (R, H1, R1),
+                                 # visible times, seamless grades and the volume go in the
+                                 # result and the trace. Optional bounds: max_open, max_close
+                                 # (in the given reading, default R), max_open_visible,
+                                 # max_close_visible, tier (default the door's), max_volume,
+                                 # max_ticks (per operation, default 600)
+
+    update_pass: all             # optional: all (default), none (no clone-onto-itself pass)
+                                 # or unobserved (observers set last, and the blocks they
+                                 # face not cloned, so placing doesn't pulse them)
+
+    door:                        # optional: a piston door, for door_cycle tests
+      doorway: {origin: [5, 1, 1], width: 2, height: 2, facing: north}
+                                 # origin is the min corner; facing is the front, the side
+                                 # the player comes from (up/down for a trapdoor-like door)
+      depth: 1                   # hallway cells checked on each side of the doorway
+      blocks: closed             # door material: what the doorway holds as placed (the
+                                 # build must then be placed closed), or a list of ids
+      surface: [white_concrete]  # hallway composition (default: the door blocks)
+      input: door_in             # the input whose drive cell feeds the fixture repeater
+      repeater: rep              # a named fixture repeater[delay=1] with the drive cell
+                                 # behind it; tick 0 is the tick its output changes
+      device: lever              # optional: the player's input device, left out of volume
+      outer_surface: [[[0, 0, 0], [9, 3, 0]]]   # optional boxes of outer wall, not circuitry
+      initial: closed            # the state as placed, with the input off (default closed)
+      tier: FULL                 # optional: the seamless tier door_cycle checks
+
     entities:                    # optional, summoned after the blocks are placed
       - {type: minecart, pos: [2.0, 1.0, 0.0], nbt: '{Invulnerable:1b}'}
                                  # pos is relative to the centre of the origin cell
@@ -134,6 +165,9 @@ class Spec:
     reserved: set[Pos] = field(default_factory=set)
     # Every cell of an input with more than one; `inputs` holds each input's first cell.
     extra_inputs: dict[str, list[Pos]] = field(default_factory=dict)
+    # The `door:` section as written; redstone.door.plan reads it.
+    door: dict | None = None
+    update_pass: str = "all"  # Build.to_commands
 
     def cell(self, name: str) -> Pos:
         if name in self.inputs:
@@ -149,7 +183,7 @@ def load(path: Path | str) -> Spec:
     doc = yaml.safe_load(path.read_text())
     palette = {str(k): v for k, v in doc["palette"].items()}
     spec = Spec(doc["name"], Build(), description=doc.get("description", ""), tests=doc.get("tests", []), path=path,
-                traits=doc.get("traits", []))
+                traits=doc.get("traits", []), door=doc.get("door"), update_pass=doc.get("update_pass", "all"))
     for e in doc.get("entities", []):
         spec.build.summon(tuple(e["pos"]), e["type"], e.get("nbt", ""))
     shape, cells = None, {}
@@ -254,11 +288,15 @@ def dump(spec: Spec) -> str:
         doc["description"] = spec.description
     if spec.traits:
         doc["traits"] = spec.traits
+    if spec.update_pass != "all":
+        doc["update_pass"] = spec.update_pass
     doc["palette"] = palette
     doc["layers"] = layers
     if spec.build.entities:
         doc["entities"] = [{"type": _short(e), "pos": list(p), **({"nbt": n} if n else {})}
                            for p, e, n in spec.build.entities]
+    if spec.door is not None:
+        doc["door"] = _flow_lists(spec.door)
     if spec.tests:
         doc["tests"] = spec.tests
     return yaml.dump(doc, Dumper=_Dumper, sort_keys=False, allow_unicode=True, width=1000)
@@ -280,8 +318,22 @@ def _dict(dumper, d):
     return dumper.represent_mapping("tag:yaml.org,2002:map", d, flow_style=flow)
 
 
+class _Flow(list):
+    """A list of scalars written on one line: [3, 1, 2]."""
+
+
+def _flow_lists(value):
+    if isinstance(value, dict):
+        return {k: _flow_lists(v) for k, v in value.items()}
+    if isinstance(value, list):
+        items = [_flow_lists(v) for v in value]
+        return _Flow(items) if all(not isinstance(v, (dict, list)) for v in items) else items
+    return value
+
+
 _Dumper.add_representer(str, _str)
 _Dumper.add_representer(dict, _dict)
+_Dumper.add_representer(_Flow, lambda d, v: d.represent_sequence("tag:yaml.org,2002:seq", v, flow_style=True))
 
 
 def parse_truth_table(text: str) -> tuple[list[str], list[str], list[tuple[dict, dict]]]:
