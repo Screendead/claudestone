@@ -107,7 +107,8 @@ def server_lines(dsats: set[str] | None, why: str) -> list[str]:
 
 
 def plot_lines() -> list[str]:
-    names = sorted({p.stem for p in PLOT_RECORDS.glob("*.lock")} | {p.stem for p in STATUS.glob("*.json")})
+    # <plot>.lock, or <plot>@<server>.lock for a run on a satellite.
+    names = sorted({p.stem.split("@")[0] for p in PLOT_RECORDS.glob("*.lock")} | {p.stem for p in STATUS.glob("*.json")})
     busy, recent, quiet = [], [], []
     for name in names:
         ran = read_json(PLOT_RECORDS / f"{name}.json")
@@ -121,7 +122,7 @@ def plot_lines() -> list[str]:
         owner = f" [{status['owner']}]" if status.get("owner") else ""
         when = f" ({ago(status['time'])})" if status.get("time") else ""
         line = f"{name} on {server}{owner}: {text[:90]}{when}"
-        if held(PLOT_RECORDS / f"{name}.lock"):
+        if any(held(p) for p in [PLOT_RECORDS / f"{name}.lock", *PLOT_RECORDS.glob(f"{name}@*.lock")]):
             busy.append("BUSY " + line)
         elif status.get("time", 0) > time.time() - RECENT:
             recent.append("idle " + line)

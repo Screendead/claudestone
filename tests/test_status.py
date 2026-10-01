@@ -51,6 +51,22 @@ def test_plots_show_busy_owner_and_quiet(tmp_path, monkeypatch):
     assert lines[1].endswith(": and")
 
 
+def test_a_satellite_run_of_a_plot_shows_busy_under_the_plot(tmp_path, monkeypatch):
+    records, st = tmp_path / "plots", tmp_path / "status"
+    records.mkdir()
+    st.mkdir()
+    monkeypatch.setattr(status, "PLOT_RECORDS", records)
+    monkeypatch.setattr(status, "STATUS", st)
+    for lock in ("xor.lock", "xor@sat1.lock", "xor@sat6.lock"):
+        (records / lock).touch()
+    (records / "xor.json").write_text(json.dumps({"server": "sat6"}))
+    with open(records / "xor@sat6.lock", "a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        lines = status.plot_lines()
+    assert len(lines) == 1 and lines[0].startswith("BUSY xor on sat6: last run")
+    assert status.plot_lines()[0].startswith("idle xor on sat6")
+
+
 def test_a_plot_without_a_status_file_is_dated_by_its_record(tmp_path, monkeypatch):
     records, st = tmp_path / "plots", tmp_path / "status"
     records.mkdir()

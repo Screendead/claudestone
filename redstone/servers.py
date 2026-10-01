@@ -45,6 +45,25 @@ SERVERS = {s.name: s for s in [MAIN, *SATELLITES]}
 PLOT_RECORDS = ROOT / "plots"
 
 
+def plot_lock(plot: str, server: Server | None = None) -> Path:
+    """server/plots/<plot>.lock guards the plot on main: held for the whole run of a test
+    that builds there (one on main, or in the main plot, which a satellite mirrors into),
+    and briefly by a satellite's run to write its showroom slot. A satellite holds
+    <plot>@<server>.lock for its run instead, so one plot runs on several satellites at once."""
+    return PLOT_RECORDS / (f"{plot}.lock" if server is None else f"{plot}@{server.name}.lock")
+
+
+def holds_plot_lock(plot: str, candidates: list[Server]) -> bool:
+    """Whether a test of `plot` that may run on any of `candidates` holds plot_lock(plot)
+    for its whole run, taken before the server's rig.lock."""
+    return plot == "main" or MAIN in candidates
+
+
+def pinned(setting: str) -> list[Server] | None:
+    """The servers $REDSTONE_SERVER allows ("sat1,sat6"), or None for "auto"."""
+    return None if setting == "auto" else [SERVERS[n] for n in setting.split(",")]
+
+
 def answers(server) -> bool:
     return not hasattr(server, "is_up") or server.is_up()
 

@@ -16,6 +16,7 @@ source .venv/bin/activate
 pytest                                   # everything; starts the server if RCON is down
 pytest "tests/test_library.py::test_spec[latch::holds a 1 when locked]"   # one spec test
 REDSTONE_PLOT=main pytest tests/test_library.py   # every test in main instead of each spec's plot
+pytest -n 4 tests/test_library.py -k <spec>       # a spec's tests on up to 4 idle satellites at once (pytest-xdist)
 python -m scripts.retest <plot>... [--spec NAME]... [--failed] [-k EXPR]   # a plot's (main: no-plot) or named specs, each in its plot; --failed: last result failed
 pytest tests/test_generated.py tests/test_devices.py tests/test_traits.py  # no server needed
 python -m scripts.generate               # rewrite generated library files
@@ -80,9 +81,16 @@ Unset, a library test builds in `plot_for`'s plot, or in main when its folder ha
 included. `scripts.try` sets it from `plot_for`. Ticks
 are global per server, so each test takes one server's `rig.lock`: the `main` plot runs on
 the main server; any other plot runs on the first idle satellite, Docker ones first (main if none is up), so
-runs in different plots proceed at once. A per-plot lock (`server/plots/<plot>.lock`)
-serialises runs of the same plot. Satellites keep plot coordinates; the plot's status sign
-on main is updated whichever server runs. `server/plots/<plot>.json` records which server
+runs in different plots proceed at once. Each satellite is its own world, so runs of one
+plot on different satellites proceed at once too (`pytest -n N`, pytest-xdist, spreads a
+spec's tests over idle satellites). The plot lock `server/plots/<plot>.lock` guards main's
+copy of the plot: a run on main, or of the `main` plot (which satellites mirror into),
+holds it throughout, taken before the rig.lock; a satellite run holds
+`<plot>@<server>.lock` instead (so `scripts.status` shows it busy) and takes the plot lock
+only after its rig.lock is released, around its showroom slot. No one waits for a plot lock
+while holding a rig.lock. Satellites keep plot coordinates; the plot's status sign
+on main is updated whichever server runs (two satellites in one plot share it, last
+writer wins). `server/plots/<plot>.json` records which server
 last ran the plot and, when `REDSTONE_OWNER` is set (a workflow id, say), who; the showroom
 entry keeps that owner and the plot's status sign shows it after the test name. After a test the `main` plot keeps its last tested build (mirrored from a
 satellite if one ran it). Every other plot on main is a showroom (`redstone/showroom.py`,
@@ -144,7 +152,8 @@ symlink and its properties (view/simulation distance 2, max-players 1). A satell
 force-loads only the plot under test. `python -m scripts.servers {start,stop,status}`
 creates/starts (idempotent) or stops them (`laptop` by default; status shows both kinds);
 pytest never starts a laptop satellite. `REDSTONE_SERVER=main` (or `sat3`, `dsat2`, ...)
-pins every test to that server; a pinned dsat that is down fails the test.
+pins every test to that server, a list (`sat1,sat6`) to the first idle of those; a pinned
+dsat that is down fails the test.
 
 Docker satellites `dsat1..dsat6` (`redstone/docker_sats.py`, which adds them to `SERVERS`
 when imported) are containers of image `redstone-satellite:26.3` (`docker/satellite/`,

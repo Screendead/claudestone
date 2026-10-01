@@ -46,6 +46,17 @@ def test_plots_do_not_overlap():
             assert ax1 + 5 <= bx0 or bx1 + 5 <= ax0 or az1 + 5 <= bz0 or bz1 + 5 <= az0, (a, b)
 
 
+def test_only_runs_that_build_in_mains_copy_of_a_plot_hold_its_lock_throughout():
+    sat1, sat6 = servers.SERVERS["sat1"], servers.SERVERS["sat6"]
+    assert servers.holds_plot_lock("main", [sat6])
+    assert servers.holds_plot_lock("xor", [servers.MAIN])
+    assert not servers.holds_plot_lock("xor", [sat1, sat6])
+    assert servers.plot_lock("xor").name == "xor.lock"
+    assert servers.plot_lock("xor", sat6).name == "xor@sat6.lock"
+    assert servers.pinned("auto") is None
+    assert servers.pinned("sat1,dsat2") == [sat1, servers.SERVERS["dsat2"]]
+
+
 class Clock:
     """Game time advances by a `tick step`, or a `tick sprint` as 26.3 runs it (n + 1 ticks
     for n >= 2); `fail_at` makes that gametime query raise."""
