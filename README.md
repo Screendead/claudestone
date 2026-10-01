@@ -26,7 +26,7 @@ one frame per 64 gt opening and per 8 gt closing; the stone and repeater wiring 
 
 ## Being built now
 
-Being built now. None of these is a claimed record.
+None of these is a claimed record.
 
 - **A seamless 16x16 door.** No seamless 16x16 is logged in the Redstone Squid records, so the aim is the first
   working one. MEASURED so far: one lever runs a 16-row slice, 10 columns wide, made of eight row pairs stacked
