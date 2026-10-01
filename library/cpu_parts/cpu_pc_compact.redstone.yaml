@@ -1,0 +1,1628 @@
+name: cpu_pc_compact
+description: 'CPU4 program counter, compact: master/slave 4-bit register, next = 0 if rst, else imm if jt, else pc+1. The pc pin repeaters at (1,1,1+3i) are the slaves (locked from NOT com), so COM to pc is 8 gt; a second slave per bit feeds a torch/comparator incrementer (carry chain of NOR cells at x=25), and per bit a subtract comparator G_i = (P_i or c_i) - (c_i+1 or J) feeds the master input d_i, OR''ed with imm_i - NJ from gates at y=3 whose outputs reach d_i over a bus on the top deck (y=7). L = NOT cap OR (hlt - rst) locks the masters, J = jt OR rst, NJ = NOT(J - rst). imm/jt/hlt/rst must settle 30 gt before cap (imm reaches d in up to ~20 gt). Pins: west pc0..3 out at z=1,4,7,10 and imm0..3 in at z=16,19,22,25; east n0..3 out at x=31, same z; south (z=27) com x=3, cap x=5, hlt x=7, rst x=9, jt x=11. Built from scripts/cpu_pc_compact.py.'
+traits:
+- torch_based
+- comparator_based
+- pistonless
+- entityless
+palette:
+  .: air
+  '#': white_concrete
+  '-': redstone_wire
+  p: {output: pc0, block: redstone_wire}
+  s: {name: s0, block: 'repeater[facing=east,delay=1]'}
+  A: comparator[facing=south,mode=subtract]
+  B: repeater[facing=east,delay=1]
+  C: repeater[facing=south,delay=1]
+  R: redstone_block
+  D: repeater[facing=west,delay=1]
+  E: repeater[facing=north,delay=1]
+  F: {output: pc1, block: redstone_wire}
+  G: {name: s1, block: 'repeater[facing=east,delay=1]'}
+  H: {output: pc2, block: redstone_wire}
+  I: {name: s2, block: 'repeater[facing=east,delay=1]'}
+  J: {output: pc3, block: redstone_wire}
+  K: {name: s3, block: 'repeater[facing=east,delay=1]'}
+  n: redstone_wall_torch[facing=north]
+  i: {input: imm0}
+  M: {output: n0, block: redstone_wire}
+  N: {input: imm1}
+  O: {output: n1, block: redstone_wire}
+  P: {input: imm2}
+  Q: {output: n2, block: redstone_wire}
+  T: {input: imm3}
+  U: {output: n3, block: redstone_wire}
+  c: {input: com}
+  V: {input: cap}
+  h: {input: hlt}
+  r: {input: rst}
+  j: {input: jt}
+  '*': redstone_torch
+  m: {name: m0, block: 'repeater[facing=east,delay=1]'}
+  d: {name: d0, block: redstone_wire}
+  q: {name: q0, block: 'repeater[facing=north,delay=1]'}
+  (: redstone_wall_torch[facing=west]
+  W: {name: m1, block: 'repeater[facing=east,delay=1]'}
+  X: {name: d1, block: redstone_wire}
+  Y: {name: q1, block: 'repeater[facing=north,delay=1]'}
+  Z: {name: m2, block: 'repeater[facing=east,delay=1]'}
+  b: {name: d2, block: redstone_wire}
+  e: {name: q2, block: 'repeater[facing=north,delay=1]'}
+  f: {name: m3, block: 'repeater[facing=east,delay=1]'}
+  g: {name: d3, block: redstone_wire}
+  k: {name: q3, block: 'repeater[facing=north,delay=1]'}
+  l: comparator[facing=west,mode=subtract]
+  u: redstone_wall_torch[facing=south]
+  t: comparator[facing=north,mode=subtract]
+layers:
+  0: |
+    #.......#......................#
+    ##.......#####....#............#
+    ##...###...#......######.#.....#
+    ####.#.................##.#....#
+    ##.#..#####......#####.........#
+    ##.#.##...#######..#.....#.....#
+    ####.#..#.....##.......##.#....#
+    ##.#.....#####.#########.......#
+    ##.#.####..#.............#.....#
+    ####.###................#.##...#
+    ##.#...#######...#####.........#
+    ##.#..........###..#.....#.....#
+    .##..###########.......##.#.....
+    ...............#########........
+    ...#............................
+    #..............................#
+    ################################
+    #..............................#
+    #..............................#
+    ################################
+    #..............................#
+    #..............................#
+    ################################
+    #..............................#
+    #..#.#.#.#.#...................#
+    ##............................##
+    #..#.#.#.#.#...................#
+    ..###########...................
+  1: |
+    .......#-#...##.................
+    ps#......AB-B-...#-.............
+    .C...---#R.C......----D-.E......
+    .---#-.....#.....#.....-D#B.....
+    FG#-..-----......AB-B-#.........
+    .C.-.--...---D---#.C..#..E......
+    .---#-.#-#....--...#...-D#B.....
+    HI#-.....AB-B-.---------........
+    .C.-.----#.C.#...........E......
+    .---#---...#.....#......D#B-....
+    JK#-...-----D-#..AB-B-#....#....
+    .C.-..........---#.C..#..E......
+    .--n#-----------...#...-D#B.....
+    ...#...........-D-------........
+    ...-............................
+    ...#............................
+    iD-------D--------D--------D--DM
+    .............................#..
+    ........................#.......
+    ND-------D--------D--------D--DO
+    ................................
+    ......................#.........
+    PD-------D--------D--------D--DQ
+    ...#.#.#.#.#....................
+    ...-.-.-.-.-....................
+    TD##.#.#.#.#.................#DU
+    ...C.C.C.C.C....................
+    ...c.V.h.r.j....................
+  2: |
+    .......-.##..--#....##..........
+    ..-#.###.#.#....#-.#.#..........
+    ...###..-#.#.####..#.###........
+    ..##-......-.#...*.#...#.*......
+    ..-#.####..#.#.....#..-..#......
+    ...###.....#.#..#-.#..-#.#......
+    ..##-..-.#.#.#####.-.###.*......
+    ..-#.###.#.#.......#.....#......
+    ...###..#-.#.-#....#.....#......
+    ..##-......-.....*.#...#.*......
+    ..-#.####..#..-##..#..-..##-....
+    ...###.....#..#.#-.#..-#.#......
+    ....-......#.....#.-...#.*......
+    ...*.......#.......#............
+    ...........#.......#............
+    ...-.#.....#.......#............
+    ...#.#.....#.......#............
+    ...#.#.....#########.........-..
+    ...#.#...#.#............-#...#..
+    ...#.#...#.##..###...##..#...#..
+    ...#.#...#.##..#.#...##..#...#..
+    ...#.#...###...#.#####-..#####..
+    ...#.#.#.#.#.#.#................
+    ...-.-.-.-.-...#................
+    ...............#................
+    ..-##########################-..
+    ................................
+    ................................
+  3: |
+    .........--###.-####--..........
+    ...-#md-#-.-.#..-..-.-..........
+    ..#DqC...-.-.----..-.---........
+    ..#.##.......-...#.-...-(#......
+    ...-#WX--#.-.-.....-.....E......
+    ..#DYC.....-.-.....-...-.E......
+    ..#.##...-#C.-----..#---(#......
+    ...-#Zb-#-.-..#....-.....E......
+    ..#DeC.....-..-....-.....E......
+    ..#.##...........#.C.##-(#......
+    ...-#fg--#.-...--..-.....E-.....
+    ..#DkC.....-....#..-...-.E#.....
+    ..#.##.....-.....-.....-(#......
+    ..##.......C.....#.-............
+    .....#.....-.......-............
+    .....-.....-.......C............
+    ...-.-.....-.......-............
+    ...-.-.....---------............
+    ...-.-...-#C#............-...-..
+    ...-.-...-.-E..---...--..-...-..
+    ...-.-...-.-l#.-.E...E-..E...E..
+    ...-.-.#.-D-.u.-.tB-Dt...tB-Dt..
+    ...-.-.-.-.-.-.-.#.#.#...#.#.#..
+    .............#.-................
+    ...............-................
+    ...------D--------D--------D-...
+    ................................
+    ................................
+  4: |
+    ...........-D-..----............
+    ..#..#..-#.#.-..#..#............
+    ..-..#..........................
+    ..-..-....#######*..............
+    ..#..#...-#.....................
+    ..-..#......########............
+    ..-..-....-##.#....#-...........
+    ..#..#..-#....-####.............
+    ..-..#............###...........
+    ..-..-....#######*..#--.........
+    ..#..#...-#.....................
+    ..-..#..........-#########-.....
+    ..-..-..........................
+    ..--.#...........-#.............
+    .....*..........................
+    .....###........................
+    .....#.#........................
+    .....#.######...................
+    .....#....-#-...................
+    .....#..........................
+    .....#..........................
+    .....##-.........#...#...#...#..
+    .................-.-.-...-.-.-..
+    .............-###.###.....##....
+    ................###.#######.....
+    ................................
+    ................................
+    ................................
+  5: |
+    ................................
+    ..-..-...-#.....................
+    .....-..........................
+    ..........-------#..............
+    ..-..-....-#....................
+    .....-......-B------............
+    ...........--......-............
+    ..-..-...-#....----.............
+    .....-............---...........
+    ..........-------#.#-...........
+    ..-..-....-#....................
+    .....-...........-------D-......
+    ................................
+    .....-............-#............
+    .....#..........................
+    .....AB-........................
+    .....-.-........................
+    .....C.-----....................
+    .....-.....-....................
+    .....-..........................
+    .....-...........#...#...#...#..
+    .....--..........-...-...-...-..
+    ................................
+    ..............---.---.....--....
+    ................---.--D----.....
+    ................................
+    ................................
+    ................................
+  6: |
+    ................................
+    ..........-###################..
+    .............................#..
+    .............................#..
+    ...........-##############...#..
+    .........................#...#..
+    .........................#...#..
+    ..........-###########...#...#..
+    .....................#...#...#..
+    ...................-.#...#...#..
+    ...........-######.#.#...#...#..
+    .................#.#.#...#...#..
+    .................#.#.#...#...#..
+    .................#.-.#...#...#..
+    .................#...#...#...#..
+    .................#...#...#...#..
+    .................#...#...#...#..
+    .................#...#...#...#..
+    .................#...#...#...#..
+    .................#...#...#...#..
+    .................-...-...-...-..
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+  7: |
+    ................................
+    ...........----B----------B---..
+    .............................-..
+    .............................-..
+    ............-------B------...-..
+    .........................-...-..
+    .........................-...-..
+    ...........-B---------...-...-..
+    .....................-...-...-..
+    .....................C...C...C..
+    ............----B-.-.-...-...-..
+    .................-.-.-...-...-..
+    .................-.-.-...-...-..
+    .................C...C...C...C..
+    .................-...-...-...-..
+    .................-...-...-...-..
+    .................-...-...-...-..
+    .................-...-...-...-..
+    .................-...-...-...-..
+    .................-...-...-...-..
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+tests:
+- name: count
+  settle: 60
+  steps:
+  - {wait: 10}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 1
+      d2: 0
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 1
+      d2: 1
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 1
+      d2: 0
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 0
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 1
+      d2: 1
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 1
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 58}
+  - expect:
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+  - {wait: 50}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+- name: jump
+  settle: 60
+  steps:
+  - {wait: 10}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - drive:
+      imm0: 1
+      imm1: 0
+      imm2: 1
+      imm3: 0
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 108}
+  - drive:
+      imm0: 0
+      imm1: 1
+      imm2: 0
+      imm3: 1
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 1
+  - {wait: 108}
+  - drive:
+      imm0: 1
+      imm1: 1
+      imm2: 1
+      imm3: 1
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 1
+  - {wait: 108}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+- name: halt
+  settle: 60
+  steps:
+  - {wait: 10}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - drive: {hlt: 1}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive: {hlt: 0}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+- name: reset
+  settle: 60
+  steps:
+  - {wait: 10}
+  - drive:
+      imm0: 1
+      imm1: 0
+      imm2: 0
+      imm3: 1
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 108}
+  - drive:
+      rst: 1
+      jt: 0
+      imm0: 0
+      imm3: 0
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive: {rst: 0}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - drive: {hlt: 1, rst: 1}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive: {rst: 0}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive: {hlt: 0}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+- name: no capture without cap
+  settle: 60
+  steps:
+  - {wait: 10}
+  - drive:
+      imm0: 0
+      imm1: 1
+      imm2: 1
+      imm3: 0
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 40}
+  - drive:
+      imm0: 1
+      imm1: 0
+      imm2: 0
+      imm3: 1
+      jt: 1
+  - {wait: 60}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 1
+      m3: 0
+  - {wait: 88}
+  - {wait: 40}
+  - drive:
+      imm0: 0
+      imm1: 1
+      imm2: 1
+      imm3: 0
+      jt: 1
+      hlt: 1
+  - {wait: 60}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 1
+      m3: 0
+  - {wait: 88}
+  - {wait: 40}
+  - drive:
+      imm0: 1
+      imm1: 1
+      imm2: 1
+      imm3: 1
+      jt: 0
+      rst: 1
+  - {wait: 60}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 1
+      m3: 0
+  - {wait: 88}
+  - {wait: 40}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 1
+      hlt: 0
+      rst: 0
+  - {wait: 60}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - expect:
+      m0: 0
+      m1: 1
+      m2: 1
+      m3: 0
+  - {wait: 88}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+      hlt: 0
+      rst: 0
+- name: two phase
+  settle: 60
+  steps:
+  - {wait: 10}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 108}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 1
+      imm3: 1
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 1
+      imm1: 1
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 0
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 108}
+  - drive:
+      imm0: 1
+      imm1: 1
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 1
+      imm1: 1
+      imm2: 1
+      imm3: 0
+      jt: 1
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 108}
+  - drive:
+      imm0: 1
+      imm1: 1
+      imm2: 1
+      imm3: 0
+      jt: 1
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - drive:
+      imm0: 0
+      imm1: 0
+      imm2: 0
+      imm3: 0
+      jt: 0
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 0
+      pc2: 1
+      pc3: 1
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 1
+      pc1: 1
+      pc2: 1
+      pc3: 0
+  - {wait: 2}
+  - drive: {com: 1}
+  - {wait: 10}
+  - drive: {com: 0}
+  - {wait: 2}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 108}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - expect:
+      pc0: 0
+      pc1: 0
+      pc2: 0
+      pc3: 1
+  - {wait: 2}
+- name: com to pc delay
+  settle: 60
+  steps:
+  - {wait: 10}
+  - {wait: 30}
+  - drive: {cap: 1}
+  - {wait: 10}
+  - drive: {cap: 0}
+  - {wait: 10}
+  - {wait: 28}
+  - {wait: 2}
+  - drive: {com: 1}
+  - wave: {pc0: '00000000111111', s0: '00000000111111'}
+  - drive: {com: 0}
+- name: passthrough
+  truth_table: |-
+    imm0 imm1 imm2 imm3 | n0 n1 n2 n3
+    0 0 0 0 | 0 0 0 0
+    1 0 0 0 | 1 0 0 0
+    1 1 0 0 | 1 1 0 0
+    1 1 1 0 | 1 1 1 0
+    1 1 1 1 | 1 1 1 1
+    0 1 1 1 | 0 1 1 1
+    0 0 1 1 | 0 0 1 1
+    0 0 0 1 | 0 0 0 1
+    1 0 1 0 | 1 0 1 0
+    0 1 0 1 | 0 1 0 1
+    0 0 0 0 | 0 0 0 0
+  delay: 10

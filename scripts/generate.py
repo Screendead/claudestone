@@ -17,7 +17,7 @@ FOLDER = {"pla_xor": "xor", "full_adder": "full_adder",
           "cpu_ctrl": "cpu_parts", "cpu_regs": "cpu_parts", "cpu_fetch": "cpu",
           "cpu_fib4": "builds", "cpu_clock_compact": "cpu_parts", "cpu_clock_compact_p100": "cpu_parts",
           "cpu_out_display_compact": "cpu_parts", "cpu_regs_compact": "cpu_parts",
-          "cpu_ctrl_compact": "cpu_parts", "cpu_alu_compact": "cpu_parts"}
+          "cpu_ctrl_compact": "cpu_parts", "cpu_alu_compact": "cpu_parts", "cpu_pc_compact": "cpu_parts"}
 
 
 def destination(name: str):
@@ -186,6 +186,8 @@ def generated_cpu():
     yield cpu_ctrl_compact()
     from scripts.cpu_alu_compact import cpu_alu_compact
     yield cpu_alu_compact()
+    from scripts.cpu_pc_compact import cpu_pc_compact
+    yield cpu_pc_compact()
     yield cpu_fetch()
     from scripts.cpu_fib4 import cpu_fib4
     yield cpu_fib4()
