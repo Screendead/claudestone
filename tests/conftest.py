@@ -126,12 +126,12 @@ def rig(connect, request):
             pytest.fail(str(e))
     running = whole or _locked(plot_lock(plot.name, server))  # for scripts.status
     try:
-        yield from _run(connect, request, plot, server, lock, whole)
+        yield from _run(connect, request, plot, server, lock, whole, running)
     finally:
         running.close()
 
 
-def _run(connect, request, plot, server, lock, whole):
+def _run(connect, request, plot, server, lock, whole, running):
     """The rig fixture's body once a server is held: test, then showroom or mirror."""
     _record(plot, server)
     in_container = _in_container(server)
@@ -158,6 +158,8 @@ def _run(connect, request, plot, server, lock, whole):
         finally:
             os.utime(lock.name)  # a dsat's idle time counts from the end of use
             lock.close()
+            if running is not whole:
+                running.close()
     if not rig.loaded.blocks:
         return
     # A run on main (holding the plot lock) clears the plot's showroom there, so a
