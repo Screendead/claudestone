@@ -64,7 +64,7 @@ of the 20 checks, one check per frame (stop-motion, not every tick).
 
 ![Every signal cell of the CPU clock on every game tick](docs/media/cpu-clock-trace.png)
 
-<sub>A full trace of `cpu_clock`, a part of the 4-bit CPU (in progress; its specs are not committed yet). Top:
+<sub>A full trace of `cpu_clock`, a part of the 4-bit CPU (in progress; parts in `library/cpu_parts/`). Top:
 all 217 signal cells, ordered by when they first switch on, with brightness for signal strength 0-15. You can
 see the pulse go round the repeater ring. Bottom: the four output pins, two phases 150 gt apart.</sub>
 
