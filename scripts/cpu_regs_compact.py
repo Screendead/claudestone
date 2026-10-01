@@ -30,16 +30,22 @@ Z_X, C_X = 24, 22
 ZO_Z, CO_Z = 33, 35
 OUT_X = [16 + 2 * k for k in range(BITS)]
 RUN = 14
+HOLD_CIRCUIT = {"a": "a", "s": "clock", "b": "b", "o": "out", "f": "flags"}
+PIN_CIRCUIT = {"y": "a", "a": "a", "b": "b", "out": "out", "wa": "ctl", "wb": "ctl", "wo": "ctl",
+               "wf": "ctl", "cap": "clock", "com": "clock"}
 
 
 class Grid:
     def __init__(self):
         self.b = {}
+        self.circuit = None
+        self.of = {}     # pos -> circuit whose placement put it there
 
     def put(self, p, s):
         if p in self.b and self.b[p] != s:
             raise ValueError(f"clash at {p}: {self.b[p]} vs {s}")
         self.b[p] = s
+        self.of.setdefault(p, self.circuit)
 
     def floor(self, p):
         q = (p[0], p[1] - 1, p[2])
@@ -79,6 +85,7 @@ def build(mutant=None):
     named, outputs, inputs = {}, {}, {}
     for k in range(BITS):
         v = [zrow(k, i) for i in range(8)]
+        g.circuit = "a"
         # A row
         inputs[f"y{k}"] = (0, 1, v[0])
         g.rep((1, 1, v[0]), "E")
@@ -102,6 +109,7 @@ def build(mutant=None):
                 g.blk((x, 2, v[0]))
         for z in v[1:6]:
             g.dust((10, 1, z))
+        g.circuit = "b"
         # B row flows west
         latch(g, (9, 1, v[5]), "W")
         g.dust((8, 1, v[5]))
@@ -111,6 +119,7 @@ def build(mutant=None):
             g.dust((x, 1, v[5]))
         g.rep((1, 1, v[5]), "W")
         outputs[f"b{k}"] = (0, 1, v[5])
+        g.circuit = "out"
         # OUT latch and its lane to the north face
         latch(g, (13, 1, v[0]), "E")
         named[f"mo{k}"] = (13, 1, v[0])
@@ -130,11 +139,13 @@ def build(mutant=None):
                 run += 1
         g.rep((X, 1, 1), "N")
         outputs[f"out{k}"] = (X, 1, 0)
+    g.circuit = "b"
     # cover the B taps of the band above against the next band's v0 dust (and the zo row)
     for k in range(BITS):
         for x in (7, 9):
             g.blk((x, 2, zrow(k, 0) + PITCH)) if (x, 2, zrow(k, 0) + PITCH) not in g.b else None
     # flags: Z (lock from the north), C (lock from the south), line x=18
+    g.circuit = "flags"
     inputs["zo"], inputs["co"] = (0, 1, ZO_Z), (0, 1, CO_Z)
     for z, out_x, name, lock in ((ZO_Z, Z_X, "z", -1), (CO_Z, C_X, "c", 1)):
         g.rep((1, 1, z), "E")
@@ -154,10 +165,12 @@ def build(mutant=None):
         g.rep((out_x, 1, PIN_Z - 1), "S")
         outputs[name] = (out_x, 1, PIN_Z)
         named["m" + name] = (17, 1, z)
+    g.circuit = "b"
     for x in (7, 9):
         g.put((x, 2, ZO_Z), SOLID) if (x, 2, ZO_Z) not in g.b else None
     # hold lines
     for key, L in LINE.items():
+        g.circuit = HOLD_CIRCUIT[key]
         top = 31 if key == "f" else 3
         for z in range(top, HEAD_Z - 1):
             if z in LINE_REPS and key != "f":
@@ -177,6 +190,7 @@ def build(mutant=None):
             g.torch((L, 1, HEAD_Z + 1), "N")
         # enable / com net from the south face, over the cap row at y=4
         pin = {"a": "wa", "s": "com", "b": "wb", "o": "wo", "f": "wf"}[key]
+        g.circuit = "clock" if key == "s" else "ctl"
         inputs[pin] = (en, 1, PIN_Z)
         g.rep((en, 1, PIN_Z - 1), "N")
         g.dust((en, 1, PIN_Z - 2))
@@ -185,6 +199,7 @@ def build(mutant=None):
         g.blk((en, 3, CAP_Z)); g.dust((en, 4, CAP_Z))
         g.blk((en, 2, CAP_Z - 1)); g.dust((en, 3, CAP_Z - 1))
         g.dust((en, 2, HEAD_Z))
+    g.circuit = "clock"
     # cap row
     for x in range(1, 20):
         g.blk((x, 1, CAP_Z))
@@ -193,24 +208,22 @@ def build(mutant=None):
     g.rep((CAP_X, 1, PIN_Z - 1), "N")
     for z in range(CAP_Z + 1, PIN_Z - 1):
         g.dust((CAP_X, 1, z))
-    for p in outputs.values():
+    for k, p in outputs.items():
+        g.circuit = PIN_CIRCUIT.get(k.rstrip("0123456789"), "flags")
         g.dust(p)
-    for p in inputs.values():
+    for k, p in inputs.items():
+        g.circuit = PIN_CIRCUIT.get(k.rstrip("0123456789"), "flags")
         g.floor(p)
     if mutant:
         del g.b[(5, 1, zrow(0, 1))]    # A's bit-0 slave loses its lock: A slave transparent
     return g, inputs, outputs, named
 
 
-def region(p):
-    x, _, z = p
-    if z >= ZO_Z or x in LINE.values():
-        return "flags" if (x >= 17 and z < HEAD_Z - 1) else "ctl"
-    if x >= 13:
-        return "out"
-    if (z - 1) % PITCH >= 4 and x <= 10:
-        return "b"
-    return "a"
+def circuits(mutant=None):
+    """pos -> the circuit that placed it: a, b, out, flags (registers and their own lines and
+    hold lines), ctl (write-enable nets from the south face), clock (cap row, com net and the
+    slave hold line it drives)."""
+    return build(mutant)[0].of
 
 
 def regs_tests():
