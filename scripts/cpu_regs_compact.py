@@ -253,7 +253,8 @@ def cpu_regs_compact(name="cpu_regs_compact", mutant=None) -> Spec:
 
 
 DESCRIPTION = (
-    "CPU4 register file, compact: A and B master/slave, OUT, Z and C latches, every latch a repeater "
+    "CPU4 register file, compact (library: each latch is d_latch/dl_lock_pair, the shared hold lines as in "
+    "register/shift_reg4_lock): A and B master/slave, OUT, Z and C latches, every latch a repeater "
     "locked from the south by a repeater that reads a block; dust on that block climbs to a hold line at "
     "y=3 running along z (x=2 A masters, 6 both slaves, 10 B masters, 14 OUT, 18 flags). Lines come down "
     "to heads at row 38: hold = NOT cap OR NOT we (a wall torch on the cap row, cap dust on blocks at row 40, "

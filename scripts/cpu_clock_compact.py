@@ -236,7 +236,9 @@ def cpu_clock_compact(name="cpu_clock_compact", period=200, cap_at=150, width=10
             b.place(p, blocks[p])
     L = 2 * SR_DELAY + 2 + 2 + 2
     inputs = {"start": names.pop("start")}
-    desc = (f"Compact two-phase CPU clock, period {period} gt: one start edge sets a two-repeater memory, a subtract "
+    desc = (f"Compact two-phase CPU clock, period {period} gt (library: the ring folded as in "
+            f"delay/delay_serpentine, the one-shot as in rising_edge/pulse_rising_comparator, the start memory "
+            f"as in d_latch/dl_lock_pair's repeater loop): one start edge sets a two-repeater memory, a subtract "
             f"comparator turns that step into one {width} gt pulse, and the pulse circulates forever in a folded repeater ring "
             f"of {period} gt. COM is the ring node X, CAP the node {cap_at} gt downstream; each pin is fed by one "
             f"repeater, so the two match to the tick. The longer chain runs on a sheet at y=3 over roofs and comes down "
