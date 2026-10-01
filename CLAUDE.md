@@ -70,7 +70,9 @@ off. `redstone/plots.py` divides it into a 192x24x192 `main` plot and, north of 
 of 72x32x72 plots (five a row, pitch 80, each forceloading exactly 5 x 5 chunks): one per
 building block, eight mechanics workbenches, a black-ringed `references` plot,
 `survival` and `storage`, each with a coloured concrete ring, glass corner posts and a floating name
-drawn two blocks outside it. `plot_for(path)` maps a `ref_*` file (a rebuilt
+drawn two blocks outside it. One plot sits off the grid: `bigdoor` (112x64x112 at 370,56,210,
+gray ring, 8x8 chunks), for piston doors up to 16x16 with their mechanism; `library/door/` maps
+to it via `FOLDER_PLOT`. `plot_for(path)` maps a `ref_*` file (a rebuilt
 community design, see `docs/WINS.md`) to `references` and any other library file by folder
 to its plot (`FOLDER_PLOT` for folders sharing one; mechanics, builds and input have none).
 Unset, a library test builds in `plot_for`'s plot, or in main when its folder has none
@@ -226,7 +228,10 @@ trace → `package` data pack.
   `glitch_free`, `reset`, `settle`, `initial` drivers, `steps` of drive/use/wait/expect/level/wave/run/log/check/repeat and the container steps
   insert/expect_items/throughput (a named cell or [x, y, z]; throughput records items moved and
   a rate per hour in the trace and result), `finally`
-  commands). `dump` must round-trip
+  commands), a top-level `update_pass` (all, none, or unobserved: observers are set last and the
+  blocks they face are not cloned), a `door:` section (doorway origin/width/height/facing, depth,
+  door and surface material, input plus fixture `repeater[delay=1]`, tier) and the `door_cycle`
+  test kind. `dump` must round-trip
   what `load` reads; `tests/test_generated.py` fails if a generated file is stale.
 - `redstone/harness.py`: `Rig` owns one plot. It clears with `fill … air strict` (no
   item drops), kills non-player entities in it (but not the watch camera), 2 blocks around
@@ -242,7 +247,9 @@ trace → `package` data pack.
   `setblock` then a `clone` of the block they hang on (setblock alone doesn't update it),
   and the harness schedules button release itself. Reads use a generated probe function
   (≤60,000 commands per chunk, because of the 65,536 command-chain limit) that copies
-  block states into storage.
+  block states into storage. `load` runs the build as `build0..N` (≤60,000 commands each, one
+  RCON call per part) and takes extra functions and block tags; `call(functions, read)` runs
+  functions, then `data get storage`, in one `rcon.sequence()`. Clears fill 32x32x32 pieces.
 - `redstone/spec.py`: runs one test of a `Spec` on a `Rig`, reports it to the watch
   director (events and a status line; other plots' status signs as before), and records traces. Step failures (expect, level, wave, check, insert,
   expect_items, throughput, a `run` or `log` whose command fails) are collected and the steps run to the end; the test then
@@ -253,6 +260,17 @@ trace → `package` data pack.
   reports; don't hand-edit it), build bounds against the spec's plot, non-string cell names
   (YAML reads unquoted on/off/yes/no as booleans), wave strings, `repeat` bodies, and `run`/`log`/`check`/`finally` length for RCON, and the container steps' cells, keys and
   generated command length.
+- `redstone/door.py`: `plan(spec)` turns a `door:` section into probe and occupancy functions
+  and tags; `cycle()` runs `door_cycle`. Tick 0 is the tick the fixture repeater's output changes.
+  Each tick it reads only the hallway (doorway ± depth) and the cells beside it (960 for 16x16;
+  a pulled block shows as moving in the wall cell beside the doorway) into `door_timing.Run`
+  until static for 40 ticks, and reports open/close times under R (landing, start + 2), H1
+  (hallway holds its final real blocks) and R1 (0-tick pulls instant), plus visible times,
+  seamless grades and the tier. Volume (`door_volume`) comes from occupancy flags over the whole
+  region at rest, each piston's line every tick, fired pistons' head cells, and entities. A moving
+  piston's `blockState` is a bare id when the block is in its default state, else
+  `{Name, Properties}`. Broken bounds are collected failures; per-tick changes go under `door`
+  in the trace.
 - `redstone/remote.py`: runs a spec test in a Docker satellite's container (`serve`) and
   drives it from the laptop (`RemoteRig`); see the Docker satellite paragraphs above.
 - `redstone/rcon.py`: the server writes every RCON client's output into one shared buffer
