@@ -273,9 +273,22 @@ class Rig:
         target = self.gametime() + n
         self._rate(WARP_RATE)
         try:
-            self.r.cmd(f"tick sprint {n - 1}" if self.sprint and n >= SPRINT_MIN else f"tick step {n}")
-            while self.gametime() < target:
-                time.sleep(0.002)
+            if self.sprint and n >= SPRINT_MIN:
+                out = self.r.cmd(f"tick sprint {n - 1}")
+                if not out.startswith("The game is sprinting"):
+                    raise CommandFailed(f"tick sprint {n - 1}: {out}")
+                # The world is frozen again only after the tick that reaches the target,
+                # and `tick step` in an unfrozen world fails.
+                while not self.r.cmd("tick query").startswith("The game is frozen"):
+                    time.sleep(0.002)
+            else:
+                out = self.r.cmd(f"tick step {n}")
+                if not out.startswith("Stepping"):
+                    raise CommandFailed(f"tick step {n}: {out}")
+                while self.gametime() < target:
+                    time.sleep(0.002)
+            if (now := self.gametime()) != target:
+                raise CommandFailed(f"stepped to game time {now}, not {target}")
         finally:
             self._rate(self.idle_rate)
 

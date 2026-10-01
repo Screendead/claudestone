@@ -260,7 +260,9 @@ trace → `package` data pack.
   whole test; `Rig.release()` (conftest teardown) sets 20 again before `tick unfreeze`.
   On a satellite a wait of `SPRINT_MIN` (32) ticks or more runs as `tick sprint n-1` (26.3's
   sprint runs n+1 ticks for n >= 2), which ignores the tick rate: 6400 ticks take ~0.1 s
-  instead of 0.64 s, landing on the same tick with every block the same. Main never sprints:
+  instead of 0.64 s, landing on the same tick with every block the same. The world is frozen
+  again only after the last tick, and a `tick step` before that fails, so the rig polls
+  `tick query` for it; a step, sprint or landing tick that is off fails the test. Main never sprints:
   each sprint's end goes to every player as system chat. `REDSTONE_SPRINT=0` steps instead.
   `Rig()` also resets the tick rate and `BASELINE_GAMERULES`. Inputs are
   redstone blocks placed/removed at driver cells; levers and buttons are toggled with

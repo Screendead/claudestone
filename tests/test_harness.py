@@ -68,9 +68,13 @@ class Clock:
         self.log.append(command)
         if command.startswith("tick step "):
             self.time += int(command.split()[-1])
+            return f"Stepping {command.split()[-1]} tick(s)"
         if command.startswith("tick sprint "):
             n = int(command.split()[-1])
             self.time += n + 1 if n >= 2 else n
+            return "The game is sprinting"
+        if command == "tick query":
+            return "The game is frozenTarget tick rate: 20.0 per second."
         if command == "time query gametime":
             self.queries += 1
             if self.queries == self.fail_at:
