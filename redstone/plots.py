@@ -53,6 +53,12 @@ REFERENCES = PLOTS["references"]
 # forceloads 8 x 8 chunks.
 BIGDOOR = Plot("bigdoor", (370, SURFACE, 210), (112, 64, 112), "gray")
 PLOTS[BIGDOOR.name] = BIGDOOR
+# A computer and its parts, south of main, x and z origins 2 past a chunk edge: cpu
+# forceloads 8 x 8 chunks with its border, cpu_parts 5 x 5.
+CPU = Plot("cpu", (130, SURFACE, 370), (120, 48, 120), "black")
+CPU_PARTS = Plot("cpu_parts", (258, SURFACE, 370), SIZE, "gray")
+PLOTS[CPU.name] = CPU
+PLOTS[CPU_PARTS.name] = CPU_PARTS
 
 # Library folders that share another building block's plot; a folder named after a plot
 # uses it, and the rest (mechanics, builds, input) have none.
