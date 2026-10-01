@@ -21,7 +21,7 @@ it one tick at a time over RCON, and the spec's tests pass or it doesn't ship. W
 
 | | |
 |---|---|
-| **423** specs in **39** building-block folders | `library/INDEX.md` |
+| **430** specs in **41** building-block folders | `library/INDEX.md` |
 | **84** mechanics specs, each proving a 26.3 behaviour | `docs/MECHANICS.md` |
 | **27** community designs rebuilt and run as `ref_*` specs | `library/*/ref_*` |
 | **1** banked win over a community best, **1** tie | `docs/WINS.md` |
