@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-from redstone import fileformat, library, showroom, spec as spec_module
+from redstone import door, fileformat, library, showroom, spec as spec_module
 from redstone.library import name_of
 from redstone.plots import MAIN, PLOTS, plot_for
 from scripts.lint import lint
@@ -100,7 +100,8 @@ def fmt_throughput(measured: list[dict]) -> str:
 def outcome(test: str, passed: bool, msg: str, result: dict | None) -> str:
     result = result or {}
     notes = ([fmt_delays(result["delay"], result.get("delays"))] if result.get("delay") is not None else []) + (
-        [fmt_throughput(result["throughput"])] if result.get("throughput") else [])
+        [fmt_throughput(result["throughput"])] if result.get("throughput") else []) + (
+        [door.summary(result["door"])] if result.get("door") else [])
     return f"PASS {test}" + (f" ({'; '.join(notes)})" if notes else "") if passed else f"FAIL {test}: {msg}"
 
 

@@ -184,6 +184,57 @@ tests:
   cell. Block-entity NBT goes in the state:
   `'hopper[facing=down]{Items:[{id:"minecraft:redstone",count:1}]}'`.
 
+## Doors
+
+Piston doors live in `library/door/`, which builds in the `bigdoor` plot (112x64x112, room
+for a 16x16 door and its mechanism). `library/door/door_2x2_flush_harness_check` is a
+working example. A door spec has a `door:` section and a `door_cycle` test:
+
+```yaml
+door:
+  doorway: {origin: [5, 1, 1], width: 2, height: 2, facing: north}  # min corner; facing = front
+  depth: 1                    # hallway cells checked on each side of the doorway
+  blocks: closed              # door material read from the doorway as placed, or [ids]
+  surface: [white_concrete]   # hallway walls/floor/ceiling material (default: the door blocks)
+  input: door_in              # an input (drive cell) ...
+  repeater: rep               # ... behind this named fixture repeater[delay=1]
+  tier: FULL                  # SUPER, FULL, SEMI or QUART
+tests:
+- name: cycle
+  door_cycle: {cycles: 2, max_open: 6, max_close: 6, tier: FULL, max_volume: 108}
+```
+
+- The build is placed with the input off, in `initial` (default `closed`); each change of
+  the input toggles the door. The input is Squid's repeater input: the harness places the
+  redstone block behind the fixture repeater, and **tick 0 is the first tick at whose end
+  that repeater's output has changed**. The door's own lever or button, if it has one, can
+  be named as `device:` so the volume leaves it out.
+- Build the hallway's walls, floor and ceiling (`surface` material) around the doorway for
+  `depth` cells each side, so the doorway starts at y >= 1. The hallway's two ends stay
+  open; anything else in view that is air, a piston head, a moving piston or another block
+  is circuitry and costs the seamless tier. Lint checks the geometry, the fixture and that
+  the hallway is clear.
+- Every tick of an operation the harness reads the hallway and the cells beside it (960
+  cells for a 16x16 at depth 1), never the whole build, until the hallway has been static
+  for 40 ticks. Times are reported under three readings of the rules, since Squid's is
+  not settled (HANDOFF open question): `R`, the rule as written (a movement ends when it
+  lands, start + 2); `H1`, the tick the hallway holds its final pattern of real blocks (a
+  pulled block counts as gone once its origin is air); `R1`, as R but a 0-tick pull counts
+  as instant. `max_open`/`max_close` bound the `reading` (default R). Visible times, the
+  seamless grade of each column (L = nothing visible, D = no circuitry but entities,
+  - = circuitry) and the tier reached go in the result; `try` prints one line.
+- Volume: the box of everything the wiring ever occupies (Squid 4.2), blocks and
+  entities, leaving out the doorway, the input fixture, the hallway except when open, and
+  surface material on the hallway's walls or `outer_surface` boxes. The whole region is read
+  only when the door is at rest; during motion only the cells along each piston's line,
+  and each fired piston's head cell counts. A block moved by a piston that was itself moved
+  is seen only at rest. `max_volume` bounds the circuitry volume.
+- Placing a door: the harness's update pass (cloning every block onto itself) pulses every
+  observer, which can set a door's mechanism off before the test. `update_pass: unobserved`
+  sets observers last and skips cloning what they face; `update_pass: none` skips the pass.
+  `door_cycle` fails first if the door does not stand in its `initial` state after settling.
+  The packaged `place` function uses the same pass.
+
 ## How a truth table is measured
 
 Rows run in order and end by repeating the first (so the design must reset); `reset: false`

@@ -5,7 +5,7 @@ import json
 import re
 from pathlib import Path
 
-from . import watch
+from . import door, watch
 from .build import Build, Pos, namespaced
 from .fileformat import Spec, parse_truth_table
 from .harness import Rig, checked
@@ -30,6 +30,7 @@ class Recorder:
         self.failures: list[str] = []
         self.loops: list[str] = []  # "i/n" of each enclosing repeat
         self.throughput: list[dict] = []
+        self.door: dict | None = None  # door_cycle: probed cells, per-tick changes, result
 
     def frame(self, event: str = "") -> dict:
         snap = self.rig.snapshot()
@@ -160,13 +161,20 @@ def _run(rig: Rig, spec: Spec, test: dict, trace: bool) -> dict:
         drivers = {p for n, on in test["initial"].items() if on for p in _cells(spec, n, "tile" in test)}
         for p in drivers:
             build.place(p, "redstone_block")
-    rig.load(build, probe=None if trace else set(spec.named.values()), drivers=drivers)
+    extra = {} if spec.update_pass == "all" else {"update": spec.update_pass}
+    door_plan = None
+    if "door_cycle" in test:
+        door_plan = door.plan(spec, tuple(rig.size))
+        extra |= {"functions": door_plan.functions, "tags": door_plan.tags}
+    rig.load(build, probe=None if trace else set(spec.named.values()), drivers=drivers, **extra)
     _event(rig, "test", spec, test)
     rec = Recorder(rig, trace)
     rec.frame("loaded")
     snap = rec.wait(test.get("settle", _settle(test)))
     result = {}
     try:
+        if door_plan is not None:
+            result["door"] = door.cycle(rig, spec, test, rec, door_plan)
         if "truth_table" in test:
             result["delay"], result["delays"] = _truth_table(rig, spec, test, rec, snap)
             _check_delays(test, result["delay"], result["delays"])
@@ -557,4 +565,4 @@ def _write_trace(spec, test, rec):
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"spec": str(spec.path) if spec.path else None, "name": spec.name,
                                "test": test["name"], "sparse": not rec.dense, "failures": rec.failures,
-                               "frames": rec.frames}))
+                               "frames": rec.frames, **({"door": rec.door} if rec.door else {})}))

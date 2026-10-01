@@ -11,7 +11,8 @@ import re
 import sys
 from pathlib import Path
 
-from redstone import fileformat, library, spec as spec_module
+from redstone import door, fileformat, library, spec as spec_module
+from redstone.build import UPDATE_PASSES
 from redstone.fileformat import Spec
 from redstone.harness import PLAIN_SUPPORTS, RUN_WRAP, has_level, parse_state, signal
 from redstone.plots import MAIN, plot_for
@@ -78,6 +79,10 @@ def lint(spec: Spec) -> list[str]:
             bad.append(f"{name} at {pos} hangs on {held}, which is air")
     plot = (plot_for(spec.path) if spec.path else None) or MAIN
     bad += _placement_problems(spec, plot)
+    if spec.update_pass not in UPDATE_PASSES:
+        bad.append(f"update_pass {spec.update_pass!r} is not one of {', '.join(UPDATE_PASSES)}")
+    if spec.door is not None:
+        bad += [f"door: {m}" for m in door.problems(spec, plot.size)]
     for n, pos in spec.named.items():
         if pos not in blocks:
             bad.append(f"cell {n} at {pos} is air")
@@ -132,6 +137,9 @@ def _test_problems(spec, test, plot):
         out += [f"initial {n!r}: {v!r} is not 1 or 0" for n, v in initial.items() if v not in (0, 1)]
     if "tile" in test:
         out += _tile_problems(spec, test["tile"], plot)
+    if "door_cycle" in test:
+        out += door.cycle_problems(spec, test["door_cycle"])
+        out += ["door_cycle and tile can't be combined"] if "tile" in test else []
     out += _step_problems(spec, test.get("steps", []), at)
     for command in test.get("finally", []):
         out += _command_problems("finally", command, at)
