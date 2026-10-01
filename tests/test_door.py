@@ -467,3 +467,13 @@ def test_remote_ships_block_data_for_door_probe():
     import tarfile
     names = tarfile.open(fileobj=io.BytesIO(base64.b64decode(remote.code())), mode="r:gz").getnames()
     assert "redstone/blocks.json" in names and "redstone/door.py" in names
+
+
+def test_blocks_without_a_facing_take_the_game_default():
+    s = proof()
+    s.build.place((0, 2, 5), "sticky_piston")
+    p = door.plan(s, BIGDOOR.size)
+    assert ((0, 2, 5), "north") in p.pistons
+    assert "unless block ~0 ~2 ~5 minecraft:sticky_piston[facing=north,extended=false] run" in p.functions["occ_track0"]
+    b = Build().place((0, 0, 0), "observer").place((0, 0, 1), "stone")
+    assert [c.split()[1:4] for c in b.to_commands("unobserved") if c.startswith("clone")] == [["~0", "~0", "~0"]]

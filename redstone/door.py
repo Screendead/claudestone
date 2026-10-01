@@ -142,9 +142,10 @@ def plan(spec, plot_size: Pos) -> Plan:
              for c in [tuple(b + k * d for b, d in zip(base, STEP[f]))]} & in_region - hallway - static
     track_chunks, _, _, _ = door_probe.occupancy_functions(
         bounds, [hall_box], static, exempt_surface, door_material, surface_material, plot_size, track=track)
-    fired = [f"execute unless block ~{x} ~{y} ~{z} {spec.build.blocks[(x, y, z)].split('{')[0]} run "
+    fired = [f"execute unless block ~{x} ~{y} ~{z} {block_id(spec.build.blocks[(x, y, z)])}[facing={f},extended="
+             f"{parse_state(spec.build.blocks[(x, y, z)])[1].get('extended', 'false')}] run "
              f"data modify storage {door_probe.OCC} fired.p{j} set value 1b"
-             for j, ((x, y, z), _) in enumerate(pistons)]
+             for j, ((x, y, z), f) in enumerate(pistons)]
     x, y, z = repeater
     functions = {
         **door_probe.door_functions(hall_chunks, occ, occ_hall),

@@ -94,9 +94,13 @@ def block_id(state: str) -> str:
     return re.split(r"[\[{]", state)[0]
 
 
+# registerDefaultState of the blocks whose facing the harness reads.
+DEFAULT_FACING = {"minecraft:observer": "south", "minecraft:piston": "north", "minecraft:sticky_piston": "north"}
+
+
 def facing(state: str) -> str | None:
     m = re.search(r"[\[,]facing=(\w+)", state.split("{")[0])
-    return m.group(1) if m else None
+    return m.group(1) if m else DEFAULT_FACING.get(block_id(namespaced(state)))
 
 
 def namespaced(state: str) -> str:
