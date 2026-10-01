@@ -170,6 +170,7 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 |---|---|---|---|---|---|---|
 | door16_carrier_segment | 7x8x1 | 56 | 33 | - | piston_based, entityless | In-plane carrier primitive for a 16x16 that pulls quartz columns sideways one cell per firing (the family NumpadInfinite's 16x16 appears to use) |
 | door16_engine_b | 13x1x4 | 52 | 7 | - | piston_based, entityless, flat | The minecraft.wiki two-way flying engine B (2 observers, 2 slime, 2 sticky pistons in one layer) on 26.3, the candidate engine for a 16x16 door's in-plane shuttles |
+| door16_shuttle_band | 9x4x6 | 216 | 22 | - | piston_based, entityless | One shuttle band for an in-plane 16x16 door |
 | door_2x2_flush_harness_check | 12x4x4 | 192 | 56 | - |  | Harness check for door tests |
 | ref_legden_fastest_10x10 | 44x22x14 | 13552 | 8616 | - | piston_based, observer_based, entityless | Our rebuild of a published door: LegDen's fastest 10x10 seamless piston door (video https://youtu.be/bZtwoJV967k, finished 02.06.2026; layout inspiration credited by LegDen to JensundLars, parkertoo and FPSL), block for block from LegDen's downloadable world (Java 1.21.11), saved open: 8,516 blocks in 44x22x14, of which 1843 observers, 1055 sticky pistons, 629 pistons |
 
