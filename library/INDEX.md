@@ -169,6 +169,7 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
 | door_2x2_flush_harness_check | 12x4x4 | 192 | 56 | - |  | Harness check for door tests |
+| ref_legden_fastest_10x10 | 44x22x14 | 13552 | 8616 | - | piston_based, observer_based, entityless | Our rebuild of a published door: LegDen's fastest 10x10 seamless piston door (video https://youtu.be/bZtwoJV967k, finished 02.06.2026; layout inspiration credited by LegDen to JensundLars, parkertoo and FPSL), block for block from LegDen's downloadable world (Java 1.21.11), saved open: 8,516 blocks in 44x22x14, of which 1843 observers, 1055 sticky pistons, 629 pistons |
 
 ## dual_edge
 
