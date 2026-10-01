@@ -8,6 +8,9 @@ OPS = ["op0", "op1", "op2", "op3"]
 OP_SETS = {"za": {1, 9}, "sub": {3, 14}, "wa": {1, 2, 3, 4, 5, 6, 7, 9, 14}, "wb": {8, 9},
            "wf": {2, 3, 4, 5, 6, 7, 14}, "wo": {10}, "hlt": {15}, "xsel": {1, 7, 14}}
 CONTROL = list(OP_SETS) + ["jt"]
+# Output rows north to south. cpu_fib4 mirrors the decoder, so these leave its west face in
+# the order its buses turn south (jt and hlt north); xsel last, for the imm gates south of it.
+ROW_ORDER = ["jt", "hlt", "wf", "wo", "wa", "wb", "za", "sub", "xsel"]
 IMM_PITCH = 4
 TORCH, REPEATER = 2, 2
 # Measured on sat3: z -> jt 18 gt, c -> jt 22 gt (the jt output row is ~40 cells with refresh repeaters).
@@ -63,7 +66,7 @@ def cpu_ctrl(name: str = "cpu_ctrl", drop_jt_term: bool = False) -> Spec:
     outs["jt"] = minimise(OPS + ["z", "c"], jt_on, set())
     if drop_jt_term:
         outs["jt"] = [t for t in outs["jt"] if "c" not in t]
-    outs["xsel"] = outs.pop("xsel")
+    outs = {o: outs[o] for o in ROW_ORDER}
     # xsel is the southmost output row, so the imm gates can sit just south of it.
     spacing = pla_mod.OUT_SPACING
     pla_mod.OUT_SPACING = 2
