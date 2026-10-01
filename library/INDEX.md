@@ -168,6 +168,7 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| door16_band_stack | 9x6x7 | 378 | 46 | - | piston_based, entityless | Two shuttle bands for an in-plane 16x16 door, stacked on adjacent door rows (2-3 and 4-5) and mirrored, so band 0's engine runs in the planes on one side of the door and band 1's on the other, and no slime of one band ever touches the other (same-side stacking would need slime/honey alternation, and honey does not conduct) |
 | door16_carrier_segment | 7x8x1 | 56 | 33 | - | piston_based, entityless | In-plane carrier primitive for a 16x16 that pulls quartz columns sideways one cell per firing (the family NumpadInfinite's 16x16 appears to use) |
 | door16_engine_b | 13x1x4 | 52 | 7 | - | piston_based, entityless, flat | The minecraft.wiki two-way flying engine B (2 observers, 2 slime, 2 sticky pistons in one layer) on 26.3, the candidate engine for a 16x16 door's in-plane shuttles |
 | door16_shuttle_band | 9x4x6 | 216 | 22 | - | piston_based, entityless | One shuttle band for an in-plane 16x16 door |
