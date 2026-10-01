@@ -3,15 +3,16 @@
 **Vanilla Minecraft redstone, designed by Claude agents, proven tick by tick on a real server, shipped as a data pack.**
 
 <p align="center">
-  <img src="docs/media/door-10x10.gif" width="720" alt="A 10x10 seamless piston door opening and closing, rendered one game tick per frame from the harness's per-tick measurement">
+  <img src="docs/media/door16-band.gif" width="800" alt="Two row pairs of a 16x16 seamless door being stored and rebuilt by slime-block flying machines, driven by one lever">
 </p>
 
 <p align="center"><sub>
-LegDen's "fastest 10x10" seamless door (a community design), rebuilt as <code>ref_legden_fastest_10x10</code> and
-stepped one game tick at a time on a headless 26.3 server. Every frame is one recorded game tick of the 420 hallway
-cells the harness probed (the quiet tail of the close, gt 25-74, is cut): opens in 29 gt, closes in 14 gt,
-FULL seamless, 13,552 blocks. Grey is anything that is not
-a door block (the trace records the block's class, not its type); a red outline means the block is mid-move that tick.
+Work in progress: one band of a 16x16 seamless piston door, <code>door16_band_pairs_ctrl</code>. One lever drives
+it with real redstone, no command stand-ins. Slime-block flying machines carry the door's quartz columns, five per
+half, out of two row pairs into stacks and rebuild the queues. Lever off closes them, and every block ends where it
+was placed. Rendered from the real block types captured during the library test on a 26.3 server (every 4 gt on the
+way out, every 2 gt on the way back); one frame per 64 gt opening and per 8 gt closing. The stone and repeater wiring
+is dimmed.
 </sub></p>
 
 You say *"two numbers on levers, a button, the sum on a 7-segment display"*. Agents write the build as a
@@ -62,11 +63,11 @@ of the 20 checks, one check per frame (stop-motion, not every tick).
 - **Traces.** Every run writes `traces/<spec>/<test>.json`; with `REDSTONE_TRACE=1` that is every signal
   cell on every tick:
 
-![Every signal cell of the CPU clock on every game tick](docs/media/cpu-clock-trace.png)
+![Timing diagram of the CPU's two-phase clock: COM and CAP pins, 10 gt pulses, 200 gt period, CAP 150 gt after COM](docs/media/cpu-clock.png)
 
-<sub>A full trace of `cpu_clock`, a part of the 4-bit CPU (in progress; parts in `library/cpu_parts/`). Top:
-all 217 signal cells, ordered by when they first switch on, with brightness for signal strength 0-15. You can
-see the pulse go round the repeater ring. Bottom: the four output pins, two phases 150 gt apart.</sub>
+<sub>The four output pins of `cpu_clock`, a part of the 4-bit CPU (in progress, `library/cpu_parts/`), from a
+full trace. A two-phase clock is what lets the CPU's master/slave registers work: on CAP every master captures its
+next value, on COM every slave commits it, so no register reads a value that is still changing.</sub>
 
 ## The rule: measured, or it isn't claimed
 
