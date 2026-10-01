@@ -105,6 +105,7 @@ and subtracts, so it passes A only when B is on |
 | cpu_ctrl | 69x4x63 | 17388 | 3476 | - |  | CPU4 control decoder |
 | cpu_out_display | 29x10x40 | 11600 | 1970 | - | torch_based, pistonless, entityless | CPU output display: out0-out3 (out0 least significant, pins on the south face at x=4,6,8,10, y=1) shown as two seven-segment digits facing north on the z=0 face, tens on the viewer's left (blank for 0-9, 1 for 10-15) |
 | cpu_pc | 22x15x40 | 13200 | 2511 | - | torch_based, pistonless, entityless | 4-bit program counter for the CPU4 computer: a master/slave register with an incrementer and a next-PC mux (next = 0 if rst, else imm if jt, else pc+1 mod 16) |
+| cpu_regs | 50x10x44 | 22000 | 2026 | - | pistonless, entityless, torch_based | CPU4 register file: A and B master/slave, OUT, Z and C single latches, all repeater latches |
 | cpu_regs_cell | 6x2x11 | 132 | 38 | - | pistonless, entityless, torch_based, comparator_based | One bit of the CPU register file (cpu_regs): a master latch that copies y while cap AND we, and a slave that copies the master while com; q is the slave |
 | cpu_rom_ctrl | 46x8x36 | 13248 | 4312 | - | torch_based, pistonless, entityless | CPU4 program memory (stage 1 of ROM_CTRL: no control decoder yet) |
 | cpu_rom_ctrl_jumps | 46x8x36 | 13248 | 4312 | - | torch_based, pistonless, entityless | CPU4 program memory (stage 1 of ROM_CTRL: no control decoder yet) |
