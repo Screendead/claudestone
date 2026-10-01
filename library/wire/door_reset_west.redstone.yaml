@@ -1,0 +1,698 @@
+name: door_reset_west
+description: 'Door part 11 (west reset, lane 3): resets the opening relays Z_S, Z11 and Y12 after the close, undoes the NP12
+  kill, and re-arms all three with no command. Door coordinates (design_c) = spec - (4,-1,0). The spec starts from the open
+  state. Changes to design_c: Z_S (2,4,2), Z11 (-2,3,1) and Y12 (-2,3,2) become STICKY pistons. ARM_ZS (2,6,2) becomes stone
+  A_S, strongly powered by dust (2,7,2), which is fed by line ls (3,7,2); A_S is a QC cell of Z_S that is not next to Z_S
+  or its head, so it is silent. RB11 becomes a two-block column: slime F11 (home (-2,4,1)) and stone B11 (home (-2,5,1));
+  repeater A11 (-3,4,1) on glass (-3,3,1) points into F11''s home and is fed by l11 (-4,4,1). Strongly powered, F11 QC-powers
+  P11 and Y12 as RB11 did; A11 also holds Z11 through its head. ARM_Z11 (-2,4,2) is removed. Y12''s arm A12 is stone (-3,4,2),
+  strongly powered by dust (-3,5,2), which is fed by l12 (-4,5,2); A12 is a QC cell of Y12 next to Y12''s head, so dropping
+  it retracts Y12, and raising it while Y12 is retracted is silent. The NP12 kill is K: a sticky piston (-4,2,3) facing north,
+  fed by lk (-4,1,3). It pushes RB12 (-4,2,2) to (-4,2,1) (L dies in that block event) and pulls it home. RB12 at (-4,2,1)
+  powers the NA dust (-4,2,0). Cells moved through: (-2,4..6,1), (-4,3,2), (-3,3,2), (-4,2,1), (-4,2,2), (1,4,2), (0,4,2).
+  Load blocker for a closed build: obsidian (-2,6,1), which replaces (-2,5,1). Fixtures: stand-ins S (DS on its ceiling; its
+  line is a stone until the c4 obsidian), P11 (its line holds S at the corner until the NV-tick obsidian), P12 with the whole
+  NP12 net and the spare, LY (Z_S''s wake), and the NA dust. Schedule (drive @kN = before tick kN): lk on @k0 (K kills NP12
+  in k0 g, P12 retracts), ls off @k0, l12 off @k1 (Y12 pulls G home, lands k3 j), ly on @k2 (LY''s rise retracts Z_S, RB_S
+  home k4 j), S blocker @k4, lk off @k4 (RB12 home k6 j), ls on @k6, l11 off @k7 and on @k9 (A11 off k8 d to k10 d; Z11 retracts
+  k8 g, column lands k10 j), P11 blocker @k8, l12 on @k12. Measured: every tick matches, and all three relays are armed by
+  k12 with no later update. P12, S and P11 do not move through k43. Then LY''s fall fires Z_S, and a freed, updated P11 runs
+  the t6 0-tick: P11 out, Z11, P11 spat, Y12, NP12 live, P12 out. Three cycles. Controls: with no S blocker, S moves at k5;
+  with A_S back at k3, Z_S fires at k5; with A11 off 3 gt, Z11 fires at k11; with A12 back at k10, Z11''s landing fires Y12;
+  with RB12 home before G, P12 extends.'
+traits:
+- piston_based
+- tick_accurate
+palette:
+  .: air
+  A:
+    block: glass
+    fixture: true
+  B:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+    name: na
+  C: redstone_block
+  D:
+    block: sticky_piston[facing=north,extended=false]
+    name: k
+  E: stone
+  F:
+    block: redstone_wire[west=side,south=up,power=15]
+    fixture: true
+    name: l
+  G: glass
+  H: piston_head[facing=west,type=sticky]
+  I:
+    block: redstone_wire[north=side,east=side,power=14]
+    fixture: true
+  J:
+    block: repeater[facing=west,delay=1,powered=true]
+    name: a11
+  K:
+    block: redstone_wire[east=side,west=side,power=15]
+    name: a12
+  L:
+    block: sticky_piston[facing=east,extended=false]
+    fixture: true
+    name: p11
+  M:
+    block: sticky_piston[facing=up,extended=true]
+    name: z11
+  N:
+    block: sticky_piston[facing=west,extended=true]
+    name: y12
+  O:
+    block: redstone_wire[west=side,east=up,power=13]
+    fixture: true
+  P: piston_head[facing=up,type=sticky]
+  Q: slime_block
+  R:
+    block: white_concrete
+    fixture: true
+  S:
+    block: redstone_wire[west=side,east=up,power=12]
+    fixture: true
+  T:
+    block: quartz_block
+    fixture: true
+  U:
+    block: piston_head[facing=down,type=sticky]
+    fixture: true
+  V:
+    block: sticky_piston[facing=down,extended=true]
+    fixture: true
+    name: p12
+  W:
+    block: redstone_wire[west=side,north=up,power=11]
+    fixture: true
+  X:
+    block: redstone_wire[north=side,south=side,power=8]
+    fixture: true
+    name: np
+  Y:
+    block: redstone_wire[north=side,south=side,power=9]
+    fixture: true
+  Z:
+    block: redstone_wire[north=side,south=side,power=10]
+    fixture: true
+  a:
+    block: stone
+    fixture: true
+  b:
+    block: sticky_piston[facing=down,extended=false]
+    fixture: true
+    name: s
+  c:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+    name: ds
+  d:
+    block: sticky_piston[facing=west,extended=true]
+    name: zs
+  e:
+    block: redstone_wire[east=side,west=side,power=15]
+    name: asd
+  f:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+    name: lyd
+  g:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+  h:
+    input: lk
+  i:
+    input: ls
+  j:
+    input: l11
+  k:
+    input: l12
+  l:
+    input: ly
+layers:
+  0: |
+    A.......
+    ........
+    .A......
+    h.......
+    ........
+  1: |
+    B....a..
+    ........
+    CF......
+    DAA.....
+    ........
+  2: |
+    ..LRTb..
+    .GM..T..
+    EHN....A
+    .IOA...A
+    ........
+  3: |
+    ....U...
+    jJP..c..
+    .E..CHdf
+    ...SA..g
+    .......l
+  4: |
+    ....V...
+    ..Q.A...
+    kK..A...
+    ....W...
+    ........
+  5: |
+    ....X...
+    ..E.Y...
+    ....Z.E.
+    ........
+    ........
+  6: |
+    ........
+    ........
+    ......ei
+    ........
+    ........
+tests:
+- name: reset, rearm and fire three times
+  initial:
+    ls: 1
+    l11: 1
+    l12: 1
+  settle: 10
+  steps:
+  - repeat:
+      times: 3
+      steps:
+      - run: setblock ~3 ~2 ~0 white_concrete strict
+      - run: setblock ~5 ~1 ~0 stone strict
+      - check: if block ~2 ~4 ~1 slime_block
+      - check: if block ~2 ~5 ~1 stone
+      - check: if block ~0 ~2 ~2 stone
+      - check: if block ~0 ~1 ~2 redstone_block
+      - check: if block ~4 ~3 ~2 redstone_block
+      - check: if block ~4 ~2 ~0 quartz_block
+      - expect:
+          zs: 1
+          z11: 1
+          y12: 1
+          k: 0
+          p12: 1
+          np: 1
+          l: 1
+          ds: 0
+          s: 0
+          p11: 0
+          na: 0
+          a11: 1
+      - drive:
+          lk: 1
+      - drive:
+          ls: 0
+      - wave:
+          k: '0'
+          y12: '1'
+          zs: '1'
+          z11: '1'
+          na: '0'
+          l: '1'
+          np: '1'
+          p12: '1'
+          ds: '0'
+          s: '0'
+          p11: '0'
+          a11: '1'
+      - drive:
+          l12: 0
+      - wave:
+          k: '1'
+          y12: '1'
+          zs: '1'
+          z11: '1'
+          na: '0'
+          l: '0'
+          np: '0'
+          p12: '0'
+          ds: '0'
+          s: '0'
+          p11: '0'
+          a11: '1'
+      - drive:
+          ly: 1
+      - wave:
+          k: '11'
+          y12: '00'
+          zs: '10'
+          z11: '11'
+          na: '01'
+          l: '00'
+          np: '00'
+          p12: '00'
+          ds: '00'
+          s: '00'
+          p11: '00'
+          a11: '11'
+      - run: setblock ~5 ~1 ~0 obsidian strict
+      - drive:
+          lk: 0
+      - wave:
+          k: '10'
+          y12: '00'
+          zs: '00'
+          z11: '11'
+          na: '10'
+          l: '00'
+          np: '00'
+          p12: '00'
+          ds: '01'
+          s: '00'
+          p11: '00'
+          a11: '11'
+      - drive:
+          ls: 1
+      - wave:
+          k: '0'
+          y12: '0'
+          zs: '0'
+          z11: '1'
+          na: '0'
+          l: '0'
+          np: '0'
+          p12: '0'
+          ds: '1'
+          s: '0'
+          p11: '0'
+          a11: '1'
+      - drive:
+          l11: 0
+      - wave:
+          k: '0'
+          y12: '0'
+          zs: '0'
+          z11: '1'
+          na: '0'
+          l: '1'
+          np: '0'
+          p12: '0'
+          ds: '1'
+          s: '0'
+          p11: '0'
+          a11: '1'
+      - run: setblock ~3 ~2 ~0 obsidian strict
+      - wave:
+          k: '0'
+          y12: '0'
+          zs: '0'
+          z11: '1'
+          na: '0'
+          l: '1'
+          np: '0'
+          p12: '0'
+          ds: '1'
+          s: '0'
+          p11: '0'
+          a11: '1'
+      - drive:
+          l11: 1
+      - wave:
+          k: '000'
+          y12: '000'
+          zs: '000'
+          z11: '000'
+          na: '000'
+          l: '111'
+          np: '000'
+          p12: '000'
+          ds: '111'
+          s: '000'
+          p11: '000'
+          a11: '001'
+      - drive:
+          l12: 1
+      - wave:
+          k: '00000000000000000000000000000000'
+          y12: '00000000000000000000000000000000'
+          zs: '00000000000000000000000000000000'
+          z11: '00000000000000000000000000000000'
+          na: '00000000000000000000000000000000'
+          l: '11111111111111111111111111111111'
+          np: '00000000000000000000000000000000'
+          p12: '00000000000000000000000000000000'
+          ds: '11111111111111111111111111111111'
+          s: '00000000000000000000000000000000'
+          p11: '00000000000000000000000000000000'
+          a11: '11111111111111111111111111111111'
+      - check: if block ~2 ~3 ~1 slime_block
+      - check: if block ~2 ~4 ~1 stone
+      - check: if block ~2 ~5 ~1 air
+      - check: if block ~1 ~2 ~2 stone
+      - check: if block ~0 ~2 ~2 air
+      - check: if block ~0 ~1 ~2 redstone_block
+      - check: if block ~0 ~1 ~1 air
+      - check: if block ~5 ~3 ~2 redstone_block
+      - check: if block ~4 ~3 ~2 air
+      - check: if block ~4 ~3 ~0 quartz_block
+      - check: if block ~4 ~2 ~0 air
+      - check: if block ~0 ~1 ~3 sticky_piston[facing=north,extended=false]
+      - check: if block ~2 ~2 ~1 sticky_piston[facing=up,extended=false]
+      - check: if block ~2 ~2 ~2 sticky_piston[facing=west,extended=false]
+      - check: if block ~6 ~3 ~2 sticky_piston[facing=west,extended=false]
+      - check: if block ~5 ~1 ~0 obsidian
+      - check: if block ~5 ~0 ~0 air
+      - drive:
+          ly: 0
+      - wave:
+          zs: '011'
+          ds: '100'
+          s: '000'
+      - check: if block ~4 ~3 ~2 redstone_block
+      - run: setblock ~3 ~2 ~0 air strict
+      - run: setblock ~4 ~2 ~0 white_concrete strict
+      - run: setblock ~1 ~2 ~0 stone
+      - wave:
+          z11: '0111'
+          y12: '0111'
+          p12: '0111'
+          np: '0111'
+          p11: '0000'
+          k: '0000'
+          l: '1111'
+      - run: setblock ~1 ~2 ~0 air
+      - check: if block ~3 ~2 ~0 white_concrete
+      - check: if block ~4 ~2 ~0 quartz_block
+      - check: if block ~0 ~2 ~2 stone
+      - check: if block ~2 ~4 ~1 slime_block
+      - check: if block ~2 ~5 ~1 stone
+      - wave:
+          z11: '1111111111'
+          y12: '1111111111'
+          p12: '1111111111'
+          zs: '1111111111'
+          p11: '0000000000'
+          s: '0000000000'
+- name: 'control: no S blocker, RB_S home at c4 j moves S at c5'
+  initial:
+    ls: 1
+    l11: 1
+    l12: 1
+  settle: 10
+  steps:
+  - run: setblock ~3 ~2 ~0 white_concrete strict
+  - run: setblock ~5 ~1 ~0 stone strict
+  - drive:
+      lk: 1
+  - drive:
+      ls: 0
+  - wave:
+      k: '0'
+      ds: '0'
+      s: '0'
+  - drive:
+      l12: 0
+  - wave:
+      k: '1'
+      ds: '0'
+      s: '0'
+  - drive:
+      ly: 1
+  - wave:
+      k: '11'
+      ds: '00'
+      s: '00'
+  - drive:
+      lk: 0
+  - wave:
+      k: '10'
+      ds: '01'
+      s: '00'
+  - drive:
+      ls: 1
+  - wave:
+      k: '0'
+      ds: '1'
+      s: '1'
+  - drive:
+      l11: 0
+  - wave:
+      k: '0'
+      ds: '1'
+      s: '1'
+  - run: setblock ~3 ~2 ~0 obsidian strict
+  - wave:
+      k: '0'
+      ds: '1'
+      s: '1'
+  - drive:
+      l11: 1
+  - wave:
+      k: '000'
+      ds: '111'
+      s: '111'
+  - drive:
+      l12: 1
+  - wave:
+      k: '00000000'
+      ds: '11111111'
+      s: '11111111'
+- name: 'control: A_S back before RB_S lands, Z_S fires at c5'
+  initial:
+    ls: 1
+    l11: 1
+    l12: 1
+  settle: 10
+  steps:
+  - run: setblock ~3 ~2 ~0 white_concrete strict
+  - run: setblock ~5 ~1 ~0 stone strict
+  - drive:
+      lk: 1
+  - drive:
+      ls: 0
+  - wave:
+      k: '0'
+      zs: '1'
+  - drive:
+      l12: 0
+  - wave:
+      k: '1'
+      zs: '1'
+  - drive:
+      ly: 1
+  - wave:
+      k: '1'
+      zs: '1'
+  - drive:
+      ls: 1
+  - wave:
+      k: '1'
+      zs: '0'
+  - run: setblock ~5 ~1 ~0 obsidian strict
+  - drive:
+      lk: 0
+  - wave:
+      k: '100'
+      zs: '001'
+  - drive:
+      l11: 0
+  - wave:
+      k: '0'
+      zs: '1'
+  - run: setblock ~3 ~2 ~0 obsidian strict
+  - wave:
+      k: '0'
+      zs: '1'
+  - drive:
+      l11: 1
+  - wave:
+      k: '000'
+      zs: '111'
+  - drive:
+      l12: 1
+  - wave:
+      k: '00000000'
+      zs: '11111111'
+- name: 'control: A11 off 3 gt, Z11 fires when it returns'
+  initial:
+    ls: 1
+    l11: 1
+    l12: 1
+  settle: 10
+  steps:
+  - run: setblock ~3 ~2 ~0 white_concrete strict
+  - run: setblock ~5 ~1 ~0 stone strict
+  - drive:
+      lk: 1
+  - drive:
+      ls: 0
+  - wave:
+      k: '0'
+      z11: '1'
+  - drive:
+      l12: 0
+  - wave:
+      k: '1'
+      z11: '1'
+  - drive:
+      ly: 1
+  - wave:
+      k: '11'
+      z11: '11'
+  - run: setblock ~5 ~1 ~0 obsidian strict
+  - drive:
+      lk: 0
+  - wave:
+      k: '10'
+      z11: '11'
+  - drive:
+      ls: 1
+  - wave:
+      k: '0'
+      z11: '1'
+  - drive:
+      l11: 0
+  - wave:
+      k: '0'
+      z11: '1'
+  - run: setblock ~3 ~2 ~0 obsidian strict
+  - wave:
+      k: '00'
+      z11: '10'
+  - drive:
+      l11: 1
+  - wave:
+      k: '00'
+      z11: '00'
+  - drive:
+      l12: 1
+  - wave:
+      k: '00000000'
+      z11: '11111111'
+- name: 'control: A12 back before Z11 lands, Z11''s landing fires Y12'
+  initial:
+    ls: 1
+    l11: 1
+    l12: 1
+  settle: 10
+  steps:
+  - run: setblock ~3 ~2 ~0 white_concrete strict
+  - run: setblock ~5 ~1 ~0 stone strict
+  - drive:
+      lk: 1
+  - drive:
+      ls: 0
+  - wave:
+      k: '0'
+      y12: '1'
+      p12: '1'
+  - drive:
+      l12: 0
+  - wave:
+      k: '1'
+      y12: '1'
+      p12: '0'
+  - drive:
+      ly: 1
+  - wave:
+      k: '11'
+      y12: '00'
+      p12: '00'
+  - run: setblock ~5 ~1 ~0 obsidian strict
+  - drive:
+      lk: 0
+  - wave:
+      k: '10'
+      y12: '00'
+      p12: '00'
+  - drive:
+      ls: 1
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '0'
+  - drive:
+      l11: 0
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '0'
+  - run: setblock ~3 ~2 ~0 obsidian strict
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '0'
+  - drive:
+      l11: 1
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '0'
+  - drive:
+      l12: 1
+  - wave:
+      k: '0000000000'
+      y12: '0011111111'
+      p12: '0011111111'
+- name: 'control: RB12 home before G, NP12 live, P12 extends'
+  initial:
+    ls: 1
+    l11: 1
+    l12: 1
+  settle: 10
+  steps:
+  - run: setblock ~3 ~2 ~0 white_concrete strict
+  - run: setblock ~5 ~1 ~0 stone strict
+  - drive:
+      lk: 1
+  - drive:
+      ls: 0
+  - wave:
+      k: '01'
+      y12: '11'
+      p12: '10'
+  - drive:
+      ly: 1
+  - wave:
+      k: '1'
+      y12: '1'
+      p12: '0'
+  - drive:
+      lk: 0
+  - wave:
+      k: '1'
+      y12: '1'
+      p12: '0'
+  - drive:
+      l12: 0
+  - run: setblock ~5 ~1 ~0 obsidian strict
+  - wave:
+      k: '00'
+      y12: '10'
+      p12: '00'
+  - drive:
+      ls: 1
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '0'
+  - drive:
+      l11: 0
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '1'
+  - run: setblock ~3 ~2 ~0 obsidian strict
+  - wave:
+      k: '0'
+      y12: '0'
+      p12: '0'
+  - drive:
+      l11: 1
+  - wave:
+      k: '000'
+      y12: '000'
+      p12: '000'
+  - drive:
+      l12: 1
+  - wave:
+      k: '00000000'
+      y12: '00000000'
+      p12: '00000000'

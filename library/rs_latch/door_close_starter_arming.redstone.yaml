@@ -1,0 +1,370 @@
+name: door_close_starter_arming
+description: 'Door part (arming, lane 2) for lane 1''s close starter X_C and depower relay D_W (door_close_wave1''s probe
+  cluster): both are armed by piston-moved blocks instead of setblock strict, and re-homed after they fire. Spec = door -
+  (1,-1,-2); the door''s own coords are listed in door2/parts/door_close_starter_arming.md. Lane 1''s cluster (unchanged except
+  S_X is stone from the start and S_D is a slime block): X_C (0,8,1) piston east, S_X (1,8,1), gate G_W (2,8,1), D_W (1,9,1)
+  piston east, S_D (2,9,1), RB_W (3,9,1), live dust (3,9,0), (2,8,0) on stone, L0 (2,7,1) on glass. Added: stone G3 (3,8,1)
+  extends X_C''s line; blocker B (5,8,1) (piston west, extended, head (4,8,1)) makes the line immovable, so X_C ignores every
+  update while B is out; E (5,9,1) (piston west) pushes D_W''s payload home; W (2,10,1) (redstone block, a QC cell of D_W)
+  is D_W''s arm, carried by the slime: D_W''s own push drags it to (3,10,1) (D_W disarms itself), E''s push drags it back.
+  Post-fire detector: dust (3,10,2) on obsidian beside W''s fired cell, repeater RQ (4,10,2) into stone Q_E (5,10,2), a QC
+  cell of E, so E is powered from 2 gt after W lands and (INFERRED) is woken only by B''s base update. B''s timer: repeater
+  R1 (6,1,2) (delay 2) reads NA, dust climbs x=7 ((7,1,2), (7,2,3), (7,3,2), (7,4,3), (7,5,2), (7,6,3), (7,7,2), (7,7,1))
+  on glass, repeater R2 (6,7,1) (delay 1) into stone (5,7,1) under B: NA delayed 6 gt. Stand-ins (fixtures/inputs): na (5,1,2)
+  = NA (on while the door is closed; the door kills it in t0 g and restores it at c2 j via part 1''s sticky I_A); kin (0,9,0)
+  = K_in (QC power for X_C while open; also powers fixture sticky piston I_A (0,8,0), whose base updates X_C on both edges,
+  like the door''s I_A); rbt (0,7,1) = RB_T''s open cell (powers X_C directly; driving it on is RB_T''s t5 j landing, off
+  is part 5''s departure). Here tick k is k ticks after a drive. Opening (kin on, na off): I_A''s update reaches X_C at k=1
+  and rbt''s at k=5, both while B is out; B retracts at k=6 (6 gt after na) and X_C is armed; D_W has been armed since the
+  last close (W at its QC cell, nothing next to D_W changes until S_X moves): a deliberate departure from arming it inside
+  the opening, since no opening event changes a cell next to D_W. Close (kin off): X_C fires at k=1 (gate G_W moving, live
+  dust dead in the same g after D_W); D_W retracts at k=3 (unpowered; INFERRED cause: X_C''s head landing next to it). na
+  on at k=3, rbt off at k=5 retracts X_C; B and E extend 6 gt after na (B first), pushing G3, G_W, S_X and RB_W, S_D, W home;
+  they land 2 ticks later, gate stones before RB_W, so the live dust returns with the gate closed; E retracts the tick after.
+  Requirement on part 5: RB_T must leave (1,6,-1) after c2 d and before B''s return (door c8 g), else B is blocked by X_C''s
+  head and the cycle stalls (with a lever input, every close tick is one earlier). Build order by hand: place E extended before
+  W or D_W; D_W is powered by W from the start and only E''s head keeps it still until E retracts. Test 1 runs three cycles
+  tick by tick (waves); test 2 holds B''s timer on with a redstone block under the climb''s first dust (X_C stays retracted
+  at the close); test 3 removes B (X_C fires during the opening).'
+traits:
+- piston_based
+- tick_accurate
+palette:
+  .: air
+  k:
+    input: kin
+  r:
+    input: rbt
+  n:
+    input: na
+  A:
+    block: stone
+    fixture: true
+  B:
+    block: sticky_piston[facing=down,extended=false]
+    fixture: true
+    name: i_a
+  C:
+    block: piston[facing=east,extended=false]
+    name: x_c
+  D: stone
+  E:
+    block: piston[facing=east,extended=false]
+    name: d_w
+  F: glass
+  G:
+    block: redstone_wire
+    name: l0
+  H:
+    block: redstone_wire
+    name: live
+  J: slime_block
+  K: redstone_block
+  L: redstone_wire
+  M: obsidian
+  N:
+    block: redstone_wire
+    name: det
+  O: piston_head[facing=west,type=normal]
+  P:
+    block: repeater[facing=west,delay=1,powered=false]
+    name: rq
+  Q:
+    block: piston[facing=west,extended=true]
+    name: b
+  R:
+    block: piston[facing=west,extended=true]
+    name: e
+  S:
+    block: repeater[facing=west,delay=2,powered=true]
+    name: r1
+  T:
+    block: repeater[facing=east,delay=1,powered=true]
+    name: r2
+layers:
+  0: |
+    ........
+    ........
+    ......FF
+    ........
+  1: |
+    ........
+    ........
+    .....nSL
+    .......F
+  2: |
+    ........
+    ........
+    .......F
+    .......L
+  3: |
+    ........
+    ........
+    .......L
+    .......F
+  4: |
+    ........
+    ........
+    .......F
+    .......L
+  5: |
+    ........
+    ........
+    .......L
+    .......F
+  6: |
+    ........
+    ..F...FF
+    .......F
+    .......L
+  7: |
+    A.D.....
+    r.G..DTL
+    .......L
+    ........
+  8: |
+    B.HD....
+    CDDDOQ..
+    ........
+    ........
+  9: |
+    k..L....
+    .EJKOR..
+    ...MF...
+    ........
+  10: |
+    ........
+    ..K.....
+    ...NPD..
+    ........
+tests:
+- name: three cycles, tick by tick
+  initial:
+    na: 1
+  settle: 20
+  steps:
+  - &id001
+    check: if block ~1 ~8 ~1 stone
+  - &id002
+    check: if block ~2 ~8 ~1 stone
+  - &id003
+    check: if block ~3 ~8 ~1 stone
+  - &id004
+    check: if block ~4 ~8 ~1 piston_head[facing=west]
+  - &id005
+    check: if block ~2 ~9 ~1 slime_block
+  - &id006
+    check: if block ~3 ~9 ~1 redstone_block
+  - &id007
+    check: if block ~2 ~10 ~1 redstone_block
+  - &id008
+    check: if block ~3 ~10 ~1 air
+  - &id009
+    check: if block ~4 ~9 ~1 air
+  - &id010
+    check: if block ~0 ~7 ~0 stone
+  - repeat:
+      times: 3
+      steps:
+      - drive:
+          kin: 1
+          na: 0
+      - wave:
+          x_c: '00000'
+          d_w: '00000'
+          b: '11111'
+          e: '00000'
+          i_a: '01111'
+          l0: '00000'
+          live: '11111'
+          det: '00000'
+          rq: '00000'
+          r2: '11111'
+          r1: '11110'
+      - drive:
+          rbt: 1
+      - wave:
+          x_c: '00000000000'
+          d_w: '00000000000'
+          b: '10000000000'
+          e: '00000000000'
+          i_a: '11111111111'
+          l0: '00000000000'
+          live: '11111111111'
+          det: '00000000000'
+          rq: '00000000000'
+          r2: '10000000000'
+          r1: '00000000000'
+      - check: if block ~4 ~8 ~1 air
+      - drive:
+          kin: 0
+      - wave:
+          x_c: '01'
+          d_w: '01'
+          b: '00'
+          e: '00'
+          i_a: '10'
+          l0: '00'
+          live: '10'
+          det: '00'
+          rq: '00'
+          r2: '00'
+          r1: '00'
+      - check: if block ~2 ~8 ~1 moving_piston
+      - check: if block ~3 ~8 ~1 moving_piston
+      - check: if block ~4 ~8 ~1 moving_piston
+      - check: if block ~3 ~9 ~1 moving_piston
+      - check: if block ~4 ~9 ~1 moving_piston
+      - check: if block ~3 ~10 ~1 moving_piston
+      - wave:
+          x_c: '1'
+          d_w: '1'
+          b: '0'
+          e: '0'
+          i_a: '0'
+          l0: '0'
+          live: '0'
+          det: '0'
+          rq: '0'
+          r2: '0'
+          r1: '0'
+      - check: if block ~2 ~8 ~1 stone
+      - check: if block ~4 ~8 ~1 stone
+      - check: if block ~4 ~9 ~1 redstone_block
+      - check: if block ~3 ~10 ~1 redstone_block
+      - check: if block ~2 ~10 ~1 air
+      - drive:
+          na: 1
+      - wave:
+          x_c: '11'
+          d_w: '10'
+          b: '00'
+          e: '00'
+          i_a: '00'
+          l0: '00'
+          live: '00'
+          det: '11'
+          rq: '00'
+          r2: '00'
+          r1: '00'
+      - drive:
+          rbt: 0
+      - wave:
+          x_c: '1000000000000000000'
+          d_w: '0000000000000000000'
+          b: '0000111111111111111'
+          e: '0000111000000000000'
+          i_a: '0000000000000000000'
+          l0: '0000000000000000000'
+          live: '0000001111111111111'
+          det: '1111000000000000000'
+          rq: '1111110000000000000'
+          r2: '0000111111111111111'
+          r1: '0011111111111111111'
+      - *id001
+      - *id002
+      - *id003
+      - *id004
+      - *id005
+      - *id006
+      - *id007
+      - *id008
+      - *id009
+      - *id010
+- name: 'control: B held extended, X_C does not fire at the close'
+  initial:
+    na: 1
+  settle: 20
+  steps:
+  - run: setblock ~7 ~0 ~2 redstone_block strict
+  - drive:
+      kin: 1
+      na: 0
+  - wave:
+      x_c: '00000'
+      d_w: '00000'
+      b: '11111'
+      e: '00000'
+      i_a: '01111'
+      l0: '00000'
+      live: '11111'
+      det: '00000'
+      rq: '00000'
+      r2: '11111'
+      r1: '11110'
+  - drive:
+      rbt: 1
+  - wave:
+      x_c: '00000000000'
+      d_w: '00000000000'
+      b: '11111111111'
+      e: '00000000000'
+      i_a: '11111111111'
+      l0: '00000000000'
+      live: '11111111111'
+      det: '00000000000'
+      rq: '00000000000'
+      r2: '11111111111'
+      r1: '00000000000'
+  - drive:
+      kin: 0
+  - wave:
+      x_c: '000'
+      d_w: '000'
+      b: '111'
+      e: '000'
+      i_a: '100'
+      l0: '000'
+      live: '111'
+      det: '000'
+      rq: '000'
+      r2: '111'
+      r1: '000'
+  - drive:
+      na: 1
+  - wave:
+      x_c: '00'
+      d_w: '00'
+      b: '11'
+      e: '00'
+      i_a: '00'
+      l0: '00'
+      live: '11'
+      det: '00'
+      rq: '00'
+      r2: '11'
+      r1: '00'
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+- name: 'control: without B, X_C fires on I_A''s opening update'
+  initial:
+    na: 1
+  settle: 20
+  steps:
+  - run: setblock ~4 ~8 ~1 air strict
+  - run: setblock ~5 ~8 ~1 air strict
+  - drive:
+      kin: 1
+      na: 0
+  - wave:
+      x_c: '01111'
+      d_w: '01110'
+      b: '00000'
+      e: '00000'
+      i_a: '01111'
+      l0: '00000'
+      live: '10000'
+      det: '00011'
+      rq: '00000'
+      r2: '11111'
+      r1: '11110'
+  - check: if block ~1 ~8 ~1 piston_head[facing=east]
+  - check: if block ~2 ~8 ~1 stone
+  - check: if block ~3 ~8 ~1 stone
+  - check: if block ~4 ~8 ~1 stone
+  - check: if block ~3 ~9 ~1 slime_block

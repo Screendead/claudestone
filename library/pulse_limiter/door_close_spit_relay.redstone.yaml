@@ -1,0 +1,236 @@
+name: door_close_spit_relay
+description: "Door close primitive: a held spit and a spat-piston spit, each in the close tick c0 (drive in:0, wait 2) with the 0 gt pair (spit targets air at c-1, real quartz at c0). Standalone, not in door geometry. Three stages share input in; each goes through a fixture delay-1 repeater into sticky trigger E (facing south, held extended), whose retraction in c0 g stands in for the door's E0. Coordinates are spec cells (x,y,z). (a) Held spit, X facing down, like T and P1: X (2,4,6), quartz (2,3,6), target (2,2,6). X's feed: stone B (3,4,6) under dust H (3,5,6); dust L (4,4,6) on glass, always 15 from redstone block RB (4,4,7); gate stone G (4,5,6) above L cuts L->H. E (4,5,4) pulls G to (4,5,5), so H powers B and X in E's event. Relay D (2,4,7), a normal piston facing east beside X's base, QC-armed by a redstone block at (2,5,8) set after load. D pushes stone S (3,4,7) and RB, so RB lands at (5,4,7) and S at (4,4,7). (a') The same, with X facing east, like P11 and V: X (10,4,8), quartz (11,4,8), target (12,4,8); B (10,4,7), H (10,5,7), L (10,4,6) on glass, G (10,5,6) pulled to (10,5,5), RB (9,4,6) to (9,4,5), S (9,4,7), relay D (9,4,8) facing north behind X, arm (8,5,8). (b) Spat piston: X2' (17,4,6) faces down with the stage (a) feed and relay D0 (17,4,7), arm (17,5,8). Its payload is sticky M (17,3,6), facing east, spat to (17,2,6), where redstone block RBm (16,2,6) powers it from behind. M's quartz (18,2,6) is spat to (19,2,6). D1 (17,2,7) faces south, beside M's landing cell, arm (17,3,8). D2 (16,2,7) faces north, arm (15,3,7), and pushes RBm to (16,2,5). FIFO argument, per relay [SOURCED mc-src PistonBaseBlock.triggerEvent/moveBlocks, PistonMovingBlockEntity.finalTick, LevelChunk.setBlockState]. X is queued inside E's event, when G's vacated cell updates H; H is the only dust whose power changes then, and X is the only piston within 2 of it (D, E and the arms are at 3 or more). D is woken by X's own base update, which comes after X's push, inside X's event, so D is queued after X. D's push kills L, and the L/H storm reaches only X, so X's retract is queued inside D's event, before D's base update (the handoff). For (b): X2' is spat as in (a). In X2''s retract event M is placed (finalTick), which queues M's extension, and M's landing cell updates D1. D1's base update then wakes D2, one event later, so D2 is queued after M whichever of M and D1 came first. D2 moving RBm unpowers M, and M's retract spits its quartz in c0 g. No relay relies on dust storm order or neighbour-update direction. The task wakes the relay from E's retract base update; that does not work. A retracting piston updates its base before it pulls [SOURCED PistonBaseBlock.java:172-199; MEASURED scratch probe retract_wake_order], so a relay woken there is queued before X and drops X's extension. Arms are scaffolding, set with setblock strict after load. Mechanisms SOURCED: MECHANICS.md piston_zero_tick_chain_same_tick, piston_moved_source_zero_tick_depower, spat_piston_fires_same_tick. The in-phase depower of a spat piston after its H2 extension is MEASURED here: M never reads extended, and its quartz is real at c0. Handoff cells da, db, d2c read extended from c0. Controls remove D, D2 or D1 with setblock air strict, and the payload is then still moving_piston at c0 (M extended)."
+traits: [piston_based, entityless, tick_accurate]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': stone
+  g: glass
+  f: {block: glass, fixture: true}
+  '-': redstone_wire
+  R: redstone_block
+  q: quartz_block
+  '_': {reserve: true}
+  i: {input: in}
+  r: {block: 'repeater[facing=north,powered=true]', fixture: true}
+  h: 'piston_head[facing=south,type=sticky]'
+  A: {name: ea, block: 'sticky_piston[facing=south,extended=true]'}
+  B: {name: eb, block: 'sticky_piston[facing=south,extended=true]'}
+  C: {name: ec, block: 'sticky_piston[facing=south,extended=true]'}
+  x: {name: xa, block: 'sticky_piston[facing=down]'}
+  w: {name: xb, block: 'sticky_piston[facing=east]'}
+  z: {name: xc, block: 'sticky_piston[facing=down]'}
+  a: {name: da, block: 'piston[facing=east]'}
+  b: {name: db, block: 'piston[facing=north]'}
+  c: {name: d0c, block: 'piston[facing=east]'}
+  m: {name: mc, block: 'sticky_piston[facing=east]'}
+  '1': {name: d1c, block: 'piston[facing=south]'}
+  '2': {name: d2c, block: 'piston[facing=north]'}
+layers:
+  0: |
+    ======================
+    ======================
+    ======================
+    ======================
+    ======================
+    ======================
+    ======================
+    ======================
+    ======================
+    ======================
+  1: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  2: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ................_.....
+    .._.............R_q_..
+    ................21....
+    ................._....
+    ......................
+  3: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ..q.g.....g......m.g..
+    ..............._......
+    ................._....
+    ......................
+  4: |
+    ......................
+    ......................
+    ......................
+    ....f.....f........f..
+    ......................
+    ........._............
+    ..x#-....R-......z#-..
+    ..a#R_...##......c#R_.
+    .........bwq_.........
+    ......................
+  5: |
+    ......................
+    ......................
+    ....i.....i........i..
+    ....r.....r........r..
+    ....A.....B........C..
+    ....h.....h........h..
+    ...-#.....#.......-#..
+    ..........-...........
+    .._....._........_....
+    ......................
+tests:
+- name: "every stage spits in c0 (0 gt pair)"
+  initial: {in: 1}
+  steps:
+  - run: "setblock ~2 ~5 ~8 redstone_block strict"
+  - run: "setblock ~8 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~3 ~8 redstone_block strict"
+  - run: "setblock ~15 ~3 ~7 redstone_block strict"
+  - wait: 2
+  - expect: {xa: 0, xb: 0, xc: 0, da: 0, db: 0, d0c: 0, d1c: 0, d2c: 0}
+  - drive: {in: 0}
+  - wait: 1
+  - expect: {xa: 0, xb: 0, xc: 0, da: 0, db: 0, d0c: 0, d1c: 0, d2c: 0}
+  - expect: {ea: 1, eb: 1, ec: 1}
+  - check: "if block ~2 ~2 ~6 air"
+  - check: "if block ~12 ~4 ~8 air"
+  - check: "if block ~17 ~2 ~6 air"
+  - check: "if block ~19 ~2 ~6 air"
+  - check: "if block ~2 ~3 ~6 quartz_block"
+  - check: "if block ~11 ~4 ~8 quartz_block"
+  - check: "if block ~18 ~2 ~6 quartz_block"
+  - check: "if block ~17 ~3 ~6 sticky_piston[facing=east,extended=false]"
+  - wait: 1
+  - check: "if block ~2 ~2 ~6 quartz_block"
+  - check: "if block ~12 ~4 ~8 quartz_block"
+  - check: "if block ~19 ~2 ~6 quartz_block"
+  - check: "if block ~2 ~3 ~6 air"
+  - check: "if block ~11 ~4 ~8 air"
+  - check: "if block ~17 ~3 ~6 air"
+  - check: "if block ~18 ~2 ~6 air"
+  - check: "if block ~2 ~4 ~6 moving_piston"
+  - check: "if block ~10 ~4 ~8 moving_piston"
+  - check: "if block ~17 ~4 ~6 moving_piston"
+  - check: "if block ~17 ~2 ~6 moving_piston"
+  - expect: {da: 1, db: 1, d0c: 1, d1c: 1, d2c: 1}
+  - wait: 2
+  - check: "if block ~2 ~4 ~6 sticky_piston[facing=down,extended=false]"
+  - check: "if block ~10 ~4 ~8 sticky_piston[facing=east,extended=false]"
+  - check: "if block ~17 ~4 ~6 sticky_piston[facing=down,extended=false]"
+  - check: "if block ~17 ~2 ~6 sticky_piston[facing=east,extended=false]"
+  - check: "if block ~2 ~2 ~6 quartz_block"
+  - check: "if block ~12 ~4 ~8 quartz_block"
+  - check: "if block ~19 ~2 ~6 quartz_block"
+  - check: "if block ~5 ~4 ~7 redstone_block"
+  - check: "if block ~9 ~4 ~5 redstone_block"
+  - check: "if block ~20 ~4 ~7 redstone_block"
+  - check: "if block ~16 ~2 ~5 redstone_block"
+  - wait: 10
+  - check: "if block ~17 ~2 ~6 sticky_piston[facing=east,extended=false]"
+  - check: "if block ~2 ~2 ~6 quartz_block"
+  - check: "if block ~12 ~4 ~8 quartz_block"
+  - check: "if block ~19 ~2 ~6 quartz_block"
+  - expect: {xa: 0, xb: 0, xc: 0}
+- name: "spitters never read extended, relays rise at c0"
+  initial: {in: 1}
+  steps:
+  - run: "setblock ~2 ~5 ~8 redstone_block strict"
+  - run: "setblock ~8 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~3 ~8 redstone_block strict"
+  - run: "setblock ~15 ~3 ~7 redstone_block strict"
+  - wait: 2
+  - drive: {in: 0}
+  - wave: {xa: "0000000000000000", xb: "0000000000000000", xc: "0000000000000000", ea: "1100000000000000", eb: "1100000000000000", ec: "1100000000000000", da: "0011111111111111", db: "0011111111111111", d0c: "0011111111111111", d1c: "0011111111111111", d2c: "0011111111111111"}
+- name: "without Da, X (down) extends and holds (control)"
+  initial: {in: 1}
+  steps:
+  - run: "setblock ~2 ~5 ~8 redstone_block strict"
+  - run: "setblock ~8 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~3 ~8 redstone_block strict"
+  - run: "setblock ~15 ~3 ~7 redstone_block strict"
+  - run: "setblock ~2 ~4 ~7 air strict"
+  - wait: 2
+  - drive: {in: 0}
+  - wait: 2
+  - expect: {xa: 1}
+  - check: "if block ~2 ~2 ~6 moving_piston"
+  - check: "if block ~2 ~3 ~6 moving_piston"
+  - wait: 2
+  - expect: {xa: 1}
+  - check: "if block ~2 ~2 ~6 quartz_block"
+  - check: "if block ~2 ~3 ~6 piston_head[facing=down,type=sticky]"
+- name: "without Db, X (east) extends and holds (control)"
+  initial: {in: 1}
+  steps:
+  - run: "setblock ~2 ~5 ~8 redstone_block strict"
+  - run: "setblock ~8 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~3 ~8 redstone_block strict"
+  - run: "setblock ~15 ~3 ~7 redstone_block strict"
+  - run: "setblock ~9 ~4 ~8 air strict"
+  - wait: 2
+  - drive: {in: 0}
+  - wait: 2
+  - expect: {xb: 1}
+  - check: "if block ~12 ~4 ~8 moving_piston"
+  - check: "if block ~11 ~4 ~8 moving_piston"
+  - wait: 2
+  - expect: {xb: 1}
+  - check: "if block ~12 ~4 ~8 quartz_block"
+  - check: "if block ~11 ~4 ~8 piston_head[facing=east,type=sticky]"
+- name: "without D2, spat M fires and holds (control)"
+  initial: {in: 1}
+  steps:
+  - run: "setblock ~2 ~5 ~8 redstone_block strict"
+  - run: "setblock ~8 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~3 ~8 redstone_block strict"
+  - run: "setblock ~15 ~3 ~7 redstone_block strict"
+  - run: "setblock ~16 ~2 ~7 air strict"
+  - wait: 2
+  - drive: {in: 0}
+  - wait: 2
+  - check: "if block ~17 ~2 ~6 sticky_piston[facing=east,extended=true]"
+  - check: "if block ~19 ~2 ~6 moving_piston"
+  - check: "if block ~18 ~2 ~6 moving_piston"
+  - check: "if block ~17 ~3 ~6 air"
+  - check: "if block ~17 ~4 ~6 moving_piston"
+  - wait: 2
+  - check: "if block ~17 ~2 ~6 sticky_piston[facing=east,extended=true]"
+  - check: "if block ~19 ~2 ~6 quartz_block"
+  - check: "if block ~18 ~2 ~6 piston_head[facing=east,type=sticky]"
+- name: "without D1, spat M fires and holds (control)"
+  initial: {in: 1}
+  steps:
+  - run: "setblock ~2 ~5 ~8 redstone_block strict"
+  - run: "setblock ~8 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~5 ~8 redstone_block strict"
+  - run: "setblock ~17 ~3 ~8 redstone_block strict"
+  - run: "setblock ~15 ~3 ~7 redstone_block strict"
+  - run: "setblock ~17 ~2 ~7 air strict"
+  - wait: 2
+  - drive: {in: 0}
+  - wait: 2
+  - check: "if block ~17 ~2 ~6 sticky_piston[facing=east,extended=true]"
+  - check: "if block ~19 ~2 ~6 moving_piston"
+  - wait: 2
+  - check: "if block ~17 ~2 ~6 sticky_piston[facing=east,extended=true]"
+  - check: "if block ~19 ~2 ~6 quartz_block"

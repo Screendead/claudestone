@@ -175,6 +175,7 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| door_lever_sticky_input | 3x7x3 | 63 | 16 | - | piston_based, tick_accurate, vertical | Door part 1 (input) for the design B / design_c 3x3 seamless door: a lever on top of K_in and I_A made sticky, so the lever works on both edges (Door_Rules.md:480) |
 | pulse_dual_edge_instant | 5x3x3 | 45 | 23 | - | ultrafast, horizontal, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | Zero-latency dual-edge detector: out comes on in the same game tick as either edge of a and stays on 1 tick after a rise, 2 ticks after a fall (pulse_dual_observer answers 2 ticks late) |
 | pulse_dual_observer | 1x1x1 | 1 | 1 | - | ultracompact, ultrafast, flat, horizontal, one_wide, tileable, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly | One observer (x=1) facing west, watching the input cell a (x=0); both on one layer, no base: 1x1x1 plus the input |
 | pulse_dual_observer_repeater | 2x2x1 | 4 | 3 | - | compact, flat, horizontal, one_wide, tileable, observer_based, silent, lightless, pistonless, entityless, tick_accurate, survival_friendly | Dual-edge detector with a longer pulse: an observer (x=1) facing west watches input a (x=0) and fires into a delay-2 repeater (x=2, facing west, on a single base block), which stretches the observer's 2 tick pulse to 4 ticks |
@@ -421,6 +422,7 @@ east face |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| door_close_spit_relay | 22x6x10 | 1320 | 260 | - | piston_based, entityless, tick_accurate | Door close primitive: a held spit and a spat-piston spit, each in the close tick c0 (drive in:0, wait 2) with the 0 gt pair (spit targets air at c-1, real quartz at c0) |
 | pulse_limiter_comparator | 4x2x2 | 16 | 15 | - | compact, flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Pulse limiter (monostable) with a long, adjustable limit and no torches: comparator out (x=3, z=0, subtract mode, facing west) reads input a (x=2, z=0) on its back; a also runs through dust (x=1..0) and two delay-4 repeaters (x=1..2, z=1, facing west) into the side dust (x=3, z=1) |
 | pulse_limiter_instant_piston | 1x4x6 | 24 | 16 | - | ultrafast, one_wide, piston_based, entityless, tick_accurate, survival_friendly | Zero-latency pulse limiter, one block wide (all cells at x=0, running south) |
 | t2_a_qc_breaker | 2x3x1 | 6 | 4 | - | one_wide, piston_based, entityless | Circuit breaker pulse limiter in 1x2x3 (6): the wiki circuit breaker without its dust column, because the input line quasi-powers the piston |
@@ -454,6 +456,8 @@ east face |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| door_close_starter_arming | 8x11x4 | 352 | 44 | - | piston_based, tick_accurate | Door part (arming, lane 2) for lane 1's close starter X_C and depower relay D_W (door_close_wave1's probe cluster): both are armed by piston-moved blocks instead of setblock strict, and re-homed after they fire |
+| door_relay_rearm | 9x3x4 | 108 | 18 | - | piston_based, tick_accurate, reset_safe | Door part (arming, lane 3): a re-armable BUD relay that replaces the load-time `setblock strict` arming |
 | rs_comparator_1wide | 4x2x1 | 8 | 6 | - |  | One-wide RS latch with a 0 gt set and a 2 gt reset in 4x2x1: rs_dropper_pair's two droppers and one item, whose comparator also takes r on its side and whose output dust also takes s directly |
 | rs_comparator_ring | 3x2x2 | 12 | 12 | 2 | stackable, ultrafast, lightless, silent, pistonless, entityless, comparator_based, flat, horizontal, compact, survival_friendly, reset_safe, tick_accurate | Lightless, silent RS latch: a 3x2 ring of dust closed by a repeater (flowing east on the north row) and a comparator (flowing west on the south row) |
 | rs_copper_bulb | 2x4x5 | 40 | 15 | 10 | observer_based, comparator_based, vertical, pistonless, entityless, reset_safe, survival_friendly, tick_accurate | Copper-bulb RS latch |
@@ -585,6 +589,8 @@ the longer variant) |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| door_reset_east | 5x5x7 | 175 | 30 | - | piston_based, tick_accurate | Door part 8 (east reset, lane 3): resets the opening relays Z_Q, Y1 and Z9 after the close and re-arms them with no command |
+| door_reset_west | 7x6x3 | 126 | 18 | - | piston_based, tick_accurate | Door part 11 (west reset, lane 3): resets the opening relays Z_S, Z11 and Y12 after the close, undoes the NP12 kill, and re-arms all three with no command |
 | ref_begamerplays_insta_drop | 3x2x1 | 6 | 5 | - | one_wide, piston_based, entityless | Reference rebuild of the Minecraft Wiki "Insta-drop instant repeater" (Java only), earliest known publication BeGamerPlays, "Dual-Edge InstaWire 1.5", 14 Feb 2013 (https://minecraft.wiki/w/Redstone_circuits/Transmission#insta-drop_instant_repeater) |
 | ref_begamerplays_insta_drop_chain3 | 11x4x1 | 44 | 19 | - | one_wide, piston_based, entityless | Three ref_begamerplays_insta_drop stages (the wiki insta-drop instant repeater, BeGamerPlays 2013) in series, the most compact chaining found: each output dust on glass points straight into the next stage's block A, so the line climbs one block per stage at a pitch of 4 (stage 3x2 plus a dust-on-glass column: 8 cells per stage) |
 | ref_begamerplays_insta_drop_chain8 | 31x9x1 | 279 | 54 | - | one_wide, piston_based, entityless | Eight ref_begamerplays_insta_drop stages in series (wiki insta-drop instant repeater, BeGamerPlays 2013), wired as in ref_begamerplays_insta_drop_chain3: each output dust on glass points into the next stage's block A, so the line climbs one block per stage at a pitch of 4 |

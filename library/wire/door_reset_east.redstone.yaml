@@ -1,0 +1,1008 @@
+name: door_reset_east
+description: 'Door part 8 (east reset, lane 3): resets the opening relays Z_Q, Y1 and Z9 after the close and re-arms them
+  with no command. Door coordinates (design_c) = spec - (-1,-2,7). Not the interface as written: an up relay whose redstone-block
+  payload sits at R+2 is QC-powered by it and can never retract (door_relay_rearm), so each relay is now a STICKY piston whose
+  payload is a two-block column with a slime or honey face, and no redstone block sits in a relay''s line. Z_Q (6,3,-3): column
+  slime F_Q (home (6,4,-3)) + slime B_Q (home (6,5,-3)); repeater A_Q (6,4,-2) facing south points into F_Q, so it powers
+  DQ through the slime and QC-powers Z_Q (arm and hold); A_Q''s feed cell is lq (6,4,-1). Y1 (7,3,-3): column honey F_Y (7,4,-3)
+  + honey B_Y (7,5,-3) with RB_Y (7,5,-2) stuck to B_Y; RB_Y feeds LY through a rerouted start (dust (7,5,-1) on stone (7,4,-1),
+  dust (7,4,0) on glass (7,3,0), dust (7,4,1) on glass (7,3,1), into the unchanged (6,4,1)); LY dusts (7,4,-2), (6,3,-1),
+  (6,3,0) are removed. Y1''s arm and hold is obsidian A_Y (8,4,-3), strongly powered by repeater (8,4,-2) facing south (feed
+  la (8,4,-1)); F_Q, powered by A_Q, also QC-arms Y1. Z9 (4,2,1): column slime F9 (4,3,1) + stone B9 (4,4,1); repeater A9
+  (4,3,2) facing south (feed l9 (4,3,3)) powers F9, which QC-powers P9. ARM_ZQ (6,4,-4), ARM_Y1 (7,4,-4), ARM_Z9 (5,3,1) are
+  removed. Swaps so no slime or honey drags a net block: (5,5,-3) glass -> obsidian, (7,6,-4) stone -> obsidian, (4,4,2) stone
+  -> obsidian, (4,4,0) glass -> hopper (dust does not survive on honey: measured). Cells moved through: (6,4..6,-3), (7,4..6,-3),
+  (7,5..6,-2), (4,3..5,1). A fresh closed-state build loads obsidian blockers at (6,6,-3), (7,6,-3), (4,5,1), removed with
+  setblock air strict after settle (they replace the old blockers at (6,5,-3), (7,5,-3), (4,4,1)). How it resets: a relay''s
+  arm repeater drops, the change reaches the relay through its head, it retracts and pulls the column home (base, face, then
+  the block behind land in that order at +2 j). For Z_Q and Z9 the arm repeater is off for exactly 2 gt, so it is back on
+  before the landing: the face lands while the block behind is still moving and blocks the line, and the block behind lands
+  away from the relay, so nothing fires; a 3 gt gap fires the relay when the repeater returns. Y1 resets first and stays unpowered
+  (A_Y off) until Z_Q''s base has landed, because each relay''s base updates the other. Fixtures: drivers lq, la, l9 (the
+  integrator''s arm lines), nbd (NB, Z_Q''s wake), nvd (NV on the hopper), stand-in Q and P9 with a P6-head obsidian placed
+  by the test, dead NV and NB dusts on the swapped supports. Measured ticks (k = la drop; lq and l9 off at k1 for 2 gt; NB
+  at k2; la back at k4): Y1 retracts k2, RB_Y home and LY live k4; Z_Q (and Z9) retract k3, land k5 with DQ live (P9 powered);
+  armed by k5; R_Y on k6; quiet for 40 gt; NB''s fall fires Z_Q then Y1; three cycles. Controls: A_Y back on 1 tick earlier
+  fires Y1 at Z_Q''s landing; lq off 3 gt fires Z_Q; NB rising after arming fires Z_Q; without the P6 stand-in DQ moves Q;
+  after the reset a freed, updated P9 extends, fires Z9 and is spat back (the t3 0-tick); a 3 gt l9 gap fires Z9.'
+traits:
+- piston_based
+- tick_accurate
+palette:
+  .: air
+  A:
+    block: quartz_block
+    fixture: true
+  B:
+    block: sticky_piston[facing=west,extended=false]
+    fixture: true
+    name: q
+  C:
+    block: redstone_wire[east=side,west=side,power=0]
+    fixture: true
+    name: dq_end
+  D:
+    block: glass
+    fixture: true
+  E:
+    block: redstone_wire[east=up,south=side,power=0]
+    fixture: true
+  F:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+    name: ly
+  G:
+    block: sticky_piston[facing=west,extended=false]
+    fixture: true
+    name: p9
+  H:
+    name: z9
+    block: sticky_piston[facing=up,extended=true]
+  I: glass
+  J:
+    block: stone
+    fixture: true
+  K:
+    block: redstone_wire[north=up,west=side,power=0]
+    fixture: true
+  L: piston_head[facing=up,type=sticky,short=false]
+  M:
+    name: a9
+    block: repeater[facing=south,delay=1,powered=true]
+  N:
+    input: l9
+  O:
+    block: redstone_wire[east=side,south=side,power=0]
+    fixture: true
+  P:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+  Q: hopper[facing=down]
+  R: slime_block
+  S: obsidian
+  T:
+    block: redstone_wire[east=side,west=side,power=0]
+    fixture: true
+    name: nv9
+  U: stone
+  V:
+    block: redstone_wire[east=side,west=side,power=0]
+    fixture: true
+  W:
+    block: redstone_wire[east=side,west=side,power=0]
+    fixture: true
+    name: dq
+  X:
+    block: redstone_wire[east=side,west=up,power=0]
+    fixture: true
+  Y:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+    name: nv
+  Z:
+    block: redstone_wire[north=up,south=side,power=0]
+    fixture: true
+    name: nb
+  a:
+    name: zq
+    block: sticky_piston[facing=up,extended=true]
+  b:
+    input: nbd
+  c:
+    name: aq
+    block: repeater[facing=south,delay=1,powered=true]
+  d:
+    input: lq
+  e:
+    block: redstone_wire[north=side,west=side,power=0]
+    fixture: true
+  f:
+    input: nvd
+  g:
+    name: y1
+    block: sticky_piston[facing=up,extended=true]
+  h: redstone_wire[north=up,south=side,power=0]
+  i: redstone_wire[north=side,west=side,power=0]
+  j: honey_block
+  k: redstone_wire[north=side,south=side,power=0]
+  l: redstone_block
+  m:
+    name: ry
+    block: repeater[facing=south,delay=1,powered=true]
+  n:
+    input: la
+layers:
+  0: |
+    ........
+    ........
+    .....D..
+    ........
+    ........
+    ........
+    ..AD....
+    .ABG....
+    ...H....
+    ...I....
+    ........
+  1: |
+    ........
+    .....J..
+    .....Z..
+    ........
+    ...DDag.
+    ...J.I.I
+    ..CK....
+    ......I.
+    ...L.DI.
+    ..DMDD..
+    ..DN....
+  2: |
+    .....b..
+    .....P..
+    ........
+    ........
+    ...OWLLS
+    ...P.c.m
+    .....dUn
+    ...QD.h.
+    ...R.Oi.
+    ..ESXe..
+    ..F.....
+  3: |
+    ........
+    ........
+    ........
+    ....D...
+    ....SRj.
+    ....J...
+    ......k.
+    ...TVf..
+    ...U....
+    ...V....
+    ........
+  4: |
+    ........
+    ........
+    ........
+    ....P.S.
+    ....YRj.
+    ....P.l.
+    ........
+    ........
+    ........
+    ........
+    ........
+  5: |
+    ........
+    ........
+    ........
+    ......P.
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+tests:
+- name: 'Z_Q and Y1: reset, rearm and fire three times'
+  initial: &id011
+    lq: 1
+    la: 1
+    l9: 1
+  settle: 10
+  steps:
+  - &id001
+    check: if block ~5 ~2 ~4 piston_head
+  - &id002
+    check: if block ~5 ~3 ~4 slime_block
+  - &id003
+    check: if block ~5 ~4 ~4 slime_block
+  - &id004
+    check: if block ~6 ~2 ~4 piston_head
+  - &id005
+    check: if block ~6 ~3 ~4 honey_block
+  - &id006
+    check: if block ~6 ~4 ~4 honey_block
+  - &id007
+    check: if block ~6 ~4 ~5 redstone_block
+  - &id008
+    check: if block ~4 ~3 ~4 obsidian
+  - &id009
+    check: if block ~6 ~4 ~3 obsidian
+  - &id010
+    expect:
+      zq: 1
+      y1: 1
+      dq: 0
+      dq_end: 0
+      ly: 0
+      q: 0
+  - &id012
+    check: if block ~3 ~1 ~8 piston_head
+  - &id013
+    check: if block ~3 ~2 ~8 slime_block
+  - &id014
+    check: if block ~3 ~3 ~8 stone
+  - &id015
+    check: if block ~3 ~2 ~7 hopper
+  - &id016
+    check: if block ~3 ~2 ~9 obsidian
+  - &id017
+    check: if block ~3 ~3 ~7 redstone_wire
+  - &id018
+    expect:
+      z9: 1
+      p9: 0
+      a9: 1
+  - repeat:
+      times: 3
+      steps:
+      - drive:
+          la: 0
+      - wait: 1
+      - drive:
+          lq: 0
+      - wait: 1
+      - drive:
+          nbd: 1
+      - expect:
+          y1: 0
+          zq: 1
+      - check: if block ~6 ~2 ~4 moving_piston
+      - check: if block ~6 ~3 ~4 moving_piston
+      - check: if block ~6 ~3 ~5 moving_piston
+      - check: if block ~6 ~4 ~5 air
+      - check: if block ~6 ~4 ~4 air
+      - wait: 1
+      - drive:
+          lq: 1
+      - run: setblock ~0 ~0 ~7 obsidian
+      - expect:
+          y1: 0
+          zq: 0
+          ly: 0
+          dq: 0
+      - check: if block ~5 ~1 ~4 moving_piston
+      - check: if block ~5 ~2 ~4 moving_piston
+      - check: if block ~5 ~3 ~4 moving_piston
+      - check: if block ~5 ~4 ~4 air
+      - wait: 1
+      - drive:
+          la: 1
+      - expect:
+          y1: 0
+          zq: 0
+          ly: 1
+          dq: 0
+      - check: if block ~6 ~1 ~4 sticky_piston[facing=up,extended=false]
+      - check: if block ~6 ~2 ~4 honey_block
+      - check: if block ~6 ~3 ~4 honey_block
+      - check: if block ~6 ~3 ~5 redstone_block
+      - check: if block ~5 ~2 ~4 moving_piston
+      - check: if block ~5 ~3 ~4 moving_piston
+      - wait: 1
+      - expect:
+          y1: 0
+          zq: 0
+          ly: 1
+          dq: 1
+          q: 0
+      - check: if block ~5 ~1 ~4 sticky_piston[facing=up,extended=false]
+      - check: if block ~5 ~2 ~4 slime_block
+      - check: if block ~5 ~3 ~4 slime_block
+      - wait: 1
+      - &id039
+        wave:
+          zq: '0000000000000000000000000000000000000000'
+          y1: '0000000000000000000000000000000000000000'
+          q: '0000000000000000000000000000000000000000'
+          dq: '1111111111111111111111111111111111111111'
+          ly: '1111111111111111111111111111111111111111'
+      - &id026
+        check: if block ~5 ~1 ~4 sticky_piston[facing=up,extended=false]
+      - &id027
+        check: if block ~5 ~2 ~4 slime_block
+      - &id028
+        check: if block ~5 ~3 ~4 slime_block
+      - &id029
+        check: if block ~5 ~4 ~4 air
+      - &id030
+        check: if block ~6 ~1 ~4 sticky_piston[facing=up,extended=false]
+      - &id031
+        check: if block ~6 ~2 ~4 honey_block
+      - &id032
+        check: if block ~6 ~3 ~4 honey_block
+      - &id033
+        check: if block ~6 ~4 ~4 air
+      - &id034
+        check: if block ~6 ~3 ~5 redstone_block
+      - &id035
+        check: if block ~6 ~4 ~5 air
+      - &id036
+        check: if block ~4 ~3 ~4 obsidian
+      - &id037
+        check: if block ~6 ~4 ~3 obsidian
+      - &id038
+        expect:
+          zq: 0
+          y1: 0
+          dq: 1
+          dq_end: 1
+          ly: 1
+          q: 0
+          nb: 1
+          aq: 1
+          ry: 1
+      - drive:
+          nbd: 0
+      - wait: 1
+      - expect:
+          zq: 1
+          y1: 1
+          dq: 0
+          ly: 0
+          q: 0
+      - wait: 3
+      - *id001
+      - *id002
+      - *id003
+      - *id004
+      - *id005
+      - *id006
+      - *id007
+      - *id008
+      - *id009
+      - *id010
+      - run: setblock ~0 ~0 ~7 air
+      - wave:
+          zq: '11111111111111111111'
+          y1: '11111111111111111111'
+          q: '00000000000000000000'
+- name: 'Z9: reset with a 2 gt gap, rearm and fire three times; P9 never moves'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - drive:
+      nvd: 1
+  - wait: 1
+  - expect:
+      nv9: 1
+  - drive:
+      nvd: 0
+  - wait: 1
+  - expect:
+      nv9: 0
+  - run: setblock ~0 ~0 ~7 obsidian
+  - repeat:
+      times: 3
+      steps:
+      - drive:
+          l9: 0
+      - wait: 1
+      - check: if block ~3 ~0 ~8 sticky_piston[facing=up,extended=true]
+      - wait: 1
+      - drive:
+          l9: 1
+      - expect:
+          z9: 0
+          a9: 0
+      - check: if block ~3 ~1 ~8 moving_piston
+      - check: if block ~3 ~2 ~8 moving_piston
+      - check: if block ~3 ~3 ~8 air
+      - wait: 1
+      - expect:
+          z9: 0
+          a9: 0
+      - check: if block ~3 ~1 ~8 moving_piston
+      - check: if block ~3 ~2 ~8 moving_piston
+      - wait: 1
+      - expect:
+          z9: 0
+          a9: 1
+          p9: 0
+      - &id019
+        check: if block ~3 ~0 ~8 sticky_piston[facing=up,extended=false]
+      - &id020
+        check: if block ~3 ~1 ~8 slime_block
+      - &id021
+        check: if block ~3 ~2 ~8 stone
+      - &id022
+        check: if block ~3 ~3 ~8 air
+      - &id023
+        check: if block ~3 ~2 ~7 hopper
+      - &id024
+        check: if block ~3 ~3 ~7 redstone_wire
+      - &id025
+        expect:
+          z9: 0
+          p9: 0
+          a9: 1
+      - wave:
+          z9: '0000000000000000000000000000000000000000'
+          p9: '0000000000000000000000000000000000000000'
+      - *id019
+      - *id020
+      - *id021
+      - *id022
+      - *id023
+      - *id024
+      - *id025
+      - run: setblock ~4 ~0 ~8 stone
+      - run: setblock ~4 ~0 ~8 air
+      - wait: 1
+      - expect:
+          z9: 1
+      - wait: 2
+      - *id012
+      - *id013
+      - *id014
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - wave:
+          z9: '11111111111111111111'
+          p9: '00000000000000000000'
+- name: 'all three: one door-like timeline, then fire'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - drive:
+      la: 0
+  - wait: 1
+  - drive:
+      lq: 0
+      l9: 0
+  - wait: 1
+  - drive:
+      nbd: 1
+  - wait: 1
+  - drive:
+      lq: 1
+      l9: 1
+  - run: setblock ~0 ~0 ~7 obsidian
+  - wait: 1
+  - drive:
+      la: 1
+  - wait: 1
+  - wave:
+      zq: '0000000000000000000000000000000000000000'
+      y1: '0000000000000000000000000000000000000000'
+      z9: '0000000000000000000000000000000000000000'
+      q: '0000000000000000000000000000000000000000'
+      p9: '0000000000000000000000000000000000000000'
+      dq: '1111111111111111111111111111111111111111'
+      ly: '1111111111111111111111111111111111111111'
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - drive:
+      nbd: 0
+  - run: setblock ~4 ~0 ~8 stone
+  - run: setblock ~4 ~0 ~8 air
+  - wait: 1
+  - expect:
+      zq: 1
+      y1: 1
+      z9: 1
+      dq: 0
+      ly: 0
+  - wait: 3
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+- name: 'Y1 reset 10 ticks before Z_Q, A_Y back at T_q+3: armed and quiet'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - drive:
+      la: 0
+  - wait: 4
+  - expect:
+      y1: 0
+      zq: 1
+      ly: 1
+  - drive:
+      nbd: 1
+  - wait: 6
+  - drive:
+      lq: 0
+  - wait: 2
+  - drive:
+      lq: 1
+  - expect:
+      zq: 0
+  - wait: 1
+  - drive:
+      la: 1
+  - run: setblock ~0 ~0 ~7 obsidian
+  - wait: 2
+  - *id039
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - drive:
+      nbd: 0
+  - wait: 1
+  - expect:
+      zq: 1
+      y1: 1
+      dq: 0
+      ly: 0
+      q: 0
+  - wait: 3
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - run: setblock ~0 ~0 ~7 air
+  - wave:
+      zq: '11111111111111111111'
+      y1: '11111111111111111111'
+      q: '00000000000000000000'
+- name: 'armed control: one update beside Y1 fires Y1, whose base update fires Z_Q'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - drive:
+      la: 0
+  - wait: 1
+  - drive:
+      lq: 0
+  - wait: 1
+  - drive:
+      nbd: 1
+  - expect:
+      y1: 0
+      zq: 1
+  - check: if block ~6 ~2 ~4 moving_piston
+  - check: if block ~6 ~3 ~4 moving_piston
+  - check: if block ~6 ~3 ~5 moving_piston
+  - check: if block ~6 ~4 ~5 air
+  - check: if block ~6 ~4 ~4 air
+  - wait: 1
+  - drive:
+      lq: 1
+  - run: setblock ~0 ~0 ~7 obsidian
+  - expect:
+      y1: 0
+      zq: 0
+      ly: 0
+      dq: 0
+  - check: if block ~5 ~1 ~4 moving_piston
+  - check: if block ~5 ~2 ~4 moving_piston
+  - check: if block ~5 ~3 ~4 moving_piston
+  - check: if block ~5 ~4 ~4 air
+  - wait: 1
+  - drive:
+      la: 1
+  - expect:
+      y1: 0
+      zq: 0
+      ly: 1
+      dq: 0
+  - check: if block ~6 ~1 ~4 sticky_piston[facing=up,extended=false]
+  - check: if block ~6 ~2 ~4 honey_block
+  - check: if block ~6 ~3 ~4 honey_block
+  - check: if block ~6 ~3 ~5 redstone_block
+  - check: if block ~5 ~2 ~4 moving_piston
+  - check: if block ~5 ~3 ~4 moving_piston
+  - wait: 1
+  - expect:
+      y1: 0
+      zq: 0
+      ly: 1
+      dq: 1
+      q: 0
+  - check: if block ~5 ~1 ~4 sticky_piston[facing=up,extended=false]
+  - check: if block ~5 ~2 ~4 slime_block
+  - check: if block ~5 ~3 ~4 slime_block
+  - wait: 1
+  - *id039
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - run: setblock ~7 ~1 ~4 stone
+  - run: setblock ~7 ~1 ~4 air
+  - wait: 1
+  - expect:
+      y1: 1
+      zq: 1
+      ly: 0
+      dq: 0
+- name: 'control: after the Z9 reset P9 is powered: freed and updated, it extends, fires Z9 and is spat back'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - run: setblock ~0 ~0 ~7 obsidian
+  - drive:
+      l9: 0
+  - wait: 1
+  - check: if block ~3 ~0 ~8 sticky_piston[facing=up,extended=true]
+  - wait: 1
+  - drive:
+      l9: 1
+  - expect:
+      z9: 0
+      a9: 0
+  - check: if block ~3 ~1 ~8 moving_piston
+  - check: if block ~3 ~2 ~8 moving_piston
+  - check: if block ~3 ~3 ~8 air
+  - wait: 1
+  - expect:
+      z9: 0
+      a9: 0
+  - check: if block ~3 ~1 ~8 moving_piston
+  - check: if block ~3 ~2 ~8 moving_piston
+  - wait: 1
+  - expect:
+      z9: 0
+      a9: 1
+      p9: 0
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - wait: 4
+  - run: setblock ~0 ~0 ~7 air
+  - run: setblock ~4 ~0 ~7 stone
+  - run: setblock ~4 ~0 ~7 air
+  - wait: 3
+  - expect:
+      z9: 1
+      p9: 0
+  - check: if block ~1 ~0 ~7 sticky_piston[facing=west]
+  - check: if block ~0 ~0 ~7 quartz_block
+  - check: if block ~2 ~0 ~7 air
+- name: 'control: in the open state P9 is unpowered'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - run: setblock ~0 ~0 ~7 air
+  - run: setblock ~4 ~0 ~7 stone
+  - run: setblock ~4 ~0 ~7 air
+  - wait: 3
+  - expect:
+      z9: 1
+      p9: 0
+  - check: if block ~2 ~0 ~7 sticky_piston[facing=west]
+  - check: if block ~1 ~0 ~7 quartz_block
+- name: 'control: A9 off for 3 gt fires Z9 when it comes back'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - run: setblock ~0 ~0 ~7 obsidian
+  - drive:
+      l9: 0
+  - wait: 3
+  - drive:
+      l9: 1
+  - wait: 6
+  - expect:
+      z9: 1
+- name: 'control: A_Y back on before Z_Q''s base lands, so that landing fires Y1 (and Y1 fires Z_Q)'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - drive:
+      la: 0
+  - wait: 1
+  - drive:
+      lq: 0
+  - wait: 1
+  - drive:
+      nbd: 1
+  - wait: 1
+  - drive:
+      lq: 1
+  - drive:
+      la: 1
+  - run: setblock ~0 ~0 ~7 obsidian
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - wait: 4
+  - expect:
+      y1: 1
+      zq: 1
+- name: 'control: A_Q off for 3 gt, so its return updates a landed, clear Z_Q and fires it'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - drive:
+      la: 0
+  - wait: 1
+  - drive:
+      lq: 0
+  - wait: 1
+  - drive:
+      nbd: 1
+  - wait: 1
+  - run: setblock ~0 ~0 ~7 obsidian
+  - wait: 1
+  - drive:
+      lq: 1
+  - drive:
+      la: 1
+  - wait: 1
+  - wait: 1
+  - wait: 4
+  - expect:
+      zq: 1
+- name: 'control: NB rising after Z_Q is armed fires Z_Q'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - drive:
+      la: 0
+  - wait: 1
+  - drive:
+      lq: 0
+  - wait: 1
+  - wait: 1
+  - drive:
+      lq: 1
+  - run: setblock ~0 ~0 ~7 obsidian
+  - wait: 1
+  - drive:
+      la: 1
+  - wait: 1
+  - wait: 1
+  - wait: 4
+  - expect:
+      zq: 0
+      y1: 0
+  - drive:
+      nbd: 1
+  - wait: 1
+  - expect:
+      zq: 1
+      y1: 1
+- name: 'control: without the P6-head stand-in, DQ moves Q'
+  initial: *id011
+  settle: 10
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - drive:
+      la: 0
+  - wait: 1
+  - drive:
+      lq: 0
+  - wait: 1
+  - drive:
+      nbd: 1
+  - expect:
+      y1: 0
+      zq: 1
+  - check: if block ~6 ~2 ~4 moving_piston
+  - check: if block ~6 ~3 ~4 moving_piston
+  - check: if block ~6 ~3 ~5 moving_piston
+  - check: if block ~6 ~4 ~5 air
+  - check: if block ~6 ~4 ~4 air
+  - wait: 1
+  - drive:
+      lq: 1
+  - expect:
+      y1: 0
+      zq: 0
+      ly: 0
+      dq: 0
+  - check: if block ~5 ~1 ~4 moving_piston
+  - check: if block ~5 ~2 ~4 moving_piston
+  - check: if block ~5 ~3 ~4 moving_piston
+  - check: if block ~5 ~4 ~4 air
+  - wait: 1
+  - drive:
+      la: 1
+  - expect:
+      y1: 0
+      zq: 0
+      ly: 1
+      dq: 0
+  - check: if block ~6 ~1 ~4 sticky_piston[facing=up,extended=false]
+  - check: if block ~6 ~2 ~4 honey_block
+  - check: if block ~6 ~3 ~4 honey_block
+  - check: if block ~6 ~3 ~5 redstone_block
+  - check: if block ~5 ~2 ~4 moving_piston
+  - check: if block ~5 ~3 ~4 moving_piston
+  - wait: 1
+  - expect:
+      y1: 0
+      zq: 0
+      ly: 1
+      dq: 1
+      q: 0
+  - check: if block ~5 ~1 ~4 sticky_piston[facing=up,extended=false]
+  - check: if block ~5 ~2 ~4 slime_block
+  - check: if block ~5 ~3 ~4 slime_block
+  - wait: 1
+  - wait: 4
+  - expect:
+      q: 1
+      zq: 0
+      y1: 0

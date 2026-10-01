@@ -1,0 +1,768 @@
+name: door_lever_sticky_input
+description: 'Door part 1 (input) for the design B / design_c 3x3 seamless door: a lever on top of K_in and I_A made sticky,
+  so the lever works on both edges (Door_Rules.md:480). Cells are the door''s, at spec = design + (4,3,8). Added: only the
+  lever, design (1,9,-2), face=floor on K_in (1,8,-2); I_A (1,7,-2) changes from a normal to a sticky piston. Moved block
+  RB_A passes through / lands in (1,6,-2) and (1,5,-2). Rising edge: I_A extends in t0 g, RB_A (1,6,-2)->(1,5,-2), lands t2
+  j, NA dies in t0 g. Falling edge: I_A retracts in c0 g and pulls RB_A home, landing c2 j; NA is live from c2 j and P7 re-extends
+  c3 g. t0/c0 = the second tick after a drive of R_in, the first after a lever use. Pistons within Chebyshev 2 of the lever
+  in the door (closed and open states): I_A (1,7,-2) and X2 (1,7,-3); the lever''s cell has only air neighbours besides K_in,
+  so it powers and updates no piston directly; K_in''s neighbour update reaches only I_A and R_in, and K_in QC-powers X2 exactly
+  as R_in input already does. Rebuilt door context: R_in and its glass (fixtures), K_in, RB_A, NA''s dust from (0,6,-2) to
+  P7''s feed (2,4,-1) with the wall quartz under it; P7, its head and TR are a fixture stand-in. The third test is the control:
+  I_A normal, RB_A never returns (I_A is read by check there: the named cell reads only the loaded block id).'
+traits:
+- piston_based
+- tick_accurate
+- vertical
+palette:
+  .: air
+  i:
+    input: in
+  R:
+    block: repeater[facing=west,delay=1,powered=false]
+    fixture: true
+  g:
+    block: glass
+    fixture: true
+  K: stone
+  l:
+    name: lever
+    block: lever[face=floor,facing=north,powered=false]
+  A:
+    name: I_A
+    block: sticky_piston[facing=down,extended=false]
+  D: redstone_block
+  _:
+    reserve: true
+  s: stone
+  C: redstone_wire
+  n:
+    name: na
+    block: redstone_wire
+  e:
+    name: na_end
+    block: redstone_wire
+  Q: quartz_block
+  p:
+    name: p7
+    block: sticky_piston[facing=down,extended=true]
+    fixture: true
+  h:
+    block: piston_head[facing=down,type=sticky]
+    fixture: true
+  t:
+    block: quartz_block
+    fixture: true
+layers:
+  5: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    ......t
+  6: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .....QQ
+    ......Q
+    ......Q
+    ......h
+  7: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    ....sCC
+    ......C
+    ......e
+    ......p
+  8: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    ....C..
+    ....s_.
+    .......
+    .......
+  9: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    ....nD.
+    .......
+    .......
+  10: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    ....gA.
+    .......
+    .......
+  11: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    ...iRK.
+    .......
+    .......
+  12: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .......
+    .....l.
+    .......
+    .......
+tests:
+- name: 'lever use on then off: I_A extends in t0 and pulls RB_A home in c0'
+  settle: 20
+  steps:
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - use: lever
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 moving_piston
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 moving_piston
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - expect:
+      lever: 1
+  - wait: 10
+  - use: lever
+  - expect:
+      I_A: 1
+      na: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 0
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - level:
+      na: 15
+      na_end: 10
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~6 ~6 ~8 moving_piston
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - expect:
+      lever: 0
+- name: 'repeater input through R_in: same edges one tick later'
+  settle: 20
+  steps:
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - drive:
+      in: 1
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 moving_piston
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 moving_piston
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 10
+  - drive:
+      in: 0
+  - expect:
+      I_A: 1
+      na: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 1
+      na: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 0
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - level:
+      na: 15
+      na_end: 10
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~6 ~6 ~8 moving_piston
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      I_A: 0
+      na: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+- name: 'control: with I_A a normal piston RB_A stays at (1,5,-2)'
+  settle: 20
+  steps:
+  - run: setblock ~5 ~10 ~6 piston[facing=down,extended=false]
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - drive:
+      in: 1
+  - expect:
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 1
+      na_end: 1
+      p7: 1
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 moving_piston
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 moving_piston
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=normal]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 10
+  - drive:
+      in: 0
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=normal]
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=normal]
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=true]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 moving_piston
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 moving_piston
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
+  - wait: 1
+  - expect:
+      na: 0
+      na_end: 0
+      p7: 0
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~5 ~9 ~6 air
+  - check: if block ~5 ~10 ~6 piston[facing=down,extended=false]
