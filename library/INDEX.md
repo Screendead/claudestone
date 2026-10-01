@@ -102,6 +102,7 @@ and subtracts, so it passes A only when B is on |
 |---|---|---|---|---|---|---|
 | cpu_alu | 47x7x32 | 10528 | 2235 | - | pistonless, entityless, comparator_based | CPU4 ALU, arithmetic: y = (a - za) + (((b - xsel) | imm) xor sub) + sub, co = carry out (for sub, 1 = no borrow) |
 | cpu_clock | 48x4x26 | 4992 | 1468 | - | comparator_based, silent, lightless, pistonless, entityless, tick_accurate | Two-phase CPU clock, period 200 gt, torch-free: one start edge sets a two-repeater memory loop, a subtract comparator turns that step into one 10 gt pulse, and the pulse circulates forever in a 26-repeater ring (200 gt) |
+| cpu_ctrl | 69x4x63 | 17388 | 3476 | - |  | CPU4 control decoder |
 | cpu_out_display | 29x10x40 | 11600 | 1970 | - | torch_based, pistonless, entityless | CPU output display: out0-out3 (out0 least significant, pins on the south face at x=4,6,8,10, y=1) shown as two seven-segment digits facing north on the z=0 face, tens on the viewer's left (blank for 0-9, 1 for 10-15) |
 | cpu_pc | 22x15x40 | 13200 | 2511 | - | torch_based, pistonless, entityless | 4-bit program counter for the CPU4 computer: a master/slave register with an incrementer and a next-PC mux (next = 0 if rst, else imm if jt, else pc+1 mod 16) |
 | cpu_regs_cell | 6x2x11 | 132 | 38 | - | pistonless, entityless, torch_based, comparator_based | One bit of the CPU register file (cpu_regs): a master latch that copies y while cap AND we, and a slave that copies the master while com; q is the slave |

@@ -14,7 +14,7 @@ FOLDER = {"pla_xor": "xor", "full_adder": "full_adder",
           "encoder": "encoder", "half_adder": "half_adder", "digit": "seven_segment",
           "digit_one": "seven_segment", "lever_switch": "input", "button_switch": "input",
           "cpu_out_display": "cpu_parts", "cpu_rom_ctrl": "cpu_parts", "cpu_rom_ctrl_jumps": "cpu_parts", "cpu_alu": "cpu_parts",
-          "cpu_fetch": "cpu"}
+          "cpu_ctrl": "cpu_parts", "cpu_fetch": "cpu"}
 
 
 def destination(name: str):
@@ -168,6 +168,8 @@ def generated_cpu():
     yield rom_ctrl("cpu_rom_ctrl_jumps", JUMP_PROGRAM)
     from scripts.alu import cpu_alu
     yield cpu_alu()
+    from scripts.cpu_ctrl import cpu_ctrl
+    yield cpu_ctrl()
     yield cpu_fetch()
 
 
