@@ -35,7 +35,7 @@ FACINGS = ("north", "south", "east", "west", "up", "down")
 INITIAL = ("closed", "open")
 READINGS = ("R", "H1", "R1")
 TIER_RANK = {"SUPER": 4, "FULL": 3, "SEMI": 2, "QUART": 1}
-DOOR_KEYS = {"doorway", "depth", "blocks", "surface", "input", "repeater", "device", "outer_surface", "tier",
+DOOR_KEYS = {"doorway", "depth", "blocks", "surface", "input", "repeater", "lever", "device", "outer_surface", "tier",
              "initial"}
 DOORWAY_KEYS = {"origin", "width", "height", "facing"}
 CYCLE_KEYS = {"cycles", "reading", "tier", "max_open", "max_close", "max_open_visible", "max_close_visible",
@@ -46,6 +46,9 @@ PUSH_LIMIT = 12
 # repeater takes 2, or 1 for an input in the player phase (MC-172213).
 MAX_LEAD = 8
 AIR_IDS = {"air", "cave_air", "void_air"}
+# The at-rest scan compares each slab of the region with the slab this far above it, which
+# no plot reaches (plots stand at y=56 and are at most 64 tall).
+SKY = 128
 
 
 def _axes(face: str) -> tuple[int, int, int]:
@@ -98,7 +101,7 @@ class Plan:
     door_material: list[str]
     surface_material: list[str]
     drive: list[Pos]
-    repeater: Pos
+    repeater: Pos | None
     initial: str
     tier: str | None
     static: set[Pos]
@@ -112,6 +115,9 @@ class Plan:
     occ_fns: list[str]
     occ_hall_fns: list[str]
     hall_index: dict[Pos, int] = field(default_factory=dict)
+    lever: Pos | None = None  # a lever input, flipped as a player would instead of the repeater
+    shell: set[Pos] = field(default_factory=set)  # the region's outer layer, less the clamped core
+    exempt_surface: set[Pos] = field(default_factory=set)  # where surface material is not circuitry
 
 
 def plan(spec, plot_size: Pos) -> Plan:
@@ -124,34 +130,36 @@ def plan(spec, plot_size: Pos) -> Plan:
     hall = dt.Hallway.of(hallway, frame, door["doorway"]["facing"], surface)
     door_material = _door_material(spec)
     surface_material = [_bare(m) for m in door.get("surface", door_material)]
-    drive = spec.input_cells(door["input"])
-    repeater = spec.named[door["repeater"]]
+    lever = spec.named[door["lever"]] if door.get("lever") else None
+    drive = [] if lever else spec.input_cells(door["input"])
+    repeater = None if lever else spec.named[door["repeater"]]
     device = {spec.named[door["device"]]} if door.get("device") else set()
-    static = set(frame) | set(drive) | {repeater} | device | set(spec.fixtures)
+    static = set(frame) | set(drive) | {repeater, lever} - {None} | device | set(spec.fixtures)
     outer = door_probe.cells([tuple(map(tuple, b)) for b in door.get("outer_surface", [])])
     exempt_surface = hallway | surface | outer
     hall_box = (tuple(min(p[a] for p in hallway) for a in range(3)), tuple(max(p[a] for p in hallway) for a in range(3)))
     bounds = spec.build.bounds()
 
     hall_chunks, probed = door_probe.hallway_probe_functions([hall_box], [(p, p) for p in sorted(surface)])
-    occ, occ_hall, region, _ = door_probe.occupancy_functions(
-        bounds, [hall_box], static, exempt_surface, door_material, surface_material, plot_size)
+    region, shell = door_probe.occupancy_region(bounds, [hall_box], plot_size)
     pistons = [(p, facing(s)) for p, s in sorted(spec.build.blocks.items()) if block_id(s) in PISTONS]
     in_region = set(region)
     track = {c for base, f in pistons for k in range(1, PUSH_LIMIT + 2)
              for c in [tuple(b + k * d for b, d in zip(base, STEP[f]))]} & in_region - hallway - static
     track_chunks, _, _, _ = door_probe.occupancy_functions(
-        bounds, [hall_box], static, exempt_surface, door_material, surface_material, plot_size, track=track)
+        bounds, [hall_box], static, exempt_surface, door_material, surface_material, plot_size, track=track,
+        door_flags=False)
     fired = [f"execute unless block ~{x} ~{y} ~{z} {block_id(spec.build.blocks[(x, y, z)])}[facing={f},extended="
              f"{parse_state(spec.build.blocks[(x, y, z)])[1].get('extended', 'false')}] run "
              f"data modify storage {door_probe.OCC} fired.p{j} set value 1b"
              for j, ((x, y, z), f) in enumerate(pistons)]
-    x, y, z = repeater
+    x, y, z = repeater or lever
     functions = {
-        **door_probe.door_functions(hall_chunks, occ, occ_hall),
+        **door_probe.door_functions(hall_chunks, [], []),
+        "occ_entities": door_probe.entity_line((region[0], region[-1])) + "\n",
         **{f"occ_track{i}": body for i, body in enumerate(door_probe._chunks(
             [line for c in track_chunks for line in c.splitlines() if line] + fired))},
-        "door_rep": f"execute if block ~{x} ~{y} ~{z} minecraft:repeater[powered=true] run "
+        "door_rep": f"execute if block ~{x} ~{y} ~{z} minecraft:{'repeater' if repeater else 'lever'}[powered=true] run "
                     f"data modify storage {door_probe.PROBE} h.rep set value 1\n",
         "door_reset": f"data modify storage {door_probe.OCC} fired set value {{}}\n",
         "door_e_clear": f"data modify storage {door_probe.OCC} e set value []\n",
@@ -163,8 +171,8 @@ def plan(spec, plot_size: Pos) -> Plan:
     return Plan(frame, hallway, surface, hall, probed, door_material, surface_material, drive, repeater,
                 door.get("initial", "closed"), door.get("tier"), static, region, pistons, zones, functions,
                 door_probe.tag_files(door_material, surface_material),
-                _numbered(names, "hall"), _numbered(names, "occ_track"), _numbered(names, "occ"),
-                _numbered(names, "occ_hall"), {p: i for i, p in enumerate(probed)})
+                _numbered(names, "hall"), _numbered(names, "occ_track"), ["occ_entities"], [],
+                {p: i for i, p in enumerate(probed)}, lever, shell, exempt_surface)
 
 
 def _numbered(names: list[str], stem: str) -> list[str]:
@@ -226,7 +234,7 @@ def problems(spec, plot_size: Pos) -> list[str]:
         out.append(f"hallway or its walls reach {outside[0]}, outside the {plot_size} plot (a floor needs y >= 0, "
                    "so the doorway starts at y >= 1)")
     initial = door.get("initial", "closed")
-    blocks = spec.build.blocks
+    blocks = {p: b for p, b in spec.build.blocks.items() if _bare(b) not in AIR_IDS}  # a named cell may be air
     if door.get("blocks", "closed") == "closed":
         if initial != "closed":
             out.append("blocks: closed reads the door blocks from the doorway, so the build must be placed closed")
@@ -246,6 +254,13 @@ def problems(spec, plot_size: Pos) -> list[str]:
 
 
 def _cell_problems(spec, door) -> list[str]:
+    if "lever" in door:
+        if "input" in door or "repeater" in door:
+            return ["give lever, or input and repeater, not both"]
+        name = door["lever"]
+        if name not in spec.named or parse_state(spec.build.blocks[spec.named[name]])[0] != "minecraft:lever":
+            return [f"lever {name!r} is not a named lever cell"]
+        return [] if door.get("device") in (None, *spec.named) else [f"device {door['device']!r} is not a named cell"]
     out = []
     name = door.get("input")
     if name not in spec.inputs:
@@ -369,6 +384,8 @@ class Probe:
 
     def __init__(self, rig, plan: Plan):
         self.rig, self.plan = rig, plan
+        self.rest_any: set[Pos] = set()
+        self.rest_circ: set[Pos] = set()
 
     def observe(self, track: bool = False) -> tuple[dt.Observation, bool]:
         fns = self.plan.hall_fns + ["door_rep"] + (self.plan.track_fns if track else [])
@@ -378,8 +395,53 @@ class Probe:
         self.rig.call(["occ_reset", "door_reset"])
 
     def stable(self, opened: bool) -> None:
-        """Flag the whole region; the hallway too in the open state."""
-        self.rig.call(self.plan.occ_fns + (self.plan.occ_hall_fns if opened else []))
+        """At rest: flag the region's entities, and find the outermost occupied cells on each
+        side of the region (the hallway counts only when open). A function testing every
+        cell of a big build's region is too big for a satellite to parse (44 MB for LegDen's
+        10x10 ran a 1 GB heap out of memory), so the region is narrowed from each face slab
+        by slab, comparing a slab with the air SKY blocks above it, and only the cells of
+        the first slab that isn't air are tested one by one."""
+        self.rig.call(self.plan.occ_fns)
+        skip = self.plan.static | (set() if opened else self.plan.hallway)
+        empty: dict[tuple, bool] = {}
+        self.rest_any |= self._extremes(skip, empty, circ=False)
+        self.rest_circ |= self._extremes(skip, empty, circ=True)
+
+    def _yes(self, command: str) -> bool:
+        return self.rig.run(command).startswith("Test passed")
+
+    def _abs(self, pos: Pos) -> str:
+        return " ".join(str(o + c) for o, c in zip(self.rig.origin, pos))
+
+    def _extremes(self, skip: set[Pos], empty: dict, circ: bool) -> set[Pos]:
+        lo, hi = self.plan.region[0], self.plan.region[-1]
+        found = set()
+        for axis in range(3):
+            for coords in (range(lo[axis], hi[axis] + 1), range(hi[axis], lo[axis] - 1, -1)):
+                for c in coords:
+                    a, b = list(lo), list(hi)
+                    a[axis] = b[axis] = c
+                    if (axis, c) not in empty:
+                        sky = (a[0], a[1] + SKY, a[2])
+                        empty[axis, c] = self._yes(f"execute if blocks {self._abs(tuple(a))} {self._abs(tuple(b))} "
+                                                   f"{self._abs(sky)} all")
+                    if empty[axis, c]:
+                        continue
+                    hit = next((p for p in door_probe.box_cells((tuple(a), tuple(b)))
+                                if p not in skip and self._occupied(p, circ)), None)
+                    if hit is not None:
+                        found.add(hit)
+                        break
+        return found
+
+    def _occupied(self, pos: Pos, circ: bool) -> bool:
+        p = self._abs(pos)
+        test = f"execute unless block {p} {door_probe.AIR_TAG}"
+        if circ:
+            test += f" unless block {p} {door_probe.DOOR_TAG}"
+            if door_probe.SURFACE_EXEMPT_ANYWHERE or pos in self.plan.exempt_surface:
+                test += f" unless block {p} {door_probe.SURFACE_TAG}"
+        return self._yes(test)
 
     def entities(self) -> list[dict]:
         """The entities flagged since the last call, which it forgets."""
@@ -415,7 +477,10 @@ def _status(rig, spec, text):
 def operate(rig, probe: Probe, plan: Plan, before: dt.Observation, rep_before: bool, on: bool, rec,
             max_ticks: int) -> tuple[dt.Run, int]:
     """Set the input and record O(0..W+quiet). Tick 0 is the first observation in which the
-    fixture repeater has flipped."""
+    fixture repeater has flipped; with a lever input, the first tick after the flip (the
+    player phase, so components it schedules fire a tick earlier: MC-172213)."""
+    if plan.lever:
+        rig.use(plan.lever)
     for pos in plan.drive:
         rig.drive(pos, on)
     rec.frame(f"door input {int(on)}")
@@ -597,8 +662,8 @@ def _grades(s: dt.Seamless) -> dict:
 def _volume(plan: Plan, probe: Probe, phases) -> dict:
     flags, fired = probe.flags()
     region = plan.region
-    blocks_any = {region[i] for i in flags["any"]}
-    blocks_circ = {region[i] for i in flags["circ"]}
+    blocks_any = {region[i] for i in flags["any"]} | probe.rest_any
+    blocks_circ = {region[i] for i in flags["circ"]} | probe.rest_circ
     heads = {dv.head_cell(plan.pistons[j][0], plan.pistons[j][1]) for j in fired if j < len(plan.pistons)}
     heads -= plan.static | plan.hallway
     known, unknown = [], set()
@@ -613,7 +678,7 @@ def _volume(plan: Plan, probe: Probe, phases) -> dict:
         known.append(dv.Tick({}, tuple(ticks), opened))
     ev = dv.volume(known, plan.zones)
     v = dv.Volume(blocks_any | heads | ev.any | unknown, blocks_circ | heads | ev.circ | unknown,
-                  {region[i] for i in flags["shell"]} | ev.shell)
+                  {region[i] for i in flags["shell"]} | (probe.rest_any & plan.shell) | ev.shell)
     box = dv.bounds(v.circ)
     return {"any": v.v_any, "circ": v.v_circ, "dims": list(dv.dims(box)),
             "box": [list(box[0]), list(box[1])] if box else None, "heads": len(heads - blocks_circ),

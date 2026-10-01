@@ -228,10 +228,12 @@ trace → `package` data pack.
   `glitch_free`, `reset`, `settle`, `initial` drivers, `steps` of drive/use/wait/expect/level/wave/run/log/check/repeat and the container steps
   insert/expect_items/throughput (a named cell or [x, y, z]; throughput records items moved and
   a rate per hour in the trace and result), `finally`
-  commands), a top-level `update_pass` (all, none, or unobserved: observers are set last and the
-  blocks they face are not cloned), a `door:` section (doorway origin/width/height/facing, depth,
-  door and surface material, input plus fixture `repeater[delay=1]`, tier) and the `door_cycle`
-  test kind. `dump` must round-trip
+  commands), a top-level `update_pass` (all, none, unobserved: observers are set last and the
+  blocks they face are not cloned, or strict: every block set with `setblock ... strict` and no
+  pass, which observer-heavy builds such as LegDen's 10x10 need; the packaged `place` and the
+  showroom use the same pass), a `door:` section (doorway origin/width/height/facing, depth,
+  door and surface material, input plus fixture `repeater[delay=1]` or a `lever` flipped like a
+  click, tier) and the `door_cycle` test kind. `dump` must round-trip
   what `load` reads; `tests/test_generated.py` fails if a generated file is stale.
 - `redstone/harness.py`: `Rig` owns one plot. It clears with `fill … air strict` (no
   item drops), kills non-player entities in it (but not the watch camera), 2 blocks around
@@ -266,8 +268,12 @@ trace → `package` data pack.
   a pulled block shows as moving in the wall cell beside the doorway) into `door_timing.Run`
   until static for 40 ticks, and reports open/close times under R (landing, start + 2), H1
   (hallway holds its final real blocks) and R1 (0-tick pulls instant), plus visible times,
-  seamless grades and the tier. Volume (`door_volume`) comes from occupancy flags over the whole
-  region at rest, each piston's line every tick, fired pistons' head cells, and entities. A moving
+  seamless grades and the tier. Volume (`door_volume`) comes from the region's outermost occupied
+  cells at rest (found over RCON by comparing slabs with the air 128 blocks above, since a
+  function over every cell is too big for a 1 GB satellite to parse), occupancy flags on each
+  piston's line every tick, fired pistons' head cells, and entities. With a `lever` input tick
+  0 is the first tick after the click. A move starting in the tick another lands in the same
+  cell shows as progress 0, 0.5, 0, 0.5 and counts as two movements. A moving
   piston's `blockState` is a bare id when the block is in its default state, else
   `{Name, Properties}`. Broken bounds are collected failures; per-tick changes go under `door`
   in the trace.

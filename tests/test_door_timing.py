@@ -93,6 +93,14 @@ def test_cut_pulse_ends_one_tick_after_start():
     assert dt.closing_time(H, c, dt.settle(c)[0]) == 1
 
 
+def test_a_move_starting_as_the_last_lands_is_a_second_movement():
+    # Seen live in LegDen's 10x10: progress 0.0, 0.5, 0.0, 0.5 in one cell.
+    floor = (2, 0, 1)
+    r = pull_open({3: {floor: moving(SURFACE, 0.0, facing="up")}, 4: {floor: moving(SURFACE, 0.5, facing="up")},
+                   5: {floor: moving(SURFACE, 0.0, facing="down")}, 6: {floor: moving(SURFACE, 0.5, facing="down")}})
+    assert [(m.start, m.end) for m in dt.movements(r, H.visible) if m.cell == floor] == [(3, 5), (5, 7)]
+
+
 def test_z_fighting_wall_swap_counts_only_as_visible():
     floor = (2, 0, 1)
     r = pull_open({3: {floor: moving(SURFACE, 0.0, facing="up")},

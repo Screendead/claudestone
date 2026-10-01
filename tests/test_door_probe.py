@@ -3,6 +3,7 @@ import re
 
 import pytest
 
+from redstone import door_probe as d
 from redstone.door_probe import (KNOWN_BLOCKS, MARGIN, OCC_RESET, OTHER, cells, door_functions,
                                  hallway_probe_functions, occupancy_functions, read_flags, read_hallway,
                                  tag_files, visible_cells, write_tags)
@@ -133,15 +134,16 @@ def test_surface_material_is_circuitry_away_from_the_surfaces():
                        "unless block ~0 ~2 ~2 #redstone_ai:surface_material unless block ~0 ~2 ~2 minecraft:moving_piston "
                        f"run data modify storage redstone_ai:occ circ.c{region.index((0, 2, 2))} set value 1b")
     assert "surface_material" not in inside[1]
-    # A moved block's default state is saved as its bare id, any other as {Name, Properties}.
-    for form in ('"minecraft:%s"', '{Name:"minecraft:%s"}'):
-        moved = "unless data block ~0 ~2 ~2 {source:0b,blockState:" + form + "}"
-        assert all(moved % m in wall[2] for m in ("smooth_quartz", "quartz_bricks"))
+    # A moved block's default state is saved as its bare id, any other as {Name, Properties};
+    # quartz has no properties, so only the bare id can occur.
+    moved = 'unless data block ~0 ~2 ~2 {source:0b,blockState:"minecraft:%s"}'
+    assert all(moved % m in wall[2] for m in ("smooth_quartz", "quartz_bricks")) and "Name:" not in wall[2]
     assert "quartz_bricks" not in inside[2] and "smooth_quartz" in inside[2]
-    assert inside[4:6] == [f"execute if block ~7 ~2 ~5 minecraft:moving_piston if data block ~7 ~2 ~5 "
-                           f"{{source:0b,blockState:{form}}} "
-                           f"run data modify storage redstone_ai:occ door.c{region.index((7, 2, 5))} set value 1b"
-                           for form in ('"minecraft:smooth_quartz"', '{Name:"minecraft:smooth_quartz"}')]
+    assert inside[4:] == ["execute if block ~7 ~2 ~5 minecraft:moving_piston if data block ~7 ~2 ~5 "
+                          '{source:0b,blockState:"minecraft:smooth_quartz"} '
+                          f"run data modify storage redstone_ai:occ door.c{region.index((7, 2, 5))} set value 1b"]
+    stairs = d._state_forms("minecraft:quartz_stairs")
+    assert stairs == ('"minecraft:quartz_stairs"', '{Name:"minecraft:quartz_stairs"}')
 
 
 def test_door_functions_and_reset():

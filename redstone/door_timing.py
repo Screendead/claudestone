@@ -228,6 +228,9 @@ def movements(run: Run, cells: Iterable[Pos]) -> list[Movement]:
             first = t
             ladder = []
             while t <= run.last and (cur := _cell(run.at(t), pos).moving) is not None:
+                # 0.0 after a full ladder: the move landed and another began in the same tick.
+                if len(ladder) == 2 and cur.progress == 0.0:
+                    break
                 ladder.append(cur)
                 t += 1
             if t > run.last:

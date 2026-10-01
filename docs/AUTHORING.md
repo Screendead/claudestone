@@ -208,7 +208,11 @@ tests:
   the input toggles the door. The input is Squid's repeater input: the harness places the
   redstone block behind the fixture repeater, and **tick 0 is the first tick at whose end
   that repeater's output has changed**. The door's own lever or button, if it has one, can
-  be named as `device:` so the volume leaves it out.
+  be named as `device:` so the volume leaves it out. A rebuilt door whose lever can't take a
+  fixture repeater can instead give `lever: <named lever cell>` (no `input`/`repeater`): the
+  harness flips it as a player's click does, and tick 0 is the first tick after the click.
+  That is player-phase input, so anything the lever schedules fires a tick earlier than
+  under repeater input (MC-172213); counted from the flip as "+1", a time reads one more.
 - Build the hallway's walls, floor and ceiling (`surface` material) around the doorway for
   `depth` cells each side, so the doorway starts at y >= 1. The hallway's two ends stay
   open; anything else in view that is air, a piston head, a moving piston or another block
@@ -225,15 +229,26 @@ tests:
   - = circuitry) and the tier reached go in the result; `try` prints one line.
 - Volume: the box of everything the wiring ever occupies (Squid 4.2), blocks and
   entities, leaving out the doorway, the input fixture, the hallway except when open, and
-  surface material on the hallway's walls or `outer_surface` boxes. The whole region is read
-  only when the door is at rest; during motion only the cells along each piston's line,
-  and each fired piston's head cell counts. A block moved by a piston that was itself moved
-  is seen only at rest. `max_volume` bounds the circuitry volume.
+  surface material on the hallway's walls or `outer_surface` boxes. At rest the region
+  (build bounds and hallway, 2 cells around) is narrowed from each face, comparing slabs with
+  the air above them and testing cells only in the outermost slab that isn't air; during
+  motion only the cells along each piston's line are read, and each fired piston's head cell
+  counts. A block moved by a piston that was itself moved is seen only at rest. Signs and
+  other decoration inside the box count. `max_volume` bounds the circuitry volume.
 - Placing a door: the harness's update pass (cloning every block onto itself) pulses every
   observer, which can set a door's mechanism off before the test. `update_pass: unobserved`
-  sets observers last and skips cloning what they face; `update_pass: none` skips the pass.
-  `door_cycle` fails first if the door does not stand in its `initial` state after settling.
-  The packaged `place` function uses the same pass.
+  sets observers last and skips cloning what they face; `update_pass: none` skips the pass;
+  `update_pass: strict` sets every block with `setblock ... strict` (no neighbour or shape
+  updates at all) and runs no pass. Observer-heavy builds need `strict`: LegDen's 10x10
+  (1,843 observers) fires itself apart under the other three and stands still under
+  `strict`. A strict build gets no updates, so dust, torches and comparators must be saved
+  in their settled states (as a build read from a world is). `door_cycle` fails first if the
+  door does not stand in its `initial` state after settling. The packaged `place` function
+  and the showroom use the same pass.
+- Scale: the per-tick hallway probe and the piston-line pass for LegDen's 10x10 (8,616
+  blocks, 1,684 pistons) are 35,000 commands and take about 20 ms a tick; each rest scan
+  takes about 0.2 s. Data packs share a satellite's 1 GB heap: a 44 MB pack (an older
+  whole-region pass) ran it out of memory at `reload`.
 
 ## How a truth table is measured
 

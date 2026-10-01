@@ -26,7 +26,8 @@ from .harness import PACK, PROBE_CHUNK
 
 Box = tuple[Pos, Pos]
 
-KNOWN_BLOCKS = set(json.loads((Path(__file__).with_name("blocks.json")).read_text())["blocks"])
+BLOCK_PROPERTIES = json.loads((Path(__file__).with_name("blocks.json")).read_text())["blocks"]
+KNOWN_BLOCKS = set(BLOCK_PROPERTIES)
 
 PROBE = f"{PACK}:probe"
 OCC = f"{PACK}:occ"
@@ -137,9 +138,12 @@ def hallway_probe_functions(hallway: list[Box], visible: list[Box] | None = None
     return _chunks(lines), probed
 
 
-def _state_forms(block: str) -> tuple[str, str]:
+def _state_forms(block: str) -> tuple[str, ...]:
     """SNBT a moving_piston's `blockState` takes for a block: BlockState.CODEC saves a
-    block's default state as its bare id, and any other state as {Name, Properties}."""
+    block's default state as its bare id, and any other state as {Name, Properties}; a block
+    without properties has only its default state."""
+    if not BLOCK_PROPERTIES.get(block.removeprefix("minecraft:")):
+        return (f'"{block}"',)
     return f'"{block}"', f'{{Name:"{block}"}}'
 
 
@@ -163,15 +167,17 @@ def occupancy_region(bounds: Box, hallway: list[Box], plot_size: Pos,
 
 def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surface: set[Pos],
                         door_material: list[str], surface_material: list[str], plot_size: Pos,
-                        margin: int = MARGIN, track: set[Pos] | None = None
-                        ) -> tuple[list[str], list[str], list[Pos], set[int]]:
+                        margin: int = MARGIN, track: set[Pos] | None = None, moving: bool = True,
+                        door_flags: bool = True) -> tuple[list[str], list[str], list[Pos], set[int]]:
     """(occ chunks, occ_hall chunks, region cells, shell indices).
 
     `bounds` is the build's bounds, `static` the frame and input device cells (never
     flagged), `surface` the hallway and outer surface cells, where the surface material
     is not circuitry. Index i of every flag is the cell's index in the region list.
     With `track`, only those cells get lines (with the same indices), for a per-tick pass
-    over the cells blocks can move through.
+    over the cells blocks can move through. `moving=False` leaves out the moving_piston
+    lines (for a door at rest) and `door_flags=False` the door.c flags: each costs memory
+    when the server parses the functions (a 1 GB satellite ran out at 44 MB of them).
     """
     door_ids = _block_ids(door_material)
     surface_ids = _block_ids(surface_material)
@@ -188,21 +194,30 @@ def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surfa
                                for m in door_ids + (surface_ids if on_surface else []) for form in _state_forms(m))
         lines = [
             f"execute unless block {p} {AIR_TAG} run data modify storage {OCC} any.c{i} set value 1b",
-            f"execute unless block {p} {AIR_TAG} {exempt} unless block {p} minecraft:moving_piston run "
-            f"data modify storage {OCC} circ.c{i} set value 1b",
-            f"execute if block {p} minecraft:moving_piston{moved_exempt} run "
-            f"data modify storage {OCC} circ.c{i} set value 1b",
-            f"execute if block {p} {DOOR_TAG} run data modify storage {OCC} door.c{i} set value 1b",
-            *(f"execute if block {p} minecraft:moving_piston if data block {p} {{source:0b,blockState:{form}}} "
-              f"run data modify storage {OCC} door.c{i} set value 1b" for m in door_ids for form in _state_forms(m)),
+            f"execute unless block {p} {AIR_TAG} {exempt}"
+            + (f" unless block {p} minecraft:moving_piston" if moving else "")
+            + f" run data modify storage {OCC} circ.c{i} set value 1b",
         ]
+        if moving:
+            lines.append(f"execute if block {p} minecraft:moving_piston{moved_exempt} run "
+                         f"data modify storage {OCC} circ.c{i} set value 1b")
+        if door_flags:
+            lines.append(f"execute if block {p} {DOOR_TAG} run data modify storage {OCC} door.c{i} set value 1b")
+        if door_flags and moving:
+            lines += [f"execute if block {p} minecraft:moving_piston if data block {p} {{source:0b,blockState:{form}}} "
+                      f"run data modify storage {OCC} door.c{i} set value 1b" for m in door_ids for form in _state_forms(m)]
         if pos in shell:
             shell_index.add(i)
             lines.append(f"execute unless block {p} {AIR_TAG} run data modify storage {OCC} shell.c{i} set value 1b")
         (occ_hall if pos in hall else occ).extend(lines)
-    at, selector = _entities_in((region[0], region[-1]))
-    occ.append(f"{at} as {selector} run data modify storage {OCC} e append from entity @s")
+    occ.append(entity_line((region[0], region[-1])))
     return _chunks(occ), _chunks(occ_hall), region, shell_index
+
+
+def entity_line(box: Box) -> str:
+    """Append every foreign entity meeting the box to `redstone_ai:occ e`."""
+    at, selector = _entities_in(box)
+    return f"{at} as {selector} run data modify storage {OCC} e append from entity @s"
 
 
 OCC_RESET = "".join(f"data modify storage {OCC} {key} set value {empty}\n"

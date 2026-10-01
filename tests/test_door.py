@@ -149,7 +149,7 @@ def test_plan_functions_and_the_static_cells():
     p = door.plan(proof(), BIGDOOR.size)
     assert p.door_material == ["smooth_quartz"] and p.surface_material == ["white_concrete"]
     assert p.static == set(FRAME) | {(5, 0, 4), (5, 0, 5)}
-    assert p.hall_fns == ["hall0"] and p.track_fns == ["occ_track0"] and p.occ_fns == ["occ0"]
+    assert p.hall_fns == ["hall0"] and p.track_fns == ["occ_track0"] and p.occ_fns == ["occ_entities"]
     assert p.functions["door_rep"].startswith("execute if block ~5 ~0 ~4 minecraft:repeater[powered=true] ")
     assert all(len(body.splitlines()) <= PROBE_CHUNK for body in p.functions.values())
     track = p.functions["occ_track0"]
@@ -178,10 +178,12 @@ class DoorWorld:
     the pistons move `delay` ticks after that (repeater 2 + torch 2), landing 2 later.
     `zero_tick` makes the opening a 0-tick pull (no head in the wall the tick before)."""
 
-    def __init__(self, plan, lead=2, delay=4, start_open=False, zero_tick=False, flags=None, entities=None):
+    def __init__(self, plan, lead=2, delay=4, start_open=False, zero_tick=False, flags=None, entities=None,
+                 rest=None):
         self.plan, self.lead, self.delay, self.zero_tick = plan, lead, delay, zero_tick
         self.changes: list[tuple[int, bool]] = []  # (tick of the drive, input on)
         self.start_open, self.flags, self.entities = start_open, flags, entities or []
+        self.rest = rest or {}  # block ids by cell, what the at-rest scan sees
 
     def rep(self, tick):
         on = False
@@ -223,6 +225,7 @@ class FakeDoorRig:
         self.origin, self.size, self.tick = BIGDOOR.origin, BIGDOOR.size, 0
         self.calls: list[tuple[int, tuple]] = []
         self.drives: list[tuple[int, tuple, bool]] = []
+        self.runs: list[str] = []
 
     def load(self, build, probe=None, drivers=frozenset(), **kw):
         self.loaded, self.kw = build, kw
@@ -241,7 +244,25 @@ class FakeDoorRig:
         if not self.world.changes or self.world.changes[-1][0] != self.tick:
             self.world.changes.append((self.tick, on))
 
+    def use(self, pos):
+        self.drive(pos, not (self.world.changes and self.world.changes[-1][1]))
+
     def run(self, command):
+        """The at-rest scan's commands, answered from world.rest."""
+        self.runs.append(command)
+        rel = lambda xyz: tuple(int(c) - o for c, o in zip(xyz, self.origin))
+        nums = re.findall(r"-?\d+", command)
+        if command.startswith("execute if blocks "):
+            lo, hi = rel(nums[0:3]), rel(nums[3:6])
+            inside = any(all(a <= c <= b for a, c, b in zip(lo, p, hi)) for p in self.world.rest)
+            return "Test failed" if inside else "Test passed"
+        if command.startswith("execute unless block "):
+            block = self.world.rest.get(rel(nums[0:3]))
+            plan = self.world.plan
+            if block is None or ("door_material" in command and block in plan.door_material) or (
+                    "surface_material" in command and block in plan.surface_material):
+                return "Test failed"
+            return "Test passed"
         return ""
 
     def command(self, command):
@@ -292,7 +313,7 @@ def test_door_cycle_times_the_proof_door_under_each_reading(traces):
     assert d["cycles"][0]["open"]["lead"] == 2
     assert door.summary(d).startswith("open 6 (R 6, H1 4, R1 6; visible 6), close 6")
     # The data pack carries the door functions and the two tags.
-    assert {"hall0", "occ0", "occ_track0", "door_rep"} <= set(rig.kw["functions"]) and set(rig.kw["tags"]) == {
+    assert {"hall0", "occ_entities", "occ_track0", "door_rep"} <= set(rig.kw["functions"]) and set(rig.kw["tags"]) == {
         "door_material", "surface_material"}
     trace = json.loads((traces / "door_2x2_flush_harness_check" / "cycle.json").read_text())
     ops = trace["door"]["ops"]
@@ -308,11 +329,13 @@ def test_door_cycle_reads_only_the_hallway_each_tick_and_the_region_at_rest():
     per_tick = [f for t, f in rig.calls if "hall0" in f]
     assert all(f == ("hall0", "door_rep", "occ_track0") for f in per_tick[1:])
     assert per_tick[0] == ("hall0", "door_rep")  # O(-1), before the first input
-    whole = [t for t, f in rig.calls if "occ0" in f]
+    whole = [t for t, f in rig.calls if f == ("occ_entities",)]
     assert len(whole) == 5  # placed, then after each of the four operations
-    opened = [f for t, f in rig.calls if "occ_hall0" in f]
-    assert len(opened) == 2 and all(f == ("occ0", "occ_hall0") for f in opened)
     assert rig.calls[0][1] == ("occ_reset", "door_reset")
+    # At rest the region is narrowed by slabs compared with the air above them, never a
+    # function over every cell.
+    assert rig.runs and all(r.startswith(("execute if blocks ", "execute unless block ")) for r in rig.runs)
+    assert not any(n.startswith(("occ0", "occ_hall")) for n in rig.kw["functions"])
     # Each operation drives once and waits for quiet.
     assert [on for _, _, on in rig.drives] == [True, False, True, False]
 
@@ -480,3 +503,70 @@ def test_blocks_without_a_facing_take_the_game_default():
     assert "unless block ~0 ~2 ~5 minecraft:sticky_piston[facing=north,extended=false] run" in p.functions["occ_track0"]
     b = Build().place((0, 0, 0), "observer").place((0, 0, 1), "stone")
     assert [c.split()[1:4] for c in b.to_commands("unobserved") if c.startswith("clone")] == [["~0", "~0", "~0"]]
+
+
+def test_rest_scan_finds_the_proof_doors_volume():
+    s = proof()
+    rest = {p: door._bare(b) for p, b in s.build.blocks.items()}
+    result, rig = run_cycle({"rest": rest}, {"cycles": 1})
+    v = result["door"]["volume"]
+    # Circuitry: torches, pistons, heads, repeaters and dust, x 0..11, y 0..2, z 1..3; the
+    # hallway walls, floor and ceiling are surface, and the fixture and drive are left out.
+    assert v["box"] == [[0, 0, 1], [11, 2, 3]] and (v["circ"], v["any"]) == (108, 192) and v["shell"] == []
+    # Narrowing: one slab test per slab at most, cell tests only in non-empty edge slabs.
+    p = door.plan(s, BIGDOOR.size)
+    lo, hi = p.region[0], p.region[-1]
+    slabs = {r for r in rig.runs if r.startswith("execute if blocks ")}
+    assert len(slabs) <= sum(b - a + 1 for a, b in zip(lo, hi))
+
+
+def test_strict_update_pass_sets_blocks_strict_and_runs_no_pass(tmp_path):
+    b = observed_build().summon((0.0, 1.0, 0.0), "minecart")
+    commands = b.to_commands("strict")
+    assert [c for c in commands if c.startswith("setblock")] == [
+        "setblock ~0 ~0 ~0 minecraft:stone strict", "setblock ~1 ~0 ~0 minecraft:observer[facing=west] strict",
+        "setblock ~2 ~0 ~0 minecraft:redstone_wire strict"]
+    assert commands[-1] == "summon minecraft:minecart ~0.0 ~1.0 ~0.0" and not any("clone" in c for c in commands)
+    big = Build({(x, 0, z): "minecraft:stone" for x in range(300) for z in range(300)})
+    parts = big.to_functions(PROBE_CHUNK, "strict")
+    assert len(parts) == 2 and all(line.endswith(" strict") for part in parts for line in part.splitlines())
+    s = proof()
+    s.update_pass = "strict"
+    assert lint_module.lint(s) == []
+    out = tmp_path / "x.redstone.yaml"
+    out.write_text(fileformat.dump(s))
+    assert fileformat.load(out).update_pass == "strict"
+
+
+def test_package_places_with_the_specs_update_pass(tmp_path, monkeypatch):
+    s = proof()
+    s.update_pass = "strict"
+    monkeypatch.setattr(package_module, "load", lambda path: s)
+    monkeypatch.setattr(package_module, "path_of", lambda name: SPEC)
+    monkeypatch.setattr(package_module, "ROOT", tmp_path)
+    place = (package_module.package("p") / "data/p/function/place.mcfunction").read_text()
+    assert place == s.build.to_mcfunction("strict") and "clone" not in place
+
+
+def lever_spec():
+    s = proof()
+    s.build.place((5, 0, 6), "lever[face=floor,facing=north]")
+    s.named["lever"] = (5, 0, 6)
+    s.door = {k: v for k, v in s.door.items() if k not in ("input", "repeater")} | {"lever": "lever"}
+    return s
+
+
+def test_lever_input_flips_the_lever_and_counts_from_the_next_tick():
+    s = lever_spec()
+    assert lint_module.lint(s) == []
+    p = door.plan(s, BIGDOOR.size)
+    assert p.lever == (5, 0, 6) and p.drive == [] and (5, 0, 6) in p.static
+    assert p.functions["door_rep"].startswith("execute if block ~5 ~0 ~6 minecraft:lever[powered=true] ")
+    # A lever's power changes with the click, so tick 0 is the first tick after it.
+    result, _ = run_cycle({"lead": 0}, {"cycles": 1}, spec=s)
+    d = result["door"]
+    assert d["cycles"][0]["open"]["lead"] == 1 and d["open"]["R"] == 5 and d["close"]["R"] == 5
+    for bad, message in (({"input": "door_in"}, "not both"), ({"lever": "nope"}, "not a named lever")):
+        s2 = lever_spec()
+        s2.door = s2.door | bad
+        assert any(message in m for m in lint_module.lint(s2)), bad
