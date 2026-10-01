@@ -174,6 +174,10 @@ def build(mutant=None):
             else:
                 g.dust((x, 4, Z(3)), n("y"))
         g.dust((38, 3, Z(3)), n("y"))
+        # zero-flag tap: Y climbs to (36,5,d2); a repeater strongly powers the collector's support
+        g.dust((36, 5, Z(2)), n("y"))
+        g.rep((35, 5, Z(2)), "w", "yany")
+        R.keep.add((36, 5, Z(3)))
 
         R.keep.add((29, 4, Z(3))); R.keep.add((38, 4, Z(3)))
         # A stream and ZA
@@ -210,6 +214,18 @@ def build(mutant=None):
             g.dust((x, 5, 2), "SUB")
     for c in [(40, 5, 3), (41, 4, 3), (42, 3, 3), (43, 2, 3), (44, 2, 3)]:
         g.dust(c, "SUB")
+    # zo = NOR(y0..y3): collector at x=34, y=6 flowing north into the torch block (34,6,2)
+    for z in range(3, 32):
+        if z in (10, 20):
+            g.rep((34, 6, z), "n", "yany")
+        else:
+            g.dust((34, 6, z), "yany")
+    g.block((34, 6, 2))
+    g.wall_torch((34, 6, 1), "s", "zo")
+    g.dust((34, 6, 0), "zo")
+    outputs["zo"] = (34, 6, 0)
+    for k in [(33, 6, 1), (35, 6, 1), (34, 5, 1), (34, 7, 1)]:
+        R.keep.add(k)
     # co is the carry out of bit 3: the link dust on the south face, lit by B3
     outputs["co"] = (XC, 2, zrow(3) + 3)
     R.keep.add((XC + 1, 2, zrow(3) + 3)); R.keep.add((XC - 1, 2, zrow(3) + 3))
@@ -263,7 +279,7 @@ def build_routed(seed_max=300):
         f = route_all(g, R, terms)
         if not f:
             try:
-                fix_strength(g)
+                fix_strength(g, fixed={"yany"})
             except RuntimeError as e:
                 f = [str(e)]
                 continue
@@ -279,12 +295,12 @@ def _row(a, b, xsel=0, za=0, sub=0, imm=0):
     x = imm if xsel else b
     t = (0 if za else a) + ((15 - x) if sub else x) + sub
     ins = [a >> i & 1 for i in range(4)] + [b >> i & 1 for i in range(4)] + [xsel, za, sub] + [imm >> i & 1 for i in range(4)]
-    outs = [t >> i & 1 for i in range(4)] + [t >> 4 & 1]
+    outs = [t >> i & 1 for i in range(4)] + [t >> 4 & 1, int(t & 15 == 0)]
     return " ".join(map(str, ins)) + " | " + " ".join(map(str, outs))
 
 
 HEAD = " ".join([f"a{i}" for i in range(4)] + [f"b{i}" for i in range(4)] + ["xsel", "za", "sub"]
-                + [f"imm{i}" for i in range(4)]) + " | y0 y1 y2 y3 co"
+                + [f"imm{i}" for i in range(4)]) + " | y0 y1 y2 y3 co zo"
 
 
 def _table(rows):
@@ -309,7 +325,10 @@ def cpu_alu(name="cpu_alu", mutant=False):
     from redstone.build import Build
     from redstone.fileformat import Spec
     g, ins, outs, named, seed = build_routed()
-    if mutant:
+    if mutant == "zo":
+        # bit 2 no longer reaches the zero collector
+        del g.b[(35, 5, zrow(2) + 2)]
+    elif mutant:
         # cut the carry link from bit 1 to bit 2
         del g.b[(XC, 2, zrow(1) + 3)]
     b = Build()
@@ -327,7 +346,7 @@ def cpu_alu(name="cpu_alu", mutant=False):
         "forms P = a xor X', and a carry-cancel chain at x=44, y=2 takes NOT P (a torch) on the cancel "
         "comparator's side and Gen = X' - P from the east; the sum bridge reads the carry tapped off the "
         "chain. Pins: b_i (0,1,7+7i), a_i (0,1,9+7i), y_i out (0,3,10+7i); control lanes enter the north "
-        "face at y=5: xsel x=7, za 10, imm0-3 13/16/19/22, sub 28; co is the chain's last link at (44,2,31). "
+        "face at y=5: xsel x=7, za 10, imm0-3 13/16/19/22, sub 28; co is the chain's last link at (44,2,31), zo out (34,6,0) on the north face. "
         "Hand-placed cells, nets routed by scripts/alu_route.py.")
     spec.tests = alu_tests()
     return spec
