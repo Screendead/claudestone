@@ -259,7 +259,8 @@ trace → `package` data pack.
   period (~40 ms) per batch, so satellites (no one joins them) stay at `WARP_RATE` for the
   whole test; `Rig.release()` (conftest teardown) sets 20 again before `tick unfreeze`.
   On a satellite a wait of `SPRINT_MIN` (32) ticks or more runs as `tick sprint n-1` (26.3's
-  sprint runs n+1 ticks for n >= 2), which ignores the tick rate: 6400 ticks take ~0.1 s
+  sprint runs n+1 ticks for n >= 2, but n right after `tick freeze` stops a running world,
+  when a `tick step 1` adds the last), which ignores the tick rate: 6400 ticks take ~0.1 s
   instead of 0.64 s, landing on the same tick with every block the same. The world is frozen
   again only after the last tick, and a `tick step` before that fails, so the rig polls
   `tick query` for it; a step, sprint or landing tick that is off fails the test. Main never sprints:
