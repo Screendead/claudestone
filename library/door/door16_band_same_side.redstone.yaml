@@ -1,0 +1,172 @@
+name: door16_band_same_side
+description: "Two x-bands for an in-plane 16x16 door stacked on adjacent door rows (2-3 and 4-5) with BOTH engines on the same side of the door plane, so the other side's hallway plane and walls never see a machine (door16_band_stack had to mirror every other band to the far side, which is why door16_full can't be seamless). Adjacent bands must not glue, and all bands stop at the same column, so their glue cells beside the door plane line up: the lower band is slime and the upper one honey (slime and honey don't stick to each other). Honey does not conduct, so in both bands every observer faces straight into a piston: O into R, B into L, and an observer behind the upper door piston into it, the lower door piston firing by quasi-connectivity. Each band uses only its own two rows: the engine row (O, R and glue in the plane two from the door, glue, S, L and B in the plane three from it), glue for the door pistons beside the door plane, and the door pistons. East half 11 blocks, so after a grab the next push is 13 and fails: each band parks with the column against its pistons wherever that column is. Kick = a block placed in the cell O watches; back-kick = a block placed in the cell B watches at the parked position. Needs update_pass strict: placed with the clone pass, the observers fire on placement and the slime band starts by itself."
+traits: [piston_based, entityless]
+update_pass: strict
+palette:
+  '.': air
+  O: 'observer[facing=west]'
+  B: 'observer[facing=east]'
+  R: 'sticky_piston[facing=east]'
+  L: 'sticky_piston[facing=west]'
+  S: 'slime_block'
+  H: 'honey_block'
+  X: 'obsidian'
+  Q: 'quartz_block'
+  k: {input: kick_s}
+  K: {input: kick_h}
+  b: {input: back_s}
+  d: {input: back_h}
+  e: {input: back_s3}
+  f: {input: back_h2}
+layers:
+  0: |
+    .............
+    .............
+    .............
+    .............
+  1: |
+    .............
+    .............
+    .............
+    .............
+  2: |
+    .............
+    .............
+    ...SS........
+    ....R..QQQQ..
+  3: |
+    XSSLB.b.e....
+    kORSS........
+    ...SS........
+    ...OR..QQQQ..
+  4: |
+    .............
+    .............
+    ...HH........
+    ....R..QQQQ..
+  5: |
+    XHHLB.df.....
+    KORHH........
+    ...HH........
+    ...OR..QQQQ..
+  6: |
+    .............
+    .............
+    .............
+    .............
+  7: |
+    .............
+    .............
+    .............
+    .............
+tests:
+- name: the slime band fetches column 0 alone and brings it home
+  steps:
+  - drive: {kick_s: 1}
+  - wait: 2
+  - drive: {kick_s: 0}
+  - wait: 40
+  - check: 'if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 observer[facing=west] if block ~3 ~3 ~0 slime_block if block ~3 ~3 ~1 sticky_piston[facing=east] if block ~4 ~2 ~2 slime_block if block ~4 ~3 ~0 sticky_piston[facing=west] if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 observer[facing=west] if block ~5 ~2 ~2 slime_block if block ~5 ~2 ~3 sticky_piston[facing=east] if block ~5 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~5 ~3 ~1 slime_block if block ~5 ~3 ~2 slime_block if block ~5 ~3 ~3 sticky_piston[facing=east] if block ~6 ~2 ~3 quartz_block if block ~6 ~3 ~3 quartz_block if block ~7 ~2 ~3 air if block ~7 ~3 ~3 air if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block'
+  - check: 'if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~1 ~5 ~0 honey_block if block ~1 ~5 ~1 observer[facing=west] if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 sticky_piston[facing=east] if block ~3 ~4 ~2 honey_block if block ~3 ~5 ~0 sticky_piston[facing=west] if block ~3 ~5 ~1 honey_block if block ~3 ~5 ~2 honey_block if block ~3 ~5 ~3 observer[facing=west] if block ~4 ~4 ~2 honey_block if block ~4 ~4 ~3 sticky_piston[facing=east] if block ~4 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 sticky_piston[facing=east] if block ~5 ~4 ~3 air if block ~5 ~5 ~3 air if block ~6 ~4 ~3 air if block ~6 ~5 ~3 air if block ~7 ~4 ~3 quartz_block if block ~7 ~5 ~3 quartz_block if block ~8 ~4 ~3 quartz_block if block ~8 ~5 ~3 quartz_block if block ~9 ~4 ~3 quartz_block'
+  - check: 'if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block if block ~10 ~5 ~3 quartz_block'
+  - drive: {back_s: 1}
+  - wait: 2
+  - drive: {back_s: 0}
+  - wait: 40
+  - check: 'if block ~1 ~3 ~0 slime_block if block ~1 ~3 ~1 observer[facing=west] if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 sticky_piston[facing=east] if block ~3 ~2 ~2 slime_block if block ~3 ~3 ~0 sticky_piston[facing=west] if block ~3 ~3 ~1 slime_block if block ~3 ~3 ~2 slime_block if block ~3 ~3 ~3 observer[facing=west] if block ~4 ~2 ~2 slime_block if block ~4 ~2 ~3 sticky_piston[facing=east] if block ~4 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 sticky_piston[facing=east] if block ~5 ~2 ~3 quartz_block if block ~5 ~3 ~3 quartz_block if block ~6 ~2 ~3 air if block ~6 ~3 ~3 air if block ~7 ~2 ~3 air if block ~7 ~3 ~3 air if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block'
+  - check: 'if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~1 ~5 ~0 honey_block if block ~1 ~5 ~1 observer[facing=west] if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 sticky_piston[facing=east] if block ~3 ~4 ~2 honey_block if block ~3 ~5 ~0 sticky_piston[facing=west] if block ~3 ~5 ~1 honey_block if block ~3 ~5 ~2 honey_block if block ~3 ~5 ~3 observer[facing=west] if block ~4 ~4 ~2 honey_block if block ~4 ~4 ~3 sticky_piston[facing=east] if block ~4 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 sticky_piston[facing=east] if block ~5 ~4 ~3 air if block ~5 ~5 ~3 air if block ~6 ~4 ~3 air if block ~6 ~5 ~3 air if block ~7 ~4 ~3 quartz_block if block ~7 ~5 ~3 quartz_block if block ~8 ~4 ~3 quartz_block if block ~8 ~5 ~3 quartz_block if block ~9 ~4 ~3 quartz_block'
+  - check: 'if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block if block ~10 ~5 ~3 quartz_block'
+- name: the honey band fetches column 0 alone and brings it home
+  steps:
+  - drive: {kick_h: 1}
+  - wait: 2
+  - drive: {kick_h: 0}
+  - wait: 40
+  - check: 'if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 observer[facing=west] if block ~3 ~5 ~0 honey_block if block ~3 ~5 ~1 sticky_piston[facing=east] if block ~4 ~4 ~2 honey_block if block ~4 ~5 ~0 sticky_piston[facing=west] if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 observer[facing=west] if block ~5 ~4 ~2 honey_block if block ~5 ~4 ~3 sticky_piston[facing=east] if block ~5 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~5 ~5 ~1 honey_block if block ~5 ~5 ~2 honey_block if block ~5 ~5 ~3 sticky_piston[facing=east] if block ~6 ~4 ~3 quartz_block if block ~6 ~5 ~3 quartz_block if block ~7 ~4 ~3 air if block ~7 ~5 ~3 air if block ~8 ~4 ~3 quartz_block if block ~8 ~5 ~3 quartz_block if block ~9 ~4 ~3 quartz_block if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block'
+  - check: 'if block ~10 ~5 ~3 quartz_block'
+  - check: 'if block ~1 ~3 ~0 slime_block if block ~1 ~3 ~1 observer[facing=west] if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 sticky_piston[facing=east] if block ~3 ~2 ~2 slime_block if block ~3 ~3 ~0 sticky_piston[facing=west] if block ~3 ~3 ~1 slime_block if block ~3 ~3 ~2 slime_block if block ~3 ~3 ~3 observer[facing=west] if block ~4 ~2 ~2 slime_block if block ~4 ~2 ~3 sticky_piston[facing=east] if block ~4 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 sticky_piston[facing=east] if block ~5 ~2 ~3 air if block ~5 ~3 ~3 air if block ~6 ~2 ~3 air if block ~6 ~3 ~3 air if block ~7 ~2 ~3 quartz_block if block ~7 ~3 ~3 quartz_block if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block'
+  - check: 'if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+  - drive: {back_h: 1}
+  - wait: 2
+  - drive: {back_h: 0}
+  - wait: 40
+  - check: 'if block ~1 ~5 ~0 honey_block if block ~1 ~5 ~1 observer[facing=west] if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 sticky_piston[facing=east] if block ~3 ~4 ~2 honey_block if block ~3 ~5 ~0 sticky_piston[facing=west] if block ~3 ~5 ~1 honey_block if block ~3 ~5 ~2 honey_block if block ~3 ~5 ~3 observer[facing=west] if block ~4 ~4 ~2 honey_block if block ~4 ~4 ~3 sticky_piston[facing=east] if block ~4 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 sticky_piston[facing=east] if block ~5 ~4 ~3 quartz_block if block ~5 ~5 ~3 quartz_block if block ~6 ~4 ~3 air if block ~6 ~5 ~3 air if block ~7 ~4 ~3 air if block ~7 ~5 ~3 air if block ~8 ~4 ~3 quartz_block if block ~8 ~5 ~3 quartz_block if block ~9 ~4 ~3 quartz_block'
+  - check: 'if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block if block ~10 ~5 ~3 quartz_block'
+  - check: 'if block ~1 ~3 ~0 slime_block if block ~1 ~3 ~1 observer[facing=west] if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 sticky_piston[facing=east] if block ~3 ~2 ~2 slime_block if block ~3 ~3 ~0 sticky_piston[facing=west] if block ~3 ~3 ~1 slime_block if block ~3 ~3 ~2 slime_block if block ~3 ~3 ~3 observer[facing=west] if block ~4 ~2 ~2 slime_block if block ~4 ~2 ~3 sticky_piston[facing=east] if block ~4 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 sticky_piston[facing=east] if block ~5 ~2 ~3 air if block ~5 ~3 ~3 air if block ~6 ~2 ~3 air if block ~6 ~3 ~3 air if block ~7 ~2 ~3 quartz_block if block ~7 ~3 ~3 quartz_block if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block'
+  - check: 'if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+- name: both bands fetch at once
+  steps:
+  - drive: {kick_s: 1, kick_h: 1}
+  - wait: 2
+  - drive: {kick_s: 0, kick_h: 0}
+  - wait: 40
+  - check: 'if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 observer[facing=west] if block ~3 ~3 ~0 slime_block if block ~3 ~3 ~1 sticky_piston[facing=east] if block ~4 ~2 ~2 slime_block if block ~4 ~3 ~0 sticky_piston[facing=west] if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 observer[facing=west] if block ~5 ~2 ~2 slime_block if block ~5 ~2 ~3 sticky_piston[facing=east] if block ~5 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~5 ~3 ~1 slime_block if block ~5 ~3 ~2 slime_block if block ~5 ~3 ~3 sticky_piston[facing=east] if block ~6 ~2 ~3 quartz_block if block ~6 ~3 ~3 quartz_block if block ~7 ~2 ~3 air if block ~7 ~3 ~3 air if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block'
+  - check: 'if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 observer[facing=west] if block ~3 ~5 ~0 honey_block if block ~3 ~5 ~1 sticky_piston[facing=east] if block ~4 ~4 ~2 honey_block if block ~4 ~5 ~0 sticky_piston[facing=west] if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 observer[facing=west] if block ~5 ~4 ~2 honey_block if block ~5 ~4 ~3 sticky_piston[facing=east] if block ~5 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~5 ~5 ~1 honey_block if block ~5 ~5 ~2 honey_block if block ~5 ~5 ~3 sticky_piston[facing=east] if block ~6 ~4 ~3 quartz_block if block ~6 ~5 ~3 quartz_block if block ~7 ~4 ~3 air if block ~7 ~5 ~3 air if block ~8 ~4 ~3 quartz_block if block ~8 ~5 ~3 quartz_block if block ~9 ~4 ~3 quartz_block if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block'
+  - check: 'if block ~10 ~5 ~3 quartz_block'
+  - drive: {back_s: 1, back_h: 1}
+  - wait: 2
+  - drive: {back_s: 0, back_h: 0}
+  - wait: 40
+  - check: 'if block ~1 ~3 ~0 slime_block if block ~1 ~3 ~1 observer[facing=west] if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 sticky_piston[facing=east] if block ~3 ~2 ~2 slime_block if block ~3 ~3 ~0 sticky_piston[facing=west] if block ~3 ~3 ~1 slime_block if block ~3 ~3 ~2 slime_block if block ~3 ~3 ~3 observer[facing=west] if block ~4 ~2 ~2 slime_block if block ~4 ~2 ~3 sticky_piston[facing=east] if block ~4 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 sticky_piston[facing=east] if block ~5 ~2 ~3 quartz_block if block ~5 ~3 ~3 quartz_block if block ~6 ~2 ~3 air if block ~6 ~3 ~3 air if block ~7 ~2 ~3 air if block ~7 ~3 ~3 air if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block'
+  - check: 'if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~1 ~5 ~0 honey_block if block ~1 ~5 ~1 observer[facing=west] if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 sticky_piston[facing=east] if block ~3 ~4 ~2 honey_block if block ~3 ~5 ~0 sticky_piston[facing=west] if block ~3 ~5 ~1 honey_block if block ~3 ~5 ~2 honey_block if block ~3 ~5 ~3 observer[facing=west] if block ~4 ~4 ~2 honey_block if block ~4 ~4 ~3 sticky_piston[facing=east] if block ~4 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 sticky_piston[facing=east] if block ~5 ~4 ~3 quartz_block if block ~5 ~5 ~3 quartz_block if block ~6 ~4 ~3 air if block ~6 ~5 ~3 air if block ~7 ~4 ~3 air if block ~7 ~5 ~3 air if block ~8 ~4 ~3 quartz_block if block ~8 ~5 ~3 quartz_block if block ~9 ~4 ~3 quartz_block'
+  - check: 'if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block if block ~10 ~5 ~3 quartz_block'
+- name: staggered bands fly past each other, stop at different columns and both come home
+  steps:
+  - run: 'fill ~7 ~2 ~3 ~8 ~3 ~3 air'
+  - run: 'fill ~7 ~4 ~3 ~7 ~5 ~3 air'
+  - wait: 2
+  - drive: {kick_s: 1}
+  - wait: 2
+  - drive: {kick_s: 0}
+  - wait: 5
+  - drive: {kick_h: 1}
+  - wait: 2
+  - drive: {kick_h: 0}
+  - wait: 60
+  - check: 'if block ~4 ~3 ~0 slime_block if block ~4 ~3 ~1 observer[facing=west] if block ~5 ~2 ~3 air if block ~5 ~3 ~0 slime_block if block ~5 ~3 ~1 sticky_piston[facing=east] if block ~5 ~3 ~3 air if block ~6 ~2 ~2 slime_block if block ~6 ~2 ~3 air if block ~6 ~3 ~0 sticky_piston[facing=west] if block ~6 ~3 ~1 slime_block if block ~6 ~3 ~2 slime_block if block ~6 ~3 ~3 observer[facing=west]'
+  - check: 'if block ~7 ~2 ~2 slime_block if block ~7 ~2 ~3 sticky_piston[facing=east] if block ~7 ~3 ~0 observer[facing=east] if block ~7 ~3 ~1 slime_block if block ~7 ~3 ~2 slime_block if block ~7 ~3 ~3 sticky_piston[facing=east] if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 air if block ~9 ~3 ~3 air if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~3 ~5 ~0 honey_block if block ~3 ~5 ~1 observer[facing=west] if block ~4 ~5 ~0 honey_block if block ~4 ~5 ~1 sticky_piston[facing=east] if block ~5 ~4 ~2 honey_block if block ~5 ~4 ~3 air if block ~5 ~5 ~0 sticky_piston[facing=west] if block ~5 ~5 ~1 honey_block if block ~5 ~5 ~2 honey_block if block ~5 ~5 ~3 observer[facing=west] if block ~6 ~4 ~2 honey_block if block ~6 ~4 ~3 sticky_piston[facing=east]'
+  - check: 'if block ~6 ~5 ~0 observer[facing=east] if block ~6 ~5 ~1 honey_block if block ~6 ~5 ~2 honey_block if block ~6 ~5 ~3 sticky_piston[facing=east] if block ~7 ~4 ~3 quartz_block if block ~7 ~5 ~3 quartz_block if block ~8 ~4 ~3 air if block ~8 ~5 ~3 air if block ~9 ~4 ~3 quartz_block if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block if block ~10 ~5 ~3 quartz_block'
+  - drive: {back_h2: 1}
+  - wait: 2
+  - drive: {back_h2: 0}
+  - wait: 5
+  - drive: {back_s3: 1}
+  - wait: 2
+  - drive: {back_s3: 0}
+  - wait: 80
+  - check: 'if block ~1 ~3 ~0 slime_block if block ~1 ~3 ~1 observer[facing=west] if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 sticky_piston[facing=east] if block ~3 ~2 ~2 slime_block if block ~3 ~3 ~0 sticky_piston[facing=west] if block ~3 ~3 ~1 slime_block if block ~3 ~3 ~2 slime_block if block ~3 ~3 ~3 observer[facing=west] if block ~4 ~2 ~2 slime_block if block ~4 ~2 ~3 sticky_piston[facing=east] if block ~4 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 sticky_piston[facing=east] if block ~5 ~2 ~3 quartz_block if block ~5 ~3 ~3 quartz_block if block ~6 ~2 ~3 air if block ~6 ~3 ~3 air if block ~7 ~2 ~3 air if block ~7 ~3 ~3 air if block ~8 ~2 ~3 air if block ~8 ~3 ~3 air if block ~9 ~2 ~3 air'
+  - check: 'if block ~9 ~3 ~3 air if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~1 ~5 ~0 honey_block if block ~1 ~5 ~1 observer[facing=west] if block ~2 ~5 ~0 honey_block if block ~2 ~5 ~1 sticky_piston[facing=east] if block ~3 ~4 ~2 honey_block if block ~3 ~5 ~0 sticky_piston[facing=west] if block ~3 ~5 ~1 honey_block if block ~3 ~5 ~2 honey_block if block ~3 ~5 ~3 observer[facing=west] if block ~4 ~4 ~2 honey_block if block ~4 ~4 ~3 sticky_piston[facing=east] if block ~4 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~5 ~1 honey_block if block ~4 ~5 ~2 honey_block if block ~4 ~5 ~3 sticky_piston[facing=east] if block ~5 ~4 ~3 quartz_block if block ~5 ~5 ~3 quartz_block if block ~6 ~4 ~3 air if block ~6 ~5 ~3 air if block ~7 ~4 ~3 air if block ~7 ~5 ~3 air if block ~8 ~4 ~3 air if block ~8 ~5 ~3 air if block ~9 ~4 ~3 quartz_block'
+  - check: 'if block ~9 ~5 ~3 quartz_block if block ~10 ~4 ~3 quartz_block if block ~10 ~5 ~3 quartz_block'
+- name: control, both bands slime, the lower band's glue holds the upper band and its kick moves nothing
+  steps:
+  - run: 'fill ~0 ~4 ~0 ~12 ~5 ~3 slime_block replace honey_block'
+  - wait: 2
+  - drive: {kick_s: 1}
+  - wait: 2
+  - drive: {kick_s: 0}
+  - wait: 40
+  - check: 'if block ~1 ~3 ~0 slime_block if block ~1 ~3 ~1 observer[facing=west] if block ~2 ~3 ~0 slime_block if block ~2 ~3 ~1 sticky_piston[facing=east] if block ~3 ~2 ~2 slime_block if block ~3 ~3 ~0 sticky_piston[facing=west] if block ~3 ~3 ~1 slime_block if block ~3 ~3 ~2 slime_block if block ~3 ~3 ~3 observer[facing=west] if block ~4 ~2 ~2 slime_block if block ~4 ~2 ~3 sticky_piston[facing=east] if block ~4 ~3 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~3 ~1 slime_block if block ~4 ~3 ~2 slime_block if block ~4 ~3 ~3 sticky_piston[facing=east] if block ~5 ~2 ~3 air if block ~5 ~3 ~3 air if block ~6 ~2 ~3 air if block ~6 ~3 ~3 air if block ~7 ~2 ~3 quartz_block if block ~7 ~3 ~3 quartz_block if block ~8 ~2 ~3 quartz_block if block ~8 ~3 ~3 quartz_block if block ~9 ~2 ~3 quartz_block'
+  - check: 'if block ~9 ~3 ~3 quartz_block if block ~10 ~2 ~3 quartz_block if block ~10 ~3 ~3 quartz_block'
+  - check: 'if block ~1 ~5 ~0 slime_block if block ~1 ~5 ~1 observer[facing=west] if block ~2 ~5 ~0 slime_block if block ~2 ~5 ~1 sticky_piston[facing=east] if block ~3 ~4 ~2 slime_block if block ~3 ~5 ~0 sticky_piston[facing=west] if block ~3 ~5 ~1 slime_block if block ~3 ~5 ~2 slime_block if block ~3 ~5 ~3 observer[facing=west] if block ~4 ~4 ~2 slime_block if block ~4 ~4 ~3 sticky_piston[facing=east] if block ~4 ~5 ~0 observer[facing=east]'
+  - check: 'if block ~4 ~5 ~1 slime_block if block ~4 ~5 ~2 slime_block if block ~4 ~5 ~3 sticky_piston[facing=east]'
