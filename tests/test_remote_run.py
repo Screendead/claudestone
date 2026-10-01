@@ -141,6 +141,14 @@ def test_the_container_limits_come_from_jobs(desk, work):
     assert not set("".join(argv)) & set(' "^&|<>%')
 
 
+def test_gpus_asks_docker_for_every_gpu(desk, work):
+    rr.execute(HOST, work, [sys.executable, "job.py", "x", "0"], 1, "1g", out=io.BytesIO(), err=io.BytesIO())
+    assert "--gpus" not in desk.runs[-1]
+    rr.execute(HOST, work, [sys.executable, "job.py", "x", "0"], 1, "4g", out=io.BytesIO(), err=io.BytesIO(), gpus=True)
+    argv = desk.runs[-1]
+    assert argv[argv.index("--gpus") + 1] == "all" and argv.index("--gpus") < argv.index(rr.IMAGE)
+
+
 def test_a_missing_command_is_exit_127(desk, work):
     out, err = io.BytesIO(), io.BytesIO()
     assert rr.execute(HOST, work, ["no-such-command-here"], 1, "1g", out=out, err=err) == 127

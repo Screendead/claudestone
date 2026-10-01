@@ -78,6 +78,14 @@ def test_any_other_exit_ends_the_job(tmp_path, work, monkeypatch):
     assert jobs.read(d)["restarts"] == 0
 
 
+def test_gpus_reaches_remote_run(tmp_path, work, monkeypatch):
+    fake, _ = fake_remote_run(tmp_path, [0])
+    monkeypatch.setattr(jobs, "REMOTE_RUN", fake)
+    monkeypatch.setattr(subprocess, "Popen", _no_runner(subprocess.Popen))
+    job = jobs.start("g", work, ["python3", "x.py"], 2, jobs=tmp_path / "jobs", gpus=True)
+    assert job["argv"][len(fake):] == [str(work), "--jobs", "2", "--gpus", "--", "python3", "x.py"]
+
+
 def test_start_detaches_and_logs(tmp_path, work, monkeypatch):
     fake, runs = fake_remote_run(tmp_path, [0])
     monkeypatch.setattr(jobs, "REMOTE_RUN", fake)

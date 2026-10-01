@@ -1,7 +1,7 @@
 """Run a CPU-heavy offline job (a search, a SAT solve; no Minecraft) on the desktop instead of
 this laptop:
 
-    python -m scripts.remote_run <dir> [--jobs N] [--memory SIZE] -- <cmd> [args]...
+    python -m scripts.remote_run <dir> [--jobs N] [--memory SIZE] [--gpus] -- <cmd> [args]...
 
 <dir> is copied to the desktop (a Docker volume per content hash, so a repeat run of the
 same files uploads nothing) and <cmd> runs in it, in a throwaway container of the satellite
@@ -13,7 +13,8 @@ its exit code is this one's. `$REMOTE_RUN_JOBS` there is N.
 The container may use N CPUs and N GB (--memory to change). All runs together hold at most
 $REDSTONE_SEARCH_CPUS (default 12) of the desktop's 14 Docker CPUs, so the dsats keep
 headroom; a run waits here for its CPUs. Ctrl-C or a killed process stops the container
-(its stdin closes). An unreachable desktop is an error: nothing runs locally.
+(its stdin closes). An unreachable desktop is an error: nothing runs locally. --gpus gives the
+container the desktop's GPU (docker --gpus all); it is not a slot, so two such runs share it.
 """
 
 import argparse
@@ -117,8 +118,9 @@ def take_cpus(n: int, total: int = TOTAL_CPUS, slots: Path | None = None, say=pr
 
 
 def docker_run_argv(host: str, name: str, volumes: list[str], cpus: int | None = None,
-                    memory: str | None = None) -> list[str]:
-    limits = ([f"--cpus={cpus}"] if cpus else []) + ([f"--memory={memory}"] if memory else [])
+                    memory: str | None = None, gpus: bool = False) -> list[str]:
+    limits = ([f"--cpus={cpus}"] if cpus else []) + ([f"--memory={memory}"] if memory else []) \
+        + (["--gpus", "all"] if gpus else [])
     mounts = [a for v in volumes for a in ("-v", v)]
     return ["ssh", "-o", "ConnectTimeout=10", host, "docker", "run", "-i", "--rm", "--name", name, "--label", LABEL, *limits, *mounts,
             IMAGE, "python3", "-c", BOOT]
@@ -229,7 +231,8 @@ def upload(host: str, root: Path, content: str, data: bytes) -> None:
         ssh(host, "docker", "volume", "rm", *stale)
 
 
-def execute(host: str, root: Path, cmd: list[str], jobs: int, memory: str, out=None, err=None) -> int:
+def execute(host: str, root: Path, cmd: list[str], jobs: int, memory: str, out=None, err=None,
+            gpus: bool = False) -> int:
     out = out or sys.stdout.buffer
     err = err or sys.stderr.buffer
     content, data = snapshot(root)
@@ -241,7 +244,7 @@ def execute(host: str, root: Path, cmd: list[str], jobs: int, memory: str, out=N
         job["req"] = req.read_text()
         volumes.append(f"rr-pip-{hashlib.sha256(job['req'].encode()).hexdigest()[:20]}:{CONTAINER['pip']}")
     for attempt in range(2):
-        s = Session(host, docker_run_argv(host, f"rr-{uuid.uuid4().hex[:12]}", volumes, jobs, memory),
+        s = Session(host, docker_run_argv(host, f"rr-{uuid.uuid4().hex[:12]}", volumes, jobs, memory, gpus),
                     program(job))
         try:
             code, need, tarball = None, False, bytearray()
@@ -290,6 +293,7 @@ def main(argv: list[str]) -> int:
     ap.add_argument("dir", type=Path)
     ap.add_argument("--jobs", type=int, default=1)
     ap.add_argument("--memory", help="docker --memory for the container (default: N GB for --jobs N)")
+    ap.add_argument("--gpus", action="store_true", help="docker --gpus all: the desktop's GPU in the container")
     a = ap.parse_args(argv[:cut])
     cmd = argv[cut + 1:]
     if not cmd or not a.dir.is_dir():
@@ -303,7 +307,7 @@ def main(argv: list[str]) -> int:
     held = take_cpus(a.jobs)
     signal.signal(signal.SIGTERM, _interrupt)
     try:
-        return execute(host, a.dir.resolve(), cmd, a.jobs, a.memory or f"{a.jobs}g")
+        return execute(host, a.dir.resolve(), cmd, a.jobs, a.memory or f"{a.jobs}g", gpus=a.gpus)
     except Unreachable as e:
         print(f"remote_run: {e}", file=sys.stderr)
         return 255

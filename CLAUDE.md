@@ -26,9 +26,9 @@ python -m scripts.try <spec> [--test NAME]... [--trace]   # lint + run on a sate
 python -m scripts.servers {start,stop,status} [laptop|docker|all]   # satellites
 python -m redstone.docker_sats {start,stop,status} [dsatN]...   # Docker satellites only
 python -m scripts.satellite_image        # rebuild the Docker satellite image on the desktop
-python -m scripts.remote_run <dir> [--jobs N] -- <cmd> [args]...   # a CPU-heavy search, on the desktop
+python -m scripts.remote_run <dir> [--jobs N] [--gpus] -- <cmd> [args]...   # a CPU-heavy search, on the desktop
 python -m scripts.remote_keep -- <cmd> [args]...   # rerun a resumable desktop job after each desktop drop
-python -m scripts.jobs start <name> <dir> [--jobs N] [--resume CMD] -- <cmd>...   # a detached desktop job
+python -m scripts.jobs start <name> <dir> [--jobs N] [--gpus] [--resume CMD] -- <cmd>...   # a detached desktop job
 python -m scripts.jobs {status [<name>],stop <name>,log <name> [-n N]}
 python -m scripts.status                 # jobs, search CPUs, servers, plots, RAM and plan usage on one screen
 python -m scripts.blockdata              # regenerate redstone/blocks.json after a server upgrade
@@ -195,7 +195,9 @@ Docker volume (`rr-src-*`, older snapshots of the same dir dropped), a `requirem
 there is pip-installed once per content (`rr-pip-*`), output streams back live, the exit
 code is the command's, and new or changed files are copied back into the dir. `--jobs N`
 gives the container N CPUs and N GB; all runs together hold at most `REDSTONE_SEARCH_CPUS`
-(default 12) of the desktop VM's 14 CPUs, via slot locks in `server/remote_run/`. Ctrl-C,
+(default 12) of the desktop VM's 14 CPUs, via slot locks in `server/remote_run/`; `--gpus` adds
+`docker --gpus all` (the desktop's RTX 3090, 24 GB; not slot-counted, and keep `--memory` at 4g
+or less, since the VM has ~12.5 GB). Ctrl-C,
 SIGTERM or a killed process stops the container (its stdin closes); an unreachable desktop
 is an error, never a local run.
 `scripts.remote_keep` runs a local command (usually a script that rebuilds its resume state from

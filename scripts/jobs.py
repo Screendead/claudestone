@@ -1,12 +1,12 @@
 """Long desktop jobs that outlive the shell that started them:
 
-    python -m scripts.jobs start <name> <dir> [--jobs N] [--resume CMD] -- <cmd> [args]...
+    python -m scripts.jobs start <name> <dir> [--jobs N] [--gpus] [--resume CMD] -- <cmd> [args]...
     python -m scripts.jobs status [<name>]
     python -m scripts.jobs stop <name>
     python -m scripts.jobs log <name> [-n LINES]
 
 `start` detaches a runner (its own session, so it survives the launching process and any
-task time limit) that runs `scripts.remote_run <dir> --jobs N -- <cmd>` under
+task time limit) that runs `scripts.remote_run <dir> --jobs N [--gpus] -- <cmd>` under
 `scripts.remote_keep`'s loop: a lost desktop (exit 255) waits for Docker and runs it again.
 Everything the job prints goes to server/jobs/<name>/log; server/jobs/<name>/job.json
 holds pid, cmd, dir, started, restarts and exit.
@@ -129,7 +129,7 @@ def run(d: Path, answers=remote_keep.docker_answers, poll: float = remote_keep.P
 
 
 def start(name: str, directory: Path, cmd: list[str], cpus: int = 1, resume_cmd: str | None = None,
-          jobs: Path = JOBS) -> dict:
+          jobs: Path = JOBS, gpus: bool = False) -> dict:
     d = job_dir(name, jobs)
     old = read(d)
     if old and state(old) == "running":
@@ -139,7 +139,7 @@ def start(name: str, directory: Path, cmd: list[str], cpus: int = 1, resume_cmd:
     d.mkdir(parents=True, exist_ok=True)
     directory = directory.resolve()
     job = {"name": name, "cmd": cmd, "dir": str(directory), "jobs": cpus, "resume": resume_cmd,
-           "argv": [*REMOTE_RUN, str(directory), "--jobs", str(cpus), "--", *cmd],
+           "argv": [*REMOTE_RUN, str(directory), "--jobs", str(cpus), *(["--gpus"] if gpus else []), "--", *cmd],
            "started": time.time(), "restarts": 0, "exit": None, "pid": None}
     write(d, job)
     with open(d / "log", "a") as log:
@@ -217,6 +217,7 @@ def main(argv: list[str]) -> int:
     s.add_argument("dir", type=Path)
     s.add_argument("--jobs", type=int, default=1)
     s.add_argument("--resume")
+    s.add_argument("--gpus", action="store_true")
     sub.add_parser("status").add_argument("name", nargs="?")
     sub.add_parser("stop").add_argument("name")
     lg = sub.add_parser("log")
@@ -226,7 +227,7 @@ def main(argv: list[str]) -> int:
     if a.action == "start":
         if not cmd:
             ap.error("start needs -- <cmd>")
-        job = start(a.name, a.dir, cmd, a.jobs, a.resume)
+        job = start(a.name, a.dir, cmd, a.jobs, a.resume, gpus=a.gpus)
         print(f"{a.name}: started, pid {job['pid']}, log {job_dir(a.name) / 'log'}")
     elif a.action == "status":
         print("\n".join(summary(names=[a.name] if a.name else None)) or "no jobs")
