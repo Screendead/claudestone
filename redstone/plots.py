@@ -48,6 +48,11 @@ PLOTS = {MAIN.name: MAIN} | {
     f: Plot(f, (130 + PITCH * (i % COLUMNS), SURFACE, 50 - PITCH * (i // COLUMNS)), SIZE, COLOURS[i])
     for i, f in enumerate(FAMILIES)}
 REFERENCES = PLOTS["references"]
+# Piston doors up to 16x16 with their mechanism, apart from the grid: east of main and south
+# of the grid's last column, x and z origins 2 past a chunk edge, so with its border it
+# forceloads 8 x 8 chunks.
+BIGDOOR = Plot("bigdoor", (370, SURFACE, 210), (112, 64, 112), "gray")
+PLOTS[BIGDOOR.name] = BIGDOOR
 
 # Library folders that share another building block's plot; a folder named after a plot
 # uses it, and the rest (mechanics, builds, input) have none.
@@ -55,7 +60,8 @@ FOLDER_PLOT = {"nand": "and", "nor": "or", "xnor": "xor", "binary_decoder": "dec
                "bcd_to_7seg": "seven_segment", "d_flip_flop": "d_latch", "demux": "mux",
                "dual_edge": "pulse", "falling_edge": "pulse", "rising_edge": "pulse",
                "pulse_extender": "pulse", "pulse_limiter": "pulse", "full_adder": "adder",
-               "half_adder": "adder", "register": "shift_register", "signal_strength": "analog"}
+               "half_adder": "adder", "register": "shift_register", "signal_strength": "analog",
+               "door": BIGDOOR.name}
 
 
 def plot_for(path) -> Plot | None:

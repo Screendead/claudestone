@@ -145,10 +145,11 @@ def ensure_server(server: Server = servers.MAIN, timeout=180) -> None:
 def clear_commands(origin: Pos, size: Pos) -> list[str]:
     """Empty a box without drops and remove the entities in it."""
     (ox, oy, oz), (sx, sy, sz) = origin, size
-    # Fill is capped at 32768 blocks per command, so clear in 32 x 32 columns; strict: no
-    # neighbour updates, so attached torches and levers don't pop off as items.
-    fills = [f"fill {x} {oy} {z} {min(x + 31, ox + sx - 1)} {oy + sy - 1} {min(z + 31, oz + sz - 1)} air strict"
-             for x in range(ox, ox + sx, 32) for z in range(oz, oz + sz, 32)]
+    # Fill is capped at 32768 blocks per command (max_block_modifications), so clear in
+    # 32 x 32 x 32 pieces; strict: no neighbour updates, so attached torches and levers
+    # don't pop off as items.
+    fills = [f"fill {x} {y} {z} {min(x + 31, ox + sx - 1)} {min(y + 31, oy + sy - 1)} {min(z + 31, oz + sz - 1)} air strict"
+             for x in range(ox, ox + sx, 32) for z in range(oz, oz + sz, 32) for y in range(oy, oy + sy, 32)]
     return fills + [kill_command(origin, size)]
 
 
@@ -301,10 +302,14 @@ class Rig:
         # A chunk's entities load after its blocks, so the first kill can miss them.
         self.run(kill_command(self.origin, self.size))
 
-    def load(self, build: Build, probe: set[Pos] | None = None, drivers: set[Pos] = frozenset()) -> None:
+    def load(self, build: Build, probe: set[Pos] | None = None, drivers: set[Pos] = frozenset(),
+             update: str = "all", functions: dict[str, str] | None = None,
+             tags: dict[str, str] | None = None) -> None:
         """Place a build. `probe` limits snapshots to those cells (default: every
         signal-carrying block). `drivers` are input cells the build places a redstone
-        block in; drive() may move them later."""
+        block in; drive() may move them later. `update` is the spec's update pass
+        (Build.to_commands). `functions` and `tags` go into the data pack beside the build
+        and probe functions, for call()."""
         (lo, hi) = build.bounds()
         for a, b, s in zip(lo, hi, self.size):
             if a < 0 or b >= s:
@@ -317,17 +322,31 @@ class Rig:
         self.pending = []
         probes, self.probed = probe_functions(self.build, probe)
         self.probe_count = len(probes)
-        root = write_datapack(self.datapacks, PACK, {"build": build.to_mcfunction(),
-                                                     **{f"probe{i}": body for i, body in enumerate(probes)}})
+        parts = build.to_functions(PROBE_CHUNK, update)
+        root = write_datapack(self.datapacks, PACK, {**{f"build{i}": body for i, body in enumerate(parts)},
+                                                     **{f"probe{i}": body for i, body in enumerate(probes)},
+                                                     **(functions or {})}, tags)
         if hasattr(self.server, "push_datapack"):
             # A Docker satellite's world is in its container; this folder is only staging.
             self.server.push_datapack(root, reload=False)
         self.run("reload")
         if f"file/{PACK}" not in self.run("datapack list enabled"):
             self.run(f'datapack enable "file/{PACK}"')
-        out = self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:build")
-        if not out.startswith("Running function"):
-            raise CommandFailed(f"build function: {out}")
+        # In order, every setblock before any clone; each part is its own command chain.
+        for i in range(len(parts)):
+            out = self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:build{i}")
+            if not out.startswith("Running function"):
+                raise CommandFailed(f"build function {i + 1}/{len(parts)}: {out}")
+
+    def call(self, functions: list[str], read: str | None = None) -> str:
+        """Run data pack functions at the build origin, then `data get storage <read>` if
+        given, with no other client's command in between; that reply, or ""."""
+        with self.r.sequence():
+            for f in functions:
+                out = self.run(f"execute positioned {self.abs((0, 0, 0))} run function {PACK}:{f}")
+                if not out.startswith("Running function"):
+                    raise CommandFailed(f"function {f}: {out}")
+            return self.run(f"data get storage {read}") if read else ""
 
     def snapshot(self) -> dict[Pos, int]:
         """Signal level of every probed block: analog power 0-15, otherwise 1 or 0. Sets

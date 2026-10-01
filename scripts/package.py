@@ -19,6 +19,7 @@ from redstone.library import path_of
 
 ROOT = Path(__file__).resolve().parent.parent
 FILL_LIMIT = 32768
+CHAIN_LIMIT = 65536  # the max_command_sequence_length game rule's default
 
 
 def package(name: str, front: tuple[int, int, int] | None = None) -> Path:
@@ -39,14 +40,24 @@ def package(name: str, front: tuple[int, int, int] | None = None) -> Path:
             for y in range(y0, y1 + 1, layers):
                 build.append(f"fill ~{x} ~{y} ~{z} ~{min(x + 31, x1)} ~{min(y + layers - 1, y1)} "
                              f"~{min(z + 31, z1)} air strict")
+    place = spec.build.to_mcfunction(spec.update_pass)
     build.append(f"execute positioned ~{ox} ~{oy} ~{oz} run function {name}:place")
     build.append('tellraw @s {"text":"Built %s.","color":"green"}' % name)
+    # One /function call, nested calls included, runs at most max_command_sequence_length
+    # commands, a limit read when the call starts: so prepare raises it for a big build,
+    # and build puts it back once it has run.
+    chain = len(build) + place.count("\n") + 100  # with room for the calls themselves
+    if chain > CHAIN_LIMIT:
+        prepare.insert(0, f"gamerule max_command_sequence_length {chain}")
+        prepare[-1] = prepare[-1].replace("/function %s:build." % name,
+                                          "/function %s:build (run prepare again before another build)." % name)
+        build.append(f"gamerule max_command_sequence_length {CHAIN_LIMIT}")
     out = ROOT / "dist"
     if (out / name).exists():
         shutil.rmtree(out / name)
     pack = write_datapack(out, name, {"prepare": "\n".join(prepare) + "\n",
                                       "build": "\n".join(build) + "\n",
-                                      "place": spec.build.to_mcfunction()})
+                                      "place": place})
     shutil.make_archive(str(out / name), "zip", pack)
     return pack
 

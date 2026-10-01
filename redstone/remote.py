@@ -167,11 +167,11 @@ def serve(job: dict, out=None, rcon_factory=None, server_dir: Path = Path("/srv"
 
 @cache
 def code() -> str:
-    """This package's source, gzipped and base64-encoded, taken once per process so every
-    test of a session runs the same code."""
+    """This package's source and data (door_probe reads blocks.json on import), gzipped and
+    base64-encoded, taken once per process so every test of a session runs the same code."""
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for f in sorted(PACKAGE.glob("*.py")):
+        for f in sorted([*PACKAGE.glob("*.py"), *PACKAGE.glob("*.json")]):
             tar.add(f, arcname=f"redstone/{f.name}")
     return base64.b64encode(buf.getvalue()).decode()
 

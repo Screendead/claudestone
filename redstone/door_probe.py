@@ -157,12 +157,15 @@ def occupancy_region(bounds: Box, hallway: list[Box], plot_size: Pos,
 
 def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surface: set[Pos],
                         door_material: list[str], surface_material: list[str], plot_size: Pos,
-                        margin: int = MARGIN) -> tuple[list[str], list[str], list[Pos], set[int]]:
+                        margin: int = MARGIN, track: set[Pos] | None = None
+                        ) -> tuple[list[str], list[str], list[Pos], set[int]]:
     """(occ chunks, occ_hall chunks, region cells, shell indices).
 
     `bounds` is the build's bounds, `static` the frame and input device cells (never
     flagged), `surface` the hallway and outer surface cells, where the surface material
     is not circuitry. Index i of every flag is the cell's index in the region list.
+    With `track`, only those cells get lines (with the same indices), for a per-tick pass
+    over the cells blocks can move through.
     """
     door_ids = _block_ids(door_material)
     surface_ids = _block_ids(surface_material)
@@ -170,7 +173,7 @@ def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surfa
     hall = cells(hallway)
     occ, occ_hall, shell_index = [], [], set()
     for i, pos in enumerate(region):
-        if pos in static:
+        if pos in static or (track is not None and pos not in track):
             continue
         p = _at(pos)
         on_surface = SURFACE_EXEMPT_ANYWHERE or pos in surface
