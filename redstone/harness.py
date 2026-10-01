@@ -1,3 +1,4 @@
+import os
 import re
 import socket
 import subprocess
@@ -85,6 +86,11 @@ WARP_RATE = 10000  # the maximum /tick rate
 # 600 ticks at the current rate (30 s here). The first tick of each batch waits out the idle
 # tick period (50 ms here), so satellites, which no one joins, stay at WARP_RATE for a test.
 IDLE_RATE = 20
+# A wait this long on a satellite runs as `tick sprint`, which ignores the tick rate (at
+# WARP_RATE a step still takes 0.1 ms a tick). `tick sprint n` runs n + 1 ticks for n >= 2,
+# and its end is announced in system chat to every player, so main never sprints.
+# REDSTONE_SPRINT=0 steps every wait instead.
+SPRINT_MIN = 32
 # Gamerules library tests change (and restore in `finally`), at their vanilla values.
 BASELINE_GAMERULES = {"random_tick_speed": 3, "tnt_explodes": "true"}
 
@@ -223,6 +229,7 @@ class Rig:
         self.r.cmd(f"tick rate {IDLE_RATE}")
         self.rate = IDLE_RATE
         self.idle_rate = IDLE_RATE if server == servers.MAIN else WARP_RATE
+        self.sprint = server != servers.MAIN and os.environ.get("REDSTONE_SPRINT", "1") != "0"
         for rule, value in BASELINE_GAMERULES.items():
             self.r.cmd(f"gamerule {rule} {value}")
         if server == servers.MAIN:
@@ -266,7 +273,7 @@ class Rig:
         target = self.gametime() + n
         self._rate(WARP_RATE)
         try:
-            self.r.cmd(f"tick step {n}")
+            self.r.cmd(f"tick sprint {n - 1}" if self.sprint and n >= SPRINT_MIN else f"tick step {n}")
             while self.gametime() < target:
                 time.sleep(0.002)
         finally:

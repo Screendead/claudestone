@@ -2,7 +2,7 @@ import pytest
 
 from redstone import servers
 from redstone.docker_sats import DOCKER_SATELLITES
-from redstone.harness import IDLE_RATE, WARP_RATE, CommandFailed, Rig, checked, clear_commands
+from redstone.harness import IDLE_RATE, SPRINT_MIN, WARP_RATE, CommandFailed, Rig, checked, clear_commands
 from redstone.plots import FOLDER_PLOT, PLOTS, plot_for
 from redstone.library import LIBRARY, path_of
 
@@ -47,7 +47,8 @@ def test_plots_do_not_overlap():
 
 
 class Clock:
-    """Game time advances by a `tick step` only; `fail_at` makes that gametime query raise."""
+    """Game time advances by a `tick step`, or a `tick sprint` as 26.3 runs it (n + 1 ticks
+    for n >= 2); `fail_at` makes that gametime query raise."""
 
     def __init__(self, fail_at=None):
         self.time, self.log, self.fail_at, self.queries = 0, [], fail_at, 0
@@ -56,6 +57,9 @@ class Clock:
         self.log.append(command)
         if command.startswith("tick step "):
             self.time += int(command.split()[-1])
+        if command.startswith("tick sprint "):
+            n = int(command.split()[-1])
+            self.time += n + 1 if n >= 2 else n
         if command == "time query gametime":
             self.queries += 1
             if self.queries == self.fail_at:
@@ -68,6 +72,7 @@ def _rig(clock, server=servers.MAIN):
     rig = Rig.__new__(Rig)
     rig.r = clock
     rig.rate, rig.idle_rate = IDLE_RATE, IDLE_RATE if server == servers.MAIN else WARP_RATE
+    rig.sprint = server != servers.MAIN
     return rig
 
 
@@ -98,8 +103,27 @@ def test_satellites_stay_at_warp_rate_between_batches(server):
         rig._advance(n)
     assert [c for c in clock.log if c.startswith("tick rate")] == [f"tick rate {WARP_RATE}"]
     assert clock.time == 178
+    assert [c for c in clock.log if c.startswith("tick ")][1:3] == ["tick step 5", "tick step 3"]
     rig.release()
     assert clock.log[-2:] == [f"tick rate {IDLE_RATE}", "tick unfreeze"]
+
+
+@pytest.mark.parametrize("server", [servers.SATELLITES[0], DOCKER_SATELLITES[0]], ids=lambda s: s.name)
+def test_satellites_sprint_long_waits_to_the_same_tick(server):
+    clock = Clock()
+    rig = _rig(clock, server)
+    for n in (SPRINT_MIN - 1, SPRINT_MIN, 6400):
+        start = clock.time
+        rig._advance(n)
+        assert clock.time - start == n
+    steps = [c for c in clock.log if c.startswith(("tick step", "tick sprint"))]
+    assert steps == [f"tick step {SPRINT_MIN - 1}", f"tick sprint {SPRINT_MIN - 1}", "tick sprint 6399"]
+
+
+def test_main_never_sprints():
+    clock = Clock()
+    _rig(clock)._advance(6400)
+    assert "tick step 6400" in clock.log and not any("sprint" in c for c in clock.log)
 
 
 def test_main_releases_without_a_second_rate_change():

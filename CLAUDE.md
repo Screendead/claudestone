@@ -249,6 +249,10 @@ trace → `package` data pack.
   current rate, so a rate left high kicks joining players. The cost is up to one idle tick
   period (~40 ms) per batch, so satellites (no one joins them) stay at `WARP_RATE` for the
   whole test; `Rig.release()` (conftest teardown) sets 20 again before `tick unfreeze`.
+  On a satellite a wait of `SPRINT_MIN` (32) ticks or more runs as `tick sprint n-1` (26.3's
+  sprint runs n+1 ticks for n >= 2), which ignores the tick rate: 6400 ticks take ~0.1 s
+  instead of 0.64 s, landing on the same tick with every block the same. Main never sprints:
+  each sprint's end goes to every player as system chat. `REDSTONE_SPRINT=0` steps instead.
   `Rig()` also resets the tick rate and `BASELINE_GAMERULES`. Inputs are
   redstone blocks placed/removed at driver cells; levers and buttons are toggled with
   `setblock` then a `clone` of the block they hang on (setblock alone doesn't update it),
