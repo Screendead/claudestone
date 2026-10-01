@@ -166,8 +166,11 @@ def test_plan_functions_and_the_static_cells():
 # ---- a fake world ------------------------------------------------------------------------
 
 def moving(block, progress, extending, source, face):
-    return (f'{{blockState: {{Name: "minecraft:{block}"}}, extending: {int(extending)}b, '
-            f'facing: {FACING.index(face)}b, id: "minecraft:piston", progress: {progress}f, source: {int(source)}b}}')
+    """A moving_piston as 26.3 prints it (seen live): a default state is a bare id."""
+    state = (f'{{Name: "minecraft:{block}", Properties: {{facing: "{face}", short: "false", type: "sticky"}}}}'
+             if block == "piston_head" else f'"minecraft:{block}"')
+    return (f'{{blockState: {state}, components: {{}}, x: 377, facing: {FACING.index(face)}b, progress: {progress}f, '
+            f'y: 57, z: 211, source: {int(source)}b, id: "minecraft:piston", extending: {int(extending)}b}}')
 
 
 class DoorWorld:

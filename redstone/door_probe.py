@@ -137,6 +137,12 @@ def hallway_probe_functions(hallway: list[Box], visible: list[Box] | None = None
     return _chunks(lines), probed
 
 
+def _state_forms(block: str) -> tuple[str, str]:
+    """SNBT a moving_piston's `blockState` takes for a block: BlockState.CODEC saves a
+    block's default state as its bare id, and any other state as {Name, Properties}."""
+    return f'"{block}"', f'{{Name:"{block}"}}'
+
+
 def occupancy_region(bounds: Box, hallway: list[Box], plot_size: Pos,
                      margin: int = MARGIN) -> tuple[list[Pos], set[Pos]]:
     """Every cell of the region, sorted, and its shell: the outer layer, less any cell of
@@ -178,8 +184,8 @@ def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surfa
         p = _at(pos)
         on_surface = SURFACE_EXEMPT_ANYWHERE or pos in surface
         exempt = f"unless block {p} {DOOR_TAG}" + (f" unless block {p} {SURFACE_TAG}" if on_surface else "")
-        moved_exempt = "".join(f' unless data block {p} {{source:0b,blockState:{{Name:"{m}"}}}}'
-                               for m in door_ids + (surface_ids if on_surface else []))
+        moved_exempt = "".join(f" unless data block {p} {{source:0b,blockState:{form}}}"
+                               for m in door_ids + (surface_ids if on_surface else []) for form in _state_forms(m))
         lines = [
             f"execute unless block {p} {AIR_TAG} run data modify storage {OCC} any.c{i} set value 1b",
             f"execute unless block {p} {AIR_TAG} {exempt} unless block {p} minecraft:moving_piston run "
@@ -187,8 +193,8 @@ def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surfa
             f"execute if block {p} minecraft:moving_piston{moved_exempt} run "
             f"data modify storage {OCC} circ.c{i} set value 1b",
             f"execute if block {p} {DOOR_TAG} run data modify storage {OCC} door.c{i} set value 1b",
-            *(f'execute if block {p} minecraft:moving_piston if data block {p} {{source:0b,blockState:{{Name:"{m}"}}}} '
-              f"run data modify storage {OCC} door.c{i} set value 1b" for m in door_ids),
+            *(f"execute if block {p} minecraft:moving_piston if data block {p} {{source:0b,blockState:{form}}} "
+              f"run data modify storage {OCC} door.c{i} set value 1b" for m in door_ids for form in _state_forms(m)),
         ]
         if pos in shell:
             shell_index.add(i)
@@ -239,12 +245,13 @@ def read_hallway(reply: str, count: int, boxes: int) -> tuple[list[int], dict[in
     moving = {}
     for i in (int(i) for i in re.findall(r"\bm(\d+): \{", h)):
         m = compound(h, f"m{i}")
-        name = re.search(r'blockState: \{.*?Name: "([^"]+)"', m)
+        # A default state is saved as its bare id, any other as {Name, Properties}.
+        name = re.search(r'blockState: (?:"([^"]+)"|\{.*?Name: "([^"]+)")', m)
         moving[i] = {"progress": float(re.search(r"\bprogress: (-?[\d.]+)f", m).group(1)),
                      "extending": re.search(r"\bextending: (\d)b", m).group(1) == "1",
                      "source": re.search(r"\bsource: (\d)b", m).group(1) == "1",
                      "facing": FACING[int(re.search(r"\bfacing: (\d)b", m).group(1))],
-                     "block": name.group(1) if name else None}
+                     "block": (name.group(1) or name.group(2)) if name else None}
     return [codes.get(i, OTHER) for i in range(count)], moving, [counts.get(b, 0) for b in range(boxes)]
 
 
