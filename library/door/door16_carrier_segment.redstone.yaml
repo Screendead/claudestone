@@ -1,0 +1,105 @@
+name: door16_carrier_segment
+description: In-plane carrier primitive for a 16x16 that pulls quartz columns sideways one cell per firing (the family NumpadInfinite's 16x16 appears to use). Two 4-tall segments, slime then honey, each a carrier column with a column of sticky pistons facing the door; the pistons fire across a one-cell gap and pull the quartz column beside them, then a wall piston retreats the slime segment one cell and its pistons pull again. Checks that the retreat leaves the pulled column behind, that the honey segment and its column don't co-move with the slime segment, and that the rest of the door never moves. Driving the honey segment's pistons also fires the slime segment's top piston by quasi-connectivity (its upper neighbour is a driven piston), so a stacked carrier column has to fire as one. Every piston is driven by a named input; no controller.
+traits: [piston_based, entityless]
+palette:
+  '.': air
+  W: {name: wall_piston, block: 'sticky_piston[facing=east]'}
+  S: slime_block
+  H: honey_block
+  P: 'sticky_piston[facing=east]'
+  Q: quartz_block
+  w: {input: wall}
+  a: {input: pull_a}
+  b: {input: pull_b}
+  c: {input: pull_a2}
+layers:
+  0: |
+    ........
+    ........
+    ........
+  1: |
+    w.ca....
+    W.SP.QQ.
+    ........
+  2: |
+    ..ca....
+    ..SP.QQ.
+    ........
+  3: |
+    ..ca....
+    ..SP.QQ.
+    ........
+  4: |
+    ..ca....
+    ..SP.QQ.
+    ........
+  5: |
+    ...b....
+    ..HP.QQ.
+    ........
+  6: |
+    ...b....
+    ..HP.QQ.
+    ........
+  7: |
+    ...b....
+    ..HP.QQ.
+    ........
+  8: |
+    ...b....
+    ..HP.QQ.
+    ........
+  9: |
+    ........
+    ........
+    ........
+tests:
+- name: pull, retreat, pull again
+  steps:
+  - check: 'if block ~5 ~1 ~1 quartz_block if block ~5 ~2 ~1 quartz_block if block ~5 ~3 ~1 quartz_block if block ~5 ~4 ~1 quartz_block if block ~5 ~5 ~1 quartz_block if block ~5 ~6 ~1 quartz_block if block ~5 ~7 ~1 quartz_block if block ~5 ~8 ~1 quartz_block'
+  - check: 'if block ~6 ~1 ~1 quartz_block if block ~6 ~2 ~1 quartz_block if block ~6 ~3 ~1 quartz_block if block ~6 ~4 ~1 quartz_block if block ~6 ~5 ~1 quartz_block if block ~6 ~6 ~1 quartz_block if block ~6 ~7 ~1 quartz_block if block ~6 ~8 ~1 quartz_block'
+  - drive: {pull_a: 1}
+  - wait: 3
+  - check: 'if block ~4 ~1 ~1 piston_head[facing=east,type=sticky] if block ~4 ~2 ~1 piston_head[facing=east,type=sticky] if block ~4 ~3 ~1 piston_head[facing=east,type=sticky] if block ~4 ~4 ~1 piston_head[facing=east,type=sticky]'
+  - check: 'if block ~5 ~1 ~1 quartz_block if block ~5 ~2 ~1 quartz_block if block ~5 ~3 ~1 quartz_block if block ~5 ~4 ~1 quartz_block'
+  - drive: {pull_a: 0}
+  - wait: 3
+  - check: 'if block ~4 ~1 ~1 quartz_block if block ~4 ~2 ~1 quartz_block if block ~4 ~3 ~1 quartz_block if block ~4 ~4 ~1 quartz_block if block ~5 ~1 ~1 air if block ~5 ~2 ~1 air if block ~5 ~3 ~1 air if block ~5 ~4 ~1 air'
+  - check: 'if block ~5 ~5 ~1 quartz_block if block ~5 ~6 ~1 quartz_block if block ~5 ~7 ~1 quartz_block if block ~5 ~8 ~1 quartz_block if block ~6 ~1 ~1 quartz_block if block ~6 ~2 ~1 quartz_block if block ~6 ~3 ~1 quartz_block if block ~6 ~4 ~1 quartz_block if block ~6 ~5 ~1 quartz_block if block ~6 ~6 ~1 quartz_block if block ~6 ~7 ~1 quartz_block if block ~6 ~8 ~1 quartz_block'
+  - drive: {wall: 1}
+  - wait: 3
+  - check: 'if block ~1 ~1 ~1 piston_head[facing=east,type=sticky]'
+  - drive: {wall: 0}
+  - wait: 3
+  - check: 'if block ~1 ~1 ~1 slime_block if block ~1 ~2 ~1 slime_block if block ~1 ~3 ~1 slime_block if block ~1 ~4 ~1 slime_block if block ~2 ~1 ~1 sticky_piston[facing=east,extended=false] if block ~2 ~2 ~1 sticky_piston[facing=east,extended=false] if block ~2 ~3 ~1 sticky_piston[facing=east,extended=false] if block ~2 ~4 ~1 sticky_piston[facing=east,extended=false]'
+  - check: 'if block ~3 ~1 ~1 air if block ~3 ~2 ~1 air if block ~3 ~3 ~1 air if block ~3 ~4 ~1 air if block ~4 ~1 ~1 quartz_block if block ~4 ~2 ~1 quartz_block if block ~4 ~3 ~1 quartz_block if block ~4 ~4 ~1 quartz_block'
+  - check: 'if block ~2 ~5 ~1 honey_block if block ~2 ~6 ~1 honey_block if block ~2 ~7 ~1 honey_block if block ~2 ~8 ~1 honey_block if block ~3 ~5 ~1 sticky_piston[facing=east,extended=false] if block ~3 ~6 ~1 sticky_piston[facing=east,extended=false] if block ~3 ~7 ~1 sticky_piston[facing=east,extended=false] if block ~3 ~8 ~1 sticky_piston[facing=east,extended=false]'
+  - check: 'if block ~5 ~5 ~1 quartz_block if block ~5 ~6 ~1 quartz_block if block ~5 ~7 ~1 quartz_block if block ~5 ~8 ~1 quartz_block if block ~6 ~1 ~1 quartz_block if block ~6 ~2 ~1 quartz_block if block ~6 ~3 ~1 quartz_block if block ~6 ~4 ~1 quartz_block if block ~6 ~5 ~1 quartz_block if block ~6 ~6 ~1 quartz_block if block ~6 ~7 ~1 quartz_block if block ~6 ~8 ~1 quartz_block'
+  - drive: {pull_a2: 1}
+  - wait: 3
+  - check: 'if block ~3 ~1 ~1 piston_head[facing=east,type=sticky] if block ~3 ~2 ~1 piston_head[facing=east,type=sticky] if block ~3 ~3 ~1 piston_head[facing=east,type=sticky] if block ~3 ~4 ~1 piston_head[facing=east,type=sticky]'
+  - drive: {pull_a2: 0}
+  - wait: 3
+  - check: 'if block ~3 ~1 ~1 quartz_block if block ~3 ~2 ~1 quartz_block if block ~3 ~3 ~1 quartz_block if block ~3 ~4 ~1 quartz_block if block ~4 ~1 ~1 air if block ~4 ~2 ~1 air if block ~4 ~3 ~1 air if block ~4 ~4 ~1 air'
+  - check: 'if block ~5 ~5 ~1 quartz_block if block ~5 ~6 ~1 quartz_block if block ~5 ~7 ~1 quartz_block if block ~5 ~8 ~1 quartz_block if block ~6 ~1 ~1 quartz_block if block ~6 ~2 ~1 quartz_block if block ~6 ~3 ~1 quartz_block if block ~6 ~4 ~1 quartz_block if block ~6 ~5 ~1 quartz_block if block ~6 ~6 ~1 quartz_block if block ~6 ~7 ~1 quartz_block if block ~6 ~8 ~1 quartz_block'
+- name: honey drive also pulls the slime segment's top block by QC
+  steps:
+  - drive: {pull_b: 1}
+  - wait: 3
+  - check: 'if block ~4 ~5 ~1 piston_head[facing=east,type=sticky] if block ~4 ~6 ~1 piston_head[facing=east,type=sticky] if block ~4 ~7 ~1 piston_head[facing=east,type=sticky] if block ~4 ~8 ~1 piston_head[facing=east,type=sticky]'
+  - drive: {pull_b: 0}
+  - wait: 3
+  - check: 'if block ~4 ~5 ~1 quartz_block if block ~4 ~6 ~1 quartz_block if block ~4 ~7 ~1 quartz_block if block ~4 ~8 ~1 quartz_block if block ~5 ~5 ~1 air if block ~5 ~6 ~1 air if block ~5 ~7 ~1 air if block ~5 ~8 ~1 air'
+  - check: 'if block ~5 ~1 ~1 quartz_block'
+  - check: 'if block ~5 ~2 ~1 quartz_block'
+  - check: 'if block ~5 ~3 ~1 quartz_block'
+  - check: 'if block ~6 ~1 ~1 quartz_block'
+  - check: 'if block ~6 ~2 ~1 quartz_block'
+  - check: 'if block ~6 ~3 ~1 quartz_block'
+  - check: 'if block ~6 ~4 ~1 quartz_block'
+  - check: 'if block ~6 ~5 ~1 quartz_block'
+  - check: 'if block ~6 ~6 ~1 quartz_block'
+  - check: 'if block ~6 ~7 ~1 quartz_block'
+  - check: 'if block ~6 ~8 ~1 quartz_block'
+  - check: 'if block ~4 ~4 ~1 quartz_block if block ~5 ~4 ~1 air'
+  - check: 'if block ~2 ~1 ~1 slime_block if block ~2 ~2 ~1 slime_block if block ~2 ~3 ~1 slime_block if block ~2 ~4 ~1 slime_block if block ~3 ~1 ~1 sticky_piston[facing=east,extended=false] if block ~3 ~2 ~1 sticky_piston[facing=east,extended=false] if block ~3 ~3 ~1 sticky_piston[facing=east,extended=false] if block ~3 ~4 ~1 sticky_piston[facing=east,extended=false]'
