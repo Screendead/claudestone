@@ -181,24 +181,33 @@ def pattern_since(run: Run, pattern: Pattern, w: int) -> int:
 
 
 def quiescence(run: Run, quiet: int = QUIET_TICKS, max_period: int = MAX_PERIOD,
-               periods: int = PERIODS) -> tuple[int, int] | None:
+               periods: int = PERIODS, keys: list | None = None) -> tuple[int, int] | None:
     """(W, period): W is the first tick from which the run repeats with that period to its end.
 
     Period 1 means static, which needs `quiet` ticks of evidence; a longer period needs
-    `periods` repeats. None when the recording shows neither.
+    `periods` repeats. None when the recording shows neither. `keys`, if given, stands for
+    [o.key() for o in run.ticks] (any values equal exactly when those keys are).
     """
-    keys = [o.key() for o in run.ticks]
+    keys = [o.key() for o in run.ticks] if keys is None else keys
     n = len(keys)
-    for t in range(n):
-        if all(k == keys[t] for k in keys[t:]):
-            # Static from t: every later start is static too, with less evidence.
-            return (t, 1) if n - 1 - t >= quiet else None
+    if not n:
+        return None
+    static = n - 1  # the start of the static tail
+    while static and keys[static - 1] == keys[-1]:
+        static -= 1
+    # For each period, the last i that breaks keys[i] == keys[i + p]: the run repeats with
+    # period p from every t after it. Linear in n per period, for runs of thousands of ticks.
+    last_break = {}
+    for p in range(2, max_period + 1):
+        last_break[p] = next((i for i in range(n - p - 1, -1, -1) if keys[i] != keys[i + p]), -1)
+    for t in range(static):
         for p in range(2, max_period + 1):
             if n - 1 - t < periods * p:
                 break
-            if all(keys[i] == keys[i + p] for i in range(t, n - p)):
+            if t > last_break[p]:
                 return t, p
-    return None
+    # Static from W: every later start is static too, with less evidence.
+    return (static, 1) if n - 1 - static >= quiet else None
 
 
 def settle(run: Run, max_ticks: int = MAX_TICKS, **kw) -> tuple[int, int]:

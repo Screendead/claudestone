@@ -229,3 +229,36 @@ def test_reset_both_directions_and_no_pass():
     closing = dt.reset_search(lambda k: True, 1, 5, visible=2)
     assert (closing.k_star, closing.reset) == (1, -1)
     assert dt.reset_search(lambda k: k < 5, 1, 5, visible=2).k_star is None
+
+
+def _quiescence_by_definition(keys, quiet=dt.QUIET_TICKS, max_period=dt.MAX_PERIOD, periods=dt.PERIODS):
+    n = len(keys)
+    for t in range(n):
+        if all(k == keys[t] for k in keys[t:]):
+            return (t, 1) if n - 1 - t >= quiet else None
+        for p in range(2, max_period + 1):
+            if n - 1 - t < periods * p:
+                break
+            if all(keys[i] == keys[i + p] for i in range(t, n - p)):
+                return t, p
+    return None
+
+
+def test_quiescence_agrees_with_its_definition_on_random_runs():
+    import random
+    rnd = random.Random(7)
+    frames = [CLOSED, OPEN, obs({(2, 0, 3): Cell(SURFACE)})]
+    for _ in range(400):
+        head = [rnd.randrange(3) for _ in range(rnd.randrange(0, 30))]
+        cyc = [rnd.randrange(3) for _ in range(rnd.choice([1, 1, 2, 3, 5]))]
+        keys = head + cyc * rnd.randrange(0, 60)
+        quiet = rnd.choice([1, 5, 40])
+        run = Run(CLOSED, [frames[k] for k in keys])
+        want = _quiescence_by_definition([f.key() for f in run.ticks], quiet, 8)
+        assert dt.quiescence(run, quiet, 8) == want
+        assert dt.quiescence(run, quiet, 8, keys=keys) == want
+
+
+def test_quiet_sets_the_static_evidence():
+    r = Run(CLOSED, [CLOSED] * 3 + [OPEN] * 41)
+    assert dt.quiescence(r, quiet=41) is None and dt.settle(r, quiet=40) == (3, 1)

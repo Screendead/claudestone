@@ -78,7 +78,8 @@
                                  # result and the trace. Optional bounds: max_open, max_close
                                  # (in the given reading, default R), max_open_visible,
                                  # max_close_visible, tier (default the door's), max_volume,
-                                 # max_ticks (per operation, default 600)
+                                 # max_ticks (per operation, default 600), quiet (static
+                                 # ticks that end an operation, default 40)
 
     update_pass: all             # optional: all (default), none (no clone-onto-itself pass),
                                  # unobserved (observers set last, and the blocks they

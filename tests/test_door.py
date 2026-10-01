@@ -131,9 +131,9 @@ def test_lint_checks_the_input_fixture():
 
 def test_lint_checks_door_cycle_keys():
     s = proof()
-    s.tests = [{"name": "t", "door_cycle": {"cycles": 0, "reading": "Q", "max_open": -1, "speed": 1}}]
+    s.tests = [{"name": "t", "door_cycle": {"cycles": 0, "reading": "Q", "max_open": -1, "speed": 1, "quiet": 0}}]
     found = lint_module.lint(s)
-    for message in ("cycles 0", "reading 'Q'", "max_open -1", "unknown key 'speed'"):
+    for message in ("cycles 0", "reading 'Q'", "max_open -1", "unknown key 'speed'", "quiet 0"):
         assert any(message in m for m in found), (message, found)
     s.door = None
     s.tests = [{"name": "t", "door_cycle": {}}]
@@ -338,6 +338,17 @@ def test_door_cycle_reads_only_the_hallway_each_tick_and_the_region_at_rest():
     assert not any(n.startswith(("occ0", "occ_hall")) for n in rig.kw["functions"])
     # Each operation drives once and waits for quiet.
     assert [on for _, _, on in rig.drives] == [True, False, True, False]
+
+
+def test_door_cycle_quiet_sets_how_long_an_operation_records_after_its_last_change(traces):
+    def recorded(cycle):
+        result, _ = run_cycle(None, cycle)
+        trace = json.loads((traces / "door_2x2_flush_harness_check" / "cycle.json").read_text())
+        return result["door"], [(len(o["ticks"]), o["w"]) for o in trace["door"]["ops"]]
+    d40, ops40 = recorded({"cycles": 1})
+    d100, ops100 = recorded({"cycles": 1, "quiet": 100})
+    assert [n - w for n, w in ops40] == [41, 41] and [n - w for n, w in ops100] == [101, 101]
+    assert [w for _, w in ops40] == [w for _, w in ops100] and d40["open"] == d100["open"]
 
 
 def test_zero_tick_pull_is_instant_only_under_r1():

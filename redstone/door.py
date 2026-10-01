@@ -13,7 +13,8 @@ Each tick of an operation the hallway probe reads the hallway (the doorway and `
 cells on each side of it) and the walls, floor and ceiling beside it, never the build:
 for a 16x16 doorway at depth 1 that is 768 + 192 = 960 cells. Blocks moving out of the
 doorway land in those cells, so every movement's progress ladder is seen. The operation
-ends when the observations are static for door_timing.QUIET_TICKS (or periodic).
+ends when the observations are static for door_timing.QUIET_TICKS, or the test's `quiet`
+(or periodic).
 
 Volume (T4, T12): the occupancy flags in storage are a union over the whole cycle. The
 full region (build bounds and hallway, grown by door_probe.MARGIN, inside the plot) is
@@ -39,7 +40,7 @@ DOOR_KEYS = {"doorway", "depth", "blocks", "surface", "input", "repeater", "leve
              "initial"}
 DOORWAY_KEYS = {"origin", "width", "height", "facing"}
 CYCLE_KEYS = {"cycles", "reading", "tier", "max_open", "max_close", "max_open_visible", "max_close_visible",
-              "max_volume", "max_ticks"}
+              "max_volume", "max_ticks", "quiet"}
 PISTONS = ("minecraft:piston", "minecraft:sticky_piston")
 PUSH_LIMIT = 12
 # Ticks from placing the drive block to the fixture repeater's output changing: a delay-1
@@ -305,7 +306,7 @@ def cycle_problems(spec, cfg) -> list[str]:
         out.append(f"door_cycle tier {cfg['tier']!r} is not one of {', '.join(dt.TIERS)}")
     out += [f"door_cycle {k} {cfg[k]!r} is not a number of ticks" for k in
             ("max_open", "max_close", "max_open_visible", "max_close_visible") if k in cfg and not _int(cfg[k], 0)]
-    out += [f"door_cycle {k} {cfg[k]!r} is not a positive number" for k in ("max_volume", "max_ticks")
+    out += [f"door_cycle {k} {cfg[k]!r} is not a positive number" for k in ("max_volume", "max_ticks", "quiet")
             if k in cfg and not _int(cfg[k], 1)]
     return out
 
@@ -475,7 +476,7 @@ def _status(rig, spec, text):
 
 
 def operate(rig, probe: Probe, plan: Plan, before: dt.Observation, rep_before: bool, on: bool, rec,
-            max_ticks: int) -> tuple[dt.Run, int]:
+            max_ticks: int, quiet: int = dt.QUIET_TICKS) -> tuple[dt.Run, int]:
     """Set the input and record O(0..W+quiet). Tick 0 is the first observation in which the
     fixture repeater has flipped; with a lever input, the first tick after the flip (the
     player phase, so components it schedules fire a tick earlier: MC-172213)."""
@@ -494,18 +495,23 @@ def operate(rig, probe: Probe, plan: Plan, before: dt.Observation, rep_before: b
             break
         if lead >= MAX_LEAD:
             raise dt.DoorError(f"the fixture repeater did not switch within {MAX_LEAD} ticks of the input")
-    ticks, keys = [obs], [obs.key()]
-    limit = max_ticks + dt.QUIET_TICKS + dt.PERIODS * dt.MAX_PERIOD
+    # Keys as small ints, and a repeated observation stored once: an operation may run for
+    # thousands of ticks of 960 cells.
+    ids = {obs.key(): 0}
+    ticks, keys = [obs], [0]
+    limit = max_ticks + quiet + dt.PERIODS * dt.MAX_PERIOD
     run = dt.Run(before, ticks)
+    trailing = 1
     while len(ticks) <= limit:
-        trailing = next((i for i, k in enumerate(reversed(keys)) if k != keys[-1]), len(keys))
-        if trailing > dt.QUIET_TICKS or (len(ticks) % 32 == 0 and dt.quiescence(run)):
+        if trailing > quiet or (len(ticks) % 32 == 0 and dt.quiescence(run, quiet, keys=keys)):
             break
         rig.step(1)
         rec.tick += 1
         obs, _ = probe.observe(track=True)
-        ticks.append(obs)
-        keys.append(obs.key())
+        key = ids.setdefault(obs.key(), len(ids))
+        trailing = trailing + 1 if key == keys[-1] else 1
+        ticks.append(ticks[-1] if key == keys[-1] else obs)
+        keys.append(key)
     return run, lead
 
 
@@ -593,6 +599,7 @@ def cycle(rig, spec, test: dict, rec, plan: Plan) -> dict:
     cfg = test.get("door_cycle") or {}
     reading = cfg.get("reading", "R")
     max_ticks = cfg.get("max_ticks", dt.MAX_TICKS)
+    quiet = cfg.get("quiet", dt.QUIET_TICKS)
     h = plan.hall
     probe = Probe(rig, plan)
     rec.door = {"probed": [list(p) for p in plan.probed], "ops": []}
@@ -612,7 +619,7 @@ def cycle(rig, spec, test: dict, rec, plan: Plan) -> dict:
             kind = "open" if state == "closed" else "close"
             on = not on
             _status(rig, spec, f"door cycle {c + 1}: {kind}")
-            run, lead = operate(rig, probe, plan, before, rep, on, rec, max_ticks)
+            run, lead = operate(rig, probe, plan, before, rep, on, rec, max_ticks, quiet)
             op = Op(kind, run, lead)
             ops.append(op)
             phases.append((probe.entities(), False))
@@ -621,7 +628,7 @@ def cycle(rig, spec, test: dict, rec, plan: Plan) -> dict:
             phases.append((probe.entities(), state == "open"))
             rec.frame(f"door {state}")
             try:
-                op.w, op.period = dt.settle(run, max_ticks)
+                op.w, op.period = dt.settle(run, max_ticks, quiet=quiet)
                 op.times = readings(h, op)
                 op.visible = dt.visible_time(h, run, op.w)
             finally:
