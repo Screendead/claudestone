@@ -1,8 +1,10 @@
 """Regenerate library/**/*.redstone.yaml files that come from generators."""
 
-from redstone.fileformat import dump, load
+from redstone.build import Build
+from redstone.fileformat import Spec, dump, load
 from redstone.library import LIBRARY, SUFFIX, path_of
 from redstone.devices import DIGITS, seven_segment, switch
+from redstone.out_display import out_display
 from redstone.pla import or_plane, pla
 from redstone.route import Circuit
 
@@ -10,7 +12,9 @@ from redstone.route import Circuit
 # ripple_adder_2bit spans 49 cells in z, more than a family plot's 48, so it is a build.
 FOLDER = {"pla_xor": "xor", "full_adder": "full_adder",
           "encoder": "encoder", "half_adder": "half_adder", "digit": "seven_segment",
-          "digit_one": "seven_segment", "lever_switch": "input", "button_switch": "input"}
+          "digit_one": "seven_segment", "lever_switch": "input", "button_switch": "input",
+          "cpu_out_display": "cpu_parts", "cpu_rom_ctrl": "cpu_parts", "cpu_rom_ctrl_jumps": "cpu_parts",
+          "cpu_fetch": "cpu"}
 
 
 def destination(name: str):
@@ -22,6 +26,8 @@ def generated():
     yield from generated_stages()
     yield from generated_devices()
     yield from generated_circuits()
+    yield from generated_cpu()
+    yield out_display()
 
 
 def generated_plas():
@@ -150,6 +156,110 @@ def adder_test(spec, pairs) -> dict:
                   {"expect": display_expect(i + j, spec)},
                   {"use": f"A{i}.switch"}, {"use": f"B{j}.switch"}]
     return {"name": "", "settle": 300, "steps": steps}
+
+
+ALU_PROGRAM = [0x1C, 0x80, 0x1A, 0x40, 0xA0, 0x1A, 0x50, 0xA0, 0x1A, 0x60, 0xA0, 0xE6, 0xCE, 0xF0, 0xA0, 0xF0]
+JUMP_PROGRAM = [0xB5, 0xC6, 0xD7, 0xF0] + [0] * 12
+
+
+def generated_cpu():
+    from scripts.rom_ctrl import rom_ctrl
+    yield rom_ctrl("cpu_rom_ctrl", ALU_PROGRAM)
+    yield rom_ctrl("cpu_rom_ctrl_jumps", JUMP_PROGRAM)
+    yield cpu_fetch()
+
+
+FIB_PROGRAM = [0x10, 0x80, 0x11, 0xA0, 0x90, 0x20, 0xD8, 0xB3, 0xF0] + [0] * 7
+WIRE_SUPPORT = "white_concrete"
+# Clock pin rise to sample: 18 gt to the first COM, ~14 on the bus, 10 in the PC, 32 in the
+# ROM leave pimm settled ~75 gt after start; sampling 140 gt in keeps >= 60 gt either side.
+FETCH_SAMPLE = 140
+# A spec's palette has about 55 free glyphs, so only these cells are named.
+FETCH_NAMED = ({f"pc.{c}{i}" for c in "sm" for i in range(4)} | {f"rom.{c}{i}" for c in ("pimm", "op") for i in range(4)}
+               | {"clock.com_node", "clock.cap_node"})
+
+
+def _wire(build, points, refresh=12):
+    """Dust at y=1 along axis-aligned waypoints (x, z), starting with a repeater.
+
+    The last point is the sink's pin cell and stays dust."""
+    from redstone.route import FACING_FROM
+    cells = [points[0]]
+    for (x0, z0), (x1, z1) in zip(points, points[1:]):
+        dx, dz = (x1 > x0) - (x1 < x0), (z1 > z0) - (z1 < z0)
+        while cells[-1] != (x1, z1):
+            cells.append((cells[-1][0] + dx, cells[-1][1] + dz))
+    run = 0
+    repeaters = 0
+    for i, (x, z) in enumerate(cells):
+        nxt = cells[i + 1] if i + 1 < len(cells) else None
+        prv = cells[i - 1] if i else None
+        assert build.blocks.get((x, 1, z), "minecraft:air") == "minecraft:air", (x, z)
+        flow = (nxt[0] - x, nxt[1] - z) if nxt else None
+        straight = prv and nxt and (x - prv[0], z - prv[1]) == flow
+        if i == 0 or (straight and run >= refresh and i < len(cells) - 2):
+            build.place((x, 1, z), f"repeater[facing={FACING_FROM[flow]},delay=1]")
+            run, repeaters = 0, repeaters + 1
+        else:
+            build.place((x, 1, z), "redstone_wire")
+            run += 1
+        if (x, 0, z) not in build.blocks:
+            build.place((x, 0, z), WIRE_SUPPORT)
+    return repeaters
+
+
+def cpu_fetch(words=FIB_PROGRAM, name="cpu_fetch") -> Spec:
+    """Clock + PC + lever ROM of the CPU4 floor plan, with hand-laid straight buses."""
+    from scripts.rom_ctrl import rom_ctrl
+    parts = {"clock": (load(LIBRARY / "cpu_parts" / f"cpu_clock{SUFFIX}"), (44, 0, 94)),
+             "pc": (load(LIBRARY / "cpu_parts" / f"cpu_pc{SUFFIX}"), (98, 0, 0)),
+             "rom": (rom_ctrl("rom", words), (44, 0, 0))}
+    build = Build()
+    named, inputs = {}, {}
+    for part, (spec, at) in parts.items():
+        build.merge(spec.build, at)
+        for cell, pos in spec.named.items():
+            if f"{part}.{cell}" in FETCH_NAMED:
+                named[f"{part}.{cell}"] = tuple(a + b for a, b in zip(pos, at))
+        for pin, pos in spec.inputs.items():
+            inputs[f"{part}.{pin}"] = tuple(a + b for a, b in zip(pos, at))
+    for i, z in enumerate([4, 7, 10, 13]):
+        _wire(build, [(97, z), (91, z)])
+        del inputs[f"rom.pc{i}"]
+    for i, z in enumerate([19, 22, 25, 28]):
+        _wire(build, [(92, z), (98, z)])
+        del inputs[f"pc.imm{i}"]
+    reps = [_wire(build, [(84, 93), (84, 90), (104, 90), (104, 39)]),
+            _wire(build, [(88, 93), (88, 92), (108, 92), (108, 39)])]
+    assert reps[0] == reps[1], reps
+    del inputs["pc.cap"], inputs["pc.com"]
+    spec = Spec(name, build, inputs=inputs, named=named, description=(
+        "CPU4 fetch loop: the two-phase clock drives the program counter, whose value "
+        "addresses the 16x8 lever ROM (Fibonacci program); the ROM's n field goes back to "
+        "the PC's jump input. jt, hlt and rst are driven by the test, since the control "
+        "decoder, ALU and registers are not built yet."))
+    spec.tests = [fetch_test(words)]
+    return spec
+
+
+def fetch_test(words) -> dict:
+    def expect(pc):
+        want = {f"pc.s{i}": pc >> i & 1 for i in range(4)}
+        want |= {f"rom.pimm{i}": words[pc] >> i & 1 for i in range(4)}
+        want |= {f"rom.op{i}": words[pc] >> (4 + i) & 1 for i in range(4)}
+        return {"expect": want}
+    steps = [{"drive": {"clock.start": 1}}, {"wait": 2}, {"drive": {"clock.start": 0}},
+             {"wait": FETCH_SAMPLE - 2}]
+    # pc 0..6 counting; at pc 6 (JC 8, n = 8) jt is held over one CAP, so pc 8 follows;
+    # hlt over three CAPs keeps pc 8; then counting resumes.
+    plan = [(pc, {}) for pc in range(6)] + [(6, {"pc.jt": 1}), (8, {"pc.jt": 0, "pc.hlt": 1}),
+            (8, {}), (8, {}), (8, {"pc.hlt": 0}), (9, {}), (10, {})]
+    for pc, drive in plan:
+        steps.append(expect(pc))
+        if drive:
+            steps.append({"drive": drive})
+        steps.append({"wait": 200})
+    return {"name": "fetch", "settle": 40, "steps": steps}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1457 @@
+name: cpu_pc
+description: '4-bit program counter for the CPU4 computer: a master/slave register with an incrementer and a next-PC mux (next = 0 if rst, else imm if jt, else pc+1 mod 16). The master captures next while cap AND (rst OR NOT hlt); the slave copies the master while com; pc0..pc3 are the slave. Built as a diagonal stack: bit i lives on its own layer at y=4+3i shifted 3 rows south per bit, so the shared hold, jump and jump-or-reset lines are dust staircases rising one row per level, the carries are short staircases, imm rises in a glass zigzag and each bit''s value comes down a spiral to the pin slave. The slave next to each pc pin is unlocked by a NOT com torch fed through one regenerating repeater, giving COM rise to pc settled in 10 gt (the pins are 35 rows apart, so 8 gt cannot be reached with repeater and torch stages). The incrementer reads the master through a 16 gt delay chain, so the master is never fed its own new value while CAP is high: CAP pulses must be shorter than about 16 gt (10 nominal). Torches on the control plane and the incrementer; no pistons or entities. Hand-authored from a scratch generator (scratchpad cpu/pc/build_pc.py).'
+traits: [torch_based, pistonless, entityless]
+palette:
+  '.': 'air'
+  '=': 'glass'
+  '#': 'smooth_stone'
+  '-': 'white_concrete'
+  'a': 'repeater[facing=south,delay=1,powered=false]'
+  'b': 'redstone_wire[east=side,north=none,south=none,west=side]'
+  'c': 'redstone_wire[east=side,north=none,south=side,west=none]'
+  'd': 'redstone_wire[east=side,north=side,south=none,west=none]'
+  'e': 'redstone_wire[east=none,north=side,south=side,west=none]'
+  'f': 'redstone_wire[east=side,north=none,south=up,west=none]'
+  'g': 'redstone_wire[east=none,north=side,south=up,west=none]'
+  'h': 'redstone_wire[east=none,north=up,south=side,west=none]'
+  'i': 'repeater[facing=north,delay=1,powered=true]'
+  'j': {input: 'cap'}
+  'k': 'repeater[facing=west,delay=1,powered=false]'
+  'l': 'redstone_wall_torch[facing=east,lit=true]'
+  'n': 'redstone_wall_torch[facing=south,lit=true]'
+  'o': 'redstone_wire[east=none,north=none,south=side,west=up]'
+  'p': 'redstone_wire[east=side,north=side,south=side,west=none]'
+  'q': 'redstone_wire[east=none,north=side,south=up,west=side]'
+  'r': 'redstone_wire[east=none,north=none,south=side,west=side]'
+  's': 'repeater[facing=west,delay=1,powered=true]'
+  't': {input: 'imm1'}
+  'u': 'redstone_wire[east=none,north=side,south=side,west=side]'
+  'v': {name: 'm3', block: 'repeater[facing=south,delay=1,powered=false,locked=true]'}
+  'w': 'redstone_wire[east=side,north=side,south=none,west=side]'
+  'x': 'redstone_wire[east=none,north=none,south=up,west=side]'
+  'y': 'repeater[facing=east,delay=1,powered=false]'
+  'z': 'redstone_wire[east=none,north=side,south=none,west=side]'
+  'A': 'redstone_wire[east=side,north=none,south=side,west=side]'
+  'B': 'redstone_wall_torch[facing=north,lit=true]'
+  'C': 'repeater[facing=south,delay=4,powered=false]'
+  'D': {input: 'hlt'}
+  'E': 'redstone_wire[east=up,north=side,south=side,west=none]'
+  'F': 'repeater[facing=north,delay=1,powered=false]'
+  'G': 'redstone_wire[east=up,north=side,south=none,west=none]'
+  'H': 'redstone_wire[east=none,north=up,south=none,west=side]'
+  'I': {input: 'rst'}
+  'J': {name: 's0', block: 'repeater[facing=east,delay=1,powered=false,locked=true]'}
+  'K': 'repeater[facing=east,delay=1,powered=true]'
+  'L': 'redstone_wire[east=up,north=none,south=none,west=side]'
+  'M': {name: 's3', block: 'repeater[facing=east,delay=1,powered=false,locked=true]'}
+  'N': {name: 'notcom', block: 'redstone_wire[east=none,north=up,south=side,west=none]'}
+  'O': {output: 'pc3', block: 'redstone_wire[east=side,north=none,south=none,west=side]'}
+  'P': 'redstone_wire[east=none,north=side,south=none,west=up]'
+  'Q': 'redstone_wall_torch[facing=south,lit=false]'
+  'R': 'redstone_wire[east=side,north=none,south=none,west=up]'
+  'S': {name: 'n0', block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  'T': {input: 'imm2'}
+  'U': {name: 'm0', block: 'repeater[facing=south,delay=1,powered=false,locked=true]'}
+  'V': 'redstone_wall_torch[facing=east,lit=false]'
+  'W': {name: 'm1', block: 'repeater[facing=south,delay=1,powered=false,locked=true]'}
+  'X': 'redstone_wire[east=none,north=up,south=up,west=none]'
+  'Y': {output: 'pc0', block: 'redstone_wire[east=side,north=none,south=none,west=side]'}
+  'Z': {name: 's1', block: 'repeater[facing=east,delay=1,powered=false,locked=true]'}
+  '0': 'redstone_wire[east=up,north=none,south=side,west=none]'
+  '1': {name: 'm2', block: 'repeater[facing=south,delay=1,powered=false,locked=true]'}
+  '2': {input: 'imm0'}
+  '3': {name: 'n1', block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  '4': {input: 'imm3'}
+  '5': {input: 'jt'}
+  '6': {input: 'com'}
+  '7': {name: 'n2', block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  '8': {output: 'pc1', block: 'redstone_wire[east=side,north=none,south=none,west=side]'}
+  '9': {name: 's2', block: 'repeater[facing=east,delay=1,powered=false,locked=true]'}
+  '!': {output: 'pc2', block: 'redstone_wire[east=side,north=none,south=none,west=side]'}
+  '$': 'repeater[facing=south,delay=1,powered=true]'
+  '%': {name: 'n3', block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  '&': 'redstone_wall_torch[facing=west,lit=true]'
+layers:
+  0: |
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+    ######################
+  1: |
+    ......................
+    ......................
+    .-....................
+    .i....................
+    YJbyL#................
+    .-....................
+    .i....................
+    8ZbyL#................
+    .-....................
+    .i....................
+    !9byL#................
+    .-....................
+    .i....................
+    OMbyL#................
+    .-....................
+    ......................
+    ..-Rbbbbr.............
+    ........e.............
+    ........e.............
+    2kx.....e.............
+    ..=.....e.............
+    ........dbr...........
+    tkx.......a...........
+    ..=.......e...fyr.....
+    ..........e...#.dbbr..
+    Tkx.......e........e..
+    ..=.......e........e..
+    ..........e........e.-
+    4kx.......e........e.h
+    ..=.......e........g.e
+    ..........e........-.e
+    5kbbbbbL-.e..........e
+    ..........e..........e
+    ..........e..........e
+    Dkr.......e..........e
+    ..G-......e..........$
+    ..........e...-......e
+    ......0-..e...h......e
+    ......a...a...a.....-P
+    ......j...6...I.......
+  2: |
+    ......................
+    ......................
+    .g....................
+    .-...#................
+    .-...H................
+    .X....................
+    .-...#................
+    .-...H................
+    .X....................
+    .-...#................
+    .-...H................
+    .X....................
+    .-...#................
+    .-...H................
+    .N....................
+    .B....................
+    .-b...................
+    ......................
+    ......................
+    ..=...................
+    ..h...................
+    ......................
+    ..=...................
+    ..h...................
+    ..............g.......
+    ..=...........#.......
+    ..h..................-
+    .....................h
+    ..=...................
+    ..h...................
+    ...................g..
+    ........L-.........-..
+    ......................
+    ......................
+    ......................
+    ...L-.........-.......
+    ..............h.......
+    .......L-.............
+    ...................-R.
+    ......................
+  3: |
+    ......................
+    ....##################
+    ....#................#
+    .e..#o...............#
+    .e...................#
+    .....................#
+    .e..#o...............#
+    .e.........#.........#
+    .....................#
+    .e..#o...#############
+    .e.......#...........#
+    .....................#
+    .e..#o...............#
+    .e...................#
+    .....................#
+    .....................#
+    .....................#
+    .....................#
+    .....................#
+    ..g..................#
+    ..=######............#
+    ........#...##########
+    ..g.....#...#.....#..#
+    ..=.....#...#.....####
+    ........#...#.....#...
+    ..g.....#..##.g...#.--
+    ..=.....#...#.#...#.-h
+    ........#...##....#.#.
+    ..g...............##..
+    ..=..-#.#...#.....#...
+    .....-.##.#########...
+    .....-...L-........g..
+    .....--..-----------..
+    ......-.....-.........
+    ......--------------..
+    ....L-........h....-..
+    .....-..............--
+    ........L-------..-..-
+    ..................-R.-
+    .....-................
+  4: |
+    ......................
+    ....cbbbbbbbbybbbbbbbr
+    ....F................e
+    ....d................e
+    .....................e
+    .....................a
+    ....f................e
+    ....#................e
+    .....................e
+    ....f....fbbbbbybbbbbu
+    ....#....-...........a
+    .....................e
+    ....f................e
+    ....#................e
+    .....................e
+    .....................e
+    .....................e
+    .....................e
+    .....................e
+    .....................e
+    ..dbkbbbr............a
+    ........e...cbbbbbAbbu
+    ..=.....e...e.....e..e
+    ..h.....e...e.....pbbz
+    ........e...F.....C...
+    ..=.....e...-.....C.cr
+    ..h.....F...F.g...e.i.
+    ........-...-y#...e.g.
+    ..=.....n...n.....UK#.
+    ..h..cx.i...i.....S...
+    .....E#s-Vkbwbbbbbz...
+    .....e....r...........
+    .....dA&-ywkAbbbbbkz..
+    ......a.....a.........
+    ......dbbbbbwbAbbbbr..
+    .....r.............e..
+    .....e.............-br
+    .....-...bbbbbbb-lAQ.e
+    .....n............d..g
+    .....G-..............-
+  5: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ....G#................
+    ......................
+    ......................
+    ....G#...g............
+    .........===..........
+    ......................
+    ....G#................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ..g...................
+    ..=...................
+    ......................
+    ..g...................
+    ..=...................
+    ..............g.......
+    ..g...........#.....g.
+    ..=.................#.
+    ......q...............
+    ......#...............
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......L--------------P
+  6: |
+    ......................
+    ......................
+    ......................
+    ......................
+    .....#################
+    .....#...............#
+    .....#...............#
+    .....H...............#
+    .....................#
+    .....#...............#
+    .....H...=.#.........#
+    .........dbx.........#
+    .....#..##.#.........#
+    .....H..##.#####.....#
+    ........#......#.....#
+    ........#..#...#######
+    ........#..#.........#
+    ........#..#...#.....#
+    ........#..###.#.....#
+    ........###....#.....#
+    ...........#.#########
+    ...........#...#.....#
+    ...........#...#.....#
+    ..G######.##...#.....#
+    ........#.#.####.....#
+    ..=.....#.#.#.....#..#
+    ..h.....#.#.#.....####
+    ........#.#.#.....#...
+    ..=.....#.###.g...#...
+    ..h.....#...#.#...#.g.
+    ........#...##....#.#.
+    ......g...........##..
+    ......#.#...#.....#...
+    .......##.#########...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    .......bbbbbbsbbbbbbb.
+  7: |
+    ......................
+    ......................
+    ......................
+    ......................
+    .....cbbbbbbbybbbbbbbr
+    .....F...............e
+    .....e...............e
+    .....................e
+    .....................a
+    ....#o...............e
+    .....................e
+    .........--..........e
+    ....#o..cx.g.........e
+    ........E-.-kbbr.....a
+    ........e..n...e.....e
+    ........a..i...-bbbbbu
+    ........e..e...n.....e
+    ........e..e...e.....e
+    ........e..-br.e.....e
+    ........dbbQ.B.e.....e
+    ...........e.--e-Rbbbu
+    ...........e...e.....e
+    ...........e...e.....e
+    ...bkbbbr.cz...e.....a
+    ........e.e.cbbz.....e
+    ..g.....e.e.e.....e..e
+    ..=.....e.e.e.....pbbz
+    ........e.e.i.....C...
+    ..g.....e.ds-.....C...
+    ..=.....F...i.g...e...
+    ........-...-y#...e.g.
+    ........n...Q.....WK#.
+    ......g.i...F.....3...
+    ......#s-Vkbwbbbbbz...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  8: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ....f.................
+    ....#.................
+    ......................
+    ....f.................
+    ....#....q.e..........
+    .........===..........
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    .............by-b.....
+    ......................
+    ......................
+    ......................
+    ......................
+    ..=...................
+    ..h...................
+    ......................
+    ..=...................
+    ..h...................
+    ..............g.......
+    ..............#.....g.
+    ....................#.
+    ......g...............
+    ......#...............
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  9: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    .......###############
+    .......#.............#
+    .......#.............#
+    ....G###.............#
+    .....................#
+    .....................#
+    ....G#...=.#.........#
+    .........dbx.........#
+    ........##.#.........#
+    ........##.#####.....#
+    ........#......#.....#
+    ........#..#...#######
+    ........#..#.........#
+    ........#..#...#.....#
+    ........#..###.#.....#
+    ........###....#.....#
+    ...........#.#########
+    ...........#...#.....#
+    ..g........#...#.....#
+    ..=######.##...#.....#
+    ........#.#.####.....#
+    ..g.....#.#.#.....#..#
+    ..=.....#.#.#.....####
+    ........#.#.#.....#...
+    ........#.###.g...#...
+    ........#...#.#...#.g.
+    ........#...##....#.#.
+    ......g...........##..
+    ......#.#...#.....#...
+    .......##.#########...
+    ......................
+    ......................
+    ......................
+  10: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    .......cbbbbbybbbbbbbr
+    .......e.............e
+    .......e.............e
+    .....byz.............e
+    .....................a
+    .....#...............e
+    .....H...............e
+    .........--..........e
+    ........cx.g.........e
+    ........E-.-kbbr.....a
+    ........e..n...e.....e
+    ........a..i...-bbbbbu
+    ........e..e...n.....e
+    ........e..e...e.....e
+    ........e..-br.e.....e
+    ........dbbQ.B.e.....e
+    ...........e.--e-Rbbbu
+    ...........e...e.....e
+    ...........e...e.....e
+    ..dbkbbbr.cz...e.....a
+    ........e.e.cbbz.....e
+    ..=.....e.e.e.....e..e
+    ..h.....e.e.e.....pbbz
+    ........e.e.i.....C...
+    ........e.ds-.....C...
+    ........F...i.g...e...
+    ........-...-y#...e.g.
+    ........n...Q.....1K#.
+    ......g.i...F.....7...
+    ......#s-Vkbwbbbbbz...
+    ......................
+    ......................
+    ......................
+  11: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ....#o................
+    ......................
+    ......................
+    ......................
+    .........q.e..........
+    .........===..........
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    .............by-b.....
+    ......................
+    ......................
+    ......................
+    ......................
+    ..g...................
+    ..=...................
+    ......................
+    ......................
+    ......................
+    ..............g.......
+    ..............#.....g.
+    ....................#.
+    ......g...............
+    ......#...............
+    ......................
+    ......................
+  12: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ..####################
+    ..#..................#
+    ..#.f................#
+    ..###................#
+    .....................#
+    .....................#
+    .........=.#.........#
+    .........dbx.........#
+    ...........#.........#
+    ...........#####.....#
+    ...............#.....#
+    ...........#...#######
+    ...........#.........#
+    ...........#...#.....#
+    ...........###.#.....#
+    ...............#.....#
+    ...........#.#########
+    ...........#...#.....#
+    ...........#...#.....#
+    ..G######.##...#.....#
+    ........#.#.####.....#
+    ........#.#.#.....#..#
+    ........#.#.#.....####
+    ........#.#.#.....#...
+    ........#.###.g...#...
+    ........#...#.#...#.g.
+    ........#...##....#.#.
+    ......g...........##..
+    ......#.#...#.....#...
+    .......##.#########...
+  13: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ..cbbbbbbbbbbybbbbbbbr
+    ..e..................e
+    ..e..................e
+    ..dkz................e
+    .....................a
+    .....................e
+    .....................e
+    .........--..........e
+    ...........g.........e
+    ...........-kbbr.....a
+    ...........n...e.....e
+    ...........i...-bbbbbu
+    ...........e...n.....e
+    ...........e...e.....e
+    ...........-br.e.....e
+    ...........Q.B.e.....e
+    ...........e.--e-Rbbbu
+    ...........e...e.....e
+    ...........e...e.....e
+    ...bkbbbr.cz...e.....a
+    ........e.e.cbbz.....e
+    ........e.e.e.....e..e
+    ........e.e.e.....pbbz
+    ........e.e.i.....C...
+    ........e.ds-.....C...
+    ........F...i.g...e...
+    ........-...-y#...e.g.
+    ........n...Q.....vK#.
+    ......g.i...F.....%...
+    ......#s-Vkbwbbbbbz...
+  14: |
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ...........e..........
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    .............by-b.....
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ..............e.......
+    ....................e.
+    ......................
+    ......e...............
+tests:
+- name: count
+  settle: 60
+  steps:
+  - wait: 10
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 58
+  - expect: {n0: 0, n1: 1, n2: 0, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 58
+  - expect: {n0: 1, n1: 1, n2: 0, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 58
+  - expect: {n0: 0, n1: 0, n2: 1, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 58
+  - expect: {n0: 1, n1: 0, n2: 1, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 58
+  - expect: {n0: 0, n1: 1, n2: 1, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 0}
+  - wait: 58
+  - expect: {n0: 1, n1: 1, n2: 1, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 0}
+  - wait: 58
+  - expect: {n0: 0, n1: 0, n2: 0, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 58
+  - expect: {n0: 1, n1: 0, n2: 0, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 58
+  - expect: {n0: 0, n1: 1, n2: 0, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 1}
+  - wait: 58
+  - expect: {n0: 1, n1: 1, n2: 0, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 0, pc3: 1}
+  - wait: 58
+  - expect: {n0: 0, n1: 0, n2: 1, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 0, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 58
+  - expect: {n0: 1, n1: 0, n2: 1, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 58
+  - expect: {n0: 0, n1: 1, n2: 1, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 1}
+  - wait: 58
+  - expect: {n0: 1, n1: 1, n2: 1, n3: 1}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 1}
+  - wait: 58
+  - expect: {n0: 0, n1: 0, n2: 0, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 58
+  - expect: {n0: 1, n1: 0, n2: 0, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 58
+  - expect: {n0: 0, n1: 1, n2: 0, n3: 0}
+  - wait: 78
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+- name: jump
+  settle: 60
+  steps:
+  - wait: 10
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - drive: {imm0: 1, imm1: 0, imm2: 1, imm3: 0, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 136
+  - drive: {imm0: 0, imm1: 1, imm2: 0, imm3: 1, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 1}
+  - wait: 136
+  - drive: {imm0: 1, imm1: 1, imm2: 1, imm3: 1, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0}
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 1}
+  - wait: 136
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+- name: halt
+  settle: 60
+  steps:
+  - wait: 10
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 136
+  - drive: {hlt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {hlt: 0}
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 0}
+  - wait: 2
+- name: reset
+  settle: 60
+  steps:
+  - wait: 10
+  - drive: {imm0: 1, imm1: 0, imm2: 0, imm3: 1, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 136
+  - drive: {rst: 1, jt: 0, imm0: 0, imm3: 0}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {rst: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - drive: {hlt: 1, rst: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {rst: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {hlt: 0}
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+- name: no capture without cap
+  settle: 60
+  steps:
+  - wait: 10
+  - drive: {imm0: 0, imm1: 1, imm2: 1, imm3: 0, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0}
+  - wait: 40
+  - drive: {imm0: 1, imm1: 0, imm2: 0, imm3: 1, jt: 1}
+  - wait: 60
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 0}
+  - expect: {m0: 0, m1: 1, m2: 1, m3: 0}
+  - wait: 88
+  - wait: 40
+  - drive: {imm0: 0, imm1: 1, imm2: 1, imm3: 0, jt: 1, hlt: 1}
+  - wait: 60
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 0}
+  - expect: {m0: 0, m1: 1, m2: 1, m3: 0}
+  - wait: 88
+  - wait: 40
+  - drive: {imm0: 1, imm1: 1, imm2: 1, imm3: 1, jt: 0, rst: 1}
+  - wait: 60
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 0}
+  - expect: {m0: 0, m1: 1, m2: 1, m3: 0}
+  - wait: 88
+  - wait: 40
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 1, hlt: 0, rst: 0}
+  - wait: 60
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 1, pc2: 1, pc3: 0}
+  - expect: {m0: 0, m1: 1, m2: 1, m3: 0}
+  - wait: 88
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0, hlt: 0, rst: 0}
+- name: two phase
+  settle: 60
+  steps:
+  - wait: 10
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 136
+  - drive: {imm0: 0, imm1: 0, imm2: 1, imm3: 1, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 1, imm1: 1, imm2: 0, imm3: 0, jt: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 0, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 136
+  - drive: {imm0: 1, imm1: 1, imm2: 0, imm3: 0, jt: 0}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 1, imm1: 1, imm2: 1, imm3: 0, jt: 1}
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 136
+  - drive: {imm0: 1, imm1: 1, imm2: 1, imm3: 0, jt: 1}
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {imm0: 0, imm1: 0, imm2: 0, imm3: 0, jt: 0}
+  - wait: 28
+  - expect: {pc0: 1, pc1: 0, pc2: 1, pc3: 1}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 0}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 1, pc1: 1, pc2: 1, pc3: 0}
+  - wait: 2
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 2
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 136
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - expect: {pc0: 0, pc1: 0, pc2: 0, pc3: 1}
+  - wait: 2
+- name: com to pc delay
+  settle: 60
+  steps:
+  - wait: 10
+  - wait: 2
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 10
+  - wait: 28
+  - wait: 2
+  - drive: {com: 1}
+  - wave: {pc0: '0000000000111111', s0: '0000000000111111'}
+  - drive: {com: 0}

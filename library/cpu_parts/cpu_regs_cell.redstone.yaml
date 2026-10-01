@@ -1,0 +1,116 @@
+name: cpu_regs_cell
+description: 'One bit of the CPU register file (cpu_regs): a master latch that copies y while cap AND we, and a slave that copies the master while com; q is the slave. Data runs west to east on z=4: y (x=2) drives the master repeater (x=3), a link repeater (x=4) feeds the slave repeater (x=5), and q is the dust at x=6. The master is locked from the south by a repeater on the hold dust (3,1,6), which two torches keep lit: NOT cap (wall torch on the concrete at (3,1,8), powered through a repeater from cap) and NOT we (wall torch on the concrete at (1,1,6), powered through a repeater from we), so the master is open only while cap and we are both high. The slave is locked from the north by a subtract comparator (5,1,3) whose rear reads a barrel holding one stick (constant 1) and whose west side reads com through a repeater and two dust, so it is open only while com is high (dl_subtract_lock, SOURCED). The master opens 8 gt after cap rises and closes 6 gt after cap falls, so data must hold until cap fall + 6; q follows the master 6 gt after com rises.'
+traits: [pistonless, entityless, torch_based, comparator_based]
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  y: {input: y}
+  w: {input: we}
+  c: {input: cap}
+  m: {input: com}
+  M: {name: master, block: 'repeater[facing=west]'}
+  L: repeater[facing=west]
+  S: {name: slave, block: 'repeater[facing=west]'}
+  q: {output: q, block: redstone_wire}
+  K: comparator[facing=north,mode=subtract]
+  B: barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:stick",count:1}]}
+  n: repeater[facing=north]
+  v: repeater[facing=south]
+  h: {name: hold, block: redstone_wire}
+  ): redstone_wall_torch[facing=east]
+  N: redstone_wall_torch[facing=north]
+layers:
+  0: |
+    ....=...
+    ....=...
+    ....==..
+    ....==..
+    ..=====.
+    ...=....
+    .===....
+    .=.=....
+    .=.=....
+    ...=....
+    ...=....
+  1: |
+    ....m...
+    ....n...
+    ....-B..
+    ....-K..
+    ..yMLSq.
+    ...v....
+    .#)h....
+    .v.N....
+    .w.#....
+    ...v....
+    ...c....
+tests:
+- name: capture and transfer
+  steps:
+  - expect: {master: 0, slave: 0, q: 0, hold: 1}
+  - drive: {we: 1, y: 1}
+  - wait: 10
+  - expect: {master: 0, hold: 1}
+  - drive: {cap: 1}
+  - wave: {master: '0000000x11', q: '0000000000'}
+  - drive: {cap: 0}
+  - wait: 10
+  - drive: {y: 0}
+  - wait: 20
+  - expect: {master: 1, q: 0, hold: 1}
+  - drive: {com: 1}
+  - wave: {q: '00000x1111', master: '1111111111'}
+  - drive: {com: 0}
+  - wait: 20
+  - expect: {q: 1, master: 1}
+  - drive: {cap: 1}
+  - wave: {master: '1111111x00', q: '1111111111'}
+  - drive: {cap: 0}
+  - wait: 20
+  - expect: {master: 0, q: 1}
+  - drive: {com: 1}
+  - wave: {q: '11111x0000'}
+  - drive: {com: 0}
+  - wait: 20
+  - expect: {q: 0, master: 0}
+- name: holds without cap or enable
+  steps:
+  - drive: {we: 1, y: 1}
+  - wait: 4
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 20
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 20
+  - expect: {master: 1, q: 1}
+  - drive: {we: 0}
+  - wait: 4
+  - drive: {y: 0}
+  - wait: 4
+  - drive: {cap: 1}
+  - wait: 10
+  - drive: {cap: 0}
+  - wait: 20
+  - expect: {master: 1, q: 1}
+  - drive: {we: 1}
+  - wait: 20
+  - drive: {we: 0}
+  - wait: 10
+  - drive: {we: 1}
+  - wait: 20
+  - expect: {master: 1, q: 1}
+  - drive: {y: 1}
+  - wait: 10
+  - drive: {y: 0}
+  - wait: 10
+  - expect: {master: 1}
+  - drive: {com: 1}
+  - wait: 10
+  - drive: {com: 0}
+  - wait: 20
+  - expect: {master: 1, q: 1}

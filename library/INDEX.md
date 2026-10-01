@@ -90,6 +90,23 @@ and subtracts, so it passes A only when B is on |
 | count_johnson_4 | 13x2x13 | 338 | 206 | - | lightless, silent, pistonless, entityless, flat, horizontal, fast, comparator_based, tick_accurate, reset_safe, survival_friendly | 4-stage Johnson (twisted-ring) counter, 8 states, lightless and silent, with every stage changing exactly 2 gt after the rising edge |
 | count_lock_ripple | 6x2x17 | 204 | 137 | - | silent, lightless, pistonless, entityless, flat, horizontal, comparator_based, reset_safe, survival_friendly, tick_accurate | Silent, lightless ripple up counter: only repeaters, comparators, dust and composters, so no torches, lamps, bulbs, pistons or droppers, and nothing to burn out |
 
+## cpu
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| cpu_fetch | 76x15x120 | 136800 | 8697 | - |  | CPU4 fetch loop: the two-phase clock drives the program counter, whose value addresses the 16x8 lever ROM (Fibonacci program); the ROM's n field goes back to the PC's jump input |
+
+## cpu_parts
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| cpu_clock | 48x4x26 | 4992 | 1468 | - | comparator_based, silent, lightless, pistonless, entityless, tick_accurate | Two-phase CPU clock, period 200 gt, torch-free: one start edge sets a two-repeater memory loop, a subtract comparator turns that step into one 10 gt pulse, and the pulse circulates forever in a 26-repeater ring (200 gt) |
+| cpu_out_display | 29x10x40 | 11600 | 1970 | - | torch_based, pistonless, entityless | CPU output display: out0-out3 (out0 least significant, pins on the south face at x=4,6,8,10, y=1) shown as two seven-segment digits facing north on the z=0 face, tens on the viewer's left (blank for 0-9, 1 for 10-15) |
+| cpu_pc | 22x15x40 | 13200 | 2511 | - | torch_based, pistonless, entityless | 4-bit program counter for the CPU4 computer: a master/slave register with an incrementer and a next-PC mux (next = 0 if rst, else imm if jt, else pc+1 mod 16) |
+| cpu_regs_cell | 6x2x11 | 132 | 38 | - | pistonless, entityless, torch_based, comparator_based | One bit of the CPU register file (cpu_regs): a master latch that copies y while cap AND we, and a slave that copies the master while com; q is the slave |
+| cpu_rom_ctrl | 46x8x36 | 13248 | 4312 | - | torch_based, pistonless, entityless | CPU4 program memory (stage 1 of ROM_CTRL: no control decoder yet) |
+| cpu_rom_ctrl_jumps | 46x8x36 | 13248 | 4312 | - | torch_based, pistonless, entityless | CPU4 program memory (stage 1 of ROM_CTRL: no control decoder yet) |
+
 ## crossing
 
 | variant | size | volume | blocks | delay | traits | summary |

@@ -250,7 +250,9 @@ def dump(spec: Spec) -> str:
 
     palette: dict[str, object] = {".": "air"}
     by_state: dict[str, str] = {"minecraft:air": "."}
-    spare = [c for c in "ABCDEFGHIJKMNOPQSTUVWXYZbcdefghijklmpqrstwxyz0123456789" if c not in GLYPHS.values()]
+    # Greek letters only once the ASCII glyphs run out, so existing files dump unchanged.
+    spare = [c for c in "ABCDEFGHIJKMNOPQSTUVWXYZbcdefghijklmpqrstwxyz0123456789"
+             "αβγδεζηθικλμνξπρστυφχψωΓΔΘΛΞΠΣΦΨΩ" if c not in GLYPHS.values()]
 
     def next_free() -> str:
         return next(c for c in spare if c not in palette)
