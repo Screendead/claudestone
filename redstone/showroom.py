@@ -196,12 +196,13 @@ def fit_rcon(command: str) -> list[str]:
     return out
 
 
-def _place(rcon: Rcon, plot: str, name: str, entry: dict, build: Build | None, test_names) -> None:
+def _place(rcon: Rcon, plot: str, name: str, entry: dict, build: Build | None, test_names,
+           update: str = "all") -> None:
     x, y, z = _abs(plot, entry["slot"])
     w, h, _ = entry["size"]
     bx = x + (entry["box"][0] - w) // 2
     if build is not None:
-        for c in normalised(build).to_commands():
+        for c in normalised(build).to_commands(update):
             for part in fit_rcon(c):
                 checked(rcon, f"execute positioned {bx} {y} {z} run {part}")
     text = json.dumps(label_text(title(plot, name), entry, test_names), ensure_ascii=False)
@@ -260,7 +261,7 @@ def redraw(rcon: Rcon, plot: str, state: dict, current: tuple[str, Build] | None
     current spec's build is the one just tested). Entries whose file is gone are dropped;
     entries whose size changed keep their slot if it still fits, else everything repacks."""
     size = PLOTS[plot].size
-    builds, tests = {}, {}
+    builds, tests, updates = {}, {}, {}
     for name in list(state["specs"]):
         entry = state["specs"][name]
         s = _library_spec(name)
@@ -279,6 +280,7 @@ def redraw(rcon: Rcon, plot: str, state: dict, current: tuple[str, Build] | None
             continue
         tests[name] = [t["name"] for t in s.tests]
         builds[name] = s.build
+        updates[name] = s.update_pass
         entry["traits"] = list(s.traits)
     if current:
         builds[current[0]] = current[1]
@@ -298,7 +300,7 @@ def redraw(rcon: Rcon, plot: str, state: dict, current: tuple[str, Build] | None
     for c in clear_commands(p.origin, p.size):
         checked(rcon, c)
     for name, entry in sorted(state["specs"].items()):
-        _place(rcon, plot, name, entry, builds.get(name), tests.get(name))
+        _place(rcon, plot, name, entry, builds.get(name), tests.get(name), updates.get(name, "all"))
 
 
 def _record(state: dict, spec, result: dict) -> dict:
@@ -367,7 +369,7 @@ def _show(rcon, plot, spec, build, result, full):
     if old.get("slot"):
         _clear_box(rcon, plot, spec.name, old)
     _clear_box(rcon, plot, spec.name, entry)
-    _place(rcon, plot, spec.name, entry, build, tests)
+    _place(rcon, plot, spec.name, entry, build, tests, spec.update_pass)
     save_state(plot, state)
 
 

@@ -53,11 +53,16 @@ class Build:
         spec's `update_pass`: "all" clones every block onto itself; "none" skips the pass;
         "unobserved" sets observers last and clones every block but those an observer faces,
         since a clone swaps its block through a barrier and so pulses an observer watching
-        it (CloneCommands)."""
+        it (CloneCommands); "strict" sets every block with `setblock ... strict` (no
+        neighbour or shape updates at all) and runs no pass, so no observer sees the build
+        being placed."""
         if update not in UPDATE_PASSES:
             raise ValueError(f"update pass {update!r} is not one of {', '.join(UPDATE_PASSES)}")
         # Bottom-up so attached blocks (torches, dust, levers) have their support first.
         order = sorted(self.blocks, key=lambda p: (p[1], p[0], p[2]))
+        if update == "strict":
+            return ([f"setblock ~{x} ~{y} ~{z} {self.blocks[(x, y, z)]} strict" for x, y, z in order]
+                    + [f"summon {e} ~{x} ~{y} ~{z} {n}".rstrip() for (x, y, z), e, n in self.entities])
         watched = set()
         if update == "unobserved":
             observers = [p for p in order if block_id(self.blocks[p]) == "minecraft:observer"]
@@ -85,7 +90,7 @@ class Build:
         return ["\n".join(commands[i:i + chunk]) + "\n" for i in range(0, len(commands), chunk)] or ["\n"]
 
 
-UPDATE_PASSES = ("all", "none", "unobserved")
+UPDATE_PASSES = ("all", "none", "unobserved", "strict")
 STEP = {"north": (0, 0, -1), "south": (0, 0, 1), "west": (-1, 0, 0), "east": (1, 0, 0),
         "down": (0, -1, 0), "up": (0, 1, 0)}
 

@@ -80,9 +80,11 @@
                                  # max_close_visible, tier (default the door's), max_volume,
                                  # max_ticks (per operation, default 600)
 
-    update_pass: all             # optional: all (default), none (no clone-onto-itself pass)
-                                 # or unobserved (observers set last, and the blocks they
-                                 # face not cloned, so placing doesn't pulse them)
+    update_pass: all             # optional: all (default), none (no clone-onto-itself pass),
+                                 # unobserved (observers set last, and the blocks they
+                                 # face not cloned, so placing doesn't pulse them) or
+                                 # strict (every block set with `setblock ... strict`, no
+                                 # updates at all, and no pass)
 
     door:                        # optional: a piston door, for door_cycle tests
       doorway: {origin: [5, 1, 1], width: 2, height: 2, facing: north}
@@ -95,6 +97,8 @@
       input: door_in             # the input whose drive cell feeds the fixture repeater
       repeater: rep              # a named fixture repeater[delay=1] with the drive cell
                                  # behind it; tick 0 is the tick its output changes
+                                 # (or instead lever: <named lever>, flipped like a click;
+                                 # tick 0 is then the first tick after the click)
       device: lever              # optional: the player's input device, left out of volume
       outer_surface: [[[0, 0, 0], [9, 3, 0]]]   # optional boxes of outer wall, not circuitry
       initial: closed            # the state as placed, with the input off (default closed)
