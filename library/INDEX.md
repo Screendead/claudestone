@@ -168,6 +168,7 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| door16_band_close | 28x7x9 | 1764 | 178 | - | piston_based, entityless | The close of an in-plane 16x16 door, all at once, for one middle band per half (door rows 4-5; rows 2-3 and 6-7 closed and still; band stacks as in door16_band_kick, mirrored about the doorway centre) |
 | door16_band_kick | 9x7x9 | 567 | 81 | - | piston_based, entityless | Three shuttle bands for an in-plane 16x16 door (door rows 2-7, columns x5-8), stacked by mirroring as in door16_band_stack (each side now 4 planes deep), that fetch a column, stop and come home with no input after the kick |
 | door16_band_stack | 9x6x7 | 378 | 46 | - | piston_based, entityless | Two shuttle bands for an in-plane 16x16 door, stacked on adjacent door rows (2-3 and 4-5) and mirrored, so band 0's engine runs in the planes on one side of the door and band 1's on the other, and no slime of one band ever touches the other (same-side stacking would need slime/honey alternation, and honey does not conduct) |
 | door16_carrier_segment | 7x8x1 | 56 | 33 | - | piston_based, entityless | In-plane carrier primitive for a 16x16 that pulls quartz columns sideways one cell per firing (the family NumpadInfinite's 16x16 appears to use) |

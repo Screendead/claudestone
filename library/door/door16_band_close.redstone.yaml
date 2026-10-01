@@ -1,0 +1,180 @@
+name: door16_band_close
+description: "The close of an in-plane 16x16 door, all at once, for one middle band per half (door rows 4-5; rows 2-3 and 6-7 closed and still; band stacks as in door16_band_kick, mirrored about the doorway centre). Each middle band starts at home with a spacer and 5 columns queued in the door plane in front of its pistons. A spit (B fires) moves the queue 1 cell and R's kick starts the flight; every landing B fires again and the band pistons spit the queue 1 more cell. The halves meet at the centre in the same step, so the next spit's chain is 2x6 quartz plus the other band's piston, over 12: both spits and both R pushes fail, the W/N/E relay kicks each band home, and the first home step pulls the spacer (the block touching the pistons) home, leaving every column on its cell."
+traits: [piston_based, entityless]
+update_pass: strict
+palette:
+  '.': air
+  O: 'observer[facing=north]'
+  o: 'observer[facing=south]'
+  S: slime_block
+  R: 'sticky_piston[facing=east]'
+  L: 'sticky_piston[facing=west]'
+  B: 'observer[facing=up]'
+  Z: stone
+  X: obsidian
+  Q: quartz_block
+  N: note_block
+  k: {input: kickw}
+  K: {input: kicke}
+layers:
+  0: |
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+  1: |
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+  2: |
+    ..S......................S..
+    ..S......................S..
+    ..S......................S..
+    ..S......................S..
+    ..R......QQQQQQQQQQ......L..
+    ............................
+    ............................
+    ............................
+    ............................
+  3: |
+    ..N......................N..
+    .OO......................OO.
+    XSL......................RSX
+    .RS......................SL.
+    ..R......QQQQQQQQQQ......L..
+    ............................
+    ............................
+    ............................
+    ............................
+  4: |
+    .SB......................BS.
+    .S........................S.
+    .S........................S.
+    ..B......................B..
+    ..RQQQQQQ..........QQQQQQL..
+    ..S......................S..
+    ..S......................S..
+    ..S......................S..
+    ..S......................S..
+  5: |
+    ............................
+    ............................
+    ............................
+    ............................
+    ..RQQQQQQ..........QQQQQQL..
+    kRS......................SLK
+    XSL......................RSX
+    .oo......................oo.
+    ..N......................N..
+  6: |
+    ..S......................S..
+    ..S......................S..
+    ..S......................S..
+    ..S......................S..
+    ..R......QQQQQQQQQQ......L..
+    ..B......................B..
+    .S........................S.
+    .S........................S.
+    .SB......................BS.
+  7: |
+    ..N......................N..
+    .OO......................OO.
+    XSL......................RSX
+    .RS......................SL.
+    ..R......QQQQQQQQQQ......L..
+    ............................
+    ............................
+    ............................
+    ............................
+  8: |
+    .SB......................BS.
+    .S........................S.
+    .S........................S.
+    ..B......................B..
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+  9: |
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+tests:
+- name: both halves close their middle rows in one trip and come home
+  steps:
+  - run: 'setblock ~2 ~7 ~5 stone'
+  - run: 'setblock ~25 ~7 ~5 stone'
+  - run: 'setblock ~2 ~7 ~5 air'
+  - run: 'setblock ~25 ~7 ~5 air'
+  - wait: 6
+  - drive: {kickw: 1, kicke: 1}
+  - wait: 2
+  - drive: {kickw: 0, kicke: 0}
+  - wait: 40
+  - check: 'if block ~9 ~4 ~4 quartz_block if block ~9 ~5 ~4 quartz_block if block ~10 ~4 ~4 quartz_block if block ~10 ~5 ~4 quartz_block if block ~11 ~4 ~4 quartz_block if block ~11 ~5 ~4 quartz_block if block ~12 ~4 ~4 quartz_block if block ~12 ~5 ~4 quartz_block if block ~13 ~4 ~4 quartz_block if block ~13 ~5 ~4 quartz_block if block ~14 ~4 ~4 quartz_block if block ~14 ~5 ~4 quartz_block'
+  - check: 'if block ~15 ~4 ~4 quartz_block if block ~15 ~5 ~4 quartz_block if block ~16 ~4 ~4 quartz_block if block ~16 ~5 ~4 quartz_block if block ~17 ~4 ~4 quartz_block if block ~17 ~5 ~4 quartz_block if block ~18 ~4 ~4 quartz_block if block ~18 ~5 ~4 quartz_block'
+  - wait: 160
+  - check: 'if block ~3 ~4 ~4 quartz_block if block ~3 ~5 ~4 quartz_block if block ~4 ~4 ~4 air if block ~4 ~5 ~4 air if block ~5 ~4 ~4 air if block ~5 ~5 ~4 air if block ~6 ~4 ~4 air if block ~6 ~5 ~4 air if block ~7 ~4 ~4 air if block ~7 ~5 ~4 air if block ~8 ~4 ~4 air if block ~8 ~5 ~4 air'
+  - check: 'if block ~9 ~4 ~4 quartz_block if block ~9 ~5 ~4 quartz_block if block ~10 ~4 ~4 quartz_block if block ~10 ~5 ~4 quartz_block if block ~11 ~4 ~4 quartz_block if block ~11 ~5 ~4 quartz_block if block ~12 ~4 ~4 quartz_block if block ~12 ~5 ~4 quartz_block if block ~13 ~4 ~4 quartz_block if block ~13 ~5 ~4 quartz_block if block ~14 ~4 ~4 quartz_block if block ~14 ~5 ~4 quartz_block'
+  - check: 'if block ~15 ~4 ~4 quartz_block if block ~15 ~5 ~4 quartz_block if block ~16 ~4 ~4 quartz_block if block ~16 ~5 ~4 quartz_block if block ~17 ~4 ~4 quartz_block if block ~17 ~5 ~4 quartz_block if block ~18 ~4 ~4 quartz_block if block ~18 ~5 ~4 quartz_block if block ~19 ~4 ~4 air if block ~19 ~5 ~4 air if block ~20 ~4 ~4 air if block ~20 ~5 ~4 air'
+  - check: 'if block ~21 ~4 ~4 air if block ~21 ~5 ~4 air if block ~22 ~4 ~4 air if block ~22 ~5 ~4 air if block ~23 ~4 ~4 air if block ~23 ~5 ~4 air if block ~24 ~4 ~4 quartz_block if block ~24 ~5 ~4 quartz_block'
+  - check: 'if block ~0 ~3 ~2 obsidian if block ~0 ~5 ~6 obsidian if block ~0 ~7 ~2 obsidian if block ~1 ~3 ~1 observer[facing=north] if block ~1 ~3 ~2 slime_block if block ~1 ~3 ~3 sticky_piston[facing=east] if block ~1 ~4 ~0 slime_block if block ~1 ~4 ~1 slime_block if block ~1 ~4 ~2 slime_block if block ~1 ~5 ~5 sticky_piston[facing=east] if block ~1 ~5 ~6 slime_block if block ~1 ~5 ~7 observer[facing=south]'
+  - check: 'if block ~1 ~6 ~6 slime_block if block ~1 ~6 ~7 slime_block if block ~1 ~6 ~8 slime_block if block ~1 ~7 ~1 observer[facing=north] if block ~1 ~7 ~2 slime_block if block ~1 ~7 ~3 sticky_piston[facing=east] if block ~1 ~8 ~0 slime_block if block ~1 ~8 ~1 slime_block if block ~1 ~8 ~2 slime_block if block ~2 ~2 ~0 slime_block if block ~2 ~2 ~1 slime_block if block ~2 ~2 ~2 slime_block'
+  - check: 'if block ~2 ~2 ~3 slime_block if block ~2 ~2 ~4 sticky_piston[facing=east] if block ~2 ~3 ~0 note_block if block ~2 ~3 ~1 observer[facing=north] if block ~2 ~3 ~2 sticky_piston[facing=west] if block ~2 ~3 ~3 slime_block if block ~2 ~3 ~4 sticky_piston[facing=east] if block ~2 ~4 ~0 observer[facing=up] if block ~2 ~4 ~3 observer[facing=up] if block ~2 ~4 ~5 slime_block if block ~2 ~4 ~6 slime_block if block ~2 ~4 ~7 slime_block'
+  - check: 'if block ~2 ~4 ~8 slime_block if block ~2 ~5 ~5 slime_block if block ~2 ~5 ~6 sticky_piston[facing=west] if block ~2 ~5 ~7 observer[facing=south] if block ~2 ~5 ~8 note_block if block ~2 ~6 ~0 slime_block if block ~2 ~6 ~1 slime_block if block ~2 ~6 ~2 slime_block if block ~2 ~6 ~3 slime_block if block ~2 ~6 ~4 sticky_piston[facing=east] if block ~2 ~6 ~5 observer[facing=up] if block ~2 ~6 ~8 observer[facing=up]'
+  - check: 'if block ~2 ~7 ~0 note_block if block ~2 ~7 ~1 observer[facing=north] if block ~2 ~7 ~2 sticky_piston[facing=west] if block ~2 ~7 ~3 slime_block if block ~2 ~7 ~4 sticky_piston[facing=east] if block ~2 ~8 ~0 observer[facing=up] if block ~2 ~8 ~3 observer[facing=up] if block ~9 ~2 ~4 quartz_block if block ~9 ~3 ~4 quartz_block if block ~9 ~6 ~4 quartz_block if block ~9 ~7 ~4 quartz_block if block ~10 ~2 ~4 quartz_block'
+  - check: 'if block ~10 ~3 ~4 quartz_block if block ~10 ~6 ~4 quartz_block if block ~10 ~7 ~4 quartz_block if block ~11 ~2 ~4 quartz_block if block ~11 ~3 ~4 quartz_block if block ~11 ~6 ~4 quartz_block if block ~11 ~7 ~4 quartz_block if block ~12 ~2 ~4 quartz_block if block ~12 ~3 ~4 quartz_block if block ~12 ~6 ~4 quartz_block if block ~12 ~7 ~4 quartz_block if block ~13 ~2 ~4 quartz_block'
+  - check: 'if block ~13 ~3 ~4 quartz_block if block ~13 ~6 ~4 quartz_block if block ~13 ~7 ~4 quartz_block if block ~14 ~2 ~4 quartz_block if block ~14 ~3 ~4 quartz_block if block ~14 ~6 ~4 quartz_block if block ~14 ~7 ~4 quartz_block if block ~15 ~2 ~4 quartz_block if block ~15 ~3 ~4 quartz_block if block ~15 ~6 ~4 quartz_block if block ~15 ~7 ~4 quartz_block if block ~16 ~2 ~4 quartz_block'
+  - check: 'if block ~16 ~3 ~4 quartz_block if block ~16 ~6 ~4 quartz_block if block ~16 ~7 ~4 quartz_block if block ~17 ~2 ~4 quartz_block if block ~17 ~3 ~4 quartz_block if block ~17 ~6 ~4 quartz_block if block ~17 ~7 ~4 quartz_block if block ~18 ~2 ~4 quartz_block if block ~18 ~3 ~4 quartz_block if block ~18 ~6 ~4 quartz_block if block ~18 ~7 ~4 quartz_block if block ~25 ~2 ~0 slime_block'
+  - check: 'if block ~25 ~2 ~1 slime_block if block ~25 ~2 ~2 slime_block if block ~25 ~2 ~3 slime_block if block ~25 ~2 ~4 sticky_piston[facing=west] if block ~25 ~3 ~0 note_block if block ~25 ~3 ~1 observer[facing=north] if block ~25 ~3 ~2 sticky_piston[facing=east] if block ~25 ~3 ~3 slime_block if block ~25 ~3 ~4 sticky_piston[facing=west] if block ~25 ~4 ~0 observer[facing=up] if block ~25 ~4 ~3 observer[facing=up] if block ~25 ~4 ~5 slime_block'
+  - check: 'if block ~25 ~4 ~6 slime_block if block ~25 ~4 ~7 slime_block if block ~25 ~4 ~8 slime_block if block ~25 ~5 ~5 slime_block if block ~25 ~5 ~6 sticky_piston[facing=east] if block ~25 ~5 ~7 observer[facing=south] if block ~25 ~5 ~8 note_block if block ~25 ~6 ~0 slime_block if block ~25 ~6 ~1 slime_block if block ~25 ~6 ~2 slime_block if block ~25 ~6 ~3 slime_block if block ~25 ~6 ~4 sticky_piston[facing=west]'
+  - check: 'if block ~25 ~6 ~5 observer[facing=up] if block ~25 ~6 ~8 observer[facing=up] if block ~25 ~7 ~0 note_block if block ~25 ~7 ~1 observer[facing=north] if block ~25 ~7 ~2 sticky_piston[facing=east] if block ~25 ~7 ~3 slime_block if block ~25 ~7 ~4 sticky_piston[facing=west] if block ~25 ~8 ~0 observer[facing=up] if block ~25 ~8 ~3 observer[facing=up] if block ~26 ~3 ~1 observer[facing=north] if block ~26 ~3 ~2 slime_block if block ~26 ~3 ~3 sticky_piston[facing=west]'
+  - check: 'if block ~26 ~4 ~0 slime_block if block ~26 ~4 ~1 slime_block if block ~26 ~4 ~2 slime_block if block ~26 ~5 ~5 sticky_piston[facing=west] if block ~26 ~5 ~6 slime_block if block ~26 ~5 ~7 observer[facing=south] if block ~26 ~6 ~6 slime_block if block ~26 ~6 ~7 slime_block if block ~26 ~6 ~8 slime_block if block ~26 ~7 ~1 observer[facing=north] if block ~26 ~7 ~2 slime_block if block ~26 ~7 ~3 sticky_piston[facing=west]'
+  - check: 'if block ~26 ~8 ~0 slime_block if block ~26 ~8 ~1 slime_block if block ~26 ~8 ~2 slime_block if block ~27 ~3 ~2 obsidian if block ~27 ~5 ~6 obsidian if block ~27 ~7 ~2 obsidian'
+- name: control, one half kicked, overshoots into the other half
+  steps:
+  - run: 'setblock ~2 ~7 ~5 stone'
+  - run: 'setblock ~2 ~7 ~5 air'
+  - wait: 6
+  - drive: {kickw: 1}
+  - wait: 2
+  - drive: {kickw: 0}
+  - wait: 250
+  - check: 'if block ~3 ~4 ~4 quartz_block if block ~3 ~5 ~4 quartz_block if block ~4 ~4 ~4 air if block ~4 ~5 ~4 air if block ~5 ~4 ~4 air if block ~5 ~5 ~4 air if block ~6 ~4 ~4 air if block ~6 ~5 ~4 air if block ~7 ~4 ~4 air if block ~7 ~5 ~4 air if block ~8 ~4 ~4 air if block ~8 ~5 ~4 air'
+  - check: 'if block ~9 ~4 ~4 air if block ~9 ~5 ~4 air if block ~10 ~4 ~4 air if block ~10 ~5 ~4 air if block ~11 ~4 ~4 air if block ~11 ~5 ~4 air if block ~12 ~4 ~4 air if block ~12 ~5 ~4 air if block ~13 ~4 ~4 air if block ~13 ~5 ~4 air if block ~14 ~4 ~4 quartz_block if block ~14 ~5 ~4 quartz_block'
+  - check: 'if block ~15 ~4 ~4 quartz_block if block ~15 ~5 ~4 quartz_block if block ~16 ~4 ~4 quartz_block if block ~16 ~5 ~4 quartz_block if block ~17 ~4 ~4 quartz_block if block ~17 ~5 ~4 quartz_block if block ~18 ~4 ~4 quartz_block if block ~18 ~5 ~4 quartz_block if block ~19 ~4 ~4 quartz_block if block ~19 ~5 ~4 quartz_block if block ~20 ~4 ~4 quartz_block if block ~20 ~5 ~4 quartz_block'
+  - check: 'if block ~21 ~4 ~4 quartz_block if block ~21 ~5 ~4 quartz_block if block ~22 ~4 ~4 quartz_block if block ~22 ~5 ~4 quartz_block if block ~23 ~4 ~4 quartz_block if block ~23 ~5 ~4 quartz_block if block ~24 ~4 ~4 quartz_block if block ~24 ~5 ~4 quartz_block if block ~25 ~4 ~4 sticky_piston[facing=west] if block ~25 ~5 ~4 sticky_piston[facing=west]'
+- name: control, 4 columns per half, the meeting does not stop and a band piston is shoved off
+  steps:
+  - run: 'fill ~8 ~4 ~4 ~8 ~5 ~4 air'
+  - run: 'fill ~19 ~4 ~4 ~19 ~5 ~4 air'
+  - wait: 1
+  - run: 'setblock ~2 ~7 ~5 stone'
+  - run: 'setblock ~25 ~7 ~5 stone'
+  - run: 'setblock ~2 ~7 ~5 air'
+  - run: 'setblock ~25 ~7 ~5 air'
+  - wait: 6
+  - drive: {kickw: 1, kicke: 1}
+  - wait: 2
+  - drive: {kickw: 0, kicke: 0}
+  - wait: 200
+  - check: 'unless block ~25 ~5 ~4 sticky_piston[facing=west]'
+  - check: 'unless block ~2 ~4 ~4 sticky_piston[facing=east]'
