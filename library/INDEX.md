@@ -44,7 +44,7 @@ and subtracts, so it passes A only when B is on |
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
 | button_lamp | 4x1x1 | 4 | 4 | - |  | A stone button pulse through a torch inverter; the button releases after 20 ticks |
-| cpu_fib4 | 185x8x86 | 127280 | 17854 | - | torch_based, pistonless, entityless | The whole CPU4 computer running the Fibonacci program (words 10 80 11 A0 90 20 D8 B3 F0), built from the compact parts: cpu_clock_compact, the 16x8 lever ROM (rom_ctrl), cpu_pc_compact abutting its east face, cpu_ctrl_compact turned under the ROM, cpu_alu_compact (n muxed inside) abutting cpu_regs_compact, and cpu_out_display_compact at the north edge |
+| cpu_fib4 | 185x8x85 | 125800 | 16210 | - | torch_based, pistonless, entityless | The whole CPU4 computer running the Fibonacci program (words 10 80 11 A0 90 20 D8 B3 F0), built from the compact parts: cpu_clock_compact, the 16x8 lever ROM (rom_ctrl), cpu_pc_compact abutting its east face, cpu_ctrl_compact turned under the ROM, cpu_alu_compact (n muxed inside) abutting cpu_regs_compact, and cpu_out_display_compact at the north edge |
 | decoder | 79x4x71 | 22436 | 5321 | - |  | A sum 0-18 (s0 = least significant bit) to units-digit segments a-g and a tens flag |
 | lever_lamp | 4x1x1 | 4 | 4 | - |  | A lever-controlled torch inverter lighting a lamp; checks player-faithful lever input |
 | probe_cells | 3x2x13 | 78 | 51 | - |  | Harness check for the readable cell kinds (rail, copper bulb, piston, hopper lock, daylight detector) and exact strengths of a comparator, a daylight detector and dust |

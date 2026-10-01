@@ -26,7 +26,7 @@ from scripts.cpu_clock_compact import cpu_clock_compact
 from scripts.rom_ctrl import rom_ctrl
 
 FIB_PROGRAM = [0x10, 0x80, 0x11, 0xA0, 0x90, 0x20, 0xD8, 0xB3, 0xF0] + [0] * 7
-PERIOD, CAP_AT = 200, 150
+PERIOD, CAP_AT = 124, 94           # measured: 124/94 passes, 120/90 fails; the clock needs CAP_AT <= PERIOD - 30
 CLOCK_L = 12                 # start rise -> first COM at the clock pin (cpu_clock_compact, MEASURED)
 YMAX = 4
 SOLIDS = ("smooth_stone", "white_concrete", "black_concrete")
@@ -134,7 +134,7 @@ def parts(words, period=PERIOD, cap_at=CAP_AT):
     doc_x = rx - dec.inputs["op0"][0]
     gap_x = doc_x + dec.build.bounds()[1][0] + 2          # PC lines climb here, east of the decoder
     ax = max(poff[0] + pw + JOG, gap_x + 10)              # then the ALU control columns
-    aoff = (ax, 0, roff[2] + 1)
+    aoff = (ax, 0, roff[2] + 5)                            # rows for the OUT lines north of the regs
     goff = (ax + alu.build.bounds()[1][0] + 1, 0, aoff[2])
     rw, rd = (v + 1 for v in regs.build.bounds()[1][::2])
     doff = (goff[0] + rw + 10, 0, 1)
@@ -169,7 +169,6 @@ NETS = [
     *[(f"n{i}", "pc", f"n{i}", "alu", f"n{i}") for i in range(4)],
     ("jt", "dec", "jt", "pc", "jt"), ("hlt", "dec", "hlt", "pc", "hlt"),
     ("com", "clock", "com", "pc", "com"), ("cap", "clock", "cap", "pc", "cap"),
-    *[(f"out{i}", "regs", f"out{i}", "disp", f"out{i}") for i in range(4)],
 ]
 # The control strip south of the decoder, rows north to south: each line leaves its source
 # pin straight (dust at y=1, along z), climbs sideways onto its own row (y=3 on supports,
@@ -181,6 +180,7 @@ STRIP = [("cap", "clock", "cap", "regs", "cap"), ("com", "clock", "com", "regs",
          ("xsel", "dec", "xsel", "alu", "xsel"), ("sub", "dec", "sub", "alu", "sub"), ("za", "dec", "za", "alu", "za"),
          ("wa", "dec", "wa", "regs", "wa"), ("wf", "dec", "wf", "regs", "wf"),
          ("wo", "dec", "wo", "regs", "wo"), ("wb", "dec", "wb", "regs", "wb")]
+OUT_NETS = [(f"out{i}", "regs", f"out{i}", "disp", f"out{i}") for i in range(4)]
 PANEL_NETS = [("start", "pstart", "src", "clock", "start"), ("rst", "prst", "src", "pc", "rst")]
 
 
@@ -213,6 +213,23 @@ def strip(g, P, pins):
             g.dust(c, net)
         g.net[a] = g.net[b] = net
     return rows
+
+
+def out_bus(g, P, pins):
+    """OUT lines, flat at y=1: north out of the register file, east, south past its east face,
+    east under the display and north into its pins. out3 takes the innermost loop at the top
+    and the outermost at the bottom, so no two lines cross."""
+    gx = at(P["regs"][1], P["regs"][0].build.bounds()[1])[0] + 3
+    for i in range(4):
+        a, b = pins[f"regs.out{i}"], pins[f"disp.out{i}"]
+        zt, xc, zb = a[2] - 1 - 2 * (3 - i), gx + 2 * (3 - i), b[2] + 2 + 2 * i
+        cells = ([(a[0], 1, z) for z in range(a[2] - 1, zt, -1)] + [(x, 1, zt) for x in range(a[0], xc)]
+                 + [(xc, 1, z) for z in range(zt, zb)] + [(x, 1, zb) for x in range(xc, b[0])]
+                 + [(b[0], 1, z) for z in range(zb, b[2] - 1, -1)])
+        for c in cells:
+            if not (g.b.get(c) == WIRE and g.net.get(c) == f"out{i}"):
+                g.dust(c, f"out{i}")
+        g.net[a] = g.net[b] = f"out{i}"
 
 
 def size(P):
@@ -450,9 +467,10 @@ def cpu_fib4(words=FIB_PROGRAM, name="cpu_fib4", period=PERIOD, cap_at=CAP_AT) -
     part_cells = {at(off, p) for spec, off in P.values() for p in spec.build.blocks}
     abut(g, pins)
     strip(g, P, pins)
+    out_bus(g, P, pins)
     reserve(g, R, P, pins, NETS + PANEL_NETS)
     g, R, order = route_some(g, R, pins, PANEL_NETS + NETS)
-    isolate(g, P, pins, STRIP + NETS + PANEL_NETS)
+    isolate(g, P, pins, STRIP + OUT_NETS + NETS + PANEL_NETS)
     fix(g, rounds=1000, fixed={n for n in set(g.net.values()) if n.startswith("part:")})
     colours, loose = paint(g, P, part_cells)
     assert not loose, f"routed solids with no net: {loose}"
