@@ -58,6 +58,7 @@ and subtracts, so it passes A only when B is on |
 
 | variant | size | volume | blocks | delay | traits | summary |
 |---|---|---|---|---|---|---|
+| clock_burst_split_ladder | 23x2x11 | 506 | 125 | - | flat, pistonless, entityless, tick_accurate, comparator_based | Burst generator in 23x2x11: one pulse in, eight pulses 10 game ticks apart out, toggling a waxed copper bulb (the compact 16x16 door's spit ladder) |
 | clock_comparator_dust | 2x2x3 | 12 | 10 | - | ultrafast, compact, flat, horizontal, analog, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Fastest clean clock here: period 4 game ticks (2 on, 2 off), toggled by en, with no torches, repeater-free loop and no sound |
 | clock_comparator_repeater | 2x2x3 | 12 | 12 | - | compact, flat, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Toggleable lightless, silent square-wave clock, 2x2x3 plus the en cell: a subtract-mode comparator gated by its own delayed output |
 | clock_comparator_stack | 2x4x3 | 24 | 24 | - | compact, stackable, horizontal, comparator_based, silent, lightless, pistonless, entityless, tick_accurate, reset_safe, survival_friendly | Two clock_comparator_repeater clocks stacked 2 blocks apart, proving the design is stackable: each layer's base sits on the layer below without coupling, so a bank of clocks with different periods fits in a 2x4x3 column (plus the en cells to the west) |
