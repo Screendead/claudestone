@@ -111,6 +111,7 @@ and subtracts, so it passes A only when B is on |
 | cpu_pc | 22x15x40 | 13200 | 2511 | - | torch_based, pistonless, entityless | 4-bit program counter for the CPU4 computer: a master/slave register with an incrementer and a next-PC mux (next = 0 if rst, else imm if jt, else pc+1 mod 16) |
 | cpu_regs | 50x10x44 | 22000 | 2026 | - | pistonless, entityless, torch_based | CPU4 register file: A and B master/slave, OUT, Z and C single latches, all repeater latches |
 | cpu_regs_cell | 6x2x11 | 132 | 38 | - | pistonless, entityless, torch_based, comparator_based | One bit of the CPU register file (cpu_regs): a master latch that copies y while cap AND we, and a slave that copies the master while com; q is the slave |
+| cpu_regs_compact | 25x5x46 | 5750 | 1151 | - | pistonless, entityless, torch_based | CPU4 register file, compact: A and B master/slave, OUT, Z and C latches, every latch a repeater locked from the south by a repeater that reads a block; dust on that block climbs to a hold line at y=3 running along z (x=2 A masters, 6 both slaves, 10 B masters, 14 OUT, 18 flags) |
 | cpu_rom_ctrl | 46x8x36 | 13248 | 4312 | - | torch_based, pistonless, entityless | CPU4 program memory (stage 1 of ROM_CTRL: no control decoder yet) |
 | cpu_rom_ctrl_jumps | 46x8x36 | 13248 | 4312 | - | torch_based, pistonless, entityless | CPU4 program memory (stage 1 of ROM_CTRL: no control decoder yet) |
 
