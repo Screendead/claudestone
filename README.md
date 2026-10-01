@@ -7,32 +7,46 @@
 </p>
 
 <p align="center"><sub>
-Work in progress: one band of a 16x16 seamless piston door, <code>door16_band_pairs_ctrl</code>. One lever drives
-it with real redstone, no command stand-ins. Slime-block flying machines carry the door's quartz columns, five per
-half, out of two row pairs into stacks and rebuild the queues. Lever off closes them, and every block ends where it
-was placed. Rendered from the real block types captured during the library test on a 26.3 server (every 4 gt on the
-way out, every 2 gt on the way back); one frame per 64 gt opening and per 8 gt closing. The stone and repeater wiring
-is dimmed.
+Two row pairs of our 16x16 seamless door (<code>door16_band_pairs_ctrl</code>, in progress) on one lever, with no command
+stand-ins. Slime-block flying machines carry the quartz columns out into stacks, rebuild the queues and put every
+block back where it was placed. Drawn from the real block types captured during the library test on a 26.3 server;
+one frame per 64 gt opening and per 8 gt closing; the stone and repeater wiring is dimmed.
 </sub></p>
 
-You say *"two numbers on levers, a button, the sum on a 7-segment display"*. Agents write the build as a
-`.redstone.yaml` spec, the harness places it on a real Minecraft Java 26.3 server, freezes the game clock and steps
-it one tick at a time over RCON, and the spec's tests pass or it doesn't ship. What ships is a data pack whose
-`place` function sets exactly the blocks that were tested. It is not a mod: everything runs in an unmodified game.
+> **From a sentence to a tested, paste-able build.** Claude agents design the redstone, a harness steps it one
+> game tick at a time on an unmodified Minecraft Java 26.3 server, and only builds that pass ship, as a data pack
+> that places exactly the blocks that were tested. Not a mod.
 
-| | |
+| At a glance (tracked files, 2026-10-01) | |
 |---|---|
-| **430** specs in **41** building-block folders | `library/INDEX.md` |
-| **84** mechanics specs, each proving a 26.3 behaviour | `docs/MECHANICS.md` |
-| **27** community designs rebuilt and run as `ref_*` specs | `library/*/ref_*` |
-| **1** banked win over a community best, **1** tie | `docs/WINS.md` |
+| **435** specs in **41** building-block folders, every one with its own tests | [`library/INDEX.md`](library/INDEX.md) |
+| **84** specs that each prove one 26.3 mechanic | [`docs/MECHANICS.md`](docs/MECHANICS.md) |
+| **27** community designs rebuilt as `ref_*` specs, so comparisons are measured, not quoted | `library/*/ref_*` |
+| **1** banked win over a community best, **1** tie | [`docs/WINS.md`](docs/WINS.md) |
 
-## A build, checked by its real lamps
+## Being built now
+
+Being built now. None of these is a claimed record.
+
+- **A seamless 16x16 door.** No seamless 16x16 is logged in the Redstone Squid records, so the aim is the first
+  working one. MEASURED so far: one lever runs a 16-row slice, 10 columns wide, made of eight row pairs stacked
+  through observer towers (`door16_band_slice16`, 58x30x39). Over two back-to-back cycles every block returns to
+  where it was placed, and the control tests (a tower observer swapped for stone, a lock or a home sensor
+  removed) show the failure each one should. Next: widening it to the full 16 columns. Its box is already 67,860
+  blocks, far above the smallest logged 16x16 (24,012), so no size record is claimed.
+- **A seamless 3x3 door.** MEASURED with real redstone: opens in 5 gt, closes in 32 gt, `door_cycle` tier FULL with
+  seamless grades L/L/L. That is slower than the plain seamless 3x3 record (3 gt open). The reset for repeated
+  cycles is in progress: the east side resets with no commands, the west side partly. Not in the library yet.
+- **A 4-bit CPU.** Committed and tested part by part: the two-phase clock, program counter, 16-word lever ROM,
+  register cell, decimal display and a fetch loop that steps the PC through the ROM (`library/cpu_parts/`,
+  `library/cpu/`). The ALU is being built; the Fibonacci program does not run yet.
+
+## A sentence, built and checked
 
 <img src="docs/media/adder-sums.gif" width="400" align="right" alt="The two-digit adder's 7-segment lamps at each check of its test, from 0 to 18">
 
-`two_digit_adder` is that opening sentence, built: 151x10x156, 14,893 blocks. `scripts/generate.py` places
-library parts (lever switches, encoders, a half adder and three full adders, latches, a decoder, two 7-segment
+The sentence *"two numbers on levers, a button, the sum on a 7-segment display"*, built: `two_digit_adder`,
+151x10x156, 14,893 blocks. `scripts/generate.py` places library parts (lever switches, encoders, a half adder and three full adders, latches, a decoder, two 7-segment
 digits) and `redstone/route.py` routes the wires between them.
 
 Its test flicks a lever in each row, presses the button and checks every lamp of the display, for every sum
@@ -109,20 +123,6 @@ Real lines from the Claude agents' session transcripts, quoted verbatim:
 >
 > — a Claude agent, banking the pulse limiter
 
-## In progress
-
-These are being built now. None of them is a claimed record.
-
-- **A seamless 3x3 piston door.** It opens and closes from a lever with real redstone on a test server. The
-  goal is a door that is faster than the plain seamless 3x3 record, or smaller than its 3,762 blocks. Making it
-  reset cleanly for the next cycle is still being worked on.
-- **A seamless 16x16 door.** No seamless 16x16 is logged in the Redstone Squid records, so the aim is the first
-  working one. It is being built band by band from flying-machine shuttle bands (`library/door/door16_*`). So
-  far one lever opens and closes two adjacent row pairs in lockstep with real redstone, and every block ends
-  where it was placed.
-- **A 4-bit CPU** on the main server: clock, program counter, registers, ROM control and an output display,
-  each tested as its own part first.
-
 ## Quick start
 
 You need Python 3.12+, Java 25+ and a Minecraft Java 26.3 `server.jar` in `server/` (not included). RCON is
@@ -145,7 +145,7 @@ Offline checks, as they run today:
 $ python -m scripts.lint
 lint ok
 $ pytest tests/test_devices.py tests/test_traits.py tests/test_spec_offline.py -q
-493 passed in 9.02s
+499 passed in 12.17s
 ```
 
 To add a design, start with [`docs/AUTHORING.md`](docs/AUTHORING.md). `CLAUDE.md` describes the whole
