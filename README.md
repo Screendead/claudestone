@@ -9,7 +9,8 @@
 <p align="center"><sub>
 LegDen's "fastest 10x10" seamless door (a community design), rebuilt as <code>ref_legden_fastest_10x10</code> and
 stepped one game tick at a time on a headless 26.3 server. Every frame is one recorded game tick of the 420 hallway
-cells the harness probed: opens in 29 gt, closes in 14 gt, FULL seamless, 13,552 blocks. Grey is anything that is not
+cells the harness probed (the quiet tail of the close, gt 25-74, is cut): opens in 29 gt, closes in 14 gt,
+FULL seamless, 13,552 blocks. Grey is anything that is not
 a door block (the trace records the block's class, not its type); a red outline means the block is mid-move that tick.
 </sub></p>
 
