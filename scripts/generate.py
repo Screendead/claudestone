@@ -14,7 +14,8 @@ FOLDER = {"pla_xor": "xor", "full_adder": "full_adder",
           "encoder": "encoder", "half_adder": "half_adder", "digit": "seven_segment",
           "digit_one": "seven_segment", "lever_switch": "input", "button_switch": "input",
           "cpu_out_display": "cpu_parts", "cpu_rom_ctrl": "cpu_parts", "cpu_rom_ctrl_jumps": "cpu_parts", "cpu_alu": "cpu_parts",
-          "cpu_ctrl": "cpu_parts", "cpu_regs": "cpu_parts", "cpu_fetch": "cpu"}
+          "cpu_ctrl": "cpu_parts", "cpu_regs": "cpu_parts", "cpu_fetch": "cpu",
+          "cpu_fib4": "builds"}
 
 
 def destination(name: str):
@@ -173,6 +174,8 @@ def generated_cpu():
     from scripts.cpu_regs import cpu_regs
     yield cpu_regs()
     yield cpu_fetch()
+    from scripts.cpu_fib4 import cpu_fib4
+    yield cpu_fib4()
 
 
 FIB_PROGRAM = [0x10, 0x80, 0x11, 0xA0, 0x90, 0x20, 0xD8, 0xB3, 0xF0] + [0] * 7

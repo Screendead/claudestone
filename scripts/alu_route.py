@@ -231,7 +231,7 @@ class Router:
         self.last_covers = covers
         return covers or True
 
-    def route(self, net, starts, goal, maxlen=14):
+    def route(self, net, starts, goal, maxlen=14, max_nodes=200000):
         """starts: existing cells of the net (dust or anything powered); goal: cell to become dust."""
         g = self.g
         reserved = g.b.get(goal) == WIRE and g.net.get(goal) == net
@@ -248,7 +248,7 @@ class Router:
             heapq.heappush(openl, (h(s), 0, s))
         found = None
         n = 0
-        while openl and n < 200000:
+        while openl and n < max_nodes:
             n += 1
             f, gc, c = heapq.heappop(openl)
             if c == goal:
