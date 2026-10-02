@@ -3,43 +3,54 @@
 **Vanilla Minecraft redstone, designed by Claude agents, proven tick by tick on a real server, shipped as a data pack.**
 
 <p align="center">
-  <img src="docs/media/door16-band.gif" width="800" alt="Two row pairs of a 16x16 seamless door being stored and rebuilt by slime-block flying machines, driven by one lever">
+  <a href="https://github.com/Screendead/claudestone/releases/tag/v0.1"><img src="docs/media/showreel.jpg" width="800" alt="A frame from the showreel: the 16x16 piston door standing open, its coloured machinery either side of the doorway"></a>
 </p>
 
-<p align="center"><sub>
-Two row pairs of our 16x16 seamless door (<code>door16_band_pairs_ctrl</code>, in progress) on one lever, with no command
-stand-ins. Slime-block flying machines carry the quartz columns out into stacks, rebuild the queues and put every
-block back where it was placed. Drawn from the real block types captured during the library test on a 26.3 server;
-one frame per 64 gt opening and per 8 gt closing; the stone and repeater wiring is dimmed.
-</sub></p>
+<p align="center"><b><a href="https://github.com/Screendead/claudestone/releases/tag/v0.1">Watch the showreel (1:42)</a></b> · <b><a href="https://github.com/Screendead/claudestone/releases/tag/v0.1">Download the world</a></b></p>
 
 > **From a sentence to a tested, paste-able build.** Claude agents design the redstone, a harness steps it one
 > game tick at a time on an unmodified Minecraft Java 26.3 server, and only builds that pass ship, as a data pack
 > that places exactly the blocks that were tested. Not a mod.
 
-| At a glance (tracked files, 2026-10-01) | |
+**What this claims, and what it doesn't.** These builds are not better, faster or smaller than what expert redstone
+builders make. The claim is that Claude agents, with this repo as their harness, build things a novice couldn't,
+on their own: they design, test and fix each build until it passes.
+
+| At a glance (tracked files, 2026-10-02) | |
 |---|---|
-| **435** specs in **41** building-block folders, every one with its own tests | [`library/INDEX.md`](library/INDEX.md) |
-| **84** specs that each prove one 26.3 mechanic | [`docs/MECHANICS.md`](docs/MECHANICS.md) |
+| **457** specs in **41** folders, every one with its own tests | [`library/INDEX.md`](library/INDEX.md) |
+| **85** specs that each prove one 26.3 mechanic | [`docs/MECHANICS.md`](docs/MECHANICS.md) |
 | **27** community designs rebuilt as `ref_*` specs, so comparisons are measured, not quoted | `library/*/ref_*` |
 | **1** banked win over a community best, **1** tie | [`docs/WINS.md`](docs/WINS.md) |
 
-## Being built now
+## Try it in Minecraft
 
-None of these is a claimed record.
+You need Minecraft Java Edition **26.3**.
 
-- **A seamless 16x16 door.** No seamless 16x16 is logged in the Redstone Squid records, so the aim is the first
-  working one. MEASURED so far: one lever runs a 16-row slice, 10 columns wide, made of eight row pairs stacked
-  through observer towers (`door16_band_slice16`, 58x30x39). Over two back-to-back cycles every block returns to
-  where it was placed, and the control tests (a tower observer swapped for stone, a lock or a home sensor
-  removed) show the failure each one should. Next: widening it to the full 16 columns. Its box is already 67,860
-  blocks, far above the smallest logged 16x16 (24,012), so no size record is claimed.
-- **A seamless 3x3 door.** MEASURED with real redstone: opens in 5 gt, closes in 32 gt, `door_cycle` tier FULL with
-  seamless grades L/L/L. That is slower than the plain seamless 3x3 record (3 gt open). The reset for repeated
-  cycles is in progress: the east side resets with no commands, the west side partly. Not in the library yet.
-- **A 4-bit CPU.** Committed and tested part by part: the two-phase clock, program counter, 16-word lever ROM,
-  register cell, decimal display and a fetch loop that steps the PC through the ROM (`library/cpu_parts/`,
-  `library/cpu/`). The ALU is being built; the Fibonacci program does not run yet.
+- **The world.** Download `claudestone-world-26.3.zip` from the [release](https://github.com/Screendead/claudestone/releases/tag/v0.1),
+  unzip it into your `saves` folder and open **Claudestone** in Singleplayer. It is the harness's own test world:
+  you start beside the CPU, in creative with cheats on. Every plot north of you is a showroom of one building
+  block, each variant under a green (passed) or red (failed) label.
+  - **The CPU:** you spawn at its controls. Flip the east lever (START) and watch the display on the far
+    (north-east) corner count 1, 1, 2, 3, 5, 8, 13.
+  - **The door:** `/tp @s 418 70 255 180 0` puts you in front of it, and the lever is at `417 59 210`.
+    It opens over about 7.7 minutes (9,234 game ticks), so `/tick rate 200` helps.
+- **One build in your own world.** The release also has a data pack for each of `two_digit_adder`, `cpu_fib4`
+  and `door16_quart_compact`. Put the zip in your world's `datapacks` folder, `/reload`, stand where the front
+  should go, run `/function <name>:prepare`, wait a second, then `/function <name>:build`. It builds to your south.
+
+## What's built
+
+- **A 16x16 piston door** (`door16_quart_compact`, 96x30x45, 7,705 blocks). One lever opens it in 9,234 game ticks
+  and closes it in 448. Slime-block flying machines carry the door's quartz out into stacks and bring it back.
+  From the front no circuitry shows in the doorway (the Redstone Squid "QUART" grade). Its `door_cycle` test
+  reads the hallway every tick of the cycle and times both moves.
+- **A 4-bit CPU running Fibonacci** (`cpu_fib4`, 185x8x85, 16,210 blocks). A two-phase clock, a program counter,
+  a 16-word lever ROM, a control decoder, an ALU, registers and a decimal display, each a tested library part.
+  Its test runs the program and checks the display shows 1, 1, 2, 3, 5, 8, 13 before it halts.
+- **A two-digit adder** from one sentence, below.
+
+Still in progress: a 16x16 door that hides its circuitry in every state, and a 3x3 door with a full reset.
 
 ## A sentence, built and checked
 
@@ -79,7 +90,7 @@ of the 20 checks, one check per frame (stop-motion, not every tick).
 
 ![Timing diagram of the CPU's two-phase clock: COM and CAP pins, 10 gt pulses, 200 gt period, CAP 150 gt after COM](docs/media/cpu-clock.png)
 
-<sub>The four output pins of `cpu_clock`, a part of the 4-bit CPU (in progress, `library/cpu_parts/`), from a
+<sub>The four output pins of `cpu_clock`, the first clock built for the 4-bit CPU (`library/cpu_parts/`), from a
 full trace. A two-phase clock is what lets the CPU's master/slave registers work: on CAP every master captures its
 next value, on COM every slave commits it, so no register reads a value that is still changing.</sub>
 
