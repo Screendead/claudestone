@@ -3,10 +3,10 @@
 **Vanilla Minecraft redstone, designed by Claude agents, proven tick by tick on a real server, shipped as a data pack.**
 
 <p align="center">
-  <a href="https://github.com/Screendead/claudestone/releases/tag/v0.1"><img src="docs/media/showreel.jpg" width="800" alt="A frame from the showreel: the 16x16 piston door standing open, its coloured machinery either side of the doorway"></a>
+  <a href="https://www.youtube.com/watch?v=4bo_RJ4ZFcg"><img src="docs/media/showreel.jpg" width="800" alt="A frame from the showreel: the 16x16 piston door standing open, its coloured machinery either side of the doorway"></a>
 </p>
 
-<p align="center"><b><a href="https://github.com/Screendead/claudestone/releases/tag/v0.1">Watch the showreel (1:42)</a></b> · <b><a href="https://github.com/Screendead/claudestone/releases/tag/v0.1">Download the world</a></b></p>
+<p align="center"><b><a href="https://www.youtube.com/watch?v=4bo_RJ4ZFcg">Watch the showreel (1:42)</a></b> · <b><a href="https://github.com/Screendead/claudestone/releases/tag/v0.1">Download the world</a></b></p>
 
 > **From a sentence to a tested, paste-able build.** Claude agents design the redstone, a harness steps it one
 > game tick at a time on an unmodified Minecraft Java 26.3 server, and only builds that pass ship, as a data pack
