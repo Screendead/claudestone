@@ -26,7 +26,7 @@ from scripts.cpu_clock_compact import cpu_clock_compact
 from scripts.rom_ctrl import rom_ctrl
 
 FIB_PROGRAM = [0x10, 0x80, 0x11, 0xA0, 0x90, 0x20, 0xD8, 0xB3, 0xF0] + [0] * 7
-PERIOD, CAP_AT = 124, 94           # measured: 124/94 passes, 120/90 fails; the clock needs CAP_AT <= PERIOD - 30
+PERIOD, CAP_AT = 122, 92           # measured: 122/92 passes, 120/90 fails; the clock needs CAP_AT <= PERIOD - 30
 CLOCK_L = 12                 # start rise -> first COM at the clock pin (cpu_clock_compact, MEASURED)
 YMAX = 4
 SOLIDS = ("smooth_stone", "white_concrete", "black_concrete")
@@ -613,8 +613,10 @@ def description(period, cap_at):
         "cpu_ctrl_compact turned under the ROM, cpu_alu_compact (n muxed inside) abutting cpu_regs_compact, and "
         "cpu_out_display_compact at the north edge. OUT shows 1, 1, 2, 3, 5, 8, 13, then JC 8 halts it at PC 8. "
         f"Clock period {period} gt, CAP {cap_at} gt after COM. "
-        "Player controls at the north edge: START starts the clock, flip it on once; RESET on for two cycles "
-        "then off sends PC to 0 and the program runs again. "
+        "Player controls on the south edge at the west end, facing south (stand south of the build): START "
+        "(the east one of the two wall levers) starts the clock, flip it on once; RESET (5 blocks west of it) on "
+        "for two cycles then off sends PC to 0 and the program runs again. The display faces north at the "
+        "north-east corner; the ROM's 128 levers lie on its top, nothing above them. "
         "Colour key (every solid block is concrete in the colour of the circuit that placed it; the legend "
         "signs along the north edge repeat it): "
         + "; ".join(f"{c.replace('_', ' ')} = {' '.join(t for t in text if t)}" for c, *text in KEY)
