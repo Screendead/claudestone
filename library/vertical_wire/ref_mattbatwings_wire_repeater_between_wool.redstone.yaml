@@ -1,0 +1,140 @@
+name: ref_mattbatwings_wire_repeater_between_wool
+description: "Flat 36-long dust line, one repeater inserted between two wool blocks (dust, wool, repeater, wool, dust): the dust before points into the wool, which it weakly powers, the repeater reads it and strongly powers the next wool, which powers the next dust at 15. The repeater accepts strength 1, so the line is one block shorter than 'repeater in the dust line' (W78, not rebuilt). 1x2x37, flat, so filed here only because it is the booster idea of the climbers above. Source: mattbatwings' 'How To Wire Like a Redstone Pro!' world (Java 1.18.2), demo cluster W71 at world origin [-15, 56, -110] (SOURCED: block layout read from the world; the demo is one lever and two lamps).  Changed for the harness: the demo's input lamp under the lever became stone (the harness only emulates a lever on a plain full block; a lamp is a conductor too, so the lever still strongly powers it and the dust beside/below it), everything else is the cluster's blocks, with power/lit/powered state reset so the game recomputes it. The output lamp is cell 'out'; the test clicks the named lever. MEASURED on 26.3 (lever click to lamp): rise 2 gt, fall 6 gt. The how-it-works wording is INFERRED from the block layout (nothing was traced block by block); the pass shows only that the level arrives. No test shows the booster is necessary."
+palette:
+  .: air
+  A: light_blue_wool
+  B: lime_wool
+  o: {output: out, block: redstone_lamp}
+  C: redstone_wire[east=none,north=side,south=side,west=none]
+  D: repeater[delay=1,facing=south]
+  E: {block: stone, fixture: true}
+  F: orange_wool
+  l: {name: lever, block: 'lever[face=floor,facing=west]', fixture: true}
+layers:
+  0: |
+    .
+    .
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    .
+    A
+    .
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    A
+    .
+    .
+  1: |
+    B
+    o
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    A
+    D
+    A
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    C
+    E
+    F
+  2: |
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    l
+    .
+tests:
+- name: lever on then off
+  settle: 40
+  steps:
+  - expect: {out: 0}
+  - use: lever
+  - wave: {out: '00111111'}
+  - wait: 20
+  - expect: {out: 1}
+  - use: lever
+  - wave: {out: '111111000000'}
+  - wait: 20
+  - expect: {out: 0}

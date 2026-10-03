@@ -293,6 +293,40 @@ changes state. Dust, repeaters and comparators are fine; see `redstone/traits.LI
 and `one_wide` leave out driver cells, so they assume inputs arrive from outside the
 footprint; when an input cell sits inside it, say so in the description.
 
+## Principles
+
+Design rules, each backed by a passing spec (most are rebuilt `ref_*` designs; see
+`docs/research/videos.md`). [M] measured, [I] inferred.
+
+- Compactness: treat signal strength as data. Dust decay, container constants and subtract
+  comparators replace whole gates: an 8-bit adder in 11x17x5 (`ref_sloimay_cca_8bit_5hz`), a
+  16-way strength decoder in 18x3x4 (`ref_unknown_redcoder_3wide`). [M]
+- Compactness: stack one 2-layer cell per bit in y and run carries and buses up the stack
+  (`ref_mattbatwings_counter_8bit_3x3`, 3x18x4 for 8 bits; `ref_llucas_inc8_2t`). [M]
+- Compactness: one comparator loop holds a whole 0-15 value with no decay
+  (`ref_unknown_lra_hex_rs_horizontal`, 3x3x5). [M]
+- Speed: derive every stage from one shared signal in the same tick rather than rippling bit
+  to bit; latency is then independent of width (12 gt for 1- and 7-bit carries in
+  `ref_sloimay_cca_8bit_5hz`; every bit at +8 gt in `ref_mattbatwings_counter_8bit_3x3`;
+  4 gt at any strength in `ref_mattbatwings_hex_line_flat`). [M]
+- Speed: dust, glass and wool add no ticks; only diodes do, 2 gt per repeater or comparator and
+  4 gt per torch pair (`ref_mattbatwings_diag_up_repeater`, `ref_mattbatwings_diag_up_torch_pair`,
+  `ref_mattbatwings_comparator_fanout4`). [M]
+- Speed: a rear-minus-delayed-side pulse shaper gives 2d gt for repeater delay d >= 2 and
+  nothing at d = 1 (`ref_unknown_config_clock`). [M]
+- Simplicity: give each timing its own knob; one repeater sets a clock's period and another its
+  pulse width, and changing one leaves the other alone (`ref_unknown_config_clock`). [M]
+- Simplicity: one-hot outputs built from parallel analog paths hand over with a 2-4 gt gap or
+  overlap, so a consumer samples after the settle time (`ref_llucas_dec005`,
+  `ref_unknown_redcoder_3wide`, `ref_antekcookie_cmp8`). [M]
+- Debuggability: read timing from the diode, not the lamp; a lamp adds 4 gt to every fall
+  (`ref_unknown_lra_tff_repeater_lock`: repeater off at 88, lamp at 92). [M]
+- Debuggability: name every stage's output, so one truth table tests every prefix and shows
+  what the design really computes (`ref_mattbatwings_cmp8_eq`). [M]
+- Debuggability: container contents are logic. A rebuild must take them from the .schem block
+  entities, and a test should sweep every strength with `level` checks
+  (`ref_llucas_torchless_a`, `ref_aminotreal_hex_halfer`, `ref_mattbatwings_hex_line_flat`). [M]
+
 ## Traps
 
 - Repeater/comparator/observer `facing=F`: input from side F, output on the opposite side.

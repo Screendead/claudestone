@@ -87,21 +87,69 @@ going from horizontal to vertical reverses the bit order; a hex line made of rep
 exactly X blocks; crossings by a repeater intersection stackable every 2 blocks, or a messy zero-tick crossover;
 bulk `//stack` can drop dust that has no block under it.
 
-### Lessons for us
+### Lessons for us: what the builds taught
 
-1. **Spiral risers.** `library/vertical_wire/vwire_spiral` exists, but MECHANICS.md still says the zero-tick
-   diode is "Untested as a spiral". Apply: test a spiral bus with adjacent spirals turning opposite ways, check
-   each bit stays separate at 1- and 2-block pitch, and settle the MECHANICS entry.
-2. **Repeater-chain hex line.** Apply: add a spec to `library/signal_strength/` that checks the far end at each
-   strength 1..15 and measures its delay against a comparator chain.
-3. **Bus pitch and crosstalk.** Apply: state the pitch in each `wire/` and `crossing/` bus spec, and add a test
-   that drives one bit and expects every other bit unchanged.
-4. **Bit order through risers.** Apply: where a CPU bus goes vertical, check the order of the bits, not just
-   that they arrive.
-5. **Dust needs a block under it.** Apply: a lint warning for dust with nothing solid beneath it in generated
-   specs.
-6. **Presentation.** A before/after thumbnail and one chapter per problem. The `cpu_fib4` OUT lines (72–74 gt
-   routed, then 8–10 gt laid by hand) would make a good before/after.
+We rebuilt the demos from the world as `ref_mattbatwings_*` specs and ran them on 26.3. Every spec below passes
+its tests [M]. Sizes are x×y×z. Delays are game ticks (gt) at the output lamp, so each fall includes the lamp's
+own 4 gt off delay (`lamp_off_delay_4_ticks`). How each one works is read from the blocks [I] unless it says
+otherwise.
+
+1. **Only boosters cost ticks on a climber.** Dust on a wool staircase, on a 2×2 spiral or on a glass zigzag
+   adds no delay. One booster partway up restores strength for climbs of 20 to 26 blocks. A repeater costs
+   rise 2 / fall 6 gt and a torch pair (two inverters in series) rise 4 / fall 8 gt, whatever the length [M].
+   Specs: `vertical_wire/ref_mattbatwings_diag_up_repeater` (1×21×25), `diag_down_repeater` (1×26×27),
+   `diag_up_torch_pair` (1×21×24), `spiral_down_repeater` (3×24×3), `spiral_down_torch_pair` (3×26×2),
+   `glass_zigzag_up_repeater`, `glass_zigzag_up_torch_pair` and `glass_zigzag_up_torch_pair_flat` (1×26×4).
+   No mutant shows the booster is needed [I]. Library: the unboosted shafts were there (`vwire_staircase`,
+   `vwire_spiral`, `vwire_glass_zigzag_up`/`_long`); the boosted staircase and spiral variants are new.
+   A torch-boosted wire starts lit after placement and goes dark about 6 gt later, so its test must settle
+   first [M].
+2. **4-bit buses by geometry alone.**
+   - `ref_mattbatwings_wool_diagonal_bus4_3wide`: four dust lines on wool staircases, offset 2 in y and 1 in x.
+     All 16 patterns pass, rise 0 / fall 4, 2×21×19 [M]. Library had `vwire_staircase_bus`.
+   - `ref_mattbatwings_glass_zigzag_torch_refresh_bus4`: four glass zigzags with a torch pair each, 25 blocks of
+     height, rise 4 / fall 8, 4×27×7 [M]. Library had `vwire_glass_zigzag_*` and `vwire_torch_tower_bus`
+     separately.
+   - `wire/ref_mattbatwings_stacked_flat_bus4_repeater`: four 34-block lines at y 1, 3, 5, 7 over wool in a
+     1-wide column, one repeater each, rise 2 / fall 6, 1×8×37 [M]. Library had `wire_flat_bus` and
+     `wire_spaced_bus`.
+3. **Repeater between two wool blocks; target block as a conductor.** A dust line pointing into a wool block
+   weakly powers it, and a repeater reading that wool restarts the line at 15
+   (`ref_mattbatwings_wire_repeater_between_wool`, 1×2×37). A dust-powered target block feeds a repeater the
+   same way (`ref_mattbatwings_wire_target_repeater`, 9×2×17). Both rise 2 / fall 6 [M]. Neither was isolated
+   in the library.
+4. **Hex line: a decaying ruler re-encoded by parallel repeaters.** A comparator reading a barrel puts strength
+   S on a dust line, which is lit for exactly S blocks. A delay-1 repeater beside each of its dust writes 15
+   into a second, unconnected line, which then decays back to exactly S at a 15-block end, where a comparator
+   reads it [I]. Strengths 0..15 all arrive exactly, with a constant 2 gt to the first comparator plus 4 gt to
+   the output at any strength [M]. Specs: `signal_strength/ref_mattbatwings_hex_line_flat` (3×2×19),
+   `hex_line_stair_targets` (2×16×22, read through target blocks), `hex_line_vertical_glass` (7×16×2). This
+   settles the old lesson that asked for a repeater-chain hex line spec. Library: `wire_analog_comparator`
+   carries strength by a different method; the ruler line is new.
+5. **A short ruler is an analog offset.** With 11 repeaters the far end reads min(15, b+4) for b > 0 and 0 for
+   b = 0, and a subtract comparator then gives max(0, that − a). All 256 (a, b) pairs pass [M]
+   (`ref_mattbatwings_line_subtract`, 3×2×15). Our first expected formula was wrong; the table caught it.
+6. **Comparator, wool, dust relay.** A comparator into a wool block; the dust beside the wool reads the full
+   strength, not one less, and the next comparator reads it again. Four dust cells equal the input for every
+   s = 0..15, 2 gt per stage, 3 blocks per stage, 1×2×16 [M] (`ref_mattbatwings_comparator_relay`). Library:
+   `wire_analog_comparator` is the comparator-block chain without the dust.
+7. **Stacked fan-out.** One comparator into a red wool block feeds the dust above and below it; a dust
+   staircase past stained-glass columns carries the signal to two more layers. One input lights four lamps on
+   four layers, rise 6 / fall 10 on all four, 19×9×5 [M] (`crossing/ref_mattbatwings_comparator_fanout4`). The
+   wool-both-faces and glass links were not isolated [I]. With a 47-block stacked bus behind it and a repeater
+   every 16 blocks, each repeater adds exactly 2 gt (far lamps rise 14) [M]
+   (`ref_mattbatwings_bus4_56_comparator_fanout`, 58×9×9). Its fan-in end and the 2 gt route to out1 were not
+   traced.
+8. **Dead structure in a cut-out.** Three of the fan-out's subtract taps read 0: a repeater feeds both the
+   comparator's rear and the dust at its side, so 15 − 15 = 0 [M] (`fanout4` test `taps`). Level reads per
+   cell found them; reading the layout did not.
+9. **Not built.** W34, W47 and W56 climb 37 to 44 blocks, over the 32-block `references` plot height [M].
+   W29, W48, W57, W70 and W78 repeat a built cluster or a library spec; W84 has no output; W25, W36, W43, W52
+   and W62 were not attempted.
+
+Left from the first reading of the video: settle MECHANICS' "untested as a spiral" (spiral risers pass, but
+no spec checks one-way flow), check bit order where a CPU bus goes vertical, and the lint warning for dust
+with nothing under it.
 
 ## 3. mattbatwings: "I Made Building Redstone 100x Faster!"
 
@@ -111,22 +159,136 @@ hex, conversion, wiring and miscellaneous. Each entry lists delay in ticks, size
 tileability, whether it uses torches, whether outputs are synchronised or rippling, and who built it [I]. He says
 one lost divider design comes with "no guarantees that it works properly" [I].
 
-### Lessons for us
+### Lessons for us: what the builds taught
 
-1. **Spec sheets.** His entries list the same things our traits and `library/INDEX.md` record, plus I/O
-   orientation. Apply: check `redstone/traits.VOCABULARY` for vertical/horizontal I/O and "no torches" (burnout
-   proof), and add whatever is missing as checked traits.
-2. **Show both sides of a trade-off.** He keeps a fast-but-large and a slow-but-small priority circuit side by
-   side. Apply: give both delay and size in each description of `encoder/dec_prio_*` and `crossing/cross_*`, so
-   the pairs show.
-3. **Categories we don't have.** No magnitude comparator, multiplier, square root, accumulator, hex/FIFO,
-   redcoder (hex to one of 16) or randomiser. Apply: the comparator and accumulator (which a CPU needs) and the
-   redcoder are the cheapest to add as tested specs.
-4. **Carry-cancel adders.** He cites 3-tick and torchless versions [I]. We have
-   `full_adder/add_carry_cancel_cell` and `add_carry_cancel_chain_x4`. Apply: measure ours, and put a result in
-   WINS.md only after a refereed comparison.
-5. **What we offer that his archive doesn't.** His archive has no guarantee that a part works. Every spec in
-   ours passes its tests tick by tick. Apply: say so next to the library index in the README.
+We rebuilt archive entries as `ref_<author>_<design>` specs and ran them on 26.3. Every spec below passes
+its tests [M]. Sizes are x×y×z; delays are game ticks (gt). Archive "ticks" are redstone ticks (2 gt) on the
+combinational parts we checked: classic crosswire "1" is 2 gt, the carry-cancel adder's "6" is 12 gt, the
+encoder's "1t" pulse is 2 gt [M]. Three figures did not match in either unit: `ref_antekcookie_cmp8` (8 rt,
+worst measured delay 18 gt), `ref_indy_serial_8b` (2RT, shortest working pulse 12 gt) and
+`ref_librok_shift_2t_4function` (2t, shortest working press period 8 gt) [M]. How each design works is read
+from blocks and traces [I] unless it says otherwise. Two categories the first reading found missing,
+magnitude comparator and redcoder, now have ref specs.
+
+**Analog strength as logic.**
+
+1. **Dust decay as carry lookahead.** `full_adder/ref_llucas_inc8_2t` (8-bit incrementer, 4×17×7, all 256
+   inputs): each bit's barrel source sits 2 levels lower than the one before, and the dust staircase between
+   bits loses exactly 2 per bit, so every lower bit's 0 arrives at bit k at bit k's own level. Two subtract
+   comparators then tell "a lower bit is 0" from "only my bit is 0" [I]. Every output rises at 4 gt and falls
+   at 8 whatever the carry length [M]. Not in the library.
+2. **Decay-offset XOR and a constant-time carry bus.** `full_adder/ref_sloimay_cca_8bit_5hz` (8-bit adder,
+   11×17×5): operands enter the two ends of a short dust line and two subtract comparators cancel equal levels,
+   giving a ⊕ b; generate and kill levels spread up a dust staircase bus with a 2-level drop per layer [I].
+   Delay is 12 gt for a 1-bit and a 7-bit carry alike, on 30 + 128 chosen sums and 448 adversarial patterns,
+   with a 5,000-row random check passing outside the file [M]. Removing any of three bus dusts fails the sums
+   tests [M]. The 5 Hz pipelining claim was not measured. Library: carry-cancel adders exist
+   (`add_carry_cancel_cell`), with a per-bit carry; the bus and the decay XOR are new.
+3. **15 against 14 per bit.** `magnitude_comparator/ref_mattbatwings_cmp8_eq` (4×18×6): an input gives 15 to
+   one dust and 14 to the next, so of two subtract comparators per bit only the one for A > B or A < B outputs
+   anything; equal bits cancel [M, in a probe run not kept as a spec]. Stage b outputs gt/eq of bits
+   b..0; 51 vectors on 16 outputs pass with rise 6 / fall 10 at every stage [M].
+   `ref_antekcookie_cmp8` (5×16×10) gives one-hot eq/lt/gt, worst 18 gt, and shows eq and lt lit together for
+   about 2 gt on returning to equal [M]. Neither existed in the library.
+4. **Two offset thermometers give one-hot.** `signal_strength/ref_unknown_redcoder_3wide` (18×3×4): one strength
+   drives two dust lines one block apart; an output is lit iff the first line reaches its column and the
+   second doesn't, so it lights only at s = k. Every s = 0..15 lights one line, 6 gt [M]. Library:
+   `analog_decoder` does the same job with one subtract comparator per line. A one-item barrel
+   on a subtract side trims exactly 1 where the last column lacks a decay step: with it empty, s = 1 lights
+   nothing [M].
+5. **Torch restart chain.** `signal_strength/ref_mattbatwings_redcoder_vertical` (2×17×6): the first level the
+   dust doesn't reach lights its output and a side torch; that torch powers the next target block, which
+   reseeds the dust at 15, so every level above stays powered and only one output lights. The trace shows
+   15, 14, 13 … above the first dark level [M]. Rise 4 or 6 gt for any pair of strengths [M]. Target blocks
+   used as conductors were not in the library; `analog_decoder` is the nearest decoder.
+6. **Equality as NOR of two one-sided differences.** `signal_strength/ref_lmt_hex_equality_check` (4×2×5):
+   s − r and r − s on two subtract comparators turn off one wall torch; all 256 pairs pass, 6 gt [M]. Library
+   had `analog_compare_ge` and `analog_abs_diff`, not equality.
+7. **Barrel thresholds as a lookup table.** `signal_strength/ref_aminotreal_hex_halfer` (18×3×4): a cake (14)
+   minus the input feeds a decaying thermometer, and five subtract comparators read barrels at 3, 6, 9, 12, 15
+   against it; out = ⌊n/2⌋ for all 16 inputs, 6 gt [M]. Reprogramming means changing item counts [I].
+   Library: `analog_const_container` for the constants, no lookup-table function.
+8. **Two-comparator neutral memory.** `signal_strength/ref_unknown_hex_incdec` (5×3×6): two subtract
+   comparators read strength-14 barrels through wool in a loop, F = 14 − E and E = 14 − F, so every value holds.
+   A 4 gt pulse of 15 on one wool overrides its barrel (as in `comparator_container_masks_weak_block_power`)
+   and moves the value by exactly 1: up 0..14 saturating, down to 0, inc 4 gt, dec 6 gt [M]. Library had
+   comparator-ring memories (`analog_peak_hold`), not an up/down analog counter.
+9. **Comparator loops hold a whole 0..15 value.** `rs_latch/ref_unknown_lra_hex_rs_horizontal` (3×3×5) holds
+   3, 6 and 8 with no decay, a larger value overwrites, a smaller one is ignored, and a side input drains it
+   in 4 to 6 gt [M]. `d_latch/ref_unknown_lra_hex_d_latch` (3×3×5) computes clk − (15 − data) into the same
+   kind of loop and re-latches 8, then 3, then 0 on clicks [M]. Library: `rs_comparator_ring` (binary),
+   `analog_peak_hold`, `dl_subtract_lock`.
+10. **Containers as constants.** Barrels and hoppers packed with items give fixed strengths with no torch:
+    `binary_decoder/ref_llucas_torchless_a` (3×11×18, 3-to-8 active-low, release 2 gt, select 6 gt) and
+    `ref_llucas_dec005` (6×8×17, new output at +4, old off at +8) [M]. Both were dead until the barrel
+    contents were read from the .schem block entities; the parsed block list drops them [M]. Library:
+    `analog_const_container`.
+
+**Locks, pulses and counters.**
+
+11. **Lock-race T flip-flop.** One signal drives both a repeater's data input and its lock. When it drops,
+    an ON repeater turns off and an OFF repeater still turns on 2 gt later, before the lock returns [M for the
+    behaviour, I for the scheduled-tick cause]. `t_flip_flop/ref_unknown_lra_tff_repeater_lock` (9×2×3)
+    toggles 6 of 6 presses. The library's lock flip-flops (`tff_torch_repeater`, `tff_lightless_lock`) are
+    master-slave; this single-repeater toggle is new.
+12. **Synchronous counter from a torch-refreshed dust ladder.** `counter/ref_mattbatwings_counter_8bit_3x3`
+    (3×18×4): one 4 gt pulse drops a dust ladder; each bit's torch (lit while the bit is
+    0) re-powers the ladder at its level, so ladder stage k stays low only if bits 0..k−1 are all 1, and every
+    bit's lock-race toggle (item 11) fires together [I]. Every bit changes at +8 gt for 0→1, 127→128 and
+    255→0 alike; 257 presses wrap 0..255 [M]. `ref_mattbatwings_counter_8bit_load` (8×20×4) adds a load: set
+    every bit through a bus, then a comparator per bit clears the zero bits (all lamps on at +6, zero bits dark
+    at +16) [M]. Library: synchronous counters existed (`count_bulb_sync`); the ladder and the loadable counter
+    are new.
+13. **Rising-edge pulse: rear minus delayed side.** A subtract comparator with the signal on its rear and the
+    same signal through a repeater on its side gives one 2d gt pulse per rise. Measured d = 2 → 4 gt, 3 → 6,
+    4 → 8; d = 1 gives no pulse [M] (`clock/ref_unknown_config_clock`, 10×2×2, which also shows a self-gated
+    comparator loop whose period is 4 + 4d: 20 gt at d = 4, 12 at d = 2). Used in
+    `d_latch/ref_unknown_lra_dlatch` (8×2×5: pulse turns a torch off, which opens a lock; q at +8),
+    `ref_indy_serial_8b` and the counters. Library: `pulse_rising_comparator`, `clock_comparator_repeater`.
+14. **Cross-coupled torch SR latch.** `rs_latch/ref_unknown_lra_srlatch` (3×3×7): set wins a same-tick press
+    from either state and either order [M].
+    Library: the `rs_latch` family.
+
+**Wiring and conversion.**
+
+15. **Crossings.** `crossing/ref_mattbatwings_classic_crosswire` (5×11×5, 5 bits each way): a repeater drives a
+    wool block at each crossing and the wool's strong power bridges the gap; 41 patterns, 2 gt [M].
+    `ref_kuggo_instant_crosswire_a` (7×18×9) and `_b` (7×18×7), 8 bits each way: dust only, staircasing over
+    wool, 70 patterns, 0 gt [M]. Library: `cross_instant_*`, `cross_underpass`, `cross_diode_grid`.
+16. **Multi-bit risers.** `vertical_wire/ref_mattbatwings_updiag_1wide` (1×22×18, 4 lines on glass steps,
+    16 patterns, rise 4) and `ref_mattbatwings_spirals_updown` (3×16×24, 4 bits up and 4 down, 64 patterns,
+    rise 0) [M]. Why the interleaved lines in updiag don't merge was not traced. Library had single spirals
+    (`vwire_spiral`); offset multi-bit spirals are new.
+17. **Hex lines.** `wire/ref_mattbatwings_hex_flat` (3×2×19), `vertical_wire/ref_mattbatwings_hex_up` (7×16×2) and
+    `hex_down` (9×17×3): the ruler line of section 2 item 4, strengths 0..15 exact, 4 gt [M].
+18. **Serial lines.** `ref_indy_serial_8b` (10×2×47): load, then 8 presses shift out, at 12 gt per pulse or
+    slower; every faster rhythm tried failed [M], against a README figure of "2RT".
+    `encoder/ref_librok_observer_encoder_serial` (9×5×12): an observer encoder stores its code as single items
+    in dropper pairs, and a torch-driven repeater chain unmasks four subtract comparators one per 4 gt, sending
+    start, b0, b1, b2; each read returns its item, so the memory clears itself [M]. The placement pass fires
+    the droppers, so its tests insert items after placing [M]. Library: no serial-out or dropper-latch spec.
+19. **Observer-on-lamp edge detector.** `encoder/ref_librok_observer_encoder_7to3` (5×5×5): an observer facing
+    a lamp pulses on both edges; seven of them OR into a 3-bit code, 4 gt after on and 8 after off (the lamp
+    delay) [M]. Library: observer pulse specs in `mechanics/`, no lamp edge detector.
+20. **Priority encoders.** `encoder/ref_mattbatwings_fast_priority` (10×3×7): subtract comparators cancel lower
+    rows, every output rises at 4 gt [M]. `ref_mattbatwings_small_priority` (7×2×10): a torch chain where each
+    winner disables the next row, ripple worst 12 gt [M]. Both need a real lever on its block: a redstone-block
+    driver beside the block does not power it, so the torch on it stays lit [M, in a probe run not kept as a
+    spec]. Library: `dec_prio_4to2`, `dec_prio_8to3`.
+21. **Bidirectional shift register.** `shift_register/ref_librok_shift_2t_4function` (10×18×15): up, down,
+    load, reset on 8 vertical slices, 14 gt to a rising lamp, one shift per press however long it is held [M].
+    Presses need at least 3 gt high and an 8 gt period with repeater drivers; the "2t" claim was not
+    reproduced [M]. Library had only serial-in shift registers.
+
+**Not built:** DECODE007 Torchless B (no input levers), Tristate A and B (input encoding not read), LFF002
+(same loop as LFF001), LFF004 (no stored items in the schematic), LFF005 upper (floating dust).
+
+**Mechanic candidates.** These are proven only inside the builds above, so none is in `docs/MECHANICS.md`
+yet; each needs an isolating spec in `library/mechanics/`: the lock-race toggle (item 11); a comparator into
+a block giving the dust beside it the full strength (section 2 item 6); the two-comparator neutral memory
+(item 8); the rear-minus-delayed-side pulse giving nothing at delay 1 (item 13); a target block carrying
+torch power on to dust at 15 (item 5); a lever on a block powering a torch's support where a redstone block
+beside it does not (item 20).
 
 ## Videos recorded elsewhere
 

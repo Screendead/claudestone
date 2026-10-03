@@ -1,0 +1,265 @@
+name: mux_4to1_instant
+description: |-
+  4:1 multiplexer whose data paths are plain dust, so every data input reaches out in 0 ticks: out = d[2*s1 + s0].
+  A tree of three dust-cut stages (the mechanism of mux_dustcut_instant): a dust step only connects while the cell above its lower dust is not a conductor, and a sticky piston slides one concrete block between two adjacent cut cells. The two s0 stages sit north and south on the top two dust levels (d0/d1 into net n0, d2/d3 into net n1), and the s1 stage between them cuts n0 or n1 on its way down into out, so the design descends one dust level per stage. Solid blockers over n0 and n1 stop the inner data dusts (d1, d2) stepping straight into the other stage's net.
+  Interface (top view, north up; layer y=4 holds only drivers): d0 enters from the north and d3 from the south on the top dust level, d1 and d2 are powered from above (a block or source on top of their dusts), s0 drives both s0 pistons from the east (one input at two cells), s1 its piston from the east one level lower; out is the west end of the bottom dust pair, taken by dust or a block placed west of it.
+  3x4x7 of blocks. Delay: data 0 ticks for every select value (tested, glitch-free); select changes settle in the measured delay below, and for about 2 ticks while a piston moves both inputs of that stage are connected (out is their OR). Output strength 10-12 at full-strength inputs (tested), so not analog.
+traits:
+- instant
+- ultrafast
+- compact
+- piston_based
+- entityless
+- tick_accurate
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  '=': smooth_stone
+  '#': white_concrete
+  '-': redstone_wire
+  o: {output: out, block: redstone_wire}
+  c: {name: c_low, block: redstone_wire}
+  n: {name: n0, block: redstone_wire}
+  m: {name: n1, block: redstone_wire}
+  w: {name: d0_dust, block: redstone_wire}
+  x: {name: d1_dust, block: redstone_wire}
+  y: {name: d2_dust, block: redstone_wire}
+  z: {name: d3_dust, block: redstone_wire}
+  P: {name: piston_s1, block: 'sticky_piston[facing=west]'}
+  Q: {name: piston_a, block: 'sticky_piston[facing=west]'}
+  R: {name: piston_b, block: 'sticky_piston[facing=west]'}
+  S: {input: s0}
+  T: {input: s1}
+  A: {input: d0}
+  B: {input: d1}
+  C: {input: d2}
+  D: {input: d3}
+layers:
+  0: |
+    ....
+    ....
+    ....
+    ....
+    ==..
+    ....
+    ....
+    ....
+    ....
+  1: |
+    ....
+    ....
+    ==..
+    =...
+    oc..
+    .=..
+    ==..
+    ....
+    ....
+  2: |
+    ....
+    =...
+    --..
+    n=..
+    .#PT
+    =m..
+    --..
+    .=..
+    ....
+  3: |
+    A...
+    w...
+    .#QS
+    #x..
+    ....
+    y#..
+    .#RS
+    .z..
+    .D..
+  4: |
+    ....
+    ....
+    ....
+    .B..
+    ....
+    C...
+    ....
+    ....
+    ....
+tests:
+- name: logic
+  truth_table: |
+    s1 s0 d0 d1 d2 d3 | out
+    0 0 0 0 0 0 | 0
+    0 1 0 0 0 0 | 0
+    1 1 0 0 0 0 | 0
+    1 0 0 0 0 0 | 0
+    0 0 1 0 0 0 | 1
+    0 1 1 0 0 0 | 0
+    1 1 1 0 0 0 | 0
+    1 0 1 0 0 0 | 0
+    0 0 1 1 0 0 | 1
+    0 1 1 1 0 0 | 1
+    1 1 1 1 0 0 | 0
+    1 0 1 1 0 0 | 0
+    0 0 0 1 0 0 | 0
+    0 1 0 1 0 0 | 1
+    1 1 0 1 0 0 | 0
+    1 0 0 1 0 0 | 0
+    0 0 0 1 1 0 | 0
+    0 1 0 1 1 0 | 1
+    1 1 0 1 1 0 | 0
+    1 0 0 1 1 0 | 1
+    0 0 1 1 1 0 | 1
+    0 1 1 1 1 0 | 1
+    1 1 1 1 1 0 | 0
+    1 0 1 1 1 0 | 1
+    0 0 1 0 1 0 | 1
+    0 1 1 0 1 0 | 0
+    1 1 1 0 1 0 | 0
+    1 0 1 0 1 0 | 1
+    0 0 0 0 1 0 | 0
+    0 1 0 0 1 0 | 0
+    1 1 0 0 1 0 | 0
+    1 0 0 0 1 0 | 1
+    0 0 0 0 1 1 | 0
+    0 1 0 0 1 1 | 0
+    1 1 0 0 1 1 | 1
+    1 0 0 0 1 1 | 1
+    0 0 1 0 1 1 | 1
+    0 1 1 0 1 1 | 0
+    1 1 1 0 1 1 | 1
+    1 0 1 0 1 1 | 1
+    0 0 1 1 1 1 | 1
+    0 1 1 1 1 1 | 1
+    1 1 1 1 1 1 | 1
+    1 0 1 1 1 1 | 1
+    0 0 0 1 1 1 | 0
+    0 1 0 1 1 1 | 1
+    1 1 0 1 1 1 | 1
+    1 0 0 1 1 1 | 1
+    0 0 0 1 0 1 | 0
+    0 1 0 1 0 1 | 1
+    1 1 0 1 0 1 | 1
+    1 0 0 1 0 1 | 0
+    0 0 1 1 0 1 | 1
+    0 1 1 1 0 1 | 1
+    1 1 1 1 0 1 | 1
+    1 0 1 1 0 1 | 0
+    0 0 1 0 0 1 | 1
+    0 1 1 0 0 1 | 0
+    1 1 1 0 0 1 | 1
+    1 0 1 0 0 1 | 0
+    0 0 0 0 0 1 | 0
+    0 1 0 0 0 1 | 0
+    1 1 0 0 0 1 | 1
+    1 0 0 0 0 1 | 0
+    0 0 1 0 0 1 | 1
+    1 1 1 0 0 1 | 1
+    1 1 1 0 0 1 | 1
+    0 0 1 0 0 1 | 1
+    0 1 0 1 1 0 | 1
+    1 0 0 1 1 0 | 1
+    1 0 0 1 1 0 | 1
+    0 1 0 1 1 0 | 1
+    0 0 1 0 0 0 | 1
+    1 1 1 0 0 0 | 0
+    1 1 0 0 0 1 | 1
+    0 0 0 0 0 1 | 0
+    0 0 0 0 0 0 | 0
+  max_delay: 6
+- name: data path is instant with s1=0 s0=0
+  truth_table: |
+    s1 s0 d0 d1 d2 d3 | out
+    0 0 0 0 0 0 | 0
+    0 0 1 0 0 0 | 1
+    0 0 1 1 0 0 | 1
+    0 0 0 1 0 0 | 0
+    0 0 0 1 1 0 | 0
+    0 0 1 1 1 0 | 1
+    0 0 1 0 1 0 | 1
+    0 0 0 0 1 0 | 0
+    0 0 0 0 1 1 | 0
+    0 0 1 0 1 1 | 1
+    0 0 1 1 1 1 | 1
+    0 0 0 1 1 1 | 0
+    0 0 0 1 0 1 | 0
+    0 0 1 1 0 1 | 1
+    0 0 1 0 0 1 | 1
+    0 0 0 0 0 1 | 0
+  delay: 0
+  glitch_free: true
+- name: data path is instant with s1=0 s0=1
+  initial: {s0: 1}
+  truth_table: |
+    s1 s0 d0 d1 d2 d3 | out
+    0 1 0 0 0 0 | 0
+    0 1 1 0 0 0 | 0
+    0 1 1 1 0 0 | 1
+    0 1 0 1 0 0 | 1
+    0 1 0 1 1 0 | 1
+    0 1 1 1 1 0 | 1
+    0 1 1 0 1 0 | 0
+    0 1 0 0 1 0 | 0
+    0 1 0 0 1 1 | 0
+    0 1 1 0 1 1 | 0
+    0 1 1 1 1 1 | 1
+    0 1 0 1 1 1 | 1
+    0 1 0 1 0 1 | 1
+    0 1 1 1 0 1 | 1
+    0 1 1 0 0 1 | 0
+    0 1 0 0 0 1 | 0
+  delay: 0
+  glitch_free: true
+- name: data path is instant with s1=1 s0=0
+  initial: {s1: 1}
+  truth_table: |
+    s1 s0 d0 d1 d2 d3 | out
+    1 0 0 0 0 0 | 0
+    1 0 1 0 0 0 | 0
+    1 0 1 1 0 0 | 0
+    1 0 0 1 0 0 | 0
+    1 0 0 1 1 0 | 1
+    1 0 1 1 1 0 | 1
+    1 0 1 0 1 0 | 1
+    1 0 0 0 1 0 | 1
+    1 0 0 0 1 1 | 1
+    1 0 1 0 1 1 | 1
+    1 0 1 1 1 1 | 1
+    1 0 0 1 1 1 | 1
+    1 0 0 1 0 1 | 0
+    1 0 1 1 0 1 | 0
+    1 0 1 0 0 1 | 0
+    1 0 0 0 0 1 | 0
+  delay: 0
+  glitch_free: true
+- name: data path is instant with s1=1 s0=1
+  initial: {s0: 1, s1: 1}
+  truth_table: |
+    s1 s0 d0 d1 d2 d3 | out
+    1 1 0 0 0 0 | 0
+    1 1 1 0 0 0 | 0
+    1 1 1 1 0 0 | 0
+    1 1 0 1 0 0 | 0
+    1 1 0 1 1 0 | 0
+    1 1 1 1 1 0 | 0
+    1 1 1 0 1 0 | 0
+    1 1 0 0 1 0 | 0
+    1 1 0 0 1 1 | 1
+    1 1 1 0 1 1 | 1
+    1 1 1 1 1 1 | 1
+    1 1 0 1 1 1 | 1
+    1 1 0 1 0 1 | 1
+    1 1 1 1 0 1 | 1
+    1 1 1 0 0 1 | 1
+    1 1 0 0 0 1 | 1
+  delay: 0
+  glitch_free: true
+- name: output strength
+  steps:
+  - drive: {d0: 1}
+  - {wait: 5}
+  - level: {out: 12}
+  - drive: {d0: 0, d2: 1, s1: 1}
+  - {wait: 10}
+  - level: {out: 10}

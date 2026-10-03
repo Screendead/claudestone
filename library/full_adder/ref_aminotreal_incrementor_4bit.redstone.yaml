@@ -1,0 +1,777 @@
+name: ref_aminotreal_incrementor_4bit
+description: '4-bit incrementer, out = in + 1 mod 16, a XOR per bit from two subtract comparators with the carry on a one-way dust staircase. Source (SOURCED): mattbatwings'' Logical Redstone Archive OTHERCOMB004 Incrementor by Aminotreal, tagged Tested & Functional and Recommended, https://discord.com/channels/1361854816837435433/1472424450497446065; claims 4-bit in, 4-bit out, 3 ticks. Size 4x10x8. Harness changes: the four wall levers stay as named levers in0..in3 (in0 lowest, the bottom stage) but the quartz block each hangs on is white_concrete, because the harness only emulates levers on its plain supports; the four lamps are out0..out3; the two light-blue glass corner markers are dropped. Mechanism (INFERRED from the build, then checked against dust powers in the trace): stage k is two layers. A torch on the lever''s block gives T = NOT in_k and powers a dust that is on the stage''s own repeater line (repeater into quartz, then dust into the west comparator''s side). A second dust, on a top slab, reads only the dust diagonally below it, so the staircase of T dusts carries power upward only (library/mechanics/dust_transparent_step_one_way): stage k sees E = OR of T_j for j<k = NOT(carry into bit k), at 2 strength lost per stage (10 left at stage 3 in the trace); stage 0 reads an always-dead dust, so E=0. A repeater turns E back into 15. The two repeater outputs hard-power quartz that powers the shared rear dust, so the rear level is T OR E (14-15). Comparator 1 = rear minus T (E and not T), comparator 2 = rear minus E (T and not E); their outputs merge on the dust and quartz that feed the lamp, so out_k = T xor E = in_k xor carry. The two comparators also read each other as side inputs, which the four cases below do not need (INFERRED redundant, not tested). Measured on a laptop satellite: all 16 inputs through a Gray walk, the 15 to 0 wrap and 34 random jumps give in+1 mod 16 on every output; after a lever click every rising output lights 6 gt later (torch 2 + repeater 2 + comparator 2, matching the README''s 3 redstone ticks), every falling output goes dark 10 gt later (the lamp adds its own 4); no output glitches in the 0111 to 1111 carry wrap. The staircase loses 2 per stage, so INFERRED reach is about 8 bits; only 4 bits were built.'
+traits:
+- vertical
+- compact
+- comparator_based
+- torch_based
+palette:
+  .: air
+  B: quartz_slab[type=top,waterlogged=false]
+  C: redstone_wire[east=side,north=none,south=none,west=side]
+  D: quartz_block
+  E: redstone_wire[east=none,north=none,south=side,west=side]
+  F: repeater[delay=1,facing=north]
+  G: redstone_wire[east=side,north=none,south=side,west=none]
+  H: comparator[facing=north,mode=subtract]
+  I: redstone_wire[east=none,north=side,south=side,west=none]
+  u: redstone_wall_torch[facing=south]
+  a:
+    name: in0
+    block: lever[face=wall,facing=north]
+  e:
+    output: out0
+    block: redstone_lamp
+  b:
+    name: in1
+    block: lever[face=wall,facing=north]
+  f:
+    output: out1
+    block: redstone_lamp
+  c:
+    name: in2
+    block: lever[face=wall,facing=north]
+  g:
+    output: out2
+    block: redstone_lamp
+  d:
+    name: in3
+    block: lever[face=wall,facing=north]
+  h:
+    output: out3
+    block: redstone_lamp
+  W: white_concrete
+layers:
+  0: '....
+
+    ....
+
+    ..B.
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    '
+  1: '....
+
+    ....
+
+    ..CB
+
+    D..D
+
+    .DD.
+
+    DDDD
+
+    .D..
+
+    .e..
+
+    '
+  2: '....
+
+    ....
+
+    D.BE
+
+    F..F
+
+    DGED
+
+    CHHC
+
+    .ID.
+
+    ....
+
+    '
+  3: '.a..
+
+    .W..
+
+    CuCB
+
+    D..D
+
+    .DD.
+
+    DDDD
+
+    .D..
+
+    .f..
+
+    '
+  4: '....
+
+    ....
+
+    D.BE
+
+    F..F
+
+    DGED
+
+    CHHC
+
+    .ID.
+
+    ....
+
+    '
+  5: '.b..
+
+    .W..
+
+    CuCB
+
+    D..D
+
+    .DD.
+
+    DDDD
+
+    .D..
+
+    .g..
+
+    '
+  6: '....
+
+    ....
+
+    D.BE
+
+    F..F
+
+    DGED
+
+    CHHC
+
+    .ID.
+
+    ....
+
+    '
+  7: '.c..
+
+    .W..
+
+    CuCB
+
+    D..D
+
+    .DD.
+
+    DDDD
+
+    .D..
+
+    .h..
+
+    '
+  8: '....
+
+    ....
+
+    D.BE
+
+    F..F
+
+    DGED
+
+    CHHC
+
+    .ID.
+
+    ....
+
+    '
+  9: '.d..
+
+    .W..
+
+    CuC.
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    '
+  10: '....
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    ....
+
+    '
+tests:
+- name: all 16 values, gray walk, wrap and random jumps
+  settle: 20
+  steps:
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+  - use: in1
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in0
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+  - use: in0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in0
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+  - use: in0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - use: in1
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+  - use: in0
+  - wait: 12
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 12
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+- name: 'rise 6 gt on every bit: 1111 -> 1110 (out 0000 -> 1111)'
+  settle: 20
+  steps:
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 20
+  - use: in0
+  - wave:
+      out0: '00000011111111'
+      out1: '00000011111111'
+      out2: '00000011111111'
+      out3: '00000011111111'
+- name: 'carry wrap: 0111 -> 1111 (out 1000 -> 0000), fall 10 gt, no glitch'
+  settle: 20
+  steps:
+  - use: in0
+  - use: in1
+  - use: in2
+  - wait: 20
+  - use: in3
+  - wave:
+      out0: '00000000000000'
+      out1: '00000000000000'
+      out2: '00000000000000'
+      out3: '11111111110000'
+- name: '0000 -> 0001 (out 0001 -> 0010): out1 rises 6, out0 falls 10'
+  settle: 20
+  steps:
+  - wait: 20
+  - use: in0
+  - wave:
+      out0: '11111111110000'
+      out1: '00000011111111'
+      out2: '00000000000000'
+      out3: '00000000000000'

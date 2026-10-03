@@ -1,0 +1,69 @@
+name: xor_comparator_bridge_rep_in
+description: 'Input convention probe for xor_comparator_bridge: each input reaches the design through a fixture repeater (as in ref_properinglish_xor_2wide, whose inputs are strongly powered blocks), and the repeaters are fed from fixture dust at strength 11 (a) and 3 (b). The repeaters restore 15, so the design sees equal full-strength inputs whatever the source strength; delays include the fixture repeater''s 2 game ticks.'
+traits:
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  a:
+    input: a
+  b:
+    input: b
+  o:
+    output: out
+    block: redstone_wire
+  '~':
+    block: redstone_wire
+    fixture: true
+  _:
+    block: smooth_stone
+    fixture: true
+  '>':
+    block: repeater[facing=east]
+    fixture: true
+  <:
+    block: repeater[facing=west]
+    fixture: true
+layers:
+  0: |
+    ......................
+    ..............==_____.
+    ._____________==......
+    ......................
+  1: |
+    ..............#.......
+    ..............S->~~~~a
+    b~~~~~~~~~~~~<-N......
+    ..............##......
+  2: |
+    ..............-.......
+    ..............#.......
+    ..............#.......
+    ..............-o......
+  3: |
+    ......................
+    ..............-.......
+    ..............-.......
+    ......................
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+  max_delay: 10
+

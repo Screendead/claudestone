@@ -1,0 +1,32 @@
+name: dust_powered_by_strong_block_above
+description: Dust directly under a block that a repeater strongly powers takes full power from it (15 at the dust, 14 one further), so a dust line can be fed from above in its middle without a gap.
+traits: [compact]
+palette:
+  .: air
+  '#': stone
+  a: {input: a}
+  r: repeater[facing=west]
+  P: {name: under, block: 'redstone_wire[east=side,west=side]'}
+  o: {output: out, block: 'redstone_wire[east=side,west=side]'}
+layers:
+  0: |
+    .###
+  1: |
+    .#Po
+  2: |
+    ar#.
+tests:
+- name: feed from above
+  truth_table: |
+    a | out
+    0 | 0
+    1 | 1
+  max_delay: 4
+- name: strength
+  steps:
+  - drive: {a: 1}
+  - wait: 6
+  - level: {under: 15, out: 14}
+  - drive: {a: 0}
+  - wait: 6
+  - level: {under: 0, out: 0}

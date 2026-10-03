@@ -1,0 +1,159 @@
+name: ref_mattbatwings_glass_zigzag_up_repeater
+description: "Upward glass zigzag riser (dust on stained glass, the vwire_glass_zigzag_up trick, 1 wide) with a repeater booster in a 2-block dust detour mid-way; rise 24 vs the 15 a plain riser tops out at. The zigzag is one way (up only). 1x26x4. Source: mattbatwings' 'How To Wire Like a Redstone Pro!' world (Java 1.18.2), demo cluster W65 at world origin [24, 56, -138] (SOURCED: block layout read from the world; the demo is one lever and two lamps).  Changed for the harness: the demo's input lamp under the lever became stone (the harness only emulates a lever on a plain full block; a lamp is a conductor too, so the lever still strongly powers it and the dust beside/below it), everything else is the cluster's blocks, with power/lit/powered state reset so the game recomputes it. The output lamp is cell 'out'; the test clicks the named lever. MEASURED on 26.3 (lever click to lamp): rise 2 gt, fall 6 gt (repeater 2 + lamp off 4). W70 is the same build with a lever that started on; the glass colour variants (cyan/light blue) are decoration. The how-it-works wording is INFERRED from the block layout (nothing was traced block by block); the pass shows only that the level arrives. No test shows the booster is necessary."
+palette:
+  .: air
+  A: cyan_stained_glass
+  B: {block: stone, fixture: true}
+  C: orange_wool
+  D: redstone_wire[east=none,north=up,south=side,west=none]
+  l: {name: lever, block: 'lever[face=floor,facing=west]', fixture: true}
+  E: redstone_wire[east=none,north=side,south=up,west=none]
+  F: cyan_wool
+  G: redstone_wire[east=none,north=side,south=side,west=none]
+  H: repeater[delay=1,facing=north]
+  o: {output: out, block: redstone_lamp}
+  I: lime_wool
+layers:
+  0: |
+    .
+    A
+    B
+    C
+  1: |
+    A
+    D
+    l
+    .
+  2: |
+    E
+    A
+    .
+    .
+  3: |
+    A
+    D
+    .
+    .
+  4: |
+    E
+    A
+    .
+    .
+  5: |
+    A
+    D
+    .
+    .
+  6: |
+    E
+    A
+    .
+    .
+  7: |
+    A
+    D
+    .
+    .
+  8: |
+    E
+    A
+    .
+    .
+  9: |
+    A
+    D
+    .
+    .
+  10: |
+    E
+    A
+    .
+    .
+  11: |
+    A
+    D
+    .
+    .
+  12: |
+    E
+    A
+    .
+    .
+  13: |
+    A
+    D
+    .
+    .
+  14: |
+    E
+    A
+    F
+    .
+  15: |
+    .
+    G
+    H
+    F
+  16: |
+    .
+    A
+    F
+    D
+  17: |
+    A
+    D
+    G
+    .
+  18: |
+    E
+    A
+    .
+    .
+  19: |
+    A
+    D
+    .
+    .
+  20: |
+    E
+    A
+    .
+    .
+  21: |
+    A
+    D
+    .
+    .
+  22: |
+    E
+    A
+    .
+    .
+  23: |
+    A
+    D
+    .
+    .
+  24: |
+    E
+    A
+    .
+    .
+  25: |
+    .
+    G
+    o
+    I
+tests:
+- name: lever on then off
+  settle: 40
+  steps:
+  - expect: {out: 0}
+  - use: lever
+  - wave: {out: '00111111'}
+  - wait: 20
+  - expect: {out: 1}
+  - use: lever
+  - wave: {out: '111111000000'}
+  - wait: 20
+  - expect: {out: 0}

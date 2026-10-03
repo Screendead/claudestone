@@ -1,0 +1,531 @@
+name: ref_llucas_inc8_2t
+description: '8-bit incrementer, out = in + 1 mod 256, built from comparators, dust and container-fed barrels. Source (SOURCED): mattbatwings'' Logical Redstone Archive OTHERCOMB009 "2t torchless incrementor (8 bit, FAST)" by LLucas, tagged Tested & Functional, https://discord.com/channels/1361854816837435433/1472681878611034265. Claims 2 ticks, 5 Hz pipeline. Size 4x18x8. Harness changes: the archive''s per-bit lever and lamp (lever on a lamp, which hard-powers the dust beside it) become an input redstone block in the lamp''s cell, touching the same dust; signs dropped; barrel contents were not in the parsed schematic, so each barrel is filled with stone stacks to the signal strength INFERRED from the measured dust powers (see below). Mechanism (INFERRED, then tested): bit k at y=2k+2 has barrel T_k (strength 16-2k) read by a subtract comparator whose output hard-powers barrel W_k (strength 17-2k) read by a second comparator; both subtract the input dust, so a 0 bit gives 16-2k on a dust staircase down the x=0 side and 17-2k on the east side, and a 1 gives 0. The staircase loses 2 per bit, so a lower 0 bit arrives at bit k at exactly 17-2k, stronger than bit k''s own 15-2k. Two subtract comparators on the layer above out_k compare those levels and light out_k only for in_k xor (all lower bits 1). Bit 0 is NOT: a comparator with a constant torch (the schematic does contain one redstone torch despite the name) and a compare-mode comparator on a strength-1 barrel. Outputs are the lamps. Measured (all 256 inputs, one laptop satellite): every output rises 4 gt (2 redstone ticks) and falls 8 gt (the same 4 plus the lamp''s own 4 gt turn-off), matching the 2-tick claim; size as built 4x17x7. Not tested: the 5 Hz pipelining claim. The README''s ''torchless'' is false for the schematic as parsed (one constant torch in bit 0).'
+traits:
+- analog
+- comparator_based
+- container_based
+- vertical
+- fast
+palette:
+  .: air
+  A: black_wool
+  B:
+    output: out0
+    block: redstone_lamp
+  C: repeater[delay=1,facing=north]
+  D: redstone_wire[east=side,north=side,south=side,west=side]
+  E:
+    input: in0
+  F: redstone_torch
+  G: redstone_wire[east=none,north=side,south=side,west=none]
+  H: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64}]}
+  I: comparator[facing=north,mode=subtract]
+  J: redstone_wire[east=side,north=none,south=none,west=side]
+  K: redstone_wire[east=side,north=side,south=none,west=side]
+  L: comparator[facing=north,mode=compare]
+  M: black_stained_glass
+  N:
+    output: out1
+    block: redstone_lamp
+  O: redstone_wire[east=side,north=up,south=side,west=none]
+  P: redstone_wire[east=side,north=none,south=side,west=side]
+  Q: redstone_wire[east=up,north=none,south=side,west=side]
+  R: redstone_wire[east=side,north=side,south=none,west=none]
+  S: redstone_wire[east=none,north=up,south=none,west=side]
+  T: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64},{Slot:24b,id:"minecraft:stone",count:64},{Slot:25b,id:"minecraft:stone",count:64}]}
+  U:
+    input: in1
+  V: redstone_wire[east=none,north=none,south=side,west=side]
+  W: redstone_wire[east=none,north=side,south=up,west=none]
+  X: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64},{Slot:24b,id:"minecraft:stone",count:64},{Slot:25b,id:"minecraft:stone",count:64},{Slot:26b,id:"minecraft:stone",count:64}]}
+  Y: comparator[facing=west,mode=subtract]
+  Z:
+    output: out2
+    block: redstone_lamp
+  a: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64}]}
+  b:
+    input: in2
+  c: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64},{Slot:20b,id:"minecraft:stone",count:64},{Slot:21b,id:"minecraft:stone",count:64},{Slot:22b,id:"minecraft:stone",count:64},{Slot:23b,id:"minecraft:stone",count:64}]}
+  d:
+    output: out3
+    block: redstone_lamp
+  e: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64}]}
+  f:
+    input: in3
+  g: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64},{Slot:16b,id:"minecraft:stone",count:64},{Slot:17b,id:"minecraft:stone",count:64},{Slot:18b,id:"minecraft:stone",count:64},{Slot:19b,id:"minecraft:stone",count:64}]}
+  h:
+    output: out4
+    block: redstone_lamp
+  i: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64}]}
+  j:
+    input: in4
+  k: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64},{Slot:12b,id:"minecraft:stone",count:64},{Slot:13b,id:"minecraft:stone",count:64},{Slot:14b,id:"minecraft:stone",count:64},{Slot:15b,id:"minecraft:stone",count:64}]}
+  l:
+    output: out5
+    block: redstone_lamp
+  m: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64}]}
+  n:
+    input: in5
+  o: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64},{Slot:8b,id:"minecraft:stone",count:64},{Slot:9b,id:"minecraft:stone",count:64},{Slot:10b,id:"minecraft:stone",count:64},{Slot:11b,id:"minecraft:stone",count:64}]}
+  p:
+    output: out6
+    block: redstone_lamp
+  q: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64}]}
+  r:
+    input: in6
+  s: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64},{Slot:4b,id:"minecraft:stone",count:64},{Slot:5b,id:"minecraft:stone",count:64},{Slot:6b,id:"minecraft:stone",count:64},{Slot:7b,id:"minecraft:stone",count:64}]}
+  t:
+    output: out7
+    block: redstone_lamp
+  u: redstone_wire[east=side,north=side,south=side,west=none]
+  v:
+    input: in7
+  w: barrel[facing=north]{Items:[{Slot:0b,id:"minecraft:stone",count:64},{Slot:1b,id:"minecraft:stone",count:64},{Slot:2b,id:"minecraft:stone",count:64},{Slot:3b,id:"minecraft:stone",count:64}]}
+layers:
+  0: |
+    ....
+    ....
+    ....
+    ....
+    ....
+    ...A
+    ..A.
+    ..B.
+  1: |
+    ....
+    ....
+    A.A.
+    AAAA
+    ...A
+    ...C
+    ..DA
+    ....
+  2: |
+    ....
+    ..E.
+    F.GH
+    IJKL
+    AAMG
+    AAAA
+    ..A.
+    ..N.
+  3: |
+    ....
+    ....
+    .AA.
+    AAA.
+    OPQA
+    RIIS
+    .AG.
+    ....
+  4: |
+    ....
+    .TU.
+    .IV.
+    WXYA
+    MAMV
+    AAAM
+    ..A.
+    ..Z.
+  5: |
+    ....
+    ....
+    .AA.
+    M.A.
+    OPQA
+    RIIS
+    .AG.
+    ....
+  6: |
+    ....
+    .ab.
+    .IV.
+    WcYA
+    MAMV
+    AAAM
+    ..A.
+    ..d.
+  7: |
+    ....
+    ....
+    .AA.
+    M.A.
+    OPQA
+    RIIS
+    .AG.
+    ....
+  8: |
+    ....
+    .ef.
+    .IV.
+    WgYA
+    MAMV
+    AAAM
+    ..A.
+    ..h.
+  9: |
+    ....
+    ....
+    .AA.
+    M.A.
+    OPQA
+    RIIS
+    .AG.
+    ....
+  10: |
+    ....
+    .ij.
+    .IV.
+    WkYA
+    MAMV
+    AAAM
+    ..A.
+    ..l.
+  11: |
+    ....
+    ....
+    .AA.
+    M.A.
+    OPQA
+    RIIS
+    .AG.
+    ....
+  12: |
+    ....
+    .mn.
+    .IV.
+    WoYA
+    MAMV
+    AAAM
+    ..A.
+    ..p.
+  13: |
+    ....
+    ....
+    .AA.
+    M.A.
+    OPQA
+    RIIS
+    .AG.
+    ....
+  14: |
+    ....
+    .qr.
+    .IV.
+    WsYA
+    MAMV
+    AAAM
+    ..A.
+    ..t.
+  15: |
+    ....
+    ....
+    AAAA
+    ..A.
+    uPQA
+    RIIS
+    .AG.
+    ....
+  16: |
+    ....
+    ..vw
+    ..JI
+    ...A
+    ...V
+    ....
+    ....
+    ....
+  17: |
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+    ....
+tests:
+- name: increments all 256 values
+  truth_table: |
+    in0 in1 in2 in3 in4 in5 in6 in7 | out0 out1 out2 out3 out4 out5 out6 out7
+    0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 | 1 1 0 0 0 0 0 0
+    1 1 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0
+    0 0 1 0 0 0 0 0 | 1 0 1 0 0 0 0 0
+    1 0 1 0 0 0 0 0 | 0 1 1 0 0 0 0 0
+    0 1 1 0 0 0 0 0 | 1 1 1 0 0 0 0 0
+    1 1 1 0 0 0 0 0 | 0 0 0 1 0 0 0 0
+    0 0 0 1 0 0 0 0 | 1 0 0 1 0 0 0 0
+    1 0 0 1 0 0 0 0 | 0 1 0 1 0 0 0 0
+    0 1 0 1 0 0 0 0 | 1 1 0 1 0 0 0 0
+    1 1 0 1 0 0 0 0 | 0 0 1 1 0 0 0 0
+    0 0 1 1 0 0 0 0 | 1 0 1 1 0 0 0 0
+    1 0 1 1 0 0 0 0 | 0 1 1 1 0 0 0 0
+    0 1 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0
+    1 1 1 1 0 0 0 0 | 0 0 0 0 1 0 0 0
+    0 0 0 0 1 0 0 0 | 1 0 0 0 1 0 0 0
+    1 0 0 0 1 0 0 0 | 0 1 0 0 1 0 0 0
+    0 1 0 0 1 0 0 0 | 1 1 0 0 1 0 0 0
+    1 1 0 0 1 0 0 0 | 0 0 1 0 1 0 0 0
+    0 0 1 0 1 0 0 0 | 1 0 1 0 1 0 0 0
+    1 0 1 0 1 0 0 0 | 0 1 1 0 1 0 0 0
+    0 1 1 0 1 0 0 0 | 1 1 1 0 1 0 0 0
+    1 1 1 0 1 0 0 0 | 0 0 0 1 1 0 0 0
+    0 0 0 1 1 0 0 0 | 1 0 0 1 1 0 0 0
+    1 0 0 1 1 0 0 0 | 0 1 0 1 1 0 0 0
+    0 1 0 1 1 0 0 0 | 1 1 0 1 1 0 0 0
+    1 1 0 1 1 0 0 0 | 0 0 1 1 1 0 0 0
+    0 0 1 1 1 0 0 0 | 1 0 1 1 1 0 0 0
+    1 0 1 1 1 0 0 0 | 0 1 1 1 1 0 0 0
+    0 1 1 1 1 0 0 0 | 1 1 1 1 1 0 0 0
+    1 1 1 1 1 0 0 0 | 0 0 0 0 0 1 0 0
+    0 0 0 0 0 1 0 0 | 1 0 0 0 0 1 0 0
+    1 0 0 0 0 1 0 0 | 0 1 0 0 0 1 0 0
+    0 1 0 0 0 1 0 0 | 1 1 0 0 0 1 0 0
+    1 1 0 0 0 1 0 0 | 0 0 1 0 0 1 0 0
+    0 0 1 0 0 1 0 0 | 1 0 1 0 0 1 0 0
+    1 0 1 0 0 1 0 0 | 0 1 1 0 0 1 0 0
+    0 1 1 0 0 1 0 0 | 1 1 1 0 0 1 0 0
+    1 1 1 0 0 1 0 0 | 0 0 0 1 0 1 0 0
+    0 0 0 1 0 1 0 0 | 1 0 0 1 0 1 0 0
+    1 0 0 1 0 1 0 0 | 0 1 0 1 0 1 0 0
+    0 1 0 1 0 1 0 0 | 1 1 0 1 0 1 0 0
+    1 1 0 1 0 1 0 0 | 0 0 1 1 0 1 0 0
+    0 0 1 1 0 1 0 0 | 1 0 1 1 0 1 0 0
+    1 0 1 1 0 1 0 0 | 0 1 1 1 0 1 0 0
+    0 1 1 1 0 1 0 0 | 1 1 1 1 0 1 0 0
+    1 1 1 1 0 1 0 0 | 0 0 0 0 1 1 0 0
+    0 0 0 0 1 1 0 0 | 1 0 0 0 1 1 0 0
+    1 0 0 0 1 1 0 0 | 0 1 0 0 1 1 0 0
+    0 1 0 0 1 1 0 0 | 1 1 0 0 1 1 0 0
+    1 1 0 0 1 1 0 0 | 0 0 1 0 1 1 0 0
+    0 0 1 0 1 1 0 0 | 1 0 1 0 1 1 0 0
+    1 0 1 0 1 1 0 0 | 0 1 1 0 1 1 0 0
+    0 1 1 0 1 1 0 0 | 1 1 1 0 1 1 0 0
+    1 1 1 0 1 1 0 0 | 0 0 0 1 1 1 0 0
+    0 0 0 1 1 1 0 0 | 1 0 0 1 1 1 0 0
+    1 0 0 1 1 1 0 0 | 0 1 0 1 1 1 0 0
+    0 1 0 1 1 1 0 0 | 1 1 0 1 1 1 0 0
+    1 1 0 1 1 1 0 0 | 0 0 1 1 1 1 0 0
+    0 0 1 1 1 1 0 0 | 1 0 1 1 1 1 0 0
+    1 0 1 1 1 1 0 0 | 0 1 1 1 1 1 0 0
+    0 1 1 1 1 1 0 0 | 1 1 1 1 1 1 0 0
+    1 1 1 1 1 1 0 0 | 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 1 0 | 1 0 0 0 0 0 1 0
+    1 0 0 0 0 0 1 0 | 0 1 0 0 0 0 1 0
+    0 1 0 0 0 0 1 0 | 1 1 0 0 0 0 1 0
+    1 1 0 0 0 0 1 0 | 0 0 1 0 0 0 1 0
+    0 0 1 0 0 0 1 0 | 1 0 1 0 0 0 1 0
+    1 0 1 0 0 0 1 0 | 0 1 1 0 0 0 1 0
+    0 1 1 0 0 0 1 0 | 1 1 1 0 0 0 1 0
+    1 1 1 0 0 0 1 0 | 0 0 0 1 0 0 1 0
+    0 0 0 1 0 0 1 0 | 1 0 0 1 0 0 1 0
+    1 0 0 1 0 0 1 0 | 0 1 0 1 0 0 1 0
+    0 1 0 1 0 0 1 0 | 1 1 0 1 0 0 1 0
+    1 1 0 1 0 0 1 0 | 0 0 1 1 0 0 1 0
+    0 0 1 1 0 0 1 0 | 1 0 1 1 0 0 1 0
+    1 0 1 1 0 0 1 0 | 0 1 1 1 0 0 1 0
+    0 1 1 1 0 0 1 0 | 1 1 1 1 0 0 1 0
+    1 1 1 1 0 0 1 0 | 0 0 0 0 1 0 1 0
+    0 0 0 0 1 0 1 0 | 1 0 0 0 1 0 1 0
+    1 0 0 0 1 0 1 0 | 0 1 0 0 1 0 1 0
+    0 1 0 0 1 0 1 0 | 1 1 0 0 1 0 1 0
+    1 1 0 0 1 0 1 0 | 0 0 1 0 1 0 1 0
+    0 0 1 0 1 0 1 0 | 1 0 1 0 1 0 1 0
+    1 0 1 0 1 0 1 0 | 0 1 1 0 1 0 1 0
+    0 1 1 0 1 0 1 0 | 1 1 1 0 1 0 1 0
+    1 1 1 0 1 0 1 0 | 0 0 0 1 1 0 1 0
+    0 0 0 1 1 0 1 0 | 1 0 0 1 1 0 1 0
+    1 0 0 1 1 0 1 0 | 0 1 0 1 1 0 1 0
+    0 1 0 1 1 0 1 0 | 1 1 0 1 1 0 1 0
+    1 1 0 1 1 0 1 0 | 0 0 1 1 1 0 1 0
+    0 0 1 1 1 0 1 0 | 1 0 1 1 1 0 1 0
+    1 0 1 1 1 0 1 0 | 0 1 1 1 1 0 1 0
+    0 1 1 1 1 0 1 0 | 1 1 1 1 1 0 1 0
+    1 1 1 1 1 0 1 0 | 0 0 0 0 0 1 1 0
+    0 0 0 0 0 1 1 0 | 1 0 0 0 0 1 1 0
+    1 0 0 0 0 1 1 0 | 0 1 0 0 0 1 1 0
+    0 1 0 0 0 1 1 0 | 1 1 0 0 0 1 1 0
+    1 1 0 0 0 1 1 0 | 0 0 1 0 0 1 1 0
+    0 0 1 0 0 1 1 0 | 1 0 1 0 0 1 1 0
+    1 0 1 0 0 1 1 0 | 0 1 1 0 0 1 1 0
+    0 1 1 0 0 1 1 0 | 1 1 1 0 0 1 1 0
+    1 1 1 0 0 1 1 0 | 0 0 0 1 0 1 1 0
+    0 0 0 1 0 1 1 0 | 1 0 0 1 0 1 1 0
+    1 0 0 1 0 1 1 0 | 0 1 0 1 0 1 1 0
+    0 1 0 1 0 1 1 0 | 1 1 0 1 0 1 1 0
+    1 1 0 1 0 1 1 0 | 0 0 1 1 0 1 1 0
+    0 0 1 1 0 1 1 0 | 1 0 1 1 0 1 1 0
+    1 0 1 1 0 1 1 0 | 0 1 1 1 0 1 1 0
+    0 1 1 1 0 1 1 0 | 1 1 1 1 0 1 1 0
+    1 1 1 1 0 1 1 0 | 0 0 0 0 1 1 1 0
+    0 0 0 0 1 1 1 0 | 1 0 0 0 1 1 1 0
+    1 0 0 0 1 1 1 0 | 0 1 0 0 1 1 1 0
+    0 1 0 0 1 1 1 0 | 1 1 0 0 1 1 1 0
+    1 1 0 0 1 1 1 0 | 0 0 1 0 1 1 1 0
+    0 0 1 0 1 1 1 0 | 1 0 1 0 1 1 1 0
+    1 0 1 0 1 1 1 0 | 0 1 1 0 1 1 1 0
+    0 1 1 0 1 1 1 0 | 1 1 1 0 1 1 1 0
+    1 1 1 0 1 1 1 0 | 0 0 0 1 1 1 1 0
+    0 0 0 1 1 1 1 0 | 1 0 0 1 1 1 1 0
+    1 0 0 1 1 1 1 0 | 0 1 0 1 1 1 1 0
+    0 1 0 1 1 1 1 0 | 1 1 0 1 1 1 1 0
+    1 1 0 1 1 1 1 0 | 0 0 1 1 1 1 1 0
+    0 0 1 1 1 1 1 0 | 1 0 1 1 1 1 1 0
+    1 0 1 1 1 1 1 0 | 0 1 1 1 1 1 1 0
+    0 1 1 1 1 1 1 0 | 1 1 1 1 1 1 1 0
+    1 1 1 1 1 1 1 0 | 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 1 | 1 0 0 0 0 0 0 1
+    1 0 0 0 0 0 0 1 | 0 1 0 0 0 0 0 1
+    0 1 0 0 0 0 0 1 | 1 1 0 0 0 0 0 1
+    1 1 0 0 0 0 0 1 | 0 0 1 0 0 0 0 1
+    0 0 1 0 0 0 0 1 | 1 0 1 0 0 0 0 1
+    1 0 1 0 0 0 0 1 | 0 1 1 0 0 0 0 1
+    0 1 1 0 0 0 0 1 | 1 1 1 0 0 0 0 1
+    1 1 1 0 0 0 0 1 | 0 0 0 1 0 0 0 1
+    0 0 0 1 0 0 0 1 | 1 0 0 1 0 0 0 1
+    1 0 0 1 0 0 0 1 | 0 1 0 1 0 0 0 1
+    0 1 0 1 0 0 0 1 | 1 1 0 1 0 0 0 1
+    1 1 0 1 0 0 0 1 | 0 0 1 1 0 0 0 1
+    0 0 1 1 0 0 0 1 | 1 0 1 1 0 0 0 1
+    1 0 1 1 0 0 0 1 | 0 1 1 1 0 0 0 1
+    0 1 1 1 0 0 0 1 | 1 1 1 1 0 0 0 1
+    1 1 1 1 0 0 0 1 | 0 0 0 0 1 0 0 1
+    0 0 0 0 1 0 0 1 | 1 0 0 0 1 0 0 1
+    1 0 0 0 1 0 0 1 | 0 1 0 0 1 0 0 1
+    0 1 0 0 1 0 0 1 | 1 1 0 0 1 0 0 1
+    1 1 0 0 1 0 0 1 | 0 0 1 0 1 0 0 1
+    0 0 1 0 1 0 0 1 | 1 0 1 0 1 0 0 1
+    1 0 1 0 1 0 0 1 | 0 1 1 0 1 0 0 1
+    0 1 1 0 1 0 0 1 | 1 1 1 0 1 0 0 1
+    1 1 1 0 1 0 0 1 | 0 0 0 1 1 0 0 1
+    0 0 0 1 1 0 0 1 | 1 0 0 1 1 0 0 1
+    1 0 0 1 1 0 0 1 | 0 1 0 1 1 0 0 1
+    0 1 0 1 1 0 0 1 | 1 1 0 1 1 0 0 1
+    1 1 0 1 1 0 0 1 | 0 0 1 1 1 0 0 1
+    0 0 1 1 1 0 0 1 | 1 0 1 1 1 0 0 1
+    1 0 1 1 1 0 0 1 | 0 1 1 1 1 0 0 1
+    0 1 1 1 1 0 0 1 | 1 1 1 1 1 0 0 1
+    1 1 1 1 1 0 0 1 | 0 0 0 0 0 1 0 1
+    0 0 0 0 0 1 0 1 | 1 0 0 0 0 1 0 1
+    1 0 0 0 0 1 0 1 | 0 1 0 0 0 1 0 1
+    0 1 0 0 0 1 0 1 | 1 1 0 0 0 1 0 1
+    1 1 0 0 0 1 0 1 | 0 0 1 0 0 1 0 1
+    0 0 1 0 0 1 0 1 | 1 0 1 0 0 1 0 1
+    1 0 1 0 0 1 0 1 | 0 1 1 0 0 1 0 1
+    0 1 1 0 0 1 0 1 | 1 1 1 0 0 1 0 1
+    1 1 1 0 0 1 0 1 | 0 0 0 1 0 1 0 1
+    0 0 0 1 0 1 0 1 | 1 0 0 1 0 1 0 1
+    1 0 0 1 0 1 0 1 | 0 1 0 1 0 1 0 1
+    0 1 0 1 0 1 0 1 | 1 1 0 1 0 1 0 1
+    1 1 0 1 0 1 0 1 | 0 0 1 1 0 1 0 1
+    0 0 1 1 0 1 0 1 | 1 0 1 1 0 1 0 1
+    1 0 1 1 0 1 0 1 | 0 1 1 1 0 1 0 1
+    0 1 1 1 0 1 0 1 | 1 1 1 1 0 1 0 1
+    1 1 1 1 0 1 0 1 | 0 0 0 0 1 1 0 1
+    0 0 0 0 1 1 0 1 | 1 0 0 0 1 1 0 1
+    1 0 0 0 1 1 0 1 | 0 1 0 0 1 1 0 1
+    0 1 0 0 1 1 0 1 | 1 1 0 0 1 1 0 1
+    1 1 0 0 1 1 0 1 | 0 0 1 0 1 1 0 1
+    0 0 1 0 1 1 0 1 | 1 0 1 0 1 1 0 1
+    1 0 1 0 1 1 0 1 | 0 1 1 0 1 1 0 1
+    0 1 1 0 1 1 0 1 | 1 1 1 0 1 1 0 1
+    1 1 1 0 1 1 0 1 | 0 0 0 1 1 1 0 1
+    0 0 0 1 1 1 0 1 | 1 0 0 1 1 1 0 1
+    1 0 0 1 1 1 0 1 | 0 1 0 1 1 1 0 1
+    0 1 0 1 1 1 0 1 | 1 1 0 1 1 1 0 1
+    1 1 0 1 1 1 0 1 | 0 0 1 1 1 1 0 1
+    0 0 1 1 1 1 0 1 | 1 0 1 1 1 1 0 1
+    1 0 1 1 1 1 0 1 | 0 1 1 1 1 1 0 1
+    0 1 1 1 1 1 0 1 | 1 1 1 1 1 1 0 1
+    1 1 1 1 1 1 0 1 | 0 0 0 0 0 0 1 1
+    0 0 0 0 0 0 1 1 | 1 0 0 0 0 0 1 1
+    1 0 0 0 0 0 1 1 | 0 1 0 0 0 0 1 1
+    0 1 0 0 0 0 1 1 | 1 1 0 0 0 0 1 1
+    1 1 0 0 0 0 1 1 | 0 0 1 0 0 0 1 1
+    0 0 1 0 0 0 1 1 | 1 0 1 0 0 0 1 1
+    1 0 1 0 0 0 1 1 | 0 1 1 0 0 0 1 1
+    0 1 1 0 0 0 1 1 | 1 1 1 0 0 0 1 1
+    1 1 1 0 0 0 1 1 | 0 0 0 1 0 0 1 1
+    0 0 0 1 0 0 1 1 | 1 0 0 1 0 0 1 1
+    1 0 0 1 0 0 1 1 | 0 1 0 1 0 0 1 1
+    0 1 0 1 0 0 1 1 | 1 1 0 1 0 0 1 1
+    1 1 0 1 0 0 1 1 | 0 0 1 1 0 0 1 1
+    0 0 1 1 0 0 1 1 | 1 0 1 1 0 0 1 1
+    1 0 1 1 0 0 1 1 | 0 1 1 1 0 0 1 1
+    0 1 1 1 0 0 1 1 | 1 1 1 1 0 0 1 1
+    1 1 1 1 0 0 1 1 | 0 0 0 0 1 0 1 1
+    0 0 0 0 1 0 1 1 | 1 0 0 0 1 0 1 1
+    1 0 0 0 1 0 1 1 | 0 1 0 0 1 0 1 1
+    0 1 0 0 1 0 1 1 | 1 1 0 0 1 0 1 1
+    1 1 0 0 1 0 1 1 | 0 0 1 0 1 0 1 1
+    0 0 1 0 1 0 1 1 | 1 0 1 0 1 0 1 1
+    1 0 1 0 1 0 1 1 | 0 1 1 0 1 0 1 1
+    0 1 1 0 1 0 1 1 | 1 1 1 0 1 0 1 1
+    1 1 1 0 1 0 1 1 | 0 0 0 1 1 0 1 1
+    0 0 0 1 1 0 1 1 | 1 0 0 1 1 0 1 1
+    1 0 0 1 1 0 1 1 | 0 1 0 1 1 0 1 1
+    0 1 0 1 1 0 1 1 | 1 1 0 1 1 0 1 1
+    1 1 0 1 1 0 1 1 | 0 0 1 1 1 0 1 1
+    0 0 1 1 1 0 1 1 | 1 0 1 1 1 0 1 1
+    1 0 1 1 1 0 1 1 | 0 1 1 1 1 0 1 1
+    0 1 1 1 1 0 1 1 | 1 1 1 1 1 0 1 1
+    1 1 1 1 1 0 1 1 | 0 0 0 0 0 1 1 1
+    0 0 0 0 0 1 1 1 | 1 0 0 0 0 1 1 1
+    1 0 0 0 0 1 1 1 | 0 1 0 0 0 1 1 1
+    0 1 0 0 0 1 1 1 | 1 1 0 0 0 1 1 1
+    1 1 0 0 0 1 1 1 | 0 0 1 0 0 1 1 1
+    0 0 1 0 0 1 1 1 | 1 0 1 0 0 1 1 1
+    1 0 1 0 0 1 1 1 | 0 1 1 0 0 1 1 1
+    0 1 1 0 0 1 1 1 | 1 1 1 0 0 1 1 1
+    1 1 1 0 0 1 1 1 | 0 0 0 1 0 1 1 1
+    0 0 0 1 0 1 1 1 | 1 0 0 1 0 1 1 1
+    1 0 0 1 0 1 1 1 | 0 1 0 1 0 1 1 1
+    0 1 0 1 0 1 1 1 | 1 1 0 1 0 1 1 1
+    1 1 0 1 0 1 1 1 | 0 0 1 1 0 1 1 1
+    0 0 1 1 0 1 1 1 | 1 0 1 1 0 1 1 1
+    1 0 1 1 0 1 1 1 | 0 1 1 1 0 1 1 1
+    0 1 1 1 0 1 1 1 | 1 1 1 1 0 1 1 1
+    1 1 1 1 0 1 1 1 | 0 0 0 0 1 1 1 1
+    0 0 0 0 1 1 1 1 | 1 0 0 0 1 1 1 1
+    1 0 0 0 1 1 1 1 | 0 1 0 0 1 1 1 1
+    0 1 0 0 1 1 1 1 | 1 1 0 0 1 1 1 1
+    1 1 0 0 1 1 1 1 | 0 0 1 0 1 1 1 1
+    0 0 1 0 1 1 1 1 | 1 0 1 0 1 1 1 1
+    1 0 1 0 1 1 1 1 | 0 1 1 0 1 1 1 1
+    0 1 1 0 1 1 1 1 | 1 1 1 0 1 1 1 1
+    1 1 1 0 1 1 1 1 | 0 0 0 1 1 1 1 1
+    0 0 0 1 1 1 1 1 | 1 0 0 1 1 1 1 1
+    1 0 0 1 1 1 1 1 | 0 1 0 1 1 1 1 1
+    0 1 0 1 1 1 1 1 | 1 1 0 1 1 1 1 1
+    1 1 0 1 1 1 1 1 | 0 0 1 1 1 1 1 1
+    0 0 1 1 1 1 1 1 | 1 0 1 1 1 1 1 1
+    1 0 1 1 1 1 1 1 | 0 1 1 1 1 1 1 1
+    0 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0
+  delays:
+    out0:
+      rise: 4
+      fall: 8
+    out1:
+      rise: 4
+      fall: 8
+    out2:
+      rise: 4
+      fall: 8
+    out3:
+      rise: 4
+      fall: 8
+    out4:
+      rise: 4
+      fall: 8
+    out5:
+      rise: 4
+      fall: 8
+    out6:
+      rise: 4
+      fall: 8
+    out7:
+      rise: 4
+      fall: 8

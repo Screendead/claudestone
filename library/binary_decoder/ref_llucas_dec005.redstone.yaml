@@ -1,0 +1,360 @@
+name: ref_llucas_dec005
+description: >-
+  Rebuild of LLucas's "2 tick torchless decoder" from mattbatwings' Logical Redstone Archive,
+  entry DECODE005 (Discord:
+  https://discord.com/channels/1361854816837435433/1472977649205772485, endorsed by Waffle
+  [Wueffi], tagged Tested and Functional, schematic DECODE005_torchlessdecode). SOURCED: no
+  torches, vertical input to horizontal output (2 wide, staggered), up to 8 input bits
+  (schematic: 3 bits, 8 outputs), one-hot output, expandable, 1 tick for the inverted output
+  (part of the decoder removed) and 2 ticks for the output. Changes for the harness: the three
+  wall levers, each hung on a redstone lamp, became redstone-block inputs standing where the
+  lamps were; the 8 output lamps are the named outputs; the hoppers and barrels keep their
+  redstone-dust fill as the constant analog sources the subtract comparators read (the dust is
+  repacked from slot 0 at the same strength; the original slot layout differs and a comparator
+  reads only fullness). Input names are the weights found by test: i4 = 4, i2 = 2, i1 = 1, and
+  output dN is the one lit when 4*i4 + 2*i2 + i1 = N, which is not the order of the levers in
+  the schematic (lever heights are i4, i1, i2 from the bottom). MEASURED on 26.3: all 8
+  outputs follow the one-hot table through a 16-change sequence, including 0 to 7 and 7 to 0.
+  After any input change the new output turns on 4 game ticks later and the old one turns off
+  8 game ticks after the change, so two outputs are lit together for 4 ticks on every change
+  (a hazard for clocked consumers). Pulses are not glitched on the other 6 outputs, also when
+  all three inputs flip at once. The archive's 1 and 2 ticks are consistent with redstone
+  ticks (2 game ticks) to the first output change (INFERRED; the first output change here is
+  at 4 game ticks = 2 redstone ticks). Size 6x8x17.
+traits: [silent, pistonless, entityless, comparator_based, container_based, tick_accurate]
+palette:
+  .: air
+  A: black_stained_glass
+  B: black_wool
+  C: redstone_wire[south=side,north=none,west=up,east=none]
+  D: comparator[mode=subtract,facing=south]
+  E: redstone_wire[west=side,north=none,east=up,south=none]
+  F: hopper
+  G: redstone_wire[north=up,west=none,south=up,east=none]
+  H: comparator[facing=south,mode=subtract]
+  I: redstone_wire[east=up,north=none,south=none,west=side]
+  J: redstone_wire[east=none,west=up,north=none,south=side]
+  K: redstone_wire[north=up,south=up,east=none,west=none]
+  M: redstone_wire[south=none,west=side,north=none,east=up]
+  N: redstone_wire[west=up,north=none,east=none,south=side]
+  O: redstone_wire[north=up,west=none,east=none,south=up]
+  P: redstone_wire[west=side,north=none,south=none,east=up]
+  Q: redstone_wire[north=none,west=side,south=none,east=up]
+  T: redstone_wire[west=side,north=none,south=side,east=none]
+  U: redstone_wire[south=none,west=up,north=none,east=side]
+  V: repeater[delay=1,facing=east]
+  W: redstone_wire[west=side,south=side,east=none,north=side]
+  X: redstone_wire[north=side,east=none,west=none,south=side]
+  Y: redstone_wire[west=side,south=side,north=side,east=none]
+  Z: repeater[facing=east,delay=1]
+  b: redstone_wire[south=side,east=none,north=side,west=none]
+  c: redstone_wire[east=up,south=none,west=side,north=none]
+  d: redstone_wire[north=none,west=up,south=none,east=side]
+  e: redstone_wire[west=side,north=side,east=none,south=side]
+  f: redstone_wire[north=side,south=side,west=none,east=none]
+  g: redstone_wire[east=none,south=side,west=side,north=side]
+  h: redstone_wire[north=none,south=none,west=up,east=side]
+  i: redstone_wire[north=side,east=none,south=none,west=side]
+  k: redstone_wire[south=side,west=up,east=none,north=none]
+  l: redstone_wire[south=none,north=none,west=side,east=up]
+  m: redstone_wire[south=none,west=side,east=up,north=none]
+  p: redstone_wire[east=none,west=side,south=up,north=up]
+  q: redstone_wire[east=up,west=side,south=none,north=none]
+  r: redstone_wire[west=up,south=side,north=none,east=none]
+  s: redstone_wire[south=up,west=none,north=up,east=none]
+  t: redstone_wire[west=side,east=up,south=none,north=none]
+  w: redstone_wire[south=up,east=none,north=up,west=side]
+  x: redstone_wire[west=side,south=none,north=none,east=up]
+  y: redstone_wire[north=none,west=side,south=side,east=none]
+  z: redstone_wire[south=side,north=none,east=none,west=up]
+  '0': redstone_wire[north=side,south=side,east=none,west=none]
+  '1': redstone_wire[south=none,north=none,west=side,east=side]
+  '2': redstone_wire[south=side,north=side,west=side,east=none]
+  '3': redstone_wire[north=none,south=none,west=side,east=up]
+  '4': redstone_wire[east=side,south=none,north=none,west=up]
+  '5': redstone_wire[north=none,west=side,east=up,south=none]
+  '6': redstone_wire[east=none,west=side,south=side,north=side]
+  '7': redstone_wire[east=none,north=none,west=up,south=side]
+  '8': redstone_wire[south=side,north=side,west=none,east=none]
+  '9': redstone_wire[east=side,north=none,west=side,south=none]
+  α: redstone_wire[north=none,south=none,east=up,west=side]
+  β: redstone_wire[north=none,east=side,west=up,south=none]
+  γ: redstone_wire[north=side,west=side,east=none,south=none]
+  ε: redstone_wire[north=none,west=up,south=side,east=none]
+  ζ: redstone_wire[west=side,east=up,north=none,south=none]
+  η: redstone_wire[east=none,south=side,north=none,west=up]
+  θ: redstone_wire[east=none,north=up,west=none,south=up]
+  ι: redstone_wire[south=none,east=up,north=none,west=side]
+  κ: redstone_wire[west=side,south=none,east=up,north=none]
+  λ: redstone_wire[south=none,north=none,east=side,west=up]
+  μ: redstone_wire[east=none,south=up,west=side,north=up]
+  ν: redstone_wire[north=none,east=up,south=none,west=side]
+  ξ: redstone_wire[west=side,east=none,north=up,south=up]
+  π: redstone_wire[south=side,north=side,west=side,east=side]
+  ρ: redstone_wire[south=none,west=side,north=none,east=side]
+  σ: barrel
+  τ: redstone_wire[south=side,north=none,east=none,west=side]
+  υ: redstone_wire[north=side,east=none,south=side,west=none]
+  φ: redstone_wire[east=side,north=side,south=side,west=side]
+  χ: comparator[facing=south,mode=compare]
+  ψ: redstone_wire[west=side,north=side,south=side,east=none]
+  ω: redstone_wire[north=none,east=side,west=side,south=none]
+  Γ: redstone_wire[south=side,west=side,east=none,north=side]
+  Δ: redstone_wire[east=none,south=side,north=side,west=none]
+  Θ: redstone_wire[south=side,west=side,north=side,east=side]
+  Λ: comparator[mode=compare,facing=south]
+  Ξ: redstone_wire[east=none,north=side,south=side,west=side]
+  Π: redstone_wire[west=side,east=side,north=none,south=none]
+  Σ: redstone_wire[east=side,north=none,south=none,west=up]
+  Φ: redstone_wire[north=side,south=side,east=none,west=side]
+  Ψ: redstone_wire[east=side,north=side,west=side,south=side]
+  Ω: redstone_wire[north=side,west=none,east=none,south=side]
+  б: redstone_wire[east=none,west=none,north=side,south=side]
+  в: redstone_wire[south=none,west=up,east=side,north=none]
+  г: redstone_wire[north=side,west=side,south=none,east=none]
+  д: redstone_wire[west=side,east=side,south=side,north=side]
+  ж: redstone_wire[west=side,north=none,east=side,south=none]
+  з: redstone_wire[north=side,south=side,east=side,west=side]
+  и: redstone_wire[north=none,south=none,west=side,east=side]
+  й: redstone_wire[south=side,west=side,east=side,north=side]
+  к: redstone_wire[north=none,east=side,south=none,west=side]
+  ❶:
+    input: i4
+  ❷:
+    input: i1
+  ❸:
+    input: i2
+  ①:
+    output: d7
+    block: redstone_lamp
+  ②:
+    output: d6
+    block: redstone_lamp
+  ③:
+    output: d5
+    block: redstone_lamp
+  ④:
+    output: d4
+    block: redstone_lamp
+  ⑤:
+    output: d3
+    block: redstone_lamp
+  ⑥:
+    output: d2
+    block: redstone_lamp
+  ⑦:
+    output: d1
+    block: redstone_lamp
+  ⑧:
+    output: d0
+    block: redstone_lamp
+  Ⅰ: hopper{Items:[{Slot:0b,id:"minecraft:redstone",count:45}]}
+  Ⅱ: hopper{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:27}]}
+  Ⅲ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64}]}
+  Ⅳ: hopper{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:9}]}
+  Ⅴ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64}]}
+layers:
+  2: |
+    ......
+    ......
+    ...A..
+    ...BA.
+    ......
+    ......
+    ...A.A
+    ...BA.
+    ......
+    ......
+    ...A.A
+    ...BA.
+    ......
+    ......
+    ...A.A
+    ...BA.
+    ......
+    ......
+    ......
+  3: |
+    ......
+    ......
+    ..AC..
+    ...DEB
+    ...ⅣBB
+    .....B
+    ..AC.G
+    ...HIB
+    ...ⅣBB
+    .....B
+    ..AJ.K
+    ...DMB
+    ...ⅣBB
+    .....B
+    ..AN.O
+    ...HPB
+    ...ⅣBB
+    ......
+    ......
+  4: |
+    ......
+    ......
+    ..QA..
+    ...BAT
+    ..AUVW
+    .....X
+    ..MABA
+    .....Y
+    ..AUZY
+    .....b
+    ..cA.A
+    ...BAW
+    ..AdZe
+    .....f
+    ..EABA
+    .....g
+    ..AhZi
+    .....❶
+    ......
+  5: |
+    ......
+    ......
+    ..Ak..
+    ...HlB
+    ..mⅡ.B
+    ...BBB
+    ..AUVp
+    .....B
+    ..qABB
+    .....B
+    ..Ar.s
+    ...HtB
+    ..IⅡ.B
+    ...BBB
+    ..AUZw
+    .....B
+    ..cABB
+    ......
+    ......
+  6: |
+    ......
+    ......
+    ..xA..
+    ...BAy
+    ..Az.0
+    ...D12
+    ..3Ⅱ.A
+    ...BAf
+    ..A4Ze
+    .....0
+    ..5ABA
+    .....6
+    ..A7.8
+    ...H96
+    ..αⅡBA
+    .....f
+    ..AβZγ
+    .....❷
+    ......
+  7: |
+    ......
+    ①.....
+    .BAε..
+    ...HζB
+    ..QⅠ.B
+    ②...BB
+    .BAη.θ
+    ...HιB
+    ..κⅠ.B
+    ③...BB
+    .BAλZμ
+    .....B
+    ..νABB
+    ④....B
+    .BAUVξ
+    .....B
+    ..PABB
+    ......
+    ......
+  8: |
+    ......
+    πB....
+    .Hρ...
+    ⑤Ⅲ...τ
+    .BAdBυ
+    φB..χψ
+    .Dω.Ⅴ.
+    ⑥Ⅲ...Γ
+    .BAβBΔ
+    ΘB..ΛΞ
+    .HΠ.Ⅴ.
+    ⑦Ⅲ...υ
+    .BAΣVΦ
+    ΨB...Ω
+    .H1...
+    ⑧Ⅲ...б
+    .BAвVг
+    .....❸
+    ......
+  9: |
+    ......
+    ......
+    ......
+    дB....
+    .Hж...
+    .Ⅲ....
+    ......
+    φB....
+    .D1...
+    .Ⅲ....
+    ......
+    зB....
+    .Hи...
+    .Ⅲ....
+    ......
+    йB....
+    .Hк...
+    .Ⅲ....
+    ......
+tests:
+- name: one_hot
+  max_delay: 8
+  truth_table: |
+    i4 i2 i1 | d0 d1 d2 d3 d4 d5 d6 d7
+    0 0 0 | 1 0 0 0 0 0 0 0
+    0 0 1 | 0 1 0 0 0 0 0 0
+    0 1 0 | 0 0 1 0 0 0 0 0
+    0 1 1 | 0 0 0 1 0 0 0 0
+    1 0 0 | 0 0 0 0 1 0 0 0
+    1 0 1 | 0 0 0 0 0 1 0 0
+    1 1 0 | 0 0 0 0 0 0 1 0
+    1 1 1 | 0 0 0 0 0 0 0 1
+    0 0 0 | 1 0 0 0 0 0 0 0
+    1 1 1 | 0 0 0 0 0 0 0 1
+    0 1 1 | 0 0 0 1 0 0 0 0
+    1 0 0 | 0 0 0 0 1 0 0 0
+    0 0 1 | 0 1 0 0 0 0 0 0
+    1 1 0 | 0 0 0 0 0 0 1 0
+    0 1 0 | 0 0 1 0 0 0 0 0
+    1 0 1 | 0 0 0 0 0 1 0 0
+    0 0 0 | 1 0 0 0 0 0 0 0
+  settle: 20
+- name: waves_one_bit_at_a_time
+  steps:
+  - drive: {i1: 1}
+  - wave: {d0: '1111111100', d1: '0000111111', d2: '0000000000', d3: '0000000000', d4: '0000000000', d5: '0000000000', d6: '0000000000', d7: '0000000000'}
+  - wait: 10
+  - drive: {i1: 0, i2: 1}
+  - wave: {d0: '0000000000', d1: '1111111100', d2: '0000111111', d3: '0000000000', d4: '0000000000', d5: '0000000000', d6: '0000000000', d7: '0000000000'}
+  - wait: 10
+  - drive: {i2: 0, i4: 1}
+  - wave: {d0: '0000000000', d1: '0000000000', d2: '1111111100', d3: '0000000000', d4: '0000111111', d5: '0000000000', d6: '0000000000', d7: '0000000000'}
+  - wait: 10
+  - drive: {i4: 0}
+  - wave: {d0: '0000111111', d1: '0000000000', d2: '0000000000', d3: '0000000000', d4: '1111111100', d5: '0000000000', d6: '0000000000', d7: '0000000000'}
+  - wait: 10
+- name: waves_all_bits_at_once
+  steps:
+  - drive: {i4: 1, i2: 1, i1: 1}
+  - wave: {d0: '1111111100', d1: '0000000000', d2: '0000000000', d3: '0000000000', d4: '0000000000', d5: '0000000000', d6: '0000000000', d7: '0000111111'}
+  - wait: 10
+  - drive: {i4: 0, i2: 0, i1: 0}
+  - wave: {d0: '0000111111', d1: '0000000000', d2: '0000000000', d3: '0000000000', d4: '0000000000', d5: '0000000000', d6: '0000000000', d7: '1111111100'}

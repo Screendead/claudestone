@@ -1,0 +1,246 @@
+name: ref_librok_vertical_priority_15
+description: >-
+  LiBRoK's 15-bit vertical priority (Logical Redstone Archive OTHERCOMB016, endorsed by mattbatwings,
+  discord.com/channels/1361854816837435433/1479218567399477281; README SOURCED: lowest layer has the highest priority, 15 inputs
+  give a one-hot output, 2t). 4x16x4, a 15-layer tower, one layer per bit: input repeater -> subtract comparator -> output lamp;
+  the comparator's side input is the OR of all lower-numbered inputs. That OR is a dust staircase climbing one layer per bit over
+  blue glass, and each rung re-reads the dust one layer below but not the one above (INFERRED from the shapes, supported by
+  MECHANICS dust_transparent_step_one_way), so power only flows up the tower, decaying 1 per layer: bit 1's 15 reaches strength 1 at
+  layer 15, exactly enough. A target block beside the staircase end takes the dust's weak power, a repeater turns it back into a full
+  15 on the comparator's side, and 15 - 15 cancels the input. Layers alternate which side the comparator sits on, which is how the
+  staircase zigzags in 4 deep. Changed from the schematic: each input lamp-plus-lever pair (the lever hard-powers the lamp, which
+  feeds the input repeater and the carry dust beside it) is one harness input cell, a redstone block in the lamp's cell, which powers
+  that repeater and dust directly (the lever column is dropped, so 4 wide not 5); outputs are the original lamps. MEASURED on a
+  laptop satellite in 26.3: 98 rows (empty, every single input, all on, input k with every lower-priority input on, input k with only
+  input 15 on, adjacent pairs, alternating patterns, 40 random) give exactly the lowest-numbered set input; every output rises 4 gt
+  (2 redstone ticks, matching the README) and falls 8 gt (the same 4 plus the lamp's 4 gt off delay), whichever input changes.
+traits: [vertical, comparator_based, silent, pistonless, entityless, compact]
+palette:
+  .: air
+  A: blue_stained_glass
+  B: blue_wool
+  C: target
+  D: redstone_wire[east=up,north=none,south=up,west=side]
+  E: repeater[delay=1,facing=north]
+  F: redstone_wire[east=none,north=up,south=none,west=up]
+  G: comparator[facing=east,mode=subtract]
+  H: repeater[delay=1,facing=east]
+  J: repeater[delay=1,facing=south]
+  K: redstone_wire[east=none,north=none,south=up,west=up]
+  M: redstone_wire[east=up,north=up,south=none,west=side]
+  N: redstone_wire[east=side,north=none,south=side,west=side]
+  O: redstone_wire[east=none,north=side,south=none,west=side]
+  P: {output: o1, block: redstone_lamp}
+  Q: {output: o2, block: redstone_lamp}
+  R: {output: o3, block: redstone_lamp}
+  S: {output: o4, block: redstone_lamp}
+  T: {output: o5, block: redstone_lamp}
+  U: {output: o6, block: redstone_lamp}
+  V: {output: o7, block: redstone_lamp}
+  W: {output: o8, block: redstone_lamp}
+  X: {output: o9, block: redstone_lamp}
+  Y: {output: o10, block: redstone_lamp}
+  Z: {output: o11, block: redstone_lamp}
+  '0': {output: o12, block: redstone_lamp}
+  '1': {output: o13, block: redstone_lamp}
+  '2': {output: o14, block: redstone_lamp}
+  '3': {output: o15, block: redstone_lamp}
+  a: {input: i1}
+  b: {input: i2}
+  c: {input: i3}
+  d: {input: i4}
+  e: {input: i5}
+  f: {input: i6}
+  g: {input: i7}
+  h: {input: i8}
+  i: {input: i9}
+  j: {input: i10}
+  k: {input: i11}
+  l: {input: i12}
+  m: {input: i13}
+  n: {input: i14}
+  o: {input: i15}
+layers:
+  0: |
+    ....
+    ..A.
+    .B.A
+    .BB.
+  1: |
+    .BB.
+    .CDA
+    .EAF
+    PGHa
+  2: |
+    QGHb
+    .JAK
+    .CMA
+    .BB.
+  3: |
+    .BB.
+    .CDA
+    .EAF
+    RGHc
+  4: |
+    SGHd
+    .JAK
+    .CMA
+    .BB.
+  5: |
+    .BB.
+    .CDA
+    .EAF
+    TGHe
+  6: |
+    UGHf
+    .JAK
+    .CMA
+    .BB.
+  7: |
+    .BB.
+    .CDA
+    .EAF
+    VGHg
+  8: |
+    WGHh
+    .JAK
+    .CMA
+    .BB.
+  9: |
+    .BB.
+    .CDA
+    .EAF
+    XGHi
+  10: |
+    YGHj
+    .JAK
+    .CMA
+    .BB.
+  11: |
+    .BB.
+    .CDA
+    .EAF
+    ZGHk
+  12: |
+    0GHl
+    .JAK
+    .CMA
+    .BB.
+  13: |
+    .BB.
+    .CDA
+    .EAF
+    1GHm
+  14: |
+    2GHn
+    .JAK
+    .CMA
+    .BB.
+  15: |
+    ....
+    .CN.
+    .E.O
+    3GHo
+tests:
+- name: priority
+  truth_table: |
+    i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 | o1 o2 o3 o4 o5 o6 o7 o8 o9 o10 o11 o12 o13 o14 o15
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 | 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 | 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 | 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 | 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 | 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 | 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 | 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 | 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+    1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 | 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 | 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+    1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 0 0 1 1 1 1 | 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+    1 1 1 0 0 1 1 0 1 1 0 1 1 1 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 1 1 1 0 1 0 0 0 0 0 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 1 1 1 0 0 1 0 0 1 | 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+    1 0 1 1 1 1 1 0 1 1 0 0 1 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 1 0 0 1 0 1 0 1 1 1 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 1 0 1 1 0 0 0 1 1 1 1 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 0 1 1 0 1 1 0 0 1 0 1 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 0 1 0 1 0 0 0 1 1 0 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 1 0 1 0 0 0 1 0 0 1 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 1 0 1 1 1 0 1 1 0 1 1 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 1 0 1 0 0 1 1 1 1 0 1 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 0 0 1 1 1 0 0 0 1 1 0 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 1 1 1 0 0 1 1 1 1 1 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 1 1 1 1 1 0 1 1 0 1 0 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 1 1 0 1 0 0 1 0 0 0 1 1 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 1 1 0 0 1 1 1 0 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 1 0 0 1 0 0 0 1 1 1 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 1 0 1 0 1 0 0 1 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 0 0 1 0 0 0 1 1 0 1 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 0 0 1 0 0 1 1 1 0 0 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 0 1 0 0 0 1 1 0 1 1 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 1 1 0 0 0 0 0 1 1 0 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 0 1 0 0 0 0 1 1 0 1 1 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 1 1 0 0 1 1 1 1 1 1 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 1 0 1 0 1 1 0 0 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 0 1 1 0 1 1 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 1 1 1 1 1 1 1 0 0 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 1 1 1 0 1 1 1 0 0 1 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 0 0 0 0 1 0 1 0 1 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+    1 0 0 1 1 0 0 0 0 1 0 0 0 1 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 1 0 1 0 0 0 0 0 1 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 1 0 0 1 1 0 1 0 1 1 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 1 1 0 1 1 0 1 1 1 1 1 1 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 0 0 1 1 1 1 1 1 0 1 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 0 1 0 0 0 1 1 0 1 0 1 1 1 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 1 1 1 0 0 1 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+  delays: {o1: {rise: 4, fall: 8}, o2: {rise: 4, fall: 8}, o3: {rise: 4, fall: 8}, o4: {rise: 4, fall: 8}, o5: {rise: 4, fall: 8}, o6: {rise: 4, fall: 8}, o7: {rise: 4, fall: 8}, o8: {rise: 4, fall: 8}, o9: {rise: 4, fall: 8}, o10: {rise: 4, fall: 8}, o11: {rise: 4, fall: 8}, o12: {rise: 4, fall: 8}, o13: {rise: 4, fall: 8}, o14: {rise: 4, fall: 8}, o15: {rise: 4, fall: 8}}

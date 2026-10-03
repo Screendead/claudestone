@@ -1,0 +1,63 @@
+name: xor_comparator_bridge_in5
+description: 'Input-strength probe for xor_comparator_bridge: the same blocks, with the drivers moved outward through fixture dust so input a enters the design at strength 5 and b at 5, the weakest equal pair that still works (4 and 4 lose the b-only output). Output is then 1 (b only) or 5 (a only).'
+traits:
+- comparator_based
+- silent
+- lightless
+- pistonless
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  a:
+    input: a
+  b:
+    input: b
+  o:
+    output: out
+    block: redstone_wire
+  '~':
+    block: redstone_wire
+    fixture: true
+  _:
+    block: smooth_stone
+    fixture: true
+layers:
+  0: |
+    ........................
+    ...........==__________.
+    .__________==...........
+    ........................
+  1: |
+    ...........#............
+    ...........S-~~~~~~~~~~a
+    b~~~~~~~~~~-N...........
+    ...........##...........
+  2: |
+    ...........-............
+    ...........#............
+    ...........#............
+    ...........-o...........
+  3: |
+    ........................
+    ...........-............
+    ...........-............
+    ........................
+tests:
+- name: logic
+  truth_table: |
+    a b | out
+    0 0 | 0
+    0 1 | 1
+    1 1 | 0
+    1 0 | 1
+    0 0 | 0
+    1 0 | 1
+    1 1 | 0
+    0 1 | 1
+  max_delay: 10
+

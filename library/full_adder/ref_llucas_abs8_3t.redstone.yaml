@@ -1,0 +1,912 @@
+name: ref_llucas_abs8_3t
+description: '8-bit signed absolute value, out = |in| mod 256 (-128 stays 128), bit k on its own two-layer slice stacked at pitch 2 (input k at y=2k+2, output lamp k at y=2k+1, sign on top), from subtract/compare comparators, dust and container-fed barrels. Source (SOURCED): mattbatwings'' Logical Redstone Archive OTHERCOMB015 "3-tick absolute value" by LLucas (endorsed by Mixel), tagged Tested & Functional, https://discord.com/channels/1361854816837435433/1474809511306067978. README claims: 3 ticks, compact, input 8-bit signed with HARD POWER, output 15ss, a 2-tick version is possible. Harness changes: the per-bit lever (which hard-powers the lamp it hangs on) is replaced by a fixture repeater[facing=east] on a fixture stone, fed by an input redstone block one cell east, because the harness cannot click a lever on a lamp and the top slice has a wall torch hanging on its input lamp (a bare redstone block there would let the torch fall off); the repeater hard-powers the same lamp, so every delay below includes its 1 redstone tick (2 gt). Signs dropped. Barrel contents were not in the parsed blocks; the schem BlockEntities hold 21 stacks of 64 redstone in each of the 7 barrels (SOURCED from the .schem NBT), so they are filled the same (strength floor(1+14*21/27)=11, INFERRED from the comparator formula, not read back). Measured (all 256 inputs, one satellite, MEASURED): every row passes; every output rises 8 gt and falls 12 gt after its input row changes. Net of the fixture repeater that is 6 gt = 3 redstone ticks, matching the 3-tick claim (INFERRED subtraction); the fall adds the output lamp''s own 4 gt turn-off. Size as built 9x18x9 (498 blocks incl. fixtures). Mechanism (partly INFERRED): a trace with the sign bit alone set shows a dust line whose strength grows by 1 per slice (3,4,5,6 at slices 1-4) that each slice compares against the strength 15 a set lower bit injects; out_k = in_k xor (sign and any lower bit set). Not traced comparator by comparator.'
+traits:
+- analog
+- comparator_based
+- container_based
+- vertical
+palette:
+  .: air
+  a: lime_wool
+  b: lime_stained_glass
+  c: redstone_wire[north=none,west=none,south=side,east=side]
+  d: redstone_torch
+  e:
+    output: out0
+    block: redstone_lamp
+  f: redstone_wire[west=none,north=none,south=up,east=side]
+  g: comparator[facing=east,mode=subtract]
+  h: redstone_wire[west=side,south=up,north=side,east=none]
+  i: redstone_wire[west=side,north=none,south=none,east=up]
+  j: repeater[delay=1,facing=north]
+  k: redstone_wire[north=side,south=side,east=side,west=side]
+  l: redstone_wall_torch[facing=north]
+  m: target
+  n: redstone_wire[east=side,west=side,north=side,south=none]
+  o: comparator[mode=subtract,facing=east]
+  p: redstone_wire[south=none,west=side,east=none,north=up]
+  q: redstone_wire[south=none,east=none,north=side,west=up]
+  r: redstone_wire[north=side,west=none,south=side,east=none]
+  s: repeater[facing=east,delay=1]
+  t: redstone_lamp
+  u:
+    block: repeater[delay=1,facing=east]
+    fixture: true
+  v:
+    input: in0
+  w:
+    block: stone
+    fixture: true
+  x: redstone_wire[south=side,east=none,north=none,west=up]
+  y: redstone_wire[north=none,east=side,west=side,south=none]
+  z: redstone_wire[north=none,south=side,east=none,west=side]
+  A: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64}]}
+  B: comparator[mode=compare,facing=west]
+  C: comparator[facing=south,mode=subtract]
+  D: redstone_wire[north=side,east=none,south=side,west=none]
+  E: redstone_wall_torch[facing=west]
+  F: redstone_wire[west=side,north=none,south=side,east=none]
+  G:
+    output: out1
+    block: redstone_lamp
+  H: redstone_wire[south=up,west=none,north=none,east=side]
+  I: redstone_wire[east=none,west=side,south=up,north=none]
+  J: redstone_wire[south=side,west=none,north=side,east=none]
+  K: redstone_wire[north=none,south=up,east=up,west=none]
+  L: redstone_wire[south=none,north=up,west=none,east=up]
+  M: redstone_wire[east=up,south=none,north=none,west=side]
+  N: redstone_wire[north=side,west=side,south=side,east=side]
+  O: redstone_wire[south=none,west=side,east=side,north=side]
+  P: redstone_wire[south=none,west=side,north=side,east=side]
+  Q: redstone_wire[east=none,west=side,south=none,north=up]
+  R: redstone_wire[west=side,east=none,north=side,south=none]
+  S: repeater[delay=1,facing=east]
+  T:
+    input: in1
+  U: redstone_wire[north=side,west=none,east=up,south=none]
+  V: redstone_wire[west=none,east=up,south=side,north=none]
+  W: redstone_wire[east=none,south=side,north=none,west=side]
+  X: redstone_wire[west=side,north=none,east=side,south=none]
+  Y: redstone_wire[north=none,east=none,south=side,west=side]
+  Z: redstone_wire[east=none,south=side,north=side,west=none]
+  '0': redstone_wire[west=side,east=none,north=none,south=side]
+  '1':
+    output: out2
+    block: redstone_lamp
+  '2': redstone_wire[north=none,south=up,east=side,west=none]
+  '3': redstone_wire[north=none,south=up,east=none,west=side]
+  '4': redstone_wire[south=side,east=none,west=none,north=side]
+  '5': redstone_wire[west=side,south=none,north=up,east=none]
+  '6': redstone_wire[north=none,south=none,west=side,east=up]
+  '7': repeater[facing=north,delay=1]
+  '8': redstone_wire[west=side,south=side,north=side,east=side]
+  '9': redstone_wire[south=none,north=side,west=side,east=side]
+  '!': redstone_wire[east=side,north=side,west=side,south=none]
+  '#': redstone_wire[east=none,north=up,west=side,south=none]
+  $: redstone_wire[west=up,north=side,east=none,south=side]
+  '%': redstone_wire[west=none,south=side,east=none,north=side]
+  '&':
+    input: in2
+  '*': redstone_wire[south=side,west=up,north=side,east=none]
+  +: redstone_wire[north=none,west=side,south=none,east=side]
+  '-': comparator[facing=west,mode=compare]
+  /: redstone_wire[west=none,north=side,east=none,south=side]
+  ;: redstone_wire[south=side,east=none,north=none,west=side]
+  <:
+    output: out3
+    block: redstone_lamp
+  '=': redstone_wire[north=none,east=none,west=side,south=up]
+  '>': redstone_wire[north=side,south=side,east=none,west=none]
+  '?': redstone_wire[west=none,east=up,north=none,south=up]
+  '@': redstone_wire[south=none,west=none,north=up,east=up]
+  ^: redstone_wire[south=none,north=none,east=up,west=side]
+  _: redstone_wire[north=side,east=side,west=side,south=side]
+  '~': redstone_wire[east=side,west=side,south=none,north=side]
+  α: redstone_wire[south=none,north=side,east=side,west=side]
+  β: redstone_wire[west=side,north=up,east=none,south=none]
+  γ: redstone_wire[north=side,west=side,south=none,east=none]
+  δ: redstone_wire[west=none,south=side,north=side,east=none]
+  ε:
+    input: in3
+  ζ: redstone_wire[south=none,east=up,north=side,west=none]
+  η: redstone_wire[south=side,east=up,west=none,north=none]
+  θ: redstone_wire[west=side,east=none,south=side,north=none]
+  ι: redstone_wire[east=side,north=none,west=side,south=none]
+  κ: redstone_wire[south=side,north=side,west=none,east=none]
+  λ:
+    output: out4
+    block: redstone_lamp
+  μ: redstone_wire[north=none,west=none,east=side,south=up]
+  ν: redstone_wire[west=side,east=none,north=up,south=none]
+  ξ: redstone_wire[south=up,west=side,east=none,north=none]
+  ο: redstone_wire[north=none,east=up,south=none,west=side]
+  π: redstone_wire[north=side,west=side,east=side,south=side]
+  ρ: redstone_wire[north=side,south=none,west=side,east=side]
+  ς: redstone_wire[south=none,east=side,north=side,west=side]
+  σ: redstone_wire[east=none,north=side,west=up,south=side]
+  τ: redstone_wire[east=none,west=none,north=side,south=side]
+  υ:
+    input: in4
+  φ: redstone_wire[north=side,east=none,west=up,south=side]
+  χ: redstone_wire[west=side,east=side,south=none,north=none]
+  ψ: comparator[mode=subtract,facing=south]
+  ω: redstone_wire[north=none,south=side,west=side,east=none]
+  А:
+    output: out5
+    block: redstone_lamp
+  Б: redstone_wire[south=up,west=side,north=none,east=none]
+  В: redstone_wire[west=none,east=none,south=side,north=side]
+  Г: redstone_wire[north=none,south=up,west=none,east=up]
+  Д: redstone_wire[west=none,north=up,south=none,east=up]
+  Е: redstone_wire[west=side,east=up,south=none,north=none]
+  Ж: redstone_wire[south=side,east=side,west=side,north=side]
+  З: redstone_wire[east=side,north=side,south=none,west=side]
+  И: redstone_wire[west=side,north=side,east=none,south=none]
+  Й:
+    input: in5
+  К: redstone_wire[west=none,north=side,south=none,east=up]
+  Л: redstone_wire[north=none,south=side,west=none,east=up]
+  М: redstone_wire[south=none,west=up,north=none,east=side]
+  Н: redstone_wire[south=side,north=none,west=side,east=none]
+  О: redstone_wire[south=none,west=side,east=side,north=none]
+  П: redstone_wire[north=none,west=side,east=none,south=side]
+  Р: redstone_wire[north=side,west=side,south=side,east=none]
+  С:
+    output: out6
+    block: redstone_lamp
+  Т: redstone_wire[east=none,south=up,west=none,north=side]
+  У: redstone_wire[west=side,south=none,east=up,north=up]
+  Ф: redstone_wire[north=none,south=up,east=side,west=side]
+  Х: redstone_wire[west=none,north=side,south=up,east=none]
+  Ц: redstone_wire[north=side,west=side,south=none,east=side]
+  Ч: redstone_wire[south=none,west=side,north=up,east=none]
+  Ш: redstone_wire[south=side,west=up,east=none,north=side]
+  Щ:
+    input: in6
+  Ъ: redstone_wire[east=side,west=side,north=none,south=none]
+  Ы: redstone_wire[north=side,west=none,east=none,south=side]
+  Ь: redstone_wire[east=side,north=none,south=none,west=side]
+  Э: redstone_wire[east=none,north=none,west=side,south=side]
+  Ю: redstone_wire[south=up,east=none,west=none,north=side]
+  Я: redstone_wire[south=side,west=side,east=none,north=side]
+  а:
+    output: out7
+    block: redstone_lamp
+  б: redstone_wire[north=none,west=none,south=up,east=side]
+  в: redstone_wire[south=up,north=none,east=none,west=side]
+  г: redstone_wire[south=side,north=side,east=none,west=none]
+  д: redstone_wire[east=up,west=side,south=none,north=none]
+  е: redstone_wire[south=none,west=side,north=none,east=up]
+  ж: redstone_wire[south=up,north=side,east=none,west=none]
+  з: redstone_wire[west=side,east=side,south=none,north=side]
+  и: redstone_wire[north=side,west=side,east=side,south=none]
+  й: redstone_wire[east=none,west=side,south=none,north=side]
+  к: redstone_wire[east=none,north=side,south=side,west=none]
+  л:
+    input: in7
+  м: redstone_wire[north=none,east=side,south=none,west=side]
+  н: redstone_wall_torch[facing=south]
+  о: redstone_wire[south=none,north=side,west=side,east=none]
+layers:
+  0: |
+    ..........
+    ..........
+    ..........
+    ..........
+    ....aa....
+    ...bab....
+    ..........
+    ..........
+    ..........
+  1: |
+    ..........
+    ..........
+    ..b.......
+    .a........
+    ....cd....
+    ea.fgh....
+    ...aaa.b..
+    ..a.a.a.w.
+    ..........
+  2: |
+    ..........
+    .....a....
+    .aia.aa...
+    .j....aa..
+    .a..a..a..
+    .klbab.b..
+    ..mnonmp..
+    .aq.rastuv
+    ..........
+  3: |
+    ..........
+    ....ax....
+    ..byagza..
+    .a...ABC..
+    ....DEmF..
+    Ga.HoI.J..
+    ...aaa.b..
+    .Kb.a.a.w.
+    .a........
+  4: |
+    ....a.....
+    ....Lb....
+    .aMa.aa...
+    .j....aa..
+    .a..a..a..
+    .Nlbab.b..
+    ..mOoPmQ..
+    ..R.raStuT
+    .Ua.......
+  5: |
+    ....Va....
+    .....W....
+    ..bXaoYa..
+    .a...ABC..
+    ....ZEm0..
+    1a.2g3.4..
+    ...aaa.b..
+    ..a.a.a.w.
+    ..5.......
+  6: |
+    .....I....
+    .....a....
+    .a6a.aa...
+    .7....aa..
+    .a..a..a..
+    .8lbab.b..
+    ..m9g!m#..
+    .a$.%astu&
+    ..........
+  7: |
+    ..........
+    ....a*....
+    ..b+aoYa..
+    .a...A-C..
+    ..../Em;..
+    <a.fo=.>..
+    ...aaa.b..
+    .?b.a.a.w.
+    .a........
+  8: |
+    ....a.....
+    ....@b....
+    .a^a.aa...
+    .7....aa..
+    .a..a..a..
+    ._lbab.b..
+    ..m~gαmβ..
+    ..γ.δastuε
+    .ζa.......
+  9: |
+    ....ηa....
+    .....θ....
+    ..bιaoza..
+    .a...ABC..
+    ....κEmY..
+    λa.μg3.%..
+    ...aaa.b..
+    ..a.a.a.w.
+    ..ν.......
+  10: |
+    .....ξ....
+    .....a....
+    .aοa.aa...
+    .7....aa..
+    .a..a..a..
+    .πlbab.b..
+    ..mρoςmβ..
+    .aσ.τaStuυ
+    ..........
+  11: |
+    ..........
+    ....aφ....
+    ..bχagWa..
+    .a...A-ψ..
+    ....DEmω..
+    Аa.foБ.В..
+    ...aaa.b..
+    .Гb.a.a.w.
+    .a........
+  12: |
+    ....a.aa..
+    ....Дb....
+    .aЕa.aa...
+    .j....aa..
+    .a..a..a..
+    .Жlbab.b..
+    ..mςgЗmQ..
+    ..И.DastuЙ
+    .Кa.......
+  13: |
+    ....ЛaМSa.
+    .....Н..a.
+    ..bОagПa..
+    .a...A-ψ..
+    ....>EmР..
+    Сa.2g3.Т..
+    ...aaa.b..
+    ..a.a.a.w.
+    ..Уaa.....
+  14: |
+    .....Ф..D.
+    .....a..Х.
+    .a6a.aa.a.
+    .j....aa..
+    .a..a..a..
+    .πlbab.b..
+    ..mЗgЦmЧ..
+    .aШ.rastuЩ
+    ...Ъsa....
+  15: |
+    ..........
+    .....Ы....
+    ...ЬagЭaЮ.
+    .....ABCa.
+    ....κEmЯa.
+    аa.бgв.гa.
+    ...aaa.b..
+    .дb.a.a.w.
+    .....еa...
+  16: |
+    ..........
+    ..........
+    ..........
+    ........г.
+    .......aЫ.
+    .yl....aж.
+    ..mзgиmдa.
+    ..й.кastuл
+    ......мн..
+  17: |
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ........о.
+    ..........
+    ..........
+tests:
+- name: abs all 256
+  truth_table: 'in0 in1 in2 in3 in4 in5 in6 in7 | out0 out1 out2 out3 out4 out5 out6 out7
+
+    0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0
+
+    1 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0
+
+    0 1 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0
+
+    1 1 0 0 0 0 0 0 | 1 1 0 0 0 0 0 0
+
+    0 0 1 0 0 0 0 0 | 0 0 1 0 0 0 0 0
+
+    1 0 1 0 0 0 0 0 | 1 0 1 0 0 0 0 0
+
+    0 1 1 0 0 0 0 0 | 0 1 1 0 0 0 0 0
+
+    1 1 1 0 0 0 0 0 | 1 1 1 0 0 0 0 0
+
+    0 0 0 1 0 0 0 0 | 0 0 0 1 0 0 0 0
+
+    1 0 0 1 0 0 0 0 | 1 0 0 1 0 0 0 0
+
+    0 1 0 1 0 0 0 0 | 0 1 0 1 0 0 0 0
+
+    1 1 0 1 0 0 0 0 | 1 1 0 1 0 0 0 0
+
+    0 0 1 1 0 0 0 0 | 0 0 1 1 0 0 0 0
+
+    1 0 1 1 0 0 0 0 | 1 0 1 1 0 0 0 0
+
+    0 1 1 1 0 0 0 0 | 0 1 1 1 0 0 0 0
+
+    1 1 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0
+
+    0 0 0 0 1 0 0 0 | 0 0 0 0 1 0 0 0
+
+    1 0 0 0 1 0 0 0 | 1 0 0 0 1 0 0 0
+
+    0 1 0 0 1 0 0 0 | 0 1 0 0 1 0 0 0
+
+    1 1 0 0 1 0 0 0 | 1 1 0 0 1 0 0 0
+
+    0 0 1 0 1 0 0 0 | 0 0 1 0 1 0 0 0
+
+    1 0 1 0 1 0 0 0 | 1 0 1 0 1 0 0 0
+
+    0 1 1 0 1 0 0 0 | 0 1 1 0 1 0 0 0
+
+    1 1 1 0 1 0 0 0 | 1 1 1 0 1 0 0 0
+
+    0 0 0 1 1 0 0 0 | 0 0 0 1 1 0 0 0
+
+    1 0 0 1 1 0 0 0 | 1 0 0 1 1 0 0 0
+
+    0 1 0 1 1 0 0 0 | 0 1 0 1 1 0 0 0
+
+    1 1 0 1 1 0 0 0 | 1 1 0 1 1 0 0 0
+
+    0 0 1 1 1 0 0 0 | 0 0 1 1 1 0 0 0
+
+    1 0 1 1 1 0 0 0 | 1 0 1 1 1 0 0 0
+
+    0 1 1 1 1 0 0 0 | 0 1 1 1 1 0 0 0
+
+    1 1 1 1 1 0 0 0 | 1 1 1 1 1 0 0 0
+
+    0 0 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0
+
+    1 0 0 0 0 1 0 0 | 1 0 0 0 0 1 0 0
+
+    0 1 0 0 0 1 0 0 | 0 1 0 0 0 1 0 0
+
+    1 1 0 0 0 1 0 0 | 1 1 0 0 0 1 0 0
+
+    0 0 1 0 0 1 0 0 | 0 0 1 0 0 1 0 0
+
+    1 0 1 0 0 1 0 0 | 1 0 1 0 0 1 0 0
+
+    0 1 1 0 0 1 0 0 | 0 1 1 0 0 1 0 0
+
+    1 1 1 0 0 1 0 0 | 1 1 1 0 0 1 0 0
+
+    0 0 0 1 0 1 0 0 | 0 0 0 1 0 1 0 0
+
+    1 0 0 1 0 1 0 0 | 1 0 0 1 0 1 0 0
+
+    0 1 0 1 0 1 0 0 | 0 1 0 1 0 1 0 0
+
+    1 1 0 1 0 1 0 0 | 1 1 0 1 0 1 0 0
+
+    0 0 1 1 0 1 0 0 | 0 0 1 1 0 1 0 0
+
+    1 0 1 1 0 1 0 0 | 1 0 1 1 0 1 0 0
+
+    0 1 1 1 0 1 0 0 | 0 1 1 1 0 1 0 0
+
+    1 1 1 1 0 1 0 0 | 1 1 1 1 0 1 0 0
+
+    0 0 0 0 1 1 0 0 | 0 0 0 0 1 1 0 0
+
+    1 0 0 0 1 1 0 0 | 1 0 0 0 1 1 0 0
+
+    0 1 0 0 1 1 0 0 | 0 1 0 0 1 1 0 0
+
+    1 1 0 0 1 1 0 0 | 1 1 0 0 1 1 0 0
+
+    0 0 1 0 1 1 0 0 | 0 0 1 0 1 1 0 0
+
+    1 0 1 0 1 1 0 0 | 1 0 1 0 1 1 0 0
+
+    0 1 1 0 1 1 0 0 | 0 1 1 0 1 1 0 0
+
+    1 1 1 0 1 1 0 0 | 1 1 1 0 1 1 0 0
+
+    0 0 0 1 1 1 0 0 | 0 0 0 1 1 1 0 0
+
+    1 0 0 1 1 1 0 0 | 1 0 0 1 1 1 0 0
+
+    0 1 0 1 1 1 0 0 | 0 1 0 1 1 1 0 0
+
+    1 1 0 1 1 1 0 0 | 1 1 0 1 1 1 0 0
+
+    0 0 1 1 1 1 0 0 | 0 0 1 1 1 1 0 0
+
+    1 0 1 1 1 1 0 0 | 1 0 1 1 1 1 0 0
+
+    0 1 1 1 1 1 0 0 | 0 1 1 1 1 1 0 0
+
+    1 1 1 1 1 1 0 0 | 1 1 1 1 1 1 0 0
+
+    0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 1 0
+
+    1 0 0 0 0 0 1 0 | 1 0 0 0 0 0 1 0
+
+    0 1 0 0 0 0 1 0 | 0 1 0 0 0 0 1 0
+
+    1 1 0 0 0 0 1 0 | 1 1 0 0 0 0 1 0
+
+    0 0 1 0 0 0 1 0 | 0 0 1 0 0 0 1 0
+
+    1 0 1 0 0 0 1 0 | 1 0 1 0 0 0 1 0
+
+    0 1 1 0 0 0 1 0 | 0 1 1 0 0 0 1 0
+
+    1 1 1 0 0 0 1 0 | 1 1 1 0 0 0 1 0
+
+    0 0 0 1 0 0 1 0 | 0 0 0 1 0 0 1 0
+
+    1 0 0 1 0 0 1 0 | 1 0 0 1 0 0 1 0
+
+    0 1 0 1 0 0 1 0 | 0 1 0 1 0 0 1 0
+
+    1 1 0 1 0 0 1 0 | 1 1 0 1 0 0 1 0
+
+    0 0 1 1 0 0 1 0 | 0 0 1 1 0 0 1 0
+
+    1 0 1 1 0 0 1 0 | 1 0 1 1 0 0 1 0
+
+    0 1 1 1 0 0 1 0 | 0 1 1 1 0 0 1 0
+
+    1 1 1 1 0 0 1 0 | 1 1 1 1 0 0 1 0
+
+    0 0 0 0 1 0 1 0 | 0 0 0 0 1 0 1 0
+
+    1 0 0 0 1 0 1 0 | 1 0 0 0 1 0 1 0
+
+    0 1 0 0 1 0 1 0 | 0 1 0 0 1 0 1 0
+
+    1 1 0 0 1 0 1 0 | 1 1 0 0 1 0 1 0
+
+    0 0 1 0 1 0 1 0 | 0 0 1 0 1 0 1 0
+
+    1 0 1 0 1 0 1 0 | 1 0 1 0 1 0 1 0
+
+    0 1 1 0 1 0 1 0 | 0 1 1 0 1 0 1 0
+
+    1 1 1 0 1 0 1 0 | 1 1 1 0 1 0 1 0
+
+    0 0 0 1 1 0 1 0 | 0 0 0 1 1 0 1 0
+
+    1 0 0 1 1 0 1 0 | 1 0 0 1 1 0 1 0
+
+    0 1 0 1 1 0 1 0 | 0 1 0 1 1 0 1 0
+
+    1 1 0 1 1 0 1 0 | 1 1 0 1 1 0 1 0
+
+    0 0 1 1 1 0 1 0 | 0 0 1 1 1 0 1 0
+
+    1 0 1 1 1 0 1 0 | 1 0 1 1 1 0 1 0
+
+    0 1 1 1 1 0 1 0 | 0 1 1 1 1 0 1 0
+
+    1 1 1 1 1 0 1 0 | 1 1 1 1 1 0 1 0
+
+    0 0 0 0 0 1 1 0 | 0 0 0 0 0 1 1 0
+
+    1 0 0 0 0 1 1 0 | 1 0 0 0 0 1 1 0
+
+    0 1 0 0 0 1 1 0 | 0 1 0 0 0 1 1 0
+
+    1 1 0 0 0 1 1 0 | 1 1 0 0 0 1 1 0
+
+    0 0 1 0 0 1 1 0 | 0 0 1 0 0 1 1 0
+
+    1 0 1 0 0 1 1 0 | 1 0 1 0 0 1 1 0
+
+    0 1 1 0 0 1 1 0 | 0 1 1 0 0 1 1 0
+
+    1 1 1 0 0 1 1 0 | 1 1 1 0 0 1 1 0
+
+    0 0 0 1 0 1 1 0 | 0 0 0 1 0 1 1 0
+
+    1 0 0 1 0 1 1 0 | 1 0 0 1 0 1 1 0
+
+    0 1 0 1 0 1 1 0 | 0 1 0 1 0 1 1 0
+
+    1 1 0 1 0 1 1 0 | 1 1 0 1 0 1 1 0
+
+    0 0 1 1 0 1 1 0 | 0 0 1 1 0 1 1 0
+
+    1 0 1 1 0 1 1 0 | 1 0 1 1 0 1 1 0
+
+    0 1 1 1 0 1 1 0 | 0 1 1 1 0 1 1 0
+
+    1 1 1 1 0 1 1 0 | 1 1 1 1 0 1 1 0
+
+    0 0 0 0 1 1 1 0 | 0 0 0 0 1 1 1 0
+
+    1 0 0 0 1 1 1 0 | 1 0 0 0 1 1 1 0
+
+    0 1 0 0 1 1 1 0 | 0 1 0 0 1 1 1 0
+
+    1 1 0 0 1 1 1 0 | 1 1 0 0 1 1 1 0
+
+    0 0 1 0 1 1 1 0 | 0 0 1 0 1 1 1 0
+
+    1 0 1 0 1 1 1 0 | 1 0 1 0 1 1 1 0
+
+    0 1 1 0 1 1 1 0 | 0 1 1 0 1 1 1 0
+
+    1 1 1 0 1 1 1 0 | 1 1 1 0 1 1 1 0
+
+    0 0 0 1 1 1 1 0 | 0 0 0 1 1 1 1 0
+
+    1 0 0 1 1 1 1 0 | 1 0 0 1 1 1 1 0
+
+    0 1 0 1 1 1 1 0 | 0 1 0 1 1 1 1 0
+
+    1 1 0 1 1 1 1 0 | 1 1 0 1 1 1 1 0
+
+    0 0 1 1 1 1 1 0 | 0 0 1 1 1 1 1 0
+
+    1 0 1 1 1 1 1 0 | 1 0 1 1 1 1 1 0
+
+    0 1 1 1 1 1 1 0 | 0 1 1 1 1 1 1 0
+
+    1 1 1 1 1 1 1 0 | 1 1 1 1 1 1 1 0
+
+    0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 1
+
+    1 0 0 0 0 0 0 1 | 1 1 1 1 1 1 1 0
+
+    0 1 0 0 0 0 0 1 | 0 1 1 1 1 1 1 0
+
+    1 1 0 0 0 0 0 1 | 1 0 1 1 1 1 1 0
+
+    0 0 1 0 0 0 0 1 | 0 0 1 1 1 1 1 0
+
+    1 0 1 0 0 0 0 1 | 1 1 0 1 1 1 1 0
+
+    0 1 1 0 0 0 0 1 | 0 1 0 1 1 1 1 0
+
+    1 1 1 0 0 0 0 1 | 1 0 0 1 1 1 1 0
+
+    0 0 0 1 0 0 0 1 | 0 0 0 1 1 1 1 0
+
+    1 0 0 1 0 0 0 1 | 1 1 1 0 1 1 1 0
+
+    0 1 0 1 0 0 0 1 | 0 1 1 0 1 1 1 0
+
+    1 1 0 1 0 0 0 1 | 1 0 1 0 1 1 1 0
+
+    0 0 1 1 0 0 0 1 | 0 0 1 0 1 1 1 0
+
+    1 0 1 1 0 0 0 1 | 1 1 0 0 1 1 1 0
+
+    0 1 1 1 0 0 0 1 | 0 1 0 0 1 1 1 0
+
+    1 1 1 1 0 0 0 1 | 1 0 0 0 1 1 1 0
+
+    0 0 0 0 1 0 0 1 | 0 0 0 0 1 1 1 0
+
+    1 0 0 0 1 0 0 1 | 1 1 1 1 0 1 1 0
+
+    0 1 0 0 1 0 0 1 | 0 1 1 1 0 1 1 0
+
+    1 1 0 0 1 0 0 1 | 1 0 1 1 0 1 1 0
+
+    0 0 1 0 1 0 0 1 | 0 0 1 1 0 1 1 0
+
+    1 0 1 0 1 0 0 1 | 1 1 0 1 0 1 1 0
+
+    0 1 1 0 1 0 0 1 | 0 1 0 1 0 1 1 0
+
+    1 1 1 0 1 0 0 1 | 1 0 0 1 0 1 1 0
+
+    0 0 0 1 1 0 0 1 | 0 0 0 1 0 1 1 0
+
+    1 0 0 1 1 0 0 1 | 1 1 1 0 0 1 1 0
+
+    0 1 0 1 1 0 0 1 | 0 1 1 0 0 1 1 0
+
+    1 1 0 1 1 0 0 1 | 1 0 1 0 0 1 1 0
+
+    0 0 1 1 1 0 0 1 | 0 0 1 0 0 1 1 0
+
+    1 0 1 1 1 0 0 1 | 1 1 0 0 0 1 1 0
+
+    0 1 1 1 1 0 0 1 | 0 1 0 0 0 1 1 0
+
+    1 1 1 1 1 0 0 1 | 1 0 0 0 0 1 1 0
+
+    0 0 0 0 0 1 0 1 | 0 0 0 0 0 1 1 0
+
+    1 0 0 0 0 1 0 1 | 1 1 1 1 1 0 1 0
+
+    0 1 0 0 0 1 0 1 | 0 1 1 1 1 0 1 0
+
+    1 1 0 0 0 1 0 1 | 1 0 1 1 1 0 1 0
+
+    0 0 1 0 0 1 0 1 | 0 0 1 1 1 0 1 0
+
+    1 0 1 0 0 1 0 1 | 1 1 0 1 1 0 1 0
+
+    0 1 1 0 0 1 0 1 | 0 1 0 1 1 0 1 0
+
+    1 1 1 0 0 1 0 1 | 1 0 0 1 1 0 1 0
+
+    0 0 0 1 0 1 0 1 | 0 0 0 1 1 0 1 0
+
+    1 0 0 1 0 1 0 1 | 1 1 1 0 1 0 1 0
+
+    0 1 0 1 0 1 0 1 | 0 1 1 0 1 0 1 0
+
+    1 1 0 1 0 1 0 1 | 1 0 1 0 1 0 1 0
+
+    0 0 1 1 0 1 0 1 | 0 0 1 0 1 0 1 0
+
+    1 0 1 1 0 1 0 1 | 1 1 0 0 1 0 1 0
+
+    0 1 1 1 0 1 0 1 | 0 1 0 0 1 0 1 0
+
+    1 1 1 1 0 1 0 1 | 1 0 0 0 1 0 1 0
+
+    0 0 0 0 1 1 0 1 | 0 0 0 0 1 0 1 0
+
+    1 0 0 0 1 1 0 1 | 1 1 1 1 0 0 1 0
+
+    0 1 0 0 1 1 0 1 | 0 1 1 1 0 0 1 0
+
+    1 1 0 0 1 1 0 1 | 1 0 1 1 0 0 1 0
+
+    0 0 1 0 1 1 0 1 | 0 0 1 1 0 0 1 0
+
+    1 0 1 0 1 1 0 1 | 1 1 0 1 0 0 1 0
+
+    0 1 1 0 1 1 0 1 | 0 1 0 1 0 0 1 0
+
+    1 1 1 0 1 1 0 1 | 1 0 0 1 0 0 1 0
+
+    0 0 0 1 1 1 0 1 | 0 0 0 1 0 0 1 0
+
+    1 0 0 1 1 1 0 1 | 1 1 1 0 0 0 1 0
+
+    0 1 0 1 1 1 0 1 | 0 1 1 0 0 0 1 0
+
+    1 1 0 1 1 1 0 1 | 1 0 1 0 0 0 1 0
+
+    0 0 1 1 1 1 0 1 | 0 0 1 0 0 0 1 0
+
+    1 0 1 1 1 1 0 1 | 1 1 0 0 0 0 1 0
+
+    0 1 1 1 1 1 0 1 | 0 1 0 0 0 0 1 0
+
+    1 1 1 1 1 1 0 1 | 1 0 0 0 0 0 1 0
+
+    0 0 0 0 0 0 1 1 | 0 0 0 0 0 0 1 0
+
+    1 0 0 0 0 0 1 1 | 1 1 1 1 1 1 0 0
+
+    0 1 0 0 0 0 1 1 | 0 1 1 1 1 1 0 0
+
+    1 1 0 0 0 0 1 1 | 1 0 1 1 1 1 0 0
+
+    0 0 1 0 0 0 1 1 | 0 0 1 1 1 1 0 0
+
+    1 0 1 0 0 0 1 1 | 1 1 0 1 1 1 0 0
+
+    0 1 1 0 0 0 1 1 | 0 1 0 1 1 1 0 0
+
+    1 1 1 0 0 0 1 1 | 1 0 0 1 1 1 0 0
+
+    0 0 0 1 0 0 1 1 | 0 0 0 1 1 1 0 0
+
+    1 0 0 1 0 0 1 1 | 1 1 1 0 1 1 0 0
+
+    0 1 0 1 0 0 1 1 | 0 1 1 0 1 1 0 0
+
+    1 1 0 1 0 0 1 1 | 1 0 1 0 1 1 0 0
+
+    0 0 1 1 0 0 1 1 | 0 0 1 0 1 1 0 0
+
+    1 0 1 1 0 0 1 1 | 1 1 0 0 1 1 0 0
+
+    0 1 1 1 0 0 1 1 | 0 1 0 0 1 1 0 0
+
+    1 1 1 1 0 0 1 1 | 1 0 0 0 1 1 0 0
+
+    0 0 0 0 1 0 1 1 | 0 0 0 0 1 1 0 0
+
+    1 0 0 0 1 0 1 1 | 1 1 1 1 0 1 0 0
+
+    0 1 0 0 1 0 1 1 | 0 1 1 1 0 1 0 0
+
+    1 1 0 0 1 0 1 1 | 1 0 1 1 0 1 0 0
+
+    0 0 1 0 1 0 1 1 | 0 0 1 1 0 1 0 0
+
+    1 0 1 0 1 0 1 1 | 1 1 0 1 0 1 0 0
+
+    0 1 1 0 1 0 1 1 | 0 1 0 1 0 1 0 0
+
+    1 1 1 0 1 0 1 1 | 1 0 0 1 0 1 0 0
+
+    0 0 0 1 1 0 1 1 | 0 0 0 1 0 1 0 0
+
+    1 0 0 1 1 0 1 1 | 1 1 1 0 0 1 0 0
+
+    0 1 0 1 1 0 1 1 | 0 1 1 0 0 1 0 0
+
+    1 1 0 1 1 0 1 1 | 1 0 1 0 0 1 0 0
+
+    0 0 1 1 1 0 1 1 | 0 0 1 0 0 1 0 0
+
+    1 0 1 1 1 0 1 1 | 1 1 0 0 0 1 0 0
+
+    0 1 1 1 1 0 1 1 | 0 1 0 0 0 1 0 0
+
+    1 1 1 1 1 0 1 1 | 1 0 0 0 0 1 0 0
+
+    0 0 0 0 0 1 1 1 | 0 0 0 0 0 1 0 0
+
+    1 0 0 0 0 1 1 1 | 1 1 1 1 1 0 0 0
+
+    0 1 0 0 0 1 1 1 | 0 1 1 1 1 0 0 0
+
+    1 1 0 0 0 1 1 1 | 1 0 1 1 1 0 0 0
+
+    0 0 1 0 0 1 1 1 | 0 0 1 1 1 0 0 0
+
+    1 0 1 0 0 1 1 1 | 1 1 0 1 1 0 0 0
+
+    0 1 1 0 0 1 1 1 | 0 1 0 1 1 0 0 0
+
+    1 1 1 0 0 1 1 1 | 1 0 0 1 1 0 0 0
+
+    0 0 0 1 0 1 1 1 | 0 0 0 1 1 0 0 0
+
+    1 0 0 1 0 1 1 1 | 1 1 1 0 1 0 0 0
+
+    0 1 0 1 0 1 1 1 | 0 1 1 0 1 0 0 0
+
+    1 1 0 1 0 1 1 1 | 1 0 1 0 1 0 0 0
+
+    0 0 1 1 0 1 1 1 | 0 0 1 0 1 0 0 0
+
+    1 0 1 1 0 1 1 1 | 1 1 0 0 1 0 0 0
+
+    0 1 1 1 0 1 1 1 | 0 1 0 0 1 0 0 0
+
+    1 1 1 1 0 1 1 1 | 1 0 0 0 1 0 0 0
+
+    0 0 0 0 1 1 1 1 | 0 0 0 0 1 0 0 0
+
+    1 0 0 0 1 1 1 1 | 1 1 1 1 0 0 0 0
+
+    0 1 0 0 1 1 1 1 | 0 1 1 1 0 0 0 0
+
+    1 1 0 0 1 1 1 1 | 1 0 1 1 0 0 0 0
+
+    0 0 1 0 1 1 1 1 | 0 0 1 1 0 0 0 0
+
+    1 0 1 0 1 1 1 1 | 1 1 0 1 0 0 0 0
+
+    0 1 1 0 1 1 1 1 | 0 1 0 1 0 0 0 0
+
+    1 1 1 0 1 1 1 1 | 1 0 0 1 0 0 0 0
+
+    0 0 0 1 1 1 1 1 | 0 0 0 1 0 0 0 0
+
+    1 0 0 1 1 1 1 1 | 1 1 1 0 0 0 0 0
+
+    0 1 0 1 1 1 1 1 | 0 1 1 0 0 0 0 0
+
+    1 1 0 1 1 1 1 1 | 1 0 1 0 0 0 0 0
+
+    0 0 1 1 1 1 1 1 | 0 0 1 0 0 0 0 0
+
+    1 0 1 1 1 1 1 1 | 1 1 0 0 0 0 0 0
+
+    0 1 1 1 1 1 1 1 | 0 1 0 0 0 0 0 0
+
+    1 1 1 1 1 1 1 1 | 1 0 0 0 0 0 0 0
+
+    '
+  delays:
+    out0:
+      rise: 8
+      fall: 12
+    out1:
+      rise: 8
+      fall: 12
+    out2:
+      rise: 8
+      fall: 12
+    out3:
+      rise: 8
+      fall: 12
+    out4:
+      rise: 8
+      fall: 12
+    out5:
+      rise: 8
+      fall: 12
+    out6:
+      rise: 8
+      fall: 12
+    out7:
+      rise: 8
+      fall: 12

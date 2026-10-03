@@ -1,0 +1,68 @@
+name: ref_unknown_lra_dlatch
+description: >-
+  Rebuild of Logical Redstone Archive LFF006 "Data (D) Latch" (author not named in the
+  README; https://discord.com/channels/1361854816837435433/1472423141648105544). SOURCED:
+  saves the data to the repeater lock whenever Clock is pressed. How it works (INFERRED
+  from the layout, then MEASURED): the clock button hard-powers a block whose dust feeds
+  the subtract comparator cmp from the rear at once, and the same signal reaches the
+  comparator's side through the 2-tick repeater, so cmp outputs 15 for 4 gt (a pulse
+  generator). cmp powers the block the torch t hangs on, switching t off, which un-powers
+  lockrep, which stops locking the data repeater hold; hold passes the data lever for the
+  window, then t comes back and relocks it. Lamp q shows hold. MEASURED, one click with
+  data=1: cmp rises at 2 gt, t falls at 4, lockrep falls at 6, q rises at 8, t rises at 8
+  (pulse over), lockrep rises at 10. Data changes while locked are ignored (held 40 gt).
+  Changes for the harness: none to the circuit; the lever and button are named cells
+  driven with use, the signs are dropped, and the light-blue wool is white wool (buttons need plain blocks).
+  8x2x5 as built. Library cousins: dl_lock_pair, dl_lock_stack.
+traits: [pistonless]
+palette:
+  .: air
+  A: white_wool
+  q: {name: q, block: redstone_lamp}
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: redstone_wire[east=side,north=none,south=side,west=none]
+  D: repeater[delay=2,facing=east]
+  E: redstone_wire[east=side,north=none,south=none,west=side]
+  F: {name: hold, block: 'repeater[delay=1,facing=south]'}
+  G: {name: lockrep, block: 'repeater[delay=1,facing=east]'}
+  '(': {name: t, block: 'redstone_wall_torch[facing=west]'}
+  H: {name: cmp, block: 'comparator[facing=east,mode=subtract]'}
+  I: {name: clk, block: 'stone_button[face=wall,facing=east]'}
+  J: {name: data, block: 'lever[face=wall,facing=south]'}
+layers:
+  0: |
+    ........
+    A...AAA.
+    AA..AA..
+    ........
+    ........
+  1: |
+    q.......
+    B...CDE.
+    FG(AHEAI
+    A.......
+    J.......
+tests:
+- name: sample
+  steps:
+  - {wait: 20}
+  - expect: {q: 0, t: 1, lockrep: 1, hold: 0}
+  - use: data
+  - {wait: 20}
+  - expect: {q: 0}
+  - use: clk
+  - {wait: 20}
+  - expect: {q: 1, t: 1}
+  - use: data
+  - {wait: 40}
+  - expect: {q: 1}
+  - use: clk
+  - {wait: 20}
+  - expect: {q: 0}
+- name: pulse timing
+  steps:
+  - {wait: 20}
+  - use: data
+  - {wait: 20}
+  - use: clk
+  - wave: {t: '111100001111', lockrep: '111111000011', q: '000000001111'}

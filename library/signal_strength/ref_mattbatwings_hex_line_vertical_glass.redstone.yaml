@@ -1,0 +1,169 @@
+name: ref_mattbatwings_hex_line_vertical_glass
+description: 'Source (SOURCED): mattbatwings'' ''How To Wire Like a Redstone Pro!'' world (Java 1.18.2), demo cluster W69 at world origin [81,56,-138]. The same hex line standing vertically (7x16x2 as rebuilt): comparator (x=5,y=1) reads a barrel at x=6 and drives a dust column that rises on glass pillars; delay-1 repeaters (facing east) between two stair columns of dust read the near column and put 15 on the far column, which feeds a comparator (x=1,y=15) at the top. Magenta stained glass holds the dust runs apart (glass is not a redstone conductor, so dust on one stair does not power the other). The core idea (INFERRED from the blocks, then MEASURED by the tests): dust loses 1 per block, so a strength-X signal on the near dust line (the comparator''s output) is still above 0 for exactly X blocks. A repeater beside each dust block reads that line and outputs a full 15 onto a second parallel dust line, so a repeater is lit iff the near line reaches it, and the lit repeaters are the X nearest the comparator. The second line decays 1 per block away from the first lit repeater, which put 15 at the X-th block, so after the 16 blocks of the line it is back at exactly X and a comparator reads it onto the far output: the strength X is re-created at the far end after travelling a 15-block line, with the repeaters all reading in parallel. Changed for the harness (INFERRED that the author''s lever/lamp demo is replaced by this): the container is a fixture named in, filled with data merge to every strength 0-15 (a redstone stack count chosen from floor(1+14*fullness)), and the end of the line is a named dust cell read with level; the lime/orange marker wool and magenta decoration wool are kept as plain support. MEASURED: out equals the container''s strength for every s 0..15; mid 2 ticks after the edit, out 4 ticks after mid (strengths 1 and 15). W52 and W62 are the downward / 11-long variants (INFERRED from block lists, not built).'
+traits: [analog, silent, pistonless, entityless]
+palette:
+  .: air
+  A: magenta_stained_glass
+  B: magenta_wool
+  C: orange_wool
+  D: redstone_wire[east=side,north=up,south=none,west=none]
+  E: repeater[delay=1,facing=east]
+  F: redstone_wire[east=side,north=up,south=none,west=side]
+  G: comparator[facing=east,mode=compare]
+  H: barrel[facing=up,open=false]
+  I: redstone_wire[east=side,north=none,south=up,west=none]
+  J: redstone_wire[east=none,north=none,south=up,west=side]
+  K: redstone_wire[east=none,north=up,south=none,west=side]
+  M: lime_wool
+  N: redstone_wire[east=side,north=none,south=none,west=side]
+  O: redstone_wire[east=side,north=side,south=none,west=side]
+  P: redstone_wire[east=none,north=side,south=none,west=side]
+  q: {name: in, block: 'barrel[facing=up,open=false]', fixture: true}
+  r: {name: out, block: 'comparator[facing=east,mode=compare]'}
+  s: {name: mid, block: 'comparator[facing=east,mode=compare]'}
+layers: {0: '.......
+
+    ..ABABC
+
+    ', 1: '..ABA..
+
+    ..DEFsq
+
+    ', 2: '..IEJ..
+
+    ..ABA..
+
+    ', 3: '..ABA..
+
+    ..DEK..
+
+    ', 4: '..IEJ..
+
+    ..ABA..
+
+    ', 5: '..ABA..
+
+    ..DEK..
+
+    ', 6: '..IEJ..
+
+    ..ABA..
+
+    ', 7: '..ABA..
+
+    ..DEK..
+
+    ', 8: '..IEJ..
+
+    ..ABA..
+
+    ', 9: '..ABA..
+
+    ..DEK..
+
+    ', 10: '..IEJ..
+
+    ..ABA..
+
+    ', 11: '..ABA..
+
+    ..DEK..
+
+    ', 12: '..IEJ..
+
+    ..ABA..
+
+    ', 13: '..ABA..
+
+    ..DEK..
+
+    ', 14: '..IEJ..
+
+    MBABA..
+
+    ', 15: '.......
+
+    NrOEP..
+
+    '}
+tests:
+- name: strength 0
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[]}'}
+  - {wait: 20}
+  - level: {out: 0, mid: 0}
+- name: strength 1
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:1}]}'}
+  - {wait: 20}
+  - level: {out: 1, mid: 1}
+- name: strength 2
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:60}]}'}
+  - {wait: 20}
+  - level: {out: 2, mid: 2}
+- name: strength 3
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:55}]}'}
+  - {wait: 20}
+  - level: {out: 3, mid: 3}
+- name: strength 4
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:51}]}'}
+  - {wait: 20}
+  - level: {out: 4, mid: 4}
+- name: strength 5
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:46}]}'}
+  - {wait: 20}
+  - level: {out: 5, mid: 5}
+- name: strength 6
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:42}]}'}
+  - {wait: 20}
+  - level: {out: 6, mid: 6}
+- name: strength 7
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:37}]}'}
+  - {wait: 20}
+  - level: {out: 7, mid: 7}
+- name: strength 8
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:32}]}'}
+  - {wait: 20}
+  - level: {out: 8, mid: 8}
+- name: strength 9
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:28}]}'}
+  - {wait: 20}
+  - level: {out: 9, mid: 9}
+- name: strength 10
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:64},{Slot:16b,id:"redstone",count:64},{Slot:17b,id:"redstone",count:23}]}'}
+  - {wait: 20}
+  - level: {out: 10, mid: 10}
+- name: strength 11
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:64},{Slot:16b,id:"redstone",count:64},{Slot:17b,id:"redstone",count:64},{Slot:18b,id:"redstone",count:64},{Slot:19b,id:"redstone",count:19}]}'}
+  - {wait: 20}
+  - level: {out: 11, mid: 11}
+- name: strength 12
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:64},{Slot:16b,id:"redstone",count:64},{Slot:17b,id:"redstone",count:64},{Slot:18b,id:"redstone",count:64},{Slot:19b,id:"redstone",count:64},{Slot:20b,id:"redstone",count:64},{Slot:21b,id:"redstone",count:14}]}'}
+  - {wait: 20}
+  - level: {out: 12, mid: 12}
+- name: strength 13
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:64},{Slot:16b,id:"redstone",count:64},{Slot:17b,id:"redstone",count:64},{Slot:18b,id:"redstone",count:64},{Slot:19b,id:"redstone",count:64},{Slot:20b,id:"redstone",count:64},{Slot:21b,id:"redstone",count:64},{Slot:22b,id:"redstone",count:64},{Slot:23b,id:"redstone",count:10}]}'}
+  - {wait: 20}
+  - level: {out: 13, mid: 13}
+- name: strength 14
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:64},{Slot:16b,id:"redstone",count:64},{Slot:17b,id:"redstone",count:64},{Slot:18b,id:"redstone",count:64},{Slot:19b,id:"redstone",count:64},{Slot:20b,id:"redstone",count:64},{Slot:21b,id:"redstone",count:64},{Slot:22b,id:"redstone",count:64},{Slot:23b,id:"redstone",count:64},{Slot:24b,id:"redstone",count:64},{Slot:25b,id:"redstone",count:5}]}'}
+  - {wait: 20}
+  - level: {out: 14, mid: 14}
+- name: strength 15
+  steps:
+  - {run: 'data merge block ~6 ~1 ~1 {Items:[{Slot:0b,id:"redstone",count:64},{Slot:1b,id:"redstone",count:64},{Slot:2b,id:"redstone",count:64},{Slot:3b,id:"redstone",count:64},{Slot:4b,id:"redstone",count:64},{Slot:5b,id:"redstone",count:64},{Slot:6b,id:"redstone",count:64},{Slot:7b,id:"redstone",count:64},{Slot:8b,id:"redstone",count:64},{Slot:9b,id:"redstone",count:64},{Slot:10b,id:"redstone",count:64},{Slot:11b,id:"redstone",count:64},{Slot:12b,id:"redstone",count:64},{Slot:13b,id:"redstone",count:64},{Slot:14b,id:"redstone",count:64},{Slot:15b,id:"redstone",count:64},{Slot:16b,id:"redstone",count:64},{Slot:17b,id:"redstone",count:64},{Slot:18b,id:"redstone",count:64},{Slot:19b,id:"redstone",count:64},{Slot:20b,id:"redstone",count:64},{Slot:21b,id:"redstone",count:64},{Slot:22b,id:"redstone",count:64},{Slot:23b,id:"redstone",count:64},{Slot:24b,id:"redstone",count:64},{Slot:25b,id:"redstone",count:64},{Slot:26b,id:"redstone",count:64}]}'}
+  - {wait: 20}
+  - level: {out: 15, mid: 15}

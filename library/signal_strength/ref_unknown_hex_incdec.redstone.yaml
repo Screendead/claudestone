@@ -1,0 +1,200 @@
+name: ref_unknown_hex_incdec
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEX001 ''Hex Incrementor/Decrementor'' (no author listed, endorsed by mattbatwings, Tested & Functional; Discord https://discord.com/channels/1361854816837435433/1472409734542921728): increments or decrements a hex number with two buttons, README speed 2 redstone ticks per inc/dec, a longer pulse changes it by more than one. 5x3x6 as rebuilt. The number lives in a loop of two subtract comparators and is the dust at x=4,y=1,z=2 (named value). How it works (INFERRED, confirmed by the tests): two barrels hold 1605 redstone each, strength 14 (read from the .schem, the parsed JSON drops block-entity items). The comparator at x=3,z=2 reads the north barrel through a wool block and subtracts the value dust from 14, writing 14 - value onto the dust at x=3,z=3; the comparator at x=4,z=3 reads the south barrel through wool and subtracts that dust from 14, writing 14 - (14 - value) = value back onto the value dust. Any value is a fixed point of that loop, so it holds whatever it has (neutral analog memory, no clock). Increment (south button): the button powers a dust that is the rear input of a subtract comparator whose side input is the same button through a delay-2 repeater, so it outputs 15 for the 4 gt before the repeater arrives; that pulse hard-powers wool beside the dust at x=4,y=2,z=4, which sits on the wool the south barrel is read through. A comparator reading a solid block takes the barrel behind it unless the block carries 15 (docs/MECHANICS.md comparator_container_masks_weak_block_power), so for 4 gt it reads 15 instead of 14 and the loop settles one higher. Decrement (north button) does the same on the north barrel''s wool: the first comparator reads 15, writes one more onto the dust, and the loop settles one lower. Range 0..14 (the barrel strength): a further increment at 14 and a decrement at 0 change nothing. Changed for the harness: the wool under both buttons is stone, because the harness only emulates buttons on plain full blocks; the loop needs no initial state (it settles at 0 from empty). MEASURED: 15 increments from 0 give 1..14 then stay 14; 15 decrements from 14 give 13..0 then stay 0; a mixed sequence; the value rises 4 gt (2 redstone ticks, the README figure) after the click on an increment but falls 6 gt (3 redstone ticks) after a decrement, because the decrement pulse goes through one more comparator (the north one, then the value one) than the increment pulse (the south one, which writes the value directly).'
+traits: [analog, comparator_based, container_based, pistonless, entityless]
+palette:
+  .: air
+  A: light_blue_wool
+  B: glass
+  D: 'comparator[facing=north,mode=subtract]'
+  E: 'redstone_wire[east=none,north=none,south=side,west=side]'
+  F: 'redstone_wire[east=side,north=side,south=none,west=none]'
+  G: 'comparator[facing=south,mode=subtract]'
+  H: 'redstone_wire[east=side,north=none,south=side,west=none]'
+  I: 'repeater[delay=2,facing=west]'
+  K: 'redstone_wire[east=side,north=none,south=none,west=side]'
+  M: 'comparator[facing=west,mode=subtract]'
+  N: 'redstone_wire[east=side,north=side,south=side,west=side]'
+  O: 'redstone_wire[east=none,north=side,south=none,west=side]'
+  s: stone
+  b: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:5}]}'
+  C: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:5}]}'
+  v: {output: value, block: 'redstone_wire[east=none,north=none,south=side,west=side]'}
+  d: {name: dec, block: 'stone_button[face=floor,facing=east]'}
+  i: {name: inc, block: 'stone_button[face=floor,facing=east]'}
+layers:
+  0: |
+    .....
+    .....
+    ...AB
+    ...AA
+    .....
+    .....
+  1: |
+    AAAb.
+    sAAA.
+    ...Dv
+    ...FG
+    sAA.A
+    AAA.C
+  2: |
+    HIE..
+    dKMK.
+    .....
+    .....
+    iKMAN
+    FIO..
+tests:
+- name: 'count up 0..14 and saturate'
+  steps:
+  - use: inc
+  - wait: 30
+  - level: {value: 1}
+  - use: inc
+  - wait: 30
+  - level: {value: 2}
+  - use: inc
+  - wait: 30
+  - level: {value: 3}
+  - use: inc
+  - wait: 30
+  - level: {value: 4}
+  - use: inc
+  - wait: 30
+  - level: {value: 5}
+  - use: inc
+  - wait: 30
+  - level: {value: 6}
+  - use: inc
+  - wait: 30
+  - level: {value: 7}
+  - use: inc
+  - wait: 30
+  - level: {value: 8}
+  - use: inc
+  - wait: 30
+  - level: {value: 9}
+  - use: inc
+  - wait: 30
+  - level: {value: 10}
+  - use: inc
+  - wait: 30
+  - level: {value: 11}
+  - use: inc
+  - wait: 30
+  - level: {value: 12}
+  - use: inc
+  - wait: 30
+  - level: {value: 13}
+  - use: inc
+  - wait: 30
+  - level: {value: 14}
+  - use: inc
+  - wait: 30
+  - level: {value: 14}
+- name: 'count down from 14 to 0 and floor'
+  steps:
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: dec
+  - wait: 30
+  - level: {value: 13}
+  - use: dec
+  - wait: 30
+  - level: {value: 12}
+  - use: dec
+  - wait: 30
+  - level: {value: 11}
+  - use: dec
+  - wait: 30
+  - level: {value: 10}
+  - use: dec
+  - wait: 30
+  - level: {value: 9}
+  - use: dec
+  - wait: 30
+  - level: {value: 8}
+  - use: dec
+  - wait: 30
+  - level: {value: 7}
+  - use: dec
+  - wait: 30
+  - level: {value: 6}
+  - use: dec
+  - wait: 30
+  - level: {value: 5}
+  - use: dec
+  - wait: 30
+  - level: {value: 4}
+  - use: dec
+  - wait: 30
+  - level: {value: 3}
+  - use: dec
+  - wait: 30
+  - level: {value: 2}
+  - use: dec
+  - wait: 30
+  - level: {value: 1}
+  - use: dec
+  - wait: 30
+  - level: {value: 0}
+  - use: dec
+  - wait: 30
+  - level: {value: 0}
+- name: 'mixed'
+  steps:
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: inc
+  - wait: 30
+  - use: dec
+  - wait: 30
+  - level: {value: 2}
+  - use: inc
+  - wait: 30
+  - level: {value: 3}
+  - use: dec
+  - wait: 30
+  - use: dec
+  - wait: 30
+  - use: dec
+  - wait: 30
+  - level: {value: 0}
+- name: 'latency inc: value 0 -> 1'
+  steps:
+  - wait: 5
+  - use: inc
+  - wave: {value: '0000111111111111'}
+- name: 'latency dec: value 1 -> 0'
+  steps:
+  - use: inc
+  - wait: 30
+  - use: dec
+  - wave: {value: '1111110000000000'}

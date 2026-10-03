@@ -1,0 +1,102 @@
+name: ref_unknown_lra_srlatch
+description: >-
+  Rebuild of Logical Redstone Archive LFF007 "Set-Reset (SR) Latch" (author not named in
+  the README; https://discord.com/channels/1361854816837435433/1472423358967840920).
+  SOURCED: pressing set and reset together ends in the Set state. MEASURED: Set is the
+  right button btnR (lampR); both buttons in one tick end with lampR lit from either
+  state and either press order. Two wall torches on blocks, cross-coupled through dust
+  that climbs over the blocks, a lamp on each side; each button hard-powers the block
+  below a dust line that lights its own lamp at once and flips the other side's torch.
+  MEASURED: set: tL (torch) falls at 2 gt, tR rises at 4 gt, lampL falls at 6 gt (lampR is
+  already lit by the button's own dust); reset mirrors it. Holds 60 gt. Changes for the
+  harness: lime wool is white wool (the harness only emulates buttons on plain
+  blocks), signs dropped, buttons are named cells driven by use.
+  3x3x7 as built; placed with tL lit, tR unlit.
+traits: [torch_based]
+palette:
+  .: air
+  A: white_wool
+  L: {name: lampL, block: redstone_lamp}
+  M: {name: lampR, block: redstone_lamp}
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: redstone_wire[east=none,north=side,south=up,west=none]
+  D: redstone_wire[east=side,north=side,south=up,west=none]
+  '(': {name: tL, block: 'redstone_wall_torch[facing=west]'}
+  ')': {name: tR, block: 'redstone_wall_torch[facing=east]'}
+  E: redstone_wire[east=none,north=up,south=side,west=side]
+  F: redstone_wire[east=none,north=up,south=side,west=none]
+  G: {name: btnL, block: 'stone_button[face=wall,facing=south]'}
+  H: {name: btnR, block: 'stone_button[face=wall,facing=south]'}
+layers:
+  0: |
+    ...
+    A.A
+    A..
+    ..A
+    A.A
+    ...
+    ...
+  1: |
+    L.M
+    B.C
+    D(A
+    A)E
+    F.B
+    A.A
+    G.H
+  2: |
+    ...
+    ...
+    ..B
+    B..
+    ...
+    ...
+    ...
+tests:
+- name: set reset hold
+  steps:
+  - {wait: 20}
+  - expect: {lampL: 1, lampR: 0}
+  - use: btnR
+  - {wait: 20}
+  - expect: {lampL: 0, lampR: 1}
+  - {wait: 60}
+  - expect: {lampL: 0, lampR: 1}
+  - use: btnL
+  - {wait: 20}
+  - expect: {lampL: 1, lampR: 0}
+- name: both from left
+  steps:
+  - {wait: 20}
+  - use: btnL
+  - use: btnR
+  - {wait: 30}
+  - expect: {lampL: 0, lampR: 1}
+- name: both from right
+  steps:
+  - {wait: 20}
+  - use: btnR
+  - {wait: 20}
+  - use: btnL
+  - use: btnR
+  - {wait: 30}
+  - expect: {lampL: 0, lampR: 1}
+- name: both other order
+  steps:
+  - {wait: 20}
+  - use: btnR
+  - use: btnL
+  - {wait: 30}
+  - expect: {lampL: 0, lampR: 1}
+- name: set timing
+  steps:
+  - {wait: 20}
+  - use: btnR
+  - wave: {tL: '11000000', tR: '00001111', lampL: '11111100', lampR: '11111111'}
+- name: reset timing
+  steps:
+  - {wait: 20}
+  - use: btnR
+  - {wait: 20}
+  - use: btnL
+  - wave: {tR: '11000000', tL: '00001111', lampR: '11111100', lampL: '11111111'}

@@ -1,0 +1,134 @@
+name: ref_mattbatwings_spiral_down_repeater
+description: "Downward 2x2 spiral staircase (one block down per quarter turn, x0/x1 by z0/z1) of dust on light blue wool, as in vwire_spiral but long enough (23 down) to need a repeater; one repeater sits in a flat dust segment half way, the seat dust bridging with a glass block. 3x24x3. Source: mattbatwings' 'How To Wire Like a Redstone Pro!' world (Java 1.18.2), demo cluster W55 at world origin [-12, 60, -184] (SOURCED: block layout read from the world; the demo is one lever and two lamps).  Changed for the harness: the demo's input lamp under the lever became stone (the harness only emulates a lever on a plain full block; a lamp is a conductor too, so the lever still strongly powers it and the dust beside/below it), everything else is the cluster's blocks, with power/lit/powered state reset so the game recomputes it. The output lamp is cell 'out'; the test clicks the named lever. MEASURED on 26.3 (lever click to lamp): rise 2 gt, fall 6 gt. Spiral keeps the shaft 2x2 where the diag takes 1x25 along. The how-it-works wording is INFERRED from the block layout (nothing was traced block by block); the pass shows only that the level arrives. No test shows the booster is necessary."
+palette:
+  .: air
+  A: light_blue_wool
+  o: {output: out, block: redstone_lamp}
+  B: lime_wool
+  C: redstone_wire[east=none,north=up,south=side,west=none]
+  D: redstone_wire[east=up,north=none,south=side,west=none]
+  E: redstone_wire[east=none,north=none,south=up,west=side]
+  F: redstone_wire[east=none,north=side,south=none,west=up]
+  G: redstone_wire[east=side,north=none,south=up,west=none]
+  H: light_blue_stained_glass
+  I: redstone_wire[east=none,north=side,south=side,west=none]
+  J: repeater[delay=1,facing=north]
+  K: redstone_wire[east=up,north=none,south=none,west=side]
+  M: redstone_wire[east=side,north=up,south=none,west=none]
+  N: orange_wool
+  O: {block: stone, fixture: true}
+  l: {name: lever, block: 'lever[face=floor,facing=west]', fixture: true}
+layers:
+  0: |
+    ...
+    AoB
+    ...
+  1: |
+    A..
+    C..
+    ...
+  2: |
+    DA.
+    ...
+    ...
+  3: |
+    .E.
+    .A.
+    ...
+  4: |
+    ...
+    AF.
+    ...
+  5: |
+    ...
+    G..
+    A..
+  6: |
+    ...
+    H..
+    I..
+  7: |
+    A..
+    J..
+    A..
+  8: |
+    KA.
+    ...
+    ...
+  9: |
+    .E.
+    .A.
+    ...
+  10: |
+    ...
+    AF.
+    ...
+  11: |
+    A..
+    M..
+    ...
+  12: |
+    DA.
+    ...
+    ...
+  13: |
+    .E.
+    .A.
+    ...
+  14: |
+    ...
+    AF.
+    ...
+  15: |
+    A..
+    M..
+    ...
+  16: |
+    DA.
+    ...
+    ...
+  17: |
+    .E.
+    .A.
+    ...
+  18: |
+    ...
+    AF.
+    ...
+  19: |
+    A..
+    M..
+    ...
+  20: |
+    DA.
+    ...
+    ...
+  21: |
+    .E.
+    .A.
+    ...
+  22: |
+    ...
+    .I.
+    ...
+  23: |
+    .N.
+    .O.
+    ...
+  24: |
+    ...
+    .l.
+    ...
+tests:
+- name: lever on then off
+  settle: 40
+  steps:
+  - expect: {out: 0}
+  - use: lever
+  - wave: {out: '00111111'}
+  - wait: 20
+  - expect: {out: 1}
+  - use: lever
+  - wave: {out: '111111000000'}
+  - wait: 20
+  - expect: {out: 0}

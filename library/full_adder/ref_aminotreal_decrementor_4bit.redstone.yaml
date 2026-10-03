@@ -1,0 +1,211 @@
+name: ref_aminotreal_decrementor_4bit
+description: '4-bit decrementer, out = in - 1 mod 16 (0 wraps to 15), four identical slices on a 2-high pitch, torch plus subtract comparators, no pistons. Source (SOURCED): mattbatwings'' Logical Redstone Archive OTHERCOMB001 "Decrementor" by Aminotreal, tagged Tested & Functional and Recommended, speed claimed 2 ticks, https://discord.com/channels/1361854816837435433/1472423610928074804. Harness changes: each lever (on the west face of a quartz block, which it hard-powers) is replaced by an input redstone block in that quartz block''s own cell, touching the same two dust cells; the lamps are the named outputs. Nothing else changed. Bit k: input at y=2k+2, lamp out_k at y=2k, slice at y=2k+1. Mechanism (INFERRED from the blocks, then tested): out_k = in_k xnor Z_k, where Z_k = some lower input bit is 1. Z ladder: each lever powers a dust column x=1 that climbs one cell per layer over top slabs, losing 1 per step; a repeater at the slice (2,y,0) reads it and, if it is above 0, hard-powers the quartz block (3,y,0) at 15, which puts 15 on dust (3,y,1) and (4,y,0). A torch (3,y,3) on the block under the input''s dust is NOT in_k, 15 when in_k=0, and feeds dust (3,y,2), (3,y,1) (14 there) and (4,y,3). Comparator A (4,y,1) = (3,y,1) - (4,y,0) = 14 only when not Z and not in_k; comparator B (4,y,2) = (3,y,2) - (4,y,3) = 14 only when in_k and Z; each is 0 otherwise. Both land in the lamp''s dust (5,y,2) (A through the strongly powered block (5,y,1)), a max-merge that is an OR. Bit 0 has no ladder below, so out0 = not in0 from comparator A alone. Why compact: subtract comparators are AND-NOT gates and the torch only supplies the inverted bit, so the 4 slices need no extra inverter, and the lossy slab-dust ladder is the OR chain for free (4 bits lose at most 7 of 15, and the repeater rebuilds 15). Measured (MEASURED, all 16 inputs in two orders, laptop or docker satellite in the references plot): every output rises 4 gt (2 redstone ticks, matching the claim) from any input bit, and falls 8 gt (the same 4 plus the lamp''s own 4 gt turn-off); size 6x9x4.'
+traits:
+- compact
+- comparator_based
+- torch_based
+- vertical
+palette:
+  .: air
+  A: quartz_slab[type=top,waterlogged=false]
+  B: quartz_block
+  L: redstone_lamp
+  C: redstone_wire[east=side,north=none,south=side,west=none]
+  D: repeater[delay=1,facing=west]
+  E: redstone_wire[east=none,north=side,south=side,west=none]
+  F: comparator[facing=west,mode=subtract]
+  G: redstone_wire[east=side,north=side,south=side,west=none]
+  H: redstone_wire[east=side,north=none,south=none,west=side]
+  ): redstone_wall_torch[facing=east]
+  I: redstone_wire[east=none,north=side,south=none,west=side]
+  a:
+    input: in0
+  e:
+    output: out0
+    block: redstone_lamp
+  b:
+    input: in1
+  f:
+    output: out1
+    block: redstone_lamp
+  c:
+    input: in2
+  g:
+    output: out2
+    block: redstone_lamp
+  d:
+    input: in3
+  h:
+    output: out3
+    block: redstone_lamp
+layers:
+  0: '.AB.B..
+
+    ...BB..
+
+    ...BBBe
+
+    ....B..
+
+    '
+  1: '.CDBE..
+
+    .A.CFB.
+
+    ..BGFH.
+
+    ..B)I..
+
+    '
+  2: '.AB.B..
+
+    .E.BB..
+
+    .aEBBBf
+
+    ..E.B..
+
+    '
+  3: '.CDBE..
+
+    .A.CFB.
+
+    ..BGFH.
+
+    ..B)I..
+
+    '
+  4: '.AB.B..
+
+    .E.BB..
+
+    .bEBBBg
+
+    ..E.B..
+
+    '
+  5: '.CDBE..
+
+    .A.CFB.
+
+    ..BGFH.
+
+    ..B)I..
+
+    '
+  6: '.AB.B..
+
+    .E.BB..
+
+    .cEBBBh
+
+    ..E.B..
+
+    '
+  7: '.CDBE..
+
+    .A.CFB.
+
+    ..BGFH.
+
+    ..B)I..
+
+    '
+  8: '.......
+
+    .E.....
+
+    .dEB...
+
+    ..E....
+
+    '
+tests:
+- name: decrement
+  truth_table: 'in3 in2 in1 in0 | out3 out2 out1 out0
+
+    0 0 0 0 | 1 1 1 1
+
+    0 0 0 1 | 0 0 0 0
+
+    0 0 1 0 | 0 0 0 1
+
+    0 0 1 1 | 0 0 1 0
+
+    0 1 0 0 | 0 0 1 1
+
+    0 1 0 1 | 0 1 0 0
+
+    0 1 1 0 | 0 1 0 1
+
+    0 1 1 1 | 0 1 1 0
+
+    1 0 0 0 | 0 1 1 1
+
+    1 0 0 1 | 1 0 0 0
+
+    1 0 1 0 | 1 0 0 1
+
+    1 0 1 1 | 1 0 1 0
+
+    1 1 0 0 | 1 0 1 1
+
+    1 1 0 1 | 1 1 0 0
+
+    1 1 1 0 | 1 1 0 1
+
+    1 1 1 1 | 1 1 1 0
+
+    '
+  delay: 8
+  delays: &id001
+    out0:
+      rise: 4
+      fall: 8
+    out1:
+      rise: 4
+      fall: 8
+    out2:
+      rise: 4
+      fall: 8
+    out3:
+      rise: 4
+      fall: 8
+- name: decrement_stride_7
+  truth_table: 'in3 in2 in1 in0 | out3 out2 out1 out0
+
+    0 0 1 1 | 0 0 1 0
+
+    1 0 1 0 | 1 0 0 1
+
+    0 0 0 1 | 0 0 0 0
+
+    1 0 0 0 | 0 1 1 1
+
+    1 1 1 1 | 1 1 1 0
+
+    0 1 1 0 | 0 1 0 1
+
+    1 1 0 1 | 1 1 0 0
+
+    0 1 0 0 | 0 0 1 1
+
+    1 0 1 1 | 1 0 1 0
+
+    0 0 1 0 | 0 0 0 1
+
+    1 0 0 1 | 1 0 0 0
+
+    0 0 0 0 | 1 1 1 1
+
+    0 1 1 1 | 0 1 1 0
+
+    1 1 1 0 | 1 1 0 1
+
+    0 1 0 1 | 0 1 0 0
+
+    1 1 0 0 | 1 0 1 1
+
+    '
+  delay: 8
+  delays: *id001

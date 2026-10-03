@@ -1,0 +1,303 @@
+name: ref_mattbatwings_register8_lock
+description: "Rebuild of mattbatwings' 8-bit register (Logical Redstone Archive REGISTER001_8-bit_Register, tags Tested & Functional and Recommended; Discord https://discord.com/channels/1361854816837435433/1472420025724829727; the README gives no speed or size and says only 'an 8-bit register with read and write', input an 8b number plus Write and Read buttons, output 8b number). Size 6x18x7, bits stacked vertically at a pitch of 2 on one tower, two button panels at the bottom. How it works (INFERRED from the blocks, MEASURED by the tests): per bit a repeater Q (delay 1, facing west, x=2) reads the input lever through a conductor block and is the memory cell; it is locked by a delay-1 repeater O pointing into its side from the north, which reads the WRITE line, a dust column (x=2) that zigzags up the tower over wool and glass (a 'V' dust climbs the north wall of the floor's wool, the next dust climbs the glass), so one line locks all 8 repeaters; the line idles high (locked). Q's output goes along a dust to a subtract comparator U (facing west, x=4) whose side input is the same kind of repeater O fed by the READ line (x=4 column); the line idles high, so U's side input cancels Q and the output lamp (x=5) stays dark. Each button feeds a pulse maker at the bottom: a subtract comparator C reads the button's dust and a 2-tick repeater E feeds the same signal back into C's side 4 game ticks later, so C emits a short pulse that powers the wool under a torch; the torch inverts it, so the whole line drops for the pulse. WRITE pulse: the 8 Q repeaters unlock, take the lever values and relock. READ pulse: U's side drops, so the lamp shows Q for a short window; the lamps do not hold the word. Harness changes: light_blue_wool and the lever's lamp became white_wool (use only emulates levers and buttons on plain blocks, so the lever's lamp is white_wool: same strong conduction, loses the input display), signs removed, output lamps named q0 (bottom floor y=3) .. q7 (y=17), levers d0..d7, buttons write and read. MEASURED on 26.3: a read click lights the lamps of the 1 bits 8 game ticks later for 8 ticks (wave); a read 2 ticks after a write click returns the new word, 0 or 1 ticks after returns a wrong word (the lamps are lit for one tick only on a bit, race with the unlocking Q); words 0xA5, 0x5A, 0xFF, 0x00, 0x01, 0x80, 0x7F, 0xFE read back exactly, lever changes while not written are ignored, and the lamps stay dark during a write and with no read. Not claimed: the README's speed or size (none given), reading while writing."
+traits: [vertical, lockable, comparator_based, torch_based, pistonless, entityless, survival_friendly]
+palette:
+  .: air
+  A: white_wool
+  B: redstone_wire[east=side,north=none,south=side,west=none]
+  C: comparator[facing=south,mode=subtract]
+  D: redstone_wire[east=none,north=none,south=side,west=side]
+  E: repeater[delay=2,facing=south]
+  F: redstone_wire[east=none,north=side,south=side,west=none]
+  G: redstone_wire[east=side,north=side,south=none,west=none]
+  H: redstone_wire[east=none,north=side,south=side,west=side]
+  I: redstone_wire[east=side,north=side,south=side,west=none]
+  J: redstone_wire[east=none,north=side,south=none,west=side]
+  k: {name: write, block: 'stone_button[face=wall,facing=south]'}
+  K: {name: read, block: 'stone_button[face=wall,facing=south]'}
+  '*': redstone_torch
+  N: redstone_wire[east=none,north=up,south=side,west=none]
+  O: repeater[delay=1,facing=north]
+  L: white_wool
+  Q: repeater[delay=1,facing=west]
+  T: redstone_wire[east=side,north=none,south=none,west=side]
+  U: comparator[facing=west,mode=subtract]
+  V: redstone_wire[east=none,north=side,south=up,west=none]
+  W: light_blue_stained_glass
+  '0': {name: d0, block: 'lever[face=wall,facing=west]'}
+  a: {name: q0, block: redstone_lamp}
+  '1': {name: d1, block: 'lever[face=wall,facing=west]'}
+  b: {name: q1, block: redstone_lamp}
+  '2': {name: d2, block: 'lever[face=wall,facing=west]'}
+  c: {name: q2, block: redstone_lamp}
+  '3': {name: d3, block: 'lever[face=wall,facing=west]'}
+  d: {name: q3, block: redstone_lamp}
+  '4': {name: d4, block: 'lever[face=wall,facing=west]'}
+  e: {name: q4, block: redstone_lamp}
+  '5': {name: d5, block: 'lever[face=wall,facing=west]'}
+  f: {name: q5, block: redstone_lamp}
+  '6': {name: d6, block: 'lever[face=wall,facing=west]'}
+  g: {name: q6, block: redstone_lamp}
+  '7': {name: d7, block: 'lever[face=wall,facing=west]'}
+  h: {name: q7, block: redstone_lamp}
+layers:
+  0: |
+    ......
+    .AA.AA
+    .AA.AA
+    .AA.AA
+    ..A.A.
+    ......
+    ......
+  1: |
+    ..A.A.
+    .BC.CD
+    .EF.FE
+    .GH.IJ
+    ..F.F.
+    ..A.A.
+    ..k.K.
+  2: |
+    ..*.*.
+    ..A.A.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  3: |
+    ..A.A.
+    ..N.N.
+    ..O.O.
+    0LQTUa
+    ......
+    ......
+    ......
+  4: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  5: |
+    ..W.W.
+    ..N.N.
+    ..O.O.
+    1LQTUb
+    ......
+    ......
+    ......
+  6: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  7: |
+    ..W.W.
+    ..N.N.
+    ..O.O.
+    2LQTUc
+    ......
+    ......
+    ......
+  8: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  9: |
+    ..W.W.
+    ..N.N.
+    ..O.O.
+    3LQTUd
+    ......
+    ......
+    ......
+  10: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  11: |
+    ..W.W.
+    ..N.N.
+    ..O.O.
+    4LQTUe
+    ......
+    ......
+    ......
+  12: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  13: |
+    ..W.W.
+    ..N.N.
+    ..O.O.
+    5LQTUf
+    ......
+    ......
+    ......
+  14: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  15: |
+    ..W.W.
+    ..N.N.
+    ..O.O.
+    6LQTUg
+    ......
+    ......
+    ......
+  16: |
+    ..V.V.
+    ..W.W.
+    ..A.A.
+    ..AAA.
+    ......
+    ......
+    ......
+  17: |
+    ......
+    ..F.F.
+    ..O.O.
+    7LQTUh
+    ......
+    ......
+    ......
+tests:
+- name: written word reads back, hold ignores the levers
+  steps:
+  - wait: 2
+  - use: read
+  - wave: {q0: '000000000000000000000000', q1: '000000000000000000000000', q2: '000000000000000000000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000000000000000000000', q6: '000000000000000000000000', q7: '000000000000000000000000'}
+  - wait: 20
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 6
+  - use: read
+  - wave: {q0: '000000000000000000000000', q1: '000000000000000000000000', q2: '000000000000000000000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000000000000000000000', q6: '000000000000000000000000', q7: '000000000000000000000000'}
+  - wait: 20
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000001111111100000000', q1: '000000000000000000000000', q2: '000000001111111100000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000001111111100000000', q6: '000000000000000000000000', q7: '000000001111111100000000'}
+  - wait: 20
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: read
+  - wave: {q0: '000000001111111100000000', q1: '000000000000000000000000', q2: '000000001111111100000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000001111111100000000', q6: '000000000000000000000000', q7: '000000001111111100000000'}
+  - wait: 20
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000000000000000000000', q1: '000000001111111100000000', q2: '000000000000000000000000', q3: '000000001111111100000000', q4: '000000001111111100000000', q5: '000000000000000000000000', q6: '000000001111111100000000', q7: '000000000000000000000000'}
+  - wait: 20
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 6
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000001111111100000000', q1: '000000001111111100000000', q2: '000000001111111100000000', q3: '000000001111111100000000', q4: '000000001111111100000000', q5: '000000001111111100000000', q6: '000000001111111100000000', q7: '000000001111111100000000'}
+  - wait: 20
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: read
+  - wave: {q0: '000000001111111100000000', q1: '000000001111111100000000', q2: '000000001111111100000000', q3: '000000001111111100000000', q4: '000000001111111100000000', q5: '000000001111111100000000', q6: '000000001111111100000000', q7: '000000001111111100000000'}
+  - wait: 20
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000000000000000000000', q1: '000000000000000000000000', q2: '000000000000000000000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000000000000000000000', q6: '000000000000000000000000', q7: '000000000000000000000000'}
+  - wait: 20
+- name: edge words
+  steps:
+  - wait: 2
+  - use: d0
+  - wait: 6
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000001111111100000000', q1: '000000000000000000000000', q2: '000000000000000000000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000000000000000000000', q6: '000000000000000000000000', q7: '000000000000000000000000'}
+  - wait: 20
+  - use: d0
+  - use: d7
+  - wait: 6
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000000000000000000000', q1: '000000000000000000000000', q2: '000000000000000000000000', q3: '000000000000000000000000', q4: '000000000000000000000000', q5: '000000000000000000000000', q6: '000000000000000000000000', q7: '000000001111111100000000'}
+  - wait: 20
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000001111111100000000', q1: '000000001111111100000000', q2: '000000001111111100000000', q3: '000000001111111100000000', q4: '000000001111111100000000', q5: '000000001111111100000000', q6: '000000001111111100000000', q7: '000000000000000000000000'}
+  - wait: 20
+  - use: d0
+  - use: d7
+  - wait: 6
+  - use: write
+  - wave: {q0: '000000000000000000000000000000', q1: '000000000000000000000000000000', q2: '000000000000000000000000000000', q3: '000000000000000000000000000000', q4: '000000000000000000000000000000', q5: '000000000000000000000000000000', q6: '000000000000000000000000000000', q7: '000000000000000000000000000000'}
+  - use: read
+  - wave: {q0: '000000000000000000000000', q1: '000000001111111100000000', q2: '000000001111111100000000', q3: '000000001111111100000000', q4: '000000001111111100000000', q5: '000000001111111100000000', q6: '000000001111111100000000', q7: '000000001111111100000000'}
+  - wait: 20
+- name: read 2 ticks after write
+  steps:
+  - wait: 2
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 6
+  - use: write
+  - wait: 2
+  - use: read
+  - wave: {q0: '00000000000000000', q1: '00000000000000000', q2: '00000000111111110', q3: '00000000111111110', q4: '00000000111111110', q5: '00000000111111110', q6: '00000000000000000', q7: '00000000000000000'}

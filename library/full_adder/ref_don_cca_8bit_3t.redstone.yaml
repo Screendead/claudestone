@@ -1,0 +1,543 @@
+name: ref_don_cca_8bit_3t
+description: '8-bit 3-tick Carry Cancel Adder (CCA) by Don, endorsed by mattbatwings. Source: Logical Redstone Archive ADD003 (ADD003_8bit_cca_3t.schem), https://discord.com/channels/1361854816837435433/1472429810520162406
+  (README, SOURCED: 2 8-bit inputs, 8-bit sum, speed 3 ticks). Size 8x19x6 (x, y = 2 layers per bit, z); the schem has no inputs, so a<k> and b<k> are redstone blocks placed in the cell where the schem
+  had the input-indicator lamp at x=1 beside its lever (a at z=2, b at z=5, on layer y=2k+2 counting the crop; the lever hard-powered the lamp, the block powers the adjacent dust the same, INFERRED), the
+  signs and levers are dropped, the sum lamps at x=7 on the odd layers are the named outputs s<k> (s0 at the bottom), and the lamp on layer 18 is cout (MEASURED: it is the 8-bit carry out). A carry-in lever
+  (layer 1) is left off. MEASURED on a laptop satellite: 80 sums (single bits, a+a, ripples to the top, carries and wraps, 40 random) with cout all pass; every sum bit rises in 6 game ticks (3 redstone
+  ticks = the README) and falls in 10 (INFERRED: 6 plus the lamp''s 4-tick turn-off), cout takes up to 12. How it works (INFERRED from the layout, not mutant-tested): each bit''s slice is a vertical pair
+  of layers; subtract comparators on the two operand dust lines yield propagate/generate/kill levels, the carry is carried upward through dust climbing glass and wool between layers (as in the 5 Hz CCA
+  ref_sloimay_cca_8bit_5hz), and the sum comes from a compare comparator and a torch/dust stage into the lamp, so every bit sees the nearest generate/kill in the same time.'
+traits:
+- pistonless
+- entityless
+- comparator_based
+- tick_accurate
+palette:
+  .: air
+  A: light_blue_stained_glass
+  B: light_blue_wool
+  C: redstone_wire[east=up,north=none,south=none,west=side]
+  L: redstone_lamp
+  E: redstone_wire[east=side,north=none,south=side,west=none]
+  F: comparator[facing=south,mode=subtract]
+  G: repeater[delay=1,facing=south]
+  H: redstone_wire[east=none,north=side,south=side,west=none]
+  I: lever[face=wall,facing=south]
+  R: redstone_block
+  n: redstone_wall_torch[facing=north]
+  J: redstone_wire[east=side,north=none,south=none,west=side]
+  M: redstone_wire[east=side,north=up,south=side,west=none]
+  N: redstone_wire[east=none,north=none,south=side,west=side]
+  P: redstone_wire[east=side,north=side,south=side,west=none]
+  Q: comparator[facing=west,mode=subtract]
+  T: redstone_wire[east=side,north=none,south=side,west=up]
+  ): redstone_wall_torch[facing=east]
+  U: redstone_wire[east=none,north=side,south=up,west=side]
+  V: redstone_wire[east=side,north=side,south=none,west=none]
+  W: redstone_wire[east=side,north=side,south=none,west=side]
+  X: repeater[delay=1,facing=west]
+  Y: redstone_wire[east=none,north=none,south=side,west=up]
+  Z: comparator[facing=north,mode=compare]
+  b: redstone_wire[east=up,north=side,south=none,west=none]
+  c: redstone_wire[east=none,north=up,south=side,west=none]
+  d: redstone_wire[east=side,north=none,south=side,west=side]
+  e: redstone_wire[east=none,north=side,south=side,west=side]
+  f: redstone_wire[east=side,north=side,south=side,west=side]
+  '0':
+    input: a0
+  h:
+    input: b0
+  q:
+    output: s0
+    block: redstone_lamp
+  '1':
+    input: a1
+  i:
+    input: b1
+  r:
+    output: s1
+    block: redstone_lamp
+  '2':
+    input: a2
+  j:
+    input: b2
+  s:
+    output: s2
+    block: redstone_lamp
+  '3':
+    input: a3
+  k:
+    input: b3
+  t:
+    output: s3
+    block: redstone_lamp
+  '4':
+    input: a4
+  l:
+    input: b4
+  u:
+    output: s4
+    block: redstone_lamp
+  '5':
+    input: a5
+  m:
+    input: b5
+  v:
+    output: s5
+    block: redstone_lamp
+  '6':
+    input: a6
+  o:
+    input: b6
+  w:
+    output: s6
+    block: redstone_lamp
+  '7':
+    input: a7
+  p:
+    input: b7
+  x:
+    output: s7
+    block: redstone_lamp
+  y:
+    output: cout
+    block: redstone_lamp
+layers:
+  0: '.........
+
+    .....A...
+
+    ...BB....
+
+    ...BB....
+
+    .........
+
+    .........
+
+    '
+  1: '..A......
+
+    ....BCBq.
+
+    .ABEF....
+
+    .BBGHBB..
+
+    .BBB.IR..
+
+    .BBB.....
+
+    '
+  2: '.nCA.....
+
+    .B.B.AJ..
+
+    0MNBB.B..
+
+    BPQBBTF..
+
+    .PQJB)U..
+
+    hVWXB)A..
+
+    '
+  3: '..AY.....
+
+    .H.ZBCBr.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  4: '.nCA.....
+
+    .B.B.AJ..
+
+    1MNBB.B..
+
+    BPQBATF..
+
+    .PQJB)U..
+
+    iVWXB)A..
+
+    '
+  5: '..AY.....
+
+    .H.ZBCBs.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  6: '.nCA.....
+
+    .B.B.AJ..
+
+    2MNBB.B..
+
+    BPQBATF..
+
+    .PQJB)U..
+
+    jVWXB)A..
+
+    '
+  7: '..AY.....
+
+    .H.ZBCBt.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  8: '.nCA.....
+
+    .B.B.AJ..
+
+    3MNBB.B..
+
+    BPQBATF..
+
+    .PQJB)U..
+
+    kVWXB)A..
+
+    '
+  9: '..AY.....
+
+    .H.ZBCBu.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  10: '.nCA.....
+
+    .B.B.AJ..
+
+    4MNBB.B..
+
+    BPQBATF..
+
+    .PQJB)U..
+
+    lVWXB)A..
+
+    '
+  11: '..AY.....
+
+    .H.ZBCBv.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  12: '.nCA.....
+
+    .B.B.AJ..
+
+    5MNBB.B..
+
+    BPQBATF..
+
+    .PQJB)U..
+
+    mVWXB)A..
+
+    '
+  13: '..AY.....
+
+    .H.ZBCBw.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  14: '.nCA.....
+
+    .B.B.AJ..
+
+    6MNBB.B..
+
+    BPQBATF..
+
+    .PQJB)U..
+
+    oVWXB)A..
+
+    '
+  15: '...N.....
+
+    .H.ZBCBx.
+
+    .ABPF....
+
+    .BBGbAB..
+
+    .BBB..A..
+
+    .BBB.Bc..
+
+    '
+  16: '.........
+
+    .B....J..
+
+    7ENB..B..
+
+    BPQB.dF..
+
+    .PQJB)e..
+
+    pVWXB)A..
+
+    '
+  17: '.........
+
+    ......B).
+
+    ......f..
+
+    ......B..
+
+    ......B..
+
+    .....Bc..
+
+    '
+  18: '.........
+
+    .......y.
+
+    ......B..
+
+    ......G..
+
+    ......H..
+
+    .........
+
+    '
+tests:
+- name: sums
+  truth_table: 'a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 cout
+
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+
+    1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 1
+
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 1 1 1 1 1 1 1 1
+
+    1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1
+
+    1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 | 1 1 1 1 1 1 1 1 0
+
+    0 1 0 1 0 1 0 1 1 0 1 0 1 0 1 0 | 1 1 1 1 1 1 1 1 0
+
+    1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+
+    0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 0
+
+    1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+
+    1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 | 0 0 0 0 0 0 0 0 1
+
+    1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+
+    0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 1 | 1 1 1 1 1 1 1 1 0
+
+    0 0 0 1 0 0 1 1 0 0 0 1 1 1 0 0 | 0 0 0 0 0 0 0 0 1
+
+    1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+
+    0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0
+
+    0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0
+
+    0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+
+    0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 | 0 0 0 0 0 1 0 0 0
+
+    0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 | 0 0 0 0 0 0 1 0 0
+
+    0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 1 0
+
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1
+
+    1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 1 1 1 1 1 1 0 0 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 0 1 1 1 1 1 0 0 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 0 0 0 0 1 1 0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1
+
+    1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+
+    1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0
+
+    1 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0
+
+    1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+
+    1 1 1 1 1 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0
+
+    1 1 1 1 1 1 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0
+
+    1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+
+    1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+
+    1 0 0 1 1 1 1 0 0 1 0 0 0 0 1 0 | 1 1 0 1 1 1 0 1 0
+
+    1 0 1 1 1 1 0 1 0 1 0 0 1 1 1 1 | 1 1 1 1 0 1 0 1 1
+
+    1 0 0 0 0 1 0 0 0 1 1 0 0 0 0 0 | 1 1 1 0 0 1 0 0 0
+
+    0 0 0 0 1 1 1 1 0 0 1 0 0 0 0 1 | 0 0 1 0 1 1 1 0 1
+
+    1 1 1 0 1 1 1 0 0 1 0 0 0 1 1 0 | 1 0 0 1 1 0 1 1 0
+
+    0 0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 | 1 1 0 0 0 1 1 1 1
+
+    1 1 0 1 0 0 1 1 1 0 1 1 0 0 1 0 | 0 0 0 1 1 0 0 0 1
+
+    0 1 1 0 1 1 1 0 1 0 1 1 0 0 1 0 | 1 1 0 0 0 0 1 1 0
+
+    1 1 1 0 0 0 1 1 1 1 1 0 0 0 0 0 | 0 1 1 1 0 0 1 1 0
+
+    0 0 0 0 0 1 0 0 1 0 0 0 1 0 1 0 | 1 0 0 0 1 1 1 0 0
+
+    1 0 1 0 1 0 0 0 0 1 0 1 1 0 0 1 | 1 1 1 1 0 1 0 1 0
+
+    1 1 1 1 0 0 0 0 1 0 0 1 0 0 0 1 | 0 0 0 1 1 0 0 1 0
+
+    0 1 0 0 1 1 1 1 0 1 1 0 0 0 1 1 | 0 0 0 1 1 1 0 1 1
+
+    0 1 0 1 1 0 1 1 0 1 0 1 0 0 1 1 | 0 0 1 0 0 1 0 1 1
+
+    1 1 0 0 0 1 1 1 0 0 1 0 0 0 1 0 | 1 1 1 0 0 1 0 0 1
+
+    1 1 0 1 1 1 0 1 1 0 0 0 1 1 0 0 | 0 0 1 1 0 1 1 1 0
+
+    0 1 0 0 1 0 0 0 1 0 1 0 0 0 1 0 | 1 1 1 0 1 0 1 0 0
+
+    1 0 1 1 1 1 1 1 1 1 1 1 0 1 1 0 | 0 0 1 1 0 1 1 0 1
+
+    0 0 1 0 0 0 0 1 1 1 1 1 1 0 1 1 | 1 1 0 0 0 1 1 0 1
+
+    0 1 0 1 1 0 0 1 1 1 1 0 1 0 1 1 | 1 0 0 0 1 1 1 0 1
+
+    1 0 1 0 0 0 1 1 1 1 0 0 1 1 0 1 | 0 0 0 1 1 1 1 0 1
+
+    0 0 0 0 1 0 1 1 0 1 1 0 1 1 1 0 | 0 1 1 0 0 0 1 0 1
+
+    0 0 1 1 0 1 0 1 0 1 1 1 0 0 0 0 | 0 1 0 1 1 1 0 1 0
+
+    1 1 1 1 0 0 0 1 1 1 0 0 1 0 1 0 | 0 1 0 0 0 1 1 1 0
+
+    1 1 1 0 0 1 0 1 1 0 1 0 1 1 0 0 | 0 0 1 1 1 0 1 1 0
+
+    0 0 1 1 0 1 1 0 0 0 0 1 0 0 0 1 | 0 0 1 0 1 1 1 1 0
+
+    1 0 0 0 1 0 0 1 1 1 1 1 1 1 0 0 | 0 0 0 0 1 0 1 1 0
+
+    0 0 0 0 0 1 0 0 0 1 1 0 1 1 1 1 | 0 1 1 0 1 0 0 0 1
+
+    1 1 1 0 1 1 1 1 1 0 1 1 0 1 0 0 | 0 0 1 0 0 1 0 0 1
+
+    0 0 0 0 1 1 0 1 0 1 0 0 0 1 0 0 | 0 1 0 0 1 0 1 1 0
+
+    0 1 0 0 1 0 1 1 1 0 1 1 0 0 1 0 | 1 1 1 1 1 0 0 0 1
+
+    0 1 0 1 0 0 0 0 0 1 1 0 1 0 0 1 | 0 0 0 0 0 1 0 1 0
+
+    0 1 0 1 1 0 1 1 0 0 1 0 1 0 1 1 | 0 1 1 1 0 1 0 1 1
+
+    0 0 1 1 1 1 0 0 0 1 1 0 1 0 0 0 | 0 1 0 0 1 0 1 0 0
+
+    1 1 1 0 1 0 0 0 1 0 0 0 0 0 1 1 | 0 0 0 1 1 0 1 1 0
+
+    1 0 0 1 0 1 0 1 0 1 1 1 0 0 0 1 | 1 1 1 0 1 1 0 0 1
+
+    0 0 0 1 1 1 1 0 0 1 0 0 1 0 0 0 | 0 1 0 1 0 0 0 1 0
+
+    0 1 1 1 1 0 0 1 1 1 0 0 0 0 0 0 | 1 0 0 0 0 1 0 1 0
+
+    1 1 1 0 0 1 0 0 1 1 1 0 1 1 0 0 | 0 1 1 1 1 0 1 0 0
+
+    0 0 0 0 1 0 0 0 1 0 1 0 0 1 1 0 | 1 0 1 0 1 1 1 0 0
+
+    '
+  max_delay: 12
+  delays:
+    s0:
+      rise: 6
+      fall: 10
+    s1:
+      rise: 6
+      fall: 10
+    s2:
+      rise: 6
+      fall: 10
+    s3:
+      rise: 6
+      fall: 10
+    s4:
+      rise: 6
+      fall: 10
+    s5:
+      rise: 6
+      fall: 10
+    s6:
+      rise: 6
+      fall: 10
+    s7:
+      rise: 6
+      fall: 10

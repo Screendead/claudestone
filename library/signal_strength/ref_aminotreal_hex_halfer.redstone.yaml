@@ -1,0 +1,143 @@
+name: ref_aminotreal_hex_halfer
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEX004 ''Hex Halfer'' (author Aminotreal, endorsed by mattbatwings, Tested & Functional; Discord https://discord.com/channels/1361854816837435433/1472410595163639808): divides a hex number (signal strength 0-15) by 2, README speed 3 ticks. 18x3x4 as rebuilt (levels y=0..2). Input is the dust at x=15,z=2 (north-south, fed from the south); the output is the dust at x=0,z=3. The block-entity contents were read from the .schem, not the parsed JSON: one totem in the input-side barrel and 2, 4, 10, 16, 23, 27 unstackable totems in the barrels at x=2,6,8,10,12,14 (z=2), which read strengths 1, 2, 3, 6, 9, 12, 15 (a 27-slot barrel gives floor(1 + 14 n / 27) for n one-item stacks); the cake (bites=0, strength 14) sits at x=16. How it works (INFERRED from the layout and the schematic''s saved dust levels, spot-checked by the tests, not traced block by block): the subtract comparator at x=15,z=1 outputs 14 - n, the cake behind it and the input dust n on its side. That feeds a thermometer, a dust line zigzagging over quartz (y=1/y=2) along z=1 that loses 1 per dust, so the dust at column x holds x + 1 - n (floored at 0). Five subtract comparators at x=5,7,9,11,13 (z=2) each read a constant barrel on their east (strengths 3, 6, 9, 12, 15) and have the thermometer dust on their north as side input, so comparator x outputs max(0, R_x - (x + 1 - n)); the barrel strengths are the thresholds of a lookup table. Each comparator powers the block on its west (a barrel or quartz), which strongly powers a dust of a second zigzag along z=3; that line decays westward to x=4, from where a compare comparator relays it to the output dust. The comparators at x=0 (z=1, z=2) and x=3 and the barrel at x=2 were not traced; the saved snapshot has them at 0 for n=14. Net result MEASURED: output = floor(n / 2) for every input n = 0..15. Changed for the harness: a fixture compare comparator at x=15,z=3 reads a fixture barrel (z=4) set with data merge to give the input strength n. MEASURED delay: the output edge appears exactly 8 gt after the fixture barrel changes in both directions (0->1 and 1->0 tested), 2 gt of it the fixture comparator, so 6 gt = 3 redstone ticks from the input dust, matching the README.'
+traits: [analog, comparator_based, container_based, silent, pistonless, entityless]
+palette:
+  .: air
+  A: quartz_block
+  B: light_blue_stained_glass
+  C: glass
+  E: 'comparator[facing=north,mode=subtract]'
+  F: 'redstone_wire[east=up,north=none,south=none,west=side]'
+  G: 'redstone_wire[east=up,north=none,south=side,west=up]'
+  H: 'redstone_wire[east=none,north=none,south=side,west=up]'
+  I: 'comparator[facing=east,mode=subtract]'
+  J: 'cake[bites=0]'
+  K: 'comparator[facing=north,mode=compare]'
+  M: 'comparator[facing=west,mode=subtract]'
+  N: 'redstone_wire[east=none,north=side,south=side,west=none]'
+  O: 'comparator[facing=east,mode=compare]'
+  P: 'redstone_wire[east=up,north=none,south=none,west=up]'
+  Q: 'redstone_wire[east=side,north=none,south=none,west=side]'
+  1: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1}]}'
+  p: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1}]}'
+  q: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1}]}'
+  r: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1}]}'
+  s: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1},{Slot:12b,id:"minecraft:totem_of_undying",count:1},{Slot:13b,id:"minecraft:totem_of_undying",count:1},{Slot:14b,id:"minecraft:totem_of_undying",count:1},{Slot:15b,id:"minecraft:totem_of_undying",count:1}]}'
+  t: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1},{Slot:12b,id:"minecraft:totem_of_undying",count:1},{Slot:13b,id:"minecraft:totem_of_undying",count:1},{Slot:14b,id:"minecraft:totem_of_undying",count:1},{Slot:15b,id:"minecraft:totem_of_undying",count:1},{Slot:16b,id:"minecraft:totem_of_undying",count:1},{Slot:17b,id:"minecraft:totem_of_undying",count:1},{Slot:18b,id:"minecraft:totem_of_undying",count:1},{Slot:19b,id:"minecraft:totem_of_undying",count:1},{Slot:20b,id:"minecraft:totem_of_undying",count:1},{Slot:21b,id:"minecraft:totem_of_undying",count:1},{Slot:22b,id:"minecraft:totem_of_undying",count:1}]}'
+  u: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1},{Slot:12b,id:"minecraft:totem_of_undying",count:1},{Slot:13b,id:"minecraft:totem_of_undying",count:1},{Slot:14b,id:"minecraft:totem_of_undying",count:1},{Slot:15b,id:"minecraft:totem_of_undying",count:1},{Slot:16b,id:"minecraft:totem_of_undying",count:1},{Slot:17b,id:"minecraft:totem_of_undying",count:1},{Slot:18b,id:"minecraft:totem_of_undying",count:1},{Slot:19b,id:"minecraft:totem_of_undying",count:1},{Slot:20b,id:"minecraft:totem_of_undying",count:1},{Slot:21b,id:"minecraft:totem_of_undying",count:1},{Slot:22b,id:"minecraft:totem_of_undying",count:1},{Slot:23b,id:"minecraft:totem_of_undying",count:1},{Slot:24b,id:"minecraft:totem_of_undying",count:1},{Slot:25b,id:"minecraft:totem_of_undying",count:1},{Slot:26b,id:"minecraft:totem_of_undying",count:1}]}'
+  o: {output: out, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  S: {name: in, block: 'barrel[facing=up,open=false]', fixture: true}
+  c: {block: 'comparator[facing=south,mode=compare]', fixture: true}
+  a: {block: quartz_block, fixture: true}
+layers:
+  0: |
+    ..................
+    AB.B.B.B.B.B.B.AA.
+    A..A.A.A.A.A.A.AAC
+    C.A.B.B.B.B.B..a..
+    ..................
+  1: |
+    1.................
+    EFAGAGAGAGAGAHAIJ.
+    K.pMAIqIrIsItIuN..
+    oAOAFAPAPAPAPA.c..
+    ...............S..
+  2: |
+    ..................
+    ..Q.Q.Q.Q.Q.Q.....
+    ..................
+    .....Q.Q.Q.Q.Q....
+    ..................
+tests:
+- name: 'in 0'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[]}'
+  - wait: 24
+  - level: {out: 0}
+- name: 'in 1'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 24
+  - level: {out: 0}
+- name: 'in 2'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 24
+  - level: {out: 1}
+- name: 'in 3'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 24
+  - level: {out: 1}
+- name: 'in 4'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 24
+  - level: {out: 2}
+- name: 'in 5'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 24
+  - level: {out: 2}
+- name: 'in 6'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 24
+  - level: {out: 3}
+- name: 'in 7'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 24
+  - level: {out: 3}
+- name: 'in 8'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 24
+  - level: {out: 4}
+- name: 'in 9'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 24
+  - level: {out: 4}
+- name: 'in 10'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 24
+  - level: {out: 5}
+- name: 'in 11'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 24
+  - level: {out: 5}
+- name: 'in 12'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 24
+  - level: {out: 6}
+- name: 'in 13'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 24
+  - level: {out: 6}
+- name: 'in 14'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 24
+  - level: {out: 7}
+- name: 'in 15'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 24
+  - level: {out: 7}
+- name: 'delay in 1 -> 2 (out 0 -> 1)'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 30
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wave: {out: '00000000111111'}
+- name: 'delay in 2 -> 1 (out 1 -> 0)'
+  steps:
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 30
+  - run: 'data merge block ~15 ~1 ~4 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wave: {out: '11111111000000'}

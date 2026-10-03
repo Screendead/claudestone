@@ -1,0 +1,30 @@
+name: furnace_power_locks_three_hoppers
+description: A repeater pointing into a furnace locks the hoppers above, beside and below it in the same update, and leaves a dropper two blocks above the furnace untriggered; so one repeater per furnace locks a furnace array slice's input tap, fuel tap and output hopper.
+traits: [container_based, compact]
+palette:
+  .: air
+  '#': stone
+  F: furnace[facing=north]
+  T: {name: top, block: 'hopper[facing=down]'}
+  S: {name: side, block: 'hopper[facing=east]'}
+  B: {name: bottom, block: 'hopper[facing=south]'}
+  D: {name: drop, block: 'dropper[facing=up]'}
+  r: repeater[facing=east]
+  a: {input: a}
+layers:
+  0: |
+    .B#.
+  1: |
+    SFra
+  2: |
+    .T..
+  3: |
+    .D..
+tests:
+- name: lock
+  truth_table: |
+    a | top side bottom drop
+    0 | 0   0    0      0
+    1 | 1   1    1      0
+  max_delay: 4
+  glitch_free: true

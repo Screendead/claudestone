@@ -1,0 +1,254 @@
+name: ref_librok_observer_encoder_serial
+description: >-
+  LiBRoK's TRANSMIT007 7-to-3 observer encoder, serial, rebuilt from the Logical Redstone Archive (mattbatwings), Discord https://discord.com/channels/1361854816837435433/1479225918621876276 (SOURCED: 7 levers and a send button in, one serial line out, 4 bits at 2t each, 8t after pressing send). 9x5x12. How it works (INFERRED from the layout, then confirmed by the traces): the 7 lever/lamp/observer pairs are the ENCODE006 encoder (see ref_librok_observer_encoder_7to3); its three 1t code pulses land on target blocks under three droppers (c0,c1,c2 at z=4), and each pulse moves that dropper's one item into its facing partner (d0,d1,d2 at z=5), so the code is stored as items. The send button cuts a wall torch, which turns off a chain of delay-2 repeaters (south side, y=1) one stage per 2 redstone ticks; they unmask four subtract-mode comparators that read the barrel (a constant start bit) and, through wool, d0,d1,d2. Each comparator that reads an item sends a pulse to its output repeater and to a repeater that triggers its d dropper, which hands the item back to c, so the memory clears as it is read; the four outputs meet on one dust line and a repeater (ser). Order on the line: start bit (barrel), then b0, b1, b2, 4 game ticks (2 redstone ticks) each. The schematic stores one wooden_axe in each of c0..c2 and the barrel (SOURCED, schem NBT); this harness places the build without block-entity items and the placement update fires the droppers, so every test inserts the items first. Harness changes: levers became redstone-block drivers l1..l7 (the harness only clicks levers on plain full blocks); the lamp under the button became stone so a real stone button (named send) can be clicked; the lever-to-code map l1..l7 = codes 2,3,6,7,1,4,5 is MEASURED on the ENCODE006 sibling. MEASURED: send_code_N for N=0..7 passes: ser rises 14 game ticks after the send click, then four 4-game-tick slots (start=1, b0, b1, b2) with ser high for each set bit; a second send with no new code outputs only the start bit (the items were consumed). Not tested: toggling a lever twice, or sending while a transmission is running.
+palette:
+  .: air
+  L: redstone_lamp
+  B: observer[facing=north]
+  C: yellow_wool
+  D: light_blue_wool
+  E: pink_wool
+  F: magenta_wool
+  G: redstone_wire[east=up,north=none,south=side,west=none]
+  H: redstone_wire[east=none,north=side,south=side,west=none]
+  I: redstone_wire[east=none,north=none,south=side,west=up]
+  J: target
+  (: redstone_wall_torch[facing=west]
+  K: redstone_wire[east=side,north=side,south=up,west=none]
+  M: repeater[delay=2,facing=west]
+  N: redstone_wire[east=side,north=none,south=up,west=side]
+  O: redstone_wire[east=none,north=none,south=up,west=side]
+  P: {name: send, block: 'stone_button[face=wall,facing=north]'}
+  Q: redstone_wire[east=side,north=none,south=side,west=none]
+  T: redstone_wire[east=none,north=none,south=side,west=side]
+  U: repeater[delay=4,facing=north]
+  V: yellow_stained_glass
+  W: redstone_wire[east=none,north=side,south=none,west=side]
+  X: lime_wool
+  Y: redstone_wire[east=side,north=side,south=none,west=none]
+  Z: pink_stained_glass
+  b: comparator[facing=north,mode=subtract]
+  f: redstone_wire[east=side,north=side,south=none,west=side]
+  h: redstone_wire[east=side,north=none,south=none,west=side]
+  i: redstone_wire[east=side,north=none,south=side,west=side]
+  j: redstone_wire[east=up,north=side,south=none,west=none]
+  k: redstone_wire[east=none,north=side,south=none,west=up]
+  l: repeater[delay=1,facing=south]
+  '1': {input: l1}
+  '2': {input: l2}
+  '3': {input: l3}
+  '4': {input: l4}
+  '5': {input: l5}
+  '6': {input: l6}
+  '7': {input: l7}
+  q: {name: c0, block: 'dropper[facing=south]'}
+  r: {name: c1, block: 'dropper[facing=south]'}
+  s: {name: c2, block: 'dropper[facing=south]'}
+  t: {name: d0, block: 'dropper[facing=north]'}
+  u: {name: d1, block: 'dropper[facing=north]'}
+  v: {name: d2, block: 'dropper[facing=north]'}
+  y: {name: bar, block: 'barrel[facing=up]'}
+  S: {name: stone_feed, block: stone}
+  g: repeater[delay=1,facing=north]
+  '@': {output: ser, block: 'repeater[delay=1,facing=north]'}
+layers:
+  0: |
+    .....1...
+    .....L...
+    .....B...
+    ...C.D.E.
+    .........
+    .........
+    FFFFFFFFF
+    .........
+    .........
+    .........
+    .........
+    .........
+  1: |
+    ....2.3..
+    ....L.L..
+    FF..B.B..
+    FF.GCHEI.
+    FF.J.J.J.
+    (F.......
+    KMNMNMNMO
+    FFFFFFFFF
+    .........
+    .F.F.F.F.
+    .FFFFFFF.
+    ....F....
+  2: |
+    .P...4...
+    .S...L...
+    QT.CIBGE.
+    UH.VWXYZ.
+    Yb.q.r.s.
+    .H.t.u.v.
+    .y.F.F.F.
+    YbfbfbfbW
+    .F.F.F.F.
+    .g.g.g.g.
+    .YhfifhW.
+    ....@....
+  3: |
+    ....5.6..
+    ....L.L..
+    ...QB.BT.
+    ...jC.Ek.
+    .........
+    ...F.F.F.
+    ...l.l.l.
+    .J.J.J.J.
+    .H.H.H.H.
+    .........
+    .........
+    .........
+  4: |
+    .....7...
+    .....L...
+    .....B...
+    ....hXh..
+    .........
+    .........
+    .........
+    .L.L.L.L.
+    .........
+    .........
+    .........
+    .........
+tests:
+- name: send_code_0
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_1
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l5: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111111110000000000000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_2
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l1: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111100001111000000000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_3
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l2: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111111111111000000000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_4
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l6: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111100000000111100000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_5
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l7: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111111110000111100000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_6
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l3: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111100001111111100000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}
+- name: send_code_7
+  settle: 30
+  steps:
+  - insert: {cell: c0, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c1, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: c2, item: wooden_axe, count: 1, clear: true}
+  - insert: {cell: d0, clear: true}
+  - insert: {cell: d1, clear: true}
+  - insert: {cell: d2, clear: true}
+  - insert: {cell: bar, item: wooden_axe, count: 1, clear: true}
+  - drive: {l4: 1}
+  - wait: 8
+  - use: send
+  - wave: {ser: '00000000000000111111111111111100000000'}
+  - wait: 30
+  - use: send
+  - wave: {ser: '00000000000000111100000000000000000000'}

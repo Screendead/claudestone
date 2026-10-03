@@ -1,0 +1,1172 @@
+name: ref_mattbatwings_counter_8bit_load
+description: "Rebuild of mattbatwings' 8-bit Counter with Load (a 'program counter'), Logical Redstone Archive COUNT001, https://discord.com/channels/1361854816837435433/1472420348317270228 (README SOURCED: counts up or loads a new number; inputs an 8-bit number, a Load button and a Count-up button; output 8-bit number; tested and functional). 8x4 footprint, 20 high: base at y1-3, then a 2-layer cell per bit at y5,7,...,19 (bit 0 at the bottom); output lamps at x5,z3, data levers at x0,z2, load button at (0,1,2), count button at (0,3,2). Harness changes: cyan wool -> white_wool; the lamp each lever sat on (x1,z2) is white_wool so the lever has a plain support (the original lamp only displayed the data; the comparator beside it reads the lever-powered block either way); levers named d0..d7, buttons btn_y1 (load) and btn_y3 (count), output lamps q0..q7. How it works (INFERRED from traces, MEASURED timings): the count half is COUNT003's design, a pulse (comparator minus delayed side) dropping a refreshed dust ladder whose stage k falls only when bits 0..k-1 are all 1, each bit a lock-glitch repeater T flip-flop (see ref_mattbatwings_counter_8bit_3x3). The load button pulses two vertical dust buses (x1 and x7, 8 bits tall) in the base: first every bit is set, then a per-bit comparator at x2 reading the lever-powered wool clears the bits whose lever is 0. MEASURED: counts 0..255 and wraps; loads 0x00, 0xFF, 0xA5, 0x5A, 0x01, 0x80, 0x7F and counts two on from each; count 0->1, 7->8, 127->128 and 255->0 show risers at +8 and fallers at +12 after the press (lamps); a load turns every lamp on at +6 and the lamps whose lever is 0 go dark at +16, so the load shows a transient all-ones for 10 gt (tested from 0x00 and from 0xFF with 0xA5 on the levers)."
+traits: [entityless, pistonless, torch_based]
+palette:
+  .: air
+  A: white_wool
+  B: repeater[delay=1,facing=east]
+  C: redstone_wire[east=side,north=none,south=none,west=side]
+  D: redstone_wire[east=up,north=none,south=none,west=side]
+  E: cyan_stained_glass
+  F: redstone_wire[east=side,north=none,south=side,west=none]
+  G: repeater[delay=3,facing=west]
+  H: comparator[facing=south,mode=subtract]
+  I: {name: btn_y1, block: 'stone_button[face=wall,facing=west]'}
+  S: {name: btn_y3, block: 'stone_button[face=wall,facing=west]'}
+  J: redstone_wire[east=side,north=side,south=none,west=side]
+  K: redstone_wire[east=none,north=side,south=none,west=side]
+  M: oak_wall_sign[facing=west,waterlogged=false]
+  N: redstone_wire[east=side,north=side,south=side,west=side]
+  O: redstone_wire[east=side,north=none,south=none,west=up]
+  '*': redstone_torch
+  P: repeater[delay=2,facing=east]
+  Q: redstone_wire[east=up,north=none,south=side,west=side]
+  T: target
+  U: repeater[delay=1,facing=north]
+  V: redstone_wire[east=none,north=none,south=side,west=side]
+  W: redstone_wire[east=side,north=none,south=up,west=none]
+  n: redstone_wall_torch[facing=north]
+  Y: comparator[facing=west,mode=subtract]
+  Z: repeater[delay=1,facing=west]
+  b: redstone_wire[east=none,north=up,south=none,west=side]
+  c: redstone_wire[east=none,north=up,south=side,west=none]
+  d: redstone_wire[east=none,north=side,south=up,west=none]
+  e: redstone_wire[east=side,north=none,south=side,west=side]
+  '0': {name: d0, block: 'lever[face=wall,facing=west]'}
+  f: {name: q0, block: redstone_lamp}
+  '1': {name: d1, block: 'lever[face=wall,facing=west]'}
+  g: {name: q1, block: redstone_lamp}
+  '2': {name: d2, block: 'lever[face=wall,facing=west]'}
+  h: {name: q2, block: redstone_lamp}
+  '3': {name: d3, block: 'lever[face=wall,facing=west]'}
+  i: {name: q3, block: redstone_lamp}
+  '4': {name: d4, block: 'lever[face=wall,facing=west]'}
+  j: {name: q4, block: redstone_lamp}
+  '5': {name: d5, block: 'lever[face=wall,facing=west]'}
+  k: {name: q5, block: redstone_lamp}
+  '6': {name: d6, block: 'lever[face=wall,facing=west]'}
+  l: {name: q6, block: redstone_lamp}
+  '7': {name: d7, block: 'lever[face=wall,facing=west]'}
+  m: {name: q7, block: redstone_lamp}
+  L: redstone_lamp
+layers:
+  0: |
+    ...AA.A.
+    ...AAA..
+    ..AAAA..
+    ........
+  1: |
+    ..ABCADE
+    ...FGH..
+    IACJCK..
+    ME......
+  2: |
+    .AN.EAEO
+    ...AAAA.
+    ..AAAA..
+    ........
+  3: |
+    .*.ACPQE
+    ...HPTUA
+    SACJCKA.
+    ME......
+  4: |
+    .A.*A..V
+    ..AAA..U
+    ..A.A.AA
+    ........
+  5: |
+    .WTTQE..
+    .EUUUn.E
+    0AYAZABb
+    .....f..
+  6: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  7: |
+    .WTTQE..
+    .EUUUn.E
+    1AYAZABb
+    .....g..
+  8: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  9: |
+    .WTTQE..
+    .EUUUn.E
+    2AYAZABb
+    .....h..
+  10: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  11: |
+    .WTTQE..
+    .EUUUn.E
+    3AYAZABb
+    .....i..
+  12: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  13: |
+    .WTTQE..
+    .EUUUn.E
+    4AYAZABb
+    .....j..
+  14: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  15: |
+    .WTTQE..
+    .EUUUn.E
+    5AYAZABb
+    .....k..
+  16: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  17: |
+    .WTTQE..
+    .EUUUn.E
+    6AYAZABb
+    .....l..
+  18: |
+    .E..EO..
+    .cAAAA.d
+    ..A.A.AE
+    ........
+  19: |
+    .FTTe...
+    ..UUU...
+    7AYAZABK
+    .....m..
+tests:
+- name: counts 0 to 255 and wraps
+  steps:
+  - {wait: 20}
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: load then count
+  steps:
+  - {wait: 20}
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - use: d0
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - use: d0
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 0}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - use: btn_y3
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+- name: count wave 0 to 1
+  steps:
+  - {wait: 20}
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - use: btn_y3
+  - wave:
+      q0: '000000001111111111111111'
+      q1: '000000000000000000000000'
+      q2: '000000000000000000000000'
+      q3: '000000000000000000000000'
+      q4: '000000000000000000000000'
+      q5: '000000000000000000000000'
+      q6: '000000000000000000000000'
+      q7: '000000000000000000000000'
+  - wait: 30
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: count wave 7 to 8
+  steps:
+  - {wait: 20}
+  - use: d0
+  - use: d1
+  - use: d2
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - use: btn_y3
+  - wave:
+      q0: '111111111111000000000000'
+      q1: '111111111111000000000000'
+      q2: '111111111111000000000000'
+      q3: '000000001111111111111111'
+      q4: '000000000000000000000000'
+      q5: '000000000000000000000000'
+      q6: '000000000000000000000000'
+      q7: '000000000000000000000000'
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: count wave 127 to 128
+  steps:
+  - {wait: 20}
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - use: btn_y3
+  - wave:
+      q0: '111111111111000000000000'
+      q1: '111111111111000000000000'
+      q2: '111111111111000000000000'
+      q3: '111111111111000000000000'
+      q4: '111111111111000000000000'
+      q5: '111111111111000000000000'
+      q6: '111111111111000000000000'
+      q7: '000000001111111111111111'
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+- name: count wave 255 to 0
+  steps:
+  - {wait: 20}
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - wait: 30
+  - use: btn_y3
+  - wave:
+      q0: '111111111111000000000000'
+      q1: '111111111111000000000000'
+      q2: '111111111111000000000000'
+      q3: '111111111111000000000000'
+      q4: '111111111111000000000000'
+      q5: '111111111111000000000000'
+      q6: '111111111111000000000000'
+      q7: '111111111111000000000000'
+  - wait: 30
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: load 0xA5 from 0 (every bit goes high at +6, zeros clear at +16)
+  steps:
+  - {wait: 20}
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - wave:
+      q0: '000000111111111111111111'
+      q1: '000000111111111100000000'
+      q2: '000000111111111111111111'
+      q3: '000000111111111100000000'
+      q4: '000000111111111100000000'
+      q5: '000000111111111111111111'
+      q6: '000000111111111100000000'
+      q7: '000000111111111111111111'
+  - wait: 20
+- name: load 0xA5 from 0xFF (zero bits clear at +16)
+  steps:
+  - {wait: 20}
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - {wait: 10}
+  - use: btn_y1
+  - {wait: 30}
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - {wait: 10}
+  - use: btn_y1
+  - wave:
+      q0: '111111111111111111111111'
+      q1: '111111111111111100000000'
+      q2: '111111111111111111111111'
+      q3: '111111111111111100000000'
+      q4: '111111111111111100000000'
+      q5: '111111111111111111111111'
+      q6: '111111111111111100000000'
+      q7: '111111111111111111111111'
+  - wait: 20
