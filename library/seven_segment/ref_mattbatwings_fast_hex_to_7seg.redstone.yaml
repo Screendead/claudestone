@@ -1,0 +1,509 @@
+name: ref_mattbatwings_fast_hex_to_7seg
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive NUMDISPLAY002 ''Fast Hex to 7seg'' (author and endorser mattbatwings, tags Tested & Functional and Recommended; https://discord.com/channels/1361854816837435433/1472415614969577495). README: ''A fast design to show a hex number. Synced, but very tall.'' Input 4b. Source 42x23x5 with four lever+lamp inputs and signs; here 40x23x5 (harness changes: each lever, the lamp it sits on and its sign are gone, and a redstone-block input d0..d3 (d0 = least significant, d0 at y=2 .. d3 at y=8) sits where the lamp was, one cell east of the dust, so the truth table can drive it; the glass that only mounted the signs is removed). Output: a 5 wide x 9 tall lamp screen on the x=0 face (viewer west of it looking east), 45 lamps all named zZyY: a, g, d are three lamps at y=19, 15, 11 (z=1..3), f/b are z=0/z=4 at y=16..18, e/c are z=0/z=4 at y=12..14. MEASURED on a satellite: all 16 inputs light exactly the standard 7-segment pattern on all 45 lamps (the six corner lamps stay dark); 9 has no bottom bar and 6 has a top bar (the design''s choice; 7 is a,b,c). Delay 22 gt worst (lamps rise 14 or 18, fall 18 or 22: the f/b/e/c lamps next to the middle row, y=14 and y=18, are one 4 gt step later); the second test re-runs the table with glitch_free and passes, so no lamp flickers on any input change, which backs the README''s ''synced''. How it works (INFERRED from the layout, then confirmed by the table): each input is a dust line on the bus at its own y (y=2,4,6,8) running west over wool; where it powers the wool below, a wall torch (inverted) or a repeater (direct) on the wool''s north side feeds a dust cell, in column pattern n/C alternating per column for bit 0, nnCC for bit 1, nnnnCCCC for bit 2 and 8+8 for bit 3, so column i of 16 collects the OR of ''this bit differs from i'' (a four-input NOR in dust, with the OR done by dust and the mismatch terms stepped up the column on glass); a torch on top of the column''s top wool inverts it, giving a one-hot line per hex value. Each one-hot line then climbs a vertical dust ladder through seven stacked bus layers (y=10..22), one per segment, and a repeater at the foot of that line on a segment''s layer pushes into the segment''s bus only where that segment is on for that digit, so a segment bus is the OR of its digits; the buses end in the lamp wall (a, g, d through target blocks into the horizontal lamps, f/b/e/c through torch stages up the vertical lamps). A bus at y=2,4,6,8 has one repeater (the H) in the same place on every input line to equalise the paths. Why tall: one layer per input bit and one per segment, each only 5 blocks deep, 23 layers in all.'
+palette:
+  .: air
+  A: orange_stained_glass
+  B: redstone_wire[east=none,north=up,south=side,west=none]
+  n: redstone_wall_torch[facing=north]
+  C: repeater[delay=1,facing=south]
+  D: orange_wool
+  E: redstone_wire[east=none,north=side,south=up,west=none]
+  G: redstone_wire[east=side,north=none,south=none,west=side]
+  H: repeater[delay=1,facing=east]
+  J: redstone_wire[east=none,north=side,south=side,west=none]
+  '*': redstone_torch
+  K: lime_stained_glass
+  M: light_blue_wool
+  N: lime_wool
+  O: repeater[delay=1,facing=north]
+  P: redstone_wire[east=side,north=side,south=none,west=none]
+  Q: redstone_wire[east=side,north=side,south=none,west=side]
+  T: redstone_wire[east=none,north=side,south=none,west=side]
+  U: target
+  V: redstone_wire[east=none,north=none,south=side,west=side]
+  W: redstone_wire[east=side,north=side,south=side,west=side]
+  X: repeater[delay=2,facing=east]
+  (: redstone_wall_torch[facing=west]
+  Y: redstone_wire[east=side,north=none,south=none,west=up]
+  ): redstone_wall_torch[facing=east]
+  Z: redstone_wire[east=up,north=none,south=none,west=side]
+  b: redstone_wire[east=none,north=none,south=up,west=side]
+  a:
+    input: d0
+  c:
+    input: d1
+  d:
+    input: d2
+  e:
+    input: d3
+  f:
+    name: z0y11
+    block: redstone_lamp
+  g:
+    name: z1y11
+    block: redstone_lamp
+  h:
+    name: z2y11
+    block: redstone_lamp
+  i:
+    name: z3y11
+    block: redstone_lamp
+  j:
+    name: z4y11
+    block: redstone_lamp
+  k:
+    name: z0y12
+    block: redstone_lamp
+  l:
+    name: z1y12
+    block: redstone_lamp
+  m:
+    name: z2y12
+    block: redstone_lamp
+  o:
+    name: z3y12
+    block: redstone_lamp
+  p:
+    name: z4y12
+    block: redstone_lamp
+  q:
+    name: z0y13
+    block: redstone_lamp
+  r:
+    name: z1y13
+    block: redstone_lamp
+  s:
+    name: z2y13
+    block: redstone_lamp
+  t:
+    name: z3y13
+    block: redstone_lamp
+  u:
+    name: z4y13
+    block: redstone_lamp
+  v:
+    name: z0y14
+    block: redstone_lamp
+  w:
+    name: z1y14
+    block: redstone_lamp
+  x:
+    name: z2y14
+    block: redstone_lamp
+  y:
+    name: z3y14
+    block: redstone_lamp
+  z:
+    name: z4y14
+    block: redstone_lamp
+  '0':
+    name: z0y15
+    block: redstone_lamp
+  '1':
+    name: z1y15
+    block: redstone_lamp
+  '2':
+    name: z2y15
+    block: redstone_lamp
+  '3':
+    name: z3y15
+    block: redstone_lamp
+  '4':
+    name: z4y15
+    block: redstone_lamp
+  '5':
+    name: z0y16
+    block: redstone_lamp
+  '6':
+    name: z1y16
+    block: redstone_lamp
+  '7':
+    name: z2y16
+    block: redstone_lamp
+  '8':
+    name: z3y16
+    block: redstone_lamp
+  '9':
+    name: z4y16
+    block: redstone_lamp
+  '!':
+    name: z0y17
+    block: redstone_lamp
+  '#':
+    name: z1y17
+    block: redstone_lamp
+  $:
+    name: z2y17
+    block: redstone_lamp
+  '%':
+    name: z3y17
+    block: redstone_lamp
+  '&':
+    name: z4y17
+    block: redstone_lamp
+  +:
+    name: z0y18
+    block: redstone_lamp
+  ',':
+    name: z1y18
+    block: redstone_lamp
+  '-':
+    name: z2y18
+    block: redstone_lamp
+  /:
+    name: z3y18
+    block: redstone_lamp
+  ':':
+    name: z4y18
+    block: redstone_lamp
+  ;:
+    name: z0y19
+    block: redstone_lamp
+  <:
+    name: z1y19
+    block: redstone_lamp
+  '=':
+    name: z2y19
+    block: redstone_lamp
+  '>':
+    name: z3y19
+    block: redstone_lamp
+  '?':
+    name: z4y19
+    block: redstone_lamp
+layers:
+  0: '..........................................
+
+    ..........................................
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    ...........A...A...A...A...A...A...A...A..
+
+    ..........................................
+
+    '
+  1: '..........................................
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .........B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    .........n.C.n.C.n.C.n.C.n.C.n.C.n.C.n.C..
+
+    .........DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD..
+
+    '
+  2: '..........................................
+
+    .........E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .............A.A.....A.A.....A.A.....A.A..
+
+    .........GGGGGGGGGGGGGGGHGGGGGGGGGGGGGGGa.
+
+    '
+  3: '..........................................
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .........B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    .........n.n.C.C.n.n.C.C.n.n.C.C.n.n.C.C..
+
+    .........DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD..
+
+    '
+  4: '..........................................
+
+    .........E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .................A.A.A.A.........A.A.A.A..
+
+    .........GGGGGGGGGGGGGGGHGGGGGGGGGGGGGGGc.
+
+    '
+  5: '..........................................
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .........B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    .........n.n.n.n.C.C.C.C.n.n.n.n.C.C.C.C..
+
+    .........DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD..
+
+    '
+  6: '..........................................
+
+    .........E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .........................A.A.A.A.A.A.A.A..
+
+    .........GGGGGGGGGGGGGGGHGGGGGGGGGGGGGGGd.
+
+    '
+  7: '..........................................
+
+    .........A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A..
+
+    .........B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    .........n.n.n.n.n.n.n.n.C.C.C.C.C.C.C.C..
+
+    .........DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD..
+
+    '
+  8: '.........D.D.D.D.D.D.D.D.D.D.D.D.D.D.D.D..
+
+    .........J.J.J.J.J.J.J.J.J.J.J.J.J.J.J.J..
+
+    ..........................................
+
+    ..........................................
+
+    .........GGGGGGGGGGGGGGGHGGGGGGGGGGGGGGGe.
+
+    '
+  9: '.........*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*..
+
+    ..........................................
+
+    .........K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    ......M..N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    ......MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  10: '.........N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    ..M......N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    ..MMMMM..B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    ..M...B....O.O.O.O.....O...O.O...O.O...O..
+
+    ......PGHGGQGQGQGQGGGGGQHGGQGQGGGQGQGGGT..
+
+    '
+  11: 'f..M.....J.J.J.J.J.J.J.J.J.J.J.J.J.J.J.J..
+
+    gUV......E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    hUWXGGV..K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    iUT......N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    j..M..MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  12: 'k(MW.MMM..................................
+
+    l......M.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    m......M.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    o......M.....O...O.O.O.O.O.O.O.O.O...O.O..
+
+    p(MW.MYGHGGGGQGGGQGQGQGQHQGQGQGQGQGGGQGT..
+
+    '
+  13: 'qM)(MGGV..................................
+
+    r......J.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    s......J.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    t......E.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    uM)(MG.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  14: 'v(M.......................................
+
+    w.M......K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    x.MMMMM..B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    y.M...M..O.O.O.O.O.O...O...O.......O...O..
+
+    z(M....PHQGQGQGQGQGQGGGQHGGQGGGGGGGQGGGT..
+
+    '
+  15: '0..M......................................
+
+    1UV......E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    2UWXGGV..K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    3UT...E..N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    4..M..MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  16: '5(MW.MMM..................................
+
+    6......M.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    7........B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    8........O.O.O...O.O.O.O...O.O.O.O.O......
+
+    9(MW.MPGHQGQGQGGGQGQGQGQHGGQGQGQGQGQGGGT..
+
+    '
+  17: '!M)(MGGV..................................
+
+    #......E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    $......M.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    %........N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    &M)(MZMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  18: '+(M.......................................
+
+    ,.M......K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    -.MMMM.E.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    /.M....M.....O.....O.O.O.O.....O.O.O.O.O..
+
+    :(M...GGHGGGGQGGGGGQGQGQHQGGGGGQGQGQGQGT..
+
+    '
+  19: ';.........................................
+
+    <UV......E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    =UWXGZM..K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    >UT....E.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    ?......MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  20: '..........................................
+
+    .........K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    ......b..B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B..
+
+    ......M..O.O...O.O.O.O.O...O.O.O.......O..
+
+    .......PHQGQGGGQGQGQGQGQHGGQGQGQGGGGGGGT..
+
+    '
+  21: '..........................................
+
+    .........E.E.E.E.E.E.E.E.E.E.E.E.E.E.E.E..
+
+    .........K.K.K.K.K.K.K.K.K.K.K.K.K.K.K.K..
+
+    ......E..N.N.N.N.N.N.N.N.N.N.N.N.N.N.N.N..
+
+    ......MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM..
+
+    '
+  22: '..........................................
+
+    ..........................................
+
+    .........J.J.J.J.J.J.J.J.J.J.J.J.J.J.J.J..
+
+    .........O.O...O...O.O.O.O.O.O...O.O...O..
+
+    ......PGHQGQGGGQGGGQGQGQHQGQGQGGGQGQGGGT..
+
+    '
+tests:
+- name: hex digit on all 45 lamps
+  truth_table: 'd0 d1 d2 d3 | z0y11 z1y11 z2y11 z3y11 z4y11 z0y12 z1y12 z2y12 z3y12 z4y12 z0y13 z1y13 z2y13 z3y13 z4y13 z0y14 z1y14 z2y14 z3y14 z4y14 z0y15 z1y15 z2y15 z3y15 z4y15 z0y16 z1y16 z2y16 z3y16 z4y16 z0y17 z1y17 z2y17 z3y17 z4y17 z0y18 z1y18 z2y18 z3y18 z4y18 z0y19 z1y19 z2y19 z3y19 z4y19
+
+    0 0 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    1 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+
+    0 1 0 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+
+    1 1 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+
+    0 0 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+
+    1 0 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    0 1 1 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    1 1 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+
+    0 0 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    1 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    0 1 0 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    1 1 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+
+    0 0 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    1 0 1 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+
+    0 1 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    1 1 1 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    '
+  max_delay: 40
+- name: glitch free
+  glitch_free: true
+  truth_table: 'd0 d1 d2 d3 | z0y11 z1y11 z2y11 z3y11 z4y11 z0y12 z1y12 z2y12 z3y12 z4y12 z0y13 z1y13 z2y13 z3y13 z4y13 z0y14 z1y14 z2y14 z3y14 z4y14 z0y15 z1y15 z2y15 z3y15 z4y15 z0y16 z1y16 z2y16 z3y16 z4y16 z0y17 z1y17 z2y17 z3y17 z4y17 z0y18 z1y18 z2y18 z3y18 z4y18 z0y19 z1y19 z2y19 z3y19 z4y19
+
+    0 0 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    1 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+
+    0 1 0 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+
+    1 1 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+
+    0 0 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+
+    1 0 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    0 1 1 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    1 1 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+
+    0 0 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    1 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    0 1 0 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+
+    1 1 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+
+    0 0 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    1 0 1 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+
+    0 1 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    1 1 1 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+
+    '
+  max_delay: 40
+traits:
+- silent
+- pistonless
+- entityless
+- vertical
+- torch_based

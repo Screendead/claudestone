@@ -1,0 +1,1347 @@
+name: ref_nano_passthrough_display
+description: 'Rebuild of PIXDISPLAY001 Passthrough Display (Nano, Omeganx, TheWildJarvi, Penscii; endorsed by mattbatwings; Recommended, Tested & Functional; https://discord.com/channels/1361854816837435433/1472413166095827109). SOURCED: the README says only "a display that allows for multiple XY plotting at once by having one decoder pass through the other"; the .schem is 22x25x25 and its block entities hold 144 barrels with one redstone each (constant 1 for a comparator) and 256 comparators. MEASURED (sweeps below): a 16x16 lamp wall at x=0 (row = y-9 from y=9, column = z from z=0) shown by two ports, A and B, each with a 3-bit row address and a 3-bit column address (bit0 at y=2, bit1 at y=4, bit2 at y=6; rows on the x=10/x=18 levers a_row*/b_row*, columns on the x=12/x=20 levers a_col*/b_col*), so a port lights one 2x2 block of an 8x8 grid; the lit lamps are exactly block A union block B for all 64 positions of A (B parked at 7,7), all 64 of B (A parked at 7,7) and 16 pairs including same-row, same-column and coinciding ones, with no ghost at the crossing points. Idle (all levers off) lights the block at row 0, column 0. Delay 30 gt worst (rise 22, fall 30; lamp on after the input changes, lamp off after it falls), of which 2 gt is the input repeater below, so 20 and 28 gt from a lever click. Harness changes: the real levers sit on redstone lamps, which the harness cannot click, so each lever is a fixture repeater at z=24 (hard-powering its lamp as a lever does) fed by an input driver at z=25 (with a fixture stone under it); size 22x25x24 leaves those out. Barrels carry {Items:[redstone x1]} (the CustomName was dropped). Lamp counts are read by cloning the lit lamps of the wall (clone ... filtered redstone_lamp[lit=true], whose result is the count) to x=30. INFERRED from traces: each address bit is inverted by a torch and climbs a dust-and-glass ladder; the row bits feed a 3-input NOR at each even layer (torch or repeater per bit) whose repeater drives a 15-block dust line along z that stays dark only for the selected row; the column bits make one-hot vertical dust wires beside the odd z rows; a subtract comparator with a one-item barrel behind it (1 minus the row and column lines) is the pixel AND, and it feeds the barrel at the even column beside it; the other port enters that barrel through a subtract comparator whose side is held at 14, so only a full-strength 15 passes (as 1) and decayed dust does not; one torch pair then lights the 2x2 block (a torch beside the odd layer''s lamp and the wool above it for the layer above, and a second torch on the same wool for the odd column). Environment note (MEASURED, cause not found): on dsat2 alone this plot kept 27 extra lamps lit at idle (31 lit instead of 4, with or without sprint, after a forced clone update) while the design passed on the other 9 servers tried and seg_lamp_3x5 passed on dsat2.'
+traits: [torch_based, comparator_based, container_based, pistonless, entityless]
+palette:
+  .: air
+  A: lime_stained_glass
+  B: redstone_wire[east=side,north=none,south=none,west=up]
+  C: repeater[delay=1,facing=east]
+  D: lime_wool
+  '(': redstone_wall_torch[facing=west]
+  E: redstone_wire[east=up,north=none,south=none,west=side]
+  F: redstone_wire[east=none,north=side,south=side,west=none]
+  G: repeater[delay=2,facing=south]
+  H: redstone_wire[east=side,north=none,south=none,west=side]
+  I: redstone_wire[east=none,north=none,south=side,west=side]
+  n: redstone_wall_torch[facing=north]
+  J: redstone_wire[east=side,north=side,south=side,west=side]
+  L: redstone_lamp
+  M: redstone_wire[east=side,north=up,south=none,west=none]
+  N: redstone_wire[east=none,north=side,south=up,west=none]
+  O: redstone_wire[east=none,north=up,south=side,west=none]
+  ')': redstone_wall_torch[facing=east]
+  P: light_gray_wool
+  R: redstone_block
+  '*': redstone_torch
+  Q: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}
+  T: comparator[facing=east,mode=subtract]
+  u: redstone_wall_torch[facing=south]
+  U: comparator[facing=south,mode=subtract]
+  V: redstone_wire[east=side,north=side,south=side,west=none]
+  W: repeater[delay=1,facing=south]
+  X: redstone_wire[east=side,north=none,south=side,west=none]
+  Y: redstone_wire[east=side,north=none,south=side,west=side]
+  Z: redstone_wire[east=none,north=side,south=none,west=side]
+  m: {output: n00, block: redstone_lamp}
+  o: {output: n11, block: redstone_lamp}
+  p: {output: n_far, block: redstone_lamp}
+  q: {output: n_corner, block: redstone_lamp}
+  s: {block: smooth_stone, fixture: true}
+  r: {block: 'repeater[delay=1,facing=south]', fixture: true}
+  a: {input: a_row0}
+  b: {input: a_col0}
+  c: {input: b_row0}
+  d: {input: b_col0}
+  e: {input: a_row1}
+  f: {input: a_col1}
+  g: {input: b_row1}
+  h: {input: b_col1}
+  i: {input: a_row2}
+  j: {input: a_col2}
+  k: {input: b_row2}
+  l: {input: b_col2}
+layers:
+  0: |
+    ......................
+    ..........AA......AA..
+    ......................
+    ..........A.......A...
+    ......................
+    ..........AA......AA..
+    ......................
+    ..........A.......A...
+    ......................
+    ..........AA......AA..
+    ......................
+    ..........A.......A...
+    ......................
+    ..........AA......AA..
+    ......................
+    ..........A.......A...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  1: |
+    ......................
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    ............D.......D.
+    ............D.......D.
+    .......DDDD.D..DDDD.D.
+    ............D.......D.
+    ............D.......D.
+    ..........D.D.....D.D.
+    ......................
+    ..........s.s.....s.s.
+    ......................
+  2: |
+    ......................
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............F.......F.
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............G.......G.
+    ............F.......F.
+    ............F.......F.
+    ......ABHHI.F.ABHHI.F.
+    ..........n.F.....n.F.
+    ..........D.F.....D.F.
+    ..........J.F.....J.F.
+    ..........L.L.....L.L.
+    ..........r.r.....r.r.
+    ..........a.b.....c.d.
+  3: |
+    ......................
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    ............D.......D.
+    ......A.....D.A.....D.
+    ......M..DD.D.M..DD.D.
+    ............D.......D.
+    ............D.......D.
+    ..........D.D.....D.D.
+    ......................
+    ..........s.s.....s.s.
+    ......................
+  4: |
+    ......................
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EAAF....EAAF.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............F.......F.
+    .........EA.F....EA.F.
+    ............G.......G.
+    ............F.......F.
+    ......N.....F.N.....F.
+    ......A.ABI.F.A.ABI.F.
+    ..........n.F.....n.F.
+    ..........D.F.....D.F.
+    ..........J.F.....J.F.
+    ..........L.L.....L.L.
+    ..........r.r.....r.r.
+    ..........e.f.....g.h.
+  5: |
+    ......................
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........ABCD....ABCD.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    .........AB(D....AB(D.
+    ............D.......D.
+    ............D.......D.
+    ......A.A...D.A.A...D.
+    ......O.M...D.O.M...D.
+    ............D.......D.
+    ............D.......D.
+    ..........D.D.....D.D.
+    ......................
+    ..........s.s.....s.s.
+    ......................
+  6: |
+    ......................
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............F.......F.
+    .......(DH..F..(DH..F.
+    ............G.......G.
+    ............F.......F.
+    ......N.N...F.N.N...F.
+    ......A.A...F.A.A...F.
+    ..........n.F.....n.F.
+    ..........D.F.....D.F.
+    ..........J.F.....J.F.
+    ..........L.L.....L.L.
+    ..........r.r.....r.r.
+    ..........i.j.....k.l.
+  7: |
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    .......D)......D).....
+    ......................
+    ......................
+    ......................
+    ......F.F.....F.F.....
+    ......D.D.D...D.D.D...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  8: |
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.DR..DDD.DR
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.....DDD...
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.DR..DDD.DR
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.....DDD...
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.DR..DDD.DR
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.....DDD...
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.DR..DDD.DR
+    ...P..P.P.P.P.P.P.P.P.
+    ...PP...DDD.....DDD...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......*.*.*...*.*.*...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  9: |
+    m(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ......A.A.A...A.A.A...
+    ......................
+    ......D.D.D...D.D.D...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+  10: |
+    LP.P..P.P.PFP.P.P.PFP.
+    oP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......W.W.W...W.W.W...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  11: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ........A.A.....A.A...
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  12: |
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......n.W.W...n.W.W...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  13: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ......A...A...A...A...
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  14: |
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......W.n.W...W.n.W...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  15: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ..........A.......A...
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  16: |
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......n.n.W...n.n.W...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  17: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ......A.A.....A.A.....
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  18: |
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......W.W.n...W.W.n...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  19: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ........A.......A.....
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  20: |
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......n.W.n...n.W.n...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  21: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCDVH.ABUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu.ABUCD...ABUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ......A.......A.......
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  22: |
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDF...EADDF..
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFDR.EADDFDR
+    LP.P..P.P.PFP.P.P.PFP.
+    LP.PP..EADDFD..EADDFD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......W.n.n...W.n.n...
+    ......D.D.D...D.D.D...
+    ......N.N.N...N.N.N...
+    ......A.A.A...A.A.A...
+    ......................
+    ......................
+    ......................
+    ......................
+  23: |
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCDVH..HUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCD....HUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCDVH..HUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCD....HUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCDVH..HUCDVH
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCD....HUCD..
+    L(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCDVH..HUCDVH
+    p(PC(PJPCQJDTPJPCQJDTP
+    L(PHCu..HUCD....HUCD..
+    .........Q.D.....Q.D..
+    ......DDDDDD..DDDDDD..
+    ......................
+    ......................
+    ......A.A.A...A.A.A...
+    ......O.O.O...O.O.O...
+    ......................
+    ......................
+    ......................
+    ......................
+  24: |
+    LP........PF......PF..
+    LP.........FD......FD.
+    LP........PF......PF..
+    LP.........F.......F..
+    LP........PF......PF..
+    LP.........FD......FD.
+    LP........PF......PF..
+    LP.........F.......F..
+    LP........PF......PF..
+    LP.........FD......FD.
+    LP........PF......PF..
+    LP.........F.......F..
+    LP........PF......PF..
+    LP.........FD......FD.
+    LP........PF......PF..
+    qP.........FD......FD.
+    ...........W.......W..
+    ......XHYHYZ..XHYHYZ..
+    ......n.n.n...n.n.n...
+    ......D.D.D...D.D.D...
+    ......F.F.F...F.F.F...
+    ......................
+    ......................
+    ......................
+    ......................
+    ......................
+tests:
+- name: timing
+  truth_table: |
+    a_row0 a_row1 a_row2 a_col0 a_col1 a_col2 b_row0 b_row1 b_row2 b_col0 b_col1 b_col2 | n00 n11 n_far n_corner
+    0 0 0 0 0 0 0 0 0 0 0 0 | 1 1 0 0
+    1 1 1 1 1 1 0 0 0 0 0 0 | 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 | 0 0 1 1
+    0 0 0 0 0 0 1 1 1 1 1 1 | 1 1 1 1
+    0 0 0 0 0 0 0 0 0 0 0 0 | 1 1 0 0
+    1 1 1 1 1 1 1 1 1 1 1 1 | 0 0 1 1
+    1 1 1 0 0 0 0 0 0 1 1 1 | 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 | 1 1 0 0
+  delay: 30
+  delays:
+    n00: {rise: 22, fall: 30}
+    n11: {rise: 22, fall: 30}
+    n_far: {rise: 22, fall: 30}
+    n_corner: {rise: 22, fall: 30}
+- name: idle
+  settle: 60
+  steps:
+  - run: scoreboard objectives add pt dummy
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 4 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true]
+  finally: [scoreboard objectives remove pt]
+- name: port_a_all_64
+  initial: {b_row0: 1, b_row1: 1, b_row2: 1, b_col0: 1, b_col1: 1, b_col2: 1}
+  settle: 60
+  steps:
+  - run: scoreboard objectives add pt dummy
+  - drive: {a_row0: 0, a_row1: 0, a_row2: 0, a_col0: 0, a_col1: 0, a_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~2 redstone_lamp[lit=true] if block ~0 ~9 ~3 redstone_lamp[lit=true] if block ~0 ~10 ~2 redstone_lamp[lit=true] if block ~0 ~10 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~6 redstone_lamp[lit=true] if block ~0 ~9 ~7 redstone_lamp[lit=true] if block ~0 ~10 ~6 redstone_lamp[lit=true] if block ~0 ~10 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~4 redstone_lamp[lit=true] if block ~0 ~9 ~5 redstone_lamp[lit=true] if block ~0 ~10 ~4 redstone_lamp[lit=true] if block ~0 ~10 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~12 redstone_lamp[lit=true] if block ~0 ~9 ~13 redstone_lamp[lit=true] if block ~0 ~10 ~12 redstone_lamp[lit=true] if block ~0 ~10 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~14 redstone_lamp[lit=true] if block ~0 ~9 ~15 redstone_lamp[lit=true] if block ~0 ~10 ~14 redstone_lamp[lit=true] if block ~0 ~10 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~10 redstone_lamp[lit=true] if block ~0 ~9 ~11 redstone_lamp[lit=true] if block ~0 ~10 ~10 redstone_lamp[lit=true] if block ~0 ~10 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~8 redstone_lamp[lit=true] if block ~0 ~9 ~9 redstone_lamp[lit=true] if block ~0 ~10 ~8 redstone_lamp[lit=true] if block ~0 ~10 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~8 redstone_lamp[lit=true] if block ~0 ~11 ~9 redstone_lamp[lit=true] if block ~0 ~12 ~8 redstone_lamp[lit=true] if block ~0 ~12 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~10 redstone_lamp[lit=true] if block ~0 ~11 ~11 redstone_lamp[lit=true] if block ~0 ~12 ~10 redstone_lamp[lit=true] if block ~0 ~12 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~14 redstone_lamp[lit=true] if block ~0 ~11 ~15 redstone_lamp[lit=true] if block ~0 ~12 ~14 redstone_lamp[lit=true] if block ~0 ~12 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~12 redstone_lamp[lit=true] if block ~0 ~11 ~13 redstone_lamp[lit=true] if block ~0 ~12 ~12 redstone_lamp[lit=true] if block ~0 ~12 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~4 redstone_lamp[lit=true] if block ~0 ~11 ~5 redstone_lamp[lit=true] if block ~0 ~12 ~4 redstone_lamp[lit=true] if block ~0 ~12 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~6 redstone_lamp[lit=true] if block ~0 ~11 ~7 redstone_lamp[lit=true] if block ~0 ~12 ~6 redstone_lamp[lit=true] if block ~0 ~12 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~2 redstone_lamp[lit=true] if block ~0 ~11 ~3 redstone_lamp[lit=true] if block ~0 ~12 ~2 redstone_lamp[lit=true] if block ~0 ~12 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~0 redstone_lamp[lit=true] if block ~0 ~11 ~1 redstone_lamp[lit=true] if block ~0 ~12 ~0 redstone_lamp[lit=true] if block ~0 ~12 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~0 redstone_lamp[lit=true] if block ~0 ~15 ~1 redstone_lamp[lit=true] if block ~0 ~16 ~0 redstone_lamp[lit=true] if block ~0 ~16 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~2 redstone_lamp[lit=true] if block ~0 ~15 ~3 redstone_lamp[lit=true] if block ~0 ~16 ~2 redstone_lamp[lit=true] if block ~0 ~16 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~6 redstone_lamp[lit=true] if block ~0 ~15 ~7 redstone_lamp[lit=true] if block ~0 ~16 ~6 redstone_lamp[lit=true] if block ~0 ~16 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~4 redstone_lamp[lit=true] if block ~0 ~15 ~5 redstone_lamp[lit=true] if block ~0 ~16 ~4 redstone_lamp[lit=true] if block ~0 ~16 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~12 redstone_lamp[lit=true] if block ~0 ~15 ~13 redstone_lamp[lit=true] if block ~0 ~16 ~12 redstone_lamp[lit=true] if block ~0 ~16 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~14 redstone_lamp[lit=true] if block ~0 ~15 ~15 redstone_lamp[lit=true] if block ~0 ~16 ~14 redstone_lamp[lit=true] if block ~0 ~16 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~10 redstone_lamp[lit=true] if block ~0 ~15 ~11 redstone_lamp[lit=true] if block ~0 ~16 ~10 redstone_lamp[lit=true] if block ~0 ~16 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~8 redstone_lamp[lit=true] if block ~0 ~15 ~9 redstone_lamp[lit=true] if block ~0 ~16 ~8 redstone_lamp[lit=true] if block ~0 ~16 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~8 redstone_lamp[lit=true] if block ~0 ~13 ~9 redstone_lamp[lit=true] if block ~0 ~14 ~8 redstone_lamp[lit=true] if block ~0 ~14 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~10 redstone_lamp[lit=true] if block ~0 ~13 ~11 redstone_lamp[lit=true] if block ~0 ~14 ~10 redstone_lamp[lit=true] if block ~0 ~14 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~14 redstone_lamp[lit=true] if block ~0 ~13 ~15 redstone_lamp[lit=true] if block ~0 ~14 ~14 redstone_lamp[lit=true] if block ~0 ~14 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~12 redstone_lamp[lit=true] if block ~0 ~13 ~13 redstone_lamp[lit=true] if block ~0 ~14 ~12 redstone_lamp[lit=true] if block ~0 ~14 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~4 redstone_lamp[lit=true] if block ~0 ~13 ~5 redstone_lamp[lit=true] if block ~0 ~14 ~4 redstone_lamp[lit=true] if block ~0 ~14 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~6 redstone_lamp[lit=true] if block ~0 ~13 ~7 redstone_lamp[lit=true] if block ~0 ~14 ~6 redstone_lamp[lit=true] if block ~0 ~14 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~2 redstone_lamp[lit=true] if block ~0 ~13 ~3 redstone_lamp[lit=true] if block ~0 ~14 ~2 redstone_lamp[lit=true] if block ~0 ~14 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~0 redstone_lamp[lit=true] if block ~0 ~13 ~1 redstone_lamp[lit=true] if block ~0 ~14 ~0 redstone_lamp[lit=true] if block ~0 ~14 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~0 redstone_lamp[lit=true] if block ~0 ~21 ~1 redstone_lamp[lit=true] if block ~0 ~22 ~0 redstone_lamp[lit=true] if block ~0 ~22 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~2 redstone_lamp[lit=true] if block ~0 ~21 ~3 redstone_lamp[lit=true] if block ~0 ~22 ~2 redstone_lamp[lit=true] if block ~0 ~22 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~6 redstone_lamp[lit=true] if block ~0 ~21 ~7 redstone_lamp[lit=true] if block ~0 ~22 ~6 redstone_lamp[lit=true] if block ~0 ~22 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~4 redstone_lamp[lit=true] if block ~0 ~21 ~5 redstone_lamp[lit=true] if block ~0 ~22 ~4 redstone_lamp[lit=true] if block ~0 ~22 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~12 redstone_lamp[lit=true] if block ~0 ~21 ~13 redstone_lamp[lit=true] if block ~0 ~22 ~12 redstone_lamp[lit=true] if block ~0 ~22 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~14 redstone_lamp[lit=true] if block ~0 ~21 ~15 redstone_lamp[lit=true] if block ~0 ~22 ~14 redstone_lamp[lit=true] if block ~0 ~22 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~10 redstone_lamp[lit=true] if block ~0 ~21 ~11 redstone_lamp[lit=true] if block ~0 ~22 ~10 redstone_lamp[lit=true] if block ~0 ~22 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~8 redstone_lamp[lit=true] if block ~0 ~21 ~9 redstone_lamp[lit=true] if block ~0 ~22 ~8 redstone_lamp[lit=true] if block ~0 ~22 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~8 redstone_lamp[lit=true] if block ~0 ~23 ~9 redstone_lamp[lit=true] if block ~0 ~24 ~8 redstone_lamp[lit=true] if block ~0 ~24 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~10 redstone_lamp[lit=true] if block ~0 ~23 ~11 redstone_lamp[lit=true] if block ~0 ~24 ~10 redstone_lamp[lit=true] if block ~0 ~24 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 4 if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~12 redstone_lamp[lit=true] if block ~0 ~23 ~13 redstone_lamp[lit=true] if block ~0 ~24 ~12 redstone_lamp[lit=true] if block ~0 ~24 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~4 redstone_lamp[lit=true] if block ~0 ~23 ~5 redstone_lamp[lit=true] if block ~0 ~24 ~4 redstone_lamp[lit=true] if block ~0 ~24 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~6 redstone_lamp[lit=true] if block ~0 ~23 ~7 redstone_lamp[lit=true] if block ~0 ~24 ~6 redstone_lamp[lit=true] if block ~0 ~24 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~2 redstone_lamp[lit=true] if block ~0 ~23 ~3 redstone_lamp[lit=true] if block ~0 ~24 ~2 redstone_lamp[lit=true] if block ~0 ~24 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~0 redstone_lamp[lit=true] if block ~0 ~23 ~1 redstone_lamp[lit=true] if block ~0 ~24 ~0 redstone_lamp[lit=true] if block ~0 ~24 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~0 redstone_lamp[lit=true] if block ~0 ~19 ~1 redstone_lamp[lit=true] if block ~0 ~20 ~0 redstone_lamp[lit=true] if block ~0 ~20 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~2 redstone_lamp[lit=true] if block ~0 ~19 ~3 redstone_lamp[lit=true] if block ~0 ~20 ~2 redstone_lamp[lit=true] if block ~0 ~20 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~6 redstone_lamp[lit=true] if block ~0 ~19 ~7 redstone_lamp[lit=true] if block ~0 ~20 ~6 redstone_lamp[lit=true] if block ~0 ~20 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~4 redstone_lamp[lit=true] if block ~0 ~19 ~5 redstone_lamp[lit=true] if block ~0 ~20 ~4 redstone_lamp[lit=true] if block ~0 ~20 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~12 redstone_lamp[lit=true] if block ~0 ~19 ~13 redstone_lamp[lit=true] if block ~0 ~20 ~12 redstone_lamp[lit=true] if block ~0 ~20 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~14 redstone_lamp[lit=true] if block ~0 ~19 ~15 redstone_lamp[lit=true] if block ~0 ~20 ~14 redstone_lamp[lit=true] if block ~0 ~20 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~10 redstone_lamp[lit=true] if block ~0 ~19 ~11 redstone_lamp[lit=true] if block ~0 ~20 ~10 redstone_lamp[lit=true] if block ~0 ~20 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~8 redstone_lamp[lit=true] if block ~0 ~19 ~9 redstone_lamp[lit=true] if block ~0 ~20 ~8 redstone_lamp[lit=true] if block ~0 ~20 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~8 redstone_lamp[lit=true] if block ~0 ~17 ~9 redstone_lamp[lit=true] if block ~0 ~18 ~8 redstone_lamp[lit=true] if block ~0 ~18 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~10 redstone_lamp[lit=true] if block ~0 ~17 ~11 redstone_lamp[lit=true] if block ~0 ~18 ~10 redstone_lamp[lit=true] if block ~0 ~18 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~14 redstone_lamp[lit=true] if block ~0 ~17 ~15 redstone_lamp[lit=true] if block ~0 ~18 ~14 redstone_lamp[lit=true] if block ~0 ~18 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~12 redstone_lamp[lit=true] if block ~0 ~17 ~13 redstone_lamp[lit=true] if block ~0 ~18 ~12 redstone_lamp[lit=true] if block ~0 ~18 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~4 redstone_lamp[lit=true] if block ~0 ~17 ~5 redstone_lamp[lit=true] if block ~0 ~18 ~4 redstone_lamp[lit=true] if block ~0 ~18 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~6 redstone_lamp[lit=true] if block ~0 ~17 ~7 redstone_lamp[lit=true] if block ~0 ~18 ~6 redstone_lamp[lit=true] if block ~0 ~18 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~2 redstone_lamp[lit=true] if block ~0 ~17 ~3 redstone_lamp[lit=true] if block ~0 ~18 ~2 redstone_lamp[lit=true] if block ~0 ~18 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~0 redstone_lamp[lit=true] if block ~0 ~17 ~1 redstone_lamp[lit=true] if block ~0 ~18 ~0 redstone_lamp[lit=true] if block ~0 ~18 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  finally: [scoreboard objectives remove pt]
+- name: port_b_all_64
+  initial: {a_row0: 1, a_row1: 1, a_row2: 1, a_col0: 1, a_col1: 1, a_col2: 1}
+  settle: 60
+  steps:
+  - run: scoreboard objectives add pt dummy
+  - drive: {b_row0: 0, b_row1: 0, b_row2: 0, b_col0: 0, b_col1: 0, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~2 redstone_lamp[lit=true] if block ~0 ~9 ~3 redstone_lamp[lit=true] if block ~0 ~10 ~2 redstone_lamp[lit=true] if block ~0 ~10 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~6 redstone_lamp[lit=true] if block ~0 ~9 ~7 redstone_lamp[lit=true] if block ~0 ~10 ~6 redstone_lamp[lit=true] if block ~0 ~10 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~4 redstone_lamp[lit=true] if block ~0 ~9 ~5 redstone_lamp[lit=true] if block ~0 ~10 ~4 redstone_lamp[lit=true] if block ~0 ~10 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~12 redstone_lamp[lit=true] if block ~0 ~9 ~13 redstone_lamp[lit=true] if block ~0 ~10 ~12 redstone_lamp[lit=true] if block ~0 ~10 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~14 redstone_lamp[lit=true] if block ~0 ~9 ~15 redstone_lamp[lit=true] if block ~0 ~10 ~14 redstone_lamp[lit=true] if block ~0 ~10 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~10 redstone_lamp[lit=true] if block ~0 ~9 ~11 redstone_lamp[lit=true] if block ~0 ~10 ~10 redstone_lamp[lit=true] if block ~0 ~10 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~8 redstone_lamp[lit=true] if block ~0 ~9 ~9 redstone_lamp[lit=true] if block ~0 ~10 ~8 redstone_lamp[lit=true] if block ~0 ~10 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~8 redstone_lamp[lit=true] if block ~0 ~11 ~9 redstone_lamp[lit=true] if block ~0 ~12 ~8 redstone_lamp[lit=true] if block ~0 ~12 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~10 redstone_lamp[lit=true] if block ~0 ~11 ~11 redstone_lamp[lit=true] if block ~0 ~12 ~10 redstone_lamp[lit=true] if block ~0 ~12 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~14 redstone_lamp[lit=true] if block ~0 ~11 ~15 redstone_lamp[lit=true] if block ~0 ~12 ~14 redstone_lamp[lit=true] if block ~0 ~12 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~12 redstone_lamp[lit=true] if block ~0 ~11 ~13 redstone_lamp[lit=true] if block ~0 ~12 ~12 redstone_lamp[lit=true] if block ~0 ~12 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~4 redstone_lamp[lit=true] if block ~0 ~11 ~5 redstone_lamp[lit=true] if block ~0 ~12 ~4 redstone_lamp[lit=true] if block ~0 ~12 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~6 redstone_lamp[lit=true] if block ~0 ~11 ~7 redstone_lamp[lit=true] if block ~0 ~12 ~6 redstone_lamp[lit=true] if block ~0 ~12 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~2 redstone_lamp[lit=true] if block ~0 ~11 ~3 redstone_lamp[lit=true] if block ~0 ~12 ~2 redstone_lamp[lit=true] if block ~0 ~12 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~0 redstone_lamp[lit=true] if block ~0 ~11 ~1 redstone_lamp[lit=true] if block ~0 ~12 ~0 redstone_lamp[lit=true] if block ~0 ~12 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~0 redstone_lamp[lit=true] if block ~0 ~15 ~1 redstone_lamp[lit=true] if block ~0 ~16 ~0 redstone_lamp[lit=true] if block ~0 ~16 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~2 redstone_lamp[lit=true] if block ~0 ~15 ~3 redstone_lamp[lit=true] if block ~0 ~16 ~2 redstone_lamp[lit=true] if block ~0 ~16 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~6 redstone_lamp[lit=true] if block ~0 ~15 ~7 redstone_lamp[lit=true] if block ~0 ~16 ~6 redstone_lamp[lit=true] if block ~0 ~16 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~4 redstone_lamp[lit=true] if block ~0 ~15 ~5 redstone_lamp[lit=true] if block ~0 ~16 ~4 redstone_lamp[lit=true] if block ~0 ~16 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~12 redstone_lamp[lit=true] if block ~0 ~15 ~13 redstone_lamp[lit=true] if block ~0 ~16 ~12 redstone_lamp[lit=true] if block ~0 ~16 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~14 redstone_lamp[lit=true] if block ~0 ~15 ~15 redstone_lamp[lit=true] if block ~0 ~16 ~14 redstone_lamp[lit=true] if block ~0 ~16 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~10 redstone_lamp[lit=true] if block ~0 ~15 ~11 redstone_lamp[lit=true] if block ~0 ~16 ~10 redstone_lamp[lit=true] if block ~0 ~16 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~8 redstone_lamp[lit=true] if block ~0 ~15 ~9 redstone_lamp[lit=true] if block ~0 ~16 ~8 redstone_lamp[lit=true] if block ~0 ~16 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~8 redstone_lamp[lit=true] if block ~0 ~13 ~9 redstone_lamp[lit=true] if block ~0 ~14 ~8 redstone_lamp[lit=true] if block ~0 ~14 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~10 redstone_lamp[lit=true] if block ~0 ~13 ~11 redstone_lamp[lit=true] if block ~0 ~14 ~10 redstone_lamp[lit=true] if block ~0 ~14 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~14 redstone_lamp[lit=true] if block ~0 ~13 ~15 redstone_lamp[lit=true] if block ~0 ~14 ~14 redstone_lamp[lit=true] if block ~0 ~14 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~12 redstone_lamp[lit=true] if block ~0 ~13 ~13 redstone_lamp[lit=true] if block ~0 ~14 ~12 redstone_lamp[lit=true] if block ~0 ~14 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~4 redstone_lamp[lit=true] if block ~0 ~13 ~5 redstone_lamp[lit=true] if block ~0 ~14 ~4 redstone_lamp[lit=true] if block ~0 ~14 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~6 redstone_lamp[lit=true] if block ~0 ~13 ~7 redstone_lamp[lit=true] if block ~0 ~14 ~6 redstone_lamp[lit=true] if block ~0 ~14 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~2 redstone_lamp[lit=true] if block ~0 ~13 ~3 redstone_lamp[lit=true] if block ~0 ~14 ~2 redstone_lamp[lit=true] if block ~0 ~14 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~0 redstone_lamp[lit=true] if block ~0 ~13 ~1 redstone_lamp[lit=true] if block ~0 ~14 ~0 redstone_lamp[lit=true] if block ~0 ~14 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~0 redstone_lamp[lit=true] if block ~0 ~21 ~1 redstone_lamp[lit=true] if block ~0 ~22 ~0 redstone_lamp[lit=true] if block ~0 ~22 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~2 redstone_lamp[lit=true] if block ~0 ~21 ~3 redstone_lamp[lit=true] if block ~0 ~22 ~2 redstone_lamp[lit=true] if block ~0 ~22 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~6 redstone_lamp[lit=true] if block ~0 ~21 ~7 redstone_lamp[lit=true] if block ~0 ~22 ~6 redstone_lamp[lit=true] if block ~0 ~22 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~4 redstone_lamp[lit=true] if block ~0 ~21 ~5 redstone_lamp[lit=true] if block ~0 ~22 ~4 redstone_lamp[lit=true] if block ~0 ~22 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~12 redstone_lamp[lit=true] if block ~0 ~21 ~13 redstone_lamp[lit=true] if block ~0 ~22 ~12 redstone_lamp[lit=true] if block ~0 ~22 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~14 redstone_lamp[lit=true] if block ~0 ~21 ~15 redstone_lamp[lit=true] if block ~0 ~22 ~14 redstone_lamp[lit=true] if block ~0 ~22 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~10 redstone_lamp[lit=true] if block ~0 ~21 ~11 redstone_lamp[lit=true] if block ~0 ~22 ~10 redstone_lamp[lit=true] if block ~0 ~22 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~8 redstone_lamp[lit=true] if block ~0 ~21 ~9 redstone_lamp[lit=true] if block ~0 ~22 ~8 redstone_lamp[lit=true] if block ~0 ~22 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~8 redstone_lamp[lit=true] if block ~0 ~23 ~9 redstone_lamp[lit=true] if block ~0 ~24 ~8 redstone_lamp[lit=true] if block ~0 ~24 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~10 redstone_lamp[lit=true] if block ~0 ~23 ~11 redstone_lamp[lit=true] if block ~0 ~24 ~10 redstone_lamp[lit=true] if block ~0 ~24 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 4 if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~12 redstone_lamp[lit=true] if block ~0 ~23 ~13 redstone_lamp[lit=true] if block ~0 ~24 ~12 redstone_lamp[lit=true] if block ~0 ~24 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~4 redstone_lamp[lit=true] if block ~0 ~23 ~5 redstone_lamp[lit=true] if block ~0 ~24 ~4 redstone_lamp[lit=true] if block ~0 ~24 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~6 redstone_lamp[lit=true] if block ~0 ~23 ~7 redstone_lamp[lit=true] if block ~0 ~24 ~6 redstone_lamp[lit=true] if block ~0 ~24 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~2 redstone_lamp[lit=true] if block ~0 ~23 ~3 redstone_lamp[lit=true] if block ~0 ~24 ~2 redstone_lamp[lit=true] if block ~0 ~24 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~0 redstone_lamp[lit=true] if block ~0 ~23 ~1 redstone_lamp[lit=true] if block ~0 ~24 ~0 redstone_lamp[lit=true] if block ~0 ~24 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~0 redstone_lamp[lit=true] if block ~0 ~19 ~1 redstone_lamp[lit=true] if block ~0 ~20 ~0 redstone_lamp[lit=true] if block ~0 ~20 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~2 redstone_lamp[lit=true] if block ~0 ~19 ~3 redstone_lamp[lit=true] if block ~0 ~20 ~2 redstone_lamp[lit=true] if block ~0 ~20 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~6 redstone_lamp[lit=true] if block ~0 ~19 ~7 redstone_lamp[lit=true] if block ~0 ~20 ~6 redstone_lamp[lit=true] if block ~0 ~20 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~4 redstone_lamp[lit=true] if block ~0 ~19 ~5 redstone_lamp[lit=true] if block ~0 ~20 ~4 redstone_lamp[lit=true] if block ~0 ~20 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~12 redstone_lamp[lit=true] if block ~0 ~19 ~13 redstone_lamp[lit=true] if block ~0 ~20 ~12 redstone_lamp[lit=true] if block ~0 ~20 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~14 redstone_lamp[lit=true] if block ~0 ~19 ~15 redstone_lamp[lit=true] if block ~0 ~20 ~14 redstone_lamp[lit=true] if block ~0 ~20 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~10 redstone_lamp[lit=true] if block ~0 ~19 ~11 redstone_lamp[lit=true] if block ~0 ~20 ~10 redstone_lamp[lit=true] if block ~0 ~20 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~19 ~8 redstone_lamp[lit=true] if block ~0 ~19 ~9 redstone_lamp[lit=true] if block ~0 ~20 ~8 redstone_lamp[lit=true] if block ~0 ~20 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_row0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~8 redstone_lamp[lit=true] if block ~0 ~17 ~9 redstone_lamp[lit=true] if block ~0 ~18 ~8 redstone_lamp[lit=true] if block ~0 ~18 ~9 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~10 redstone_lamp[lit=true] if block ~0 ~17 ~11 redstone_lamp[lit=true] if block ~0 ~18 ~10 redstone_lamp[lit=true] if block ~0 ~18 ~11 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~14 redstone_lamp[lit=true] if block ~0 ~17 ~15 redstone_lamp[lit=true] if block ~0 ~18 ~14 redstone_lamp[lit=true] if block ~0 ~18 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~12 redstone_lamp[lit=true] if block ~0 ~17 ~13 redstone_lamp[lit=true] if block ~0 ~18 ~12 redstone_lamp[lit=true] if block ~0 ~18 ~13 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~4 redstone_lamp[lit=true] if block ~0 ~17 ~5 redstone_lamp[lit=true] if block ~0 ~18 ~4 redstone_lamp[lit=true] if block ~0 ~18 ~5 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~6 redstone_lamp[lit=true] if block ~0 ~17 ~7 redstone_lamp[lit=true] if block ~0 ~18 ~6 redstone_lamp[lit=true] if block ~0 ~18 ~7 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~2 redstone_lamp[lit=true] if block ~0 ~17 ~3 redstone_lamp[lit=true] if block ~0 ~18 ~2 redstone_lamp[lit=true] if block ~0 ~18 ~3 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {b_col0: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~0 redstone_lamp[lit=true] if block ~0 ~17 ~1 redstone_lamp[lit=true] if block ~0 ~18 ~0 redstone_lamp[lit=true] if block ~0 ~18 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  finally: [scoreboard objectives remove pt]
+- name: two_pixels_no_ghosts
+  settle: 60
+  steps:
+  - run: scoreboard objectives add pt dummy
+  - drive: {a_row0: 1, a_col1: 1, b_row0: 1, b_row1: 1, b_col0: 1, b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~4 redstone_lamp[lit=true] if block ~0 ~11 ~5 redstone_lamp[lit=true] if block ~0 ~12 ~4 redstone_lamp[lit=true] if block ~0 ~12 ~5 redstone_lamp[lit=true] if block ~0 ~15 ~10 redstone_lamp[lit=true] if block ~0 ~15 ~11 redstone_lamp[lit=true] if block ~0 ~16 ~10 redstone_lamp[lit=true] if block ~0 ~16 ~11 redstone_lamp[lit=true]
+  - drive: {a_row0: 0, a_row1: 1, a_col0: 1, a_col1: 0, b_row0: 0, b_col0: 0, b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~2 redstone_lamp[lit=true] if block ~0 ~13 ~3 redstone_lamp[lit=true] if block ~0 ~14 ~2 redstone_lamp[lit=true] if block ~0 ~14 ~3 redstone_lamp[lit=true] if block ~0 ~13 ~12 redstone_lamp[lit=true] if block ~0 ~13 ~13 redstone_lamp[lit=true] if block ~0 ~14 ~12 redstone_lamp[lit=true] if block ~0 ~14 ~13 redstone_lamp[lit=true]
+  - drive: {a_row0: 1, a_row1: 0, a_row2: 1, a_col1: 1, b_row0: 1, b_row1: 0, b_col0: 1, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~6 redstone_lamp[lit=true] if block ~0 ~11 ~7 redstone_lamp[lit=true] if block ~0 ~12 ~6 redstone_lamp[lit=true] if block ~0 ~12 ~7 redstone_lamp[lit=true] if block ~0 ~19 ~6 redstone_lamp[lit=true] if block ~0 ~19 ~7 redstone_lamp[lit=true] if block ~0 ~20 ~6 redstone_lamp[lit=true] if block ~0 ~20 ~7 redstone_lamp[lit=true]
+  - drive: {a_row0: 0, a_row2: 0, a_col2: 1, b_row1: 1, b_row2: 1, b_col0: 0, b_col1: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~14 redstone_lamp[lit=true] if block ~0 ~9 ~15 redstone_lamp[lit=true] if block ~0 ~10 ~14 redstone_lamp[lit=true] if block ~0 ~10 ~15 redstone_lamp[lit=true] if block ~0 ~23 ~0 redstone_lamp[lit=true] if block ~0 ~23 ~1 redstone_lamp[lit=true] if block ~0 ~24 ~0 redstone_lamp[lit=true] if block ~0 ~24 ~1 redstone_lamp[lit=true]
+  - drive: {a_col0: 0, a_col1: 0, a_col2: 0, b_col0: 1, b_col1: 1, b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row0: 1, a_row1: 1, a_row2: 1, a_col0: 1, a_col1: 1, a_col2: 1, b_row0: 0, b_row1: 0, b_row2: 0, b_col0: 0, b_col1: 0, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row2: 0, a_col2: 0, b_row0: 1, b_row1: 1, b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~15 ~6 redstone_lamp[lit=true] if block ~0 ~15 ~7 redstone_lamp[lit=true] if block ~0 ~16 ~6 redstone_lamp[lit=true] if block ~0 ~16 ~7 redstone_lamp[lit=true] if block ~0 ~15 ~8 redstone_lamp[lit=true] if block ~0 ~15 ~9 redstone_lamp[lit=true] if block ~0 ~16 ~8 redstone_lamp[lit=true] if block ~0 ~16 ~9 redstone_lamp[lit=true]
+  - drive: {b_col0: 1, b_col1: 1, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 4 if block ~0 ~15 ~6 redstone_lamp[lit=true] if block ~0 ~15 ~7 redstone_lamp[lit=true] if block ~0 ~16 ~6 redstone_lamp[lit=true] if block ~0 ~16 ~7 redstone_lamp[lit=true]
+  - drive: {a_row0: 0, a_row1: 0, a_row2: 1, a_col0: 0, a_col1: 0, a_col2: 1, b_row1: 0, b_row2: 1, b_col1: 0, b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~17 ~8 redstone_lamp[lit=true] if block ~0 ~17 ~9 redstone_lamp[lit=true] if block ~0 ~18 ~8 redstone_lamp[lit=true] if block ~0 ~18 ~9 redstone_lamp[lit=true] if block ~0 ~19 ~10 redstone_lamp[lit=true] if block ~0 ~19 ~11 redstone_lamp[lit=true] if block ~0 ~20 ~10 redstone_lamp[lit=true] if block ~0 ~20 ~11 redstone_lamp[lit=true]
+  - drive: {a_row1: 1, a_col0: 1, a_col2: 0, b_row0: 0, b_row1: 1, b_col0: 0, b_col1: 1, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~21 ~2 redstone_lamp[lit=true] if block ~0 ~21 ~3 redstone_lamp[lit=true] if block ~0 ~22 ~2 redstone_lamp[lit=true] if block ~0 ~22 ~3 redstone_lamp[lit=true] if block ~0 ~21 ~4 redstone_lamp[lit=true] if block ~0 ~21 ~5 redstone_lamp[lit=true] if block ~0 ~22 ~4 redstone_lamp[lit=true] if block ~0 ~22 ~5 redstone_lamp[lit=true]
+  - drive: {a_row0: 1, a_row1: 0, a_row2: 0, a_col0: 0, a_col1: 1, a_col2: 1, b_row2: 0, b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~11 ~12 redstone_lamp[lit=true] if block ~0 ~11 ~13 redstone_lamp[lit=true] if block ~0 ~12 ~12 redstone_lamp[lit=true] if block ~0 ~12 ~13 redstone_lamp[lit=true] if block ~0 ~13 ~12 redstone_lamp[lit=true] if block ~0 ~13 ~13 redstone_lamp[lit=true] if block ~0 ~14 ~12 redstone_lamp[lit=true] if block ~0 ~14 ~13 redstone_lamp[lit=true]
+  - drive: {a_row1: 1, a_row2: 1, a_col1: 0, a_col2: 0, b_row0: 1, b_row2: 1, b_col0: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~23 ~0 redstone_lamp[lit=true] if block ~0 ~23 ~1 redstone_lamp[lit=true] if block ~0 ~24 ~0 redstone_lamp[lit=true] if block ~0 ~24 ~1 redstone_lamp[lit=true] if block ~0 ~23 ~14 redstone_lamp[lit=true] if block ~0 ~23 ~15 redstone_lamp[lit=true] if block ~0 ~24 ~14 redstone_lamp[lit=true] if block ~0 ~24 ~15 redstone_lamp[lit=true]
+  - drive: {a_row0: 0, a_row1: 0, a_row2: 0, b_row0: 0, b_row1: 0, b_row2: 0, b_col0: 0, b_col1: 0, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 4 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true]
+  - drive: {a_row1: 1, a_col0: 1, a_col2: 1, b_row0: 1, b_row2: 1, b_col1: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~10 redstone_lamp[lit=true] if block ~0 ~13 ~11 redstone_lamp[lit=true] if block ~0 ~14 ~10 redstone_lamp[lit=true] if block ~0 ~14 ~11 redstone_lamp[lit=true] if block ~0 ~19 ~4 redstone_lamp[lit=true] if block ~0 ~19 ~5 redstone_lamp[lit=true] if block ~0 ~20 ~4 redstone_lamp[lit=true] if block ~0 ~20 ~5 redstone_lamp[lit=true]
+  - drive: {a_row0: 1, a_row1: 0, a_row2: 1, a_col0: 0, a_col1: 1, a_col2: 0, b_row0: 0, b_row1: 1, b_row2: 0, b_col0: 1, b_col1: 0, b_col2: 1}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~13 ~10 redstone_lamp[lit=true] if block ~0 ~13 ~11 redstone_lamp[lit=true] if block ~0 ~14 ~10 redstone_lamp[lit=true] if block ~0 ~14 ~11 redstone_lamp[lit=true] if block ~0 ~19 ~4 redstone_lamp[lit=true] if block ~0 ~19 ~5 redstone_lamp[lit=true] if block ~0 ~20 ~4 redstone_lamp[lit=true] if block ~0 ~20 ~5 redstone_lamp[lit=true]
+  - drive: {a_row2: 0, a_col0: 1, a_col1: 0, b_row1: 0, b_col0: 0, b_col2: 0}
+  - wait: 40
+  - run: execute store result score n pt run clone ~0 ~9 ~0 ~0 ~24 ~15 ~30 ~9 ~0 filtered redstone_lamp[lit=true]
+  - check: if score n pt matches 8 if block ~0 ~9 ~0 redstone_lamp[lit=true] if block ~0 ~9 ~1 redstone_lamp[lit=true] if block ~0 ~10 ~0 redstone_lamp[lit=true] if block ~0 ~10 ~1 redstone_lamp[lit=true] if block ~0 ~11 ~2 redstone_lamp[lit=true] if block ~0 ~11 ~3 redstone_lamp[lit=true] if block ~0 ~12 ~2 redstone_lamp[lit=true] if block ~0 ~12 ~3 redstone_lamp[lit=true]
+  finally: [scoreboard objectives remove pt]

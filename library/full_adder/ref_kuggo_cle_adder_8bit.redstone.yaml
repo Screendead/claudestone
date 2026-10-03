@@ -1,6 +1,8 @@
 name: ref_kuggo_cle_adder_8bit
-description: x
-traits: []
+description: '8-bit adder, s = a + b + cin (9-bit result with cout) by Kuggo, a look-everywhere carry design stacked as eight two-layer slices on a 2-high pitch, dust, repeaters, wall torches and a target block, no pistons or comparators. Source (SOURCED): mattbatwings'' Logical Redstone Archive ADD005 8-bit Carry Look-Everywhere Adder (CLE), author Kuggo, endorsed by mattbatwings, tagged Tested & Functional, https://discord.com/channels/1361854816837435433/1472430273793884273; README claims 2 8-bit inputs, 8-bit sum, speed 4 ticks. Size 11x21x20 (1166 blocks). Harness changes: each of the 16 operand levers (hard-powering the lamp it hangs on, which feeds the dust beside it) is replaced by an input redstone block in that lamp''s own cell (a_k at the higher-z lever of slice k, b_k at the other; the sum is symmetric); the schematic''s extra lever at layer 1 (carry in) keeps its lamp, which a torch sits on, so it is driven by a fixture repeater on a fixture stone fed by the cin redstone block one cell west; signs are dropped; the 8 sum lamps (layers 1,3,..15, s_j) and the lamp on layer 18 (cout) are the named outputs. Nothing else is changed. Measured (MEASURED, 26.3): the sample truth table of 38 pairs incl. all-ones, carries through every bit, wrap and cin passes first time with the bit order guessed from the layout (a_k, b_k at y=4+2k, s_j at y=1+2j), worst-case delay 14 gt (cout rise 6 fall 8, s0-s2 rise 10 fall 14, s3-s7 rise 8 fall 14). 255+0+cin 0->1 flips every sum bit at 14 gt and cout at 6, so latency is flat across bits (no ripple), but the README''s 4 ticks is not reproduced: sums need 14 gt (7 redstone ticks), only cout is near it. Mechanism (INFERRED, not traced in detail): each slice computes generate/propagate locally and the carries to all bits are formed in parallel by look-everywhere logic instead of a rippling chain, which is why the latency does not grow with the carry length.'
+traits:
+- pistonless
+- entityless
 palette:
   .: air
   A: red_wool
@@ -547,6 +549,17 @@ layers:
 
 tests:
 - name: sums
+  delay: 14
+  delays:
+    cout: {rise: 6, fall: 8}
+    s0: {rise: 10, fall: 14}
+    s1: {rise: 10, fall: 14}
+    s2: {rise: 10, fall: 14}
+    s3: {rise: 8, fall: 14}
+    s4: {rise: 8, fall: 14}
+    s5: {rise: 8, fall: 14}
+    s6: {rise: 8, fall: 14}
+    s7: {rise: 8, fall: 14}
   truth_table: |
     cin a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 cout
     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
@@ -599,18 +612,11 @@ tests:
     1 1 0 0 0 0 1 0 0 0 1 1 1 1 0 0 1 | 0 0 0 0 0 0 1 1 0
     1 0 0 1 1 1 0 0 1 0 1 1 0 1 1 1 1 | 1 1 0 0 1 0 0 1 1
     1 0 1 1 1 1 0 1 0 0 1 1 0 1 1 1 1 | 1 0 1 0 1 0 1 0 1
-- name: probe
+- name: carry_in_through_255
+  initial: {a0: 1, a1: 1, a2: 1, a3: 1, a4: 1, a5: 1, a6: 1, a7: 1}
   settle: 30
   steps:
-  - drive: {a0: 1, b0: 1}
-  - wait: 30
+  - expect: {cout: 0, s0: 1, s1: 1, s2: 1, s3: 1, s4: 1, s5: 1, s6: 1, s7: 1}
   - drive: {cin: 1}
-  - wait: 30
-  - drive: {a1: 1, a2: 1, a3: 1, a4: 1, a5: 1, a6: 1, a7: 1}
-  - wait: 30
-  - drive: {cin: 0}
-  - wait: 30
-  - drive: {cin: 1}
-  - wait: 30
-  - drive: {a0: 0, b0: 0}
-  - wait: 30
+  - wave: {cout: '000000111111111111111111', s0: '111111111111110000000000', s7: '111111111111110000000000', s3: '111111111111110000000000'}
+  - expect: {cout: 1, s0: 0, s1: 0, s2: 0, s3: 0, s4: 0, s5: 0, s6: 0, s7: 0}

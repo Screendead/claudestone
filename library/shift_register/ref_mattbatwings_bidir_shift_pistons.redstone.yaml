@@ -1,5 +1,25 @@
 name: ref_mattbatwings_bidir_shift_pistons
-description: wip
+description: 'Bi-directional 8-bit shift register built from repeaters, locks and sticky pistons, rebuilt from mattbatwings'' Logical Redstone Archive entry SHIFT004_Bi-directional_Shift_Register (SHIFT004_bidirectional_shift_reg_pistons.schem,
+  endorsed by mattbatwings, tagged Tested & Functional; original post https://discord.com/channels/1361854816837435433/1472419495921455297). SOURCED from the README: two shift buttons in, an 8b number out.
+  Size 13x11x23 (the schematic is 13x11x22; the extra row is the q7 input''s support block). Lamps q0..q7 stand at x=3 on z=7,9,...,21 (q0 north); btn_to_q0 and btn_to_q7 are the two stone buttons at x=0,
+  z=1 and z=3. HOW IT WORKS (INFERRED from the blocks, and the pistons'' role MEASURED by the mutant tests): each bit is a cell of two iron blocks, x=8 and x=10 at y=3, joined by a lone cross dust at x=9
+  that passes a repeater''s strong power from either block to the other. Between cells, two repeater chains run in opposite directions: x=8 repeaters (facing north: input north, output south) move bits
+  toward q7, x=10 repeaters (facing south) toward q0. Every repeater is LOCKED by a side repeater (x=7 and x=11) that two long lock lines (dust at x=6 and x=12, y=4, on iron) keep powered; a locked repeater
+  holds its output, so the locked repeaters are the memory and there is no other latch. A lamp reads its cell through the dust under the cell blocks (y=2) and the iron under the lamp. A press is turned
+  into a rising-edge pulse by a subtract comparator fed by the button and by a 2-tick-delayed copy of it; a torch inverts it, and a repeater makes a second copy 2 gt later, so each press has an early and
+  a late edge. Through torches on iron the pulse drops the lock lines and one of two piston lines (dust at y=7 over top slabs, which power the sticky pistons below them by quasi-connectivity). btn_to_q0:
+  the x=12 lock line drops first (the x=10 chain, toward q0, unlocks at +10 with the x=10 pistons still down) while the x=8 pistons retract at +10 and the x=8 chain unlocks at +12, so it reads a lifted,
+  empty cell and clears itself; everything is relocked and the pistons are back by +16. btn_to_q7 is the mirror image (INFERRED from the layout; the timing in this sentence is MEASURED only for btn_to_q0)
+  with the x=8 chain first and the x=10 pistons lifting. So one chain copies every cell onto the next and the other, whose cells are lifted away, is cleared. The two lift timings race the unlock of the
+  copying chain; the copying chain wins in 26.3 (MEASURED: the alternating-direction test, which reads data held by the opposite chain through the cross dust, passes). HARNESS CHANGES: the iron blocks behind
+  both buttons are smooth_stone (the harness only presses buttons on plain blocks); the schematic''s serial input is only a stub, so in_q0 is a fixture repeater at (8,3,6) driven by a redstone block (the
+  redstone block alone does not hard-power the cell), which feeds cell q0 for shifts toward q7, and in_q7 a fixture repeater at (10,3,22) feeding cell q7 for shifts toward q0; the stub iron and a stale
+  dust were removed. The saved snapshot had stale power in it (a lit lamp at q4 with no power source among the blocks), so it is rebuilt from the blocks and not from the saved state. MEASURED: an input
+  end is live, not latched: q0 is in_q0 OR what a shift toward q0 stored (so hold in_q0 at the bit you want in while pressing btn_to_q7, and bits that fall off the far end are lost); a bit appears in the
+  next lamp 12 ticks after the press and the vacated lamp goes dark at 16 (the lamp''s 4 gt turn-off delay; both lamps are lit for 4 ticks), both directions; presses 23 ticks apart all shift, presses 22
+  apart lose shifts (button hold 20 gt plus the pulse maker); holds 600 ticks; with the x=8 pistons held down a shift toward q0 smears every bit to 1, with the x=10 pistons held down a shift toward q7 does,
+  and the other direction is unaffected in both cases, which is what the pistons are for. Not claimed: the README''s left/right naming (the buttons are named by direction here), behaviour under simultaneous
+  presses or faster press rates.'
 palette:
   .: air
   A: iron_block
@@ -20,15 +40,15 @@ palette:
   O: repeater[delay=2,facing=west]
   P: redstone_wire[east=none,north=none,south=side,west=side]
   Q:
-    name: btn_a
+    name: btn_to_q0
     block: stone_button[face=wall,facing=west]
   T: redstone_wire[east=side,north=side,south=none,west=none]
   U: comparator[facing=west,mode=subtract]
   V: redstone_wire[east=none,north=side,south=none,west=side]
   i:
-    input: din_n
+    input: in_q0
   j:
-    input: din_s
+    input: in_q7
   r:
     block: repeater[facing=north,delay=1]
     fixture: true
@@ -60,74 +80,20 @@ palette:
     output: q7
     block: redstone_lamp
   R:
-    name: btn_b
+    name: btn_to_q7
     block: stone_button[face=wall,facing=west]
   S: smooth_stone
   a:
-    name: pulse_a
-    block: redstone_wire[east=side,north=none,south=none,west=side]
-  b:
-    name: r1a
-    block: redstone_wire[east=side,north=none,south=none,west=side]
-  c:
-    name: r1b
-    block: redstone_wire[east=side,north=none,south=none,west=side]
-  d:
-    name: pulse_b
-    block: redstone_wire[east=side,north=none,south=none,west=side]
-  e:
-    name: r3a
-    block: redstone_wire[east=side,north=none,south=none,west=side]
-  f:
-    name: r3b
-    block: redstone_wire[east=side,north=none,south=none,west=side]
-  g:
     name: lk_l
     block: redstone_wire[east=none,north=side,south=side,west=none]
-  h:
+  b:
     name: lk_r
     block: redstone_wire[east=none,north=side,south=side,west=none]
-  k:
+  c:
     name: pl8
     block: redstone_wire[east=none,north=side,south=side,west=none]
-  l:
+  d:
     name: pl10
-    block: redstone_wire[east=none,north=side,south=side,west=none]
-  m:
-    name: p8
-    block: sticky_piston[facing=down]
-  n:
-    name: p10
-    block: sticky_piston[facing=down]
-  o:
-    name: f8
-    block: repeater[delay=1,facing=west]
-  p:
-    name: g8
-    block: repeater[delay=1,facing=north]
-  q:
-    name: h8
-    block: repeater[delay=1,facing=south]
-  s:
-    name: i8
-    block: repeater[delay=1,facing=east]
-  v:
-    name: e7
-    block: redstone_wire[east=side,north=side,south=side,west=side]
-  w:
-    name: e9
-    block: redstone_wire[east=side,north=side,south=side,west=side]
-  x:
-    name: ln_l
-    block: redstone_wire[east=none,north=side,south=side,west=none]
-  y:
-    name: ln_r
-    block: redstone_wire[east=none,north=side,south=side,west=none]
-  z:
-    name: x8
-    block: redstone_wire[east=none,north=side,south=side,west=none]
-  '!':
-    name: x10
     block: redstone_wire[east=none,north=side,south=side,west=none]
 layers:
   0: |
@@ -205,7 +171,7 @@ layers:
     ....CCCCCDC..
     .......AA.AA.
     ....CCCCCDC..
-    ........A....
+    ..........A..
     .............
     .............
   3: |
@@ -216,10 +182,6 @@ layers:
     .............
     ........i....
     ........r....
-    ......A.AvA.A
-    ......Aop.qsA
-    ......A.AwA.A
-    ......AFG.HIA
     ......A.AEA.A
     ......AFG.HIA
     ......A.AEA.A
@@ -231,8 +193,12 @@ layers:
     ......A.AEA.A
     ......AFG.HIA
     ......A.AEA.A
-    ........t....
-    ........j....
+    ......AFG.HIA
+    ......A.AEA.A
+    ......AFG.HIA
+    ......A.AEA.A
+    ..........t..
+    ..........j..
     .............
   4: |
     .............
@@ -242,7 +208,7 @@ layers:
     .............
     .............
     .............
-    ......g.K.K.h
+    ......a.K.K.b
     ......J.....J
     ......J.K.K.J
     ......J.....J
@@ -268,7 +234,7 @@ layers:
     ......A.A.A.A
     ......A.....A
     ......A.....A
-    ......u.m.n.u
+    ......u.M.M.u
     .............
     ........M.M..
     .............
@@ -289,9 +255,9 @@ layers:
   6: |
     .............
     .............
-    ......x.z.J.y
     ......J.J.J.J
-    ......J.J.!.J
+    ......J.J.J.J
+    ......J.J.J.J
     ......J.A.A.J
     ......J.u.u.J
     ........D.D..
@@ -320,7 +286,7 @@ layers:
     ......u...u.u
     .............
     ........A.A..
-    ........k.l..
+    ........c.d..
     ........J.J..
     ........J.J..
     ........J.J..
@@ -340,9 +306,9 @@ layers:
     .............
   8: |
     .............
-    ......CCcIbCC
+    ......CCCICCC
     .............
-    ......CCeFfCC
+    ......CCCFCCC
     .............
     .............
     .............
@@ -392,9 +358,9 @@ layers:
     .............
   10: |
     ..NOP........
-    QSTCUCCCCa...
+    QSTCUCCCCC...
     .............
-    RSNCUCCd.....
+    RSNCUCCC.....
     ..TOV........
     .............
     .............
@@ -417,18 +383,1175 @@ layers:
     .............
     .............
 tests:
-- name: explore
+- name: fill 10110010 from the q0 end, one bit per press
+  settle: 40
+  steps:
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 1
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 0
+- name: a filled register drains out of the q0 end, zeros entering at q7
   settle: 40
   steps:
   - drive:
-      din_n: 1
+      in_q0: 1
   - wait: 20
-  - use: btn_a
-  - wait: 80
+  - use: btn_to_q7
+  - wait: 40
   - drive:
-      din_n: 0
+      in_q0: 0
   - wait: 20
-  - use: btn_a
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: fill 11010011 from the q7 end toward q0
+  settle: 40
+  steps:
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q7: 1
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 1
+  - drive:
+      in_q7: 0
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - drive:
+      in_q7: 1
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 1
+  - drive:
+      in_q7: 0
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q7: 1
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 1
+- name: eight ones in then eight zeros in clear every bit
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: 'alternating directions: bits move one place per press either way, the end bit is lost'
+  settle: 40
+  steps:
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q0
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+- name: a filled register holds 600 ticks
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: btn_to_q7
+  - wait: 40
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - wait: 600
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+- name: 'timing toward q7: a bit enters the next lamp 12 ticks after the press and the vacated lamp goes dark at 16'
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+  - use: btn_to_q7
+  - wave:
+      q2: '000000000000111111111111'
+      q1: '111111111111111100000000'
+- name: 'timing toward q0: the same 12 and 16 ticks'
+  settle: 40
+  steps:
+  - drive:
+      in_q7: 1
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 40
+  - drive:
+      in_q7: 0
+  - wait: 20
+  - expect:
+      q7: 0
+      q6: 1
+      q5: 0
+  - use: btn_to_q0
+  - wave:
+      q5: '000000000000111111111111'
+      q6: '111111111111111100000000'
+- name: five presses 23 ticks apart all shift
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 23
+  - use: btn_to_q7
+  - wait: 23
+  - use: btn_to_q7
+  - wait: 23
+  - use: btn_to_q7
+  - wait: 23
+  - use: btn_to_q7
+  - wait: 23
   - wait: 80
-  - use: btn_b
-  - wait: 80
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+- name: 'mutant: col-8 pistons held extended, a shift toward q0 smears every bit to 1'
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - expect: &id001
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 0
+  - run: setblock ~8 ~7 ~6 redstone_block
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+- name: 'mutant: col-10 pistons held extended, a shift toward q7 smears every bit to 1'
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - expect: *id001
+  - run: setblock ~10 ~7 ~6 redstone_block
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+- name: 'control: col-8 pistons held extended, a shift toward q7 is still right'
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - expect: *id001
+  - run: setblock ~8 ~7 ~6 redstone_block
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 1
+- name: 'control: col-10 pistons held extended, a shift toward q0 is still right'
+  settle: 40
+  steps:
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 1
+  - wait: 20
+  - use: btn_to_q7
+  - wait: 40
+  - drive:
+      in_q0: 0
+  - wait: 20
+  - expect: *id001
+  - run: setblock ~10 ~7 ~6 redstone_block
+  - wait: 20
+  - use: btn_to_q0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0

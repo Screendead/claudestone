@@ -1,0 +1,10528 @@
+name: ref_mixel_16seg_display
+description: 'Rebuild of Mixel''s 16 Segment Display from mattbatwings'' Logical Redstone Archive, entry CHARDISPLAY001 (Discord: https://discord.com/channels/1361854816837435433/1518881602749468762, endorsed by mattbatwings, tagged Tested and Functional, schematic CHARDISPLAY001_16seg_5). SOURCED claims: a 16 segment display for letters and numbers, input 4 hex inputs, output the lamp display, speed 8 ticks, stackable horizontally 1 block apart and vertically 2 blocks apart, a text file maps common characters (A - CDFE, 1 - 0730, ...). Changes for the harness: the schematic has no input source, so each of the four hex lines enters where the build''s input comparators face west (x=0, z=8, one per even layer y=2,4,6,8); a fixture hopper (comparator-readable analog source, filled with redstone to 0-15) and a fixture comparator stand outside the footprint in two padding columns and the tests set the strength with insert steps. All barrels keep the schematic''s contents (redstone dust and totems
+  as constant analog sources). The 49 lamps are the named cells l<y>_<z>. Size 14x10x11 with the lamp face on the east side (x=13). MEASURED on 26.3: the four layer pairs are four identical digit decoders. Each takes a 0-15 signal strength v and lights its own four segment groups by the reflected Gray code g = v ^ (v >> 1), bit 3 = v >= 8, bit 2 = 4 <= v < 12, bit 1 = 2..5 and 10..13, bit 0 = 1..2, 5..6, 9..10, 13..14, so a step of 1 in v changes exactly one segment. The 16 segment groups are 37 of the 49 lamps; the other 12 lamps (the corners between segments, each with its own torch) never light for any input. The top digit decoder (y=8) is the first digit of a character code, so CDFE puts C on the top layer: A, 1, 2, 7 and the slashed 0 of the README table render as those glyphs on the 7x7 lamp face (viewer on the east, z=7 on the left), INFERRED from the rendered lamp pattern. Tests: every value of every digit alone (64 values), all 50 README characters at once, 30 random four-digit
+  jumps, all against the Gray rule; a sweep over all 480 ordered value pairs of two digits (not kept here) showed the right final lamps with no segment leaving a state it holds before and after the change and no other lamp lighting. Delay, from the tick the fixture comparator is told to change (2 gt of that is the fixture comparator, so subtract 2 for a line already carrying the signal): segment groups 0 and 1 of each digit rise at +20 and fall at +24 gt, groups 2 and 3 rise at +18 and fall at +22, the same in all four digits and in every context tried. From the line itself that is 16 gt (8 redstone ticks, the README speed) for the fastest rise and 22 gt (11 redstone ticks) for the slowest fall.'
+traits:
+- torch_based
+- comparator_based
+- container_based
+- pistonless
+- entityless
+palette:
+  .: air
+  S: stone
+  A: smooth_stone_slab[type=top,waterlogged=false]
+  B: white_stained_glass
+  C: redstone_wire[east=side,north=none,south=side,west=none]
+  D: target
+  E: repeater[delay=1,facing=west]
+  ): redstone_wall_torch[facing=east]
+  F: orange_wool
+  G: redstone_wire[east=none,north=side,south=side,west=none]
+  H: lime_wool
+  I: comparator[facing=south,mode=subtract]
+  J: comparator[facing=east,mode=compare]
+  K: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:54}]}
+  M: redstone_wire[east=none,north=side,south=none,west=side]
+  N: green_wool
+  O: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:50}]}
+  P: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:45}]}
+  Q: cyan_wool
+  T: redstone_wire[east=none,north=side,south=up,west=side]
+  U: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:41}]}
+  V: blue_wool
+  W: {block: stone, fixture: true}
+  X: redstone_wire[east=side,north=side,south=side,west=side]
+  Y: redstone_wire[east=side,north=none,south=none,west=side]
+  l: {name: l2_1, block: redstone_lamp}
+  Z: yellow_wool
+  b: {name: l2_2, block: redstone_lamp}
+  c: redstone_wire[east=side,north=side,south=none,west=none]
+  d: redstone_wire[east=side,north=side,south=none,west=side]
+  e: {name: l2_3, block: redstone_lamp}
+  f: {name: l2_4, block: redstone_lamp}
+  g: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1}]}
+  h: redstone_wire[east=side,north=none,south=side,west=side]
+  i: {name: l2_5, block: redstone_lamp}
+  j: comparator[facing=north,mode=compare]
+  k: light_blue_wool
+  m: {name: l2_6, block: redstone_lamp}
+  p: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:22}]}
+  q: comparator[facing=west,mode=subtract]
+  r: comparator[facing=west,mode=compare]
+  s: repeater[delay=2,facing=west]
+  t: {name: l2_7, block: redstone_lamp}
+  w: {name: d3, block: 'hopper[facing=down]', fixture: true}
+  x: {block: 'comparator[facing=west,mode=compare]', fixture: true}
+  y: comparator[facing=south,mode=compare]
+  z: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:36}]}
+  '0': red_wool
+  '1': {name: l3_1, block: redstone_lamp}
+  u: redstone_wall_torch[facing=south]
+  '2': {name: l3_2, block: redstone_lamp}
+  '3': {name: l3_3, block: redstone_lamp}
+  '4': {name: l3_4, block: redstone_lamp}
+  '5': {name: l3_5, block: redstone_lamp}
+  '6': redstone_wire[east=side,north=none,south=none,west=up]
+  '7': {name: l3_6, block: redstone_lamp}
+  '8': purple_wool
+  '9': {name: l3_7, block: redstone_lamp}
+  α: redstone_wire[east=up,north=none,south=side,west=none]
+  β: redstone_wire[east=none,north=side,south=up,west=none]
+  γ: {name: l4_1, block: redstone_lamp}
+  δ: {name: l4_2, block: redstone_lamp}
+  ε: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1}]}
+  ζ: {name: l4_3, block: redstone_lamp}
+  η: {name: l4_4, block: redstone_lamp}
+  θ: {name: l4_5, block: redstone_lamp}
+  ι: {name: l4_6, block: redstone_lamp}
+  κ: {name: l4_7, block: redstone_lamp}
+  λ: {name: d2, block: 'hopper[facing=down]', fixture: true}
+  μ: redstone_wire[east=none,north=none,south=side,west=side]
+  ν: brown_wool
+  ξ: brown_stained_glass
+  π: {name: l5_1, block: redstone_lamp}
+  n: redstone_wall_torch[facing=north]
+  ρ: {name: l5_2, block: redstone_lamp}
+  σ: {name: l5_3, block: redstone_lamp}
+  τ: light_gray_stained_glass
+  υ: light_gray_wool
+  φ: {name: l5_4, block: redstone_lamp}
+  χ: {name: l5_5, block: redstone_lamp}
+  ψ: {name: l5_6, block: redstone_lamp}
+  ω: magenta_wool
+  Γ: {name: l5_7, block: redstone_lamp}
+  Δ: {name: l6_1, block: redstone_lamp}
+  Θ: gray_wool
+  Λ: {name: l6_2, block: redstone_lamp}
+  Ξ: {name: l6_3, block: redstone_lamp}
+  Π: {name: l6_4, block: redstone_lamp}
+  Σ: pink_wool
+  Φ: {name: l6_5, block: redstone_lamp}
+  Ψ: {name: l6_6, block: redstone_lamp}
+  Ω: {name: l6_7, block: redstone_lamp}
+  б: {name: d1, block: 'hopper[facing=down]', fixture: true}
+  в: {name: l7_1, block: redstone_lamp}
+  г: {name: l7_2, block: redstone_lamp}
+  д: redstone_wire[east=side,north=up,south=none,west=none]
+  ж: {name: l7_3, block: redstone_lamp}
+  з: redstone_wire[east=up,north=none,south=none,west=side]
+  и: {name: l7_4, block: redstone_lamp}
+  й: {name: l7_5, block: redstone_lamp}
+  к: {name: l7_6, block: redstone_lamp}
+  л: {name: l7_7, block: redstone_lamp}
+  м: {name: l8_1, block: redstone_lamp}
+  н: black_wool
+  п: {name: l8_2, block: redstone_lamp}
+  т: black_stained_glass
+  ф: {name: l8_3, block: redstone_lamp}
+  ц: {name: l8_4, block: redstone_lamp}
+  ч: white_wool
+  ш: {name: l8_5, block: redstone_lamp}
+  щ: {name: l8_6, block: redstone_lamp}
+  ъ: {name: l8_7, block: redstone_lamp}
+  ы: {name: d0, block: 'hopper[facing=down]', fixture: true}
+layers:
+  0: |
+    ................
+    ...S.S..........
+    ...S..A.........
+    ....SS..........
+    ...SS.S.........
+    .....SS.........
+    ....SB..........
+    ................
+    ................
+    ................
+    ................
+  1: |
+    ................
+    ...CDES)S.FF....
+    ...GS)S......H..
+    ...SIJKSSHHHHH..
+    ...IMSES)...N...
+    ...OSIJPSQQQQQ..
+    ....IT.S.....Q..
+    ...SUS.SSVVV....
+    .WSSS.S.........
+    ....D...........
+    ................
+  2: |
+    ................
+    ...S.S.SXFEYF).l
+    ...S.SG....ZDEHb
+    ....SScYEYEEdEHe
+    ...SS.S.S..NEN)f
+    .....SSgYYEEhEQi
+    ....SB.j...kDEQm
+    ..pqDMSrsYEYV).t
+    wxrdqSX.........
+    ....y...........
+    ....z...........
+  3: |
+    ............0...
+    ...CDES)SZZZ0F)1
+    ...GS)S...uYEZ)2
+    ...SIJKSSNN.HZ.3
+    ...IMSES)..XN.N4
+    ...OSIJPS...kk.5
+    ....IT.S..k6Ek)7
+    ...SUS.SS88V.V)9
+    .WSSS.S.........
+    ....D...........
+    ................
+  4: |
+    ............α0..
+    ...S.S.SYYY.β0Fγ
+    ...S.SG....00G.δ
+    ....SScYEYYNεqZζ
+    ...SS.S.S..uEN)η
+    .....SSgXk).εqkθ
+    ....SB.j..c.8G.ι
+    ..pqDMSrsYE8.8Vκ
+    λxrdqSX.........
+    ....y...........
+    ....z...........
+  5: |
+    .............μ..
+    ...CDES)S..νξD)π
+    ...GS)S...nEXD)ρ
+    ...SIJKSS.0.cD)σ
+    ...IMSES)..τυ.Nφ
+    ...OSIJPS..nhD)χ
+    ....IT.S...8cD)ψ
+    ...SUS.SS..Xωs8Γ
+    .WSSS.S.........
+    ....D...........
+    ................
+  6: |
+    ................
+    ...S.S.SXν)EYν)Δ
+    ...S.SG.....νΘ.Λ
+    ....SScYE0X.ΘΘ)Ξ
+    ...SS.S.S.υ6Eυ)Π
+    .....SSgXυ).ΣΣ)Φ
+    ....SB.j....8Σ.Ψ
+    ..pqDMSrsω)ωEω)Ω
+    бxrdqSX.........
+    ....y...........
+    ....z...........
+  7: |
+    ................
+    ...CDES)S..ΘΘ.νв
+    ...GS)S.....εqΘг
+    ...SIJKSS.0.дM.ж
+    ...IMSES).зτυ.υи
+    ...OSIJPS.υΣYμ.й
+    ....IT.S...8εqΣк
+    ...SUS.SS.ωX..ωл
+    .WSSS.S.........
+    ....D...........
+    ................
+  8: |
+    ................
+    .......SXΘ)Eμ..м
+    .....SG.....Gн)п
+    ......cYEн)нтн)ф
+    ........S..YEυ)ц
+    .......gXΣ)EΣч)ш
+    .......j.....ч)щ
+    ..pqDMSrsч)ччч.ъ
+    ыxrdqSX.........
+    ....y...........
+    ....z...........
+  9: |
+    ................
+    ................
+    ............нG..
+    ..........нEYM..
+    ................
+    .............G..
+    .............G..
+    ..........чEYM..
+    ................
+    ................
+    ................
+tests:
+- name: each digit alone, all 16 values
+  steps:
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+- name: README character table
+  steps:
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+- name: random four-digit jumps
+  steps:
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d2
+      items: []
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - insert:
+      cell: d1
+      items: []
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 0
+      l5_2: 0
+      l5_3: 0
+      l5_4: 0
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 1
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 1
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 1
+      l2_3: 1
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 1
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 1
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 1
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 0
+      l2_6: 0
+      l2_7: 0
+      l3_1: 1
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 1
+      l3_7: 0
+      l4_1: 1
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 1
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items: []
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 1
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 0
+      l3_3: 0
+      l3_4: 1
+      l3_5: 0
+      l3_6: 0
+      l3_7: 0
+      l4_1: 0
+      l4_2: 0
+      l4_3: 0
+      l4_4: 1
+      l4_5: 0
+      l4_6: 0
+      l4_7: 0
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 1
+      l5_5: 1
+      l5_6: 1
+      l5_7: 1
+      l6_1: 0
+      l6_2: 0
+      l6_3: 0
+      l6_4: 1
+      l6_5: 0
+      l6_6: 0
+      l6_7: 0
+      l7_1: 0
+      l7_2: 0
+      l7_3: 0
+      l7_4: 1
+      l7_5: 0
+      l7_6: 0
+      l7_7: 0
+      l8_1: 0
+      l8_2: 0
+      l8_3: 0
+      l8_4: 1
+      l8_5: 0
+      l8_6: 0
+      l8_7: 0
+  - insert:
+      cell: d0
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - insert:
+      cell: d1
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - insert:
+      cell: d2
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - {wait: 30}
+  - expect:
+      l2_1: 0
+      l2_2: 0
+      l2_3: 0
+      l2_4: 0
+      l2_5: 1
+      l2_6: 1
+      l2_7: 0
+      l3_1: 0
+      l3_2: 1
+      l3_3: 0
+      l3_4: 0
+      l3_5: 0
+      l3_6: 1
+      l3_7: 1
+      l4_1: 0
+      l4_2: 0
+      l4_3: 1
+      l4_4: 0
+      l4_5: 1
+      l4_6: 0
+      l4_7: 1
+      l5_1: 1
+      l5_2: 1
+      l5_3: 1
+      l5_4: 0
+      l5_5: 0
+      l5_6: 0
+      l5_7: 0
+      l6_1: 1
+      l6_2: 0
+      l6_3: 1
+      l6_4: 0
+      l6_5: 1
+      l6_6: 0
+      l6_7: 0
+      l7_1: 1
+      l7_2: 1
+      l7_3: 0
+      l7_4: 0
+      l7_5: 0
+      l7_6: 1
+      l7_7: 0
+      l8_1: 0
+      l8_2: 1
+      l8_3: 1
+      l8_4: 0
+      l8_5: 1
+      l8_6: 1
+      l8_7: 0
+- name: segment edge delays (insert tick to lamp)
+  steps:
+  - {wait: 4}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 1}
+      clear: true
+  - wave: {l3_1: '000000000000000000001111'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 23}
+      clear: true
+  - wave: {l2_2: '000000000000000000001111'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 46}
+      clear: true
+  - wave: {l3_1: '1111111111111111111111110000'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 5}
+      clear: true
+  - wave: {l2_5: '0000000000000000001111'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 28}
+      clear: true
+  - wave: {l3_1: '000000000000000000001111'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 51}
+      clear: true
+  - wave: {l2_2: '1111111111111111111111110000'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 10}
+      clear: true
+  - wave: {l3_1: '1111111111111111111111110000'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 32}
+      clear: true
+  - wave: {l3_7: '0000000000000000001111'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 55}
+      clear: true
+  - {wait: 30}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 14}
+      clear: true
+  - {wait: 30}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 37}
+      clear: true
+  - {wait: 30}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 60}
+      clear: true
+  - wave: {l2_5: '11111111111111111111110000'}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 19}
+      clear: true
+  - {wait: 30}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 42}
+      clear: true
+  - {wait: 30}
+  - insert:
+      cell: d3
+      items:
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      - {id: redstone, count: 64}
+      clear: true
+  - {wait: 30}
+  - insert:
+      cell: d3
+      items: []
+      clear: true
+  - wave: {l3_7: '11111111111111111111110000'}

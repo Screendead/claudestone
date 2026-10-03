@@ -1,0 +1,300 @@
+name: ref_mattbatwings_big_7seg_module
+description: 'Rebuild of mattbatwings'' Big 7seg Display Module, Logical Redstone Archive DISMODULE002 (README SOURCED: ''Wiring to display 7 segments on a larger display'', endorsed by mattbatwings, tagged Recommended and Tested & Functional; https://discord.com/channels/1361854816837435433/1472417204971765944). Size 5 wide x 10 tall x 2 deep (59 blocks: 21 lamps, 7 dust, 31 gray wool); a vertical wall, lamps in the z=1 plane (lamp side faces +z; seen from +z, x grows to the viewer''s right). Each of the seven segments is three lamps in a row (a top, b upper right, c lower right, d bottom, e lower left, f upper left, g middle), 3x3 for the side segments, with wool between segments; one dust per segment sits on the wool plane at z=0 behind the middle lamp. How (MEASURED unless marked): the dust takes a redstone driver from the north (z=-1) and becomes a north-south line, so it points into the lamp in front of it; dust pointing into a lamp powers it as a conductor and a conducting lamp lights the two lamps touching it, so one dust lights the whole segment; lamps lit that way pass nothing on and the wool between segments stops the bleed (the 128-row truth table over every combination of segments has no stray lamp). Harness changes: the .schem has no inputs, so each dust gets a redstone block behind it at z=-1 as its driver (a (2,9,0), b (4,7,0), c (4,3,0), d (2,1,0), e (0,3,0), f (0,7,0), g (2,5,0), in the layer for z=-1, which the size leaves out). Feeding from the side instead lights only the lamp over the wool block under the dust (a test below): the dust becomes an east-west line and points at no lamp, its power reaches the wool below, and that wool touches one lamp. So the module has to be fed from behind (INFERRED: from the README picture, which shows dust leading away on the far side). The dust is kept in its cross state from the schematic; the harness''s placement pass leaves it alone. Timing: a lamp lights in the same tick as its power (rise 0) and goes dark 4 game ticks after (fall 4, the lamp''s own turn-off delay).'
+traits:
+- compact
+- silent
+- pistonless
+- entityless
+- vertical
+- survival_friendly
+palette:
+  .: air
+  W: gray_wool
+  D: redstone_wire[east=side,north=side,south=side,west=side]
+  a:
+    name: a0
+    block: redstone_lamp
+  b:
+    name: a1
+    block: redstone_lamp
+  c:
+    name: a2
+    block: redstone_lamp
+  d:
+    input: a
+  e:
+    name: b0
+    block: redstone_lamp
+  f:
+    name: b1
+    block: redstone_lamp
+  g:
+    name: b2
+    block: redstone_lamp
+  h:
+    input: b
+  i:
+    name: c0
+    block: redstone_lamp
+  j:
+    name: c1
+    block: redstone_lamp
+  k:
+    name: c2
+    block: redstone_lamp
+  l:
+    input: c
+  m:
+    name: d0
+    block: redstone_lamp
+  n:
+    name: d1
+    block: redstone_lamp
+  o:
+    name: d2
+    block: redstone_lamp
+  p:
+    input: d
+  q:
+    name: e0
+    block: redstone_lamp
+  r:
+    name: e1
+    block: redstone_lamp
+  s:
+    name: e2
+    block: redstone_lamp
+  t:
+    input: e
+  u:
+    name: f0
+    block: redstone_lamp
+  v:
+    name: f1
+    block: redstone_lamp
+  w:
+    name: f2
+    block: redstone_lamp
+  x:
+    input: f
+  y:
+    name: g0
+    block: redstone_lamp
+  z:
+    name: g1
+    block: redstone_lamp
+  A:
+    name: g2
+    block: redstone_lamp
+  B:
+    input: g
+layers:
+  0: |
+    .....
+    ..W..
+    .....
+  1: |
+    ..p..
+    ..D..
+    WmnoW
+  2: |
+    .....
+    W...W
+    qWWWi
+  3: |
+    t...l
+    D...D
+    rWWWj
+  4: |
+    .....
+    ..W..
+    sWWWk
+  5: |
+    ..B..
+    ..D..
+    WyzAW
+  6: |
+    .....
+    W...W
+    uWWWe
+  7: |
+    x...h
+    D...D
+    vWWWf
+  8: |
+    .....
+    ..W..
+    wWWWg
+  9: |
+    ..d..
+    ..D..
+    WabcW
+tests:
+- name: every combination of segments
+  truth_table: |
+    a b c d e f g | a0 a1 a2 b0 b1 b2 c0 c1 c2 d0 d1 d2 e0 e1 e2 f0 f1 f2 g0 g1 g2
+    0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+    0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0
+    0 0 0 0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1
+    0 0 0 0 1 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0
+    0 0 0 0 1 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1
+    0 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0
+    0 0 0 0 1 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1
+    0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 1 | 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1
+    0 0 0 1 0 1 0 | 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0
+    0 0 0 1 0 1 1 | 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1
+    0 0 0 1 1 0 0 | 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0
+    0 0 0 1 1 0 1 | 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1
+    0 0 0 1 1 1 0 | 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0
+    0 0 0 1 1 1 1 | 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1
+    0 0 1 0 0 0 0 | 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 1 | 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1
+    0 0 1 0 0 1 0 | 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0
+    0 0 1 0 0 1 1 | 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1
+    0 0 1 0 1 0 0 | 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0
+    0 0 1 0 1 0 1 | 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+    0 0 1 0 1 1 0 | 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0
+    0 0 1 0 1 1 1 | 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    0 0 1 1 0 0 0 | 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 0 1 | 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1
+    0 0 1 1 0 1 0 | 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0
+    0 0 1 1 0 1 1 | 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1
+    0 0 1 1 1 0 0 | 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0
+    0 0 1 1 1 0 1 | 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1
+    0 0 1 1 1 1 0 | 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0
+    0 0 1 1 1 1 1 | 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    0 1 0 0 0 0 0 | 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 1 | 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+    0 1 0 0 0 1 0 | 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0
+    0 1 0 0 0 1 1 | 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1
+    0 1 0 0 1 0 0 | 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0
+    0 1 0 0 1 0 1 | 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1
+    0 1 0 0 1 1 0 | 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0
+    0 1 0 0 1 1 1 | 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1
+    0 1 0 1 0 0 0 | 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0
+    0 1 0 1 0 0 1 | 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1
+    0 1 0 1 0 1 0 | 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0
+    0 1 0 1 0 1 1 | 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1
+    0 1 0 1 1 0 0 | 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0
+    0 1 0 1 1 0 1 | 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1
+    0 1 0 1 1 1 0 | 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0
+    0 1 0 1 1 1 1 | 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1
+    0 1 1 0 0 0 0 | 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 0 0 0 1 | 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1
+    0 1 1 0 0 1 0 | 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0
+    0 1 1 0 0 1 1 | 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1
+    0 1 1 0 1 0 0 | 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0
+    0 1 1 0 1 0 1 | 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+    0 1 1 0 1 1 0 | 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0
+    0 1 1 0 1 1 1 | 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    0 1 1 1 0 0 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0
+    0 1 1 1 0 0 1 | 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1
+    0 1 1 1 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0
+    0 1 1 1 0 1 1 | 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1
+    0 1 1 1 1 0 0 | 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0
+    0 1 1 1 1 0 1 | 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1
+    0 1 1 1 1 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0
+    0 1 1 1 1 1 1 | 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 0 0 0 0 0 | 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 1 | 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+    1 0 0 0 0 1 0 | 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0
+    1 0 0 0 0 1 1 | 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1
+    1 0 0 0 1 0 0 | 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0
+    1 0 0 0 1 0 1 | 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1
+    1 0 0 0 1 1 0 | 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0
+    1 0 0 0 1 1 1 | 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1
+    1 0 0 1 0 0 0 | 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0
+    1 0 0 1 0 0 1 | 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1
+    1 0 0 1 0 1 0 | 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0
+    1 0 0 1 0 1 1 | 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1
+    1 0 0 1 1 0 0 | 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0
+    1 0 0 1 1 0 1 | 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1
+    1 0 0 1 1 1 0 | 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0
+    1 0 0 1 1 1 1 | 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 1 0 0 0 0 | 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 1 0 0 0 1 | 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1
+    1 0 1 0 0 1 0 | 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0
+    1 0 1 0 0 1 1 | 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1
+    1 0 1 0 1 0 0 | 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0
+    1 0 1 0 1 0 1 | 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+    1 0 1 0 1 1 0 | 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0
+    1 0 1 0 1 1 1 | 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 0 1 1 0 0 0 | 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0
+    1 0 1 1 0 0 1 | 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1
+    1 0 1 1 0 1 0 | 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0
+    1 0 1 1 0 1 1 | 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1
+    1 0 1 1 1 0 0 | 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0
+    1 0 1 1 1 0 1 | 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1
+    1 0 1 1 1 1 0 | 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0
+    1 0 1 1 1 1 1 | 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 0 0 0 0 0 | 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 0 0 0 0 1 | 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+    1 1 0 0 0 1 0 | 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0
+    1 1 0 0 0 1 1 | 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1
+    1 1 0 0 1 0 0 | 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0
+    1 1 0 0 1 0 1 | 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0 1 1 1
+    1 1 0 0 1 1 0 | 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0
+    1 1 0 0 1 1 1 | 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1
+    1 1 0 1 0 0 0 | 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0
+    1 1 0 1 0 0 1 | 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0 1 1 1
+    1 1 0 1 0 1 0 | 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0
+    1 1 0 1 0 1 1 | 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 1 1
+    1 1 0 1 1 0 0 | 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0
+    1 1 0 1 1 0 1 | 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0 1 1 1
+    1 1 0 1 1 1 0 | 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0
+    1 1 0 1 1 1 1 | 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 0 0 0 1 | 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1
+    1 1 1 0 0 1 0 | 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 0 0 0
+    1 1 1 0 0 1 1 | 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1
+    1 1 1 0 1 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 0 0 0
+    1 1 1 0 1 0 1 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+    1 1 1 0 1 1 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 0 0 0
+    1 1 1 0 1 1 1 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 1 1 1 0 0 0 | 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0
+    1 1 1 1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 1 1 1
+    1 1 1 1 0 1 0 | 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 0 0 0
+    1 1 1 1 0 1 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1
+    1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0
+    1 1 1 1 1 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1
+    1 1 1 1 1 1 0 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0
+    1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+  delay: 4
+- name: on in 0 ticks, off after 4
+  steps:
+  - drive:
+      f: 1
+  - expect:
+      f0: 1
+      f1: 1
+      f2: 1
+      e1: 0
+      g0: 0
+      a0: 0
+  - wait: 10
+  - drive:
+      f: 0
+  - wait: 3
+  - expect:
+      f0: 1
+      f1: 1
+      f2: 1
+  - wait: 1
+  - expect:
+      f0: 0
+      f1: 0
+      f2: 0
+- name: fed from the side lights only the lamp over the wool
+  steps:
+  - run: setblock ~-1 ~7 ~1 redstone_block
+  - wait: 6
+  - expect:
+      f0: 1
+      f1: 0
+      f2: 0
+      e0: 0
+      e1: 0
+  finally:
+  - setblock ~-1 ~7 ~1 air

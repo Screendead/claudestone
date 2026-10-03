@@ -1,5 +1,23 @@
 name: ref_odmen_register16
-description: x
+description: 'odmen.2159''s ''2t 16b register'' (REGISTER003 in mattbatwings'' Logical Redstone Archive, tagged Tested & Functional, endorsed by Waffle [Wueffi]; discord.com/channels/1361854816837435433/1479219110511378645),
+  rebuilt block for block from REGISTER003_16bit_register.schem (6x18x12, 738 blocks). README (SOURCED): inputs a read button, a write button and 16 data levers, output a 16 bit number, speed 2t. Harness
+  changes: the 16 levers and 2 stone buttons hang on a lamp or wool, which lever emulation cannot drive, so each is a fixture repeater[facing=east] on a fixture stone block with the input cell behind it
+  at x=7 (a repeater hard-powers the lamp or wool like the lever did); the fixture repeater adds 2 game ticks to every input. Everything else is the schematic''s, with lit/powered/locked states left for
+  the game to compute. Layout (INFERRED from the traces, then checked by the tests): one bit per layer, y=2..17, bit i at y=2+i, mirrored on alternate layers (even y: data path along x=0, storage s_i at
+  (0,y,6); odd y: x=3, storage at (3,y,6)); d_i lever at (6,y,9) even or (6,y,11) odd; output lamp o_i at (5,y,0) even or (5,y,2) odd. The two control rows are at y=1: write at (6,1,6), read at (6,1,5).
+  Each is a rising-edge pulse generator: the button powers a wool block; a repeater reads it into a subtract comparator whose side input is the same signal delayed by a delay-3 repeater, so the comparator
+  passes only the first 4 game ticks; that pulse powers a target block and so turns off the torch hung on it. The torch normally powers a vertical dust line (lime = read, blue = write) that zigzags up the
+  stack over glass (dust on glass, dust on a wool, alternating x=1 and x=2); it falls 15 to 1 over the 16 layers and a pulse takes it to 0 for 4 game ticks at every layer. Write line: the dust powers a
+  target block whose neighbouring repeater is the side lock of the storage repeater s_i, so s_i is locked (holds its state) except during the write pulse, when it copies the data path (lever lamp, repeater,
+  dust, then a repeater and target block up to s_i). Read line: the same arrangement powers a repeater into the side of a subtract comparator that reads s_i, blocking it; during the read pulse the comparator
+  passes s_i and a repeater/wool/dust/repeater chain carries a pulse to the output lamp. So storage is a locked repeater per bit (no torch, no comparator memory), a read is non-destructive and the output
+  is a pulse, not a level. MEASURED (tests): read rising edge to output lamp rises 18 game ticks (16 plus the fixture repeater''s 2) and the lamp stays lit 8 game ticks; write rising edge to storage repeater
+  changes 14 game ticks later (both directions); data stable from before the write press to 30 game ticks after is always stored right, and nothing is needed in setup (d may rise in the same tick as the
+  write); a write or read press of 4 game ticks works, 2 game ticks does nothing (the pulse generator needs 4); a button held for 200 game ticks fires once; two write presses 10 game ticks apart or less
+  fire once, 12 apart fire twice (trace of the blue line, not a test). In an early probe dropping a 1 on d_0 about 6 game ticks after the press stored the 1 and about 8 stored 0, so d must be held through
+  the whole press; the tests never rely on less. 16 words (all ones and zeros, alternating, 9 patterns), all 16 walking-one and 16 walking-zero words, read without clear of d, overwrite, read twice, d changed
+  without write, all pass. The README''s 2t is not a latency we could reproduce as one number: it matches the 4 game tick (2 redstone tick) write/read pulse; the press-to-output latency is 16 game ticks.
+  Library parts it shares: the repeater-lock storage cell and glass zigzag hold line of register/shift_reg4_lock and d_latch/dl_lock_stack, the comparator-subtract gate of cpu_regs_cell.'
 palette:
   .: air
   A: lime_wool
@@ -673,6 +691,15 @@ layers:
     IFFfILηθ.................
 
     '
+traits:
+- vertical
+- comparator_based
+- torch_based
+- lockable
+- silent
+- pistonless
+- entityless
+- survival_friendly
 tests:
 - name: words
   steps:
@@ -2650,3 +2677,103 @@ tests:
   - drive:
       read: 0
   - wait: 30
+- name: 2 gt write pulse ignored
+  steps:
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 1
+      d9: 1
+      d10: 1
+      d11: 1
+      d12: 1
+      d13: 1
+      d14: 1
+      d15: 1
+  - wait: 20
+  - drive:
+      write: 1
+  - wait: 20
+  - drive:
+      write: 0
+  - wait: 30
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+      d10: 0
+      d11: 0
+      d12: 0
+      d13: 0
+      d14: 0
+      d15: 0
+  - wait: 20
+  - drive:
+      write: 1
+  - wait: 2
+  - drive:
+      write: 0
+  - wait: 30
+  - drive:
+      read: 1
+  - wave:
+      o0: '000000000000000000111111110000'
+      o1: '000000000000000000111111110000'
+      o2: '000000000000000000111111110000'
+      o3: '000000000000000000111111110000'
+      o4: '000000000000000000111111110000'
+      o5: '000000000000000000111111110000'
+      o6: '000000000000000000111111110000'
+      o7: '000000000000000000111111110000'
+      o8: '000000000000000000111111110000'
+      o9: '000000000000000000111111110000'
+      o10: '000000000000000000111111110000'
+      o11: '000000000000000000111111110000'
+      o12: '000000000000000000111111110000'
+      o13: '000000000000000000111111110000'
+      o14: '000000000000000000111111110000'
+      o15: '000000000000000000111111110000'
+  - wait: 0
+  - drive:
+      read: 0
+  - wait: 30
+- name: write timing
+  steps:
+  - drive:
+      d0: 1
+      d15: 1
+  - wait: 20
+  - drive:
+      write: 1
+  - wave:
+      s0: '000000000000001'
+      s15: '000000000000001'
+  - wait: 10
+  - drive:
+      write: 0
+  - wait: 20
+  - drive:
+      d0: 0
+      d15: 0
+  - wait: 20
+  - drive:
+      write: 1
+  - wave:
+      s0: '111111111111110'
+      s15: '111111111111110'
+  - wait: 10
+  - drive:
+      write: 0

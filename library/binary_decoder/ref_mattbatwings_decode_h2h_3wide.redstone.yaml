@@ -1,0 +1,188 @@
+name: ref_mattbatwings_decode_h2h_3wide
+description: 'Rebuild of DECODE003 ''Decoder horizontal to horizontal (2 versions)'' from mattbatwings'' Logical Redstone Archive (endorsed by mattbatwings; Discord https://discord.com/channels/1361854816837435433/1472425622319136915), 3-wide version, as shipped. A programmable 4-input, 4-output AND plane: each input row r4/r6/r8/r10 (the z of its line) runs west along y3 dust and taps wool at y2; each output column (dust running north along y1) is OFF only when every row''s literal holds, then a torch inverts it into a lamp. A row''s literal in a column is a wall torch on the tapped wool above the column (column on while input 0, so the output needs the input 1) or a repeater-powered wool above the column dust (strongly powered wool powers the dust below, column on while input 1, so the output needs input 0). As shipped the columns are programmed r4&~r6&r8&~r10 (o0, o2) and ~r4&r6&~r8&r10 (o1, o3), so pairs repeat; moving torches and repeaters makes each column a different product (one-hot
+  if unique). Harness changes: the lever on a lamp at the end of each input line is replaced by an input cell where the lamp stood (a driver block powers the dust x9 neighbour as the lever-powered lamp did), output lamps named o0..o3 west to east. README claims (SOURCED): 4 bit in, 4 bit one-hot out if uniquely programmed, 2 ticks, 3-wide columns, easily programmable. MEASURED: all 16 input rows give the table; worst delay 8 game ticks (rise 4, fall 8 on every output), i.e. 4 redstone ticks on a fall, so the README''s 2 ticks matches only the rise. Size 13x5x11, 212 blocks.'
+palette:
+  .: air
+  A: lime_wool
+  n: redstone_wall_torch[facing=north]
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: repeater[delay=1,facing=east]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: redstone_wire[east=up,north=none,south=none,west=side]
+  F: redstone_wire[east=side,north=none,south=none,west=up]
+  G: air
+  '1':
+    name: o0
+    block: redstone_lamp
+  '2':
+    name: o1
+    block: redstone_lamp
+  '3':
+    name: o2
+    block: redstone_lamp
+  '4':
+    name: o3
+    block: redstone_lamp
+  a:
+    input: r4
+  b:
+    input: r6
+  c:
+    input: r8
+  d:
+    input: r10
+  L: redstone_lamp
+layers:
+  0: '...............
+
+    ...............
+
+    ...............
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    A..A..A..A.....
+
+    '
+  1: '1..2..3..4.....
+
+    n..n..n..n.....
+
+    A..A..A..A.....
+
+    B..B..B..B.....
+
+    B..BA.B..BA....
+
+    B..B..B..B.....
+
+    BA.B..BA.B.....
+
+    B..B..B..B.....
+
+    B..BA.B..BA....
+
+    B..B..B..B.....
+
+    BA.B..BA.B.....
+
+    '
+  2: '...............
+
+    ...............
+
+    ...............
+
+    n.....n........
+
+    AAAACAAAAACAA..
+
+    ...n.....n.....
+
+    ACAAAAACAAAAA..
+
+    n.....n........
+
+    AAAACAAAAACAA..
+
+    ...n.....n.....
+
+    ACAAAAACAAAAA..
+
+    '
+  3: '...............
+
+    ...............
+
+    ...............
+
+    ...............
+
+    DDEAAFDDEAAFDaG
+
+    ...............
+
+    AAFDDEAAFDDDDbG
+
+    ...............
+
+    DDEAAFDDEAAFDcG
+
+    ...............
+
+    AAFDDEAAFDDDDdG
+
+    '
+  4: '...............
+
+    ...............
+
+    ...............
+
+    ...............
+
+    ...DD....DD....
+
+    ...............
+
+    DD....DD.......
+
+    ...............
+
+    ...DD....DD....
+
+    ...............
+
+    DD....DD.......
+
+    '
+tests:
+- name: decode
+  truth_table: 'r4 r6 r8 r10 | o0 o1 o2 o3
+
+    0 0 0 0 | 0 0 0 0
+
+    0 0 0 1 | 0 0 0 0
+
+    0 0 1 0 | 0 0 0 0
+
+    0 0 1 1 | 0 0 0 0
+
+    0 1 0 0 | 0 0 0 0
+
+    0 1 0 1 | 0 1 0 1
+
+    0 1 1 0 | 0 0 0 0
+
+    0 1 1 1 | 0 0 0 0
+
+    1 0 0 0 | 0 0 0 0
+
+    1 0 0 1 | 0 0 0 0
+
+    1 0 1 0 | 1 0 1 0
+
+    1 0 1 1 | 0 0 0 0
+
+    1 1 0 0 | 0 0 0 0
+
+    1 1 0 1 | 0 0 0 0
+
+    1 1 1 0 | 0 0 0 0
+
+    1 1 1 1 | 0 0 0 0
+
+    '
+  delay: 8

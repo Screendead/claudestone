@@ -1,0 +1,240 @@
+name: ref_librok_stackable_vertical_hex_to_binary
+description: 'LiBRoK, HEXTOBIN003 stackable vertical hex to binary (mattbatwings Logical Redstone Archive; discord.com/channels/1361854816837435433/1479218672601010196). Strength 0-15 in at (5,8,2) from the east, four lamps out: b8 y=7, b4 y=5, b2 y=3, b1 y=1 (x=0,z=3). Each stage: a barrel of wooden axes (3, 7, 14 of 27 slots = strength 2, 4, 8) feeds a constant by a comparator; compare mode against the constant gives the bit (a repeater to a lamp), a subtract comparator gives H-c, and a repeater-driven subtract comparator (side 15) passes H unchanged when H<c; the two paths meet at one wool block and the dust below carries the remainder to the next stage. Size 6x9x5 plus the fixture barrel src at x=6 (harness: a 27-slot barrel of stone read by the input comparator, set by data merge; the .schem has no input source). Changes: schem lamp glyphs named b1..b8, the three barrels kept with their wooden_axe contents from the schem block entities. MEASURED: all 16 values correct up, down and in jumps; rise b8 6 gt, b4 10, b2 14, b1 18 (each stage +4 gt); fall b8 10 ... b1 22; worst 5 to 10: b1 falls at 34 gt (lamp fall includes 4 gt); the README claim of 6t is not reproduced as total latency (INFERRED: it is the first-bit latency, 6 gt).'
+traits: [analog, compact, vertical]
+palette:
+  d: {block: 'redstone_wire[east=side,north=none,south=none,west=side]', name: inlvl}
+  '.': 'air'
+  'A': 'blue_wool'
+  'B': 'comparator[facing=east,mode=compare]'
+  'C': 'repeater[delay=1,facing=east]'
+  'D': 'redstone_wire[east=side,north=none,south=none,west=side]'
+  'E': 'comparator[facing=north,mode=compare]'
+  'F': 'redstone_wire[east=side,north=side,south=side,west=side]'
+  'G': 'comparator[facing=south,mode=compare]'
+  'I': 'comparator[facing=west,mode=compare]'
+  'J': 'redstone_wire[east=side,north=none,south=side,west=side]'
+  'K': 'comparator[facing=south,mode=subtract]'
+  'M': 'repeater[delay=1,facing=west]'
+  'N': 'comparator[facing=north,mode=subtract]'
+  'p': 'barrel[facing=west,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_axe",count:1},{Slot:1b,id:"minecraft:wooden_axe",count:1},{Slot:2b,id:"minecraft:wooden_axe",count:1}]}'
+  'q': 'barrel[facing=west,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_axe",count:1},{Slot:1b,id:"minecraft:wooden_axe",count:1},{Slot:2b,id:"minecraft:wooden_axe",count:1},{Slot:3b,id:"minecraft:wooden_axe",count:1},{Slot:4b,id:"minecraft:wooden_axe",count:1},{Slot:5b,id:"minecraft:wooden_axe",count:1},{Slot:6b,id:"minecraft:wooden_axe",count:1}]}'
+  'r': 'barrel[facing=west,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_axe",count:1},{Slot:1b,id:"minecraft:wooden_axe",count:1},{Slot:2b,id:"minecraft:wooden_axe",count:1},{Slot:3b,id:"minecraft:wooden_axe",count:1},{Slot:4b,id:"minecraft:wooden_axe",count:1},{Slot:5b,id:"minecraft:wooden_axe",count:1},{Slot:6b,id:"minecraft:wooden_axe",count:1},{Slot:7b,id:"minecraft:wooden_axe",count:1},{Slot:8b,id:"minecraft:wooden_axe",count:1},{Slot:9b,id:"minecraft:wooden_axe",count:1},{Slot:10b,id:"minecraft:wooden_axe",count:1},{Slot:11b,id:"minecraft:wooden_axe",count:1},{Slot:12b,id:"minecraft:wooden_axe",count:1},{Slot:13b,id:"minecraft:wooden_axe",count:1}]}'
+  'W': {block: 'barrel[facing=west,open=false]', fixture: true, name: 'src'}
+  '1': {block: 'redstone_lamp', name: 'b1'}
+  '2': {block: 'redstone_lamp', name: 'b2'}
+  '4': {block: 'redstone_lamp', name: 'b4'}
+  '8': {block: 'redstone_lamp', name: 'b8'}
+layers:
+  0: |
+    .......
+    .......
+    ...A...
+    .AA....
+    .......
+  1: |
+    .......
+    .....A.
+    ..ABA..
+    1CD..A.
+    .......
+  2: |
+    .....A.
+    ..AAAE.
+    ...AFA.
+    .AAAAG.
+    .....A.
+  3: |
+    ....AF.
+    .pIJKA.
+    ..ABA..
+    2CDMNA.
+    ....AF.
+  4: |
+    .....A.
+    ..AAAE.
+    ...AFA.
+    .AAAAG.
+    .....A.
+  5: |
+    ....AF.
+    .qIJKA.
+    ..ABA..
+    4CDMNA.
+    ....AF.
+  6: |
+    .....A.
+    ..AAAE.
+    ...AFA.
+    .AAAAG.
+    .....A.
+  7: |
+    ....AF.
+    .rIJKA.
+    ..ABAA.
+    8CDMNA.
+    ....AF.
+  8: |
+    .......
+    .......
+    ....dBW
+    .......
+    .......
+tests:
+- name: sweep up
+  steps:
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[]}'}
+  - {wait: 60}
+  - {level: {inlvl: 0}}
+  - {expect: {b8: 0, b4: 0, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 1}}
+  - {expect: {b8: 0, b4: 0, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 2}}
+  - {expect: {b8: 0, b4: 0, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 3}}
+  - {expect: {b8: 0, b4: 0, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 4}}
+  - {expect: {b8: 0, b4: 1, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 5}}
+  - {expect: {b8: 0, b4: 1, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 6}}
+  - {expect: {b8: 0, b4: 1, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 7}}
+  - {expect: {b8: 0, b4: 1, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 8}}
+  - {expect: {b8: 1, b4: 0, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 9}}
+  - {expect: {b8: 1, b4: 0, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 10}}
+  - {expect: {b8: 1, b4: 0, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 11}}
+  - {expect: {b8: 1, b4: 0, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 12}}
+  - {expect: {b8: 1, b4: 1, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 13}}
+  - {expect: {b8: 1, b4: 1, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 14}}
+  - {expect: {b8: 1, b4: 1, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 15}}
+  - {expect: {b8: 1, b4: 1, b2: 1, b1: 1}}
+- name: sweep down and jumps
+  steps:
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 15}}
+  - {expect: {b8: 1, b4: 1, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[]}'}
+  - {wait: 60}
+  - {level: {inlvl: 0}}
+  - {expect: {b8: 0, b4: 0, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 9}}
+  - {expect: {b8: 1, b4: 0, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 6}}
+  - {expect: {b8: 0, b4: 1, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 15}}
+  - {expect: {b8: 1, b4: 1, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 5}}
+  - {expect: {b8: 0, b4: 1, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 10}}
+  - {expect: {b8: 1, b4: 0, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 3}}
+  - {expect: {b8: 0, b4: 0, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 12}}
+  - {expect: {b8: 1, b4: 1, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 1}}
+  - {expect: {b8: 0, b4: 0, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 14}}
+  - {expect: {b8: 1, b4: 1, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 2}}
+  - {expect: {b8: 0, b4: 0, b2: 1, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 13}}
+  - {expect: {b8: 1, b4: 1, b2: 0, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 4}}
+  - {expect: {b8: 0, b4: 1, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 11}}
+  - {expect: {b8: 1, b4: 0, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 7}}
+  - {expect: {b8: 0, b4: 1, b2: 1, b1: 1}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {level: {inlvl: 8}}
+  - {expect: {b8: 1, b4: 0, b2: 0, b1: 0}}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[]}'}
+  - {wait: 60}
+  - {level: {inlvl: 0}}
+  - {expect: {b8: 0, b4: 0, b2: 0, b1: 0}}
+- name: delay 5 to 10 (worst fall, b1 at 34)
+  steps:
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64}]}'}
+  - wave: {b8: '0000001111111111111111111111111111111111', b4: '1111111111111111110000000000000000000000', b2: '0000000000000011111111111111111111111111', b1: '1111111111111111111111111111111111000000'}
+- name: delay 0 to 15 (all rise)
+  steps:
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[]}'}
+  - {wait: 60}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'}
+  - wave: {b8: '0000001111111111111111111111111111111111', b4: '0000000000111111111111111111111111111111', b2: '0000000000000011111111111111111111111111', b1: '0000000000000000001111111111111111111111'}
+- name: delay 15 to 0 (all fall)
+  steps:
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'}
+  - {wait: 60}
+  - {run: 'data merge block ~6 ~8 ~2 {Items:[]}'}
+  - wave: {b8: '1111111111000000000000000000000000000000', b4: '1111111111111100000000000000000000000000', b2: '1111111111111111110000000000000000000000', b1: '1111111111111111111111000000000000000000'}

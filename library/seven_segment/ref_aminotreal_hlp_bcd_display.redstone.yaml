@@ -1,0 +1,258 @@
+name: ref_aminotreal_hlp_bcd_display
+description: "Rebuild of NUMDISPLAY005 Hex Layer Problem (HLP) Displays (authors Aminotreal and Powsi, endorsed by mattbatwings; Recommended, Tested & Functional; https://discord.com/channels/1361854816837435433/1472416236989317202). SOURCED: README says three HLP displays, all stackable every 4x6 blocks: one hex, one BCD, one unordered BCD; no speed given. The .schem holds all three side by side; this file is the BCD one (middle size, z 19..27 of the schem), cut out at its own origin; siblings ref_aminotreal_hlp_hex_display and ref_aminotreal_hlp_ubcd_display. How it works (INFERRED from the blocks, MEASURED in traces): 9 levers k1..k9 at y=4 feed a dust line the same way as the hex display (lever kN at x=26-N, line end reads N, no lever = 0, highest wins by the same decay argument); a decoder of comparator layers, one per pixel row, built from 58 barrels of totems, 67 comparators, an end portal frame, two hoppers and a target block as constants, drives the lamp wall; plus a floor lever 'extra' at y=7 that blanks the display (MEASURED: extra on lights no lamp, whatever digit is selected; blank_overrides_digit). Output is a 5x7 lamp wall at x=0, z=0..4 (rel), y=1..7 with the 3x5 glyph at columns 1..3, rows y=2..6. MEASURED: decimal glyphs 0-9 all correct (digits test); worst case lever click to last lamp change 22 game ticks (latency_slowest). Size 26x7x9. Harness changes: sign labels dropped (they read 9..0 above the levers, x=17..26 with 0 = no lever), wool under the levers and the floor lever's support is white_wool instead of cyan for scripts.try's plain-support rule, levers are named cells clicked with use, not redstone-block drivers; barrel contents come from the .schem block entities (totems, 1-27 per barrel). Tests settle 60 ticks after placement."
+traits: ["analog", "comparator_based", "container_based", "pistonless", "entityless", "compact"]
+palette:
+  ".": "air"
+  "A": {block: "redstone_lamp", name: "r1c1"}
+  "B": "cyan_wool"
+  "C": {block: "redstone_lamp", name: "r1c2"}
+  "D": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "E": {block: "redstone_lamp", name: "r1c3"}
+  "F": "barrel[facing=down,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "G": {block: "redstone_lamp", name: "r1c4"}
+  "H": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "I": {block: "redstone_lamp", name: "r1c5"}
+  "J": "redstone_block"
+  "K": "barrel[facing=down,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "L": {block: "redstone_lamp", name: "r2c1"}
+  "M": "redstone_wire[east=none,north=side,south=side,west=none]"
+  "N": "comparator[facing=east,mode=subtract]"
+  "O": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "P": {block: "redstone_lamp", name: "r2c2"}
+  "Q": "repeater[delay=1,facing=east]"
+  "R": "comparator[facing=east,mode=compare]"
+  "S": "water_cauldron[level=1]"
+  "T": "redstone_wire[east=side,north=side,south=side,west=none]"
+  "U": "redstone_wire[east=none,north=side,south=none,west=side]"
+  "V": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "W": {block: "redstone_lamp", name: "r2c3"}
+  "X": "redstone_wall_torch[facing=west]"
+  "Y": "redstone_wire[east=side,north=side,south=side,west=side]"
+  "Z": "repeater[delay=2,facing=east]"
+  "a": "target"
+  "b": "comparator[facing=south,mode=compare]"
+  "c": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "d": {block: "redstone_lamp", name: "r2c4"}
+  "e": "barrel[facing=down,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "f": "redstone_wire[east=side,north=side,south=none,west=side]"
+  "g": "redstone_wire[east=up,north=none,south=none,west=side]"
+  "h": {block: "redstone_lamp", name: "r2c5"}
+  "i": "redstone_wire[east=side,north=side,south=none,west=none]"
+  "j": {block: "redstone_lamp", name: "r3c1"}
+  "k": {block: "redstone_lamp", name: "r3c2"}
+  "l": {block: "redstone_lamp", name: "r3c3"}
+  "m": "barrel[facing=down,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "n": {block: "redstone_lamp", name: "r3c4"}
+  "o": "redstone_wire[east=side,north=none,south=side,west=none]"
+  "p": "redstone_wire[east=side,north=none,south=none,west=side]"
+  "q": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "r": "cyan_stained_glass"
+  "s": "redstone_wire[east=none,north=none,south=up,west=side]"
+  "t": {block: "redstone_lamp", name: "r3c5"}
+  "u": "barrel[facing=down,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "v": {block: "redstone_lamp", name: "r4c1"}
+  "w": "redstone_wire[east=up,north=none,south=side,west=none]"
+  "x": {block: "redstone_lamp", name: "r4c2"}
+  "y": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1},{Slot:16b,id:\"minecraft:totem_of_undying\",count:1},{Slot:17b,id:\"minecraft:totem_of_undying\",count:1},{Slot:18b,id:\"minecraft:totem_of_undying\",count:1},{Slot:19b,id:\"minecraft:totem_of_undying\",count:1},{Slot:20b,id:\"minecraft:totem_of_undying\",count:1},{Slot:21b,id:\"minecraft:totem_of_undying\",count:1},{Slot:22b,id:\"minecraft:totem_of_undying\",count:1},{Slot:23b,id:\"minecraft:totem_of_undying\",count:1},{Slot:24b,id:\"minecraft:totem_of_undying\",count:1},{Slot:25b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "z": {block: "redstone_lamp", name: "r4c3"}
+  "0": "redstone_wire[east=side,north=none,south=side,west=side]"
+  "1": {block: "redstone_lamp", name: "r4c4"}
+  "2": "hopper[enabled=false,facing=down]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:redstone\",count:63}]}"
+  "3": {block: "redstone_lamp", name: "r4c5"}
+  "4": {block: "lever[face=wall,facing=north]", name: "k9"}
+  "5": {block: "lever[face=wall,facing=north]", name: "k8"}
+  "6": {block: "lever[face=wall,facing=north]", name: "k7"}
+  "7": {block: "lever[face=wall,facing=north]", name: "k6"}
+  "8": {block: "lever[face=wall,facing=north]", name: "k5"}
+  "9": {block: "lever[face=wall,facing=north]", name: "k4"}
+  "\u00c0": {block: "lever[face=wall,facing=north]", name: "k3"}
+  "\u00c1": {block: "lever[face=wall,facing=north]", name: "k2"}
+  "\u00c2": {block: "lever[face=wall,facing=north]", name: "k1"}
+  "\u00c3": "white_wool"
+  "\u00c4": {block: "redstone_lamp", name: "r5c1"}
+  "\u00c5": {block: "redstone_lamp", name: "r5c2"}
+  "\u00c6": {block: "redstone_lamp", name: "r5c3"}
+  "\u00c7": "redstone_wire[east=none,north=none,south=side,west=side]"
+  "\u00c8": {block: "redstone_lamp", name: "r5c4"}
+  "\u00c9": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "\u00ca": {block: "redstone_lamp", name: "r5c5"}
+  "\u00cb": "comparator[facing=south,mode=subtract]"
+  "\u00cc": "end_portal_frame[eye=true,facing=south]"
+  "\u00cd": "hopper[enabled=true,facing=down]{Items:[{Slot:0b,id:\"minecraft:wooden_axe\",count:1},{Slot:1b,id:\"minecraft:wooden_axe\",count:1}]}"
+  "\u00ce": {block: "redstone_lamp", name: "r6c1"}
+  "\u00cf": {block: "redstone_lamp", name: "r6c2"}
+  "\u00d0": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "\u00d1": {block: "redstone_lamp", name: "r6c3"}
+  "\u00d2": {block: "redstone_lamp", name: "r6c4"}
+  "\u00d3": {block: "redstone_lamp", name: "r6c5"}
+  "\u00d4": {block: "redstone_lamp", name: "r7c1"}
+  "\u00d5": {block: "redstone_lamp", name: "r7c2"}
+  "\u00d6": {block: "redstone_lamp", name: "r7c3"}
+  "\u00d7": {block: "redstone_lamp", name: "r7c4"}
+  "\u00d8": {block: "redstone_lamp", name: "r7c5"}
+  "\u00d9": {block: "lever[face=floor,facing=west]", name: "extra"}
+layers:
+  0: |
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+  1: |
+    A.....B.B.................
+    C.B.B.BDB.B...............
+    E..BBB.B.FB.B.............
+    G.B.B....B.BHB............
+    I.JBB......K..............
+    ..........................
+    ..........................
+    ..........................
+    ..........................
+  2: |
+    L.....MBNBO...............
+    PBQBRSTNUVNBV.............
+    WXBQYZabBNUcNc............
+    dBRaNJBeBbBNfgB...........
+    h.ifZB.B.BebB.............
+    .........K.BV.............
+    ...........c..............
+    ..........................
+    ..........................
+  3: |
+    j.B...B.F.................
+    kXBQBRBBB.B...............
+    l..BBB.B.mB.B.............
+    nXBQBNSopBNBqrs...........
+    t....MBNHNUBNuB...........
+    .........bBNUB............
+    .........c................
+    ..........................
+    ..........................
+  4: |
+    v.wBBBMBNO................
+    xBNy.BiNUBNBO.............
+    zXBQ0QBbBNUDNV............
+    1BQBNSBHBbBNfN2...........
+    3......B.OBbBTU..456789ÀÁÂ
+    .........B.BONyBBÃÃÃÃÃÃÃÃÃ
+    ...........D....B.........
+    ................B.........
+    ..........................
+  5: |
+    Ä..pZBB.B.................
+    ÅXBQBQBVB.B...............
+    Æ..BBaÇBNBH.B.............
+    ÈXBQBQfNUÉNBqBJ...........
+    Ê......bBNUÉNDB...........
+    .......V.bBRUBËpNppppppppp
+    .........B.b..Ì.b.........
+    .........É.B....Í.........
+    ...........É..............
+  6: |
+    Î....pÇBNBO...............
+    ÏBQBNSiRUÐNBq.............
+    ÑXBQYQBbBNUcNÉ............
+    ÒBQBNSBqBbBRfNy...........
+    Ó......B.BObBTp...........
+    .........Ð.BqNyÃ.rrrrrrrrr
+    ...........c..............
+    ..........................
+    ..........................
+  7: |
+    Ô.....B...................
+    Õ.....B...................
+    Ö.....MBNH................
+    ×.....iNUBNBH.............
+    Ø.....BbBNUVNO............
+    .......D.bBNU..Ù..........
+    .........H.b..............
+    ...........B..............
+    ...........V..............
+tests:
+- name: digits
+  settle: 60
+  steps:
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k9
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k9
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k8
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k8
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k7
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 0, r2c3: 0, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 0, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 0, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k7
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k6
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 0, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k6
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k5
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 0, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k5
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k4
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 0, r2c3: 0, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 0, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k4
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k3
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 0, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 0, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k3
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k2
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 0, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 0, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k2
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k1
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 0, r2c3: 0, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 0, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 0, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 0, r6c3: 0, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k1
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: extra
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 0, r2c3: 0, r2c4: 0, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 0, r3c5: 0, r4c1: 0, r4c2: 0, r4c3: 0, r4c4: 0, r4c5: 0, r5c1: 0, r5c2: 0, r5c3: 0, r5c4: 0, r5c5: 0, r6c1: 0, r6c2: 0, r6c3: 0, r6c4: 0, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: extra
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+- name: latency_slowest
+  settle: 60
+  steps:
+  - use: k9
+  - wave: {r3c2: "111111111111111111111100000", r4c3: "000000000000000000111111111"}
+- name: blank_overrides_digit
+  settle: 60
+  steps:
+  - use: k5
+  - use: extra
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 0, r2c3: 0, r2c4: 0, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 0, r3c5: 0, r4c1: 0, r4c2: 0, r4c3: 0, r4c4: 0, r4c5: 0, r5c1: 0, r5c2: 0, r5c3: 0, r5c4: 0, r5c5: 0, r6c1: 0, r6c2: 0, r6c3: 0, r6c4: 0, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: extra
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 0, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 1, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 0, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+  - use: k5
+  - wait: 26
+  - expect: {r1c1: 0, r1c2: 0, r1c3: 0, r1c4: 0, r1c5: 0, r2c1: 0, r2c2: 1, r2c3: 1, r2c4: 1, r2c5: 0, r3c1: 0, r3c2: 1, r3c3: 0, r3c4: 1, r3c5: 0, r4c1: 0, r4c2: 1, r4c3: 0, r4c4: 1, r4c5: 0, r5c1: 0, r5c2: 1, r5c3: 0, r5c4: 1, r5c5: 0, r6c1: 0, r6c2: 1, r6c3: 1, r6c4: 1, r6c5: 0, r7c1: 0, r7c2: 0, r7c3: 0, r7c4: 0, r7c5: 0}
+

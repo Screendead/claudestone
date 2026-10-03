@@ -1,0 +1,1758 @@
+name: ref_samosthesage_hex_fifo_vertical
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEX006 ''Hex FIFO Register (Vertical, Dual-read)'' by SamosTheSage (endorsed by mattbatwings, Recommended, Tested & Functional; Discord https://discord.com/channels/1361854816837435433/1472411295847546881; README: ''A first in, first out register for hex numbers''). 40x17x22 as rebuilt, 967 blocks: eight stages stacked in y (y = 1,3,..15, each a 2-layer cell), each holding one signal strength 1-14 (MEASURED; 15 breaks, see below) and showing it as a bar of lit lamps on both sides. Interface (cell coordinates from the origin): data in = 15 stone buttons b1..b15 at x=21,y=15,z=0..14, button bN pushing strength N (they power a dust line on y=16 that decays toward z=0, so z=14 gives 15 and z=0 gives 1; INFERRED, confirmed by the round-trip test); pop = the floor button at (19,2,21) clears the oldest entry; clear_btn = the wall button at (16,1,17) clears every stage with a pulse; clear_lever = the lever at (20,0,20) holds every stage clear while on. Read ports: L0..L7 (dust at x=15, y=2k+1, z=16) and R0..R7 (x=24) carry the stored strength of stage k, stage 0 (bottom) the oldest; lamp rows at x=1..14 and x=25..38 on y=2k light a bar as long as the value (MEASURED for 6: x=9..14 and x=25..30). ''Dual-read'' is read as these two mirrored ports on every stage (INFERRED). How it works (INFERRED from the block layout, checked by the per-tick traces): each stage is a two-comparator compare-mode loop (dust 18,16 -> comparator 19,16 -> gray block 20,16 -> dust 20,17 -> comparator 19,17 -> gray block 18,17 -> back), which holds a strength with no decay, so storage is the comparator loop of ref_unknown_lra_hex_rs_horizontal''s kind; a repeater (17,15) makes a nonzero loop raise an occupied flag. A subtract comparator (20,15) copies the stage above (read through comparator 21,y+1,15 off a block the upper loop''s dust powers from above) into this loop only while the occupied flag is off, so a value falls to the lowest empty stage and an occupied stage refuses. Once the lower loop holds the value, a short pulse (cells c: loaded but flag not yet up, 2-4 gt) runs through a wall-torch pair (20,y,19)/(19,y+1,19) and powers dust (19,y+2,18) on the side of the upper loop''s comparator (19,17), which clears the donor stage; so the whole queue shifts down one stage per clear. Pop clears stage 0 the same way and the stack above ripples down. MEASURED: a push into an empty FIFO reaches stage 0 (L0) 34 gt after the click, 4 gt per stage fall (L7 at +6, L0 at +34; the right port R leads the left by 2 gt on the way down); a pop empties L0 at +6 gt and the next entry is on L0 at +14 gt; a pop ripples the rest at 14 gt per stage (full FIFO: 104 gt). Pushes need the stone button''s 20 gt apart (five distinct values 20 gt apart are stored in order); closer pushes overlap on the data line and merge to their maximum. A ninth push into a full FIFO is ignored and corrupts nothing. DEFECT (MEASURED): a stored 15 is stored twice. The clear is a compare-mode side signal of strength 15, and compare mode passes the rear when rear >= side, so a loop holding 15 cannot be cleared by it; the donor keeps its 15 as a ghost that behaves as a second entry (push 15: L0=15 and L1=15; after one pop L0=15 only). Values 1-14 round-trip alone (every_value_1_to_14_round_trip). Changed for the harness: the four sign blocks are dropped; the red concrete blocks (and the black block under the clear button) are white concrete so the harness can emulate clicks on the button and lever hanging on them (colour has no effect on redstone); the schematic''s saved power/lit states are dropped (the harness settles the build empty); the schematic was captured with values in flight, which is why saved dust powers differ from the settled empty state.'
+traits:
+- analog
+- comparator_based
+- torch_based
+- vertical
+palette:
+  .: air
+  '#': white_concrete
+  L: redstone_lamp
+  B: smooth_stone_slab[type=top,waterlogged=false]
+  C: black_concrete
+  D: white_concrete
+  F: redstone_wire[east=side,north=side,south=side,west=side]
+  G: repeater[delay=1,facing=south]
+  H: repeater[delay=1,facing=west]
+  I: comparator[facing=north,mode=subtract]
+  J: redstone_wire[east=side,north=none,south=none,west=side]
+  K: comparator[facing=east,mode=compare]
+  M: comparator[facing=west,mode=compare]
+  N: gray_concrete
+  P: comparator[facing=east,mode=subtract]
+  Q: repeater[delay=2,facing=north]
+  T: redstone_wire[east=side,north=up,south=none,west=none]
+  U: redstone_wire[east=none,north=side,south=side,west=side]
+  V: redstone_wire[east=none,north=side,south=none,west=side]
+  W: redstone_wire[east=side,north=none,south=side,west=none]
+  X: comparator[facing=south,mode=subtract]
+  (: redstone_wall_torch[facing=west]
+  Y: repeater[delay=2,facing=south]
+  Z: redstone_wire[east=none,north=side,south=side,west=none]
+  c: comparator[facing=south,mode=compare]
+  e: redstone_wire[east=side,north=side,south=none,west=none]
+  h: lime_concrete
+  k:
+    name: b1
+    block: stone_button[face=wall,facing=east]
+  l:
+    name: b2
+    block: stone_button[face=wall,facing=east]
+  m:
+    name: b3
+    block: stone_button[face=wall,facing=east]
+  n:
+    name: b4
+    block: stone_button[face=wall,facing=east]
+  o:
+    name: b5
+    block: stone_button[face=wall,facing=east]
+  p:
+    name: b6
+    block: stone_button[face=wall,facing=east]
+  q:
+    name: b7
+    block: stone_button[face=wall,facing=east]
+  r:
+    name: b8
+    block: stone_button[face=wall,facing=east]
+  s:
+    name: b9
+    block: stone_button[face=wall,facing=east]
+  t:
+    name: b10
+    block: stone_button[face=wall,facing=east]
+  u:
+    name: b11
+    block: stone_button[face=wall,facing=east]
+  v:
+    name: b12
+    block: stone_button[face=wall,facing=east]
+  w:
+    name: b13
+    block: stone_button[face=wall,facing=east]
+  x:
+    name: b14
+    block: stone_button[face=wall,facing=east]
+  y:
+    name: b15
+    block: stone_button[face=wall,facing=east]
+  z:
+    name: pop
+    block: stone_button[face=floor,facing=east]
+  À:
+    name: clear_lever
+    block: lever[face=wall,facing=east]
+  Á:
+    name: clear_btn
+    block: stone_button[face=wall,facing=west]
+  Â:
+    output: L0
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ã:
+    output: R0
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ä:
+    name: m0
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Å:
+    name: c0
+    block: comparator[facing=north,mode=subtract]
+  Æ:
+    name: e0
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  Ç:
+    output: L1
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  È:
+    output: R1
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  É:
+    name: m1
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ê:
+    name: c1
+    block: comparator[facing=north,mode=subtract]
+  Ë:
+    name: e1
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  Ì:
+    output: L2
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Í:
+    output: R2
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Î:
+    name: m2
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ï:
+    name: c2
+    block: comparator[facing=north,mode=subtract]
+  Ð:
+    name: e2
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  Ñ:
+    output: L3
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ò:
+    output: R3
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ó:
+    name: m3
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ô:
+    name: c3
+    block: comparator[facing=north,mode=subtract]
+  Õ:
+    name: e3
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  Ö:
+    output: L4
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ø:
+    output: R4
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ù:
+    name: m4
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ú:
+    name: c4
+    block: comparator[facing=north,mode=subtract]
+  Û:
+    name: e4
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  Ü:
+    output: L5
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Ý:
+    output: R5
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  Þ:
+    name: m5
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  ß:
+    name: c5
+    block: comparator[facing=north,mode=subtract]
+  à:
+    name: e5
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  á:
+    output: L6
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  â:
+    output: R6
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  ã:
+    name: m6
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  ä:
+    name: c6
+    block: comparator[facing=north,mode=subtract]
+  å:
+    name: e6
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  æ:
+    output: L7
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  ç:
+    output: R7
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  è:
+    name: m7
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  é:
+    name: c7
+    block: comparator[facing=north,mode=subtract]
+  ê:
+    name: e7
+    block: redstone_wire[east=none,north=side,south=none,west=side]
+  ë: white_concrete
+layers:
+  0: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.....................
+    .................#.##...................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    ...................##.#.................
+    .................BC#.##.................
+    ..................DD....................
+    ..................DDÀ...................
+    ..................D.....................
+  1: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJÂK#JMNF#MÃJJJJJJJJJJJJJJ.
+    ................ÁëNPÄ#Q.................
+    .................THU.ÅÆ.................
+    ..................WX(#..................
+    ..................YZ....................
+    ..................ZD....................
+  2: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ...................z....................
+  3: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJÇK#JMNF#MÈJJJJJJJJJJJJJJ.
+    .................BNPÉ#Q.................
+    .................eHV.ÊË.................
+    ...................#(#..................
+    ........................................
+    ........................................
+  4: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ........................................
+  5: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJÌK#JMNF#MÍJJJJJJJJJJJJJJ.
+    .................BNPÎ#Q.................
+    .................eHV.ÏÐ.................
+    ...................#(#..................
+    ........................................
+    ........................................
+  6: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ........................................
+  7: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJÑK#JMNF#MÒJJJJJJJJJJJJJJ.
+    .................BNPÓ#Q.................
+    .................eHV.ÔÕ.................
+    ...................#(#..................
+    ........................................
+    ........................................
+  8: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ........................................
+  9: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJÖK#JMNF#MØJJJJJJJJJJJJJJ.
+    .................BNPÙ#Q.................
+    .................eHV.ÚÛ.................
+    ...................#(#..................
+    ........................................
+    ........................................
+  10: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ........................................
+  11: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJÜK#JMNF#MÝJJJJJJJJJJJJJJ.
+    .................BNPÞ#Q.................
+    .................eHV.ßà.................
+    ...................#(#..................
+    ........................................
+    ........................................
+  12: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ........................................
+  13: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    .................#F.#...................
+    .................G#HI#..................
+    .JJJJJJJJJJJJJJáK#JMNF#MâJJJJJJJJJJJJJJ.
+    .................BNPã#Q.................
+    .................eHV.äå.................
+    ...................#(#..................
+    ........................................
+    ........................................
+  14: |
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ..................#.F#..................
+    .................#.##c..................
+    LLLLLLLLLLLLLLL##.##.#.##LLLLLLLLLLLLLLL
+    .................Z.##.#.................
+    .................BC#.##.................
+    ...................(#...................
+    ........................................
+    ........................................
+  15: |
+    ....................#k..................
+    ....................#l..................
+    ....................#m..................
+    ....................#n..................
+    ....................#o..................
+    ....................#p..................
+    ....................#q..................
+    ....................#r..................
+    ....................#s..................
+    ....................#t..................
+    ....................#u..................
+    ....................#v..................
+    ....................#w..................
+    ....................#x..................
+    .................#F.#y..................
+    .................G#HI...................
+    .JJJJJJJJJJJJJJæK#JMhF#MçJJJJJJJJJJJJJJ.
+    ..................NPè#Q.................
+    .................eHV.éê.................
+    ...................#....................
+    ........................................
+    ........................................
+  16: |
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ....................Z...................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+    ........................................
+tests:
+- name: fifo_order_left_and_right_ports
+  settle: 40
+  steps:
+  - use: b4
+  - wait: 130
+  - use: b7
+  - wait: 130
+  - use: b2
+  - wait: 130
+  - use: b12
+  - wait: 130
+  - use: b1
+  - wait: 130
+  - level:
+      L0: 4
+      R0: 4
+      L1: 7
+      R1: 7
+      L2: 2
+      R2: 2
+      L3: 12
+      R3: 12
+      L4: 1
+      R4: 1
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 7
+      R0: 7
+      L1: 2
+      R1: 2
+      L2: 12
+      R2: 12
+      L3: 1
+      R3: 1
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 2
+      R0: 2
+      L1: 12
+      R1: 12
+      L2: 1
+      R2: 1
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 12
+      R0: 12
+      L1: 1
+      R1: 1
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 1
+      R0: 1
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: every_value_1_to_14_round_trip
+  settle: 40
+  steps:
+  - use: b1
+  - wait: 130
+  - level:
+      L0: 1
+      R0: 1
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b2
+  - wait: 130
+  - level:
+      L0: 2
+      R0: 2
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b3
+  - wait: 130
+  - level:
+      L0: 3
+      R0: 3
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b4
+  - wait: 130
+  - level:
+      L0: 4
+      R0: 4
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b5
+  - wait: 130
+  - level:
+      L0: 5
+      R0: 5
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b6
+  - wait: 130
+  - level:
+      L0: 6
+      R0: 6
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b7
+  - wait: 130
+  - level:
+      L0: 7
+      R0: 7
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b8
+  - wait: 130
+  - level:
+      L0: 8
+      R0: 8
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b9
+  - wait: 130
+  - level:
+      L0: 9
+      R0: 9
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b10
+  - wait: 130
+  - level:
+      L0: 10
+      R0: 10
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b11
+  - wait: 130
+  - level:
+      L0: 11
+      R0: 11
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b12
+  - wait: 130
+  - level:
+      L0: 12
+      R0: 12
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b13
+  - wait: 130
+  - level:
+      L0: 13
+      R0: 13
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b14
+  - wait: 130
+  - level:
+      L0: 14
+      R0: 14
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: five_pushes_20_ticks_apart
+  settle: 40
+  steps:
+  - use: b3
+  - wait: 20
+  - use: b5
+  - wait: 20
+  - use: b7
+  - wait: 20
+  - use: b9
+  - wait: 20
+  - use: b11
+  - wait: 20
+  - wait: 130
+  - level:
+      L0: 3
+      R0: 3
+      L1: 5
+      R1: 5
+      L2: 7
+      R2: 7
+      L3: 9
+      R3: 9
+      L4: 11
+      R4: 11
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: eight_entries_then_full
+  settle: 40
+  steps:
+  - use: b1
+  - wait: 130
+  - use: b2
+  - wait: 130
+  - use: b3
+  - wait: 130
+  - use: b4
+  - wait: 130
+  - use: b5
+  - wait: 130
+  - use: b6
+  - wait: 130
+  - use: b7
+  - wait: 130
+  - use: b8
+  - wait: 130
+  - level:
+      L0: 1
+      R0: 1
+      L1: 2
+      R1: 2
+      L2: 3
+      R2: 3
+      L3: 4
+      R3: 4
+      L4: 5
+      R4: 5
+      L5: 6
+      R5: 6
+      L6: 7
+      R6: 7
+      L7: 8
+      R7: 8
+  - use: b9
+  - wait: 130
+  - use: b10
+  - wait: 130
+  - level:
+      L0: 1
+      R0: 1
+      L1: 2
+      R1: 2
+      L2: 3
+      R2: 3
+      L3: 4
+      R3: 4
+      L4: 5
+      R4: 5
+      L5: 6
+      R5: 6
+      L6: 7
+      R6: 7
+      L7: 8
+      R7: 8
+  - use: pop
+  - wait: 130
+  - level:
+      L0: 2
+      R0: 2
+      L1: 3
+      R1: 3
+      L2: 4
+      R2: 4
+      L3: 5
+      R3: 5
+      L4: 6
+      R4: 6
+      L5: 7
+      R5: 7
+      L6: 8
+      R6: 8
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 130
+  - level:
+      L0: 3
+      R0: 3
+      L1: 4
+      R1: 4
+      L2: 5
+      R2: 5
+      L3: 6
+      R3: 6
+      L4: 7
+      R4: 7
+      L5: 8
+      R5: 8
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b9
+  - wait: 130
+  - level:
+      L0: 3
+      R0: 3
+      L1: 4
+      R1: 4
+      L2: 5
+      R2: 5
+      L3: 6
+      R3: 6
+      L4: 7
+      R4: 7
+      L5: 8
+      R5: 8
+      L6: 9
+      R6: 9
+      L7: 0
+      R7: 0
+- name: value_15_is_stored_twice
+  settle: 40
+  steps:
+  - use: b15
+  - wait: 200
+  - level:
+      L0: 15
+      R0: 15
+      L1: 15
+      R1: 15
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 15
+      R0: 15
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: value_15_after_2
+  settle: 40
+  steps:
+  - use: b2
+  - wait: 130
+  - use: b15
+  - wait: 200
+  - level:
+      L0: 2
+      R0: 2
+      L1: 15
+      R1: 15
+      L2: 15
+      R2: 15
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 15
+      R0: 15
+      L1: 15
+      R1: 15
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 15
+      R0: 15
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: pop
+  - wait: 100
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: fall_through_timing
+  settle: 40
+  steps:
+  - use: b9
+  - wave:
+      L7: 00000011111111110000xxxxxxxxxxxxxxxxxx
+      L6: 000000000011111111110000xxxxxxxxxxxxxx
+      L0: '00000000000000000000000000000000001111'
+      R7: 0000111111111111110000xxxxxxxxxxxxxxxx
+      R0: '00000000000000000000000000000000111111'
+  - wait: 20
+  - level:
+      L0: 9
+      R0: 9
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: pop_timing
+  settle: 40
+  steps:
+  - use: b9
+  - wait: 130
+  - use: b6
+  - wait: 130
+  - use: b3
+  - wait: 130
+  - use: pop
+  - wave:
+      L0: '111111000000001111'
+      R0: '111111110000111111'
+  - wait: 100
+  - level:
+      L0: 6
+      R0: 6
+      L1: 3
+      R1: 3
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: clear_button_empties_every_stage
+  settle: 40
+  steps:
+  - use: b4
+  - wait: 130
+  - use: b7
+  - wait: 130
+  - use: b9
+  - wait: 130
+  - level:
+      L0: 4
+      R0: 4
+      L1: 7
+      R1: 7
+      L2: 9
+      R2: 9
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: clear_btn
+  - wait: 20
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - wait: 60
+  - use: b5
+  - wait: 130
+  - level:
+      L0: 5
+      R0: 5
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: clear_lever_holds_everything_empty
+  settle: 40
+  steps:
+  - use: b4
+  - wait: 130
+  - use: b7
+  - wait: 130
+  - level:
+      L0: 4
+      R0: 4
+      L1: 7
+      R1: 7
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: clear_lever
+  - wait: 60
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: b5
+  - wait: 130
+  - level:
+      L0: 0
+      R0: 0
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+  - use: clear_lever
+  - wait: 30
+  - use: b8
+  - wait: 130
+  - level:
+      L0: 8
+      R0: 8
+      L1: 0
+      R1: 0
+      L2: 0
+      R2: 0
+      L3: 0
+      R3: 0
+      L4: 0
+      R4: 0
+      L5: 0
+      R5: 0
+      L6: 0
+      R6: 0
+      L7: 0
+      R7: 0
+- name: lamp_bar_length_equals_value
+  settle: 40
+  steps:
+  - use: b6
+  - wait: 130
+  - check: if block ~9 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~10 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~11 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~12 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~13 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~14 ~0 ~16 redstone_lamp[lit=true]
+  - check: unless block ~7 ~0 ~16 redstone_lamp[lit=true]
+  - check: unless block ~8 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~25 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~26 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~27 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~28 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~29 ~0 ~16 redstone_lamp[lit=true]
+  - check: if block ~30 ~0 ~16 redstone_lamp[lit=true]
+  - check: unless block ~31 ~0 ~16 redstone_lamp[lit=true]
+  - check: unless block ~32 ~0 ~16 redstone_lamp[lit=true]

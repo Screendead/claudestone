@@ -1,0 +1,2489 @@
+name: ref_xoliks_fractional_dec_to_bin8
+description: 'Xoliks, Flyingdean, Uni and Stickman''s Fractional DectoBin Converter (BCDTOBIN003, Logical Redstone Archive, tags Tested & Functional, Recommended, endorsed by Waffle [Wueffi]; Discord https://discord.com/channels/1361854816837435433/1487528241144004640). SOURCED (README): converts a fractional decimal (n digits as signal strength, "ss on the top") to binary (n bits on the side, MSB at the top), speed 2(d-1)+2(p-1)+3rt for d digits and p bits, expandable by 7x4x2 per cell, uses TTP to remove directionality issues. This is the 3-digit, 8-bit build, 7x18x14, 1241 blocks. Inputs are three lecterns on the top layer (y=17, x=0) holding a 15-page book: the comparator beside each reads page+1 (docs/MECHANICS.md lectern_page_signal_and_pulse), so digit d is page d-1 and digit 0 is a lectern with no book (strength 0). z=8 is the tenths digit, z=4 the hundredths, z=0 the thousandths; the tests drive them with run steps (setblock for no book or a book, data merge for the page). Outputs
+  are the 8 lamps at x=0, z=13, y=15 (b1, weight 1/2) down to y=1 (b8, weight 1/256). As saved the lecterns are on pages 4, 1, 0 (strengths 5, 2, 1, 0.125) and the third lamp is lit, as in the README render. Rebuilt from the .schem block entities and the full saved block states (power, lit, powered; the skeleton strips these): barrel items (26, 18 and 14 wooden shovels, one per slot, are the constants 14, 10 and 8 read by comparators), the lectern books and every comparator''s OutputSignal; update_pass all. No block was changed. MEASURED on sat1 and dsat4 (fresh build per value, all three lecterns set to no book and 60 gt of rest, then the value set, 150 gt of rest): all 1000 inputs 0.000 to 0.999 give 8 bits equal to floor((256*v + 250) / 1000) for v in thousandths. That is the exact truncated binary expansion for 752 of the 1000 values and one more (rounded up) for the 248 whose remainder 256*v mod 1000 is 750 or more (v=50 gives 13, not 12; v=300 gives 77, not 76); the threshold lies
+  between remainder 744 (v=249, truncated) and 752 (v=42, rounded up). Exact binary fractions (0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875) and 0 and 0.999 (255) are right. The README does not say whether the last bit truncates or rounds; the tests assert the measured rule. Timing: over 89 input changes the first lamp change came 6 to 38 gt after the lectern change and the last lamp change at most 42 gt after it (including a lamp''s 4 gt on a fall); the ''settles within 44 gt'' test passes on sat2, against 24 gt if the README''s 3rt is 3 redstone ticks (6 gt), so it is slower than the formula reads, but the formula''s unit was not pinned down. History does not matter in the shuffled and settling tests (values in sequence, no reset). INFERRED (not tested piecewise): each of the 8 stacked 2-layer stages doubles the 3-digit decimal fraction digit by digit, thousandths first with the decimal carry rippling to the tenths digit, using the barrel constants as subtract and compare thresholds to
+  fold a doubled digit back below 10 and detect the carry; the carry out of the tenths digit is that stage''s bit, read through an inverting wall torch at z=12 that drives the lamp, and the remaining three digits are passed down to the next stage; the compactness comes from carrying every digit as one strength and from constants in barrels, which need no wiring. Pitfalls found: (1) built from the skeleton alone (no saved power or comparator output) the lamps all rest lit and the outputs stay wrong until an input changes, and a digit left at its built value (tenths 1) gave the pattern of 0.9; the saved states fix both. (2) Before the desktop satellites went down, the same build on dsat2 and dsat3 left one or two of the 24 constant comparators in column x=0 (z=6 at y=11 on dsat2; z=6 at y=3 and y=5 on dsat3) at output 0 for good, even when re-placed, which changed the outputs; sat1 to sat6, dsat1 and dsat4 to dsat6 had none (checked with the skeleton-based build, not with this file). A run
+  pinned to dsat2 or dsat3 may fail.'
+palette:
+  .: air
+  A: magenta_concrete
+  B: magenta_stained_glass
+  C: red_concrete
+  D: repeater[delay=1,facing=north,locked=false,powered=false]
+  E: redstone_wire[east=side,north=none,power=4,south=side,west=none]
+  F: redstone_wire[east=up,north=none,power=5,south=side,west=side]
+  G: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:10}
+  H: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:5}
+  I: redstone_wire[east=side,north=none,power=5,south=none,west=side]
+  J: comparator[facing=south,mode=compare,powered=true]{OutputSignal:14}
+  K: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1}]}
+  M: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1},{Slot:15b,id:"minecraft:wooden_shovel",count:1},{Slot:16b,id:"minecraft:wooden_shovel",count:1},{Slot:17b,id:"minecraft:wooden_shovel",count:1},{Slot:18b,id:"minecraft:wooden_shovel",count:1},{Slot:19b,id:"minecraft:wooden_shovel",count:1},{Slot:20b,id:"minecraft:wooden_shovel",count:1},{Slot:21b,id:"minecraft:wooden_shovel",count:1},{Slot:22b,id:"minecraft:wooden_shovel",count:1},{Slot:23b,id:"minecraft:wooden_shovel",count:1},{Slot:24b,id:"minecraft:wooden_shovel",count:1},{Slot:25b,id:"minecraft:wooden_shovel",count:1}]}
+  N: repeater[delay=1,facing=north,locked=false,powered=true]
+  O: redstone_wire[east=side,north=none,power=3,south=side,west=none]
+  P: redstone_wire[east=up,north=none,power=4,south=side,west=side]
+  Q: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:12}
+  T: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:8}
+  U: redstone_wire[east=side,north=none,power=8,south=none,west=side]
+  V: redstone_wall_torch[facing=south,lit=false]
+  b: {output: b8, block: 'redstone_lamp[lit=false]'}
+  W: redstone_wire[east=side,north=none,power=6,south=none,west=side]
+  X: comparator[facing=east,mode=subtract,powered=true]{OutputSignal:6}
+  Y: redstone_wire[east=none,north=side,power=2,south=side,west=up]
+  Z: redstone_wire[east=none,north=up,power=6,south=side,west=none]
+  c: redstone_wire[east=side,north=none,power=0,south=side,west=none]
+  d: redstone_wire[east=side,north=none,power=1,south=none,west=side]
+  e: redstone_wire[east=side,north=up,power=2,south=none,west=side]
+  f: redstone_wire[east=side,north=side,power=1,south=none,west=side]
+  g: redstone_wire[east=none,north=none,power=0,south=side,west=side]
+  h: repeater[delay=1,facing=south,locked=false,powered=false]
+  i: redstone_wire[east=side,north=none,power=0,south=none,west=side]
+  j: redstone_wire[east=none,north=side,power=0,south=none,west=side]
+  k: redstone_wire[east=side,north=side,power=0,south=none,west=none]
+  l: redstone_wire[east=none,north=side,power=7,south=side,west=up]
+  m: redstone_wire[east=none,north=up,power=15,south=side,west=none]
+  p: redstone_wire[east=side,north=none,power=5,south=side,west=none]
+  q: redstone_wire[east=side,north=up,power=7,south=none,west=side]
+  r: redstone_wire[east=side,north=side,power=6,south=none,west=side]
+  s: redstone_wire[east=none,north=none,power=5,south=side,west=side]
+  t: repeater[delay=1,facing=south,locked=false,powered=true]
+  w: redstone_wire[east=side,north=none,power=3,south=none,west=side]
+  x: redstone_wire[east=none,north=side,power=4,south=none,west=side]
+  y: redstone_wire[east=side,north=side,power=4,south=none,west=none]
+  z: redstone_wire[east=none,north=side,power=3,south=none,west=side]
+  '0': comparator[facing=east,mode=subtract,powered=true]{OutputSignal:5}
+  '1': redstone_wire[east=none,north=side,power=8,south=side,west=up]
+  '2': redstone_wire[east=side,north=none,power=6,south=side,west=none]
+  '3': redstone_wire[east=side,north=none,power=7,south=none,west=side]
+  '4': redstone_wire[east=side,north=up,power=8,south=none,west=side]
+  '5': redstone_wire[east=side,north=side,power=7,south=none,west=side]
+  '6': redstone_wire[east=none,north=none,power=6,south=side,west=side]
+  '7': redstone_wire[east=side,north=none,power=4,south=none,west=side]
+  '8': redstone_wire[east=none,north=side,power=5,south=none,west=side]
+  '9': redstone_wire[east=side,north=side,power=5,south=none,west=none]
+  α: redstone_wire[east=up,north=none,power=6,south=side,west=side]
+  β: redstone_wire[east=side,north=none,power=8,south=side,west=none]
+  γ: redstone_wire[east=none,north=none,power=7,south=side,west=side]
+  δ: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:9}
+  ε: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:3}
+  ζ: redstone_wire[east=side,north=none,power=3,south=side,west=side]
+  η: comparator[facing=south,mode=compare,powered=true]{OutputSignal:8}
+  θ: redstone_wire[east=side,north=none,power=13,south=side,west=none]
+  ι: redstone_wire[east=none,north=none,power=14,south=side,west=side]
+  κ: redstone_wire[east=side,north=none,power=8,south=side,west=side]
+  λ: redstone_wire[east=side,north=none,power=2,south=side,west=none]
+  μ: redstone_wire[east=up,north=none,power=3,south=side,west=side]
+  ν: redstone_wire[east=side,north=none,power=9,south=side,west=side]
+  ξ: {output: b7, block: 'redstone_lamp[lit=false]'}
+  π: comparator[facing=east,mode=subtract,powered=true]{OutputSignal:7}
+  ρ: redstone_wire[east=none,north=side,power=6,south=side,west=up]
+  σ: redstone_wire[east=side,north=up,power=6,south=none,west=side]
+  τ: redstone_wire[east=side,north=side,power=5,south=none,west=side]
+  υ: redstone_wire[east=none,north=none,power=4,south=side,west=side]
+  φ: redstone_wire[east=side,north=none,power=2,south=none,west=side]
+  χ: redstone_wire[east=side,north=side,power=3,south=none,west=none]
+  ψ: redstone_wire[east=none,north=side,power=2,south=none,west=side]
+  ω: redstone_wire[east=none,north=side,power=3,south=side,west=up]
+  Γ: redstone_wire[east=side,north=none,power=1,south=side,west=none]
+  Δ: redstone_wire[east=side,north=up,power=3,south=none,west=side]
+  Θ: redstone_wire[east=side,north=side,power=2,south=none,west=side]
+  Λ: redstone_wire[east=none,north=none,power=1,south=side,west=side]
+  Ξ: comparator[facing=east,mode=subtract,powered=true]{OutputSignal:4}
+  Π: redstone_wire[east=none,north=side,power=9,south=side,west=up]
+  Σ: redstone_wire[east=side,north=none,power=7,south=side,west=none]
+  Φ: redstone_wire[east=side,north=up,power=9,south=none,west=side]
+  Ψ: redstone_wire[east=side,north=side,power=8,south=none,west=side]
+  Ω: redstone_wire[east=none,north=side,power=6,south=none,west=side]
+  б: redstone_wire[east=side,north=side,power=6,south=none,west=none]
+  в: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:11}
+  г: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:7}
+  д: redstone_wire[east=side,north=none,power=7,south=side,west=side]
+  ж: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:4}
+  з: redstone_wire[east=side,north=none,power=4,south=side,west=side]
+  и: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:13}
+  й: redstone_wire[east=side,north=none,power=10,south=side,west=side]
+  к: {output: b6, block: 'redstone_lamp[lit=false]'}
+  л: {output: b5, block: 'redstone_lamp[lit=false]'}
+  м: redstone_wire[east=none,north=side,power=4,south=side,west=up]
+  н: redstone_wire[east=side,north=up,power=4,south=none,west=side]
+  п: redstone_wire[east=side,north=side,power=3,south=none,west=side]
+  т: redstone_wire[east=none,north=none,power=2,south=side,west=side]
+  ф: redstone_wire[east=none,north=side,power=1,south=none,west=side]
+  ц: redstone_wire[east=side,north=side,power=1,south=none,west=none]
+  ч: redstone_wire[east=side,north=none,power=5,south=side,west=side]
+  ш: {output: b4, block: 'redstone_lamp[lit=false]'}
+  щ: redstone_wall_torch[facing=south,lit=true]
+  ъ: {output: b3, block: 'redstone_lamp[lit=true]'}
+  ы: {output: b2, block: 'redstone_lamp[lit=false]'}
+  ь: {output: b1, block: 'redstone_lamp[lit=false]'}
+  э: {name: thousandths, block: 'lectern[facing=west,has_book=true,powered=false]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"A\n10"},{raw:"B\n11"},{raw:"C\n12"},{raw:"D\n13"},{raw:"E\n14"},{raw:"F\n15"}],author:"Xoliks",title:{raw:"Redstone Signal"},resolved:1b}}},Page:4}'}
+  ю: comparator[facing=west,mode=compare,powered=true]{OutputSignal:5}
+  я: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1},{Slot:15b,id:"minecraft:wooden_shovel",count:1},{Slot:16b,id:"minecraft:wooden_shovel",count:1},{Slot:17b,id:"minecraft:wooden_shovel",count:1}]}
+  Б: {name: hundredths, block: 'lectern[facing=west,has_book=true,powered=false]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"A\n10"},{raw:"B\n11"},{raw:"C\n12"},{raw:"D\n13"},{raw:"E\n14"},{raw:"F\n15"}],author:"Xoliks",title:{raw:"Redstone Signal"},resolved:1b}}},Page:1}'}
+  Г: comparator[facing=west,mode=compare,powered=true]{OutputSignal:2}
+  Д: {name: tenths, block: 'lectern[facing=west,has_book=true,powered=false]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"A\n10"},{raw:"B\n11"},{raw:"C\n12"},{raw:"D\n13"},{raw:"E\n14"},{raw:"F\n15"}],author:"Xoliks",title:{raw:"Redstone Signal"},resolved:1b}}},Page:0}'}
+  Ж: comparator[facing=west,mode=compare,powered=true]{OutputSignal:1}
+layers:
+  0: |
+    AAB....
+    .AAC...
+    A......
+    .......
+    AAB....
+    .AAC...
+    A......
+    .......
+    AAB....
+    .AAC...
+    A......
+    .......
+    .......
+    .......
+  1: |
+    DEFAA..
+    AGHIB.B
+    JAABAKA
+    MA...AA
+    DEFAA..
+    AGHIB.B
+    JAABAKA
+    MA...AA
+    NOPAA..
+    AQTUB.B
+    JAABAKA
+    MA...AA
+    V......
+    b......
+  2: |
+    AABWXAA
+    .AACYAZ
+    Acdefgh
+    ij...kj
+    AABWXAA
+    .AAClAm
+    ApWqrst
+    wx...yz
+    AABI0AA
+    .AAC1Am
+    A23456t
+    78...9x
+    .......
+    .......
+  3: |
+    DpαAAβγ
+    AδεζBηB
+    JAABAKA
+    MA...AA
+    NOPAAθι
+    AQTκBηB
+    JAABAKA
+    MA...AA
+    DλμAAθι
+    AQδνBηB
+    JAABAKA
+    MA...AA
+    V......
+    ξ......
+  4: |
+    AAB3πAA
+    .AACρAm
+    AEIστυt
+    φz...χψ
+    AABI0AA
+    .AACωAZ
+    AΓφΔΘΛh
+    ij...kj
+    AAB7ΞAA
+    .AACΠAm
+    AΣUΦΨγt
+    IΩ...б8
+    .......
+    .......
+  5: |
+    DOPAAθι
+    AвгдBηB
+    JAABAKA
+    MA...AA
+    NpαAAβγ
+    AGжзBηB
+    JAABAKA
+    MA...AA
+    NλμAAθι
+    AиGйBηB
+    JAABAKA
+    MA...AA
+    V......
+    к......
+  6: |
+    AABI0AA
+    .AAC1Am
+    A23456t
+    78...9x
+    AAB3πAA
+    .AACρAm
+    AEIστυt
+    φz...χψ
+    AAB7ΞAA
+    .AACΠAm
+    AΣUΦΨγt
+    IΩ...б8
+    .......
+    .......
+  7: |
+    DλμAAθι
+    AQδνBηB
+    JAABAKA
+    MA...AA
+    DOPAAθι
+    AвгдBηB
+    JAABAKA
+    MA...AA
+    NλμAAθι
+    AиGйBηB
+    JAABAKA
+    MA...AA
+    V......
+    л......
+  8: |
+    AAB7ΞAA
+    .AACмAZ
+    Aλwнптh
+    iф...цj
+    AABI0AA
+    .AAC1Am
+    A23456t
+    78...9x
+    AAB7ΞAA
+    .AACΠAm
+    AΣUΦΨγt
+    IΩ...б8
+    .......
+    .......
+  9: |
+    DEFAAβγ
+    AGHчBηB
+    JAABAKA
+    MA...AA
+    DλμAAθι
+    AQδνBηB
+    JAABAKA
+    MA...AA
+    NλμAAθι
+    AиGйBηB
+    JAABAKA
+    MA...AA
+    V......
+    ш......
+  10: |
+    AABWXAA
+    .AACYAZ
+    Acdefgh
+    ij...kj
+    AAB7ΞAA
+    .AACΠAm
+    AΣUΦΨγt
+    IΩ...б8
+    AAB7ΞAA
+    .AACΠAm
+    AΣUΦΨγt
+    IΩ...б8
+    .......
+    .......
+  11: |
+    DpαAAβγ
+    AδεζBηB
+    JAABAKA
+    MA...AA
+    NλμAAθι
+    AиGйBηB
+    JAABAKA
+    MA...AA
+    NλμAAθι
+    AиGйBηB
+    JAABAKA
+    MA...AA
+    щ......
+    ъ......
+  12: |
+    AAB3πAA
+    .AACρAm
+    AEIστυt
+    φz...χψ
+    AAB7ΞAA
+    .AACΠAm
+    AΣUΦΨγt
+    IΩ...б8
+    AAB7ΞAA
+    .AACмAZ
+    Aλwнптh
+    iф...цj
+    .......
+    .......
+  13: |
+    DOPAAθι
+    AвгдBηB
+    JAABAKA
+    MA...AA
+    NλμAAθι
+    AиGйBηB
+    JAABAKA
+    MA...AA
+    DEFAAβγ
+    AGHчBηB
+    JAABAKA
+    MA...AA
+    V......
+    ы......
+  14: |
+    AABI0AA
+    .AAC1Am
+    A23456t
+    78...9x
+    AAB7ΞAA
+    .AACмAZ
+    Aλwнптh
+    iф...цj
+    AABWXAA
+    .AAClAm
+    ApWqrst
+    wx...yz
+    .......
+    .......
+  15: |
+    DλμAAθι
+    AQδνBηB
+    JAABAKA
+    MA...AA
+    DEFAAβγ
+    AGHчBηB
+    JAABAKA
+    MA...AA
+    NOPAAθι
+    AQTκBηB
+    JAABAKA
+    MA...AA
+    V......
+    ь......
+  16: |
+    AAB7ΞAA
+    .AACмAZ
+    Aλwнптh
+    iф...цj
+    AABWXAA
+    .AAClAm
+    ApWqrst
+    wx...yz
+    AABI0AA
+    .AAC1Am
+    A23456t
+    78...9x
+    .......
+    .......
+  17: |
+    эюsA.βγ
+    .яHч.η.
+    .....K.
+    .....AA
+    БГтA.θι
+    .яTκ.η.
+    .....K.
+    .....AA
+    ДЖΛA.θι
+    .яδν.η.
+    .....K.
+    .......
+    .......
+    .......
+tests:
+- name: as built rests at 0.125
+  settle: 60
+  steps:
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+- name: tenths digit 0 to 9
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+- name: hundredths digit 0 to 9
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 1
+- name: thousandths digit 0 to 9
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+- name: edges and exact binary fractions
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:4}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+- name: rounds up at remainder 0.75 LSB
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:1}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+- name: shuffled values
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:4}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:5}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:5}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 60}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 60}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+- name: settles within 44 gt of the change
+  settle: 60
+  steps:
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 60}
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:6}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:6}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:6}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:0}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=false]'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'setblock ~0 ~17 ~8 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:7}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:3}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:8}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 0
+  - {run: 'setblock ~0 ~17 ~0 lectern[facing=west,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{pages:[{raw:"1"},{raw:"2"},{raw:"3"},{raw:"4"},{raw:"5"},{raw:"6"},{raw:"7"},{raw:"8"},{raw:"9"},{raw:"10"},{raw:"11"},{raw:"12"},{raw:"13"},{raw:"14"},{raw:"15"}],author:"x",title:{raw:"x"}}}},Page:6}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:8}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:2}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:4}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:5}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:1}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:1}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:6}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 0
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:7}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 1
+      b3: 0
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:5}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:2}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:4}'}
+  - {wait: 44}
+  - expect:
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~4 {Page:3}'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 0
+      b8: 1
+  - {run: 'data merge block ~0 ~17 ~0 {Page:0}'}
+  - {run: 'setblock ~0 ~17 ~4 lectern[facing=west,has_book=false]'}
+  - {run: 'data merge block ~0 ~17 ~8 {Page:0}'}
+  - {wait: 44}
+  - expect:
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 1
+      b8: 0

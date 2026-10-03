@@ -1,0 +1,434 @@
+name: ref_mixel_cle_adder_8bit_3t
+description: "8-bit 3-tick Carry Look Everywhere (CLE) adder by Mixel and zPippo, endorsed by Mixel. Source: Logical Redstone Archive ADD014_3_Tick_Carry_Look_Everywhere_Adder (ADD014_3tCLE_5.schem), https://discord.com/channels/1361854816837435433/1542465205219360820 (README SOURCED: tagged Tested & Functional and Recommended; two 8b values plus carry in, one 8b sum plus carry out, speed 3 ticks). Size 20x19x8 as tested ; one bit per two layers: b_k input at y=2k+2, z=0 and a_k at y=2k+3, z=2, cin at (0,2,6), sum lamp s_k at y=2k and s8 (carry out) at y=16, z=6, east face (all x one column east of the .schem). Harness changes: the .schem has no inputs and its 17 levers sit on lamps (a lever strongly powers its lamp, the lamp powers the dust beside it). Each a/b lever plus lamp became one input cell holding a redstone block at the lamp's place (it powers the same neighbouring dust directly). That does not work for cin: the cin lamp carries a wall torch, and a redstone block powers only components and dust next to it, never the block between (MEASURED: with a redstone block at the lever the torch stayed lit and cin had no effect on any sum), so cin keeps its lamp, driven through a fixture repeater[delay=1] on a fixture block (a strongly powered feed, like the lever) from a new input cell one column west of the original footprint. The fixture repeater adds 2 gt to cin-to-sum delays only. Input lamps and the sign are dropped; the 9 output lamps are kept as the named outputs. The 40 barrels carry their redstone stacks from the .schem block entities (comparator constants, strengths 15 down to 4). MEASURED: all four tests pass on 26.3: sums match for edge cases and wrap, every carry ripple length 1-8 with and without cin, 60 random sums; with cin held still the delay is 6 gt (3 redstone ticks) rise and 10 gt fall on every sum bit (the 4 gt lamp on each fall, as in the other lamp-output specs), so the README's 3 ticks holds; a change of cin adds the fixture's 2 gt (8/12). How it works (INFERRED, not traced cell by cell): each bit is a 2-layer cell stacked in y at pitch 2 with dust buses along z=7 and x=18-19; a_k and b_k are compared against redstone-filled barrels by subtract comparators, whose strengths (15, 13, 11, 9, 7 across the bit columns) act as per-bit thresholds, and the carry into every bit is derived from all lower a, b and cin in the same 3 ticks rather than rippled, which is why the latency does not depend on the ripple length (MEASURED: 6/10 for 1-bit and 8-bit ripples alike)."
+traits: [pistonless, entityless, comparator_based, tick_accurate]
+palette:
+  ".": "air"
+  "A": "white_concrete"
+  "B": {"output": "s0", "block": "redstone_lamp"}
+  "C": "redstone_wire[east=none,north=up,south=side,west=none]"
+  "D": "redstone_wire[east=none,north=side,south=side,west=none]"
+  "E": "redstone_wire[east=none,north=none,south=side,west=up]"
+  "F": "target"
+  "G": "redstone_wire[east=none,north=up,south=none,west=side]"
+  "H": "redstone_wire[east=side,north=none,south=up,west=none]"
+  "I": "redstone_wire[east=none,north=side,south=side,west=side]"
+  "J": "redstone_wall_torch[facing=south]"
+  "K": "comparator[facing=west,mode=subtract]"
+  "M": "redstone_wire[east=side,north=up,south=side,west=none]"
+  "N": "redstone_wire[east=side,north=none,south=none,west=side]"
+  "O": "redstone_wall_torch[facing=east]"
+  "P": "redstone_wire[east=side,north=side,south=none,west=side]"
+  "Q": "redstone_wire[east=none,north=side,south=none,west=side]"
+  "R": {"input": "b0"}
+  "S": "redstone_wire[east=side,north=none,south=side,west=side]"
+  "T": "repeater[delay=1,facing=west]"
+  "U": "redstone_wire[east=side,north=none,south=side,west=none]"
+  "V": "white_stained_glass"
+  "W": "redstone_wire[east=side,north=none,south=side,west=up]"
+  "X": "redstone_wire[east=none,north=none,south=side,west=side]"
+  "Y": "redstone_wire[east=side,north=side,south=none,west=none]"
+  "Z": "redstone_lamp"
+  "a": {"input": "cin"}
+  "b": {"block": "white_concrete", "fixture": true}
+  "c": {"block": "repeater[delay=1,facing=west]", "fixture": true}
+  "d": {"output": "s1", "block": "redstone_lamp"}
+  "e": "comparator[facing=east,mode=compare]"
+  "f": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:64},{Slot:10b,id:\"minecraft:redstone\",count:64},{Slot:11b,id:\"minecraft:redstone\",count:64},{Slot:12b,id:\"minecraft:redstone\",count:64},{Slot:13b,id:\"minecraft:redstone\",count:31}]}"
+  "g": {"input": "a0"}
+  "h": "comparator[facing=west,mode=compare]"
+  "i": "redstone_wire[east=none,north=up,south=up,west=none]"
+  "j": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:64},{Slot:10b,id:\"minecraft:redstone\",count:64},{Slot:11b,id:\"minecraft:redstone\",count:64},{Slot:12b,id:\"minecraft:redstone\",count:64},{Slot:13b,id:\"minecraft:redstone\",count:64},{Slot:14b,id:\"minecraft:redstone\",count:64},{Slot:15b,id:\"minecraft:redstone\",count:64},{Slot:16b,id:\"minecraft:redstone\",count:64},{Slot:17b,id:\"minecraft:redstone\",count:64},{Slot:18b,id:\"minecraft:redstone\",count:64},{Slot:19b,id:\"minecraft:redstone\",count:64},{Slot:20b,id:\"minecraft:redstone\",count:64},{Slot:21b,id:\"minecraft:redstone\",count:64},{Slot:22b,id:\"minecraft:redstone\",count:64},{Slot:23b,id:\"minecraft:redstone\",count:64},{Slot:24b,id:\"minecraft:redstone\",count:64},{Slot:25b,id:\"minecraft:redstone\",count:64},{Slot:26b,id:\"minecraft:redstone\",count:64}]}"
+  "k": "redstone_wire[east=side,north=up,south=none,west=none]"
+  "l": {"input": "b1"}
+  "m": "redstone_wire[east=side,north=side,south=side,west=side]"
+  "n": "redstone_wire[east=none,north=side,south=up,west=none]"
+  "o": {"output": "s2", "block": "redstone_lamp"}
+  "p": {"input": "a1"}
+  "q": "comparator[facing=east,mode=subtract]"
+  "r": "redstone_wire[east=up,north=none,south=none,west=side]"
+  "s": "redstone_wire[east=side,north=none,south=none,west=up]"
+  "t": {"input": "b2"}
+  "u": {"output": "s3", "block": "redstone_lamp"}
+  "v": {"input": "a2"}
+  "w": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:64},{Slot:10b,id:\"minecraft:redstone\",count:64},{Slot:11b,id:\"minecraft:redstone\",count:64},{Slot:12b,id:\"minecraft:redstone\",count:64},{Slot:13b,id:\"minecraft:redstone\",count:64},{Slot:14b,id:\"minecraft:redstone\",count:64},{Slot:15b,id:\"minecraft:redstone\",count:64},{Slot:16b,id:\"minecraft:redstone\",count:64},{Slot:17b,id:\"minecraft:redstone\",count:64},{Slot:18b,id:\"minecraft:redstone\",count:64},{Slot:19b,id:\"minecraft:redstone\",count:64},{Slot:20b,id:\"minecraft:redstone\",count:64},{Slot:21b,id:\"minecraft:redstone\",count:64},{Slot:22b,id:\"minecraft:redstone\",count:64},{Slot:23b,id:\"minecraft:redstone\",count:64},{Slot:24b,id:\"minecraft:redstone\",count:64},{Slot:25b,id:\"minecraft:redstone\",count:4}]}"
+  "x": "redstone_wire[east=up,north=none,south=none,west=up]"
+  "y": {"input": "b3"}
+  "z": {"output": "s4", "block": "redstone_lamp"}
+  "\u03b1": "comparator[facing=south,mode=compare]"
+  "\u03b2": {"input": "a3"}
+  "\u03b3": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:64},{Slot:10b,id:\"minecraft:redstone\",count:64},{Slot:11b,id:\"minecraft:redstone\",count:64},{Slot:12b,id:\"minecraft:redstone\",count:64},{Slot:13b,id:\"minecraft:redstone\",count:64},{Slot:14b,id:\"minecraft:redstone\",count:64},{Slot:15b,id:\"minecraft:redstone\",count:64},{Slot:16b,id:\"minecraft:redstone\",count:64},{Slot:17b,id:\"minecraft:redstone\",count:64},{Slot:18b,id:\"minecraft:redstone\",count:64},{Slot:19b,id:\"minecraft:redstone\",count:18}]}"
+  "\u03b4": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:64},{Slot:10b,id:\"minecraft:redstone\",count:64},{Slot:11b,id:\"minecraft:redstone\",count:64},{Slot:12b,id:\"minecraft:redstone\",count:64},{Slot:13b,id:\"minecraft:redstone\",count:64},{Slot:14b,id:\"minecraft:redstone\",count:64},{Slot:15b,id:\"minecraft:redstone\",count:64},{Slot:16b,id:\"minecraft:redstone\",count:64},{Slot:17b,id:\"minecraft:redstone\",count:64},{Slot:18b,id:\"minecraft:redstone\",count:64},{Slot:19b,id:\"minecraft:redstone\",count:64},{Slot:20b,id:\"minecraft:redstone\",count:64},{Slot:21b,id:\"minecraft:redstone\",count:13}]}"
+  "\u03b5": {"input": "b4"}
+  "\u03b6": {"output": "s5", "block": "redstone_lamp"}
+  "\u03b7": {"input": "a4"}
+  "\u03b8": "redstone_wire[east=none,north=up,south=side,west=side]"
+  "\u03b9": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:64},{Slot:10b,id:\"minecraft:redstone\",count:64},{Slot:11b,id:\"minecraft:redstone\",count:64},{Slot:12b,id:\"minecraft:redstone\",count:64},{Slot:13b,id:\"minecraft:redstone\",count:64},{Slot:14b,id:\"minecraft:redstone\",count:64},{Slot:15b,id:\"minecraft:redstone\",count:64},{Slot:16b,id:\"minecraft:redstone\",count:64},{Slot:17b,id:\"minecraft:redstone\",count:22}]}"
+  "\u03ba": {"input": "b5"}
+  "\u03bb": {"output": "s6", "block": "redstone_lamp"}
+  "\u03bc": {"input": "a5"}
+  "\u03bd": {"input": "b6"}
+  "\u03be": "redstone_wire[east=side,north=side,south=side,west=none]"
+  "\u03bf": "redstone_wire[east=up,north=none,south=up,west=none]"
+  "\u03c0": {"output": "s7", "block": "redstone_lamp"}
+  "\u03c1": {"input": "a6"}
+  "\u03c3": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:64},{Slot:8b,id:\"minecraft:redstone\",count:64},{Slot:9b,id:\"minecraft:redstone\",count:41}]}"
+  "\u03c4": {"input": "b7"}
+  "\u03c5": "redstone_wire[east=up,north=none,south=side,west=side]"
+  "\u03c6": "redstone_wire[east=side,north=none,south=up,west=side]"
+  "\u03c7": {"output": "s8", "block": "redstone_lamp"}
+  "\u03c8": "redstone_wire[east=up,north=none,south=up,west=side]"
+  "\u03c9": {"input": "a7"}
+  "0": "redstone_wire[east=side,north=up,south=none,west=side]"
+  "1": "redstone_wall_torch[facing=west]"
+  "2": "redstone_wire[east=up,north=side,south=none,west=side]"
+  "3": "redstone_wire[east=up,north=side,south=none,west=up]"
+  "4": "redstone_wire[east=none,north=up,south=none,west=up]"
+  "5": "redstone_torch"
+  "6": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:redstone\",count:64},{Slot:1b,id:\"minecraft:redstone\",count:64},{Slot:2b,id:\"minecraft:redstone\",count:64},{Slot:3b,id:\"minecraft:redstone\",count:64},{Slot:4b,id:\"minecraft:redstone\",count:64},{Slot:5b,id:\"minecraft:redstone\",count:64},{Slot:6b,id:\"minecraft:redstone\",count:64},{Slot:7b,id:\"minecraft:redstone\",count:45}]}"
+  "7": "comparator[facing=north,mode=subtract]"
+layers:
+  0: |
+    ......................
+    .....A................
+    ...A.A..............A.
+    ...A.A..............A.
+    ....A..............AA.
+    ....................A.
+    ...................AAB
+    ......AAAAAAAAAAAAAAA.
+  1: |
+    ....AAAAAAAAAAA.A.A...
+    ...A.C...........AA...
+    ...C.DAAAAAAAAAA.AAAE.
+    ...DADA.........A.A.D.
+    ...FGA.............HI.
+    ...J.J.............AKA
+    .b..A..............MKN
+    ....AONNNNNNNNNNNNNPQ.
+  2: |
+    ...RNSNNNNNNNNNATADA..
+    ...D...A.........UKA..
+    ...VAAWNNNNNNNNX.YKNV.
+    ...ACAD........FTAD.A.
+    ......A............VA.
+    ...A.AJ............DA.
+    acZOXA.............VAd
+    ...AD.AAAAAAAAAAAAAAA.
+  3: |
+    ....AAAAAAAAAAA.A.Aef.
+    ...A.A.C.........AA...
+    ..gNSN.AAAAAAAAA.AAAE.
+    .......J........fhA.D.
+    ...V.V.A...........HI.
+    ...i.CA............AKA
+    ...AjKA............MKN
+    ...kFONNNNNNNNNNNNNPQ.
+  4: |
+    ...lNSNSNNNNNNNATAD...
+    ...m.D...A.......UKA..
+    ...AAAAAWNNNNNNX.YKNV.
+    ...J.J.AF......FTAD.A.
+    ...n.n.HJ..........VA.
+    ...V.V.A...........DA.
+    ...D.A.A...........VAo
+    ...V..A.AAAAAAAAAAAAA.
+  5: |
+    ....AAAAAAAAAAA.A.A...
+    ...A.A.A.C.......AA...
+    ..pNNNNN.AAAAAAA.AAAE.
+    .........J......A.A.D.
+    ...V.V.V.A.........HI.
+    ...i.C.C...........AKA
+    ...AjKAqj..........MKN
+    ...kFOrAsNNNNNNNNNNPQ.
+  6: |
+    ...tNSNSNSNNNNNATADA..
+    ...m.D.D...A.....UKA..
+    ...AAAAAAAWNNNNX.YKNV.
+    ...J.J.J.AF....FTAD.A.
+    ...n.n.n.HJ........VA.
+    ...V.V.V.A.........DA.
+    ...D.A.A.A.........VAu
+    ...V..VNV.AAAAAAAAAAA.
+  7: |
+    ....AAAAAAAAAAA.A.Aef.
+    ...A.A.A.A.C.....AA...
+    ..vNNNNNNN.AAAAA.AAAE.
+    ...........J....fhA.D.
+    ...V.V.V.V.A.......HI.
+    ...i.C.C.C.........AKA
+    ...AjKAqjqw........MKN
+    ...kFOrAxAsNNNNNNNNPQ.
+  8: |
+    ...yNSNSNSNSNNNATADA..
+    ...m.D.D.D...A...UKA.A
+    ...AAAAAAAAAWNNX.YKNV.
+    ...J.J.J.J.AF..FTAD.A.
+    ...n.n.n.n.HJ......VA.
+    ...V.V.V.V.A.......DA.
+    ...D.A.A.A.A.......VAz
+    ...V..VNVNV.AAAAAAAAA.
+  9: |
+    ....AAAAAAAAAAA.A.AefA
+    ...A.A.A.A.A.C...AA..α
+    ..βNNNNNNNNN.AAA.AAAEγ
+    .............J..fhA.D.
+    ...V.V.V.V.V.A.....HI.
+    ...i.C.C.C.C.......AKA
+    ...AjKAqjqwqδ......MKN
+    ...kFOrAxAxAsNNNNNNPQ.
+  10: |
+    ...εNSNSNSNSNSNATADAAs
+    ...m.D.D.D.D...A.UKAA.
+    ...AAAAAAAAAAAWX.YKNVA
+    ...J.J.J.J.J.AFFTAD..A
+    ...n.n.n.n.n.HJ....VAA
+    ...V.V.V.V.V.A.....DA.
+    ...D.A.A.A.A.A.....VAζ
+    ...V..VNVNVNV.AAAAAAA.
+  11: |
+    ....AAAAAAAAAAAAAAAsS.
+    ...A.A.A.A.A.A.C...ADA
+    ..ηNNNNNNNNNNN.AAAAAKθ
+    ...............J..A..D
+    ...V.V.V.V.V.V.A...HSQ
+    ...i.C.C.C.C.C.....AKA
+    ...AjKAqjqwqδqι....MKN
+    ...kFOrAxAxAxAsNNNNPQ.
+  12: |
+    ...κNSNSNSNSNSNSNTSVA.
+    ...m.D.D.D.D.D...AFKAD
+    ...AAAAAAAAAAAAAWNTQAV
+    ...J.J.J.J.J.J.AFfhA.A
+    ...n.n.n.n.n.n.HJ..VAA
+    ...V.V.V.V.V.V.A...DA.
+    ...D.A.A.A.A.A.A...VAλ
+    ...V..VNVNVNVNV.AAAAA.
+  13: |
+    ....AAAAAAAAAAAAAAAsX.
+    ...A.A.A.A.A.A.AAWαADA
+    ..μNNNNNNNNNNNNN.FγAKθ
+    .................J...D
+    ...V.V.V.V.V.V.V.A.HSQ
+    ...i.C.C.C.C.C.C...AKA
+    ...AjKAqjqwqδqιqf..MKN
+    ...kFOrAxAxAxAxAsNNPQ.
+  14: |
+    ...νNSNSNSNSNSNSSTSVA.
+    ...m.D.D.D.D.D.ξP.FKAD
+    ...AAAAAAAAAAAAFAATQAV
+    ...J.J.J.J.J.J.J.A.A.A
+    ...n.n.n.n.n.n.n.οA.AA
+    ...V.V.V.V.V.V.V.A.DA.
+    ...D.A.A.A.A.A.A.A.VAπ
+    ...V..VNVNVNVNVNV.AAA.
+  15: |
+    ....AAAAAAAAAAAA.AAsX.
+    ...A.A.A.A.A.A.AAAαADA
+    ..ρNNNNNNNNNNNNNNXγAKθ
+    .................FOα.D
+    ...V.V.V.V.V.V.V.VQfWQ
+    ...i.C.C.C.C.C.C.C.AKA
+    ...AjKAqjqwqδqιqfqσMKN
+    ...kFOrAxAxAxAxAxAsPQ.
+  16: |
+    ...τNSNSNSNSNSNυATφ...
+    ...m.D.D.D.D.D.ξNSFKAD
+    ...AAAAAAAAAAAAFAFAD..
+    ...J.J.J.J.J.J.J.J....
+    ...n.n.n.n.n.n.n.nAU..
+    ...V.V.V.V.V.V.V.V.D..
+    ...D...............V.χ
+    ....A.VNVNVNVNVNVNV...
+  17: |
+    ................ψAV...
+    ...A.A.A.A.A.AAAAAD.A.
+    ..ωNNNNNNNNNNN0NSNTAA.
+    ................FVAAA.
+    ...............VAV.A..
+    ...D.D.D.D.D.D.D.DAA..
+    ...A1A1A1A1A1A1A1AATAm
+    ...J2A3A3A3A3A3A3A4...
+  18: |
+    .................NNA..
+    ..............USQ.AJX.
+    ...............FAAA.D.
+    ...............J5SNSQ.
+    ...............YPQ6D..
+    ...............A.A7Q..
+    ..................D...
+    .....N.N.N.N.N.N.N....
+tests:
+- name: edges and wrap
+  truth_table: |
+    cin a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 s8
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0
+    1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    1 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 1 1 0 0 0 0 0 0 0
+    0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+    1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 1
+    0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1
+    0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 0
+    1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1
+    1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 | 0 0 0 0 0 0 0 0 1
+    0 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 | 1 1 1 1 1 1 1 1 0
+    0 1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 | 1 1 1 1 1 1 1 1 0
+    1 1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 | 0 0 0 0 0 0 0 0 1
+    0 0 1 0 1 0 1 0 1 1 0 1 0 1 0 1 0 | 1 1 1 1 1 1 1 1 0
+    0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 | 0 0 1 0 1 0 1 0 1
+    0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 | 0 1 0 1 0 1 0 1 0
+    1 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 | 1 1 0 1 0 1 0 1 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+  delay: 12
+- name: carry ripples 1-8 bits, with and without cin
+  truth_table: |
+    cin a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 s8
+    0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0
+    1 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0
+    0 1 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0
+    1 0 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0
+    0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+    1 0 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+    0 1 1 1 1 1 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0
+    1 0 1 1 1 1 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0
+    0 1 1 1 1 1 1 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0
+    1 0 1 1 1 1 1 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0
+    0 1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+    1 0 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+    0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    1 0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+  delay: 10
+- name: random sums
+  truth_table: |
+    cin a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 s8
+    0 0 1 1 1 1 1 1 0 0 1 0 1 0 0 0 1 | 0 0 0 1 0 0 0 0 1
+    1 1 0 1 0 1 0 0 1 1 0 1 0 0 1 0 0 | 1 1 0 1 1 1 0 1 0
+    1 1 1 0 1 1 0 0 1 0 1 1 1 0 1 1 1 | 0 1 0 1 0 0 0 1 1
+    1 1 0 0 1 0 0 1 1 0 0 1 1 1 1 0 0 | 0 1 1 0 0 0 0 0 1
+    1 0 1 0 0 1 1 1 0 1 0 0 0 0 1 0 1 | 0 0 1 0 1 0 0 0 1
+    1 1 0 1 0 0 0 0 1 0 0 0 1 1 1 0 1 | 0 1 1 1 1 1 0 0 1
+    0 0 1 0 0 1 0 1 0 0 0 1 1 0 0 0 1 | 0 1 1 1 1 0 1 1 0
+    0 1 0 1 0 0 0 0 0 1 1 0 0 0 1 0 0 | 0 0 0 1 0 1 0 0 0
+    0 0 0 1 1 0 1 0 1 0 1 1 1 0 0 0 0 | 0 1 0 1 1 1 0 1 0
+    0 0 0 1 1 0 0 0 1 0 0 0 1 0 1 1 0 | 0 0 1 0 1 1 1 1 0
+    1 0 1 1 1 0 0 1 1 0 0 0 0 0 1 1 1 | 1 1 1 1 0 1 0 1 1
+    0 1 0 0 1 1 1 0 0 0 1 0 1 1 1 0 1 | 1 1 0 0 1 1 1 1 0
+    0 0 0 0 0 1 1 0 0 1 0 0 1 1 1 1 1 | 1 0 0 1 0 1 0 0 1
+    0 0 1 0 1 0 0 0 1 1 1 1 0 0 1 1 1 | 1 0 0 0 1 1 1 0 1
+    0 0 0 0 1 1 1 1 1 0 0 0 0 1 0 0 1 | 0 0 0 1 0 0 0 1 1
+    1 0 0 1 0 1 1 0 0 0 1 1 1 1 1 0 0 | 1 1 0 0 1 1 1 0 0
+    0 0 1 1 1 0 0 0 1 1 1 1 1 0 0 0 1 | 1 0 1 1 1 0 0 0 1
+    0 0 1 1 1 0 0 0 0 0 1 0 0 1 0 1 0 | 0 0 0 0 0 1 1 0 0
+    1 0 1 0 1 1 1 0 0 1 1 1 1 0 1 0 0 | 0 1 0 1 0 1 1 0 0
+    1 1 0 1 0 1 1 1 1 0 1 1 0 1 0 1 0 | 0 0 1 1 0 0 1 0 1
+    1 1 0 0 1 0 1 1 1 0 1 1 1 1 0 0 1 | 0 0 0 1 0 0 0 1 1
+    1 1 1 0 1 0 1 1 1 1 1 1 1 1 0 1 1 | 1 1 0 1 0 0 1 1 1
+    1 0 0 0 0 1 1 0 0 1 1 0 0 0 0 0 1 | 0 0 1 0 1 1 0 1 0
+    1 1 0 0 1 0 0 1 1 0 0 0 1 1 1 1 0 | 0 1 0 0 0 0 1 0 1
+    1 0 1 0 1 1 1 1 1 0 1 0 0 0 1 0 0 | 1 0 1 1 1 0 0 0 1
+    0 0 1 0 1 1 1 1 1 0 0 0 1 0 0 0 1 | 0 1 0 0 0 0 0 1 1
+    1 1 0 0 1 0 0 0 0 1 1 1 1 0 0 1 1 | 1 0 0 1 1 0 1 1 0
+    1 0 1 0 1 0 0 0 0 1 0 0 0 1 1 0 1 | 0 0 1 1 1 1 0 1 0
+    1 1 0 0 0 1 1 1 1 0 1 1 0 0 0 0 1 | 0 0 0 1 1 1 1 0 1
+    1 0 1 0 1 1 0 0 1 0 0 0 0 0 1 1 0 | 1 1 0 1 1 1 1 1 0
+    0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 1 | 1 1 0 0 1 1 1 0 1
+    0 0 1 1 0 0 0 1 1 0 1 0 0 1 1 0 0 | 0 0 0 1 1 1 1 1 0
+    0 0 1 0 0 0 1 1 0 1 1 1 1 1 0 0 1 | 1 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 | 0 0 0 0 1 0 0 1 0
+    1 0 0 0 0 0 0 0 1 0 1 0 1 1 1 0 0 | 1 1 0 1 1 1 0 1 0
+    0 0 1 0 1 0 0 1 0 1 0 1 0 0 1 1 0 | 1 1 1 1 0 1 0 1 0
+    0 1 0 1 0 1 1 1 0 0 0 0 0 0 0 0 1 | 1 0 1 0 1 1 1 1 0
+    1 1 0 1 1 1 0 1 0 1 1 1 1 1 1 1 0 | 1 0 1 1 1 0 1 1 0
+    0 1 0 0 1 0 1 0 1 1 0 1 0 1 0 0 1 | 0 1 1 1 1 1 0 0 1
+    1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 1 0 | 0 1 0 0 0 1 1 0 0
+    0 1 1 0 1 1 1 0 1 1 1 0 1 1 1 1 1 | 0 1 1 0 1 1 0 1 1
+    1 1 0 1 1 1 1 1 0 0 1 1 0 0 0 1 1 | 0 0 1 0 0 0 1 0 1
+    1 1 0 0 1 1 1 1 1 0 0 0 0 1 0 0 0 | 0 1 0 1 0 0 0 0 1
+    0 1 1 0 1 1 0 1 1 0 0 0 0 1 1 1 1 | 1 1 0 1 0 0 1 1 1
+    1 1 0 1 1 0 1 0 0 0 1 1 0 0 0 0 1 | 0 0 1 0 1 1 0 1 0
+    0 0 1 0 0 0 0 1 0 0 1 1 0 0 1 1 0 | 0 0 0 1 0 1 0 1 0
+    0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 1 0 | 0 0 1 0 1 1 0 1 0
+    1 1 0 0 1 1 1 1 1 1 0 1 0 0 1 1 1 | 1 1 1 1 1 0 1 1 1
+    0 0 1 0 0 0 0 1 1 0 1 0 1 1 0 0 0 | 0 0 1 1 1 0 1 1 0
+    0 1 1 0 0 0 0 0 1 0 0 1 1 1 1 0 1 | 1 1 1 1 1 1 0 0 1
+    1 0 1 1 0 1 0 1 1 1 0 0 0 0 0 1 0 | 0 0 0 1 1 0 0 0 1
+    1 1 0 0 0 1 1 1 0 0 1 1 1 0 1 0 0 | 0 0 0 0 0 1 0 1 0
+    0 0 0 0 1 1 0 1 0 1 1 0 1 0 0 1 0 | 1 1 0 0 0 1 0 1 0
+    0 1 0 0 0 1 1 1 0 0 0 1 0 1 1 0 1 | 1 0 1 0 0 1 0 0 1
+    0 0 0 0 0 1 0 1 1 1 1 1 1 0 1 1 1 | 1 1 1 1 1 1 0 1 1
+    1 0 0 0 0 1 1 1 1 1 0 1 0 0 1 0 1 | 0 1 1 0 1 0 0 1 1
+    0 1 1 0 1 1 1 0 1 1 1 1 1 1 0 0 0 | 0 1 0 1 1 0 1 1 0
+    0 1 1 0 0 0 1 0 0 0 1 0 1 1 0 1 1 | 1 0 1 1 1 1 1 1 0
+    0 0 1 0 1 1 0 0 0 1 1 1 0 1 0 1 0 | 1 0 0 0 1 1 1 0 0
+    0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 1 | 0 0 1 1 1 0 0 1 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+  delay: 12
+- name: fixed cin, no carry-in repeater edge
+  truth_table: |
+    cin a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 s8
+    0 1 0 1 0 0 1 0 1 1 0 1 1 0 0 1 0 | 0 1 0 0 1 1 1 1 0
+    0 0 1 0 1 0 0 1 1 0 0 0 1 1 0 0 0 | 0 1 0 0 0 1 1 1 0
+    0 1 0 1 0 0 1 0 0 0 0 0 0 1 1 0 0 | 1 0 1 0 1 0 1 0 0
+    0 1 1 0 1 1 1 0 1 1 0 1 1 1 0 0 0 | 0 0 0 1 1 0 1 1 0
+    0 1 0 1 1 0 1 1 0 1 1 0 0 1 0 0 0 | 0 0 0 0 0 0 0 1 0
+    0 0 0 1 1 0 1 0 0 0 1 1 1 1 0 1 1 | 0 1 0 1 0 0 0 0 1
+    0 0 1 1 0 1 0 1 1 1 1 0 0 0 1 0 0 | 1 0 0 1 1 1 1 1 0
+    0 1 1 0 1 1 1 1 0 0 1 1 1 0 1 0 0 | 1 0 0 1 0 1 0 1 0
+    0 1 0 0 1 1 0 1 1 0 1 1 1 1 0 0 0 | 1 1 1 0 1 1 1 1 0
+    0 1 1 1 1 1 1 0 0 0 1 0 0 1 1 1 0 | 1 0 0 0 1 1 0 1 0
+    0 1 1 1 1 1 0 0 0 1 1 0 1 0 0 1 1 | 0 1 0 1 0 1 1 1 0
+    0 1 0 0 1 1 0 0 0 1 0 0 0 1 1 1 0 | 0 1 0 1 0 0 0 1 0
+    0 1 1 1 0 1 0 0 0 0 0 1 0 0 0 1 0 | 1 1 0 1 1 0 1 0 0
+    0 0 0 1 0 1 0 0 1 0 1 1 0 1 0 1 1 | 0 1 0 1 0 1 1 0 1
+    0 1 0 0 1 0 0 1 0 0 0 1 1 1 1 0 0 | 1 0 1 0 0 0 0 1 0
+    0 1 0 1 1 1 0 0 1 0 0 1 1 1 0 1 0 | 1 0 0 1 1 1 1 1 0
+    0 0 0 1 0 1 1 0 0 0 0 0 0 0 1 1 0 | 0 0 1 0 1 0 0 1 0
+    0 0 1 1 1 1 1 0 1 1 0 0 0 1 1 0 0 | 1 1 1 1 0 1 1 1 0
+    0 0 0 0 0 0 1 0 0 0 1 1 1 1 0 0 0 | 0 1 1 1 1 1 0 0 0
+    0 1 0 0 1 0 1 1 0 0 1 1 1 1 1 1 1 | 1 1 1 0 0 1 1 0 1
+    0 0 1 0 1 1 0 1 1 0 0 0 0 0 1 0 1 | 0 1 0 1 1 1 1 0 1
+    0 0 1 1 1 0 1 1 1 0 0 0 1 0 1 1 1 | 0 1 1 0 1 0 1 1 1
+    0 1 0 0 1 1 1 0 1 1 0 0 1 1 0 0 1 | 0 1 0 0 1 0 1 0 1
+    0 1 1 1 1 1 1 1 0 0 0 1 1 1 0 1 0 | 1 1 0 1 1 0 1 1 0
+    0 0 0 1 1 1 1 1 0 1 0 0 1 0 1 0 0 | 1 0 1 0 0 1 0 1 0
+    0 1 0 0 1 1 0 0 1 1 0 1 1 1 1 1 1 | 0 1 1 0 1 0 0 1 1
+    0 1 1 1 1 0 1 0 1 1 0 1 0 0 1 1 1 | 0 0 1 0 1 0 0 1 1
+    0 1 1 0 0 1 0 0 1 1 0 1 0 0 1 0 0 | 0 0 0 1 1 1 0 1 0
+    0 0 0 1 1 1 1 0 0 0 1 1 0 1 0 1 1 | 0 1 0 0 1 0 0 0 1
+    0 0 0 1 0 1 0 1 0 1 1 1 1 0 1 0 1 | 1 1 0 0 0 0 0 0 1
+    0 1 0 1 1 0 0 1 0 0 1 0 1 1 1 1 1 | 1 1 1 0 0 0 1 0 1
+    0 1 1 1 0 1 0 1 1 0 0 1 0 1 0 0 0 | 1 1 0 1 0 1 1 1 0
+    0 1 1 1 0 0 1 0 0 0 0 0 0 0 1 0 1 | 1 1 1 0 0 0 1 1 0
+    0 0 1 1 1 0 1 0 1 1 1 0 0 1 1 0 1 | 1 0 0 0 0 1 1 0 1
+    0 0 1 1 1 1 1 1 1 1 0 0 1 0 1 1 1 | 1 1 1 0 0 1 1 1 1
+    0 1 1 0 0 0 1 0 0 1 1 1 1 0 1 0 0 | 0 1 0 0 1 0 1 0 0
+    0 0 1 0 1 0 0 0 1 0 1 0 0 1 1 1 1 | 0 0 1 1 1 1 1 0 1
+    0 1 0 0 0 0 1 0 0 1 1 1 1 1 0 0 0 | 0 0 0 0 0 0 1 0 0
+    0 0 1 1 1 1 0 0 1 0 0 1 0 0 1 1 1 | 0 1 0 0 0 0 0 1 1
+    0 1 0 0 0 1 0 0 1 1 0 1 0 0 0 1 1 | 0 1 1 0 1 0 1 0 1
+    0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    0 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0
+    0 1 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0
+    0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+    0 1 1 1 1 1 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0
+    0 1 1 1 1 1 1 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0
+    0 1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+    0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+  delay: 10
+  delays:
+    s1: {rise: 6, fall: 10}
+    s8: {rise: 6, fall: 10}
+

@@ -1,0 +1,442 @@
+name: ref_mattbatwings_encode_v2h
+description: "mattbatwings' Logical Redstone Archive ENCODE002 (encode_v2h), Discord https://discord.com/channels/1361854816837435433/1472426173618196530 (SOURCED: endorsed by mattbatwings, tags Tested & Functional/Recommended; programmable, expandable 4b one-hot to 4b encoding, 1 tick). A 4x4 repeater crossbar: each lever's dust line (one per y level, 4 levers stacked) is tapped by one repeater per output bit, each feeding a dust path down to that bit's lamp; the schematic ships with all 16 repeaters, so every lever gives 1111, and removing a repeater clears that (input, bit) pair, so a code is programmed by deleting repeaters (INFERRED from the layout, MEASURED: cutting each of the 16 one at a time clears exactly one output of its lever). Taps for odd and even levers sit on alternate layers (the wool floor under a lever's dust is weakly powered and feeds repeaters on the layer below), which interleaves the 4 inputs 2 layers apart. Outputs are bit j = lamp o{j} at z=1,3,5,7 (o0 first). Size 6x9x11, 184 blocks. Harness change: the lever holder blocks at the far end were redstone lamps in the schematic; the harness only emulates levers on plain full blocks, so they are white_concrete here (a lever strongly powers either the same; the original lamp lights as a side effect). MEASURED: lever on to lamps lit 2 game ticks (one repeater), lever off to lamps dark 6 (repeater 2 + lamp 4); tests: as built (every lever 1111), binary program (codes 0-3), arbitrary program (1,7,10,12) with OR of simultaneous levers."
+palette:
+  .: air
+  A: red_wool
+  B: redstone_wire[east=side,north=none,south=none,west=side]
+  C: redstone_wire[east=up,north=none,south=none,west=side]
+  D: redstone_wire[east=side,north=none,south=none,west=up]
+  E: repeater[delay=1,facing=east]
+  F: redstone_wire[east=none,north=side,south=side,west=none]
+  G: redstone_wire[east=side,north=up,south=none,west=side]
+  H: redstone_wire[east=none,north=side,south=side,west=side]
+  J: redstone_wire[east=side,north=none,south=side,west=up]
+  K: redstone_wire[east=up,north=none,south=side,west=none]
+  M: redstone_wire[east=side,north=none,south=up,west=none]
+  N: redstone_wire[east=side,north=none,south=up,west=side]
+  O: redstone_wire[east=up,north=side,south=none,west=none]
+  P: redstone_wire[east=side,north=side,south=none,west=up]
+  Q: redstone_wire[east=side,north=up,south=none,west=none]
+  T: redstone_wire[east=side,north=none,south=side,west=none]
+  X: white_concrete
+  '0':
+    output: o0
+    block: redstone_lamp
+  a:
+    name: lv0
+    block: lever[face=wall,facing=south]
+  '1':
+    output: o1
+    block: redstone_lamp
+  b:
+    name: lv1
+    block: lever[face=wall,facing=south]
+  '2':
+    output: o2
+    block: redstone_lamp
+  c:
+    name: lv2
+    block: lever[face=wall,facing=south]
+  '3':
+    output: o3
+    block: redstone_lamp
+  d:
+    name: lv3
+    block: lever[face=wall,facing=south]
+layers:
+  0: '......
+
+    .AA...
+
+    ......
+
+    .A.AA.
+
+    ......
+
+    .AA...
+
+    ......
+
+    .A.AA.
+
+    ......
+
+    ......
+
+    ......
+
+    '
+  1: '.....A
+
+    0BCAAA
+
+    .....A
+
+    1CADEA
+
+    .....A
+
+    2BCAAA
+
+    .....A
+
+    3CADEA
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  2: '...AAF
+
+    ...GEH
+
+    ..A..F
+
+    ..G..F
+
+    ...AAF
+
+    ...GEH
+
+    ..A..F
+
+    ..G..F
+
+    .....F
+
+    .....X
+
+    .....a
+
+    '
+  3: '..AJEA
+
+    .....A
+
+    ..KAAA
+
+    .....A
+
+    ..AJEA
+
+    .....A
+
+    ..KAAA
+
+    .....A
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  4: '..M..F
+
+    ..A..F
+
+    ...NEH
+
+    ...AAF
+
+    ..M..F
+
+    ..A..F
+
+    ...NEH
+
+    ...AAF
+
+    .....F
+
+    .....X
+
+    .....b
+
+    '
+  5: '.....A
+
+    ..OAAA
+
+    .....A
+
+    ..APEA
+
+    .....A
+
+    ..OAAA
+
+    .....A
+
+    ..APEA
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  6: '...AAF
+
+    ...GEH
+
+    ..A..F
+
+    ..Q..F
+
+    ...AAF
+
+    ...GEH
+
+    ..A..F
+
+    ..Q..F
+
+    .....F
+
+    .....X
+
+    .....c
+
+    '
+  7: '...TEA
+
+    .....A
+
+    ..KAAA
+
+    .....A
+
+    ...TEA
+
+    .....A
+
+    ..KAAA
+
+    .....A
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  8: '.....F
+
+    .....F
+
+    ...BEH
+
+    .....F
+
+    .....F
+
+    .....F
+
+    ...BEH
+
+    .....F
+
+    .....F
+
+    .....X
+
+    .....d
+
+    '
+tests:
+- name: idle
+  settle: 30
+  steps:
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+- name: as_built_each
+  settle: 30
+  steps:
+  - use: lv0
+  - wave: {o0: '0011', o1: '0011', o2: '0011', o3: '0011'}
+  - wait: 4
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv0
+  - wave: {o0: '11111100', o3: '11111100'}
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - wave: {o0: '0011', o1: '0011', o2: '0011', o3: '0011'}
+  - wait: 4
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv1
+  - wave: {o0: '11111100', o3: '11111100'}
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv2
+  - wave: {o0: '0011', o1: '0011', o2: '0011', o3: '0011'}
+  - wait: 4
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv2
+  - wave: {o0: '11111100', o3: '11111100'}
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv3
+  - wave: {o0: '0011', o1: '0011', o2: '0011', o3: '0011'}
+  - wait: 4
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv3
+  - wave: {o0: '11111100', o3: '11111100'}
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+- name: program_binary
+  settle: 30
+  steps:
+  - run: setblock ~4 ~2 ~1 air
+  - run: setblock ~4 ~1 ~3 air
+  - run: setblock ~4 ~2 ~5 air
+  - run: setblock ~4 ~1 ~7 air
+  - run: setblock ~4 ~4 ~2 air
+  - run: setblock ~4 ~3 ~4 air
+  - run: setblock ~4 ~4 ~6 air
+  - run: setblock ~4 ~6 ~1 air
+  - run: setblock ~4 ~6 ~5 air
+  - run: setblock ~4 ~5 ~7 air
+  - run: setblock ~4 ~7 ~4 air
+  - run: setblock ~4 ~8 ~6 air
+  - wait: 6
+  - use: lv0
+  - wait: 8
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv0
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - wait: 8
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv2
+  - wait: 8
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+  - use: lv2
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 0, o3: 0}
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - use: lv2
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 0, o3: 0}
+  - use: lv1
+  - use: lv2
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv2
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 0, o3: 0}
+  - use: lv2
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+- name: program_arbitrary
+  settle: 30
+  steps:
+  - run: setblock ~4 ~1 ~3 air
+  - run: setblock ~4 ~2 ~5 air
+  - run: setblock ~4 ~1 ~7 air
+  - run: setblock ~4 ~4 ~6 air
+  - run: setblock ~4 ~6 ~1 air
+  - run: setblock ~4 ~6 ~5 air
+  - run: setblock ~4 ~7 ~0 air
+  - run: setblock ~4 ~8 ~2 air
+  - wait: 6
+  - use: lv0
+  - wait: 8
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+  - use: lv0
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 0}
+  - use: lv1
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv2
+  - wait: 8
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 1}
+  - use: lv2
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 1}
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv0
+  - use: lv1
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 0}
+  - use: lv0
+  - use: lv1
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv1
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv2
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 0, o1: 1, o2: 1, o3: 1}
+  - use: lv2
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+- name: program_shipped_ones
+  settle: 30
+  steps:
+  - wait: 6
+  - use: lv0
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv0
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv1
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv1
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv2
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv2
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+  - use: lv0
+  - use: lv3
+  - wait: 8
+  - expect: {o0: 1, o1: 1, o2: 1, o3: 1}
+  - use: lv0
+  - use: lv3
+  - wait: 10
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}

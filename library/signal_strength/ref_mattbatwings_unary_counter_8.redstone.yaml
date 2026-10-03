@@ -1,0 +1,884 @@
+name: ref_mattbatwings_unary_counter_8
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEX003 ''8-bit Unary Counter'' (endorsed by mattbatwings, Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472410359854792815). README: counts how many bits are on, input 8b (inverted), output a hex number, 4 ticks. 7x2x17 as rebuilt (8x2x17 with the levers). MEASURED: the output dust count (0,1,9) holds the number of levers that are OFF (0..8), all 256 lever combinations (Gray-code order, so every step flips one lever; ''inverted'' = a lever on is a 0 bit); each combination settles within 8 gt (4 redstone ticks = the README''s 4 ticks) and 7 gt is too few (the sweep fails at wait 7 for nearly every step); latency tests: 1 -> 0 and 0 -> 1 at the output edge take exactly 8 gt, and 0 -> 8 and 8 -> 0 settle in 8 gt. Changed for the harness: the author''s lamp + lever pair per input (lamp at x=6, lever on its east face) is replaced by a driver redstone block at the lamp''s cell, named lv0..lv7 (lv0 at z=1, lv7 at z=15; lv=1 is the lever on); a redstone block powers the dust at x=5 at 15 just as the strongly powered lamp does, so the dust, comparators and constants are unchanged, but the lamps'' indicator light is gone. The input cells therefore sit inside the footprint. The author''s barrels are taken from the .schem block entities: a stack of totems or redstone sets each constant (strengths 1, 2, 4, 9, 10 and two big ones; the 8 is 13.5 stacks of redstone, exactly half full), so a rebuild without the contents does not count. INFERRED mechanism: each lever''s dust (15 at x=5, 14 at x=4) is the side input of a subtract comparator whose rear is a constant barrel, so a lever on zeroes that branch (14 is more than any constant it meets) and a lever off lets the constant through; the passing constants are merged by wool and dust (a block takes the strongest of its feeders, dust adds nothing but decay), and later compare/subtract stages keep a running value that ends as the count at the west edge. The saved all-off dust strengths 10, 10, 9, 8, 8 in the schem (SOURCED) are consistent with a value of 8 + c after the first lever pair (c = off levers in it) falling to the final 8 at the output, but I did not decode every stage. Compactness: no torches, repeaters or clock, all of it is strength as data (compare with ref_mattbatwings_unary_counter_15).'
+traits:
+- analog
+- silent
+- pistonless
+- entityless
+palette:
+  .: air
+  A: red_wool
+  B: glass
+  C: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:32}]}
+  D: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1},{Slot:12b,id:"minecraft:totem_of_undying",count:1},{Slot:13b,id:"minecraft:totem_of_undying",count:1},{Slot:14b,id:"minecraft:totem_of_undying",count:1},{Slot:15b,id:"minecraft:totem_of_undying",count:1}]}
+  E: comparator[facing=north,mode=compare]
+  F: comparator[facing=north,mode=subtract]
+  G: redstone_wire[east=side,north=none,south=side,west=side]
+  H: redstone_wire[east=side,north=none,south=none,west=side]
+  I:
+    input: lv0
+  J: redstone_wire[east=side,north=side,south=side,west=side]
+  K: comparator[facing=east,mode=subtract]
+  L: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1},{Slot:12b,id:"minecraft:totem_of_undying",count:1},{Slot:13b,id:"minecraft:totem_of_undying",count:1},{Slot:14b,id:"minecraft:totem_of_undying",count:1},{Slot:15b,id:"minecraft:totem_of_undying",count:1},{Slot:16b,id:"minecraft:totem_of_undying",count:1},{Slot:17b,id:"minecraft:totem_of_undying",count:1}]}
+  M: comparator[facing=south,mode=subtract]
+  N: redstone_wire[east=side,north=side,south=none,west=side]
+  O:
+    input: lv1
+  P: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1}]}
+  Q: redstone_wire[east=none,north=none,south=side,west=side]
+  R:
+    input: lv2
+  S: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1}]}
+  T: redstone_wire[east=none,north=side,south=none,west=side]
+  U:
+    input: lv3
+  V: redstone_wire[east=none,north=side,south=side,west=none]
+  W:
+    output: count
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  X:
+    input: lv4
+  Y: comparator[facing=east,mode=compare]
+  Z:
+    input: lv5
+  a:
+    input: lv6
+  b: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1}]}
+  c:
+    input: lv7
+layers:
+  0: |
+    ........
+    .A.AAA..
+    ..A.A...
+    .A.AAA..
+    ........
+    .AA.AA..
+    ...AAA..
+    .AA.AA..
+    ..A.....
+    BA.AAA..
+    .AA.A...
+    ...AAA..
+    .A......
+    ...AAA..
+    .AA.A...
+    ...AAA..
+    ........
+  1: |
+    .C.D....
+    .E.FGHI.
+    .AJAKL..
+    .E.MNHO.
+    .A.DP...
+    .FHAFQR.
+    .A.MJKS.
+    .HQSMTU.
+    ..VPP...
+    WKAFGHX.
+    .MYAKS..
+    .A.MNHZ.
+    .J.P....
+    .A.FGHa.
+    .MHAKS..
+    .b.MNHc.
+    ...P....
+tests:
+- name: all 256 inputs
+  settle: 20
+  steps:
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 8}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 0}
+  - wait: 20
+  - level: {count: 7}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 0}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 1}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 1, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 2}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 1, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 3}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 1, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 0, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 4}
+  - drive: {lv0: 0, lv1: 1, lv2: 1, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 0, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 1, lv1: 1, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 5}
+  - drive: {lv0: 1, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 6}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 1}
+  - wait: 20
+  - level: {count: 7}
+- name: output goes 1 to 0 at 8 gt
+  initial: {lv0: 0, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  settle: 20
+  steps:
+  - drive: {lv0: 1}
+  - wave: {count: '111111110'}
+- name: output goes 0 to 1 at 8 gt
+  initial: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  settle: 20
+  steps:
+  - drive: {lv0: 0}
+  - wave: {count: '000000001'}
+- name: all off to all on and back
+  initial: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  settle: 20
+  steps:
+  - level: {count: 8}
+  - drive: {lv0: 1, lv1: 1, lv2: 1, lv3: 1, lv4: 1, lv5: 1, lv6: 1, lv7: 1}
+  - wait: 7
+  - level: {count: 8}
+  - wait: 1
+  - level: {count: 0}
+  - drive: {lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0, lv6: 0, lv7: 0}
+  - wait: 7
+  - level: {count: 0}
+  - wait: 1
+  - level: {count: 8}

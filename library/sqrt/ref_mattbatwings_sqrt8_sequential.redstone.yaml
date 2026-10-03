@@ -1,0 +1,3983 @@
+name: ref_mattbatwings_sqrt8_sequential
+description: 'Rebuild of SQRT001 8-bit Sequential Square Root Extractor (mattbatwings, endorsed; Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472426720521883769, Logical Redstone Archive; schematic SQRT001_8bit_sqrt.schem).
+  SOURCED: README says an 8-bit sequential square root extractor; input one 8-bit number and a Start button, output a 4b.2b square root (4 integer bits, 2 fraction bits). Schematic 15x20x36, 1975 blocks (plus one empty column on the west here). PORTS:
+  levers b0..b7 (weights 1..128; b0 at z=0, b7 at z=14, x=14 on layer 6), button start (layer 10), output lamps r3 r2 r1 r0 (integer 8,4,2,1) and f1 f0 (1/2, 1/4) at x=6 on layer y=19,17,..,9, and the lever arm (layer 0), which must stay ON as saved. HARNESS
+  CHANGES: (1) the lamp each input lever hangs on and the lamp behind the start button are white wool, the magenta wool under arm is white wool (the harness only emulates levers and buttons on plain blocks; a lamp conducts like wool); signs dropped. (2)
+  The build is placed from the schematic''s saved block states (dust power, torch lit, repeater locked, comparator and lamp states) with update_pass: strict. Reason, MEASURED: the stripped skeleton (no power or lit, default clone pass) settled differently
+  on satellite dsat2, where redstone blocks left by other runs stood outside the plot 1-2 cells west of the build (x=368-369, y=65-67): a dust column at x=0 kept a stale 3-4-5-6-5-4-3-2-1 charge and conversions of some inputs (31 for one) never produced
+  a result there, but did elsewhere. With the saved states and strict placement the build is quiet from tick 0 on every satellite. The empty column on the west keeps the dust column off the plot edge. The saved states include the author''s last result
+  in the lamps (r1 r0 f0 lit, 001101 = 3.25) until the first conversion replaces it. MEASURED (26.3, references plot): all 256 inputs convert to floor(sqrt(v)*4) = isqrt(16 v) (a test per input, each from a fresh load, 150 gt after the press); one 281-test
+  run passes. TIMING (MEASURED, input independent): after the press the lamps keep the old result until +140 gt, at +140 the new ones are lit on top of the old (old OR new), at +144 the old-only lamps go out; the result is final 144 gt after the press
+  (timeline test, input 31). The machine goes on switching after that: for 223 inputs it halts 163 to 550 gt after the press (most at 163-284, then 369, 449-501, 550), for 33 inputs (v = 8, 15, 23, 28, 34, 46, 47, 77, 78, 87, 97, 129, 139, 140, 141, 143,
+  155, 163, 164, 165, 167, 168, 191, 192, 194, 195, 218, 219, 220, 221, 222, 223, 224) a torch loop with a period of about 20 gt never stops (no stop in 800 gt for all of them, in 3000 gt for 15, 140, 155, 165, 195, 220); releasing the levers, pressing
+  start again or cycling arm does not stop it, and the lamps stay correct. INPUT IS NOT LATCHED (MEASURED, as in the library''s ref_mattbatwings_seq_bin_to_bcd8): the levers are read in pairs as the run proceeds, MSB pair first, 20 gt per pair; releasing
+  lever b_k at or after this many gt after the press leaves the answer alone: b7 8, b6 10, b5 28, b4 30, b3 48, b2 50, b1 68, b0 70; one gt earlier the bit reads wrong (the tests release each bit at its limit and one gt before). Keep the number on the
+  levers for 70 gt. ARM (MEASURED): arm off before the press or 50 gt after it corrupts the result (input 31 gives 001111 or 010101). BACK TO BACK IS NOT RELIABLE (MEASURED, a design flaw or a flaw of this rebuild; not resolved): there is no reset input
+  and sequences of conversions, even 600 gt apart, can go wrong depending on the earlier inputs; 177 then 178 is right but 176, 177, 178 gives 111000 for 178 (right is 110101), on three satellites, while 178 alone is right. All 280 tests start from a fresh
+  load and a long chain of presses was not made to work. HOW (INFERRED from the layout, the picture and the measured timing; not proven): a stack of near-identical two-layer slices (layers 4-19, 66 comparators in subtract mode in the build, dust risers
+  between slices, the picture shows eight slices) with one output lamp per result bit on the east edge (layer y=19-2k for r3..f0). The hold times show the levers being read two at a time, MSB pair first, 20 gt apart, for the four integer bits; the two
+  fraction bits then need no input, which is how one machine gets 4b.2b out of an 8-bit number. That is the digit-by-digit (bit-pair) square root: try a trial bit, subtract the trial from the remainder with a comparator, keep the bit if it does not go
+  negative. About 6 steps of 20 gt plus an output stage fits the +140. No stage-by-stage trace was made, so the slice-to-step mapping and the restoring-subtract reading are inferred only from the hold times and the six lamps.'
+traits: [torch_based, pistonless, entityless]
+update_pass: strict
+palette:
+  .: air
+  'A': {name: arm, block: 'lever[face=wall,facing=west,powered=true]'}
+  'B': 'white_wool'
+  'C': 'redstone_wall_torch[facing=south,lit=false]'
+  'D': 'magenta_wool'
+  'E': 'smooth_stone_slab[type=top,waterlogged=false]'
+  'F': 'purple_wool'
+  'G': 'blue_wool'
+  'H': 'redstone_torch[lit=true]'
+  'I': 'comparator[facing=north,mode=subtract,powered=true]'
+  'J': 'redstone_wire[east=side,north=side,power=15,south=side,west=side]'
+  'K': 'repeater[delay=1,facing=north,locked=false,powered=true]'
+  'L': 'redstone_wire[east=up,north=side,power=15,south=up,west=none]'
+  'M': 'redstone_wire[east=side,north=none,power=15,south=none,west=side]'
+  'N': 'redstone_wire[east=side,north=none,power=14,south=none,west=side]'
+  'O': 'redstone_wall_torch[facing=east,lit=false]'
+  'P': 'redstone_wire[east=side,north=none,power=0,south=none,west=up]'
+  'Q': 'redstone_wire[east=side,north=none,power=0,south=none,west=side]'
+  'R': 'redstone_wire[east=up,north=none,power=0,south=none,west=side]'
+  'S': 'lime_wool'
+  'T': 'light_blue_wool'
+  'U': 'redstone_wire[east=side,north=none,power=14,south=side,west=side]'
+  'V': 'redstone_wire[east=side,north=none,power=13,south=side,west=side]'
+  'W': 'redstone_wire[east=none,north=side,power=12,south=side,west=side]'
+  'X': 'redstone_wire[east=side,north=side,power=14,south=none,west=none]'
+  'Y': 'comparator[facing=north,mode=subtract,powered=false]'
+  'Z': 'redstone_wire[east=none,north=side,power=11,south=none,west=side]'
+  'a': 'redstone_wire[east=none,north=side,power=2,south=none,west=up]'
+  'b': 'repeater[delay=1,facing=west,locked=false,powered=true]'
+  'c': 'repeater[delay=1,facing=south,locked=false,powered=false]'
+  'd': 'redstone_wire[east=none,north=side,power=0,south=none,west=side]'
+  'e': 'orange_wool'
+  'f': 'redstone_wire[east=none,north=side,power=0,south=side,west=none]'
+  'g': 'redstone_wire[east=none,north=side,power=0,south=up,west=none]'
+  'h': 'repeater[delay=1,facing=north,locked=false,powered=false]'
+  'i': 'redstone_wire[east=none,north=none,power=0,south=side,west=side]'
+  'j': 'redstone_wire[east=side,north=none,power=0,south=side,west=none]'
+  'k': 'redstone_wire[east=side,north=none,power=0,south=side,west=side]'
+  'l': 'redstone_wire[east=side,north=side,power=0,south=side,west=none]'
+  'm': 'target[power=0]'
+  'n': 'redstone_wall_torch[facing=south,lit=true]'
+  'o': 'redstone_wire[east=side,north=side,power=15,south=side,west=none]'
+  'p': 'redstone_wire[east=none,north=none,power=15,south=side,west=side]'
+  'q': 'redstone_wire[east=none,north=side,power=15,south=side,west=none]'
+  'r': 'redstone_wire[east=side,north=side,power=0,south=side,west=side]'
+  's': 'redstone_wire[east=none,north=side,power=14,south=side,west=none]'
+  't': 'redstone_wire[east=up,north=side,power=12,south=up,west=none]'
+  'u': 'redstone_wire[east=side,north=none,power=1,south=side,west=none]'
+  'v': 'repeater[delay=2,facing=north,locked=false,powered=true]'
+  'w': 'repeater[delay=3,facing=north,locked=false,powered=false]'
+  'x': 'redstone_wire[east=none,north=up,power=1,south=side,west=none]'
+  'y': 'redstone_wire[east=none,north=up,power=0,south=side,west=none]'
+  'z': 'repeater[delay=4,facing=north,locked=false,powered=false]'
+  '0': 'redstone_wall_torch[facing=west,lit=true]'
+  '1': 'repeater[delay=1,facing=west,locked=false,powered=false]'
+  '2': 'repeater[delay=3,facing=west,locked=false,powered=false]'
+  '3': 'redstone_wire[east=none,north=side,power=0,south=none,west=up]'
+  '4': 'redstone_wire[east=none,north=side,power=15,south=side,west=side]'
+  '5': 'redstone_wire[east=side,north=side,power=11,south=none,west=none]'
+  '6': 'redstone_wire[east=none,north=side,power=14,south=none,west=side]'
+  '7': 'redstone_wire[east=none,north=none,power=2,south=side,west=up]'
+  '8': 'redstone_wire[east=side,north=none,power=13,south=none,west=side]'
+  '9': 'comparator[facing=east,mode=subtract,powered=false]'
+  '#': {name: b0, block: 'lever[face=wall,facing=east,powered=false]'}
+  '%': {name: b1, block: 'lever[face=wall,facing=east,powered=false]'}
+  '&': {name: b2, block: 'lever[face=wall,facing=east,powered=false]'}
+  '@': {name: b3, block: 'lever[face=wall,facing=east,powered=false]'}
+  '$': {name: b4, block: 'lever[face=wall,facing=east,powered=false]'}
+  '!': {name: b5, block: 'lever[face=wall,facing=east,powered=false]'}
+  '~': {name: b6, block: 'lever[face=wall,facing=east,powered=false]'}
+  '^': {name: b7, block: 'lever[face=wall,facing=east,powered=false]'}
+  '+': 'red_wool'
+  '-': 'redstone_wire[east=none,north=none,power=12,south=side,west=side]'
+  '=': 'redstone_wire[east=side,north=side,power=14,south=side,west=none]'
+  '<': 'redstone_wire[east=none,north=side,power=2,south=side,west=none]'
+  '>': 'redstone_wire[east=side,north=side,power=13,south=side,west=none]'
+  '|': 'redstone_wire[east=side,north=none,power=3,south=up,west=none]'
+  ';': 'redstone_wall_torch[facing=east,lit=true]'
+  ':': 'redstone_wire[east=none,north=side,power=12,south=side,west=none]'
+  ',': 'redstone_wire[east=up,north=side,power=4,south=none,west=none]'
+  '?': 'redstone_wire[east=none,north=none,power=0,south=side,west=up]'
+  '/': 'repeater[delay=2,facing=south,locked=false,powered=false]'
+  '*': 'repeater[delay=4,facing=south,locked=false,powered=false]'
+  '(': 'yellow_wool'
+  ')': 'redstone_wire[east=side,north=side,power=11,south=side,west=none]'
+  '[': 'redstone_wire[east=none,north=up,power=5,south=none,west=side]'
+  ']': 'redstone_wire[east=none,north=up,power=14,south=side,west=none]'
+  '{': 'redstone_wall_torch[facing=north,lit=true]'
+  '}': 'repeater[delay=1,facing=west,locked=true,powered=true]'
+  'α': {name: f0, block: 'redstone_lamp[lit=true]'}
+  'β': 'redstone_wire[east=none,north=side,power=10,south=side,west=none]'
+  'γ': 'redstone_wire[east=none,north=none,power=6,south=side,west=up]'
+  'δ': 'repeater[delay=4,facing=east,locked=false,powered=false]'
+  'ε': 'repeater[delay=2,facing=west,locked=false,powered=false]'
+  'ζ': 'comparator[facing=west,mode=subtract,powered=false]'
+  'η': {name: start, block: 'stone_button[face=floor,facing=west,powered=false]'}
+  'θ': 'repeater[delay=4,facing=north,locked=false,powered=true]'
+  'ι': 'repeater[delay=2,facing=north,locked=false,powered=false]'
+  'κ': 'repeater[delay=4,facing=south,locked=false,powered=true]'
+  'λ': 'redstone_wire[east=side,north=side,power=9,south=side,west=none]'
+  'μ': 'redstone_wire[east=side,north=none,power=7,south=up,west=none]'
+  'ν': 'repeater[delay=1,facing=west,locked=true,powered=false]'
+  'ξ': {name: f1, block: 'redstone_lamp[lit=false]'}
+  'π': 'redstone_wire[east=none,north=side,power=8,south=up,west=none]'
+  'ρ': 'redstone_wire[east=none,north=side,power=8,south=side,west=none]'
+  'σ': 'redstone_wire[east=up,north=side,power=8,south=none,west=none]'
+  'τ': 'redstone_wire[east=none,north=side,power=13,south=side,west=none]'
+  'υ': 'black_wool'
+  'φ': 'redstone_wire[east=none,north=side,power=9,south=up,west=none]'
+  'χ': 'redstone_wire[east=side,north=side,power=7,south=side,west=none]'
+  'ψ': 'redstone_wire[east=none,north=up,power=9,south=none,west=side]'
+  'ω': {name: r0, block: 'redstone_lamp[lit=true]'}
+  'Α': 'redstone_wire[east=none,north=side,power=10,south=up,west=none]'
+  'Β': 'redstone_wire[east=none,north=side,power=6,south=side,west=none]'
+  'Γ': 'redstone_wire[east=none,north=up,power=10,south=side,west=none]'
+  'Δ': 'redstone_wire[east=none,north=side,power=11,south=side,west=none]'
+  'Λ': 'redstone_wire[east=none,north=side,power=11,south=up,west=none]'
+  'Ξ': 'redstone_wire[east=side,north=side,power=5,south=side,west=none]'
+  'Π': 'redstone_wire[east=none,north=up,power=11,south=side,west=none]'
+  'Σ': {name: r1, block: 'redstone_lamp[lit=true]'}
+  'Φ': 'redstone_wire[east=none,north=side,power=4,south=side,west=none]'
+  'Ψ': 'redstone_wire[east=none,north=side,power=12,south=up,west=none]'
+  'Ω': 'redstone_wire[east=none,north=up,power=12,south=side,west=none]'
+  'À': 'redstone_wire[east=none,north=side,power=9,south=side,west=none]'
+  'Á': 'redstone_wire[east=side,north=side,power=3,south=side,west=none]'
+  'Â': 'redstone_wire[east=none,north=side,power=13,south=up,west=none]'
+  'Ã': 'redstone_wire[east=none,north=up,power=13,south=side,west=none]'
+  'Ä': {name: clk, block: 'redstone_wall_torch[facing=west,lit=true]'}
+  'Å': {name: r2, block: 'redstone_lamp[lit=false]'}
+  'Æ': 'redstone_wire[east=none,north=side,power=14,south=up,west=none]'
+  'Ç': 'redstone_wire[east=none,north=side,power=7,south=side,west=none]'
+  'È': 'redstone_wire[east=side,north=side,power=1,south=side,west=none]'
+  'É': {name: r3, block: 'redstone_lamp[lit=false]'}
+layers:
+  0: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    .....AB.........
+    ......C.........
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+  1: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......D.........
+    ......D.........
+    ................
+    ......D.........
+    .....D..........
+    .....E..........
+    ................
+    ................
+    ................
+    .....FF.........
+    ................
+    ..GGGGGG........
+    ................
+  2: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......H.........
+    ......I.........
+    ......D.........
+    .....DJ.........
+    .....K..........
+    .....LDDD.......
+    .....DDDD.......
+    ......E.........
+    ................
+    ....FMNFO.......
+    ........G.......
+    .GPQQQQRG.......
+    ................
+  3: |
+    ................
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ........S.S.....
+    ................
+    ........T.......
+    .........TT.....
+    .....DDDD.T.....
+    .....DDDD.T.....
+    .......D..T.....
+    ..........T.....
+    .....DD.D.T.....
+    .....ED.D.T.....
+    ........D.T.....
+    ......D.D.T.....
+    .....D..C.T.....
+    .....EUVW.T.....
+    .....XYIZ.T.....
+    .....DaD..T.....
+    .....D....T.....
+    ...FbF..F.T.....
+    .G..GDF.cFT.....
+    .QEG....d.......
+    .....eeeeeeE....
+  4: |
+    ................
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.f.....
+    ........f.g.....
+    ........S.S.....
+    ........h.......
+    ........TQi.....
+    .....jkki.f.....
+    .....lYYd.f.....
+    .....mDf..f.....
+    .....nED..f.....
+    .....Konp.f.....
+    .....oY.K.f.....
+    .....ED.q.f.....
+    .....Dr.s.f.....
+    .....h....f.....
+    .....tDDD.f.....
+    .....DDDD.f.....
+    .G...uE...f.....
+    .G.F.v..F.w.....
+    .G.x.D..y.z.....
+    .h..QYM0F1Y.....
+    .GP2Ge..G.e.E...
+    .....QQQQQQRe...
+  5: |
+    ........SSS..S..
+    ........C....S..
+    ........SSS..S..
+    ..........C.....
+    ........SSS..S..
+    ........C....S..
+    ........SSS..S..
+    ..........C.....
+    ........SSS..S..
+    ........C....S..
+    ........SSS..S..
+    ..........C.....
+    ........SSS..S..
+    ........C....S..
+    ........SSS..S..
+    ..........C.....
+    .........S3.....
+    ........T.......
+    .........TT.....
+    .....DDDD.T.....
+    .....DDDD.T.....
+    .......D..T.....
+    ......s...T.....
+    .....DE.D.T.....
+    .....ED.D.T.....
+    .....s..D.T.....
+    ......D.D.T.....
+    .....D..n.T.....
+    .....EVU4.T.....
+    .G...5IY6.T.....
+    .y...DaD..T.....
+    .fF7.D..f.T.....
+    .f......E.T.E...
+    ....GDF..FT.e...
+    .QEG........y...
+    .....eeeeeeEd...
+  6: |
+    ........8NM0S9B#
+    .............q..
+    ........8NM0S9B%
+    ................
+    ........8NM0S9B&
+    .............q..
+    ........8NM0S9B@
+    ................
+    ........8NM0S9B$
+    .............q..
+    ........8NM0S9B!
+    ................
+    ........8NM0S9B~
+    .............q..
+    ........8NM0S9B^
+    ................
+    ........SQ......
+    .....+..h.......
+    .....n..TQi.....
+    .....oUV-.f.....
+    .....=YIZ.f.....
+    .....mD<..f.....
+    .....CED..f.....
+    .....h>Ci.f.....
+    .....>Y.h.f.....
+    .....ED.f.f.....
+    .....Dr.f.f.....
+    .....h....f.....
+    .G...tDDD.f.....
+    .y...DDDD.f.....
+    .....uE...f.E...
+    .G|..v..E.w.e...
+    ..F..D..f.z.y...
+    ....QYM0F1Y.f...
+    .EQ2Ge....e.E...
+    .....QQQQQQRe...
+  7: |
+    ................
+    ............S;..
+    ............S...
+    ............S...
+    ............S...
+    ............S;..
+    ............S...
+    ............S...
+    ............S...
+    ............S;..
+    ............S...
+    ............S...
+    ............S...
+    ............S;..
+    ................
+    ................
+    ........eeeee...
+    ........T...e...
+    .........TT.e...
+    .....DDDD.T.e...
+    .....DDDD.T.e...
+    .......D..T.e...
+    ......:...T.e...
+    .....DE.D.T.e...
+    .....ED.D.T.e...
+    .....:..D.T.e...
+    ......D.D.T.e...
+    .G...D..n.T.e...
+    .y...EVU4.T.e...
+    .....5IY6.T.e...
+    .....DaD..T.y...
+    .....D..f.T.f...
+    ..,F....E.T.E...
+    ....GDF..FT.e...
+    .QEG........y...
+    .....eeeeeeEd...
+  8: |
+    ................
+    ...........S?...
+    ............/...
+    ............*...
+    ............*...
+    ............f...
+    ............/...
+    ............*...
+    ............*...
+    ............f...
+    ............/...
+    ............*...
+    ......(.....*...
+    ......(.....f...
+    ......(.........
+    .....+..........
+    ........jQQQi...
+    .....+..h...f...
+    .....n..TQi.f...
+    .....oUV-.f.f...
+    .....=YIZ.f.f...
+    .....mD<..f.f...
+    .....CED..f.f...
+    .....h)Ci.f.f...
+    .....)Y.h.f.f...
+    .....ED.f.f.f...
+    .G...Dr.f.f.f...
+    .y...h....f.c...
+    .....tDDD.f.f...
+    .....DDDD.f.f...
+    .....uE...f.E...
+    ...F.v..E.w.e...
+    ...[.D..f.z.y...
+    ....QYM0F1Y.f...
+    .EQ2Ge....e.E...
+    .....QQQQQQRe...
+  9: |
+    ................
+    .SSSSSSSSSSP....
+    .S..............
+    .S..............
+    .S..............
+    .S..............
+    .S..............
+    .S..............
+    .S..............
+    .S..............
+    .(((............
+    .(((..(.........
+    .G....].........
+    .G...{K.....B...
+    .G...+}α........
+    .G...*..........
+    .G...m..eeeee...
+    .G.FOd..T...e...
+    .G.F.....TT.e...
+    .G...DDDD.T.e...
+    .G...DDDD.T.e...
+    .G.....D..T.e...
+    .G....β...T.e...
+    .G...DE.D.T.e...
+    .G...ED.D.T.e...
+    .G...β..D.T.e...
+    .y....D.D.T.e...
+    .....D..n.T.e...
+    .....EVU4.T.e...
+    .....5IY6.T.e...
+    .....DaD..T.y...
+    ..Fγ.D..f.T.f...
+    ........E.T.E...
+    ....GDF..FT.e...
+    .QEG........y...
+    .....eeeeeeEd...
+  10: |
+    ................
+    .jδδδδδδδδQ.....
+    .z..............
+    .f..............
+    .f..............
+    .f..............
+    .f..............
+    .f..............
+    .f..............
+    .f..............
+    .lεi............
+    .lQζ(;p.........
+    .f....E.........
+    .f...+(.....η...
+    .f...θ(.........
+    .f...+..........
+    .f...C..jQQQi...
+    .f.q.+..h...f...
+    .ι.κ.n..TQi.f...
+    .f.F.oUV-.f.f...
+    .f...=YIZ.f.f...
+    .f...mD<..f.f...
+    .f...CED..f.f...
+    .f...hλCi.f.f...
+    .f...λY.h.f.f...
+    .f...ED.f.f.f...
+    .....Dr.f.f.f...
+    .....h....f.c...
+    .....tDDD.f.f...
+    .....DDDD.f.f...
+    .....uE...f.E...
+    ..μ..v..E.w.e...
+    ..F..D..f.z.y...
+    ....QYM0F1Y.f...
+    .EQ2Ge....e.E...
+    .....QQQQQQRe...
+  11: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......E.........
+    ......s.........
+    .....{K.........
+    .....+νξ........
+    .....*..........
+    .....+..eeeee...
+    .....r..T...e...
+    .........TT.e...
+    ...π.DDDD.T.e...
+    ...F.DDDD.T.e...
+    .......D..T.e...
+    ......ρ...T.e...
+    .....DE.D.T.e...
+    .....ED.D.T.e...
+    .....ρ..D.T.e...
+    ......D.D.T.e...
+    .....D..n.T.e...
+    .....EVU4.T.e...
+    .....5IY6.T.e...
+    .....DaD..T.y...
+    .....D..f.T.f...
+    ..σF....E.T.E...
+    ....GDF..FT.e...
+    .QEG........y...
+    .....eeeeeeEd...
+  12: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......τ.........
+    ......E.........
+    .....+(.........
+    .....θ(υ........
+    .....+..........
+    .....C..jQQQi...
+    .....+..h...f...
+    .....n..TQi.f...
+    .....oUV-.f.f...
+    ...φ.=YIZ.f.f...
+    ...F.mD<..f.f...
+    .....CED..f.f...
+    .....hχCi.f.f...
+    .....χY.h.f.f...
+    .....ED.f.f.f...
+    .....Dr.f.f.f...
+    .....h....f.c...
+    .....tDDD.f.f...
+    .....DDDD.f.f...
+    .....uE...f.E...
+    ...F.v..E.w.e...
+    ...ψ.D..f.z.y...
+    ....QYM0F1Y.f...
+    .EQ2Ge....e.E...
+    .....QQQQQQRe...
+  13: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......E.........
+    ......:.........
+    .....{K.........
+    .....+}ω........
+    .....*..........
+    .....+..eeeee...
+    .....r..T...e...
+    .........TT.e...
+    .....DDDD.T.e...
+    .....DDDD.T.e...
+    ...Α...D..T.e...
+    ...F..Β...T.e...
+    .....DE.D.T.e...
+    .....ED.D.T.e...
+    .....Β..D.T.e...
+    ......D.D.T.e...
+    .....D..n.T.e...
+    .....EVU4.T.e...
+    .....5IY6.T.e...
+    ...F.DaD..T.y...
+    ...Γ.D..f.T.f...
+    ........E.T.E...
+    ....GDF..FT.e...
+    .QEG........y...
+    .....eeeeeeEd...
+  14: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......Δ.........
+    ......E.........
+    .....+(.........
+    .....θ(.........
+    .....+..........
+    .....C..jQQQi...
+    .....+..h...f...
+    .....n..TQi.f...
+    .....oUV-.f.f...
+    .....=YIZ.f.f...
+    .....mD<..f.f...
+    ...Λ.CED..f.f...
+    ...F.hΞCi.f.f...
+    .....ΞY.h.f.f...
+    .....ED.f.f.f...
+    .....Dr.f.f.f...
+    .....h....f.c...
+    .....tDDD.f.f...
+    ...F.DDDD.f.f...
+    ...Π.uE...f.E...
+    .....v..E.w.e...
+    .....D..f.z.y...
+    ....QYM0F1Y.f...
+    .EQ2Ge....e.E...
+    .....QQQQQQRe...
+  15: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......E.........
+    ......β.........
+    .....{K.........
+    .....+}Σ........
+    .....*..........
+    .....+..eeeee...
+    .....r..T...e...
+    .........TT.e...
+    .....DDDD.T.e...
+    .....DDDD.T.e...
+    .......D..T.e...
+    ......Φ...T.e...
+    ...Ψ.DE.D.T.e...
+    ...F.ED.D.T.e...
+    .....Φ..D.T.e...
+    ......D.D.T.e...
+    .....D..n.T.e...
+    ...F.EVU4.T.e...
+    ...Ω.5IY6.T.e...
+    .....DaD..T.y...
+    .....D..f.T.f...
+    ........E.T.E...
+    ....GDF..FT.e...
+    .QEG........y...
+    .....eeeeee.d...
+  16: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......À.........
+    ......E.........
+    .....+(.........
+    .....θ(.........
+    .....+..........
+    .....C..jQQQi...
+    .....+..h...f...
+    .....n..TQi.f...
+    .....oUV-.f.f...
+    .....=YIZ.f.f...
+    .....mD<..f.f...
+    .....CED..f.f...
+    .....hÁCi.f.f...
+    ...Â.ÁY.h.f.f...
+    ...F.ED.f.f.f...
+    .....Dr.f.f.f...
+    ...F.h....f.c...
+    ...Ã.tDDD.f.f...
+    .....DDDD.f.f...
+    .....uE...f.E...
+    .....v..E.w.e...
+    .....D..f.z.y...
+    ....QYMÄF1Y.f...
+    .EQ2Ge....e.....
+    .....QQQQQQ.....
+  17: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......E.........
+    ......ρ.........
+    .....{K.........
+    .....+νÅ........
+    .....*..........
+    .....+..eeeee...
+    .....r..T...e...
+    .........TT.e...
+    .....DDDD.T.e...
+    .....DDDD.T.e...
+    .......D..T.e...
+    ......<...T.e...
+    .....DE.D.T.e...
+    .....ED.D.T.e...
+    ...Æ.<..D.T.e...
+    ...F..D.D.T.e...
+    ...]....n.T.e...
+    ......VU4.T.e...
+    .....5IY6.T.e...
+    .....DaD..T.y...
+    .....D..f.T.f...
+    ........E.T.....
+    ....GDF..FT.....
+    .QEG............
+    .....eeeeee.....
+  18: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......Ç.........
+    ......E.........
+    .....+(.........
+    .....θ(.........
+    .....+..........
+    .....C..jQQQi...
+    .....+..h...f...
+    .....n..TQi.f...
+    .....oUV-.f.f...
+    .....=YIZ.f.f...
+    .....mD<..f.f...
+    .....C.D..f.f...
+    .....hÈCi.f.f...
+    .....ÈY.h.f.f...
+    ......D.f.f.f...
+    ...o0Dr.f.f.f...
+    ..........f.c...
+    ..........f.f...
+    .....D....f.f...
+    .....u....f.....
+    .....v....w.....
+    .....D..f.z.....
+    ....QYM0F1Y.....
+    ..Q2Ge....e.....
+    .....QQQQQQ.....
+  19: |
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ......Β.........
+    .....{K.........
+    .....+νÉ........
+    .....*..........
+    .....+..........
+    .....r..........
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+    ................
+tests:
+- name: quiet after load
+  settle: 0
+  steps:
+  - wave: {r3: '0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', r2: '0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', r1: '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', r0: '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', f1: '0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', f0: '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111'}
+- name: sqrt of 0
+  steps:
+  - {wait: 4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 1
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 2
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 3
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 4
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 5
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 6
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 7
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 8
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 9
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 10
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 11
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 12
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 13
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 14
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 15
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 16
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 17
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 18
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 19
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 20
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 21
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 22
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 23
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 24
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 25
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 26
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 27
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 28
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 29
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 30
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 31
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 32
+  steps:
+  - {wait: 4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 33
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 34
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 35
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 36
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 37
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 38
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 39
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 40
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 41
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 42
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 43
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 44
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 45
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 46
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 47
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 48
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 49
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 50
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 51
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 52
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 53
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 54
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 55
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 56
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 57
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 58
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 59
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 60
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 61
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 62
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 63
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 64
+  steps:
+  - {wait: 4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 65
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 66
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 67
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 68
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 69
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 70
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 71
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 72
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 73
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 74
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 75
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 76
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 77
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 78
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 79
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 80
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 81
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 82
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 83
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 84
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 85
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 86
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 87
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 88
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 89
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 90
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 91
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 92
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 93
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 94
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 95
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 96
+  steps:
+  - {wait: 4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 97
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 98
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 99
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 100
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 101
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 102
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 103
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 104
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 105
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 106
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 107
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 108
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 109
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 110
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 111
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 112
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 113
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 114
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 115
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 116
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 117
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 118
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 119
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 120
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 121
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 122
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 123
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 124
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 125
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 126
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 127
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 128
+  steps:
+  - {wait: 4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 129
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 130
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 131
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 132
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 133
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 134
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 135
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 136
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 137
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 138
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 139
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 140
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 141
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 142
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 143
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 144
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 145
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 146
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 147
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 148
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 149
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 150
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 151
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 152
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 153
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 154
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 155
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 156
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 157
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 158
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 159
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 160
+  steps:
+  - {wait: 4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 161
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 162
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 163
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 164
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 165
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 166
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 167
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 168
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 169
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 170
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 171
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 172
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 173
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 174
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 175
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 176
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 177
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 178
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 179
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 180
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 181
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 182
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 183
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 184
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 185
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 186
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 187
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 188
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 189
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 190
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 191
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 192
+  steps:
+  - {wait: 4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 193
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 194
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 195
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 196
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 197
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 198
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 199
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 200
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 201
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 202
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 203
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: sqrt of 204
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 205
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 206
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 207
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 208
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 209
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 210
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 1}}
+- name: sqrt of 211
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 212
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 213
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 214
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 215
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 216
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 217
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 0}}
+- name: sqrt of 218
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 219
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 220
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 221
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 222
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 223
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 224
+  steps:
+  - {wait: 4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: sqrt of 225
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 226
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 227
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 228
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 229
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 230
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 231
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 232
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 0}}
+- name: sqrt of 233
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 234
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 235
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 236
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 237
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 238
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 239
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 240
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: sqrt of 241
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 242
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 243
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 244
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 245
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 246
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 247
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 248
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 0}}
+- name: sqrt of 249
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 250
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 251
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 252
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 253
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 254
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: sqrt of 255
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: timeline 31
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - wave: {r3: '0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', r2: '0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011111111111111111111', r1: '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110000000000000000', r0: '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', f1: '0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011111111111111111111', f0: '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110000000000000000'}
+- name: 177 then 178 back to back
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+  - {wait: 450}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+  - {wait: 450}
+- name: 176, 177, 178 back to back gives a wrong third answer
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+  - {wait: 450}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+  - {wait: 450}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 150}
+  - {expect: {r3: 1, r2: 1, r1: 1, r0: 0, f1: 0, f0: 0}}
+  - {wait: 450}
+- name: arm off before the press corrupts the result
+  steps:
+  - {wait: 4}
+  - {use: arm}
+  - {wait: 20}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 300}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: arm off 50 after the press corrupts the result
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 50}
+  - {use: arm}
+  - {wait: 300}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: input 15 keeps the clock torch switching
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 2000}
+  - wave: {clk: '110000000111111111111100000001111111111111000000011111111111'}
+- name: input 31 halts
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 700}
+  - wave: {clk: '111111111111111111111111111111111111111111111111111111111111'}
+- name: release b7 8 after press
+  steps:
+  - {wait: 4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 8}
+  - {use: b7}
+  - {wait: 200}
+  - {expect: {r3: 1, r2: 0, r1: 1, r0: 1, f1: 0, f0: 1}}
+- name: release b7 7 after press
+  steps:
+  - {wait: 4}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 7}
+  - {use: b7}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 1, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: release b6 10 after press
+  steps:
+  - {wait: 4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 10}
+  - {use: b6}
+  - {wait: 200}
+  - {expect: {r3: 1, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: release b6 9 after press
+  steps:
+  - {wait: 4}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 9}
+  - {use: b6}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: release b5 28 after press
+  steps:
+  - {wait: 4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 28}
+  - {use: b5}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 1, f1: 1, f0: 0}}
+- name: release b5 27 after press
+  steps:
+  - {wait: 4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 27}
+  - {use: b5}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 1, f1: 1, f0: 1}}
+- name: release b4 30 after press
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 30}
+  - {use: b4}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 1, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: release b4 29 after press
+  steps:
+  - {wait: 4}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 29}
+  - {use: b4}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: release b3 48 after press
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 48}
+  - {use: b3}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 1, f0: 1}}
+- name: release b3 47 after press
+  steps:
+  - {wait: 4}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 47}
+  - {use: b3}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 1, f1: 1, f0: 1}}
+- name: release b2 50 after press
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 50}
+  - {use: b2}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 1, r0: 0, f1: 0, f0: 0}}
+- name: release b2 49 after press
+  steps:
+  - {wait: 4}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 49}
+  - {use: b2}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}
+- name: release b1 68 after press
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 68}
+  - {use: b1}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 1, f1: 0, f0: 1}}
+- name: release b1 67 after press
+  steps:
+  - {wait: 4}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 67}
+  - {use: b1}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 0, f1: 1, f0: 1}}
+- name: release b0 70 after press
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 70}
+  - {use: b0}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 1, f1: 0, f0: 0}}
+- name: release b0 69 after press
+  steps:
+  - {wait: 4}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 69}
+  - {use: b0}
+  - {wait: 200}
+  - {expect: {r3: 0, r2: 0, r1: 0, r0: 0, f1: 0, f0: 0}}

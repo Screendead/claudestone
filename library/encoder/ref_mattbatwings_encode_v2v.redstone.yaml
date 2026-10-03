@@ -1,0 +1,459 @@
+name: ref_mattbatwings_encode_v2v
+description: 'mattbatwings'' Encoder (vertical to vertical) (Logical Redstone Archive ENCODE001, discord.com/channels/1361854816837435433/1472426008194846741; README: programmable and expandable, 4b one-hot
+  in, 4b encoding out, 2 ticks). Four stacked layers (y=2,4,6,8), 6x10x13. Each input lever''s dust column runs to one row (z=9,6,5,2 for the levers at y=2,4,6,8) and climbs a dust-on-glass staircase through
+  every layer; in each layer a repeater taps the row into that layer''s output bus (x=0 dust, ending at a lamp). Dust on wool powers the wool beneath, which feeds the tap repeater, so every input reaches
+  every layer. The code is the set of tap repeaters present. MEASURED in 26.3: the archive schematic as shipped has all 16 taps and lights all four lamps for any single input (1111), a blank template, not
+  a particular code. Changed: 11 taps removed here (air) to program the codes lv2=0001, lv4=0010, lv6=0011, lv8=0100 (o2 low bit, o8 high bit); test reprogram_all_taps puts them back with setblock and measures
+  1111 again, which proves the taps are the program. The input lamps under the levers are white concrete (the harness cannot flip a lever on a lamp); levers are flipped by steps (use). Inputs are one-hot
+  by claim, so multi-input rows are not tested. MEASURED: rise 4 gt (two repeaters, 2 redstone ticks, matching the README), fall 8 gt (4 more for the lamp off delay).'
+palette:
+  .: air
+  A: red_wool
+  B: red_stained_glass
+  C: redstone_wire[east=up,north=none,south=none,west=side]
+  D: redstone_wire[east=side,north=none,south=none,west=up]
+  E: repeater[delay=1,facing=east]
+  F: redstone_wire[east=none,north=side,south=side,west=none]
+  G: redstone_wire[east=none,north=up,south=none,west=side]
+  H: redstone_wire[east=side,north=side,south=side,west=none]
+  I: redstone_wire[east=side,north=up,south=none,west=side]
+  J: redstone_wire[east=side,north=side,south=none,west=none]
+  M: redstone_wire[east=none,north=none,south=side,west=up]
+  N: redstone_wire[east=up,north=none,south=side,west=none]
+  O: redstone_wire[east=side,north=none,south=side,west=up]
+  P: redstone_wire[east=side,north=none,south=up,west=side]
+  Q: redstone_wire[east=none,north=none,south=up,west=side]
+  T: redstone_wire[east=up,north=side,south=none,west=none]
+  U: redstone_wire[east=side,north=side,south=none,west=up]
+  V: redstone_wire[east=none,north=side,south=none,west=up]
+  W: white_concrete
+  '0':
+    output: o2
+    block: redstone_lamp
+  a:
+    name: lv2
+    block: lever[face=wall,facing=south]
+  '1':
+    output: o4
+    block: redstone_lamp
+  b:
+    name: lv4
+    block: lever[face=wall,facing=south]
+  '2':
+    output: o6
+    block: redstone_lamp
+  c:
+    name: lv6
+    block: lever[face=wall,facing=south]
+  '3':
+    output: o8
+    block: redstone_lamp
+  d:
+    name: lv8
+    block: lever[face=wall,facing=south]
+layers:
+  0: '......
+
+    ......
+
+    ......
+
+    ..A...
+
+    ......
+
+    ...A..
+
+    ......
+
+    ..A...
+
+    ......
+
+    ...AA.
+
+    ......
+
+    ......
+
+    ......
+
+    '
+  1: '......
+
+    A.....
+
+    A.B...
+
+    A.CA..
+
+    A.....
+
+    AAAD..
+
+    A.B...
+
+    A.CA..
+
+    A.....
+
+    AAADEA
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  2: '0.....
+
+    F.....
+
+    FA.A..
+
+    F..G..
+
+    F.A...
+
+    HEI...
+
+    FA.AA.
+
+    F..G..
+
+    F.A...
+
+    JEI..F
+
+    .....F
+
+    .....W
+
+    .....a
+
+    '
+  3: '......
+
+    A.....
+
+    AAAM..
+
+    A.....
+
+    A.NA..
+
+    A.B...
+
+    AAAOEA
+
+    A....A
+
+    A.NA.A
+
+    A.B..A
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  4: '1.....
+
+    F.....
+
+    H.P...
+
+    F.A...
+
+    F..Q..
+
+    FAEAA.
+
+    HEP..F
+
+    F.A..F
+
+    F..Q.F
+
+    FA.A.F
+
+    .....F
+
+    .....W
+
+    .....b
+
+    '
+  5: '......
+
+    A.....
+
+    A.B...
+
+    A.TA..
+
+    A.....
+
+    AAAUEA
+
+    A.B..A
+
+    A.TA.A
+
+    A....A
+
+    AAAV.A
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  6: '2.....
+
+    F.....
+
+    FAEAA.
+
+    F..G..
+
+    F.A...
+
+    H.I..F
+
+    FA.A.F
+
+    F..G.F
+
+    F.A..F
+
+    J.I..F
+
+    .....F
+
+    .....W
+
+    .....c
+
+    '
+  7: '......
+
+    A.....
+
+    AAAOEA
+
+    A....A
+
+    A.NA.A
+
+    A.B..A
+
+    AAAM.A
+
+    A....A
+
+    A.NA.A
+
+    A.B..A
+
+    .....A
+
+    ......
+
+    ......
+
+    '
+  8: '3.....
+
+    F.....
+
+    H.P..F
+
+    F.A..F
+
+    F..Q.F
+
+    FA.A.F
+
+    H.P..F
+
+    F.A..F
+
+    F..Q.F
+
+    FA.A.F
+
+    .....F
+
+    .....W
+
+    .....d
+
+    '
+  9: '......
+
+    ......
+
+    ......
+
+    ..F...
+
+    ......
+
+    ...F..
+
+    ......
+
+    ..F...
+
+    ......
+
+    ...F..
+
+    ......
+
+    ......
+
+    ......
+
+    '
+tests:
+- name: none
+  settle: 30
+  steps:
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 0
+      o8: 0
+- name: lv2
+  settle: 30
+  steps:
+  - use: lv2
+  - wait: 10
+  - expect:
+      o2: 1
+      o4: 0
+      o6: 0
+      o8: 0
+  - use: lv2
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 0
+      o8: 0
+- name: lv4
+  settle: 30
+  steps:
+  - use: lv4
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 1
+      o6: 0
+      o8: 0
+  - use: lv4
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 0
+      o8: 0
+- name: lv6
+  settle: 30
+  steps:
+  - use: lv6
+  - wait: 10
+  - expect:
+      o2: 1
+      o4: 1
+      o6: 0
+      o8: 0
+  - use: lv6
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 0
+      o8: 0
+- name: lv8
+  settle: 30
+  steps:
+  - use: lv8
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 1
+      o8: 0
+  - use: lv8
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 0
+      o8: 0
+- name: timing_rise_lv4
+  settle: 30
+  steps:
+  - use: lv4
+  - wave:
+      o4: '0000111'
+- name: timing_fall_lv4
+  settle: 30
+  steps:
+  - use: lv4
+  - wait: 10
+  - use: lv4
+  - wave:
+      o4: '1111111100'
+- name: timing_lv6_both_bits
+  settle: 30
+  steps:
+  - use: lv6
+  - wave:
+      o2: '0000111'
+      o4: '0000111'
+- name: reprogram_all_taps
+  settle: 30
+  steps:
+  - run: setblock ~2 ~4 ~9 repeater[delay=1,facing=east]
+  - run: setblock ~1 ~6 ~9 repeater[delay=1,facing=east]
+  - run: setblock ~2 ~8 ~9 repeater[delay=1,facing=east]
+  - run: setblock ~2 ~2 ~6 repeater[delay=1,facing=east]
+  - run: setblock ~2 ~6 ~6 repeater[delay=1,facing=east]
+  - run: setblock ~1 ~8 ~6 repeater[delay=1,facing=east]
+  - run: setblock ~1 ~6 ~5 repeater[delay=1,facing=east]
+  - run: setblock ~2 ~8 ~5 repeater[delay=1,facing=east]
+  - run: setblock ~2 ~2 ~2 repeater[delay=1,facing=east]
+  - run: setblock ~1 ~4 ~2 repeater[delay=1,facing=east]
+  - run: setblock ~1 ~8 ~2 repeater[delay=1,facing=east]
+  - wait: 10
+  - use: lv2
+  - wait: 10
+  - expect:
+      o2: 1
+      o4: 1
+      o6: 1
+      o8: 1
+  - use: lv2
+  - wait: 10
+  - expect:
+      o2: 0
+      o4: 0
+      o6: 0
+      o8: 0
+  - use: lv8
+  - wait: 10
+  - expect:
+      o2: 1
+      o4: 1
+      o6: 1
+      o8: 1

@@ -1,0 +1,141 @@
+name: ref_mattbatwings_three_way_randomizer
+description: >-
+  Source RANDOM003_3_way_Randomizer, mattbatwings' Logical Redstone Archive (Discord
+  https://discord.com/channels/1361854816837435433/1472398275842805895): a button press gives signal
+  strength 1, 2 or 3, a third each (README, SOURCED). 3x3x6. Harness change: the button is placed with setblock and
+  a clone of the dropper (the harness cannot click a button on a dropper with items) and released by hand after 20
+  ticks, as a stone button does. Mechanism (INFERRED, then MEASURED): a pressed button powers the dropper, which fires 4 gt
+  later a random non-empty slot (one item) up into the hopper; the powered dropper hard-powers the hopper,
+  so the item stays there while the button is down. The torch on the dropper turns off, ending the subtract comparator's
+  side input of 15, so the comparator reads the dropper fill: axe + 16 redstone + sign = 3; after the axe leaves 1, the sign
+  2, one redstone still 3 (axe 1/9 slot + 15/64 + 1/16). Rising 4 gt after the press, holding until release, then
+  falling 3 gt after release as the torch relights and the item drops back. 150 presses gave 1/2/3 = 53/40/57 (MEASURED);
+  the test passes if each is at least 25 and the hold never changes.
+traits: [compact, container_based, comparator_based, analog]
+palette:
+  .: air
+  L: {output: l3, block: redstone_lamp}
+  M: {output: l2, block: redstone_lamp}
+  N: {output: l1, block: redstone_lamp}
+  A: white_wool
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: {name: cmp, block: 'comparator[facing=south,mode=subtract]'}
+  D: redstone_wire[east=none,north=none,south=side,west=side]
+  E: {name: dr, block: 'dropper[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_axe",count:1},{Slot:1b,id:"minecraft:redstone",count:16},{Slot:2b,id:"minecraft:oak_sign",count:1}]}'}
+  ): redstone_wall_torch[facing=east]
+  F: {name: btn, block: 'stone_button[face=wall,facing=south]'}
+  G: {name: hop, block: 'hopper[facing=down]'}
+layers:
+  0: |
+    LA.
+    MA.
+    NA.
+    .AA
+    ...
+    ...
+  1: |
+    .B.
+    .B.
+    .B.
+    .CD
+    .E)
+    .F.
+  2: |
+    ...
+    ...
+    ...
+    ...
+    .G.
+    ...
+tests:
+- name: quiet until pressed
+  settle: 0
+  steps:
+  - wave: {l1: '0000000000', l2: '0000000000', l3: '0000000000'}
+- name: press and release timing
+  settle: 20
+  steps:
+  - run: setblock ~1 ~1 ~5 stone_button[face=wall,facing=south,powered=true]
+  - run: clone ~1 ~1 ~4 ~1 ~1 ~4 ~1 ~1 ~4 replace force
+  - wave: {cmp: '00001111111111111111'}
+  - run: setblock ~1 ~1 ~5 stone_button[face=wall,facing=south,powered=false]
+  - run: clone ~1 ~1 ~4 ~1 ~1 ~4 ~1 ~1 ~4 replace force
+  - wave: {cmp: '11100000'}
+- name: strength follows the item left behind
+  steps:
+  - run: setblock ~1 ~1 ~5 stone_button[face=wall,facing=south,powered=true]
+  - run: clone ~1 ~1 ~4 ~1 ~1 ~4 ~1 ~1 ~4 replace force
+  - wait: 6
+  - run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:16},{Slot:1b,id:"minecraft:oak_sign",count:1}]}'
+  - wait: 8
+  - level: {cmp: 1}
+  - expect: {l1: 1, l2: 0, l3: 0}
+  - run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:wooden_axe",count:1},{Slot:1b,id:"minecraft:redstone",count:16}]}'
+  - wait: 8
+  - level: {cmp: 2}
+  - expect: {l1: 1, l2: 1, l3: 0}
+  - run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:wooden_axe",count:1},{Slot:1b,id:"minecraft:redstone",count:15},{Slot:2b,id:"minecraft:oak_sign",count:1}]}'
+  - wait: 8
+  - level: {cmp: 3}
+  - expect: {l1: 1, l2: 1, l3: 1}
+  - run: 'data merge block ~1 ~1 ~4 {Items:[{Slot:0b,id:"minecraft:redstone",count:16},{Slot:1b,id:"minecraft:oak_sign",count:1}]}'
+  - wait: 8
+  - level: {cmp: 1}
+  - expect: {l1: 1, l2: 0, l3: 0}
+  - run: setblock ~1 ~1 ~5 stone_button[face=wall,facing=south,powered=false]
+  - run: clone ~1 ~1 ~4 ~1 ~1 ~4 ~1 ~1 ~4 replace force
+  - wait: 10
+  - expect: {l1: 0, l2: 0, l3: 0}
+- name: press gives 1, 2 or 3 in thirds
+  steps:
+  - run: scoreboard objectives add rz3 dummy
+  - run: scoreboard players set p_n1 rz3 0
+  - run: scoreboard players set p_n2 rz3 0
+  - run: scoreboard players set p_n3 rz3 0
+  - run: scoreboard players set p_bad rz3 0
+  - run: scoreboard players set p_dark rz3 0
+  - run: scoreboard players set p_lost rz3 0
+  - repeat:
+      times: 150
+      steps:
+      - run: setblock ~1 ~1 ~5 stone_button[face=wall,facing=south,powered=true]
+      - run: clone ~1 ~1 ~4 ~1 ~1 ~4 ~1 ~1 ~4 replace force
+      - {wait: 6}
+      - run: scoreboard players set p_o rz3 0
+      - run: execute if block ~0 ~0 ~2 redstone_lamp[lit=true] run scoreboard players set p_o rz3 1
+      - run: execute if block ~0 ~0 ~1 redstone_lamp[lit=true] run scoreboard players set p_o rz3 2
+      - run: execute if block ~0 ~0 ~0 redstone_lamp[lit=true] run scoreboard players set p_o rz3 3
+      - run: scoreboard players operation p_a rz3 = p_o rz3
+      - run: execute if score p_o rz3 matches 1 run scoreboard players add p_n1 rz3 1
+      - run: execute if score p_o rz3 matches 2 run scoreboard players add p_n2 rz3 1
+      - run: execute if score p_o rz3 matches 3 run scoreboard players add p_n3 rz3 1
+      - {wait: 13}
+      - run: scoreboard players set p_o rz3 0
+      - run: execute if block ~0 ~0 ~2 redstone_lamp[lit=true] run scoreboard players set p_o rz3 1
+      - run: execute if block ~0 ~0 ~1 redstone_lamp[lit=true] run scoreboard players set p_o rz3 2
+      - run: execute if block ~0 ~0 ~0 redstone_lamp[lit=true] run scoreboard players set p_o rz3 3
+      - run: execute unless score p_o rz3 = p_a rz3 run scoreboard players add p_bad rz3 1
+      - run: setblock ~1 ~1 ~5 stone_button[face=wall,facing=south,powered=false]
+      - run: clone ~1 ~1 ~4 ~1 ~1 ~4 ~1 ~1 ~4 replace force
+      - {wait: 10}
+      - run: scoreboard players set p_o rz3 0
+      - run: execute if block ~0 ~0 ~2 redstone_lamp[lit=true] run scoreboard players set p_o rz3 1
+      - run: execute if block ~0 ~0 ~1 redstone_lamp[lit=true] run scoreboard players set p_o rz3 2
+      - run: execute if block ~0 ~0 ~0 redstone_lamp[lit=true] run scoreboard players set p_o rz3 3
+      - run: execute unless score p_o rz3 matches 0 run scoreboard players add p_dark rz3 1
+      - run: execute unless data block ~1 ~1 ~4 Items[2] run scoreboard players add p_lost rz3 1
+      - run: execute if data block ~1 ~1 ~4 Items[3] run scoreboard players add p_lost rz3 1
+      - run: execute unless data block ~1 ~1 ~4 Items[{id:"minecraft:wooden_axe"}] run scoreboard players add p_lost rz3 1
+      - run: execute unless data block ~1 ~1 ~4 Items[{id:"minecraft:oak_sign"}] run scoreboard players add p_lost rz3 1
+      - run: execute unless data block ~1 ~1 ~4 Items[{id:"minecraft:redstone",count:16}] run scoreboard players add p_lost rz3 1
+  - log: scoreboard players get p_n1 rz3
+  - log: scoreboard players get p_n2 rz3
+  - log: scoreboard players get p_n3 rz3
+  - check: if score p_bad rz3 matches 0
+  - check: if score p_dark rz3 matches 0
+  - check: if score p_lost rz3 matches 0
+  - check: if score p_n1 rz3 matches 25..
+  - check: if score p_n2 rz3 matches 25..
+  - check: if score p_n3 rz3 matches 25..
+  finally:
+  - scoreboard objectives remove rz3

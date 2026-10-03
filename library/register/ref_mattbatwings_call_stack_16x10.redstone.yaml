@@ -1,0 +1,3469 @@
+name: ref_mattbatwings_call_stack_16x10
+description: 'mattbatwings'' ''16 Layer 10 bit Call Stack'' (QSTACK001 in his Logical Redstone Archive, tagged Tested & Functional, endorsed by mattbatwings; discord.com/channels/1361854816837435433/1472398151980679231), rebuilt block for block from QSTACK001_call_stack.schem (55x24x18, 7280 blocks) with ONE added repeater. README (SOURCED): a call stack of 16 layers of 10 bits, push and pop; inputs a 10 bit data word on levers, a clock button and a push/pop lever; output the 10 bit word at the top of the stack on lamps. Harness changes: the 10 data levers, the push/pop lever and the clock stone button hang on a lamp or wool, which lever emulation cannot drive, so each is a fixture repeater[facing=west] on a fixture stone block with the input cell behind it (the whole build is shifted one block east to make room); the fixture repeater adds 2 game ticks to every input, and a press of the button is drive clk=1, wait, clk=0 (a stone button holds 20 game ticks). Inputs: d0..d9 data (bit i is
+  the lever at y=5+2i), pp push/pop (1 = push, 0 = pop; the lever at y=1), clk (the button at y=3). Outputs: q0..q9, the lamps at (6, 5+2i, 10); the top of the stack is read from layer 0. BUILD CHANGE (MEASURED): as saved in the .schem, the pop control line (dust at y=3, z=12 in the schematic, fed by the repeater at x=6) has no regenerating repeater, so its pulse decays from 15 at x=8 to 0 at x=23 and never reaches layers 5 and deeper (the push line, y=3 z=5, has repeaters at x=7, 24 and 40; the row of delay-compensating repeaters beside the pop line, Y x5 then K x5 then dust x5, assumes one at x~23 as well). As saved, 16 ones pushed and one pop leave only layers 0-4 set, and 8 distinct words pushed then popped read right for 5 pops and 0 on the 6th. Replacing the dust at schematic (23,3,12) (x=24 here) with repeater[delay=1,facing=west], the same piece the push line has at x=24, makes all 16 layers pop right; every test below needs it. Whether the original author''s world had this repeater
+  is not known. Layout (INFERRED from traces, then checked by the tests): a layer is 3 blocks wide in x (layer k at schematic x=7+3k, here +1) and a bit is a 2-block slice in y. In each slice row z=8 carries the push copy east: a subtract comparator reads the previous layer''s storage dust and a repeater (locked by a side repeater except during a push) writes this layer''s dust; row z=9 carries the pop copy west: a subtract comparator reads this layer''s dust and a repeater (locked by a south repeater except during a pop) writes the previous layer''s dust. Storage is the locked repeaters; the dust node between them is read by the next layer. A press makes a 4 game tick pulse (comparator edge detector under the button), which runs along two decaying dust lines at y=3 (push z=5, pop z=12) and is tapped at each layer through repeaters of delay 2, 1 then 0 (layers 0-5, 6-10, 11-15) that cancel the 2 game ticks each regenerating repeater adds, so every layer acts in the same tick; torches and
+  glass/wool zigzag columns carry the pulse up the 10 slices. Output: layer 0''s storage reads out through a target block and a repeater to the lamp. MEASURED (tests): push 16 distinct words (all 10 walking ones and six dense patterns), each read at the top, then pop 15 times and read each older word, then a 16th pop reads 0; a 17th push onto a full stack drops the oldest word and the other 16 pop right; popping an empty stack reads 0 and the stack works afterwards; data, push/pop and the clock can change in the same tick (no setup time); a clock held 150 game ticks shifts once (edge triggered); a 4 game tick press works, 2 does nothing; pushes every 24 game ticks work, every 20 do not; pops every 16 work (the test uses 20). Latency from the clock input (fixture repeater included): the new top word''s bits rise 24 game ticks after the press and the old word''s bits fall 28, so the lamps show both words for 4 game ticks (22 and 26 from a button, INFERRED by subtracting the fixture). Push
+  and pop take the same time. The README gives no speed.'
+palette:
+  .: air
+  A: green_wool
+  B: redstone_wire[east=up,north=none,south=side,west=none]
+  C: redstone_wire[east=none,north=side,south=side,west=none]
+  D: lever[face=wall,facing=west]
+  L: redstone_lamp
+  E: redstone_wire[east=up,north=side,south=none,west=none]
+  F: redstone_wire[east=side,north=none,south=none,west=side]
+  G: repeater[delay=1,facing=west]
+  H: redstone_wire[east=side,north=none,south=side,west=side]
+  I: redstone_wire[east=none,north=none,south=side,west=side]
+  J: redstone_wire[east=side,north=side,south=side,west=side]
+  K: repeater[delay=1,facing=north]
+  M: repeater[delay=1,facing=south]
+  ): redstone_wall_torch[facing=east]
+  N: redstone_wire[east=side,north=side,south=none,west=side]
+  O: redstone_wire[east=none,north=side,south=none,west=side]
+  '*': redstone_torch
+  P: repeater[delay=2,facing=south]
+  Q: redstone_wire[east=side,north=none,south=side,west=none]
+  T: stone_button[face=wall,facing=west]
+  U: comparator[facing=west,mode=subtract]
+  V: redstone_wire[east=none,north=side,south=side,west=side]
+  W: repeater[delay=2,facing=west]
+  X: redstone_wire[east=side,north=side,south=none,west=none]
+  Y: repeater[delay=2,facing=north]
+  Z: green_stained_glass
+  b: redstone_wire[east=side,north=side,south=side,west=none]
+  c: repeater[delay=1,facing=east]
+  d: comparator[facing=east,mode=subtract]
+  e: target
+  u: redstone_wall_torch[facing=south]
+  n: redstone_wall_torch[facing=north]
+  f: redstone_wire[east=none,north=up,south=side,west=none]
+  g: redstone_wire[east=none,north=side,south=up,west=none]
+  r:
+    block: repeater[delay=1,facing=west]
+    fixture: true
+  s:
+    block: stone
+    fixture: true
+  p:
+    input: pp
+  k:
+    input: clk
+  '0':
+    input: d0
+  a:
+    output: q0
+    block: redstone_lamp
+  '1':
+    input: d1
+  h:
+    output: q1
+    block: redstone_lamp
+  '2':
+    input: d2
+  i:
+    output: q2
+    block: redstone_lamp
+  '3':
+    input: d3
+  j:
+    output: q3
+    block: redstone_lamp
+  '4':
+    input: d4
+  l:
+    output: q4
+    block: redstone_lamp
+  '5':
+    input: d5
+  m:
+    output: q5
+    block: redstone_lamp
+  '6':
+    input: d6
+  o:
+    output: q6
+    block: redstone_lamp
+  '7':
+    input: d7
+  q:
+    output: q7
+    block: redstone_lamp
+  '8':
+    input: d8
+  t:
+    output: q8
+    block: redstone_lamp
+  '9':
+    input: d9
+  v:
+    output: q9
+    block: redstone_lamp
+layers:
+  0: |
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    .s.A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+    ...A....................................................
+  1: |
+    ...BAAAA.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..
+    ...C....A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    prLC....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C....................................................
+    ...C........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ...EAAAA..AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.
+  2: |
+    ....FFFGAFFHFFHFFHFFHFFHGFHFFHFFHFFHFFHFGHFFHFFHFFHFFI..
+    ........J..C..C..C..C..K..C..C..C..C..C..C..C..C..C..C..
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ........................................................
+    .........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ......AAA.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.
+    ......A.................................................
+    ......A.................................................
+    .s.AAAA.................................................
+    ..AAA.A.................................................
+    ......A.................................................
+    ......A.................................................
+    ......AA.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..
+    ...........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ........................................................
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ............C..C..C..C..M..C..C..C..C..C..C..C..C..C..C.
+    ....FFFFA)FFNFFNFFNFFNFFNGFNFFNFFNFFNFFNFGNFFNFFNFFNFFO.
+  3: |
+    ........................................................
+    ........................................................
+    ........*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..
+    .........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    .........P..P..P..P..P..P..M..M..M..M..M..C..C..C..C..C.
+    ......QFGAFFNFFNFFNFFNFFNGFNFFNFFNFFNFFNFGNFFNFFNFFNFFO.
+    ......C.................................................
+    ......C.................................................
+    krAFUFV.................................................
+    ..FWO.C.................................................
+    ......C.................................................
+    ......C.................................................
+    ......XGAFFHFFHFFHFFHFFHGFHFFHFFHFFHFFHFGHFFHFFHFFHFFI..
+    ...........Y..Y..Y..Y..Y..K..K..K..K..K..C..C..C..C..C..
+    ...........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ............*..*..*..*..*..*..*..*..*..*..*..*..*..*..*.
+    ........................................................
+    ........................................................
+  4: |
+    ........................................................
+    ........................................................
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    .........*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*.
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........................................................
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ........................................................
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ........................................................
+    ...........*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ........................................................
+    ........................................................
+  5: |
+    ........................................................
+    ........................................................
+    ........*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..
+    .........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ........K..K..K..K..K..K..K..K..K..K..K..K..K..K..K..K..
+    ........AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....0rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......aFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ............M..M..M..M..M..M..M..M..M..M..M..M..M..M..M.
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ...........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ............*..*..*..*..*..*..*..*..*..*..*..*..*..*..*.
+    ........................................................
+    ........................................................
+  6: |
+    ........................................................
+    ........................................................
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    .........*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*.
+    ........JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.JA.
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    .........J..J..J..J..J..J..J..J..J..J..J..J..J..J..J..J.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........J..J..J..J..J..J..J..J..J..J..J..J..J..J..J..
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ...........AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.AJ.
+    ...........*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ........................................................
+    ........................................................
+  7: |
+    ........................................................
+    ........................................................
+    ........J..J..J..J..J..J..J..J..J..J..J..J..J..J..J..J..
+    ........AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ........uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.uK.
+    ........KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.KA.
+    ........Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.Au.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....1rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......hFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........nA.nA.nA.nA.nA.nA.nA.nA.nA.nA.nA.nA.nA.nA.nA.
+    ...........AM.AM.AM.AM.AM.AM.AM.AM.AM.AM.AM.AM.AM.AM.AM.
+    ...........Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.Mn.
+    ...........AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ............J..J..J..J..J..J..J..J..J..J..J..J..J..J..J.
+    ........................................................
+    ........................................................
+  8: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........................................................
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ........................................................
+    ........AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ........................................................
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ........................................................
+    ........................................................
+    ........................................................
+    ........................................................
+  9: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....2rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......iFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  10: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  11: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....3rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......jFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  12: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  13: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....4rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......lFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  14: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  15: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....5rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......mFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  16: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  17: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....6rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......oFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  18: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  19: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....7rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......qFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  20: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  21: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    ........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.Kf.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....8rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......tFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.gM.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ............g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ........................................................
+    ........................................................
+    ........................................................
+  22: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..
+    ........Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..
+    .........g..g..g..g..g..g..g..g..g..g..g..g..g..g..g..g.
+    ........AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.AZ.
+    ........AAAAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    .....s.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ..........AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    .......AAA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.AA.
+    ...........ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.ZA.
+    ...........f..f..f..f..f..f..f..f..f..f..f..f..f..f..f..
+    ............Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z..Z.
+    ............f..f..f..f..f..f..f..f..f..f..f..f..f..f..f.
+    ........................................................
+    ........................................................
+    ........................................................
+  23: |
+    ........................................................
+    ........................................................
+    ........................................................
+    ........................................................
+    ........C..C..C..C..C..C..C..C..C..C..C..C..C..C..C..C..
+    ........A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..A..
+    ........KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.KC.
+    ........CKMCK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.CK.
+    ....9rLFUGJUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGHUGI
+    ..........bcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdNcdO
+    ......vFFceMC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.MC.
+    ...........CM.CM.CM.CM.CM.CM.CM.CM.CM.CM.CM.CM.CM.CM.CM.
+    ............A..A..A..A..A..A..A..A..A..A..A..A..A..A..A.
+    ............C..C..C..C..C..C..C..C..C..C..C..C..C..C..C.
+    ........................................................
+    ........................................................
+    ........................................................
+    ........................................................
+tests:
+- name: push 16 values then pop them all
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 1
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 1
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 1
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 1
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 1
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 1
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 1
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: 17th push drops the oldest
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 1
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 1
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 1
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 1
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 1
+      d7: 1
+      d8: 1
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 1
+      d8: 1
+      d9: 1
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+      q8: 1
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 1
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 1
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: pop on empty reads zero and the stack still works
+  steps:
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: data, push/pop and clock in the same tick
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: a held clock shifts once
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 150
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: pushes every 24 game ticks
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 20
+  - wait: 80
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: pops every 20 game ticks
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 1
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wait: 4
+  - drive:
+      clk: 0
+  - wait: 16
+  - wait: 80
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+- name: latency from the clock input
+  steps:
+  - drive:
+      pp: 1
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+      d8: 0
+      d9: 0
+  - wait: 6
+  - drive:
+      clk: 1
+  - wait: 20
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      d0: 0
+      d1: 1
+      pp: 1
+  - drive:
+      clk: 1
+  - wave:
+      q0: '1111111111111111111111111111000000000000'
+      q1: '0000000000000000000000001111111111111111'
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+  - drive:
+      pp: 0
+  - drive:
+      clk: 1
+  - wave:
+      q1: '1111111111111111111111111111000000000000'
+      q0: '0000000000000000000000001111111111111111'
+  - drive:
+      clk: 0
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+      q8: 0
+      q9: 0
+traits:
+- pistonless
+- entityless
+- silent
+- comparator_based
+- torch_based
+- reset_safe

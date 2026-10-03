@@ -161,8 +161,9 @@ one lost divider design comes with "no guarantees that it works properly" [I].
 
 ### Lessons for us: what the builds taught
 
-We rebuilt archive entries as `ref_<author>_<design>` specs and ran them on 26.3. Every spec below passes
-its tests [M]. Sizes are x×y×z; delays are game ticks (gt). Archive "ticks" are redstone ticks (2 gt) on the
+We rebuilt archive entries as `ref_<author>_<design>` specs and ran them on 26.3. Every spec in items 1-21
+passes its tests [M]; in the second batch (after item 21) a spec marked *partial* passes only the tests that
+pin what it really does, and the README claim it misses is named. Sizes are x×y×z; delays are game ticks (gt). Archive "ticks" are redstone ticks (2 gt) on the
 combinational parts we checked: classic crosswire "1" is 2 gt, the carry-cancel adder's "6" is 12 gt, the
 encoder's "1t" pulse is 2 gt [M]. Three figures did not match in either unit: `ref_antekcookie_cmp8` (8 rt,
 worst measured delay 18 gt), `ref_indy_serial_8b` (2RT, shortest working pulse 12 gt) and
@@ -280,8 +281,112 @@ magnitude comparator and redcoder, now have ref specs.
     Presses need at least 3 gt high and an 8 gt period with repeater drivers; the "2t" claim was not
     reproduced [M]. Library had only serial-in shift registers.
 
+### Second batch: the rest of the archive
+
+104 more entries were rebuilt: 92 pass, 11 are partial, 1 failed (REDCODE001, removed). 49 more were
+read without running ("analysed" table at the end). Delays are measured from the input change [M] and
+include any fixture repeater (2 gt) a rebuild needed; "net" removes it. Mechanisms are [I] unless marked.
+A lamp output adds 4 gt to every fall (`lamp_off_delay_4_ticks` in `docs/MECHANICS.md`). Several archive
+schematics are blank templates (every tap placed); for those the [M] result is of a code the rebuilder
+chose, not one the archive shipped.
+
+**Analog arithmetic and conversion.**
+
+| Technique | How | Proving spec, size, delay | Library before |
+|---|---|---|---|
+| One-way dust staircase as a carry/OR bus | Dust stepping up over a transparent step reads only the dust below, so stage k sees the OR of lower stages; a repeater per stage restores 15 | `full_adder/ref_aminotreal_incrementor_4bit` 4×10×8, rise 6 every bit; `_decrementor_4bit` 6×9×4, rise 4; `_negator` 4×10×7, 4 gt; `encoder/ref_librok_vertical_priority_15` 4×16×4, rise 4, 15 levels end at strength 1 [M] | mechanic `dust_transparent_step_one_way`; not used as a bus |
+| XOR from two subtract comparators on one OR rear | rear = a OR b, sides a and b, outputs merged on one dust | incrementor, negator [M, levels read from trace] | comparator XORs in `xor/`; not this form |
+| Constant-1 barrel rear makes a comparator a NOR of its sides | rear 1 minus max(sides) | `seven_segment/ref_nano_passthrough_display`; emptying one such barrel fails a sweep [M] | `nor/or_nor_comparator` (different) |
+| Side held at 14 as a 15-only valve | subtract comparator passes 1 only when its rear is 15; joins two ports one-way | same spec, trace T=1, V=14 [M] | no |
+| Popcount by saturating subtract chains | one chain subtracts from 15 down to 8, a second counts up from 0, a final subtract joins them | `signal_strength/ref_mattbatwings_unary_counter_15` 32×2×10, 14 gt net; `_8` 7×2×17, 8 gt for every pattern [M] | no |
+| Dust-only signum | nonzero = wired OR of dust staircases; sign = fan-out | `full_adder/ref_walvischris_signum_5bit` 11×10×3, `magnitude_comparator/ref_mattbatwings_signum_8bit` 5×16×5, both 0 gt to the dust [M] | no |
+| Absolute value | sign-gated invert enable carried as a decaying dust ladder (15..1); or barrel constants | `full_adder/ref_walvischris_abs8` 13×19×7, settles 12 gt with a 10 gt out7 glitch on 0x40→0xC0; `ref_llucas_abs8_3t` 9×18×9, 8/12 gt [M] | no |
+| Accumulator, sum latched on one pulse | carry settles before the latch, all bits change together | `accumulator/ref_mattbatwings_accumulator_8bit` 11×18×9, rise +8 / fall +12 on every bit, 255+1 included [M] | no |
+| Hex digit as a strength, decoded by decay windows | repeater pairs k apart on one decaying line feed a subtract comparator: on for k input values; bit j uses windows of 2^j | `signal_strength/ref_mattbatwings_hex_to_bin` 5×9×17, 6 gt (*partial*: stale dust on dsat1-3) [M]; `ref_aminotreal_hex_to_binary` 9×4×18, 6 gt, ORs detectors by joining dusts [M] | `analog_decoder` (one-hot only) |
+| Remainder pass, one bit per stage | compare against barrel constants 8, 4, 2; a repeater-driven 15 side blocks the subtract path | `signal_strength/ref_librok_stackable_vertical_hex_to_binary` 6×9×5, +4 gt per stage, worst 34 [M] | no |
+| Binary to strength | 15 torches as a thermometer on one dust line; or gated barrel constants plus one subtract | `ref_mattbatwings_bin_to_hex_targets` 13×7×16, 4 gt (`_stack` 7×11×17 *partial*: one dsat process); `ref_powsi_small_bin_to_hex` 5×6×6, 6 gt; `ref_librok_vertical_binary_to_hex` 4×9×5, ≤12 gt [M] | `analog_dac` |
+| Decimal digits as strengths | strength per digit, halved or doubled per bit stage with barrel constants | `bcd/ref_xoliks_bin_to_dec_8bit` 7×18×15, ≤42 gt; `ref_xoliks_dectobin_converter` 25×18×14, ≤46 gt; fractional versions round the last place up on 16 and 248 inputs [M] | no |
+| Double dabble | unclocked add-3 network, or one add-3 stage reused 8 times with levers read 6 gt apart | `bcd/ref_mattbatwings_comb_bin_to_bcd8` 19×19×48, ≤38 gt; `bin_to_bcd/ref_mattbatwings_seq_bin_to_bcd8` 34×12×33, 60 gt for every input [M] | no |
+| Counting sort | per threshold k, count inputs ≥ k; output j = number of k whose count > j | `sorter/ref_oscar91_counting_sorter` 50×30×24, rise 20 / fall 24 for any vector [M] | no |
+| Tristate input by strength | 15 = 1, 14 = don't care, 0 = 0 on one dust line | `binary_decoder/ref_llucas_tristate_decoder_2t` 7×8×20, rise 4 / fall 8 [M] | no |
+| Gray-coded windows to 16 segments | each segment is a union of strength intervals, so a step of 1 flips one segment | `seven_segment/ref_mixel_16seg_display` 14×10×11, 18-24 gt from insert [M] | no |
+| Comparator diode bus | dust, wool, compare comparator, wool repeated: strength unchanged, 2 gt per hop, one-way | `register/ref_zebronic_register_file_7x32_dual_read` [M, trace] | no |
+
+**Adders, ALUs, shifters, square roots.**
+
+| Technique | Proving spec, size, delay | Library before |
+|---|---|---|
+| Stacked carry-cancel adders (2 layers per bit, staircase bus, container constants) | `full_adder/ref_fearless_z_cca_8bit_3t` 8×18×6, sum rise 6 (mutants: one barrel or the cake removed fail); `ref_don_cca_8bit_3t` 8×19×6, 6; `ref_fearless_z_cca_8bit_3t5hz` 8×19×9, 6; `ref_mixel_cca_10bit_3t` 9×24×8, 6; `ref_mattbatwings_cca_8bit_add007` 15×19×4, 10 at the dust [M] | item 2 above |
+| Carry look-everywhere | `ref_mixel_cle_adder_8bit_3t` 20×19×8, rise 6; `ref_kuggo_cle_adder_8bit` 11×21×20, sums 14, cout 6 [M] | no |
+| Piston-pulled corner block as carry skip | `ref_q2ck_ica_8bit` 13×7×20, rise 8 any carry length; removing bit 3's piston fails all tests [M] | `add_full_piston_instant` |
+| Hex-digit carry-cancel | `ref_louparmi_hex_cca_5t` 9×18×8, 10 gt (*partial*: upper nibbles give A+B+1, the schematic's own saved state too); `ref_louparmi_hex_cca_16nibbles` (*partial*: second operand not found) [M] | no |
+| Plain ripple full adder | `ref_mattbatwings_rca_dust_torch` 12×4×6, worst 10 [M] | `full_adder/` |
+| ALU from one adder plus control rows (an OR-plane of op levers; no op selected = ADD) | `alu/ref_mattbatwings_alu_cca_8bit` 33×21×22, 11 ops, operand ≤22 gt, op change ≤32 gt; `ref_flyingdean_alu_8bit_4rt` 10×18×9, sum 8 gt net, Cout 10 (add) and 16 (subtract) net [M] | `cpu_alu`, `cpu_alu_compact` |
+| Barrel shifter, same latency for every shift | `barrel_shifter/ref_llucas_dorito_rsh8`, `_lsh8` 6×24×17, value 4 gt net, shift 6 gt net [M] | no |
+| Square root: flat PLA | `sqrt/ref_mixel_sqrt8_4t` 19×28×11, 8 gt; `ref_mattbatwings_sqrt8_2t` 29×18×17, 4 gt net [M] | no |
+| Square root: sequential | `sqrt/ref_mattbatwings_sqrt8_sequential` 15×20×36, 144 gt for every input, levers read 2 at a time 20 gt apart; `ref_safetyiwisher_sqrt8_seq_71rt` 22×23×15, 136 gt, start pulse ≥16 gt [M] | no |
+
+**Memory, registers, counters.**
+
+| Technique | How | Proving spec, size, delay | Library before |
+|---|---|---|---|
+| Shared lock line over per-bit locked repeaters | one idle-high line climbs the stack; a short drop (item 13 pulse) unlocks every bit for one copy | `register/ref_mattbatwings_register8_lock` 6×18×7, read 8 gt; `ref_odmen_register16` 6×18×12, write 14, read 16 net; `shift_register/ref_mattbatwings_shift_reg_up`/`_down` 5×19×6, 8 gt; `ref_mattbatwings_shift_regs_vertical_load` 8×20×25, 12 gt; `register/ref_mattbatwings_call_stack_16x10` 54×24×18, 24 gt; `randomiser/ref_llucas_lfsr_8bit` 11×17×50 [M] | `shift_pulse_lock`, `shift_reg4_lock`, `dl_lock_stack` |
+| Two copies per bit for a second read port | each copy has its own read gate; no mux | `register/ref_librok_register8_dual_read` 7×19×14, read 12 gt rise [M] | no |
+| Barrel-calibrated thresholds on one decaying tower | barrel signal per bit equals the tower's level there, so one tower opens every lock | `register/ref_mattbatwings_tristate_register` 8×18×4, read 4 gt, write pulse ≥2 gt [M] | no |
+| Pistons lift the non-copying chain | two opposite repeater chains share cells; pistons lift one chain's cells so it clears | `shift_register/ref_mattbatwings_bidir_shift_pistons` 13×11×23, 12 gt; mutants holding a piston column smear 11111111 [M] | no |
+| Analog FIFO, move not copy | comparator rings hold 1..15; the transfer output also cuts the source ring | `signal_strength/ref_samosthesage_hex_fifo` 21×2×33, 2 gt per hop; `_vertical` 40×17×22, falls 4 gt per stage, pops 14 per stage, a 15 is stored twice [M] | item 9 (single loop) |
+| Register file | `register/ref_mattbatwings_register_file_8x8` 20×29×10, read 10 gt, address taken by +3, data until +25 [M]; `ref_zebronic_register_file_7x32_dual_read` 31×26×20, analog nibbles, read 14-28 gt by distance [M] | `cpu_regs_*` |
+| Up/down counter with load | `counter/ref_mattbatwings_counter_updown_load` 19×18×4, 10 gt (the "8-bit" schematic is 6 bits); `ref_tlamp_updown_load_counter` *partial*: carry into bit 6 lost [M] | item 12 |
+| Position-coded decimal counter | count is a strength; a V-shaped dust gradient, abs(z−(9−d)) at row z, plus torches gives one-hot; a one-item dropper/hopper/barrel loop shapes the pulse and limits counts to one per 17 gt; digits stack observer to observer | `seven_segment/ref_maizumagames_stackable_7seg_counter` 4×9×14, lamps by +48; `_x2` carries 00..25 and 99→00 [M] | no |
+| Arbiters and priority | `encoder/ref_rcs33_choose_n_arbiter` 22×6×32, +4 gt per layer, barrels of shovels as thresholds; `ref_rcs33_banking_arbiter` 21×6×31, rise 4, a dust line of length rear−1 as a threshold; `ref_rcs33_cancellable_priority_encoder` 6×6×31, ≤14 gt, two decaying lines race; `ref_mixel_priority_8bit` *partial* (one pattern of 256, one dust short) [M] | item 20 |
+| 32-bit magnitude compare | `magnitude_comparator/ref_antekcookie_hex_cmp32` 5×16×14, ≤24 gt for any digit, eq and lt lit together 16-24 gt [M] | `ref_antekcookie_cmp8` |
+
+**Programmable templates and displays.**
+
+| Technique | Proving spec, size, delay | Library before |
+|---|---|---|
+| Code as present/absent taps: a repeater (encode/decode) or torch per crossing | `encoder/ref_mattbatwings_encode_v2v` 6×10×13, 4 gt; `_v2h` 6×9×11, 2 gt; `_h2h` 10×4×10; `_h2v` 4×9×9, 2 gt; `binary_decoder/ref_mattbatwings_decode_v2v`, `_v2h`, `_h2h_2wide`/`_3wide`, `_h2v`, all rise 4 / fall 8; reprogram tests swap blocks with setblock [M] | fixed decoders only |
+| ROM bit as target vs wool | `seven_segment/ref_rt_rom_display` 15×20×18, 12-16 gt net, image changes as targets are swapped [M] | no |
+| One dust per segment; lamp bleed fills it | `seven_segment/ref_mattbatwings_big_7seg_module` 5×10×2, 0/4 gt; `ref_mattbatwings_small_7seg_module` 5×6×4 [M] | `seg_lamp_3x5` |
+| Dust into a target block lights the lamp behind; torch-on-wool stack for 3-lamp verticals | `ref_mattbatwings_big_7seg_lamps` 5×10×6, 0-8 gt rise [M] | no |
+| One-hot decode then an OR plane per segment, equal depth | `bcd_to_7seg/ref_mattbatwings_fast_bcd_to_7seg` 29×23×5, 14-18 rise; `seven_segment/ref_mattbatwings_fast_hex_to_7seg` 40×23×5, glitch-free [M] | `seg_dec_bcd` |
+| Unsynced decode (segments settle 12-38 gt) | `bcd_to_7seg/ref_mattbatwings_classic_hex_to_7seg`; `_classic_bcd_to_7seg` *partial* [M] | |
+| Lever row on a dust line as a one-hot to strength encoder (highest lever wins) | `seven_segment/ref_aminotreal_hlp_hex_display` 28 gt, `_bcd_display` 22 gt, `_ubcd_display` 12 gt (*partial*, dsat2/3) [M] | no |
+| Pixel matrices | `ref_mattbatwings_basic_pixel_display_8x8` 8×17×16, 6/10 gt, a repeater equalises a pixel's two branches; `ref_mattbatwings_4function_display` 20×25×24, write on button release (30 gt), address as a strength ramp; `ref_nano_passthrough_display` 22×25×24, two ports, no ghosts; `ref_mattbatwings_pixel_module_3x5` 5×10×11 [M] | no |
+| Binary to signed decimal display | `seven_segment/ref_penscii_8bit_to_7seg_2s_comp` 17×8×34, final within 46 gt [M] | no |
+| Animated icon | `seven_segment/ref_sloimay_loading_icon` 11×10×4, period 46 gt while held [M] | no |
+
+**Inputs, randomness, wiring.**
+
+| Technique | Proving spec, size, delay | Library before |
+|---|---|---|
+| Dropper `triggered` flag as a row's memory; one dust line as a block-update broadcast | `input/ref_craftymasterman_selector_panel` 3×4×5, old row off at +6 [M] | no |
+| Shared clear bus between latch columns | `input/ref_mattbatwings_classic_selector_panel` 7×4×9, new lamp +6, old off +10 [M] | no |
+| Key as dust-decay distance on two analog outputs | `input/ref_mattbatwings_banner_keyboard` 13×9×7, 26 keys, 2-4 gt [M] | no |
+| Torch per key on its own block | `input/ref_mattbatwings_button_keypad` 5×8×5, 2 gt, key 0 masks key 8 [M] | no |
+| Dropper's random slot, hopper locked by the powered dropper holds the result | `randomiser/ref_mattbatwings_two_way_randomizer` 3×3×5, `_three_way` 3×3×6 (53/40/57 of 150), `_9_way` 3×4×15 with shulker boxes as values, press period ≥25 gt [M] | no |
+| Dummy button caps a dust end to stop a leak | `mux/ref_mattbatwings_flipper_8bit` 8×16×9, 4 gt; without the button in2 also lights out4 [M] | dust_redirect_by_signal_sources |
+| Stale cross-shaped dust kept by `update_pass: strict` | `mux/ref_sloimay_swapper_8bit` 3×17×5, 4 gt; fails under the default pass [M] | no |
+
+**Analysed, not run.** Read from the README [S] and the parsed blocks [I]; none is tested.
+
+| Entry | Technique | Label |
+|---|---|---|
+| MULTIPY001-003, 006, 008 (combinational multipliers) | partial-product array reduced by subtract comparators and barrel constants; 8x8 at 12-52 ticks | [S] speeds, [I] structure |
+| MULTIPY004, 005, 007, 010, 011 (sequential multipliers) | one bit-sliced adder (CCA or carry-save) reused per bit; radix-4 Booth halves the iterations | [S] |
+| DIVIDE001-010 | restoring and non-restoring dividers, unrolled (one stage per quotient bit) or looped; 4-11 gt per bit | [S] speeds, [I] structure |
+| SQRT003, 006, 007 | 256-entry lookup ROM (9 ticks); digit-by-digit 18 and 11 gt per bit | [S] |
+| ROM001, ROM003, RWM001, RWM002, REGISTERFILE001 | repeater-or-wool ROM bits; word lines as dust/glass ladders; Ketari-style locked-repeater RAM at about 31 blocks per bit; 1-line cache | [S] sizes, [I] cells |
+| OTHERARITH001-003, 009 | sine/cosine/tangent lookup tables (target block + torch one-hot decode); 32-bit cube root | [S] |
+| OTHERCOMB010-012, IOPORT002 | CAM and read/write port crossbars with barrel constants | [I] |
+| ALU002, OTHERCPU001, OTHERSEQ002, ADD001, ADD009, BINTOBCD005, BCDTOBIN004 | 16-bit ALU, multi-function math unit, 16-bit accumulator, hex and 16-bit CCAs, double dabble, sequential BCD | [S] |
+| SORT002 | odd-even transposition network of analog compare-exchange cells, 17 ticks | [S] speed, [I] network |
+| PIXDISPLAY005, CHARDISPLAY002, CHARDISPLAY003, OTHERDISPLAY001, OTHERDISPLAY003 | colour and sprite displays, word processor, XY matrix decoders (row/column coincidence, one torch per pixel) | [I] |
+
 **Not built:** DECODE007 Torchless B (no input levers), Tristate A and B (input encoding not read), LFF002
-(same loop as LFF001), LFF004 (no stored items in the schematic), LFF005 upper (floating dust).
+(same loop as LFF001), LFF004 (no stored items in the schematic), LFF005 upper (floating dust). REDCODE001
+1-wide pulse redcoder: rebuilt, but it loaded to a different start state on each run and never decoded
+correctly, so the spec was removed.
 
 **Mechanic candidates.** These are proven only inside the builds above, so none is in `docs/MECHANICS.md`
 yet; each needs an isolating spec in `library/mechanics/`: the lock-race toggle (item 11); a comparator into
@@ -289,6 +394,19 @@ a block giving the dust beside it the full strength (section 2 item 6); the two-
 (item 8); the rear-minus-delayed-side pulse giving nothing at delay 1 (item 13); a target block carrying
 torch power on to dust at 15 (item 5); a lever on a block powering a torch's support where a redstone block
 beside it does not (item 20).
+
+Second-batch candidates, each measured inside a passing build only: a redstone block beside a lamp lights it
+but leaves a torch on the lamp lit, where a lever or a repeater into it turns the torch off
+(`ref_mixel_cle_adder_8bit_3t`, `ref_llucas_dorito_rsh8`, `ref_xoliks_fractional_bin_to_dec8`); a
+compare-mode side of 15 cannot clear a stored 15, the tie case of `comparator_compare_is_ge`
+(`ref_samosthesage_hex_fifo_vertical`); a subtract comparator with a one-item barrel behind it as a NOR of
+its sides (`ref_nano_passthrough_display`); a stale cross-shaped dust kept by `update_pass: strict` powering
+all four side blocks (`ref_sloimay_swapper_8bit`); a powered dropper locking the hopper above it
+(`ref_mattbatwings_two_way_randomizer`); a dropper's `triggered` flag cleared by a neighbouring dust's
+strength change (`ref_craftymasterman_selector_panel`); hopper fill as strength 1 + floor(14·items/320) for
+redstone (`ref_louparmi_hex_cca_5t`, `ref_zebronic_register_file_7x32_dual_read`); a setblock of a lectern
+with `has_book=false` reading 0 at once (`ref_aminotreal_hex_to_binary`); a note block's observer firing only
+when the note actually changes (`ref_samosthesage_hex_fifo`).
 
 ## Videos recorded elsewhere
 

@@ -1,0 +1,154 @@
+name: ref_xoliks_disc_to_hex_reader
+description: "Xoliks' DisctoHex Reader (HEX007_DiscReaderV3, mattbatwings' Logical Redstone Archive, https://discord.com/channels/1361854816837435433/1517282256497021058; endorsed by Mixel): a note block starts it, a hopper/dropper/dispenser chain places each shulker box from the top chest, empties it with a hopper, feeds discs to a jukebox and a comparator turns the disc into dust strength 1-15 at the south-west wire (named out); README claim (SOURCED): one strength pulse per disc every 8 gt, box repackaged into the bottom chest. 10x8x3, rebuilt block for block from the .schem including its container items (redstone in the dropper, a shulker in the hopper, shovels in the barrels); the only additions are the start input (a redstone block on the note block's east side) and cell names. MEASURED in 26.3: the front end works, a box of discs put in the top chest is placed and unpacked on its own, and 26 gt after start the first disc is in the jukebox and out reads its strength (13 -> 1, 11 -> 11, 5 -> 15; tests below). The rest of the claim FAILS here: the first disc stays in the jukebox playing (ticks_since_song_started kept counting to 577 with a 3-disc box; removing the redstone block that locks the hopper under the jukebox changed nothing), out never changes again, and the next discs are taken by the hopper under the first dropper into the repackaging shulker without being read. INFERRED, not tested: the design relied on emptying a playing jukebox early (docs/MECHANICS.md jukebox_disc_timer_and_id: in 26.3 the hopper below a playing jukebox is locked and takes the disc only when the song ends, 1420-3560 gt)."
+traits:
+- analog
+palette:
+  .: air
+  A: yellow_concrete
+  B: {name: done, block: 'chest[facing=south,type=right,waterlogged=false]'}
+  C: chest[facing=south,type=left,waterlogged=false]
+  D: observer[facing=south]
+  E: hopper[facing=north]
+  F: piston[facing=east]
+  G: observer[facing=up]
+  H: observer[facing=west]
+  I: repeater[delay=2,facing=west]
+  J: observer[facing=down]
+  K: hopper[facing=down]
+  M: comparator[facing=east,mode=compare]
+  N: note_block[instrument=harp,note=0]
+  O: dropper[facing=up]
+  P: observer[facing=east]
+  Q: hopper[facing=east]
+  T: dropper[facing=south]
+  U: piston[facing=south]
+  V: stone_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=tall]
+  W: oak_trapdoor[facing=east,half=bottom,open=false,waterlogged=false]
+  X: observer[facing=north]
+  Y: activator_rail[shape=ascending_north,waterlogged=false]
+  Z: dropper[facing=east]
+  b: shulker_box[facing=up]
+  c: dispenser[facing=west]
+  d: sticky_piston[facing=down]
+  e: redstone_wire[east=side,north=none,south=none,west=side]
+  f: target
+  g: note_block[instrument=basedrum,note=0]
+  h: yellow_stained_glass
+  R: redstone_block
+  i: comparator[facing=west,mode=compare]
+  j: hopper[facing=south]
+  k: repeater[delay=2,facing=east]
+  l: {name: juke, block: 'jukebox[has_record=false]'}
+  m: dropper[facing=west]
+  p: composter[level=0]
+  q: oak_trapdoor[facing=east,half=top,open=false,waterlogged=false]
+  r: stone_brick_wall[east=low,north=none,south=none,up=true,waterlogged=false,west=none]
+  s: soul_sand
+  ): redstone_wall_torch[facing=east]
+  t: oak_trapdoor[facing=south,half=bottom,open=false,waterlogged=false]
+  w: waxed_copper_bulb
+  x: note_block[instrument=bass,note=0]
+  u: redstone_wall_torch[facing=south]
+  y: barrel[facing=up,open=false]
+  z: comparator[facing=north,mode=subtract]
+  '0': dispenser[facing=down]
+  '1': stone_brick_wall[east=tall,north=tall,south=tall,up=false,waterlogged=false,west=tall]
+  '2': oak_trapdoor[facing=east,half=bottom,open=true,waterlogged=false]
+  '3': repeater[delay=1,facing=west]
+  '4': oak_trapdoor[facing=west,half=bottom,open=true,waterlogged=false]
+  '5': stone_brick_wall[east=none,north=tall,south=none,up=true,waterlogged=false,west=tall]
+  '6': {name: feed, block: 'chest[facing=west,type=right,waterlogged=false]'}
+  '7': repeater[delay=1,facing=east]
+  '8': note_block[instrument=bass,note=6]
+  '9': chest[facing=west,type=left,waterlogged=false]
+  α: powered_rail[shape=east_west,waterlogged=false]
+  β: dropper[facing=up]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}
+  γ: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1}]}
+  δ: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1}]}
+  S:
+    input: start
+  o:
+    output: out
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+layers:
+  0: |
+    ..........
+    ...A.BC.D.
+    .....EAF..
+  1: |
+    ..........
+    .GHIA...J.
+    .GHHAKMNβP
+  2: |
+    ..........
+    .G.QTUPVW.
+    .X.YZbcMKd
+  3: |
+    ...K......
+    .efY..TgAh
+    AhRKK.KAi.
+  4: |
+    ..........
+    .G...jγAke
+    oMAlmmpkPq
+  5: |
+    ....hhh...
+    .rAhF.siA)
+    .tAPwPx.uG
+  6: |
+    ..δ.......
+    ..zMN0P12A
+    ..δ)3EGH45
+  7: |
+    ..........
+    ....A67P8S
+    .....9ααPJ
+tests:
+- name: reads_disc_13
+  steps:
+  - insert: {cell: feed, items: [{id: shulker_box, count: 1}]}
+  - run: 'data modify block ~5 ~7 ~1 Items[0].components set value {"minecraft:container":[{slot:0,item:{id:"minecraft:music_disc_13",count:1}},{slot:1,item:{id:"minecraft:stick",count:1}}]}'
+  - wait: 30
+  - expect: {out: 0}
+  - drive: {start: 1}
+  - wave: {out: '000000000000000000000000001'}
+  - level: {out: 1}
+  - wait: 40
+  - level: {out: 1}
+  - check: if data block ~3 ~4 ~2 RecordItem{id:"minecraft:music_disc_13"}
+- name: reads_disc_cat
+  steps:
+  - insert: {cell: feed, items: [{id: shulker_box, count: 1}]}
+  - run: 'data modify block ~5 ~7 ~1 Items[0].components set value {"minecraft:container":[{slot:0,item:{id:"minecraft:music_disc_cat",count:1}},{slot:1,item:{id:"minecraft:stick",count:1}}]}'
+  - wait: 30
+  - expect: {out: 0}
+  - drive: {start: 1}
+  - wave: {out: '000000000000000000000000001'}
+  - level: {out: 2}
+  - wait: 40
+  - level: {out: 2}
+  - check: if data block ~3 ~4 ~2 RecordItem{id:"minecraft:music_disc_cat"}
+- name: reads_disc_11
+  steps:
+  - insert: {cell: feed, items: [{id: shulker_box, count: 1}]}
+  - run: 'data modify block ~5 ~7 ~1 Items[0].components set value {"minecraft:container":[{slot:0,item:{id:"minecraft:music_disc_11",count:1}},{slot:1,item:{id:"minecraft:stick",count:1}}]}'
+  - wait: 30
+  - expect: {out: 0}
+  - drive: {start: 1}
+  - wave: {out: '000000000000000000000000001'}
+  - level: {out: 11}
+  - wait: 40
+  - level: {out: 11}
+  - check: if data block ~3 ~4 ~2 RecordItem{id:"minecraft:music_disc_11"}
+- name: reads_disc_5
+  steps:
+  - insert: {cell: feed, items: [{id: shulker_box, count: 1}]}
+  - run: 'data modify block ~5 ~7 ~1 Items[0].components set value {"minecraft:container":[{slot:0,item:{id:"minecraft:music_disc_5",count:1}},{slot:1,item:{id:"minecraft:stick",count:1}}]}'
+  - wait: 30
+  - expect: {out: 0}
+  - drive: {start: 1}
+  - wave: {out: '000000000000000000000000001'}
+  - level: {out: 15}
+  - wait: 40
+  - level: {out: 15}
+  - check: if data block ~3 ~4 ~2 RecordItem{id:"minecraft:music_disc_5"}

@@ -1,0 +1,572 @@
+name: ref_mattbatwings_bin_to_hex_targets
+description: "Fast Binary to Hex by mattbatwings (LRA BINTOHEX002, endorsed by mattbatwings, Discord https://discord.com/channels/1361854816837435433/1472409017987891384; the entry holds one schematic with two versions side by side): four levers b3 b2 b1 b0 (b3 most significant) become the hex digit as the signal strength 0-15 of the dust `out`, README speed 2 ticks (SOURCED). This is the version whose levers lie in a row (x=6,8,10,12 along z=1, b0 at x=6). 13x7x16 including the levers and their supports. Harness changes: the lamps the levers hang on became white concrete (the lever tests only emulate plain supports), the other version cut away, and the output dust named. How it works (INFERRED, checked against one trace): the same thresholds-on-a-strength-line idea as the other version: each bit runs down a dust bus along z; in each of eight even rows three wall torches on iron blocks put strength 15 on a 10-long dust line at three positions, so the strength reaching the west end encodes the row's partial result; that dust powers a target block (any strength above 0 counts as powered, so it works as a threshold), and the torch on the target's north face (y=4, odd rows) or on its west face (y=6, rows 2-14) is lit when the target is not; the 15 torches drive a zigzag dust line at x=0 that alternates between y=4 and y=5, one dust per row, ending at `out`; the nearest lit torch sets the output to 15 minus its distance in rows (at value 6 the 15 is in the dust at row 10, 9 dust from the output, giving 6). MEASURED: all 16 values correct from 0, Gray walk, set and cleared, and complement jumps with all four levers changing, on laptop satellites and dsat1 and dsat2; the output changes exactly 4 game ticks (2 redstone ticks, matching the README) after the click, rise and fall."
+palette:
+  .: air
+  "(": "redstone_wall_torch[facing=west]"
+  A: iron_block
+  B: "smooth_stone_slab[type=top,waterlogged=false]"
+  C: "redstone_wire[east=side,north=none,south=none,west=side]"
+  D: "redstone_wire[east=side,north=none,south=none,west=up]"
+  E: "repeater[delay=1,facing=west]"
+  F: "redstone_wire[east=up,north=none,south=none,west=side]"
+  G: "repeater[delay=1,facing=east]"
+  I: "redstone_wire[east=none,north=side,south=side,west=none]"
+  J: "repeater[delay=1,facing=south]"
+  K: "redstone_wire[east=none,north=up,south=up,west=none]"
+  L: white_concrete
+  M: "repeater[delay=1,facing=north]"
+  N: "redstone_wire[east=none,north=up,south=side,west=none]"
+  O: glass
+  P: "redstone_wire[east=none,north=side,south=up,west=none]"
+  T: target
+  U: "redstone_wire[east=side,north=up,south=up,west=none]"
+  V: "redstone_wire[east=none,north=none,south=side,west=side]"
+  W: "redstone_wire[east=none,north=side,south=side,west=side]"
+  X: "redstone_wire[east=side,north=up,south=none,west=none]"
+  Y: "redstone_wire[east=none,north=side,south=none,west=side]"
+  a: {name: b0, block: "lever[face=wall,facing=north]"}
+  b: {name: b1, block: "lever[face=wall,facing=north]"}
+  c: {name: b2, block: "lever[face=wall,facing=north]"}
+  d: {name: b3, block: "lever[face=wall,facing=north]"}
+  n: "redstone_wall_torch[facing=north]"
+  o: {name: out, block: "redstone_wire[east=side,north=none,south=up,west=none]"}
+layers:
+  0: |
+    .............
+    ...AAAAAAAAAA
+    .............
+    ...AAAAAAAAAA
+    .............
+    ...AAAAAAAAAA
+    ...........A.
+    ...AAAAAAAAAA
+    .............
+    ...AAAAAAAAAA
+    .............
+    ...AAAAAAAAAA
+    ...........A.
+    ...AAAAAAAAAA
+    ...........A.
+    ...AAAAAAAAAA
+  1: |
+    .............
+    ..BCCCCCCCCCC
+    .............
+    ..BCCCCCCCCCC
+    ........A....
+    ..BCCCCCCCCCC
+    ..........AEA
+    ..BCCCCCCCCCC
+    ........A....
+    ..BCCCCCCCCCC
+    ............A
+    ..BCCCCCCCCCC
+    ........A.AGA
+    ..BCCCCCCCCCC
+    ........A.AEA
+    ..BCCCCCCCCCC
+  2: |
+    .............
+    ..CB...(A(A(A
+    ....AA..A.A.A
+    ..CB....A(A(A
+    ....AA..J.A.A
+    ..CB...(A.A(A
+    ....AA..A.K.A
+    ..CB....A.A(A
+    ....AA..J.A.A
+    ..CB...(A(A.A
+    ....AA..A.A.J
+    ..CB....A(A.A
+    ....AA..J.A.K
+    ..CB...(A.A.A
+    ....AA..M.N.M
+    ..CB....A.A.A
+  3: |
+    O............
+    ..BFA...I.I.I
+    A.(ACFA.P.I.I
+    ..BFA.A.A.I.I
+    A.(ACFA.A.I.I
+    ..BFA.A.N.I.I
+    A.(ACFA.P...I
+    ..BFA.A.A.I.I
+    A.(ACFA.A.I.P
+    ..BFA.A.N.I.A
+    A.(ACFA.P.I.A
+    ..BFA.A.A.I.N
+    A.(ACFA.A.I..
+    ..BFA.A.N.I.I
+    A.(ACFA......
+    ..BC.........
+  4: |
+    on....a.b.c.d
+    ATCBC.L.L.L.L
+    UnA.ABV......
+    ATCBC.I.I....
+    UnA.ABW.I....
+    ATCBC.I......
+    UnA.ABW......
+    ATCBC.I.I....
+    UnA.ABW.I....
+    ATCBC.I.....I
+    UnA.ABW.....I
+    ATCBC.I.I....
+    UnA.ABW.I....
+    ATCBC.I......
+    XnA.ABY......
+    .TC..........
+  5: |
+    .............
+    I.AD.........
+    ...AGC.......
+    I.AD.........
+    ...AGC.......
+    I.AD.........
+    ...AGC.......
+    I.AD.........
+    ...AGC.......
+    I.AD.........
+    ...AGC.......
+    I.AD.........
+    ...AGC.......
+    I.AD.........
+    ...AGC.......
+    .............
+  6: |
+    .............
+    (TC..........
+    .............
+    (TC..........
+    .............
+    (TC..........
+    .............
+    (TC..........
+    .............
+    (TC..........
+    .............
+    (TC..........
+    .............
+    (TC..........
+    .............
+    .............
+tests:
+- name: gray walk, one lever at a time
+  steps:
+  - wait: 12
+  - level: {out: 0}
+  - use: b0
+  - wait: 8
+  - level: {out: 1}
+  - use: b1
+  - wait: 8
+  - level: {out: 3}
+  - use: b0
+  - wait: 8
+  - level: {out: 2}
+  - use: b2
+  - wait: 8
+  - level: {out: 6}
+  - use: b0
+  - wait: 8
+  - level: {out: 7}
+  - use: b1
+  - wait: 8
+  - level: {out: 5}
+  - use: b0
+  - wait: 8
+  - level: {out: 4}
+  - use: b3
+  - wait: 8
+  - level: {out: 12}
+  - use: b0
+  - wait: 8
+  - level: {out: 13}
+  - use: b1
+  - wait: 8
+  - level: {out: 15}
+  - use: b0
+  - wait: 8
+  - level: {out: 14}
+  - use: b2
+  - wait: 8
+  - level: {out: 10}
+  - use: b0
+  - wait: 8
+  - level: {out: 11}
+  - use: b1
+  - wait: 8
+  - level: {out: 9}
+  - use: b0
+  - wait: 8
+  - level: {out: 8}
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+- name: every value set from 0 and cleared
+  steps:
+  - wait: 12
+  - level: {out: 0}
+  - use: b0
+  - wait: 8
+  - level: {out: 1}
+  - use: b0
+  - wait: 8
+  - level: {out: 0}
+  - use: b1
+  - wait: 8
+  - level: {out: 2}
+  - use: b1
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b1
+  - wait: 8
+  - level: {out: 3}
+  - use: b0
+  - use: b1
+  - wait: 8
+  - level: {out: 0}
+  - use: b2
+  - wait: 8
+  - level: {out: 4}
+  - use: b2
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b2
+  - wait: 8
+  - level: {out: 5}
+  - use: b0
+  - use: b2
+  - wait: 8
+  - level: {out: 0}
+  - use: b1
+  - use: b2
+  - wait: 8
+  - level: {out: 6}
+  - use: b1
+  - use: b2
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - wait: 8
+  - level: {out: 7}
+  - use: b0
+  - use: b1
+  - use: b2
+  - wait: 8
+  - level: {out: 0}
+  - use: b3
+  - wait: 8
+  - level: {out: 8}
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b3
+  - wait: 8
+  - level: {out: 9}
+  - use: b0
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b1
+  - use: b3
+  - wait: 8
+  - level: {out: 10}
+  - use: b1
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b1
+  - use: b3
+  - wait: 8
+  - level: {out: 11}
+  - use: b0
+  - use: b1
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 12}
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 13}
+  - use: b0
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 14}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 15}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+- name: complement jumps (all four levers change together)
+  steps:
+  - wait: 12
+  - level: {out: 0}
+  - wait: 8
+  - level: {out: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 15}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 1}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 14}
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 2}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 13}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 3}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 12}
+  - use: b3
+  - wait: 8
+  - level: {out: 4}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 11}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 5}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 10}
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 6}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 9}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 7}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 8}
+  - wait: 8
+  - level: {out: 8}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 7}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 9}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 6}
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 10}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 5}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 11}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 4}
+  - use: b3
+  - wait: 8
+  - level: {out: 12}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 3}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 13}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 2}
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 14}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 1}
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 15}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 8
+  - level: {out: 0}
+  - wait: 8
+  - level: {out: 0}
+- name: output changes 4 game ticks after the click
+  steps:
+  - wait: 12
+  - level: {out: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 3
+  - level: {out: 0}
+  - wait: 1
+  - level: {out: 15}
+  - wait: 6
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 3
+  - level: {out: 15}
+  - wait: 1
+  - level: {out: 0}
+  - wait: 6
+  - use: b0
+  - use: b2
+  - wait: 3
+  - level: {out: 0}
+  - wait: 1
+  - level: {out: 5}
+  - wait: 6
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 3
+  - level: {out: 5}
+  - wait: 1
+  - level: {out: 10}
+  - wait: 6
+  - use: b1
+  - use: b3
+  - wait: 3
+  - level: {out: 10}
+  - wait: 1
+  - level: {out: 0}
+  - wait: 6
+  - use: b1
+  - use: b3
+  - wait: 3
+  - level: {out: 0}
+  - wait: 1
+  - level: {out: 10}
+  - wait: 6
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 3
+  - level: {out: 10}
+  - wait: 1
+  - level: {out: 5}
+  - wait: 6
+  - use: b1
+  - use: b3
+  - wait: 3
+  - level: {out: 5}
+  - wait: 1
+  - level: {out: 15}
+  - wait: 6
+traits:
+- analog
+

@@ -1,0 +1,3865 @@
+name: ref_mattbatwings_seq_bin_to_bcd8
+description: 'Rebuild of BINTOBCD002 8-bit Sequential Binary to BCD (mattbatwings, endorsed; Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472406231519068200, Logical Redstone Archive). SOURCED: README says
+  it converts any 8 bit number to its BCD form; input an 8b number and a Start button, output 3 BCD digits. Size 34x12x33, 2730 blocks. HARNESS CHANGES: the lamp each of the 8 input levers hangs on (layer 5) and the lamp behind the start button (layer
+  2) are white wool, because the harness only emulates levers and buttons on plain blocks (a lamp is as conductive as wool, so the circuit is the same; only the input display is lost); signs dropped; the 86 torches that were unlit in the schematic are
+  placed lit=false (the stripped skeleton lit them all, which started the 12 output lamps lit; torch loops hold their state, so the schematic''s idle state is part of the design). PORTS: levers b7..b0 (named by weight, b7 the westmost, x=6) and button
+  start; output lamps at x=0 on layer 10, z=2..24 in steps of 2, named h3..h0 (hundreds, bit 3 first), t3..t0 (tens), o3..o0 (ones), so z=2 is the hundreds'' 8 and z=24 the ones'' 1; hundreds only ever reaches 2. MEASURED (26.3, references plot, satellite):
+  all 256 inputs convert correctly, one after another with no reset between conversions (the test checks the lamps are all dark 59 gt after the press and correct 60 gt after it, then still correct 20 gt later); the 16 spot values and an 11-conversion sequence
+  pass as well. Latency is the same 60 gt from the press to the result for every input; the 12 lamps change together on that tick, and an old result is cleared 10-14 gt after the press (the ones lamps first), so the display is blank from about +14 to +60.
+  INPUT IS NOT LATCHED: the levers are read in turn as the run proceeds, MSB first, one every 6 gt; releasing a lever early changes the answer. Measured hold times (releasing bit k at or after this many gt after the press leaves the answer alone, 3 gt
+  resolution; one gt earlier is wrong): b7 6, b6 12, b5 18, b4 24, b3 30, b2 36, b1 42, b0 about 50 (48 fails, 50 passes), so keep the number on the levers for 50 gt (2.5 s); the tests release each bit at its limit (all pass) and check that releasing b7,
+  b4 or b0 just before its limit reads that bit as 0. HOW (INFERRED from the layout and the per-tick trace; only the timings are measured): a start press sends a clear along the x=4 dust column on layer 11 to the output lamps, then a read steps along the
+  row of dust at z=26 on layer 2 (cells x=6, 8, ..., 20 change 6 gt apart in the trace), one lever bit at a time, MSB first. Each step is followed by a wave through the digit grids: a 5-column grid on the left (x=4..16) and a 4-column grid on the right
+  (x=23..33) per digit, torches on purple wool at hand-chosen cells, which looks like a per-digit add-3 lookup; the waves reach rows z=24, 22, 20, then 16, 14, 12, then 8, 6 in turn. That reads as shift-and-add-3 (double dabble) done as 8 sequential rounds,
+  the working BCD kept in the comparator and dust latches on layers 7-10 behind the lamps, and copied to the lamps in one go at +60. The row-by-row wave and the 6 gt bit step are MEASURED; the double dabble reading is not proven.'
+traits:
+- torch_based
+- pistonless
+- entityless
+- tick_accurate
+palette:
+  .: air
+  A: light_blue_wool
+  B: redstone_wire[east=side,north=none,south=side,west=none]
+  C: redstone_wire[east=side,north=none,south=up,west=side]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: redstone_wire[east=up,north=none,south=none,west=side]
+  F: purple_wool
+  ): redstone_wall_torch[facing=east]
+  G: redstone_wire[east=side,north=side,south=none,west=none]
+  H: redstone_wire[east=side,north=none,south=none,west=up]
+  I: red_wool
+  J: repeater[delay=1,facing=west]
+  K: redstone_wire[east=none,north=side,south=up,west=none]
+  n: redstone_wall_torch[facing=north]
+  M: repeater[delay=1,facing=east]
+  (: redstone_wall_torch[facing=west]
+  N: repeater[delay=1,facing=south]
+  O: redstone_wire[east=side,north=none,south=side,west=side]
+  P: redstone_wire[east=none,north=side,south=side,west=side]
+  Q: redstone_wire[east=none,north=side,south=side,west=none]
+  T:
+    name: start
+    block: stone_button[face=wall,facing=west]
+  L: redstone_lamp
+  U: comparator[facing=west,mode=subtract]
+  V: repeater[delay=3,facing=west]
+  W: oak_wall_sign[facing=west,waterlogged=false]
+  X: red_stained_glass
+  Y: redstone_wire[east=none,north=side,south=none,west=side]
+  Z: redstone_wire[east=side,north=side,south=side,west=none]
+  b: lime_wool
+  c: lime_stained_glass
+  d: redstone_wire[east=up,north=none,south=none,west=up]
+  u: redstone_wall_torch[facing=south]
+  e: light_gray_wool
+  f: yellow_wool
+  g: redstone_wire[east=side,north=side,south=side,west=side]
+  i: redstone_wire[east=side,north=up,south=none,west=none]
+  j: redstone_wire[east=none,north=up,south=none,west=side]
+  k: oak_wall_sign[facing=south,waterlogged=false]
+  l: redstone_wire[east=none,north=up,south=side,west=none]
+  m: comparator[facing=east,mode=subtract]
+  p: repeater[delay=3,facing=south]
+  '*': redstone_torch
+  q: light_gray_stained_glass
+  r: redstone_wire[east=none,north=none,south=side,west=side]
+  s: black_wool
+  '0':
+    name: b7
+    block: lever[face=wall,facing=south]
+  '1':
+    name: b6
+    block: lever[face=wall,facing=south]
+  '2':
+    name: b5
+    block: lever[face=wall,facing=south]
+  '3':
+    name: b4
+    block: lever[face=wall,facing=south]
+  '4':
+    name: b3
+    block: lever[face=wall,facing=south]
+  '5':
+    name: b2
+    block: lever[face=wall,facing=south]
+  '6':
+    name: b1
+    block: lever[face=wall,facing=south]
+  '7':
+    name: b0
+    block: lever[face=wall,facing=south]
+  '!': redstone_wall_torch[facing=east,lit=false]
+  ^: redstone_wall_torch[facing=north,lit=false]
+  _: redstone_wall_torch[facing=west,lit=false]
+  a:
+    name: h3
+    block: redstone_lamp
+  o:
+    name: h2
+    block: redstone_lamp
+  R:
+    name: h1
+    block: redstone_lamp
+  S:
+    name: h0
+    block: redstone_lamp
+  t:
+    name: t3
+    block: redstone_lamp
+  v:
+    name: t2
+    block: redstone_lamp
+  w:
+    name: t1
+    block: redstone_lamp
+  x:
+    name: t0
+    block: redstone_lamp
+  y:
+    name: o3
+    block: redstone_lamp
+  z:
+    name: o2
+    block: redstone_lamp
+  '@':
+    name: o1
+    block: redstone_lamp
+  '%':
+    name: o0
+    block: redstone_lamp
+  $: white_wool
+layers:
+  0: '.....AAAAAAAAAAAAA................
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    .....AAAAAAAAAAAAA.....AAAAAAAAAA.
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    '
+  1: '.....BCDDCDDCDDCDEAA..............
+
+    ....F!A..A..A..A..................
+
+    .....GDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....BDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ....F!A..A..A..A..................
+
+    .....GDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....BDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ....F!A..A..A..A..................
+
+    .....GDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ..................................
+
+    .....DDDDDDDDDDDDEAA.AAHDDDDDDDDD.
+
+    ....................I.............
+
+    ......IIIIIIIIIIIIIII.............
+
+    ..................................
+
+    ..................................
+
+    ......I.I.I.I.I.I.I.I.............
+
+    ..................................
+
+    ...III.I.I.I.I.I.I.I..............
+
+    ...III............................
+
+    '
+  2: '..................DJ..............
+
+    ....K.G^.G^.G^.G^.................
+
+    ....F.AF.AF.AF.AF.DJAMD.F..F..F._F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    ....F..F!.F!.F..F.DJAMD.F._F._F..F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    ....F..F!.F..F!.F.DJAMD_F..F._F..F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    .......F..F..F..F.DJAMD.F..F..F..F
+
+    ....K.D^.D^.D^.D^.................
+
+    ....F.AF.AF.AF.AF.DJAMD.F..F..F._F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    ....F..F!.F!.F..F.DJAMD.F._F._F..F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    ....F..F!.F..F!.F.DJAMD_F..F._F..F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    .......F..F..F..F.DJAMD.F..F..F..F
+
+    ....K.D^.D^.D^.D^.................
+
+    ....F.AF.AF.AF.AF.DJAMD.F..F..F._F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    ....F..F!.F!.F..F.DJAMD.F._F._F..F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    ....F..F!.F..F!.F.DJAMD_F..F._F..F
+
+    ....F..F..F..F..F.......F..F..F..F
+
+    .......F..F..F..F.DJAMD.F..F..F..F
+
+    ....................N.............
+
+    ......BDODODODODODODP.............
+
+    ......^.^.^.^.^.^.^.^.............
+
+    ......I.I.I.I.I.I.I.I.............
+
+    ......Q.Q.Q.Q.Q.Q.Q.Q.............
+
+    ......n.n.n.n.n.n.n.n.............
+
+    .T$BDUIVIVIVIVIVIVIVI.............
+
+    .WXGVY............................
+
+    '
+  3: '..................................
+
+    ..................................
+
+    ....Z(bQ..Qc.Qc.Qc.AdA.cQ.cQ.cQ.cQ
+
+    ....Q..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....Qc.Qc.Q..Q..Q..AdA.cQ.cQ.cQ..Q
+
+    ....Q..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....Qc.Qc.Q..Q..Qc.AdA.cQ..Q..Q.cQ
+
+    ....K..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....F..Qc.Q..Qc.Q..AdA..Q.cQ..Q.cQ
+
+    ..................................
+
+    ....Z(bQ..Qc.Qc.Qc.AdA.cQ.cQ.cQ.cQ
+
+    ....Q..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....Qc.Qc.Q..Q..Q..AdA.cQ.cQ.cQ..Q
+
+    ....Q..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....Qc.Qc.Q..Q..Qc.AdA.cQ..Q..Q.cQ
+
+    ....K..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....F..Qc.Q..Qc.Q..AdA..Q.cQ..Q.cQ
+
+    ..................................
+
+    ....Z(bQ..Qc.Qc.Qc.AdA.cQ.cQ.cQ.cQ
+
+    ....Q..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....Qc.Qc.Q..Q..Q..AdA.cQ.cQ.cQ..Q
+
+    ....Q..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....Qc.Qc.Q..Q..Qc.AdA.cQ..Q..Q.cQ
+
+    ....K..Q..Q..Q..Q.......Q..Q..Q..Q
+
+    ....F..Qc.Q..Qc.Q..AdA..Q.cQ..Q.cQ
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ......I.I.I.I.I.I.I.I.............
+
+    ......u.u.u.u.u.u.u.u.............
+
+    ..................................
+
+    .....eH.............Ef............
+
+    ..................................
+
+    '
+  4: '..................................
+
+    ..................................
+
+    ......Eb.bbMbbMbbMbH.EbJbbJbbJbbJb
+
+    .......u..n..n..n................n
+
+    ....bMbbMbbbbbbbbbbH.EbJbbJbbJbbbb
+
+    ..........n..n.............n..n...
+
+    ....bMbbMbbbbbbbbMbH.EbJbbbbbbbbJb
+
+    ..........n.....n.......n.....n...
+
+    ....G(bbMbbbbbMbbbbH.EbbbbJbbbbbJb
+
+    ..................................
+
+    ......Eb.bbMbbMbbMbH.EbJbbJbbJbbJb
+
+    .......u..n..n..n................n
+
+    ....bMbbMbbbbbbbbbbH.EbJbbJbbJbbbb
+
+    ..........n..n.............n..n...
+
+    ....bMbbMbbbbbbbbMbH.EbJbbbbbbbbJb
+
+    ..........n.....n.......n.....n...
+
+    ....G(bbMbbbbbMbbbbH.EbbbbJbbbbbJb
+
+    ..................................
+
+    ......Eb.bbMbbMbbMbH.EbJbbJbbJbbJb
+
+    .......u..n..n..n................n
+
+    ....bMbbMbbbbbbbbbbH.EbJbbJbbJbbbb
+
+    ..........n..n.............n..n...
+
+    ....bMbbMbbbbbbbbMbH.EbJbbbbbbbbJb
+
+    ..........n.....n.......n.....n...
+
+    ....G(bbMbbbbbMbbbbH.EbbbbJbbbbbJb
+
+    ..................................
+
+    ..................................
+
+    ......I.I.I.I.I.I.I.I.............
+
+    ......g.g.g.g.g.g.g.g.............
+
+    ..................................
+
+    ..................................
+
+    ....eH...............Ef...........
+
+    ..................................
+
+    '
+  5: '..................................
+
+    ..................................
+
+    .......EbdbbdbbdbbH_f!Ebbdbbdbbdbb
+
+    ....................f.............
+
+    ......EbbHDDDDDDDDD.f.EbbdbbdbbHDD
+
+    ....................f.............
+
+    ......EbbHDDDDDEbbH_f!EbbHDDDDDEbb
+
+    ....................f.............
+
+    ......EbbHDDEbbHDDD.f.DDDEbbHDDEbb
+
+    ....................f.............
+
+    .......EbdbbdbbdbbH_f!Ebbdbbdbbdbb
+
+    ....................f.............
+
+    ......EbbHDDDDDDDDD.f.EbbdbbdbbHDD
+
+    ....................f.............
+
+    ......EbbHDDDDDEbbH_f!EbbHDDDDDEbb
+
+    ....................f.............
+
+    ......EbbHDDEbbHDDD.f.DDDEbbHDDEbb
+
+    ....................f.............
+
+    .......EbdbbdbbdbbH_f!Ebbdbbdbbdbb
+
+    ....................f.............
+
+    ......EbbHDDDDDDDDD.f.EbbdbbdbbHDD
+
+    ....................f.............
+
+    ......EbbHDDDDDEbbH_f!EbbHDDDDDEbb
+
+    ..................................
+
+    ......EbbHDDEbbHDDD...DDDEbbHDDEbb
+
+    ..................................
+
+    ..................................
+
+    ......$.$.$.$.$.$.$.$.............
+
+    ......0.1.2.3.4.5.6.7.............
+
+    ..................................
+
+    ....e.................f...........
+
+    ....i.................j...........
+
+    ..................................
+
+    '
+  6: '..................................
+
+    ..................................
+
+    ..eeeeccH.DD.DD.DD..Q..DD.DD.DD.DD
+
+    .....e..............Q.............
+
+    ..eeeecHD...........Q..DD.DD.DD...
+
+    ....................Q.............
+
+    ..eeeecHD.......DD..Q..DD.......DD
+
+    .....e..............Q.............
+
+    ..eeeecHD....DD.....Q.....DD....DD
+
+    ....................N.............
+
+    ..eeeeccH.DD.DD.DD..Q..DD.DD.DD.DD
+
+    .....e..............Q.............
+
+    ..eeeecHD...........Q..DD.DD.DD...
+
+    ....................Q.............
+
+    ..eeeecHD.......DD..Q..DD.......DD
+
+    .....e..............Q.............
+
+    ..eeeecHD....DD.....Q.....DD....DD
+
+    ....................N.............
+
+    ..eeeeccH.DD.DD.DD..Q..DD.DD.DD.DD
+
+    .....e..............Q.............
+
+    ..eeeecHD...........Q..DD.DD.DD...
+
+    ....................Q.............
+
+    ..eeeecHD.......DD..Q..DD.......DD
+
+    .....e..............f.............
+
+    ..eeeecHD....DD...........DD....DD
+
+    ..................................
+
+    ......................f...........
+
+    ......X.X.X.X.X.X.X.X.f...........
+
+    ......k.k.k.k.k.k.k.k.f...........
+
+    ....e.................f...........
+
+    ....l.................l...........
+
+    ..................................
+
+    ..................................
+
+    '
+  7: '..................................
+
+    ..................................
+
+    .eDDMmDD..........................
+
+    .....Q............................
+
+    .eDDMmD...........................
+
+    ..................................
+
+    .eDDMmD...........................
+
+    .....Q............................
+
+    .eDDMmD...........................
+
+    ..................................
+
+    .eDDMmDD..........................
+
+    .....Q............................
+
+    .eDDMmD...........................
+
+    ..................................
+
+    .eDDMmD...........................
+
+    .....Q............................
+
+    .eDDMmD...........................
+
+    ..................................
+
+    .eDDMmDD..........................
+
+    .....Q............................
+
+    .eDDMmD...........................
+
+    ..................................
+
+    .eDDMmD.............f.............
+
+    .....Q..............p.............
+
+    .eDDMmD.............n.............
+
+    .......ffffffffffffffff...........
+
+    ......................N...........
+
+    ......................Q...........
+
+    ....e.................Q...........
+
+    ....l.................Q...........
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    '
+  8: '..................................
+
+    ..................................
+
+    .*e!..............................
+
+    ....e)............................
+
+    .*e!e.............................
+
+    ....e.............................
+
+    .*e!e.............................
+
+    ....e)............................
+
+    .*e!e.............................
+
+    ....e.............................
+
+    .*e!e.............................
+
+    ....e)............................
+
+    .*e!e.............................
+
+    ....e.............................
+
+    .*e!e.............................
+
+    ....e)............................
+
+    .*e!eff...........................
+
+    ....e.f...........................
+
+    .*e!e.f...........................
+
+    ....e)f...........................
+
+    .*e!e.f...........................
+
+    ....e.f...........................
+
+    .*e!e.f...........................
+
+    ....e)f...........................
+
+    .*e!..f...........................
+
+    ......fMDDDDDDDDDDDDDDD...........
+
+    ..................................
+
+    ....e.............................
+
+    ....l.............................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    '
+  9: '..................................
+
+    ..................................
+
+    _egq..............................
+
+    ....Q.............................
+
+    _egqQ.............................
+
+    ....Q.............................
+
+    _egqQ.............................
+
+    ....Q.............................
+
+    _egqQ.............................
+
+    ....Q.............................
+
+    _egqQ.............................
+
+    ....Q.............................
+
+    _egqQ.............................
+
+    ....Q.............................
+
+    _egqQ.............................
+
+    ....Q.............................
+
+    _egqZMr...........................
+
+    ....Q.Q...........................
+
+    _egqQ.Q...........................
+
+    ....Q.Q...........................
+
+    _egqQ.Q...........................
+
+    ....Q.Q...........................
+
+    _egqQ.Q...........................
+
+    ....Q.Q...........................
+
+    _egq..Q...........................
+
+    ......Q...........................
+
+    ....e.............................
+
+    ....l.............................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    '
+  10: '..................................
+
+    ..................................
+
+    a.eMe.............................
+
+    ....e.............................
+
+    o.eMe.............................
+
+    ....e.............................
+
+    R.eMe.............................
+
+    ....e.............................
+
+    S.eMe.............................
+
+    s...e.............................
+
+    t.eMe.............................
+
+    ....e.............................
+
+    v.eMe.............................
+
+    ....e.............................
+
+    w.eMe.............................
+
+    ....e.............................
+
+    x.eMe.............................
+
+    s...e.............................
+
+    y.eMe.............................
+
+    ....e.............................
+
+    z.eMe.............................
+
+    ....e.............................
+
+    @.eMe.............................
+
+    ....e.............................
+
+    %.eMe.............................
+
+    ....e.............................
+
+    ....l.............................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    '
+  11: '..................................
+
+    ..................................
+
+    ....Q.............................
+
+    ....N.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....N.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ....Q.............................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    ..................................
+
+    '
+tests:
+- name: convert 0
+  steps:
+  - {wait: 30}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+- name: convert 1
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+- name: convert 5
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b2}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: convert 9
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b3}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+- name: convert 10
+  steps:
+  - {wait: 30}
+  - {use: b1}
+  - {use: b3}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+- name: convert 15
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: convert 16
+  steps:
+  - {wait: 30}
+  - {use: b4}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+- name: convert 99
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+- name: convert 100
+  steps:
+  - {wait: 30}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+- name: convert 127
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+- name: convert 128
+  steps:
+  - {wait: 30}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+- name: convert 160
+  steps:
+  - {wait: 30}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+- name: convert 199
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+- name: convert 200
+  steps:
+  - {wait: 30}
+  - {use: b3}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+- name: convert 254
+  steps:
+  - {wait: 30}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+- name: convert 255
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: back to back
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {use: b2}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b6}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b1}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {use: b2}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: start}
+  - {wait: 100}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: all 256 values
+  steps:
+  - {wait: 30}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 1, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 1, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 0, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 0, o3: 1, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 0, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 0, o1: 1, o0: 1}}
+  - {use: b0}
+  - {use: b1}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+  - {use: b0}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 59}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 0, t3: 0, t2: 0, t1: 0, t0: 0, o3: 0, o2: 0, o1: 0, o0: 0}}
+  - {wait: 1}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+  - {wait: 20}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: release 50
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 50}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 10}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: staggered release (bit k sampled at about 6(8-k) gt)
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 6}
+  - {use: b7}
+  - {wait: 6}
+  - {use: b6}
+  - {wait: 6}
+  - {use: b5}
+  - {wait: 6}
+  - {use: b4}
+  - {wait: 6}
+  - {use: b3}
+  - {wait: 6}
+  - {use: b2}
+  - {wait: 6}
+  - {use: b1}
+  - {wait: 8}
+  - {use: b0}
+  - {wait: 14}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 1}}
+- name: release b0 at 47 reads b0 as 0
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 47}
+  - {use: b0}
+  - {wait: 17}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 1, t1: 0, t0: 1, o3: 0, o2: 1, o1: 0, o0: 0}}
+- name: release b4 at 21 reads b4 as 0
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 21}
+  - {use: b4}
+  - {wait: 43}
+  - {expect: {h3: 0, h2: 0, h1: 1, h0: 0, t3: 0, t2: 0, t1: 1, t0: 1, o3: 1, o2: 0, o1: 0, o0: 1}}
+- name: release b7 at 3 reads b7 as 0
+  steps:
+  - {wait: 30}
+  - {use: b0}
+  - {use: b1}
+  - {use: b2}
+  - {use: b3}
+  - {use: b4}
+  - {use: b5}
+  - {use: b6}
+  - {use: b7}
+  - {wait: 4}
+  - {use: start}
+  - {wait: 3}
+  - {use: b7}
+  - {wait: 61}
+  - {expect: {h3: 0, h2: 0, h1: 0, h0: 1, t3: 0, t2: 0, t1: 1, t0: 0, o3: 0, o2: 1, o1: 1, o0: 1}}

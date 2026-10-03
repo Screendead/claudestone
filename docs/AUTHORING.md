@@ -326,12 +326,61 @@ Design rules, each backed by a passing spec (most are rebuilt `ref_*` designs; s
 - Debuggability: container contents are logic. A rebuild must take them from the .schem block
   entities, and a test should sweep every strength with `level` checks
   (`ref_llucas_torchless_a`, `ref_aminotreal_hex_halfer`, `ref_mattbatwings_hex_line_flat`). [M]
+- Compactness: a one-way dust staircase (dust over a transparent step) is a free OR or carry
+  bus; every stage reads the lower ones in the same tick (`ref_aminotreal_incrementor_4bit`,
+  rise 6 on every bit; `ref_librok_vertical_priority_15`, 4 gt for 15 levels). [M]
+- Compactness: give a second read port by storing each bit twice, not by a mux
+  (`ref_librok_register8_dual_read`). [M]
+- Compactness: a decaying dust chain is a budget; put a regenerating repeater before it reaches
+  0, or the far end silently drops out (`ref_mixel_priority_8bit` misses by one dust,
+  `ref_tlamp_updown_load_counter` loses bit 6, `ref_mattbatwings_call_stack_16x10` needed one
+  added repeater). [M]
+- Speed: dust-only logic adds no delay of its own; a dust OR and fan-out signum is 0 gt to the
+  dust (`ref_walvischris_signum_5bit`, `ref_mattbatwings_signum_8bit`). [M]
+- Simplicity: make a program a block swap per bit, a repeater or wool, a target or wool, so it
+  is changed by setblock with no rewiring (`ref_mattbatwings_encode_h2v`, `ref_rt_rom_display`). [M]
+- Simplicity: a compare-mode clear passes ties, so a side of 15 cannot clear a stored 15
+  (`ref_samosthesage_hex_fifo_vertical`); keep data below the clear level or use subtract. [M]
+- Debuggability: rebuild a stateful design from its saved states (power, lit, comparator
+  output, container items) and place it with `update_pass: strict`; a stripped skeleton can
+  settle differently or not at all (`ref_mattbatwings_sqrt8_sequential`,
+  `ref_sloimay_swapper_8bit`, `ref_maizumagames_stackable_7seg_counter`). [M]
+- Debuggability: run a new build on more than one server before trusting a pass or a fail
+  (`ref_mattbatwings_hex_to_bin` and `ref_aminotreal_hlp_ubcd_display` fail only on some
+  satellites). [M]
+- Debuggability: test a shipped template as shipped, then a programmed copy, and say which code
+  the tests use (`ref_mattbatwings_decode_h2v`, `ref_mattbatwings_encode_v2v`: every output
+  identical as shipped). [M]
+- Debuggability: test hold and setup windows at both edges (`ref_mattbatwings_register_file_8x8`:
+  data changed at +24 is stored, at +26 not; `ref_qmb_official_bcd_shift_tile`: 3 gt leaks, 4 holds). [M]
+- Debuggability: an exhaustive table and the schematic's own saved state find what a README
+  misses (`ref_mixel_priority_8bit`: 1 of 256 patterns; `ref_louparmi_hex_cca_5t`: its saved
+  state already gives 0+0 = 1 in the upper nibbles). [M]
+- Debuggability: a mutant with one block removed proves that block carries the function
+  (`ref_q2ck_ica_8bit`, `ref_fearless_z_cca_8bit_3t`, `ref_mattbatwings_bidir_shift_pistons`). [M]
 
 ## Traps
 
 - Repeater/comparator/observer `facing=F`: input from side F, output on the opposite side.
   Wall torch `facing=F`: hangs on the block on the opposite side of F.
 - Input cells must stay air, with their neighbours what the redstone block should power.
+- A redstone-block driver beside a lamp or other block lights a lamp but does not hard-power the
+  block, so a torch hanging on it stays lit. Where the original has a lever on that block, use a
+  fixture repeater facing into it, driven from an input cell behind (`ref_llucas_abs8_3t`,
+  `ref_mixel_cle_adder_8bit_3t`).
+- `use` only clicks a lever or button on a plain support (stone, cobblestone, smooth_stone,
+  stone_bricks, white_concrete, white_wool); swap the support, or click it with
+  `run: setblock` of the new state and `run: clone <block> <block> <block> replace force` of the
+  block it hangs on (`ref_xoliks_fractional_bin_to_dec8`).
+- The rig clears only the build box. Leftover blocks at x = -1 of a shared plot have powered edge
+  dust and lamps on some satellites; leave a one-block air margin (a `reserve`d column) on any
+  face whose cells react to neighbours (`ref_maizumagames_stackable_7seg_counter`,
+  `ref_mattbatwings_basic_pixel_display_8x8`).
+- A `wave` step with many cells or long strings makes an RCON command too long and the server
+  closes the connection; lint does not catch it. Split it into several waves over a few cells.
+- A `wave` failure message counts characters from 1: "character 3" is index 2.
+- A note block's observer fires only when `setblock` actually changes the note; alternate two
+  notes to push repeatedly (`ref_samosthesage_hex_fifo`).
 - Torches burn out after 8 toggles in 60 ticks; long truth tables on one torch can hit it.
 - A block powered only by dust (weakly) turns off torches and drives repeaters and lamps
   beside it, but not dust. Hard power (a repeater into it, a torch under it) drives dust too.
