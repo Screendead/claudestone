@@ -1,0 +1,58 @@
+name: doorbell_jingle
+description: 'A doorbell: press the stone button and nine pling note blocks play a nine-note phrase (E5 D#5 E5 D#5 E5 B4 D5 C5 A4, notes 22 21 22 21 22 17 20 18 15) from a repeater delay line, then it rings again on the next press. Use: click the button at the west end (x=0); the notes are the row of note blocks along z=1, one per hard-powered stone tap on the z=2 chain. Size 21x2x5. MEASURED (trace, ticks after the click): notes rise at +2 +6 +10 +14 +18 +24 +28 +32 +38 gt, each exactly once and held 19-21 gt (the button pulse passes down the chain), nothing fires at rest. Retrigger is IGNORED, not restarted: a press at +30 changes nothing (tested); a lock stays up from about +28 until the last note''s pulse ends, about +63 gt (INFERRED from the lock dust trace at +26..+60 plus the 2 gt lock repeater), and a press in the few gt between the button popping up (+20) and the lock rising (about +28) is NOT ignored (not tested). How it works: the button hard-powers a stone, an entry repeater feeds tap stone 1, and each tap stone powers its note block directly and the next repeater; the repeater delay settings (2,2,2,2,3,2,2,3 redstone ticks per gap) are the rhythm. A dust OR runs beside taps 6-9 only and, through a repeater facing the entry repeater''s side, locks it once the entry pulse has ended (dust alone cannot lock a repeater; locking it earlier would latch it on). Pling comes from glowstone under each note block; the note is set in the state. Library parts: this is a hand-built delay line using the repeater-lock and hard-powered-block behaviour listed in docs/MECHANICS.md; no library gate is reused.'
+palette:
+  .: air
+  '=': stone
+  S: stone
+  b: {name: button, block: 'stone_button[face=wall,facing=west,powered=false]'}
+  e: {name: entry, block: 'repeater[facing=west,delay=1]'}
+  g: glowstone
+  w: redstone_wire
+  L: {name: lock, block: 'repeater[facing=south,delay=1]'}
+  '<': 'repeater[facing=east,delay=1]'
+  '2': {block: 'repeater[facing=west,delay=2]'}
+  '3': {block: 'repeater[facing=west,delay=3]'}
+  A: {name: n1, block: 'note_block[instrument=pling,note=22]'}
+  B: {name: n2, block: 'note_block[instrument=pling,note=21]'}
+  C: {name: n3, block: 'note_block[instrument=pling,note=22]'}
+  D: {name: n4, block: 'note_block[instrument=pling,note=21]'}
+  E: {name: n5, block: 'note_block[instrument=pling,note=22]'}
+  F: {name: n6, block: 'note_block[instrument=pling,note=17]'}
+  G: {name: n7, block: 'note_block[instrument=pling,note=20]'}
+  H: {name: n8, block: 'note_block[instrument=pling,note=18]'}
+  I: {name: n9, block: 'note_block[instrument=pling,note=15]'}
+layers:
+  0: |
+    =====================
+    ===g=g=g=g=g=g=g=g=g=
+    =====================
+    =====================
+    =====================
+  1: |
+    .....................
+    ...A.B.C.D.E.F.G.H.I.
+    bSeS2S2S2S2S3S2S2S3S.
+    ..L..........wwwwwww.
+    ..wwwwww<wwwww.......
+tests:
+- name: silent at rest
+  steps:
+  - wave: {n1: '0000000000000000000000000000000000000000', n2: '0000000000000000000000000000000000000000', n3: '0000000000000000000000000000000000000000', n4: '0000000000000000000000000000000000000000', n5: '0000000000000000000000000000000000000000', n6: '0000000000000000000000000000000000000000', n7: '0000000000000000000000000000000000000000', n8: '0000000000000000000000000000000000000000', n9: '0000000000000000000000000000000000000000'}
+- name: tune plays in order, each note once
+  steps:
+  - {use: button}
+  - wave: {n1: '0011111111111111111110000000000000000000000000000000000000000000', n2: '0000001111111111111111111000000000000000000000000000000000000000', n3: '0000000000111111111111111111100000000000000000000000000000000000', n4: '0000000000000011111111111111111110000000000000000000000000000000', n5: '0000000000000000001111111111111111111000000000000000000000000000', n6: '0000000000000000000000001111111111111111111000000000000000000000', n7: '0000000000000000000000000000111111111111111111100000000000000000', n8: '0000000000000000000000000000000011111111111111111110000000000000', n9: '0000000000000000000000000000000000000011111111111111111110000000'}
+- name: second press during the tune is ignored
+  steps:
+  - {use: button}
+  - wave: {n1: '001111111111111111111000000000', n2: '000000111111111111111111100000', n3: '000000000011111111111111111110', n4: '000000000000001111111111111111', n5: '000000000000000000111111111111', n6: '000000000000000000000000111111', n7: '000000000000000000000000000011', n8: '000000000000000000000000000000', n9: '000000000000000000000000000000'}
+  - {use: button}
+  - wave: {n1: '0000000000000000000000000000000000', n2: '0000000000000000000000000000000000', n3: '0000000000000000000000000000000000', n4: '1110000000000000000000000000000000', n5: '1111111000000000000000000000000000', n6: '1111111111111000000000000000000000', n7: '1111111111111111100000000000000000', n8: '0011111111111111111110000000000000', n9: '0000000011111111111111111110000000'}
+- name: rings again after the tune
+  steps:
+  - repeat:
+      times: 2
+      steps:
+      - {use: button}
+      - wave: {n1: '0011111111111111111110000000000000000000000000000000000000000000', n2: '0000001111111111111111111000000000000000000000000000000000000000', n3: '0000000000111111111111111111100000000000000000000000000000000000', n4: '0000000000000011111111111111111110000000000000000000000000000000', n5: '0000000000000000001111111111111111111000000000000000000000000000', n6: '0000000000000000000000001111111111111111111000000000000000000000', n7: '0000000000000000000000000000111111111111111111100000000000000000', n8: '0000000000000000000000000000000011111111111111111110000000000000', n9: '0000000000000000000000000000000000000011111111111111111110000000'}
+      - {wait: 10}

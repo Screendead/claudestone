@@ -1,0 +1,640 @@
+name: reaction_timer
+description: 'Reaction timer game, slow motion: raise START, wait for the GO lamp, raise STOP as fast as you can, and five lamps show how many counts passed between GO and STOP as a binary number (d0 = least significant), held until START is raised again. One count is 16 game ticks (8 redstone ticks, 0.8 s), so this times in seconds, not milliseconds. START and STOP are levels (a lever each, not a button): the build has three START driver cells and two STOP driver cells, which a player feeds from one lever each through dust or repeaters, and the tests drive them as redstone blocks. Use: START down and STOP down is idle. Raise START: the counter is cleared (see below), then 44 gt after the clear finishes the GO lamp lights (MEASURED: 44 gt after START rises when the counter already reads 0) and the counter runs. Raise STOP: counting stops at once and the lamps hold, even with START still up. STOP must stay up to hold. Lower START: the GO lamp goes out and the count still holds, with STOP down or up. Raise START again: that clears it. Count rule (MEASURED, 14 STOP times over 0 to 523 gt after GO): the count is the number of clock edges that have fired by STOP + 3 gt, the first edge 12 gt after GO then every 16 gt, so STOP 2 gt after GO shows 0, 3 shows 1, 18 shows 1, 19 shows 2; the lamp cells settle a few gt later. Overflow (MEASURED): 5 bits, so the count wraps 31 to 0 and keeps counting (STOP 507 gt after GO shows 0, 523 shows 1); a clock edge can land one game tick either side of the STOP press, so only times well inside an interval are reproducible. START clears (MEASURED) by running the counter round to 0 rather than by resetting bits (a copper bulb only changes on a power rise, so it can''t be forced): from a held 4 the counter counts up through 31 and wraps to 0 in about 460 gt with GO still dark (tested dark at +300, reading 0 at +480, lit at +540); a held 31 is the worst case at 31 counts, about 500 gt (INFERRED from 16 gt a count), and a count of 0 clears at once (MEASURED). STOP before GO (MEASURED): STOP held from the start of a round withholds GO until it is released (GO then lights 44 gt later and the count runs normally); STOP raised during the 44 gt wait lets GO light but the counter never runs, so the round shows 0. How it works: five waxed copper bulbs hold the count inverted (lit = 0), clocked together so every bit changes in the same tick: bulb n is powered by the shared clock and by a mask of all lower bulbs, so on each rising edge exactly the unmasked bulbs toggle, and a comparator beside each bulb reads it into a stone block, where a wall torch gives the true bit and lights the lamp beside it. The dust under the torches is an OR (nz) of all five bits, true while the count is not 0. A repeater-delay comparator clock, gated by en, makes the 16 gt edges. en = (nz OR GO) minus STOP minus NOT START (three subtract comparators, NOT START is a redstone block minus START): so while START is up and STOP is down the clock runs whenever the count is not 0, which is the clearing pass, and it stops by itself when the count wraps to 0. GO is a repeater-lock latch that is set by START minus (nz OR STOP) after a four-repeater delay line (32 gt) and reset by NOT START. The GO lamp sits on the latch''s output stone. The clock period is 16 gt because 12 was too fast for two reasons found in testing: the mask passes through three repeaters (MEASURED: a period of 8 gt missed the carry into bit 4; INFERRED cause: the fifth bulb''s mask needs about 8 gt to settle after a toggle), and the nz stop signal needs about 12 gt to reach the clock (MEASURED: with 12 gt one more edge got through and the clear pass overshot to 1; the 12 gt path length is INFERRED from the diodes on it). Size 27x3x15, 254 blocks. Interface: START driver cells at (19,1,3), (23,1,8), (26,1,15); STOP driver cells at (22,1,4), (27,1,14); lamps d0..d4 at x = 0, 3, 6, 9, 12 on z = 5 (the torches v0..v4 are one cell east of them, reading as the value bit), GO lamp at (22,2,6). Placed with every bulb lit (value 0) and settles by itself in about 16 gt after loading (MEASURED). Library parts used: library/counter/count_bulb_sync and count_bulb_sync_up (bulb plus masked-clock counter, the torch readout and the startup ripple, widened to five bits), library/clock/clock_comparator_repeater (gated comparator clock whose repeater sets the period), library/rs_latch/rs_repeater_lock (GO latch), library/delay/delay_repeater_line (the 32 gt delay), library/delay/delay_selectable (a comparator over a redstone block as an inverter), and docs/MECHANICS.md copper_bulb_instant_toggle.'
+traits:
+- pistonless
+- entityless
+- comparator_based
+- torch_based
+palette:
+  .: air
+  '=': smooth_stone
+  a: redstone_wire
+  b:
+    name: clkout
+    block: repeater[facing=east,delay=1]
+  c: comparator[facing=east,mode=subtract]
+  d:
+    name: en
+    block: redstone_wire
+  e: repeater[facing=south,delay=3]
+  f: waxed_copper_bulb[lit=true]
+  g: stone
+  h: waxed_copper_bulb
+  i: repeater[facing=south,delay=1]
+  j:
+    name: b0
+    block: comparator[facing=north]
+  k:
+    name: b1
+    block: comparator[facing=north]
+  l:
+    name: b2
+    block: comparator[facing=north]
+  m:
+    name: b3
+    block: comparator[facing=north]
+  n:
+    name: b4
+    block: comparator[facing=north]
+  o:
+    input: start
+  p: redstone_block
+  q: comparator[facing=west,mode=subtract]
+  r:
+    name: E
+    block: comparator[facing=south,mode=subtract]
+  s:
+    input: stop
+  t:
+    name: lamp0
+    block: redstone_lamp
+  u:
+    name: v0
+    block: redstone_wall_torch[facing=south,lit=false]
+  v:
+    name: lamp1
+    block: redstone_lamp
+  w:
+    name: v1
+    block: redstone_wall_torch[facing=south,lit=false]
+  x:
+    name: lamp2
+    block: redstone_lamp
+  y:
+    name: v2
+    block: redstone_wall_torch[facing=south,lit=false]
+  z:
+    name: lamp3
+    block: redstone_lamp
+  A:
+    name: v3
+    block: redstone_wall_torch[facing=south,lit=false]
+  B:
+    name: lamp4
+    block: redstone_lamp
+  C:
+    name: v4
+    block: redstone_wall_torch[facing=south,lit=false]
+  D:
+    name: nzraw
+    block: redstone_wire
+  E:
+    name: nzamp
+    block: repeater[facing=west,delay=1]
+  F:
+    name: nz
+    block: redstone_wire
+  G: repeater[facing=west,delay=1]
+  H: repeater[facing=east,delay=1]
+  I:
+    name: g
+    block: repeater[facing=east,delay=1,locked=true]
+  J: repeater[facing=east,delay=3]
+  K:
+    name: sp
+    block: redstone_wire
+  L:
+    name: N2
+    block: comparator[facing=west,mode=subtract]
+  M:
+    name: L
+    block: comparator[facing=south,mode=subtract,powered=true]
+  N:
+    name: sd
+    block: repeater[facing=east,delay=1]
+  O: repeater[facing=north,delay=1]
+  P:
+    name: d10
+    block: repeater[facing=south,delay=4]
+  Q:
+    name: d11
+    block: repeater[facing=south,delay=4]
+  R:
+    name: d12
+    block: repeater[facing=south,delay=4]
+  S:
+    name: d13
+    block: repeater[facing=south,delay=4]
+  T:
+    name: F
+    block: comparator[facing=south,mode=subtract]
+  U: repeater[facing=west]
+  V:
+    name: go
+    block: redstone_lamp
+layers:
+  0: |
+    .=====================......
+    .=..=..=..=..=..==...=......
+    ................==...=......
+    .=..=..=..=..=.......=......
+    ..=..=..=..=.......===......
+    .....................=......
+    .=====================.====.
+    ..................=....====.
+    ..................=.......=.
+    ..................=.......=.
+    ..................=.......=.
+    ..................=.......=.
+    ..................=.......=.
+    ..................=.......=.
+    ..................=========.
+    ............................
+  1: |
+    .aaaaaaaaaaaaaabacdaaa......
+    .a..a..a..a..a..ae...a......
+    .fgghgghgghggh..aa...i......
+    .jggkgglggmggn.....o.a......
+    .ga.ga.ga.ga.g....pqars.....
+    tu.vw.xy.zA.BC.......a......
+    .aaaaaaaaaaaaaDEFaaaGagHIJK.
+    ..................a...pLMNa.
+    ..................a....op.a.
+    ..................a.......a.
+    ..................O.......P.
+    ..................a.......Q.
+    ..................a.......R.
+    ..................a.......S.
+    ..................aaaaaaaGTs
+    ..........................o.
+  2: |
+    ............................
+    ............................
+    ...aaUaaUaaUaa..............
+    ..aa.aa.aa.aa...............
+    ............................
+    ............................
+    ......................V.....
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+    ............................
+tests:
+- name: rests at 0 with the GO lamp dark
+  steps:
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - wait: 200
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+- name: STOP 0 gt after GO shows 0
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 2 gt after GO shows 0
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 1
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 3 gt after GO shows 1
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 2
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 11 gt after GO shows 1
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 10
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 18 gt after GO shows 1
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 17
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 19 gt after GO shows 2
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 18
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 1
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 43 gt after GO shows 3
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 42
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 1
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 107 gt after GO shows 7
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 106
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 1
+      v2: 1
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP 123 gt after GO shows 8
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 122
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 1
+      v4: 0
+      go: 1
+- name: STOP 235 gt after GO shows 15
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 234
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 1
+      v2: 1
+      v3: 1
+      v4: 0
+      go: 1
+- name: STOP 251 gt after GO shows 16
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 250
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 1
+      go: 1
+- name: STOP 491 gt after GO shows 31
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 490
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 1
+      v2: 1
+      v3: 1
+      v4: 1
+      go: 1
+- name: 'overflow: STOP 507 gt after GO wraps 31 to 0'
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 506
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: 'overflow: STOP 523 gt after GO shows 1'
+  steps:
+  - wait: 20
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 522
+  - drive:
+      stop: 1
+  - wait: 60
+  - expect:
+      v0: 1
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP held from the start withholds GO until released
+  steps:
+  - wait: 20
+  - drive:
+      start: 1
+      stop: 1
+  - wait: 150
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      stop: 0
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 50
+  - expect:
+      v0: 1
+      v1: 1
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: STOP raised during the wait still lets GO light but nothing counts
+  steps:
+  - wait: 20
+  - drive:
+      start: 1
+  - wait: 20
+  - drive:
+      stop: 1
+  - wait: 150
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 1
+- name: 'START clears: the shown count holds until START rises, then the counter runs round to 0 before GO'
+  steps:
+  - wait: 20
+  - drive:
+      start: 1
+  - wave:
+      go: '000000000000000000000000000000000000000000001'
+  - wait: 58
+  - drive:
+      stop: 1
+  - wait: 40
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 1
+      v3: 0
+      v4: 0
+      go: 1
+  - drive:
+      start: 0
+  - wait: 40
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 1
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      stop: 0
+  - wait: 300
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 1
+      v3: 0
+      v4: 0
+      go: 0
+  - drive:
+      start: 1
+  - wait: 300
+  - expect:
+      go: 0
+  - wait: 180
+  - expect:
+      v0: 0
+      v1: 0
+      v2: 0
+      v3: 0
+      v4: 0
+      go: 0
+  - wait: 60
+  - expect:
+      go: 1

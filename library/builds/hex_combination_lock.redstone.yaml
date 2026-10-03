@@ -1,0 +1,647 @@
+name: hex_combination_lock
+description: 'Combination lock where signal strength is the data: three 4-lever hex digits are turned into strengths 0-15, compared with a secret code of three item counts by subtract comparators both ways (D - code and code - D), and a CHECK button latches the result into an UNLOCK lamp. The code is A, 3, C (10, 3, 12), stored as stone in two decorated pots a digit (one per comparator); change the code by changing the count (strength s needs 1,5,10,14,19,23,28,32,37,42,46,51,55,60,64 stone for s=1..15). USE: set digit 1/2/3 on its four levers (inputs d1b3..d1b0, d2b..., d3b..., most significant bit first; each is a power cell where a lever sits), press CHECK (stone button), the lamp stays lit until a wrong CHECK or RESET (lever; hold it on, then off). Order matters because digit i is compared only with code digit i. HOW IT WORKS: per digit a 4-bit DAC of three subtract comparators fed by hopper constants (library analog_dac, unchanged apart from moving its b1 and b0 inputs onto the side
+  cells) puts the digit on a comparator (named d1, d2, d3, exact strength 0-15); a compare-mode comparator copies that strength onto a stone, where one subtract comparator reads it through the stone as rear against the pot''s strength (D - code) and a second reads the dust on top of the stone as side against the pot''s strength as rear (code - D); the two exact-difference dusts each go through a repeater, which turns any difference of 1 or more into 15, onto one mismatch bus shared by all three digits. A repeater reads the bus, a subtract comparator inverts it (15 - bus) and gates it into a data repeater locked by a second subtract comparator (library dl_subtract_lock''s gated latch): the latch follows the match only while CHECK is held (a stone button, 20 gt), so the digits can change after CHECK without relocking, and RESET opens the latch and forces the data to 0. SIMPLIFIED versus entry one digit at a time: the three digits are entered in parallel on 12 levers with one CHECK button,
+  and the digits are live DAC strengths rather than latched copies (the comparator-loop latch from d_latch/dl_analog_ring would add 8x7 blocks a digit; the lock latch is one bit). Library parts: signal_strength/analog_dac, signal_strength/analog_const_container (pot constants), signal_strength/analog_abs_diff (difference both ways, rebuilt around a stone tap), d_latch/dl_subtract_lock. Size 19x3x22 (558 blocks, plot main). MEASURED: bit change to digit strength 8 gt (b2, the slowest DAC path; waved on d1); CHECK to q 4 gt and to the lamp 6 gt; RESET to q 4 gt and the lamp off 10 gt (a lamp adds 4 gt to every fall). Full digit-entry to mismatch bus latency was not measured; tests wait 40 gt after entering. INFERRED: the mismatch bus loses one strength per dust, 14 at worst from the far digit to the reading repeater at the middle digit''s row, so it reads 8 or more everywhere. Tests cover: all-zero fails, digit strengths exactly as entered (level on d1..d3), correct code unlocks only on CHECK
+  and holds after the digits change, each digit one above / one below / zero fails, wrong order and reversed order fail, a wrong re-entry relocks, RESET clears and a second CHECK unlocks again. Gotcha found while building: q''s output lamp strongly powered dust on c1''s side, so it kept the latch open; q now drives the lamp through a repeater.'
+traits:
+- analog
+- comparator_based
+- container_based
+- pistonless
+- entityless
+palette:
+  .: air
+  '=': smooth_stone
+  '#': redstone_wire
+  A: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}
+  B: decorated_pot[facing=north]{item:{id:"minecraft:stone",count:42}}
+  C: comparator[facing=north,mode=subtract]
+  D: repeater[facing=east]
+  E:
+    input: d1b1
+  F: comparator[facing=north]
+  G: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}
+  H: stone
+  I: comparator[facing=west,mode=subtract]
+  J:
+    output: d1
+    block: comparator[facing=west,mode=subtract]
+  K: comparator[facing=west]
+  L: repeater[facing=west]
+  M: comparator[facing=south,mode=subtract]
+  N:
+    input: d1b0
+  O: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}
+  P: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}
+  Q:
+    name: unlock
+    block: redstone_lamp
+  R: decorated_pot[facing=north]{item:{id:"minecraft:stone",count:10}}
+  S: repeater[facing=south]
+  T:
+    name: check
+    block: stone_button[face=wall,facing=east]
+  U:
+    input: d2b1
+  V:
+    output: q
+    block: repeater[facing=south]
+  W: comparator[facing=east,mode=subtract]
+  X: redstone_block
+  Y:
+    output: d2
+    block: comparator[facing=west,mode=subtract]
+  Z:
+    name: reset
+    block: lever[face=wall,facing=east,powered=false]
+  a:
+    input: d2b0
+  b: decorated_pot[facing=north]{item:{id:"minecraft:stone",count:51}}
+  c:
+    input: d3b1
+  d:
+    output: d3
+    block: comparator[facing=west,mode=subtract]
+  e:
+    input: d3b0
+  f:
+    input: d1b3
+  g:
+    input: d1b2
+  h:
+    input: d2b3
+  i:
+    input: d2b2
+  j:
+    input: d3b3
+  k:
+    input: d3b2
+layers:
+  0: |
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+    ===================
+  1: |
+    .#.A....B..........
+    .#.CDE..F..........
+    GHIIJHKHI#L#.......
+    .#M.MNHHHHH##......
+    ..O.P.......#......
+    ............#......
+    ............#.Q....
+    .#.A....R...#.S#HT.
+    .#.CDU..F...#.VWX..
+    GHIIYHKHI#L##LM#HZ.
+    .#M.MaHHHHH##.X....
+    ..O.P.......#......
+    ............#......
+    ............#......
+    .#.A....b...#......
+    .#.CDc..F...#......
+    GHIIdHKHI#L##......
+    .#M.MeHHHHH##......
+    ..O.P..............
+    ...................
+    ...................
+    ...................
+  2: |
+    ...................
+    .f.................
+    .......#...........
+    .g...BKI#L#........
+    ...................
+    ...................
+    ...................
+    ...................
+    .h.................
+    .......#...........
+    .i...RKI#L#........
+    ...................
+    ...................
+    ...................
+    ...................
+    .j.................
+    .......#...........
+    .k...bKI#L#........
+    ...................
+    ...................
+    ...................
+    ...................
+tests:
+- name: starts locked, all zeros fails
+  steps:
+  - expect:
+      unlock: 0
+  - drive:
+      d1b3: 0
+      d1b2: 0
+      d1b1: 0
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 0
+      d2b0: 0
+      d3b3: 0
+      d3b2: 0
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - &id001
+    use: check
+  - &id002
+    wait: 30
+  - expect:
+      unlock: 0
+- name: digit strengths held as data
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - level:
+      d1: 10
+      d2: 3
+      d3: 12
+  - drive:
+      d1b3: 1
+      d1b2: 1
+      d1b1: 1
+      d1b0: 1
+      d2b3: 0
+      d2b2: 0
+      d2b1: 0
+      d2b0: 0
+      d3b3: 0
+      d3b2: 1
+      d3b1: 1
+      d3b0: 1
+  - wait: 40
+  - level:
+      d1: 15
+      d2: 0
+      d3: 7
+  - drive:
+      d1b3: 0
+      d1b2: 0
+      d1b1: 0
+      d1b0: 1
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 0
+      d3b3: 1
+      d3b2: 1
+      d3b1: 1
+      d3b0: 0
+  - wait: 40
+  - level:
+      d1: 1
+      d2: 2
+      d3: 14
+- name: correct code unlocks only on check
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - expect:
+      unlock: 0
+  - *id001
+  - *id002
+  - expect:
+      unlock: 1
+  - wait: 40
+  - expect:
+      unlock: 1
+- name: unlock holds after the digits change
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 1
+  - drive:
+      d1b3: 0
+      d1b2: 0
+      d1b1: 0
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 0
+      d2b0: 0
+      d3b3: 0
+      d3b2: 0
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - wait: 20
+  - expect:
+      unlock: 1
+- name: digit 1 one above (11) fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 1
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 1 one below (9) fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 0
+      d1b0: 1
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 1 zero fails
+  steps:
+  - drive:
+      d1b3: 0
+      d1b2: 0
+      d1b1: 0
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 2 one above (4) fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 1
+      d2b1: 0
+      d2b0: 0
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 2 one below (2) fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 0
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 2 zero fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 0
+      d2b0: 0
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 3 one above (13) fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 1
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 3 one below (11) fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 0
+      d3b1: 1
+      d3b0: 1
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: digit 3 zero fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 0
+      d3b2: 0
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: wrong order fails
+  steps:
+  - drive:
+      d1b3: 0
+      d1b2: 0
+      d1b1: 1
+      d1b0: 1
+      d2b3: 1
+      d2b2: 0
+      d2b1: 1
+      d2b0: 0
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: reversed order fails
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 1
+      d1b1: 0
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 0
+      d3b1: 1
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+- name: wrong entry then check relocks
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 1
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 0
+      d3b1: 1
+      d3b0: 1
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 0
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 1
+- name: reset clears the unlock
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - expect:
+      unlock: 1
+  - use: reset
+  - wait: 16
+  - expect:
+      unlock: 0
+  - use: reset
+  - wait: 40
+  - expect:
+      unlock: 0
+  - *id001
+  - *id002
+  - expect:
+      unlock: 1
+- name: 'timing: check to unlock'
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - use: check
+  - wave:
+      q: '0000111111'
+      unlock: '0000001111'
+- name: 'timing: reset to relock'
+  steps:
+  - drive:
+      d1b3: 1
+      d1b2: 0
+      d1b1: 1
+      d1b0: 0
+      d2b3: 0
+      d2b2: 0
+      d2b1: 1
+      d2b0: 1
+      d3b3: 1
+      d3b2: 1
+      d3b1: 0
+      d3b0: 0
+  - wait: 40
+  - *id001
+  - *id002
+  - use: reset
+  - wave:
+      q: '111100000000'
+      unlock: '111111111100'
+- name: 'timing: bit to strength'
+  steps:
+  - drive:
+      d1b2: 1
+  - wave:
+      d1: '000000001'
