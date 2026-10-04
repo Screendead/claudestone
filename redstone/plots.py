@@ -35,9 +35,12 @@ FAMILIES += [f"mechanics_{i}" for i in range(1, 9)]
 # apart from our own designs; then builds for survival play (library/survival) and storage
 # tech (library/storage).
 FAMILIES += ["references", "survival", "storage"]
+# Small finished gadgets, one plot each.
+FAMILIES += ["dice_roller", "reaction_timer", "hex_combination_lock", "doorbell_jingle"]
 COLOURS = ["red", "orange", "yellow", "lime", "green", "cyan", "light_blue", "blue",
            "purple", "magenta", "pink", "brown", "red", "orange", "yellow", "lime",
-           "green", "cyan", "light_blue", "blue"] + ["white", "light_gray"] * 4 + ["black", "lime", "purple"]
+           "green", "cyan", "light_blue", "blue"] + ["white", "light_gray"] * 4 + ["black", "lime", "purple"] + [
+    "pink", "yellow", "cyan", "orange"]
 SIZE = (72, 32, 72)
 # With its border a plot spans 76 blocks; at a pitch of 80 from x and z origins 2 past a
 # chunk edge, each plot forceloads exactly 5 x 5 chunks.

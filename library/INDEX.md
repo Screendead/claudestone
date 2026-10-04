@@ -94,12 +94,8 @@ and subtracts, so it passes A only when B is on |
 | button_lamp | 4x1x1 | 4 | 4 | - |  | A stone button pulse through a torch inverter; the button releases after 20 ticks |
 | cpu_fib4 | 185x8x85 | 125800 | 16210 | - | torch_based, pistonless, entityless | The whole CPU4 computer running the Fibonacci program (words 10 80 11 A0 90 20 D8 B3 F0), built from the compact parts: cpu_clock_compact, the 16x8 lever ROM (rom_ctrl), cpu_pc_compact abutting its east face, cpu_ctrl_compact turned under the ROM, cpu_alu_compact (n muxed inside) abutting cpu_regs_compact, and cpu_out_display_compact at the north edge |
 | decoder | 79x4x71 | 22436 | 5321 | - |  | A sum 0-18 (s0 = least significant bit) to units-digit segments a-g and a tens flag |
-| dice_roller | 9x7x22 | 1386 | 368 | - | container_based, comparator_based, analog | Electronic die: one click of the button rolls a fair 1-6 and shows it as dice pips on a 3x3 face of redstone lamps facing north (player stands north; the bottom middle cell is the button's stone, the top middle lamp never lights) |
-| doorbell_jingle | 21x2x5 | 210 | 154 | - |  | A doorbell: press the stone button and nine pling note blocks play a nine-note phrase (E5 D#5 E5 D#5 E5 B4 D5 C5 A4, notes 22 21 22 21 22 17 20 18 15) from a repeater delay line, then it rings again on the next press |
-| hex_combination_lock | 19x3x22 | 1254 | 558 | - | analog, comparator_based, container_based, pistonless, entityless | Combination lock where signal strength is the data: three 4-lever hex digits are turned into strengths 0-15, compared with a secret code of three item counts by subtract comparators both ways (D - code and code - D), and a CHECK button latches the result into an UNLOCK lamp |
 | lever_lamp | 4x1x1 | 4 | 4 | - |  | A lever-controlled torch inverter lighting a lamp; checks player-faithful lever input |
 | probe_cells | 3x2x13 | 78 | 51 | - |  | Harness check for the readable cell kinds (rail, copper bulb, piston, hopper lock, daylight detector) and exact strengths of a comparator, a daylight detector and dust |
-| reaction_timer | 27x3x15 | 1215 | 254 | - | pistonless, entityless, comparator_based, torch_based | Reaction timer game, slow motion: raise START, wait for the GO lamp, raise STOP as fast as you can, and five lamps show how many counts passed between GO and STOP as a binary number (d0 = least significant), held until START is raised again |
 | ripple_adder_2bit | 37x4x48 | 7104 | 1408 | - |  | Two generated full adders with the carry routed from the first to the second |
 | route_chain | 16x2x7 | 224 | 44 | - |  | Two NOT gates joined by a routed wire |
 | route_cross | 20x4x15 | 1200 | 142 | - |  | Two routed wires that must swap sides, one of them fanning out to two sinks |
@@ -258,6 +254,12 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 | mux_demux_lock_latch | 5x2x5 | 50 | 21 | - | lockable, compact, lightless, silent, pistonless, entityless, flat, horizontal, tick_accurate, reset_safe, survival_friendly | Addressable latch: a 1:2 demultiplexer whose deselected output holds its last value instead of clearing, built on repeater locking |
 | mux_demux_piston_instant | 3x3x5 | 45 | 14 | 0/3 | ultrafast, instant, compact, piston_based, entityless, tick_accurate, reset_safe, survival_friendly | 1:2 demultiplexer with a 0-tick data path: mux_piston_instant driven from its output |
 
+## dice_roller
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| dice_roller | 9x7x22 | 1386 | 368 | - | container_based, comparator_based, analog | Electronic die: one click of the button rolls a fair 1-6 and shows it as dice pips on a 3x3 face of redstone lamps facing north (player stands north; the bottom middle cell is the button's stone, the top middle lamp never lights) |
+
 ## door
 
 | variant | size | volume | blocks | delay | traits | summary |
@@ -287,6 +289,12 @@ gate0 reads d through one dust at its back and subtracts s on its side |
 | door16_shuttle_band | 9x4x6 | 216 | 22 | - | piston_based, entityless | One shuttle band for an in-plane 16x16 door |
 | door_2x2_flush_harness_check | 12x4x4 | 192 | 56 | - |  | Harness check for door tests |
 | ref_legden_fastest_10x10 | 44x22x14 | 13552 | 8616 | - | piston_based, observer_based, entityless | Our rebuild of a published door: LegDen's fastest 10x10 seamless piston door (video https://youtu.be/bZtwoJV967k, finished 02.06.2026; layout inspiration credited by LegDen to JensundLars, parkertoo and FPSL), block for block from LegDen's downloadable world (Java 1.21.11), saved open: 8,516 blocks in 44x22x14, of which 1843 observers, 1055 sticky pistons, 629 pistons |
+
+## doorbell_jingle
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| doorbell_jingle | 21x2x5 | 210 | 154 | - |  | A doorbell: press the stone button and nine pling note blocks play a nine-note phrase (E5 D#5 E5 D#5 E5 B4 D5 C5 A4, notes 22 21 22 21 22 17 20 18 15) from a repeater delay line, then it rings again on the next press |
 
 ## dual_edge
 
@@ -379,6 +387,12 @@ to up (9,2,7) |
 | add_half_comparator_flat | 6x2x5 | 60 | 51 | 4 | lightless, silent, pistonless, entityless, flat, horizontal, stackable, compact, comparator_based, fast, tick_accurate, reset_safe, survival_friendly | Lightless, silent half adder on one layer |
 | add_half_comparator_flat_x2 | 6x5x5 | 150 | 102 | 4 | lightless, silent, pistonless, entityless, stackable, comparator_based, tick_accurate, reset_safe, survival_friendly | Two add_half_comparator_flat copies stacked 3 blocks apart (the upper copy's floor sits directly on the lower copy's input cells), with independent inputs a1/b1 (lower) and a2/b2 (upper) |
 | half_adder | 19x4x15 | 1140 | 194 | - |  | One-bit half adder |
+
+## hex_combination_lock
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| hex_combination_lock | 19x3x22 | 1254 | 558 | - | analog, comparator_based, container_based, pistonless, entityless | Combination lock where signal strength is the data: three 4-lever hex digits are turned into strengths 0-15, compared with a secret code of three item counts by subtract comparators both ways (D - code and code - D), and a CHECK button latches the result into an UNLOCK lamp |
 
 ## input
 
@@ -615,6 +629,12 @@ RANDOM001 (Discord: https://discord.com/channels/1361854816837435433/14723982166
 Tested and Functional and Recommended, schematic RANDOM001_subset_selector) |
 | ref_mattbatwings_three_way_randomizer | 3x3x6 | 54 | 17 | - | compact, container_based, comparator_based, analog | Source RANDOM003_3_way_Randomizer, mattbatwings' Logical Redstone Archive (Discord https://discord.com/channels/1361854816837435433/1472398275842805895): a button press gives signal strength 1, 2 or 3, a third each (README, SOURCED) |
 | ref_mattbatwings_two_way_randomizer | 3x3x5 | 45 | 14 | - | compact, container_based, comparator_based | Rebuilt from LRA entry RANDOM002 '2 way Randomizer' (no author listed, endorsed by mattbatwings; https://discord.com/channels/1361854816837435433/1472398246973538495) |
+
+## reaction_timer
+
+| variant | size | volume | blocks | delay | traits | summary |
+|---|---|---|---|---|---|---|
+| reaction_timer | 27x3x15 | 1215 | 254 | - | pistonless, entityless, comparator_based, torch_based | Reaction timer game, slow motion: raise START, wait for the GO lamp, raise STOP as fast as you can, and five lamps show how many counts passed between GO and STOP as a binary number (d0 = least significant), held until START is raised again |
 
 ## register
 

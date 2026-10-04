@@ -70,7 +70,7 @@ The world is a redstone-preset superflat (surface y=56), daylight, weather and m
 off. `redstone/plots.py` divides it into a 192x24x192 `main` plot and, north of it, a grid
 of 72x32x72 plots (five a row, pitch 80, each forceloading exactly 5 x 5 chunks): one per
 building block, eight mechanics workbenches, a black-ringed `references` plot,
-`survival` and `storage`, each with a coloured concrete ring, glass corner posts and a floating name
+`survival`, `storage` and one plot per finished gadget (`dice_roller`, `reaction_timer`, `hex_combination_lock`, `doorbell_jingle`, each in the library folder of that name), each with a coloured concrete ring, glass corner posts and a floating name
 drawn two blocks outside it. One plot sits off the grid: `bigdoor` (112x64x112 at 370,56,210,
 gray ring, 8x8 chunks), for piston doors up to 16x16 with their mechanism; `library/door/` maps
 to it via `FOLDER_PLOT`. `plot_for(path)` maps a `ref_*` file (a rebuilt
