@@ -77,9 +77,11 @@ def test_looks_like_a_satellite(sat):
     assert not ports & set(range(25565, 25582))
 
 
-def test_importing_registers_the_dsats_without_a_cycle():
-    code = ("import redstone.docker_sats; from redstone.servers import SERVERS; "
-            "assert SERVERS['dsat3'].rcon_port == 25678, SERVERS; import scripts.satellite_image")
+def test_importing_registers_the_dsats_without_a_cycle_and_pinning_takes_their_names():
+    code = ("import os; os.environ['REDSTONE_SERVER'] = 'dsat2'; import sys; sys.path.insert(0, 'tests'); "
+            "import conftest; from redstone.servers import SERVERS, pinned; "
+            "assert pinned(conftest.SERVER) == [SERVERS['dsat2']] and SERVERS['dsat2'].rcon_port == 25677, SERVERS; "
+            "import scripts.satellite_image")
     subprocess.run([sys.executable, "-c", code], cwd=ds.ROOT.parent, check=True)
 
 
@@ -100,6 +102,7 @@ def test_no_host_means_unavailable_without_running_anything(fake, sat, monkeypat
     with pytest.raises(ds.DesktopError, match="REDSTONE_DOCKER_HOST"):
         ds.running()
     assert ds.main(["status"]) == 1
+    assert ds.available() == [] and ds.start_spare() is None
     assert not fake.calls
 
 
@@ -510,13 +513,6 @@ def test_a_pinned_server_waits_for_its_lock_then_must_be_up(pool):
     assert _free(d[0].lock)
 
 
-def test_pinning_accepts_the_dsat_names():
-    code = ("import os; os.environ['REDSTONE_SERVER'] = 'dsat2'; import sys; sys.path.insert(0, 'tests'); "
-            "import conftest; from redstone.servers import SERVERS; "
-            "assert conftest.SERVER == 'dsat2' and SERVERS[conftest.SERVER].rcon_port == 25677")
-    subprocess.run([sys.executable, "-c", code], cwd=ds.ROOT.parent, check=True)
-
-
 @pytest.fixture
 def down_file(fake, monkeypatch, tmp_path):
     monkeypatch.setattr(ds, "DOWN_FILE", tmp_path / "dsat_unreachable")
@@ -580,12 +576,6 @@ def test_no_docker_cli_means_unavailable_not_an_error(fake, down_file, monkeypat
     monkeypatch.setattr(ds, "run", missing)
     assert ds.available() == [] and ds.start_spare() is None and not ds.reachable()
     assert down_file.read_text() == HOST
-
-
-def test_no_host_offers_no_dsats_without_running_anything(fake, down_file, monkeypatch):
-    monkeypatch.setattr(ds, "HOST", None)
-    assert ds.available() == [] and ds.start_spare() is None
-    assert not fake.calls
 
 
 def test_start_spare_starts_the_first_stopped_dsat_whose_lock_is_free(fake, down_file, monkeypatch, tmp_path):

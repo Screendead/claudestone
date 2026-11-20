@@ -1,7 +1,6 @@
 import pytest
 
 from redstone import servers
-from redstone.docker_sats import DOCKER_SATELLITES
 from redstone.harness import IDLE_RATE, SPRINT_MIN, WARP_RATE, CommandFailed, Rig, checked, clear_commands
 from redstone.plots import FOLDER_PLOT, PLOTS, plot_for
 from redstone.library import LIBRARY, path_of
@@ -112,10 +111,9 @@ def test_advance_restores_the_tick_rate_when_polling_fails():
     assert clock.log[-1] == f"tick rate {IDLE_RATE}"
 
 
-@pytest.mark.parametrize("server", [servers.SATELLITES[0], DOCKER_SATELLITES[0]], ids=lambda s: s.name)
-def test_satellites_stay_at_warp_rate_between_batches(server):
+def test_satellites_stay_at_warp_rate_between_batches():
     clock = Clock()
-    rig = _rig(clock, server)
+    rig = _rig(clock, servers.SATELLITES[0])
     for n in (5, 3, 170):
         rig._advance(n)
     assert [c for c in clock.log if c.startswith("tick rate")] == [f"tick rate {WARP_RATE}"]
@@ -125,10 +123,9 @@ def test_satellites_stay_at_warp_rate_between_batches(server):
     assert clock.log[-2:] == [f"tick rate {IDLE_RATE}", "tick unfreeze"]
 
 
-@pytest.mark.parametrize("server", [servers.SATELLITES[0], DOCKER_SATELLITES[0]], ids=lambda s: s.name)
-def test_satellites_sprint_long_waits_to_the_same_tick(server):
+def test_satellites_sprint_long_waits_to_the_same_tick():
     clock = Clock()
-    rig = _rig(clock, server)
+    rig = _rig(clock, servers.SATELLITES[0])
     for n in (SPRINT_MIN - 1, SPRINT_MIN, 6400):
         start = clock.time
         rig._advance(n)

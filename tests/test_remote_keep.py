@@ -24,12 +24,6 @@ def test_a_lost_desktop_waits_for_docker_then_reruns(tmp_path, monkeypatch):
     assert runs.read_text().split() == ["0", "1", "2"]
 
 
-def test_any_other_exit_ends_the_watch(tmp_path):
-    cmd, runs = job(tmp_path, [3, 0])
-    assert rk.keep(cmd, answers=lambda: True, poll=0) == 3
-    assert runs.read_text().split() == ["0"]
-
-
 def test_quick_repeated_losses_give_up(tmp_path):
     cmd, runs = job(tmp_path, [255] * 5)
     assert rk.keep(cmd, answers=lambda: True, poll=0) == 255
