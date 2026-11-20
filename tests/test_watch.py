@@ -46,23 +46,22 @@ def _projections(box, eye, yaw, pitch):
         yield sum(a * b for a, b in zip(q, r)) / fwd, sum(a * b for a, b in zip(q, u)) / fwd, fwd
 
 
-@pytest.mark.parametrize("seed", range(40))
-def test_fit_puts_every_corner_inside_the_field_of_view_and_one_on_the_margin(seed):
-    rnd = random.Random(seed)
-    lo = [rnd.uniform(-50, 50), rnd.uniform(56, 70), rnd.uniform(-50, 50)]
-    box = tuple(lo + [a + rnd.uniform(1, 40) for a in lo])
-    az, el = rnd.uniform(-30, 30), rnd.uniform(20, 60)
-    d = w.fit_distance(box, az, el)
-    eye, yaw, pitch = w.Framing(box, el, d, azimuth=az).pose(0)
-    assert (yaw, pitch) == pytest.approx((az, el))
+def test_fit_puts_every_corner_inside_the_field_of_view_and_one_on_the_margin():
     th, tv = w.half_tangents(CFG["fov"], CFG["aspect"])
     m = CFG["margin"]
-    worst = 0
-    for x, y, fwd in _projections(box, eye, yaw, pitch):
-        assert fwd > 0
-        assert abs(x) <= th * m + 1e-9 and abs(y) <= tv * m + 1e-9
-        worst = max(worst, abs(x) / (th * m), abs(y) / (tv * m))
-    assert worst == pytest.approx(1)
+    for seed in range(40):
+        rnd = random.Random(seed)
+        lo = [rnd.uniform(-50, 50), rnd.uniform(56, 70), rnd.uniform(-50, 50)]
+        box = tuple(lo + [a + rnd.uniform(1, 40) for a in lo])
+        az, el = rnd.uniform(-30, 30), rnd.uniform(20, 60)
+        d = w.fit_distance(box, az, el)
+        eye, yaw, pitch = w.Framing(box, el, d, azimuth=az).pose(0)
+        assert (yaw, pitch) == pytest.approx((az, el)), seed
+        worst = 0
+        for x, y, fwd in _projections(box, eye, yaw, pitch):
+            assert fwd > 0 and abs(x) <= th * m + 1e-9 and abs(y) <= tv * m + 1e-9, seed
+            worst = max(worst, abs(x) / (th * m), abs(y) / (tv * m))
+        assert worst == pytest.approx(1), seed
 
 
 def test_horizontal_field_follows_the_aspect():
