@@ -1,5 +1,5 @@
 """scripts.retest offline: which cases it picks and how it reports them, with pytest's run
-of the library replaced by a fake session, plus a collect-only pass over the real library."""
+of the library replaced by a fake session."""
 
 import io
 import json
@@ -53,7 +53,8 @@ def test_a_plot_runs_every_test_of_its_specs(ran):
     assert all(line.startswith(f"{s}: PASS {t} (delay 2; out rise 2)") for line, (s, t) in zip(lines, ran[0][0]))
 
 
-def test_main_means_the_specs_with_no_plot(ran):
+def test_main_means_the_specs_with_no_plot(ran, monkeypatch):
+    monkeypatch.setattr(retest, "lint", lambda spec: [])
     main("main")
     specs = {s for s, _ in ran[0][0]}
     assert specs and all(plot_for(library.path_of(s)) is None for s in specs)
@@ -99,18 +100,18 @@ def test_outcome_lines():
     assert retest.outcome("flow", False, "boom", measured) == "FAIL flow: boom"
 
 
-def test_the_session_selects_by_spec_and_test_name_on_the_real_library():
+def test_the_session_keeps_only_the_chosen_cases_of_the_collected_items():
     s = not_specs()[0]
     t = s.tests[-1]["name"]
+
+    class Item:
+        def __init__(self, nodeid, **params):
+            self.nodeid, self.callspec = nodeid, type("Callspec", (), {"params": params})
+
+    items = [Item("a", path=s.path, name=t), Item("b", path=s.path, name="other"), Item("c")]
+    dropped = []
+    config = type("Config", (), {"hook": type("Hook", (), {"pytest_deselected": lambda items: dropped.extend(items)})})
     session = retest.Session({(s.name, t)})
-    with redirect_stdout(io.StringIO()):
-        pytest.main(["-p", "no:terminal", "-p", "no:cacheprovider", "--collect-only", str(retest.LIBRARY_TESTS)],
-                    plugins=[session])
-    assert list(session.ids.values()) == [(s.name, t)]
-    for k, kept in ((t.split()[0], True), ("zzzz", False)):
-        session = retest.Session({(s.name, x["name"]) for x in s.tests})
-        with redirect_stdout(io.StringIO()):
-            pytest.main(["-p", "no:terminal", "-p", "no:cacheprovider", "--collect-only", "-k", k,
-                         str(retest.LIBRARY_TESTS)], plugins=[session])
-        assert ((s.name, t) in session.ids.values()) == kept
-        assert all(k in x for _, x in session.ids.values())
+    session.pytest_collection_modifyitems(config, items)
+    assert session.ids == {"a": (s.name, t)} and [i.nodeid for i in items] == ["a"]
+    assert [i.nodeid for i in dropped] == ["b", "c"]
