@@ -9,6 +9,13 @@ on a real headless server over RCON, and shipped as a data pack that places the 
 tested blocks. It is not a mod. The goal is to turn a sentence like "two numbers on levers,
 a button, the sum on a 7-segment display" into a proven, paste-able build.
 
+## How work is done
+
+`CONSTITUTION.md` (Jack, 2026-11-20) governs how work is run: one owner per piece, done means impeccable in the
+game, no review rounds, and the eye over tests; tests guard only what the eye cannot see (ticks, glitches,
+traits, mechanics, wins, harness rules) and the suite stays fast. The `constitution-audit` workflow
+(`.claude/workflows/constitution-audit.js`) brings the code back into line; its branches go up as PRs for Jack.
+
 ## Commands
 
 ```sh
