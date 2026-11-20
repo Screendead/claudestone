@@ -24,12 +24,14 @@ def destination(name: str):
     return LIBRARY / FOLDER.get(name, "builds") / f"{name}{SUFFIX}"
 
 
-def generated():
+def generated(slow: bool = True):
+    """slow=False leaves out two_digit_adder, cpu_alu_compact and cpu_fib4, which take minutes
+    between them, so the staleness test can check the rest in seconds."""
     yield from generated_plas()
     yield from generated_stages()
     yield from generated_devices()
-    yield from generated_circuits()
-    yield from generated_cpu()
+    yield from generated_circuits(slow)
+    yield from generated_cpu(slow)
     yield out_display()
 
 
@@ -73,7 +75,7 @@ def generated_devices():
     yield switch("button_switch", "stone_button")
 
 
-def generated_circuits():
+def generated_circuits(slow: bool = True):
 
     not_gate = load(path_of("not_gate"))
     yield (Circuit("route_chain").add("A", not_gate, (0, 0, 2)).add("B", not_gate, (12, 0, 8))
@@ -91,7 +93,8 @@ def generated_circuits():
         a0, b0, c0, a1, b1 = (v[k] for k in ("F0.a", "F0.b", "F0.c", "F1.a", "F1.b"))
         c1 = (a0 + b0 + c0) >= 2
         return {"F0.sum": a0 ^ b0 ^ c0, "F1.sum": a1 ^ b1 ^ c1, "F1.carry": (a1 + b1 + c1) >= 2}
-    yield two_digit_adder()
+    if slow:
+        yield two_digit_adder()
     yield (Circuit("ripple_adder_2bit").add("F0", fa, (0, 0, 1)).add("F1", fa, (0, 0, 26))
            .connect("F0.carry", "F1.c")
            .build("Two generated full adders with the carry routed from the first to the second.", ripple))
@@ -165,7 +168,7 @@ ALU_PROGRAM = [0x1C, 0x80, 0x1A, 0x40, 0xA0, 0x1A, 0x50, 0xA0, 0x1A, 0x60, 0xA0,
 JUMP_PROGRAM = [0xB5, 0xC6, 0xD7, 0xF0] + [0] * 12
 
 
-def generated_cpu():
+def generated_cpu(slow: bool = True):
     from scripts.rom_ctrl import rom_ctrl
     yield rom_ctrl("cpu_rom_ctrl", ALU_PROGRAM)
     yield rom_ctrl("cpu_rom_ctrl_jumps", JUMP_PROGRAM)
@@ -184,13 +187,15 @@ def generated_cpu():
     yield cpu_regs_compact()
     from scripts.cpu_ctrl_compact import cpu_ctrl_compact
     yield cpu_ctrl_compact()
-    from scripts.cpu_alu_compact import cpu_alu_compact
-    yield cpu_alu_compact()
+    if slow:
+        from scripts.cpu_alu_compact import cpu_alu_compact
+        yield cpu_alu_compact()
     from scripts.cpu_pc_compact import cpu_pc_compact
     yield cpu_pc_compact()
     yield cpu_fetch()
-    from scripts.cpu_fib4 import cpu_fib4
-    yield cpu_fib4()
+    if slow:
+        from scripts.cpu_fib4 import cpu_fib4
+        yield cpu_fib4()
 
 
 FIB_PROGRAM = [0x10, 0x80, 0x11, 0xA0, 0x90, 0x20, 0xD8, 0xB3, 0xF0] + [0] * 7
