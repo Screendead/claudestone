@@ -215,16 +215,16 @@ def test_sources_read_new_events_and_wait_for_a_whole_line(tmp_path):
     events.write_text(json.dumps({"kind": "test", "plot": "main", "server": "main", "spec": "old",
                                   "box": [0, 0, 0, 1, 1, 1], "time": 1}) + "\n")
     src = w.Sources(events, tmp_path, start=100)
-    assert src.poll(100) == []  # what was there before the director started is not news
+    assert src.poll() == []  # what was there before the director started is not news
     ev = {"kind": "test", "plot": "main", "server": "main", "spec": "s", "test": "t",
           "box": [128, 56, 128, 131, 58, 129], "time": 101}
     line = json.dumps(ev)
     with open(events, "a") as f:
         f.write(line[:10])
-    assert src.poll(101) == []
+    assert src.poll() == []
     with open(events, "a") as f:
         f.write(line[10:] + "\n" + json.dumps(dict(ev, kind="result", passed=False, time=102)) + "\n")
-    got = src.poll(102)
+    got = src.poll()
     assert [(s.kind, s.status, s.priority) for s in got] == [("test", "running", w.LIVE),
                                                              ("result", "fail", w.FAIL)]
     assert got[0].box == (128, 56, 128, 131, 58, 129)
@@ -241,12 +241,12 @@ def test_event_shots_only_for_what_stands_on_main():
 def test_sources_find_new_and_updated_showroom_entries(tmp_path):
     _showroom(tmp_path, "and", {"a": _entry(50)})
     src = w.Sources(tmp_path / "none.jsonl", tmp_path, start=100)
-    assert src.poll(100) == []
+    assert src.poll() == []
     _showroom(tmp_path, "and", {"a": _entry(110), "b": _entry(111, "fail", (6, 0)), "c": _entry(112, slot=(12, 0))})
-    got = {s.spec: s for s in src.poll(112)}
+    got = {s.spec: s for s in src.poll()}
     assert got["a"].priority == w.PLAIN and got["b"].priority == w.FAIL and got["c"].priority == w.NEW
     assert got["c"].detail.startswith("new")
-    assert src.poll(113) == []
+    assert src.poll() == []
 
 
 # ---- director ------------------------------------------------------------------------------

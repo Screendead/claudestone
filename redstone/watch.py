@@ -575,7 +575,7 @@ class Sources:
         self.known = {s.key: s.time for s in showroom_shots(showroom)}
         self.last_main: Shot | None = None
 
-    def poll(self, now: float) -> list[Shot]:
+    def poll(self) -> list[Shot]:
         out = self._events() + self._showroom()
         for s in out:
             if s.plot == MAIN.name:
@@ -908,7 +908,7 @@ class Director:
             self.camera.sync(self.watched, now)
             self.due["players"] = now + 1
         if now >= self.due["events"]:
-            for shot in self.sources.poll(now):
+            for shot in self.sources.poll():
                 self.scheduler.offer(shot, now)
             self.due["events"] = now + 0.5
         if now >= self.due["tick"]:

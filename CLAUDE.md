@@ -121,7 +121,7 @@ player's view and an entity's eases the eye height by 1.62 blocks. While main is
 warping the client can't move them, so the camera holds still; a camera cleared away with a
 plot is summoned again; `camera: "tp"` in the config teleports the players instead (steps).
 The status line is an actionbar. Events come from
-`server/watch/events.jsonl` and `status/<plot>.json` (written by `spec.py`) and the showroom
+`server/watch/events.jsonl`, `status/<plot>.json` (written by `spec.py`) and the showroom
 files. `spec.run` and `scripts.servers start`
 start the director if none holds `server/watch/director.lock`; it outlives pytest, and
 `scripts.watch stop` keeps it off until `start`; `REDSTONE_WATCH=0` stops one process from
