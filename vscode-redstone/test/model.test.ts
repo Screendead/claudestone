@@ -116,7 +116,6 @@ test("paint edit is accepted by the Python loader and reflected in blocks", () =
   assert.deepEqual(loaded.outputs.sort(), ["out", "second"]);
   assert.deepEqual(loaded.inputs.a, [0, 1, 0]);
   assert.equal(loaded.blocks["0,0,0"] !== undefined, true);
-  // glyph consistency: lamp uses the preferred glyph
   assert.equal(entryAt(parseModel(out), 0, 0, 0)?.glyph, "L");
 });
 
@@ -146,7 +145,6 @@ test("structure edits (layers, rows, columns, rotate, rename) load in Python", (
   assert.equal(l.blocks["1,2,1"], "stone");
   assert.deepEqual(l.inputs.renamed, [1, 1, 1]);
   assert.ok(!removeLayer(parseModel("name: a\npalette: {.: air}\nlayers:\n  0: |\n    .\n"), 0));
-  // removing edges and layers again
   const m2 = parseModel(out);
   resize(m2, "west", -1); resize(m2, "north", -1); resize(m2, "east", -1); resize(m2, "south", -1);
   removeLayer(m2, 2); removeLayer(m2, -1);

@@ -206,7 +206,6 @@ function drawDiode(c: Ctx, k: Cell) {
     torchHead(c, S * 0.5, S * 0.22, r, lit);
     torchHead(c, S * 0.5, S * (0.8 - 0.13 * (delay - 1)), r, false);
   }
-  // Flow arrow between the two torches.
   c.fillStyle = "rgba(20,20,20,0.75)";
   c.beginPath();
   c.moveTo(S * 0.5, S * 0.36);
@@ -427,7 +426,6 @@ export function drawLayer(c: Ctx, model: Model, o: DrawOpts): void {
       if (info?.label) badge(c, { info, x, y, z, px: x * S, py: z * S, S, level: 0, traced: false });
     }
   };
-  // Cell backgrounds and grid.
   c.strokeStyle = o.theme.grid;
   c.lineWidth = 1;
   for (let z = 0; z < h; z++) for (let x = 0; x < w; x++) {
@@ -439,7 +437,6 @@ export function drawLayer(c: Ctx, model: Model, o: DrawOpts): void {
   c.strokeStyle = o.theme.grid;
   for (let x = 0; x <= w; x++) { c.beginPath(); c.moveTo(x * S + 0.5, 0); c.lineTo(x * S + 0.5, h * S); c.stroke(); }
   for (let z = 0; z <= h; z++) { c.beginPath(); c.moveTo(0, z * S + 0.5); c.lineTo(w * S, z * S + 0.5); c.stroke(); }
-  // North marker.
   if (o.compass !== false) text(c, "N", w * S - 8, 8, 10, o.theme.fg, "center");
   const box = (p: { x: number; z: number } | null | undefined, colour: string) => {
     if (!p) return;
