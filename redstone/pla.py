@@ -12,7 +12,6 @@ Complemented inputs get their own line, fed by a torch from the true line's head
 """
 
 import itertools
-from collections.abc import Callable
 
 from .build import Build, Pos
 from .fileformat import Spec
@@ -123,22 +122,16 @@ def pla(name: str, inputs: list[str], outputs: dict[str, list[dict[str, bool]]],
                 bound = max(bound, ticks)
 
     b.with_base()
-    fn = _evaluator(inputs, outputs)
     header = " ".join(inputs) + " | " + " ".join(outputs)
     lines = [header]
     for row in itertools.product([0, 1], repeat=len(inputs)):
-        got = fn(dict(zip(inputs, map(bool, row))))
+        values = dict(zip(inputs, map(bool, row)))
+        got = {o: any(all(values[v] == pol for v, pol in term.items()) for term in sop)
+               for o, sop in outputs.items()}
         lines.append(" ".join(map(str, row)) + " | " + " ".join(str(int(got[o])) for o in outputs))
     test = {"name": "logic", "truth_table": "\n".join(lines) + "\n", "max_delay": bound}
     return Spec(name, b, inputs=spec_inputs, outputs=spec_outputs, named=dict(spec_outputs),
                 tests=[test], description=description)
-
-
-def _evaluator(inputs, outputs) -> Callable[[dict[str, bool]], dict[str, bool]]:
-    def fn(values):
-        return {o: any(all(values[v] == pol for v, pol in term.items()) for term in sop)
-                for o, sop in outputs.items()}
-    return fn
 
 
 def or_plane(name: str, inputs: list[str], outputs: dict[str, list[str]], description: str = "",

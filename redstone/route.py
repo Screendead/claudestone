@@ -21,7 +21,6 @@ from dataclasses import dataclass, field
 
 from .build import Build, Pos
 from .fileformat import Spec
-from .harness import parse_state
 
 REFRESH_AT = 4
 REPEATER_TICKS = 2

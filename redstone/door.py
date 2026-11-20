@@ -1,10 +1,9 @@
 """Piston door tests: the `door:` section of a spec and the `door_cycle` test.
 
 Wires door_probe (function text), door_timing (times and seamless grades) and door_volume
-(the Squid volume) into a Rig (design: docs/research/door_harness_design.md, T3, T4, T6,
-T7, T9, T12).
+(the Squid volume) into a Rig (design: docs/research/door_harness_design.md).
 
-Input (T7): the door's input is a drive cell behind a fixture `repeater[delay=1]`. The
+Input: the door's input is a drive cell behind a fixture `repeater[delay=1]`. The
 harness places the redstone block and steps one tick at a time; tick 0 is the first tick
 at whose end the repeater's `powered` has flipped. The door is placed with the input off in
 its `initial` state, and each change of the input toggles it.
@@ -16,7 +15,7 @@ doorway land in those cells, so every movement's progress ladder is seen. The op
 ends when the observations are static for door_timing.QUIET_TICKS, or the test's `quiet`
 (or periodic).
 
-Volume (T4, T12): the occupancy flags in storage are a union over the whole cycle. The
+Volume: the occupancy flags in storage are a union over the whole cycle. The
 full region (build bounds and hallway, grown by door_probe.MARGIN, inside the plot) is
 flagged only in the stable states; each tick flags only the cells on each piston's line
 (its head cell and the 12 it can push through), which is where blocks move, and notes
@@ -447,7 +446,7 @@ class Probe:
         test = f"execute unless block {p} {door_probe.AIR_TAG}"
         if circ:
             test += f" unless block {p} {door_probe.DOOR_TAG}"
-            if door_probe.SURFACE_EXEMPT_ANYWHERE or pos in self.plan.exempt_surface:
+            if pos in self.plan.exempt_surface:
                 test += f" unless block {p} {door_probe.SURFACE_TAG}"
         return self._yes(test)
 
@@ -547,7 +546,7 @@ def _ends(h: dt.Hallway, run: dt.Run, w: int, door_only: bool) -> list[tuple[int
 
 
 def readings(h: dt.Hallway, op: Op) -> dict:
-    """The operation's end under each reading of the rules (HANDOFF open question):
+    """The operation's end under each reading of the rules:
     R, the rule as written (each movement ends at its landing, start + 2); H1, the tick the
     hallway holds its final pattern of real blocks (a pull counts once its origin is air);
     R1, as R but a 0-tick pull counts as instant (ends at its start)."""
