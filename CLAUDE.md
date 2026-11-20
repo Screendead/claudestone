@@ -17,13 +17,14 @@ pytest                                   # everything; starts the server if RCON
 pytest "tests/test_library.py::test_spec[latch::holds a 1 when locked]"   # one spec test
 REDSTONE_PLOT=main pytest tests/test_library.py   # every test in main instead of each spec's plot
 pytest -n 4 tests/test_library.py -k <spec>       # a spec's tests on up to 4 idle satellites at once (pytest-xdist)
-python -m scripts.retest <plot>... [--spec NAME]... [--failed] [-k EXPR]   # a plot's (main: no-plot) or named specs, each in its plot; --failed: last result failed
+python -m scripts.retest <plot>... [--spec NAME]... [--failed] [-k EXPR] [--trace]   # a plot's (main: no-plot) or named specs, each in its plot; --failed: last result failed
 pytest tests/test_generated.py tests/test_devices.py tests/test_traits.py  # no server needed
 python -m scripts.generate               # rewrite generated library files
 python -m scripts.package two_digit_adder   # dist/<name>/ + .zip data pack
 python -m scripts.plots                  # redraw plot borders and labels in the world
 python -m scripts.lint [<spec>]          # offline checks, whole library by default
 python -m scripts.try <spec> [--test NAME]... [--trace]   # lint + run on a satellite
+python -m scripts.look {trace <spec> <test> [--cells a,b] [--from T --to T] [--levels],world <plot> [--y N]}   # read a trace or the live blocks
 python -m scripts.servers {start,stop,status} [laptop|docker|all]   # satellites
 python -m redstone.docker_sats {start,stop,status} [dsatN]...   # Docker satellites only
 python -m scripts.satellite_image        # rebuild the Docker satellite image on the desktop
@@ -71,9 +72,10 @@ off. `redstone/plots.py` divides it into a 192x24x192 `main` plot and, north of 
 of 72x32x72 plots (five a row, pitch 80, each forceloading exactly 5 x 5 chunks): one per
 building block, eight mechanics workbenches, a black-ringed `references` plot,
 `survival`, `storage` and one plot per finished gadget (`dice_roller`, `reaction_timer`, `hex_combination_lock`, `doorbell_jingle`, each in the library folder of that name), each with a coloured concrete ring, glass corner posts and a floating name
-drawn two blocks outside it. One plot sits off the grid: `bigdoor` (112x64x112 at 370,56,210,
+drawn two blocks outside it. Three plots sit off the grid: `bigdoor` (112x64x112 at 370,56,210,
 gray ring, 8x8 chunks), for piston doors up to 16x16 with their mechanism; `library/door/` maps
-to it via `FOLDER_PLOT`. `plot_for(path)` maps a `ref_*` file (a rebuilt
+to it via `FOLDER_PLOT`; `cpu` (120x48x120 at 130,56,370, black ring, 8x8 chunks) and `cpu_parts` (72x32x72
+at 258,56,370), south of main, for a computer and its parts. `plot_for(path)` maps a `ref_*` file (a rebuilt
 community design, see `docs/WINS.md`) to `references` and any other library file by folder
 to its plot (`FOLDER_PLOT` for folders sharing one; mechanics, builds and input have none).
 Unset, a library test builds in `plot_for`'s plot, or in main when its folder has none

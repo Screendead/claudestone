@@ -16,11 +16,11 @@
 builders make. The claim is that Claude agents, with this repo as their harness, build things a novice couldn't,
 on their own: they design, test and fix each build until it passes.
 
-| At a glance (tracked files, 2026-10-02) | |
+| At a glance (tracked files, 2026-11-20) | |
 |---|---|
-| **457** specs in **41** folders, every one with its own tests | [`library/INDEX.md`](library/INDEX.md) |
-| **85** specs that each prove one 26.3 mechanic | [`docs/MECHANICS.md`](docs/MECHANICS.md) |
-| **27** community designs rebuilt as `ref_*` specs, so comparisons are measured, not quoted | `library/*/ref_*` |
+| **636** specs in **54** folders, every one with its own tests | [`library/INDEX.md`](library/INDEX.md) |
+| **88** specs that each prove one 26.3 mechanic | [`docs/MECHANICS.md`](docs/MECHANICS.md) |
+| **190** community designs rebuilt as `ref_*` specs, so comparisons are measured, not quoted | `library/*/ref_*` |
 | **1** banked win over a community best, **1** tie | [`docs/WINS.md`](docs/WINS.md) |
 
 ## Try it in Minecraft
