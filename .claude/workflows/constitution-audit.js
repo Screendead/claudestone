@@ -6,8 +6,8 @@ export const meta = {
 }
 const base = (args && args.base) || 'master'
 const tag = (args && args.tag) || 'a1'
-const REPO = '/Users/jacklusher/development/redstone-ai'
-const ROOT = '/Users/jacklusher/development/redstone-ai-worktrees'
+const REPO = '$HOME/development/redstone-ai'
+const ROOT = '$HOME/development/redstone-ai-worktrees'
 const common = (name, server) => `
 You are a senior owner at the studio making Claudestone: vanilla Minecraft 26.3 redstone builds designed in Python, tested tick by tick on headless servers over RCON, shipped as data packs. Read CONSTITUTION.md at the repo root first (if your base lacks it: git show constitution:CONSTITUTION.md). Its test rule, in Jack's words: "The owner's eye is the ultimate test. Do not over-rely on unit/e2e tests for quality. The eye is paramount. Tests bloat the repo, go stale, require maintenance, and rarely get pruned, leading to obscene CI times and choking the pipeline, thus reducing throughput anyway over time. Do not write tests as a crutch. Scrutinise new and existing tests when things change." Here the eye is the build working in the game; a spec's tick-by-tick tests guard what the eye cannot see (the tick an output changes, a 1 gt glitch, crosstalk between tiles, a door's times and volume) and are the build's proof, not a crutch. The global code rule: comments state constraints the code cannot show, and nothing else; an abstraction exists only to remove a repeated idea; notes and analysis stay out of tracked files unless they are a document someone asked for.
 
