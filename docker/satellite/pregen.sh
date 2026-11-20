@@ -1,6 +1,6 @@
 #!/bin/sh
 # Image build only: unpack the bundled libraries, generate the world, set the gamerules
-# scripts/servers.py sets, generate every plot's chunks, and record an AOT cache.
+# scripts/servers.py sets, generate the chunks below, and record an AOT cache.
 set -eu
 cd /srv
 java -jar /tmp/server.jar --help >/dev/null
@@ -18,7 +18,7 @@ wait_for() {
 }
 wait_for 'Done ('
 for rule in advance_time advance_weather spawn_mobs; do echo "gamerule $rule false" >&3; done
-# Chunks x 8..21, z -17..20, 256 per command; plots outside them generate when first forceloaded.
+# Chunks x 8..21, z -17..20, 256 per command.
 for z in "-272 -81" "-80 127" "128 335"; do set -- $z; echo "forceload add 128 $1 351 $2" >&3; done
 until grep -q pregen-loaded /tmp/pregen.log; do
     echo "execute if loaded 128 56 -272 if loaded 351 56 -272 if loaded 128 56 335 if loaded 351 56 335 if loaded 240 56 32 run say pregen-loaded" >&3
