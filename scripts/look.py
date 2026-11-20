@@ -11,7 +11,6 @@ import argparse
 import json
 import re
 import sys
-from pathlib import Path
 
 from redstone import fileformat, library
 from redstone.build import namespaced
@@ -70,7 +69,6 @@ COMMON = ("smooth_stone white_concrete stone redstone_wire repeater redstone_tor
           "white_carpet grass_block dirt").split()
 FACING = ("repeater comparator redstone_wall_torch observer piston sticky_piston hopper dropper dispenser "
           "lever stone_button polished_blackstone_button").split()
-FACES = ("wall", "floor", "ceiling")
 DIRS = ("north", "south", "east", "west")
 SPARE = iter("ABCDEFGHIJKMNOPQSTUVWXYZbcdefghijklmpqrstwxyz0123456789")
 

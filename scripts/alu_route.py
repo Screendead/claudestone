@@ -152,9 +152,6 @@ class Router:
     def mark_input(self, cell, net):
         self.inputs[cell] = net
 
-    def foreign_dust(self, q, net):
-        return self.g.b.get(q) == WIRE and self.g.net.get(q) != net
-
     def ok(self, c, net, newsup):
         g = self.g
         x, y, z = c

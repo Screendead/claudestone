@@ -2,12 +2,11 @@
 
 Each slice is placed by hand (comparator bridges, the carry cell, lane taps) and the nets
 between them are routed by scripts.alu_route; build_routed() is deterministic."""
-from scripts.alu_route import Grid, Router, SOLID, WIRE, fix as fix_strength
+from scripts.alu_route import Grid, Router, WIRE, fix as fix_strength
 
 SIZE = (48, 16, 32)
 XC = 44
 LANE = {"XS": 7, "ZA": 10, "I0": 13, "I1": 16, "I2": 19, "I3": 22, "SUB": 28}
-Y5 = 5
 
 
 def zrow(i):
@@ -326,7 +325,7 @@ def cpu_alu(name="cpu_alu", mutant=False):
     from redstone.fileformat import Spec
     g, ins, outs, named, seed = build_routed()
     if mutant == "zo":
-        # bit 2 no longer reaches the zero collector
+        # bit 2 cut from the zero collector
         del g.b[(35, 5, zrow(2) + 2)]
     elif mutant:
         # cut the carry link from bit 1 to bit 2

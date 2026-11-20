@@ -15,7 +15,6 @@ a repeater chain at its segment's height and runs north as a repeater lane into 
 A torch at the turn inverts the outputs the PLA builds as off-sets.
 """
 
-import itertools
 
 from redstone.build import Build, Pos
 from redstone.devices import DIGITS

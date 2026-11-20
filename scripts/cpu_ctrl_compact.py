@@ -224,7 +224,7 @@ INS = ["op0", "op1", "op2", "op3", "z", "c"]
 ROWS = {"op0": 13, "op1": 15, "op2": 17, "op3": 19}
 PRODUCTS_AT = 21
 LENGTH = 45
-CONTROL_MAX = 14     # MEASURED worst over the table on dsat (PASS line gives each edge)
+CONTROL_MAX = 14     # worst delay over the table on 26.3
 FLAG_MAX = 10
 
 

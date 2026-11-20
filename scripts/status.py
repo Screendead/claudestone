@@ -21,7 +21,7 @@ from pathlib import Path
 
 from redstone import docker_sats
 from redstone.harness import _rcon_up
-from redstone.servers import MAIN, PLOT_RECORDS, ROOT, SATELLITES
+from redstone.servers import MAIN, PLOT_RECORDS, SATELLITES
 from redstone.watch import STATUS
 from scripts import jobs
 from scripts.remote_run import SLOTS, TOTAL_CPUS
