@@ -54,10 +54,11 @@ def test_a_plot_runs_every_test_of_its_specs(ran):
 
 
 def test_main_means_the_specs_with_no_plot(ran, monkeypatch):
-    monkeypatch.setattr(retest, "lint", lambda spec: [])
+    paths = library.paths()
+    some = [p for p in paths if plot_for(p) is None][:3] + [p for p in paths if plot_for(p)][:3]
+    monkeypatch.setattr(library, "paths", lambda: some)
     main("main")
-    specs = {s for s, _ in ran[0][0]}
-    assert specs and all(plot_for(library.path_of(s)) is None for s in specs)
+    assert {s for s, _ in ran[0][0]} == {fileformat.load(p).name for p in some[:3]}
 
 
 def test_named_specs_and_k_pass_through(ran):

@@ -640,7 +640,7 @@ def test_conftest_offers_dsats_then_laptop_satellites_that_are_up(monkeypatch, p
 # Live: only when the desktop answers. Uses dsat6, which scripts and tests pick last.
 @pytest.fixture(scope="module")
 def live():
-    if not ds.reachable():
+    if ds.DOWN_FILE.exists() or not ds.reachable():
         pytest.skip(f"desktop {ds.HOST or '(no host configured)'} not reachable")
     sat = ds.BY_NAME["dsat6"]
     if sat.name in ds.running():
