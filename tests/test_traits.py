@@ -1,6 +1,6 @@
 import pytest
 
-from redstone import fileformat
+from library_specs import load
 from redstone.build import Build
 from redstone.fileformat import Spec
 from redstone.library import name_of, paths
@@ -9,7 +9,7 @@ from redstone.traits import UNTILED, dimensions, violations
 
 @pytest.mark.parametrize("path", paths(), ids=name_of)
 def test_traits_hold(path):
-    assert not violations(fileformat.load(path))
+    assert not violations(load(path))
 
 
 def _spec(traits, tests=(), **kw):
@@ -40,7 +40,7 @@ def test_tileable_and_stackable_need_a_tile_test_in_that_direction():
 
 
 def test_untiled_list_only_shrinks():
-    specs = {s.name: s for s in map(fileformat.load, paths())}
+    specs = {s.name: s for s in map(load, paths())}
     stale = [n for n in UNTILED if n not in specs or not {"tileable", "stackable"} & set(specs[n].traits)
              or any("tile" in t for t in specs[n].tests)]
     assert not stale, f"remove from traits.UNTILED: {stale}"

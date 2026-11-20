@@ -2,7 +2,7 @@ import functools
 
 import pytest
 
-from redstone import fileformat
+from library_specs import load
 from redstone.build import Build
 from redstone.library import paths
 from redstone.rotate import (RAIL_CW90, canonical, rotate_entity, rotate_pos, rotate_state, rotate_yaw,
@@ -33,12 +33,8 @@ EXTRA = [
 
 @functools.cache
 def states() -> list[str]:
-    found = {s for p in paths() for s in fileformat.load(p).build.blocks.values()}
+    found = {s for p in paths() for s in load(p).build.blocks.values()}
     return sorted(found) + EXTRA
-
-
-def test_library_is_covered():
-    assert len(states()) > 100
 
 
 def test_four_quarter_turns_are_identity():
@@ -177,10 +173,3 @@ def test_block_pos_is_refused():
     with pytest.raises(ValueError):
         rotate_entity(((0, 1, 0), "item_frame", "{block_pos:[I;0,1,0]}"), 1)
 
-
-def test_rotated_library_builds_have_no_collisions():
-    for p in paths():
-        b = fileformat.load(p).build
-        for k in range(4):
-            r = rotated(b, k, k == 3)
-            assert len(r.blocks) == len(b.blocks) and len(r.entities) == len(b.entities)

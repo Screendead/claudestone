@@ -1,5 +1,6 @@
 import pytest
 
+from library_specs import load
 from redstone import fileformat
 from redstone.build import Build
 from redstone.fileformat import Spec
@@ -10,7 +11,7 @@ from scripts.lint import lint
 
 @pytest.mark.parametrize("path", paths(), ids=name_of)
 def test_library_lints_clean(path):
-    assert lint(fileformat.load(path)) == []
+    assert lint(load(path)) == []
 
 
 def spec(blocks, **kw):
