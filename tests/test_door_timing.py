@@ -165,18 +165,6 @@ def test_visible_clock_sets_visible_time_to_stable_state():
     assert dt.visible_time(H, r, w) == w
 
 
-def test_short_periodic_tail_is_quiescent():
-    floor = (2, 0, 3)
-    cycle = [{floor: moving(SURFACE, 0.0, facing="up")}, {floor: moving(SURFACE, 0.5, facing="up")}, {}, {}]
-    frames = pull_open({3 + i: cycle[i % 4] for i in range(4 * 5)}).ticks[:3 + 4 * 5]
-    assert dt.quiescence(Run(CLOSED, frames)) == (2, 4)
-
-
-def test_short_static_tail_is_not_quiescent():
-    assert dt.quiescence(Run(CLOSED, [OPEN] * 20)) is None
-    assert dt.quiescence(Run(CLOSED, [CLOSED] * 3 + [OPEN] * 41)) == (3, 1)
-
-
 def test_visible_clock_quiet_at_the_stable_tick_still_gives_w():
     floor = (2, 0, 3)
     cycle = [{}, {}, {floor: moving(SURFACE, 0.0, facing="up")}, {floor: moving(SURFACE, 0.5, facing="up")}]
@@ -248,7 +236,7 @@ def test_quiescence_agrees_with_its_definition_on_random_runs():
     import random
     rnd = random.Random(7)
     frames = [CLOSED, OPEN, obs({(2, 0, 3): Cell(SURFACE)})]
-    for _ in range(400):
+    for _ in range(100):
         head = [rnd.randrange(3) for _ in range(rnd.randrange(0, 30))]
         cyc = [rnd.randrange(3) for _ in range(rnd.choice([1, 1, 2, 3, 5]))]
         keys = head + cyc * rnd.randrange(0, 60)

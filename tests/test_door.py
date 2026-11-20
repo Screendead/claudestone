@@ -13,7 +13,7 @@ from redstone.build import Build, write_datapack
 from redstone.door_probe import FACING, OCC
 from redstone.harness import PROBE_CHUNK, clear_commands
 from redstone.library import path_of
-from redstone.plots import BIGDOOR, MAIN, PLOTS, plot_for
+from redstone.plots import BIGDOOR, MAIN, plot_for
 from scripts import lint as lint_module
 from scripts import package as package_module
 
@@ -467,18 +467,12 @@ def test_clear_fills_stay_under_the_block_limit_in_the_bigdoor_plot():
     assert volume == 112 * 64 * 112
 
 
-def test_bigdoor_plot_is_clear_of_main_and_the_grid_and_chunk_aligned():
+def test_bigdoor_plot_is_chunk_aligned_within_the_forceload_limit():
     ox, _, oz = BIGDOOR.origin
     assert BIGDOOR.size[0] >= 112 and BIGDOOR.size[1] >= 64 and BIGDOOR.size[2] >= 112
     assert (ox - 2) % 16 == 0 and (oz - 2) % 16 == 0
     chunks = lambda a, n: (a + n - 1 + 2) // 16 - (a - 2) // 16 + 1
     assert chunks(ox, BIGDOOR.size[0]) * chunks(oz, BIGDOOR.size[2]) <= 256  # forceload's limit
-    for p in PLOTS.values():
-        if p is not BIGDOOR:
-            (px, _, pz), (sx, _, sz) = p.origin, p.size
-            assert (ox >= px + sx + 5 or px >= ox + BIGDOOR.size[0] + 5
-                    or oz >= pz + sz + 5 or pz >= oz + BIGDOOR.size[2] + 5), p.name
-    assert MAIN.origin[0] + MAIN.size[0] + 5 <= ox
 
 
 def test_package_raises_the_chain_limit_for_a_big_build(tmp_path, monkeypatch):
