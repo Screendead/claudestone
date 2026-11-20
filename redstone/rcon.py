@@ -14,6 +14,10 @@ class RconError(Exception):
     pass
 
 
+def read_password() -> str:
+    return re.search(r"^rcon\.password=(.*)$", PROPERTIES.read_text(), re.M).group(1)
+
+
 @contextlib.contextmanager
 def port_turn(port: int):
     """Hold a port's turn without a connection, as Rcon.sequence does: a test running inside a
@@ -32,16 +36,14 @@ def port_turn(port: int):
 class Rcon:
     _held = 0  # depth of open sequence() blocks
 
-    def __init__(self, host="127.0.0.1", port=25575, password=None, timeout=10.0):
-        if password is None:
-            password = re.search(r"^rcon\.password=(.*)$", PROPERTIES.read_text(), re.M).group(1)
-        self.sock = socket.create_connection((host, port), timeout=timeout)
+    def __init__(self, port=25575, timeout=10.0):
+        self.sock = socket.create_connection(("127.0.0.1", port), timeout=timeout)
         # The server collects every RCON client's command output in one shared buffer
         # (DedicatedServer.runCommand), so replies of commands from two clients at once mix.
         # Commands to one port take turns across processes.
         self._turn = open(PROPERTIES.parent / f"rcon.{port}.lock", "a")
         self._id = 0
-        if self._request(AUTH, password)[0] == -1:
+        if self._request(AUTH, read_password())[0] == -1:
             raise RconError("authentication failed")
 
     def _send(self, kind, body):

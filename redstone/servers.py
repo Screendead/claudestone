@@ -107,7 +107,7 @@ def take(server: Server):
     server.dir.mkdir(parents=True, exist_ok=True)
     lock = open(server.lock, "a")
     fcntl.flock(lock, fcntl.LOCK_EX)
-    if hasattr(server, "is_up") and not server.is_up():
+    if not answers(server):
         lock.close()
         raise RuntimeError(f"{server.name} is not up; python -m redstone.docker_sats start {server.name}")
     os.utime(server.lock)

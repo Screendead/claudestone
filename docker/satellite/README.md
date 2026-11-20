@@ -1,7 +1,7 @@
 # redstone-satellite
 
 A headless 26.3 satellite with sat1..sat6's settings (flat preset, distance 2, gamerules
-off), libraries unpacked, world and every plot's chunks pre-generated, and a JDK AOT cache.
+off), libraries unpacked, world and chunks x 8..21, z -17..20 pre-generated, and a JDK AOT cache.
 The build context is this folder plus `server/server.jar` (the legacy builder has no BuildKit):
 
     COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata -cf - -C docker/satellite \
