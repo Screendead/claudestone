@@ -1,5 +1,5 @@
 name: dice_roller
-description: "Electronic die: one click of the button rolls a fair 1-6 and shows it as dice pips on a 3x3 face of redstone lamps facing north (player stands north; the bottom middle cell is the button's stone, the top middle lamp never lights). HOW TO USE: click the stone button under the face; about 45 gt later (MEASURED) the face shows the roll and holds until the next click. RANDOMNESS (vanilla, no entities): two droppers pick a random non-empty slot. Dropper 3way holds an iron sword, 4 snowballs and 5 cobblestone (3 slots), dropper 2way holds a sword and 10 cobblestone (2 slots), so each press makes an independent uniform 1/3 and 1/2 choice = 1/6 per face. The chosen item is dropped into a hopper facing back into the dropper; the hopper is locked by a lock line, so it holds the item and the dropper's comparator reads a level that depends on the item's stack size (sword 1.56, snowball 0.10, cobblestone 0.02 levels of 14 per slot): 3way reads 1/2/3 and 2way reads 1/2 (MEASURED over many presses; at rest, all items home, they read 3 and 2). The click inverts through a torch into the lock line: the hoppers unlock for the click (the items go home), and when the click ends the line rises, both droppers fire 4 gt later into their hoppers and the hoppers relock. DECODE: one subtract comparator takes s = A - (B - 1) from the two readings (0..3, one value per face), a dust line with comparator refreshers carries s, and repeaters tapped after 0, 1 and 2 dust steps give s>0 (diagonal pair 1), s>1 (diagonal pair 2) and s>2 (middle pair); the centre pip is the 2way reading minus one, through its own comparator chain. Each tap is sent to both lamp columns, rising or falling to the lamp's height on glass zigzag risers and stone staircases, and each lamp is lit by dust on top of it. Faces: s=0,B=2 -> 1; s=1 -> 2 and 3; s=2 -> 4 and 5; s=3 -> 6. Size 9x7x22 (MEASURED by try). Timing: the face is stable 43 to 45 gt after the click (MEASURED from per-tick lamp traces of four clicks; includes the 20 gt button hold), the test asserts it is unchanged 50 gt after the click and 150 gt after. While the roll runs, for about 45 gt the lamps pass through other patterns (including all seven pips and the previous 'all items home' face 5), so read it after the roll. Placement: the build starts with a roll already made at placement (INFERRED: the placement update fires the droppers once). Library parts used: vwire_glass_zigzag_up (glass zigzag riser, up only), vwire_staircase (stone dust staircase, falls instantly); comparator refresher chain as in signal_strength specs; lock line per hopper_lock_instant_accepts_input and dropper contents per container mechanics in docs/MECHANICS.md. Click is done by the harness setting the button and its support, a player click is the same."
+description: "Electronic die: one click of the button rolls a fair 1-6 and shows it as dice pips on a 3x3 face of redstone lamps facing north (player stands north; the bottom middle cell is the button's stone, the top middle lamp never lights). HOW TO USE: click the stone button under the face; about 45 gt later (MEASURED) the face shows the roll and holds until the next click. RANDOMNESS (vanilla, no entities): two droppers pick a random non-empty slot. Dropper 3way holds an iron sword, 4 snowballs and 5 cobblestone (3 slots), dropper 2way holds a sword and 10 cobblestone (2 slots), so each press makes an independent uniform 1/3 and 1/2 choice = 1/6 per face. The chosen item is dropped into a hopper facing back into the dropper; the hopper is locked by a lock line, so it holds the item and the dropper's comparator reads a level that depends on the item's stack size (sword 1.56, snowball 0.10, cobblestone 0.02 levels of 14 per slot): 3way reads 1/2/3 and 2way reads 1/2 (MEASURED over many presses; at rest, all items home, they read 3 and 2). The click inverts through a torch into the lock line: the hoppers unlock for the click (the items go home), and when the click ends the line rises, both droppers fire 4 gt later into their hoppers and the hoppers relock. DECODE: one subtract comparator takes s = A - (B - 1) from the two readings (0..3, one value per face), a dust line with comparator refreshers carries s, and repeaters tapped after 0, 1 and 2 dust steps give s>0 (diagonal pair 1), s>1 (diagonal pair 2) and s>2 (middle pair); the centre pip is the 2way reading minus one, through its own comparator chain. Each tap is sent to both lamp columns, rising or falling to the lamp's height on glass zigzag risers and stone staircases, and each lamp is lit by dust on top of it. Faces: s=0,B=2 -> 1; s=1 -> 2 and 3; s=2 -> 4 and 5; s=3 -> 6. Size 9x7x22 (MEASURED by try). Timing: the face is stable 43 to 45 gt after the click (MEASURED from per-tick lamp traces of four clicks; includes the 20 gt button hold), the test asserts it is unchanged from 50 gt after the click to 150 and 460 gt after. While the roll runs, for about 45 gt the lamps pass through other patterns (including all seven pips and the previous 'all items home' face 5), so read it after the roll. Placement: the build starts with a roll already made at placement (INFERRED: the placement update fires the droppers once). Library parts used: vwire_glass_zigzag_up (glass zigzag riser, up only), vwire_staircase (stone dust staircase, falls instantly); comparator refresher chain as in signal_strength specs; lock line per hopper_lock_instant_accepts_input and dropper contents per container mechanics in docs/MECHANICS.md. Click is done by the harness setting the button and its support, a player click is the same."
 traits: [container_based, comparator_based, analog]
 palette:
   .: air
@@ -243,37 +243,7 @@ tests:
   - log: "scoreboard players get #f4 dice"
   - log: "scoreboard players get #f5 dice"
   - log: "scoreboard players get #f6 dice"
-- name: face holds between presses
-  settle: 30
-  finally: ["scoreboard objectives remove dice"]
-  steps:
-  - {run: "scoreboard objectives add dice dummy"}
-  - repeat:
-      times: 6
-      steps:
-      - {"use": "btn"}
-      - {"wait": 60}
-      - {"run": "scoreboard players set #a dice 0"}
-      - {"run": "execute if block ~6 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 1"}
-      - {"run": "execute if block ~2 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 2"}
-      - {"run": "execute if block ~6 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 4"}
-      - {"run": "execute if block ~2 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 8"}
-      - {"run": "execute if block ~4 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 16"}
-      - {"run": "execute if block ~6 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 32"}
-      - {"run": "execute if block ~2 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 64"}
-      - {"run": "execute if block ~4 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #a dice 128"}
-      - {"wait": 400}
-      - {"run": "scoreboard players set #b dice 0"}
-      - {"run": "execute if block ~6 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 1"}
-      - {"run": "execute if block ~2 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 2"}
-      - {"run": "execute if block ~6 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 4"}
-      - {"run": "execute if block ~2 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 8"}
-      - {"run": "execute if block ~4 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 16"}
-      - {"run": "execute if block ~6 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 32"}
-      - {"run": "execute if block ~2 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 64"}
-      - {"run": "execute if block ~4 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 128"}
-      - {"check": "if score #a dice = #b dice"}
-- name: stable 50 ticks after the press
+- name: face settles 50 gt after a press and holds until the next
   settle: 30
   finally: ["scoreboard objectives remove dice"]
   steps:
@@ -303,3 +273,14 @@ tests:
       - {"run": "execute if block ~2 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 64"}
       - {"run": "execute if block ~4 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #b dice 128"}
       - {"check": "if score #a dice = #b dice"}
+      - {"wait": 310}
+      - {"run": "scoreboard players set #c dice 0"}
+      - {"run": "execute if block ~6 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 1"}
+      - {"run": "execute if block ~2 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 2"}
+      - {"run": "execute if block ~6 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 4"}
+      - {"run": "execute if block ~2 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 8"}
+      - {"run": "execute if block ~4 ~3 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 16"}
+      - {"run": "execute if block ~6 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 32"}
+      - {"run": "execute if block ~2 ~1 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 64"}
+      - {"run": "execute if block ~4 ~5 ~1 redstone_lamp[lit=true] run scoreboard players add #c dice 128"}
+      - {"check": "if score #a dice = #c dice"}
