@@ -340,7 +340,7 @@ def _show(rcon, plot, spec, build, result, full):
     entry = _record(state, spec, result)
     tests = [t["name"] for t in spec.tests]
     if first or full:
-        # First time: the plot still holds the last whole-plot mirror, so start clean.
+        # No state file, so whatever stands in the plot is unrecorded: start clean.
         redraw(rcon, plot, state, (spec.name, build))
         save_state(plot, state)
         return

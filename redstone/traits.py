@@ -95,8 +95,8 @@ CHECKS = {
 NEEDS = {"tileable": "no truth-table test has tile: [dx, 0, dz]",
          "stackable": "no truth-table test has tile: with dy != 0"}
 
-# Claimed tileable or stackable before tile tests existed, proved (if at all) by a
-# separate multi-copy file. Each leaves this list when it gains a tile test.
+# Exempt from the tile-test check for tileable and stackable: each is proved, if at all, by a
+# separate multi-copy file, and leaves this list when it gains a tile test.
 UNTILED = frozenset({
     'add_carry_cancel_cell', 'add_carry_cancel_chain_x4', 'add_full_comparator_lightless',
     'add_full_comparator_lightless_x2', 'add_half_comparator_flat', 'add_half_comparator_flat_x2',

@@ -124,7 +124,7 @@ def attached_to(pos: Pos, props: dict[str, str]) -> Pos:
     return (x + dx, y + dy, z + dz)
 
 
-def _rcon_up(port: int = servers.MAIN.rcon_port) -> bool:
+def _rcon_up(port: int) -> bool:
     try:
         socket.create_connection(("127.0.0.1", port), timeout=0.5).close()
         return True
@@ -242,11 +242,6 @@ class Rig:
             self.r.cmd(f"forceload add {ox} {oz} {ox + sx - 1} {oz + sz - 1}")
             wait_loaded(self.r, origin, size)
             self.r.cmd("tick freeze")
-
-    @staticmethod
-    def level_name() -> str:
-        props = (SERVER_DIR / "server.properties").read_text()
-        return re.search(r"^level-name=(.*)$", props, re.M).group(1)
 
     def abs(self, pos: Pos) -> str:
         return " ".join(str(o + p) for o, p in zip(self.origin, pos))
@@ -414,29 +409,6 @@ class Rig:
         if pos in self.build.blocks:
             raise ValueError(f"driver {pos} overlaps the build")
         self.run(f"setblock {self.abs(pos)} {'redstone_block' if on else 'air'}")
-
-    def powered(self, pos: Pos) -> bool:
-        if not self.is_(pos, "redstone_wire"):
-            raise ValueError(f"{pos} is not redstone dust")
-        return not self.is_(pos, "redstone_wire[power=0]")
-
-    def describe(self, pos: Pos) -> str:
-        """The live value of whatever property carries signal at pos, for failure reports."""
-        state = self.build.blocks.get(pos, "minecraft:air")
-        block = parse_state(state)[0]
-        name = block.removeprefix("minecraft:")
-        sig = signal(state)
-        if not sig:
-            return name
-        prop, kind = sig
-        if kind == ANALOG:
-            return f"{name} {prop}={self.level(pos)}"
-        live = "true" if self.is_(pos, f"{block}[{prop}=true]") else "false"
-        return f"{name} {prop}={live}" + (" (locked)" if kind == INVERTED and live == "false" else "")
-
-    def dump(self) -> str:
-        interesting = [p for p, s in sorted(self.build.blocks.items()) if signal(s) or "redstone_block" in s]
-        return "\n".join(f"  {p}: {self.describe(p)}" for p in interesting)
 
     def use(self, pos: Pos) -> None:
         """Flip a lever or press a button the way a player's click does.

@@ -148,9 +148,6 @@ GLYPHS = {
 }
 
 
-_norm = namespaced
-
-
 def _short(state: str) -> str:
     return state.removeprefix("minecraft:")
 
@@ -205,7 +202,7 @@ def load(path: Path | str) -> Spec:
                 entry = palette[ch]
                 pos = (x, int(y), z)
                 if isinstance(entry, str):
-                    if _norm(entry) != "minecraft:air":
+                    if namespaced(entry) != "minecraft:air":
                         spec.build.place(pos, entry)
                     continue
                 if "input" in entry:
