@@ -1,0 +1,1105 @@
+name: close_feeds_probe
+description: 'Scratch probe for the door close (door2/close_layout/feeds.py). The whole design_c door is fixture; the design is 9 blocks: T''s feed (stone (1,6,0), a QC cell of T and P12; dust DT (1,7,0)
+  on it; stone cut (0,7,0) keeping DT off G12 (0,6,0)) and the P6+P11 feed (stone (-3,3,0): P11 direct, P6 by QC through P11''s cell; dust DP (-3,4,0); stone cut (-3,4,-1) keeping DP off NA (-3,3,-1)).
+  After the opening, the close''s c0 events are emulated by commands between ticks: RB_A (1,5,-2) removed (E0), RB12 removed (NP12 kill), redstone blocks at (1,7,1) and (-4,4,0) light DT and DP, RB_T (1,6,-1)
+  removed (Z_T''s wake), or instead the hold (4,6,-1) of sticky puller P_R (3,6,-1, facing west, head (2,6,-1)) removed, so P_R pulls RB_T to (2,6,-1) and Z_T retracts. Door coords + (4,3,8) = spec coords.'
+traits:
+- piston_based
+palette:
+  .: air
+  i:
+    input: in
+  A:
+    block: glass
+    fixture: true
+  B:
+    block: stone
+    fixture: true
+  C:
+    block: redstone_wire
+    fixture: true
+  D:
+    block: redstone_block
+    fixture: true
+  E:
+    block: obsidian
+    fixture: true
+  F:
+    block: repeater[facing=west,delay=1,powered=true]
+    fixture: true
+  G: stone
+  H:
+    block: redstone_wire
+    name: dp
+  I:
+    block: repeater[facing=north,delay=1,powered=true]
+    fixture: true
+  J:
+    block: sticky_piston[facing=east,extended=true]
+    fixture: true
+    name: p4
+  K:
+    block: sticky_piston[facing=east,extended=true]
+    fixture: true
+    name: p6
+  L:
+    block: sticky_piston[facing=east,extended=false]
+    fixture: true
+    name: p11
+  M:
+    block: piston[facing=up,extended=false]
+    fixture: true
+  N:
+    block: piston[facing=west,extended=false]
+    fixture: true
+  O:
+    block: quartz_block
+    fixture: true
+  P:
+    block: piston_head[facing=east,type=sticky]
+    fixture: true
+  Q:
+    block: sticky_piston[facing=east,extended=true]
+    fixture: true
+    name: s
+  R:
+    block: piston_head[facing=down,type=sticky]
+    fixture: true
+  S:
+    block: repeater[facing=north,delay=3,powered=true]
+    fixture: true
+  T:
+    block: sticky_piston[facing=down,extended=true]
+    fixture: true
+    name: p10
+  U:
+    block: sticky_piston[facing=up,extended=true]
+    fixture: true
+  V:
+    block: piston_head[facing=up,type=sticky]
+    fixture: true
+  W:
+    block: sticky_piston[facing=down,extended=false]
+    fixture: true
+    name: p12
+  X:
+    block: repeater[facing=west,delay=1,powered=false]
+    fixture: true
+  Y:
+    block: sticky_piston[facing=down,extended=false]
+    fixture: true
+  Z:
+    block: piston[facing=up,extended=false]
+    fixture: true
+    name: z_t
+  b:
+    block: sticky_piston[facing=down,extended=false]
+    fixture: true
+    name: t
+  c:
+    block: piston[facing=north,extended=false]
+    fixture: true
+  d:
+    block: piston[facing=down,extended=false]
+    fixture: true
+  e:
+    block: redstone_wire
+    name: dt
+  f:
+    block: sticky_piston[facing=down,extended=true]
+    fixture: true
+    name: p7
+  g: piston_head[facing=west,type=sticky]
+  h:
+    block: piston_head[facing=west,type=sticky]
+    fixture: true
+  j:
+    block: sticky_piston[facing=west,extended=false]
+    fixture: true
+  k:
+    block: sticky_piston[facing=down,extended=true]
+    fixture: true
+    name: p8
+  m: sticky_piston[facing=west,extended=true]
+  n:
+    block: sticky_piston[facing=west,extended=true]
+    fixture: true
+  o: redstone_block
+  p:
+    block: repeater[facing=east,delay=1,powered=true]
+    fixture: true
+layers:
+  0: |
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ...AAAA.....
+    ....AAA.....
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+  1: |
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ..BCCCC.....
+    ....III.....
+    ....UUU.....
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+  2: |
+    ............
+    ............
+    ............
+    ............
+    ....OOO.....
+    ..B.OOO...A.
+    ..C.OOO...A.
+    ....OOO...A.
+    ....VVV..AA.
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+  3: |
+    ............
+    ............
+    ............
+    ............
+    ...O...O..B.
+    .BCO...O..C.
+    ..AO...O..C.
+    ..AO...O..C.
+    ...OOOOOBpC.
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+  4: |
+    ............
+    ............
+    ............
+    ............
+    ...O...OABC.
+    .C.O...O....
+    .BCO...O....
+    ..IO...O....
+    AAJPOOOhn...
+    ...O...O....
+    .A.O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+  5: |
+    ............
+    ............
+    ............
+    ..........A.
+    ...O...OCC..
+    ...O...O....
+    .C.O...O....
+    BB.O...OA.A.
+    CFKPOOOjj.A.
+    ...O...OM...
+    DC.O...O....
+    .AAO...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+    ...O...O....
+  6: |
+    ............
+    ............
+    ..........B.
+    ..........C.
+    ...BOOOC....
+    ...COOO.AAMM
+    B..COOO.B..A
+    CC.COOOCC.CB
+    .GLQPYRR..C.
+    ..M.OOO.DDA.
+    EBN.OOOA.AA.
+    .CCAOOOA....
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+    ....OOO.....
+  7: |
+    ............
+    ............
+    ..........CB
+    ...B........
+    ...C..C...DD
+    ....BCC.CCDD
+    CBAA..C.C..C
+    .G.A.ZCB.A.C
+    .H.RObfkAA..
+    ..D..C..E.C.
+    ..D.EDNCBCC.
+    ...CA..C....
+    ............
+    ............
+    ............
+    ............
+  8: |
+    ............
+    ............
+    ...BAAAAAA.C
+    ...C.....A.B
+    .........A..
+    ....C....AEE
+    .CCCB....B..
+    ...S.D...C..
+    ...TW...CC..
+    ..E.A.......
+    ....A...C...
+    ....C.......
+    ............
+    ............
+    ............
+    ............
+  9: |
+    ............
+    .....B......
+    ...CCCCCCC..
+    .........C.C
+    ......AA.C.B
+    .........C..
+    ....CD...C..
+    ......gmo...
+    ....CG......
+    ....C.......
+    ....C.D.....
+    ............
+    ............
+    ............
+    ............
+    ............
+  10: |
+    .....D......
+    .....C......
+    ............
+    .....B......
+    .....DCCAABC
+    .....c......
+    ....Ad......
+    ............
+    ....Ge......
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+  11: |
+    ............
+    ............
+    ............
+    ............
+    ........CCC.
+    ............
+    ...iXB......
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+tests:
+- name: opening frame and slots per tick match the simulator
+  settle: 20
+  steps:
+  - &id001
+    run: setblock ~10 ~8 ~5 air strict
+  - &id002
+    run: setblock ~11 ~8 ~5 air strict
+  - &id003
+    run: setblock ~4 ~7 ~10 air strict
+  - &id004
+    run: setblock ~8 ~7 ~9 air strict
+  - &id005
+    run: setblock ~2 ~8 ~9 air strict
+  - &id006
+    run: setblock ~0 ~6 ~10 air strict
+  - &id007
+    run: setblock ~5 ~11 ~4 redstone_block strict
+  - &id008
+    wait: 4
+  - drive:
+      in: 1
+  - wait: 1
+  - check: if block ~4 ~3 ~8 quartz_block
+  - check: if block ~4 ~4 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~5 ~3 ~8 quartz_block
+  - check: if block ~5 ~4 ~8 quartz_block
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~6 ~3 ~8 quartz_block
+  - check: if block ~6 ~4 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: unless block ~4 ~2 ~8 quartz_block
+  - check: unless block ~5 ~2 ~8 quartz_block
+  - check: unless block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: unless block ~5 ~6 ~8 quartz_block
+  - check: unless block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: unless block ~3 ~4 ~8 quartz_block
+  - check: unless block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: unless block ~7 ~4 ~8 quartz_block
+  - check: unless block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: if block ~4 ~3 ~8 quartz_block
+  - check: if block ~4 ~4 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: if block ~6 ~3 ~8 quartz_block
+  - check: if block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: unless block ~4 ~2 ~8 quartz_block
+  - check: unless block ~5 ~2 ~8 quartz_block
+  - check: unless block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: unless block ~5 ~6 ~8 quartz_block
+  - check: unless block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: unless block ~3 ~4 ~8 quartz_block
+  - check: unless block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: unless block ~7 ~4 ~8 quartz_block
+  - check: unless block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: if block ~4 ~3 ~8 quartz_block
+  - check: if block ~4 ~4 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: if block ~6 ~3 ~8 quartz_block
+  - check: if block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: unless block ~4 ~2 ~8 quartz_block
+  - check: unless block ~5 ~2 ~8 quartz_block
+  - check: unless block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: unless block ~5 ~6 ~8 quartz_block
+  - check: unless block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: unless block ~3 ~4 ~8 quartz_block
+  - check: unless block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: unless block ~7 ~4 ~8 quartz_block
+  - check: unless block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: unless block ~4 ~2 ~8 quartz_block
+  - check: unless block ~5 ~2 ~8 quartz_block
+  - check: unless block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: unless block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: unless block ~3 ~4 ~8 quartz_block
+  - check: unless block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: unless block ~7 ~4 ~8 quartz_block
+  - check: unless block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: unless block ~4 ~2 ~8 quartz_block
+  - check: unless block ~5 ~2 ~8 quartz_block
+  - check: unless block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: unless block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: unless block ~3 ~4 ~8 quartz_block
+  - check: unless block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: unless block ~7 ~4 ~8 quartz_block
+  - check: unless block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: unless block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: unless block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: unless block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+  - wait: 1
+  - check: unless block ~4 ~3 ~8 quartz_block
+  - check: unless block ~4 ~4 ~8 quartz_block
+  - check: unless block ~4 ~5 ~8 quartz_block
+  - check: unless block ~5 ~3 ~8 quartz_block
+  - check: unless block ~5 ~4 ~8 quartz_block
+  - check: unless block ~5 ~5 ~8 quartz_block
+  - check: unless block ~6 ~3 ~8 quartz_block
+  - check: unless block ~6 ~4 ~8 quartz_block
+  - check: unless block ~6 ~5 ~8 quartz_block
+  - check: if block ~4 ~2 ~8 quartz_block
+  - check: if block ~5 ~2 ~8 quartz_block
+  - check: if block ~6 ~2 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~3 ~3 ~8 quartz_block
+  - check: if block ~3 ~4 ~8 quartz_block
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~7 ~3 ~8 quartz_block
+  - check: if block ~7 ~4 ~8 quartz_block
+  - check: if block ~7 ~5 ~8 quartz_block
+- name: P6 and P11 fire together after P12's retract
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - &id011
+    drive:
+      in: 1
+  - &id012
+    wait: 16
+  - &id013
+    check: if block ~4 ~3 ~8 air
+  - &id014
+    check: if block ~4 ~4 ~8 air
+  - &id015
+    check: if block ~4 ~5 ~8 air
+  - &id016
+    check: if block ~5 ~3 ~8 air
+  - &id017
+    check: if block ~5 ~4 ~8 air
+  - &id018
+    check: if block ~5 ~5 ~8 air
+  - &id019
+    check: if block ~6 ~3 ~8 air
+  - &id020
+    check: if block ~6 ~4 ~8 air
+  - &id021
+    check: if block ~6 ~5 ~8 air
+  - &id022
+    check: if block ~4 ~6 ~8 quartz_block
+  - &id023
+    check: if block ~5 ~6 ~8 quartz_block
+  - &id024
+    check: if block ~3 ~5 ~8 quartz_block
+  - &id025
+    expect:
+      t: 0
+      p6: 0
+      p11: 0
+      p12: 1
+      z_t: 1
+      p7: 0
+      p8: 0
+      p10: 0
+      s: 0
+  - &id026
+    level:
+      dt: 0
+      dp: 0
+  - &id027
+    run: setblock ~5 ~8 ~6 air
+  - &id028
+    run: setblock ~0 ~5 ~10 air
+  - wait: 1
+  - check: if block ~4 ~8 ~8 moving_piston
+  - check: if block ~4 ~6 ~8 air
+  - run: setblock ~0 ~7 ~8 redstone_block
+  - level:
+      dp: 15
+  - wait: 1
+  - expect:
+      p6: 1
+      p11: 1
+      p7: 0
+      p8: 0
+      p10: 0
+  - check: if block ~4 ~5 ~8 moving_piston
+  - check: if block ~4 ~6 ~8 moving_piston
+  - check: if block ~3 ~5 ~8 moving_piston
+  - check: if block ~3 ~6 ~8 moving_piston
+  - &id009
+    check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - &id010
+    check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - wait: 2
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~3 ~5 ~8 piston_head
+  - check: if block ~3 ~6 ~8 piston_head
+  - expect:
+      p7: 0
+      p8: 0
+      p10: 0
+  - *id009
+  - *id010
+- name: P6+P11 feed with NP12 alive pushes the top row (control)
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - run: setblock ~0 ~7 ~8 redstone_block
+  - wait: 1
+  - expect:
+      p6: 1
+      p11: 1
+  - wait: 2
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~8 ~6 ~8 sticky_piston[facing=west,extended=false]
+- name: T fires when Z_T retracts under its lit feed
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - wait: 1
+  - check: if block ~4 ~8 ~8 moving_piston
+  - run: setblock ~5 ~10 ~9 redstone_block
+  - run: setblock ~5 ~9 ~7 air
+  - level:
+      dt: 15
+  - wait: 1
+  - check: if block ~5 ~7 ~7 moving_piston
+  - expect:
+      t: 1
+      p7: 0
+      p8: 0
+      p10: 0
+  - check: if block ~5 ~5 ~8 moving_piston
+  - check: if block ~5 ~6 ~8 moving_piston
+  - *id009
+  - *id010
+  - wait: 2
+  - check: if block ~5 ~5 ~8 quartz_block
+  - expect:
+      t: 1
+      p7: 0
+      p8: 0
+      p10: 0
+  - *id009
+  - *id010
+- name: T fires when puller P_R takes RB_T off Z_T
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - wait: 1
+  - run: setblock ~5 ~10 ~9 redstone_block
+  - run: setblock ~8 ~9 ~7 air
+  - wait: 1
+  - check: if block ~7 ~9 ~7 moving_piston
+  - check: if block ~5 ~7 ~7 moving_piston
+  - expect:
+      t: 1
+      p7: 0
+      p8: 0
+      p10: 0
+  - check: if block ~5 ~5 ~8 moving_piston
+  - *id009
+  - *id010
+  - wait: 2
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - expect:
+      t: 1
+      p7: 0
+      p8: 0
+      p10: 0
+  - *id009
+  - *id010
+- name: P_R without the T feed retracts Z_T but T stays (control)
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - wait: 1
+  - run: setblock ~8 ~9 ~7 air
+  - wait: 1
+  - check: if block ~5 ~7 ~7 moving_piston
+  - expect:
+      t: 0
+  - wait: 2
+  - check: if block ~6 ~9 ~7 redstone_block
+  - expect:
+      t: 0
+  - check: if block ~5 ~6 ~8 quartz_block
+- name: lit T feed alone does not wake T until the spare lands (control)
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - wait: 1
+  - run: setblock ~5 ~10 ~9 redstone_block
+  - level:
+      dt: 15
+  - wait: 1
+  - expect:
+      t: 0
+      z_t: 1
+  - check: if block ~5 ~6 ~8 quartz_block
+  - wait: 2
+  - expect:
+      t: 1
+- name: T feed lit before the NP12 kill holds P12 out (control)
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - run: setblock ~5 ~10 ~9 redstone_block
+  - wait: 1
+  - *id028
+  - wait: 3
+  - expect:
+      p12: 1
+  - check: if block ~4 ~6 ~8 quartz_block
