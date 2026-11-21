@@ -1091,3 +1091,19 @@ Labels: SOURCED / MEASURED / COMPUTED / INFERRED.
   pass; door_cycle open R 9234 (H1/R1 9232), close R 448, front L, tier QUART, volume 99,900 = 74x30x45, the same
   times as v4b. Spec regenerated with --measured; the showroom slot has not been looked at by eye yet.
 - 2026-11-21 Started: moving the CLOSEK, CLOSE2 and CLOSE3 snakes off row -7 to free the two bottom layers.
+- Bottom row (COMPUTED, low_snakes.py = odd_south.py with rows -5..9, new snake places and pin_v3.pkl):
+  * Two layers can't go, only one: the input feed reaches the lever cell IL (8,-5,2) from the block under it, since
+    the logic core boxes IL in at its own level (LP's observer north of it, NLV/LV/LVC beside, LV3 south); the feed's
+    repeaters at y -6 stand on supports at -7. The routes now come up level with the feed, so ctrlq2.fresh blocks the
+    feed and every cell beside it (the first build without that put a CLOSEK support on a feed stone).
+  * Without row -7 the old snake places thrash: the router rips CLOSEK, CLOSE2, CLOSE3, STOREE, STOREO and XARR
+    against each other for 10+ min, and rerouted XSPO/KZB break the tuned delays. Pinning every route that never used
+    row -7 (save_pins.py, from odd_south.py; only CLOSEK, CLOSE2, CLOSE3, STOREO, TAPA, TAPB and ZARR reroute) and
+    placing the snakes where none of those pins pass settles in one build with no rip-up.
+  * Snakes: CLOSEK 11 x 2 lines at (-12,-5,-5) (z -5..-3, north of the core; even lines so its exit stays at x -13
+    and a longer snake adds only delay), CLOSE2 6 x 7 at (-11,-3,10), no CLOSE3 snake (bulb B's route alone gives
+    74). Close timings against the close input (probe: propagate from gc): kick 218/228 as before, CLOSE2 at its goal
+    272 (278), CLOSE3 302 (302). Other placements tried put CLOSE2/CLOSE3 at (272..300, 294..326); none gave both.
+  * Every hand cell's arrival from gr, gs and gf is the same as odd_south's; from gz and sz (ZB arrival, rebuild) 2 gt
+    earlier (ZARR rerouted), from gc the close kick's cells 2 gt later than the first try and then exact.
+  * Size 72x29x47 (door_cycle box 72x29x45 = 93,960 against 99,900): the controller also stops at x -15 (-16 before).

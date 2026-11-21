@@ -39,6 +39,8 @@ def setup(n, pairs=2):
     N, ZD, PAIRS = n, geomq.ZD, pairs
     DZ = ZD - OLD_ZD
     L3.ROWS = COMPACT['rows'] or (-7, -5, -3, -1, 1, 3, 5, 7, 9)
+    if COMPACT['closek_lines']:
+        CLOSEK_LINES[0] = COMPACT['closek_lines']
     L3.SZ_SHORT = COMPACT['sz_short']
     if COMPACT['first']:
         L3.FIRST = list(COMPACT['first'])
@@ -348,7 +350,7 @@ def zb_ends(c):
 ZAS_EXTRA = {'e': 0, 'o': 0}
 # compaction overrides (None = stage4 placement); set by pairs_ctrlq --compact
 COMPACT = dict(bounds=None, lad_x0=None, xhm=None, close2=None, closek=None, taps_x=False, kzb_x=False, za_obs=False, ladder_e=False, ladder_split=None, nsp_o=None, nhp_o=None,
-               sx_dx=0, sx_dz=0, close2_len=None, close2_lines=None, closek_len=None, rows=None, odd_south=False, first=None, sz_short=False, storee_n=None, kzb_n=None, close3_snake=None, pin=None)
+               sx_dx=0, sx_dz=0, close2_len=None, close2_lines=None, closek_len=None, closek_lines=None, rows=None, odd_south=False, first=None, sz_short=False, storee_n=None, kzb_n=None, close3_snake=None, pin=None)
 CLOSEK_LINES = [4]             # the close kick's delay-1 snake (layout3: 9 x 4)     # fixed delay-1 repeaters ahead of each ZA spit line's taps (set by timingq2.tuned)
 
 
@@ -638,6 +640,29 @@ def nets(c):
             [nx(m['close3_goal'])])] if 'close2_goal' in m else [])
 
 
+def feed_keepout(IL):
+    """The cells of pairs_ctrlq's input feed (a repeater column north from under the lever cell IL, then a dust row
+    east to the centre line at z IL-7, on supports one lower) and every cell beside them: no route may use them."""
+    x0, y0, z0 = IL[0], IL[1] - 1, IL[2]
+    xj = (geomq.X - 1) // 2
+    feed = [(x0, y0, z0 + dz) for dz in range(-7, 0)] + [(x, y0, z0 - 7) for x in range(x0 + 1, xj + 2)] \
+        + [(xj, y0, z0 - 8), (xj, y0, z0 - 9)]
+    feed += [(x, y - 1, z) for x, y, z in feed]
+    return {(x + dx, y + dy, z + dz) for x, y, z in feed for dx, dy, dz in R.NB6 + [(0, 0, 0)]}
+
+
+_fresh = L3._fresh
+
+
+def fresh(N):
+    """Without the bottom routing row, routes come up level with the input feed: keep them off it."""
+    c, bd = _fresh(N)
+    if -7 not in L3.ROWS:
+        bd.blocked |= {q for q in feed_keepout(c.marks['IL']) if q not in bd.cells}
+    return c, bd
+
+
+L3._fresh = fresh
 L3.build_hand = build_hand
 L3.nets = nets
 L3.FIRST = ['CLOSEK', 'KZB', 'STOREE', 'XKE', 'XKO', 'XARR', 'XSPE', 'XSPO', 'XHPE', 'XHPO', 'TMR', 'TAPA', 'ZASE', 'ZASO']
