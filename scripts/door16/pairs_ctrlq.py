@@ -2,7 +2,13 @@
 one input (fixture repeater on the centre line), facing south (front = side B, which no x-band ever enters), the
 front ring of the hallway filled with quartz.
 
-python pairs_ctrlq.py OUT.yaml N PAIRS [--name NAME] [--open T] [--close T]
+python -m scripts.door16.pairs_ctrlq OUT.yaml N PAIRS [--name NAME] [--open T] [--close T]
+
+door16_quart_compact, byte for byte (about a minute):
+python -m scripts.door16.pairs_ctrlq library/door/door16_quart_compact.redstone.yaml 8 8 --v2 \
+    --compact scripts/door16/final.py --colour --name door16_quart_compact --open 13000 --close 1500 \
+    --measured "door_cycle on dsats: open R 9234, close R 448, front L, tier QUART, volume 129,600 = 96x30x45 \
+against door16_quart's 213,840 = 108x30x66, open 166 gt and close 16 gt faster"
 """
 import re
 import sys
@@ -152,8 +158,7 @@ for n in bq.BANDS:
     QUEUES.update(queue(n))
 cycle = ("  - drive: {door_in: 1}\n" + f"  - wait: {OPEN_WAIT}\n" + checks(QUEUES) +
          "  - drive: {door_in: 0}\n" + f"  - wait: {CLOSE_WAIT}\n" + checks(ALL))
-tests = [("input on opens every pair and rebuilds every queue, input off closes them, every block ends as placed", cycle),
-         ("two cycles, the counter and every bulb reset in between", cycle + cycle)]
+tests = [("two cycles, the counter and every bulb reset in between", cycle + cycle)]
 
 
 def door():
@@ -176,8 +181,8 @@ if __name__ == '__main__':
             "controller after door16_full's (logic core, counter, ladder, master bulbs, routed lines) with new x-band "
             "ends: kick hopper in the cell O watches, spit hopper in the cell the door-plane observer watches, hold "
             "repeater into the upper door piston from the front side inside the wall, and the odd band's home sensor "
-            "watching its O through an arrival filter (merge repeater, bulb, torch, bulb, relay). Generator: scratchpad "
-            "quart/pairs_ctrlq.py.")
+            "watching its O through an arrival filter (merge repeater, bulb, torch, bulb, relay). Generator: "
+            "scripts/door16/pairs_ctrlq.py.")
     if '--compact' in sys.argv:
         meas = sys.argv[sys.argv.index('--measured') + 1] if '--measured' in sys.argv else 'door_cycle pending'
         desc = (f"door16_quart compacted ({meas}): the same 16x16 QUART door, machines and logic, with the "
@@ -192,7 +197,7 @@ if __name__ == '__main__':
                 "windows), and the store and kick lines keep routes pinned from an earlier build. Every timing target of "
                 "door16_quart is kept (spits R+56+10j, holds R+138..R+178, close kick 34/20 gt after the close spits). "
                 "Nothing stands in the doorway's prism (the even ZB sensor line is folded west of x 13). Generator: "
-                "scratchpad quart_compact/pairs_ctrlq.py --compact.")
+                "scripts/door16/pairs_ctrlq.py --compact.")
     if COLOUR:
         key = '; '.join(f"{c[0].replace('_', ' ')}: {' '.join(w for w in c[1:] if w)}" for c in colourq.CLASSES.values())
         desc += (" Colour key (plain stone recoloured to concrete by circuit, traced by redstone.circuits from the "
