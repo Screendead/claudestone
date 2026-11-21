@@ -1,6 +1,7 @@
 """DP, stage 2 of the close (door coords): what its on and off need and what the free cells allow. Built on
-trigger.py; the chain of stages 0 and 1 is unchanged. No design is added here: none was found (see
-docs/research/door_close_layout.md, "DP, stage 2"). Everything printed is computed on the simulator.
+trigger.py; the chain of stages 0 and 1 is unchanged. No design is added here: this pass found none (see
+docs/research/door_close_layout.md, "DP, stage 2"); the one found after it is dp_off.py. Everything printed is
+computed on the simulator.
 
 What-ifs set or clear SRC_P (-3,4,1) between two block events of one phase, which no command can do in the
 game: they show which orders work, not how to get them.
