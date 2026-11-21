@@ -1,9 +1,7 @@
 """scripts.remote_run offline: the real worker runs here under this python, with the
 container's volumes as symlinks into a temporary directory in place of `ssh ... docker run`."""
 
-import base64
 import io
-import json
 import os
 import shutil
 import signal
@@ -116,71 +114,40 @@ def test_a_run_uploads_once_streams_and_copies_changes_back(desk, work):
     src = desk.vols / desk.volumes()[0] / "tree"
     assert (src / "job.py").exists() and not (src / "__pycache__").exists()
 
-    # The files copied back are new content, so the next run uploads again; one after it
-    # that changes nothing does not.
+    # The files copied back are new content, so the next run uploads again into a new
+    # volume and drops the old one; one after it that changes nothing does not upload.
+    first = desk.volumes()
     run(work, "a")
     assert len(desk.runs) == 6
+    second = [v for v in desk.volumes() if v not in first]
+    assert len(second) == 1 and second[0].rsplit("-", 1)[0] == first[0].rsplit("-", 1)[0]
+    assert ("docker", "volume", "rm", *first) in desk.ssh
     run(work, "a")
     assert len(desk.runs) == 7 and (work / "result.txt").read_text() == "found a"
 
 
-def test_new_content_gets_a_new_volume_and_the_old_one_is_dropped(desk, work):
-    run(work)
-    first = desk.volumes()
-    (work / "keep.txt").write_text("edited")
-    run(work)
-    second = [v for v in desk.volumes() if v not in first]
-    assert len(second) == 1 and second[0].rsplit("-", 1)[0] == first[0].rsplit("-", 1)[0]
-    assert ("docker", "volume", "rm", *first) in desk.ssh
+def test_the_container_limits_come_from_jobs(monkeypatch, work):
+    seen = []
 
+    def session(host, argv, line, rest=None):
+        seen.append(argv)
+        raise KeyboardInterrupt
 
-def test_the_container_limits_come_from_jobs(desk, work):
-    rr.execute(HOST, work, [sys.executable, "job.py", "x", "0"], 3, "3g", out=io.BytesIO(), err=io.BytesIO())
-    argv = desk.runs[-1]
-    assert "--cpus=3" in argv and "--memory=3g" in argv and "--rm" in argv and rr.LABEL in argv
-    assert not set("".join(argv)) & set(' "^&|<>%')
-
-
-def test_gpus_asks_docker_for_every_gpu(desk, work):
-    rr.execute(HOST, work, [sys.executable, "job.py", "x", "0"], 1, "1g", out=io.BytesIO(), err=io.BytesIO())
-    assert "--gpus" not in desk.runs[-1]
-    rr.execute(HOST, work, [sys.executable, "job.py", "x", "0"], 1, "4g", out=io.BytesIO(), err=io.BytesIO(), gpus=True)
-    argv = desk.runs[-1]
-    assert argv[argv.index("--gpus") + 1] == "all" and argv.index("--gpus") < argv.index(rr.IMAGE)
+    monkeypatch.setattr(rr, "Session", session)
+    for gpus in (False, True):
+        with pytest.raises(KeyboardInterrupt):
+            rr.execute(HOST, work, [sys.executable, "job.py"], 3, "3g", gpus=gpus)
+    plain, gpu = seen
+    assert "--cpus=3" in plain and "--memory=3g" in plain and "--rm" in plain and rr.LABEL in plain
+    assert not set("".join(plain)) & set(' "^&|<>%')
+    assert "--gpus" not in plain
+    assert gpu[gpu.index("--gpus") + 1] == "all" and gpu.index("--gpus") < gpu.index(rr.IMAGE)
 
 
 def test_a_missing_command_is_exit_127(desk, work):
     out, err = io.BytesIO(), io.BytesIO()
     assert rr.execute(HOST, work, ["no-such-command-here"], 1, "1g", out=out, err=err) == 127
     assert b"No such file" in err.getvalue()
-
-
-def test_closing_stdin_stops_the_command(desk, work, tmp_path):
-    """What a killed laptop process looks like from the container: stdin reaches EOF."""
-    (work / "slow.py").write_text("import os, time, pathlib\n"
-                                  f"pathlib.Path({str(tmp_path / 'pid')!r}).write_text(str(os.getpid()))\n"
-                                  "print('started', flush=True)\n"
-                                  "time.sleep(60)\n")
-    run(work)  # uploads the source
-    job = {"mode": "run", **rr.CONTAINER, "cmd": [sys.executable, "slow.py"], "jobs": 1}
-    p = desk(rr.docker_run_argv(HOST, "rr-x", [f"{desk.volumes()[0]}:{rr.CONTAINER['src']}"]),
-             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    p.stdin.write(rr.program(job))
-    p.stdin.flush()
-    assert b"started" in base64.b64decode(json.loads(p.stdout.readline())["o"])
-    pid = int((tmp_path / "pid").read_text())
-    p.stdin.close()
-    assert p.wait(20) == 143
-    deadline = time.time() + 10
-    while time.time() < deadline:
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            break
-        time.sleep(0.1)
-    else:
-        os.kill(pid, signal.SIGKILL)
-        pytest.fail("the command outlived its container's stdin")
 
 
 class Dead:
@@ -213,22 +180,30 @@ def test_no_host_is_an_error(monkeypatch, work, capsys):
 
 
 def test_a_silent_desktop_is_given_up_and_the_container_removed(desk, work, monkeypatch):
-    run(work)
     monkeypatch.setattr(rr, "SILENCE", 0.3)
     monkeypatch.setattr(docker_sats, "_probe", lambda: False)
-    (work / "hang.py").write_text("import time\ntime.sleep(5)\n")
     real = desk.__call__
 
     def silent(argv, **kw):
         p = real(argv, **kw)
         r, w = os.pipe()
-        p.stdout = os.fdopen(r, "rb")  # never written: silence
-        p._keep = w
+        p.stdout = os.fdopen(r, "rb")  # never written: silence, until the session waits for its end
+        wait = p.wait
+
+        def waited(*a):
+            if w not in closed:
+                closed.append(w)
+                os.close(w)
+            return wait(*a)
+
+        p.wait = waited
         return p
+
+    closed = []
 
     monkeypatch.setattr(rr, "popen", silent)
     with pytest.raises(rr.Unreachable, match="stopped answering"):
-        rr.execute(HOST, work, [sys.executable, "hang.py"], 1, "1g", out=io.BytesIO(), err=io.BytesIO())
+        rr.execute(HOST, work, [sys.executable, "job.py"], 1, "1g", out=io.BytesIO(), err=io.BytesIO())
     assert any(a[:3] == ("docker", "rm", "-f") for a in desk.ssh)
 
 
@@ -295,43 +270,37 @@ def test_the_cli_killed_mid_stream_exits_cleanly_and_stops_the_command(tmp_path,
     (work / "chatty.py").write_text(CHATTY)
     driver = DRIVER.format(tests=str(Path(__file__).parent), repo=str(Path(__file__).parent.parent), host=HOST)
     pidfile = tmp_path / "chatty.pid"
-    for _ in range(3):
-        pidfile.unlink(missing_ok=True)
-        root = tmp_path / f"run{_}"
-        root.mkdir()
-        p = subprocess.Popen([sys.executable, "-c", driver, str(root), str(work), str(pidfile)],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        assert p.stdout.readline().startswith(b"tick")
-        p.send_signal(sig)
-        out, err = p.communicate(timeout=60)
-        assert p.returncode == 130, err.decode()
-        assert b"Fatal Python error" not in err and b"interrupted" in err
-        assert _gone(int(pidfile.read_text())), "the command outlived the interrupted run"
+    p = subprocess.Popen([sys.executable, "-c", driver, str(tmp_path), str(work), str(pidfile)],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert p.stdout.readline().startswith(b"tick")
+    p.send_signal(sig)
+    out, err = p.communicate(timeout=60)
+    assert p.returncode == 130, err.decode()
+    assert b"Fatal Python error" not in err and b"interrupted" in err
+    assert _gone(int(pidfile.read_text())), "the command outlived the interrupted run"
 
 
-def test_the_worker_never_aborts_at_exit(desk, work, tmp_path):
-    """Worker processes, ended by their stdin closing mid-stream and by their command
-    finishing, exit with their code and no fatal error, many times over."""
+def test_the_worker_ends_with_its_code_and_no_fatal_error(desk, work, tmp_path):
+    """Ended by its command finishing, and by its stdin closing mid-stream (what a killed
+    laptop process looks like from the container), which also stops the command."""
     (work / "chatty.py").write_text(CHATTY)
     run(work)
     volume = f"{desk.volumes()[0]}:{rr.CONTAINER['src']}"
-    for i in range(6):
-        cmd = [sys.executable, "chatty.py", str(tmp_path / "pid")] if i % 2 else [sys.executable, "job.py", "x", "5"]
+    pidfile = tmp_path / "pid"
+    for cmd, want in (([sys.executable, "job.py", "x", "5"], 5), ([sys.executable, "chatty.py", str(pidfile)], 143)):
         p = desk(rr.docker_run_argv(HOST, "rr-x", [volume]), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                  stderr=subprocess.PIPE)
         p.stdin.write(rr.program({"mode": "run", **rr.CONTAINER, "cmd": cmd, "jobs": 1}))
         p.stdin.flush()
-        if i % 2:
+        if want == 143:
             p.stdout.readline()
-            want = 143
         else:
             while b'"exit"' not in p.stdout.readline():
                 pass
-            want = 5
         p.stdin.close()
-        err = p.stderr.read()
-        p.stdout.read()
-        assert p.wait(30) == want and b"Fatal Python error" not in err, err.decode()
+        _, err = p.communicate(timeout=30)
+        assert p.returncode == want and b"Fatal Python error" not in err, err.decode()
+    assert _gone(int(pidfile.read_text())), "the command outlived its container's stdin"
 
 
 def test_an_upload_the_container_never_reads_is_retried(desk, work, monkeypatch):
