@@ -1068,3 +1068,17 @@ Labels: SOURCED / MEASURED / COMPUTED / INFERRED.
   snakes; moving them would free 2 layers.
 - One attempt at odd_south with every other final route pinned (pin_all.pkl, v5.py): the router did not settle within
   the 5-minute alarm (killed, no output). Stopped there as planned; the odd lines stay west (x -27).
+
+## Odd lines along z (cloud lead, 2026-11-21)
+- Why odd_south never settled (COMPUTED, a probe routing XSPO and XHPO alone on the hand-only board): each routes alone
+  in under a second, but whichever goes second finds no route. The hold line's column (x xw-2 = -12) runs beside the
+  spit line's (x -13), and every routed way into it ends on a block (a turn or a riser's top) beside the spit line,
+  which `router.free_active` never allows; the spit line's own end then blocks the hold line's way in. Rip-up just
+  swaps the two forever.
+- Fix (ctrlq2.x_ends, odd_south only): the hold line's turn is hand-placed, a block one cell south of its last
+  repeater, with the goal fed from the east (`hold_goal` (xp-2, t, ZD+6+nh) west). A powered block beside a
+  repeater's side doesn't power it, so the spit line is untouched. With nhp_o 10 the block sits at z ZD+16, level
+  with the spit line's last hand repeater. `odd_south.py` = final.py + odd_south + nhp_o 10.
+- COMPUTED: routes in 57 s (one build); every route but XSPO, XHPO, TAPA and TAPB is identical to v4b's (TAPA/TAPB
+  same lengths, re-tuned delays); the timing dict equals v4b's exactly; size 74x30x47, door_cycle box 74x30x45 =
+  99,900 against 129,600 (-22.9%). Lint ok. Installed as library/door/door16_quart_compact (door_cycle pending).
