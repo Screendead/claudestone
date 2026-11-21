@@ -1,0 +1,72 @@
+opening, design_c vs design_c+feeds, open-state differences: none
+cell differences outside the added blocks: none
+added blocks in the open state: {(1, 6, 0): (stone, ''), (1, 7, 0): (redstone_wire[power=0], ''), (0, 7, 0): (stone, ''), (-3, 3, 0): (stone, ''), (-3, 4, 0): (redstone_wire[power=0], ''), (-3, 4, -1): (stone, '')}
+refuted RB_T mover R_T (0,6,-1) facing east: open-state block piston[extended=True,facing=east,id=R_T] powered by [('direct', (0, 6, 0))] | RB_T now at [(2, 6, -1)]
+
+== A: kill NP12; next tick light T feed + remove RB_T
+    k1g RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+    k2g queue sticky_piston@(1, 4, 0) ev0
+    k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+    k2g EXTEND T@(1, 4, 0) down
+    k3j land sticky_piston@(0, 5, 0)
+    k3j queue sticky_piston@(0, 5, 0) ev0
+    k3j land quartz@(0, 4, 0)
+    k4g EXTEND P12@(0, 5, 0) down
+    k4j land piston@(1, 4, -1)
+    k4j land quartz@(1, 2, 0)
+    k4j land piston_head@(1, 3, 0)
+   changed: {'T': (((1, 4, 0), 'real', False), ((1, 4, 0), 'real', True)), 'Z_T': (((1, 4, -1), 'real', True), ((1, 4, -1), 'real', False)), (0, 3, 0): ('SP', 'SP~'), (1, 2, 0): ('air', 'C'), (1, 3, 0): ('C', 'piston_head')}
+
+== A-ctl1: T feed only (no Z_T wake)
+    k1g RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+    k3j land sticky_piston@(0, 5, 0)
+    k3j queue sticky_piston@(1, 4, 0) ev0
+    k3j queue sticky_piston@(0, 5, 0) ev0
+    k3j land quartz@(0, 4, 0)
+    k4g EXTEND T@(1, 4, 0) down
+    k4g EXTEND P12@(0, 5, 0) down
+   changed: {'T': (((1, 4, 0), 'real', False), ((1, 4, 0), 'real', True)), (0, 3, 0): ('SP', 'SP~'), (1, 2, 0): ('air', 'C~'), (1, 3, 0): ('C', 'piston_head~')}
+
+== A-ctl2: remove RB_T only (no T feed)
+    k1g RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+    k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+    k3j land sticky_piston@(0, 5, 0)
+    k3j land quartz@(0, 4, 0)
+    k4j land piston@(1, 4, -1)
+   changed: {'P12': (((0, 5, 0), 'real', True), ((0, 5, 0), 'real', False)), 'Z_T': (((1, 4, -1), 'real', True), ((1, 4, -1), 'real', False)), (0, 3, 0): ('SP', 'air')}
+
+== A-ctl3: T feed lit before the NP12 kill
+    k3g queue sticky_piston@(1, 4, 0) ev0
+    k3g RETRACT Z_T@(1, 4, -1) ev1: retract
+    k3g EXTEND T@(1, 4, 0) down
+    k5j land piston@(1, 4, -1)
+    k5j land quartz@(1, 2, 0)
+    k5j land piston_head@(1, 3, 0)
+   changed: {'T': (((1, 4, 0), 'real', False), ((1, 4, 0), 'real', True)), 'Z_T': (((1, 4, -1), 'real', True), ((1, 4, -1), 'real', False)), (1, 2, 0): ('air', 'C'), (1, 3, 0): ('C', 'piston_head')}
+
+== B: kill NP12; next tick light the P6+P11 feed
+    k1g RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+    k2g EXTEND P11@(-2, 3, 0) east
+    k2g queue sticky_piston@(-2, 2, 0) ev0
+    k2g EXTEND P6@(-2, 2, 0) east
+    k3j land sticky_piston@(0, 5, 0)
+    k3j land quartz@(0, 4, 0)
+    k4j land sticky_piston@(0, 3, 0)
+    k4j land piston_head@(-1, 3, 0)
+    k4j land quartz@(0, 2, 0)
+    k4j land piston_head@(-1, 2, 0)
+   changed: {'P11': (((-2, 3, 0), 'real', False), ((-2, 3, 0), 'real', True)), 'P12': (((0, 5, 0), 'real', True), ((0, 5, 0), 'real', False)), 'P6': (((-2, 2, 0), 'real', False), ((-2, 2, 0), 'real', True)), 'S': (((-1, 3, 0), 'real', False), ((0, 3, 0), 'real', False)), (-1, 2, 0): ('TL', 'piston_head'), (-1, 3, 0): ('S', 'piston_head'), (0, 2, 0): ('air', 'TL'), (0, 3, 0): ('SP', 'S')}
+
+== B-ctl: P6+P11 feed lit with NP12 alive
+    k1g EXTEND P11@(-2, 3, 0) east
+    k1g queue sticky_piston@(-2, 2, 0) ev0
+    k1g EXTEND P6@(-2, 2, 0) east
+    k3j land sticky_piston@(4, 3, 0)
+    k3j land quartz@(3, 3, 0)
+    k3j land quartz@(2, 3, 0)
+    k3j land quartz@(1, 3, 0)
+    k3j land sticky_piston@(0, 3, 0)
+    k3j land piston_head@(-1, 3, 0)
+    k3j land quartz@(0, 2, 0)
+    k3j land piston_head@(-1, 2, 0)
+   changed: {'P11': (((-2, 3, 0), 'real', False), ((-2, 3, 0), 'real', True)), 'P6': (((-2, 2, 0), 'real', False), ((-2, 2, 0), 'real', True)), 'Q': (((3, 3, 0), 'real', False), ((4, 3, 0), 'real', False)), 'S': (((-1, 3, 0), 'real', False), ((0, 3, 0), 'real', False)), (-1, 2, 0): ('TL', 'piston_head'), (-1, 3, 0): ('S', 'piston_head'), (0, 2, 0): ('air', 'TL'), (0, 3, 0): ('SP', 'S'), (1, 3, 0): ('C', 'SP'), (2, 3, 0): ('TR', 'C'), (3, 3, 0): ('Q', 'TR')}
