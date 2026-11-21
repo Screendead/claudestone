@@ -133,7 +133,7 @@ Contents: 1 Dust shape and connection; 2 Power delivery and through-block reads;
 
 ### light_checks_torch_not_dust
 **Verdict:** confirmed
-**Behaviour:** Counted with `perf` (the `light_checks` step) on a satellite, over a lever click on, a wait, a click off and a wait. A wall torch on a lever-powered block, turned off and on: 2 light checks, both from scheduled block ticks. A 15-long dust line (15 down to 1, then 0): 0. A line of 4 repeaters (all on, then off): 0. The harness's lever click itself is not free: the `clone` of the lever's support block onto itself queues 4 light checks, under the command rather than the tick, which is why `light_checks` counts only the ticks' checks.
+**Behaviour:** Counted with `perf` (the `light_checks` step) on a satellite, over a lever click on, a wait, a click off and a wait. A wall torch on a lever-powered block, turned off and on: 2 light checks, both from scheduled block ticks. A 14-long dust line fed through a repeater, so it switches in the repeater's tick (15 down to 2, then 0): 0. A line of 4 repeaters (all on, then off): 0. The harness's lever click itself is not free: the `clone` of the lever's support block onto itself queues 4 light checks, under the command rather than the tick, which is why `light_checks` counts only the ticks' checks. A dust line on the lever itself switches inside that command, out of the count; counted with the commands, a 15-long one queued nothing beyond those 4 (the same 4 as the repeater line).
 **Use:** A torch costs one light check per toggle, measured; dust and repeaters cost none. Prove a `lightless` claim by wrapping a test's steps in `light_checks: {max: 0}`.
 
 ---
