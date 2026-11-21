@@ -1,0 +1,332 @@
+opening, design_c + close feeds vs + S feed, open-state differences: none
+cell differences outside the added blocks: none
+added blocks in the open state: {(1, 5, 3): (sticky_piston[extended=False,facing=north,id=F_S], []), (1, 5, 2): (rb[id=RB_F], ''), (3, 5, 1): (sticky_piston[extended=True,facing=west,id=G_S], [('direct', (3, 6, 1))]), (2, 5, 1): (piston_head[facing=west,sticky=True], ''), (3, 6, 1): (rb, '')}
+Z_S in the closed state is QC-powered by [(2, 6, 2), (1, 5, 2)] (ARM_ZS (2,6,2); RB_F (1,5,2))
+moved during load: none | power on F_S at every tick, closed state to open state: none | on G_S: [(3, 6, 1)]
+box, opening: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+why (1,5,1): a redstone block at each free neighbour of DS, after k2 (S waiting at (0,3,0), T out), powers: {(0, 4, 1): ['S@(0, 3, 0) qc'], (2, 4, 1): ['P7@(2, 4, 0) direct', 'Z_S@(2, 4, 2) direct'], (1, 5, 1): ['T@(1, 4, 0) qc']}
+why from the south: a redstone block resting at each free neighbour of (1,5,1) through the opening, pistons whose open state changes: {(1, 5, 2): 'none', (2, 5, 1): ['P7'], (1, 6, 1): ['S'], (1, 5, 0): ['P7', 'S', 'T']} ((0,5,1) is NP12's glass)
+box, opening + drives A, B and C (stand-in sources included): x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== A: drive A: RB_F spat before S lands (S fires on landing), pulled by G_S 1 gt later
+k1 [RB_A off, RB12 off, SRC_P on]
+   k1g RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+   k1g EXTEND P11@(-2, 3, 0) east
+   k1g EXTEND P6@(-2, 2, 0) east
+k2 [SRC_P off, SRC_T on, HOLD off]
+   k2g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   k2g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   k2g RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0)
+   k2g queue sticky_piston@(1, 4, 0) ev0
+   k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+   k2g EXTEND T@(1, 4, 0) down
+k3 [SRC_T off, POKE set, POKE clear, SRC_10 on]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g queue sticky_piston@(1, 4, 0) ev2
+   k3g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+   k3g EXTEND P10@(-1, 5, 0) down
+k4 [SRC_V on, SRC_10 off, SRC_F on]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4g EXTEND F_S@(1, 5, 3) north
+   k4g EXTEND V@(-1, 3, 0) east
+k5 [SRC_F off, SRC_V off]
+   k5g wire (1, 4, 1) power 0->15
+   k5g RETRACT F_S@(1, 5, 3) ev2: retract+SPIT (1, 5, 1)
+   k5g queue sticky_piston@(1, 3, 0) ev0
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5g EXTEND S@(1, 3, 0) down
+   k5j land sticky_piston@(1, 4, 0)
+k6 [HOLD_G off]
+   k6g wire (1, 4, 1) power 15->0
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT G_S@(3, 5, 1) ev1: retract+PULL RB_F@(1, 5, 1)
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+k8 []
+   k8j land rb@(2, 5, 1)
+   k8j land sticky_piston@(1, 3, 0)
+   pistons updated by DS's changes: k5 ['G_S', 'P7', 'Z_S', 'Z_T']; k6 ['P7', 'S', 'T', 'Z_S', 'Z_T']
+   -> S H2 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T in; RB_F parked; V, P12, SP, P7, TR, P8, Q, TM where the close needs them
+
+== A2: drive A, S spat first, then RB_F (S is woken by DS's change) (as A through k4)
+k5 [SRC_V off, SRC_F off]
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5g wire (1, 4, 1) power 0->15
+   k5g queue sticky_piston@(1, 3, 0) ev0
+   k5g RETRACT F_S@(1, 5, 3) ev2: retract+SPIT (1, 5, 1)
+   k5g EXTEND S@(1, 3, 0) down
+   k5j land sticky_piston@(1, 4, 0)
+k6 [HOLD_G off]
+   k6g wire (1, 4, 1) power 15->0
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT G_S@(3, 5, 1) ev1: retract+PULL RB_F@(1, 5, 1)
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+k8 []
+   k8j land rb@(2, 5, 1)
+   k8j land sticky_piston@(1, 3, 0)
+   pistons updated by DS's changes: k5 ['G_S', 'P7', 'S', 'Z_S', 'Z_T']; k6 ['P7', 'S', 'T', 'Z_S', 'Z_T']
+   -> S H2 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T in; RB_F parked; V, P12, SP, P7, TR, P8, Q, TM where the close needs them
+
+== B: drive B: RB_F spat right after T's retract event (k3), S lands lit at k5, F_S's second pulse pulls RB_F home (as A through k1)
+k2 [SRC_P off, SRC_T on, HOLD off, SRC_F on]
+   k2g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   k2g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   k2g EXTEND F_S@(1, 5, 3) north
+   k2g RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0)
+   k2g queue sticky_piston@(1, 4, 0) ev0
+   k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+   k2g EXTEND T@(1, 4, 0) down
+k3 [SRC_T off, POKE set, POKE clear, SRC_10 on, SRC_F off]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g queue sticky_piston@(1, 4, 0) ev2
+   k3g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+   k3g EXTEND P10@(-1, 5, 0) down
+   k3g wire (1, 4, 1) power 0->15
+   k3g RETRACT F_S@(1, 5, 3) ev2: retract+SPIT (1, 5, 1)
+k4 [SRC_V on, SRC_10 off]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4g EXTEND V@(-1, 3, 0) east
+k5 [SRC_V off]
+   k5g queue sticky_piston@(1, 3, 0) ev0
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5g EXTEND S@(1, 3, 0) down
+   k5j land sticky_piston@(1, 4, 0)
+k6 [SRC_F on]
+   k6g EXTEND F_S@(1, 5, 3) north
+k7 [SRC_F off]
+   k7g wire (1, 4, 1) power 15->0
+   k7g queue sticky_piston@(1, 3, 0) ev2
+   k7g RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   k7g queue sticky_piston@(1, 3, 0) ev2
+   k7g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+k9 []
+   k9j land rb@(1, 5, 2)
+   k9j land sticky_piston@(1, 3, 0)
+   pistons updated by DS's changes: k3 ['G_S', 'P7', 'Z_S']; k7 ['G_S', 'P7', 'S', 'T', 'Z_S', 'Z_T']
+   -> S H2 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T in; RB_F home; V, P12, SP, P7, TR, P8, Q, TM where the close needs them
+
+== C: drive C: F_S out from k2, RB_F lands at k4 j, S lands lit at k5, F_S's release pulls RB_F home (as A through k1)
+k2 [SRC_P off, SRC_T on, HOLD off, SRC_F on]
+   k2g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   k2g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   k2g EXTEND F_S@(1, 5, 3) north
+   k2g RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0)
+   k2g queue sticky_piston@(1, 4, 0) ev0
+   k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+   k2g EXTEND T@(1, 4, 0) down
+k3 [SRC_T off, POKE set, POKE clear, SRC_10 on]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g queue sticky_piston@(1, 4, 0) ev2
+   k3g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+   k3g EXTEND P10@(-1, 5, 0) down
+k4 [SRC_V on, SRC_10 off]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4g EXTEND V@(-1, 3, 0) east
+   k4j wire (1, 4, 1) power 0->15
+   k4j land rb@(1, 5, 1)
+   k4j land piston_head@(1, 5, 2)
+k5 [SRC_V off]
+   k5g queue sticky_piston@(1, 3, 0) ev0
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5g EXTEND S@(1, 3, 0) down
+   k5j land sticky_piston@(1, 4, 0)
+k6 [SRC_F off]
+   k6g wire (1, 4, 1) power 15->0
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+k8 []
+   k8j land rb@(1, 5, 2)
+   k8j land sticky_piston@(1, 3, 0)
+   pistons updated by DS's changes: k4 ['G_S', 'P7', 'Z_S']; k6 ['G_S', 'P7', 'S', 'T', 'Z_S', 'Z_T']
+   -> S H2 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T in; RB_F home; V, P12, SP, P7, TR, P8, Q, TM where the close needs them
+
+== after each drive: one neighbour update beside P7 (glass set and cleared at (2,5,0)); P7 extends: {'A': True, 'A2': True, 'B': False, 'C': False}
+
+== windows (done: the end state above; T's retract event is k3 g, T lands at k5 j)
+   A, S fires at k5, G_S's pull 1/2/3 gt after: RB_F spat at k3 done/done/FAILS; RB_F spat at k4 done/done/FAILS; RB_F spat at k5 done/done/FAILS
+   B, S fires at k5, F_S's second release 2/3 gt after: RB_F spat at k3 done/FAILS; RB_F spat at k4 FAILS/FAILS
+   C, S fires at k5, F_S's release 1/2/3 gt after: F_S out from k1 done/done/FAILS; F_S out from k2 done/done/FAILS; F_S out from k3 FAILS/FAILS/FAILS (out from k3 is ctl 6: dust's update order decides)
+   S late under a DS lit before T lands, pull or release 1 gt after S fires; S spat at k6 / landing by itself at k6 j and firing at k7: A, RB_F spat at k3 done/done; B, RB_F spat at k3 done/done; C, F_S out from k2 done/done
+
+== ctl 1: no feed (SRC_F never set) (as A through k3)
+k4 [SRC_V on, SRC_10 off]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4g EXTEND V@(-1, 3, 0) east
+k5 [SRC_V off]
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5j land sticky_piston@(1, 4, 0)
+   pistons updated by DS's changes: none
+   -> FAILS: C ((1, 2, 0), 'real', None); (1,2,0) quartz[id=C]
+
+== ctl 2: drive A, RB_F not pulled (HOLD_G stays) (as A through k5)
+k7 []
+   k7j land quartz@(1, 1, 0)
+   k7j land piston_head@(1, 2, 0)
+   pistons updated by DS's changes: k5 ['G_S', 'P7', 'Z_S', 'Z_T']
+   -> FAILS: S ((1, 3, 0), 'real', True); RB_F ((1, 5, 1), 'real', None); G_S ((3, 5, 1), 'real', True); (1,2,0) piston_head[facing=down,sticky=True]
+
+== ctl 3: drive A, pull 3 gt after S fires: a landed C is pulled back (as A through k5)
+k7 []
+   k7j land quartz@(1, 1, 0)
+   k7j land piston_head@(1, 2, 0)
+k8 [HOLD_G off]
+   k8g wire (1, 4, 1) power 15->0
+   k8g queue sticky_piston@(1, 3, 0) ev1
+   k8g RETRACT G_S@(3, 5, 1) ev1: retract+PULL RB_F@(1, 5, 1)
+   k8g RETRACT S@(1, 3, 0) ev1: retract+PULL C@(1, 1, 0)
+k10 []
+   k10j land rb@(2, 5, 1)
+   k10j land sticky_piston@(1, 3, 0)
+   k10j land quartz@(1, 2, 0)
+   pistons updated by DS's changes: k5 ['G_S', 'P7', 'Z_S', 'Z_T']; k8 ['P7', 'S', 'T', 'Z_S', 'Z_T']
+   -> FAILS: C ((1, 2, 0), 'real', None); (1,2,0) quartz[id=C]
+
+== ctl 4: wrong order: RB_F spat before T's retract event (as A through k1)
+k2 [SRC_P off, SRC_T on, HOLD off, SRC_F on]
+   k2g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   k2g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   k2g EXTEND F_S@(1, 5, 3) north
+   k2g RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0)
+   k2g queue sticky_piston@(1, 4, 0) ev0
+   k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+   k2g EXTEND T@(1, 4, 0) down
+k3 [SRC_F off, SRC_T off, POKE set, POKE clear, SRC_10 on]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g wire (1, 4, 1) power 0->15
+   k3g RETRACT F_S@(1, 5, 3) ev2: retract+SPIT (1, 5, 1)
+   k3g sticky_piston@(1, 4, 0) ev2 cancelled (powered)
+   k3g EXTEND P10@(-1, 5, 0) down
+k4 [SRC_V on, SRC_10 off]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4j land quartz@(1, 2, 0)
+   k4j land piston_head@(1, 3, 0)
+k5 [SRC_V off]
+k6 [HOLD_G off]
+   k6g wire (1, 4, 1) power 15->0
+   k6g queue sticky_piston@(1, 4, 0) ev1
+   k6g RETRACT G_S@(3, 5, 1) ev1: retract+PULL RB_F@(1, 5, 1)
+   k6g RETRACT T@(1, 4, 0) ev1: retract+PULL C@(1, 2, 0)
+k8 []
+   k8j land rb@(2, 5, 1)
+   k8j land sticky_piston@(1, 4, 0)
+   k8j land quartz@(1, 3, 0)
+k9 []
+   k9g EXTEND P7@(2, 4, 0) down
+   pistons updated by DS's changes: k3 ['G_S', 'P7', 'T', 'Z_S']; k6 ['P7', 'T', 'Z_S', 'Z_T']
+   -> FAILS: S ((0, 3, 0), 'real', False); C ((1, 3, 0), 'real', None); P7 ((2, 4, 0), 'real', True); TR ((2, 2, 0), 'moving', None)
+
+== ctl 5: drive C with stages 3 and 4 two ticks late: T lands at k5 j, lit, over an empty (1,3,0) (as A through k1)
+k2 [SRC_P off, SRC_T on, HOLD off, SRC_F on]
+   k2g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   k2g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   k2g EXTEND F_S@(1, 5, 3) north
+   k2g RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0)
+   k2g queue sticky_piston@(1, 4, 0) ev0
+   k2g RETRACT Z_T@(1, 4, -1) ev1: retract
+   k2g EXTEND T@(1, 4, 0) down
+k3 [SRC_T off, POKE set, POKE clear]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g queue sticky_piston@(1, 4, 0) ev2
+   k3g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+k4 []
+   k4j wire (1, 4, 1) power 0->15
+   k4j land rb@(1, 5, 1)
+   k4j land piston_head@(1, 5, 2)
+k5 [SRC_10 on]
+   k5g EXTEND P10@(-1, 5, 0) down
+   k5j queue sticky_piston@(1, 4, 0) ev0
+   k5j land sticky_piston@(1, 4, 0)
+k6 [SRC_V on, SRC_10 off]
+   k6g EXTEND T@(1, 4, 0) down
+   k6g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+k7 [SRC_V off]
+k8 [SRC_F off]
+   k8g wire (1, 4, 1) power 15->0
+   k8g queue sticky_piston@(1, 4, 0) ev1
+   k8g RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   k8g queue sticky_piston@(1, 4, 0) ev1
+   k8g RETRACT T@(1, 4, 0) ev1: retract+PULL C@(1, 2, 0)
+k10 []
+   k10j land rb@(1, 5, 2)
+   k10j land sticky_piston@(1, 4, 0)
+   k10j land quartz@(1, 3, 0)
+   pistons updated by DS's changes: k4 ['G_S', 'P7', 'Z_S']; k8 ['G_S', 'P7', 'T', 'Z_S', 'Z_T']
+   -> FAILS: S ((0, 3, 0), 'real', False); C ((1, 3, 0), 'real', None)
+
+== ctl 6: drive C started in the tick of T's retract: RB_F lands at k5 j, after T, with S at rest (as A through k2)
+k3 [SRC_T off, POKE set, POKE clear, SRC_10 on, SRC_F on]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g queue sticky_piston@(1, 4, 0) ev2
+   k3g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+   k3g EXTEND P10@(-1, 5, 0) down
+   k3g EXTEND F_S@(1, 5, 3) north
+k4 [SRC_V on, SRC_10 off]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4g EXTEND V@(-1, 3, 0) east
+k5 [SRC_V off]
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5j land sticky_piston@(1, 4, 0)
+   k5j wire (1, 4, 1) power 0->15
+   k5j queue sticky_piston@(1, 4, 0) ev0
+   k5j queue sticky_piston@(1, 3, 0) ev0
+   k5j land rb@(1, 5, 1)
+   k5j land piston_head@(1, 5, 2)
+k6 [SRC_F off]
+   k6g EXTEND T@(1, 4, 0) down
+   k6g wire (1, 4, 1) power 15->0
+   k6g queue sticky_piston@(1, 4, 0) ev2
+   k6g RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   k6g queue sticky_piston@(1, 4, 0) ev2
+   k6g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+k8 []
+   k8j land quartz@(1, 1, 0)
+   k8j land rb@(1, 5, 2)
+   k8j land sticky_piston@(1, 4, 0)
+   pistons updated by DS's changes: k5 ['G_S', 'P7', 'S', 'T', 'Z_S', 'Z_T']; k6 ['G_S', 'P7', 'T', 'Z_S', 'Z_T']
+   -> FAILS: S ((1, 2, 0), 'real', False); (1,2,0) sticky_piston[extended=False,facing=down,id=S]
+
+== ctl 6: drive C started in the tick of T's retract: RB_F lands at k5 j, after T, with S at rest; dust's neighbour updates in reverse order (as A through k2)
+k3 [SRC_T off, POKE set, POKE clear, SRC_10 on, SRC_F on]
+   k3cmd queue sticky_piston@(1, 4, 0) ev2
+   k3g queue sticky_piston@(1, 4, 0) ev2
+   k3g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+   k3g EXTEND P10@(-1, 5, 0) down
+   k3g EXTEND F_S@(1, 5, 3) north
+k4 [SRC_V on, SRC_10 off]
+   k4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   k4g EXTEND V@(-1, 3, 0) east
+k5 [SRC_V off]
+   k5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   k5j land sticky_piston@(1, 4, 0)
+   k5j wire (1, 4, 1) power 0->15
+   k5j queue sticky_piston@(1, 3, 0) ev0
+   k5j queue sticky_piston@(1, 4, 0) ev0
+   k5j land rb@(1, 5, 1)
+   k5j land piston_head@(1, 5, 2)
+k6 [SRC_F off]
+   k6g EXTEND S@(1, 3, 0) down
+   k6g sticky_piston@(1, 4, 0) ev0 resolve failed
+   k6g wire (1, 4, 1) power 15->0
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   k6g queue sticky_piston@(1, 3, 0) ev2
+   k6g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+k8 []
+   k8j land rb@(1, 5, 2)
+   k8j land sticky_piston@(1, 3, 0)
+   pistons updated by DS's changes: k5 ['G_S', 'P7', 'S', 'T', 'Z_S', 'Z_T']; k6 ['G_S', 'P7', 'S', 'T', 'Z_S', 'Z_T']
+   -> S H2 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T in; RB_F home; V, P12, SP, P7, TR, P8, Q, TM where the close needs them
+
+== dust's neighbour updates in reverse order, every other schedule: events and end-state cells {'A': 'same', 'A2': 'same', 'B': 'same', 'C': 'same', 'ctl 1': 'same', 'ctl 2': 'same', 'ctl 3': 'same', 'ctl 4': 'same', 'ctl 5': 'same'}
+
+== drive A's return: the closed state loaded as A leaves the feed (RB_F at (2,5,1), G_S in, no hold), then the reset
+   moved during load: none | P7 powered by [(2, 4, -1), (2, 5, 1)] | Z_S by [(2, 6, 2), (2, 5, 1)]
+   g EXTEND G_S@(3, 5, 1) west
+   g EXTEND F_S@(1, 5, 3) north
+   g RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   cells differing from the loaded closed state of the standard build: none
+   opening after the reset, open-state differences: none
+   ctl: opening from the parked state without the reset, open-state differences: {(1, 1, 0): ('air', 'C'), (1, 3, 0): ('C', 'TM'), (2, 3, 0): ('TR', 'piston_head'), (3, 2, 0): ('TM', 'TR'), 'P7': (((2, 4, 0), 'real', False), ((2, 4, 0), 'real', True))}
