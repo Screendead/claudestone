@@ -131,13 +131,14 @@ the order is T first, P12 after; and DP (stage 2) is still a command, its on and
 - Probe: `close_trigger_probe` (`export_trigger`): the run above and three controls (glass under RB_ST, W_T or WK
   removed with setblock air strict before the opening), 27 to 47 cells and the levels of DT and DS checked against the
   simulator after c0 and later ticks. Its steps, read back from the YAML and replayed in the simulator, pass 4/4; without
-  K_T, W_T, M_K or the dust above P_R the first test fails [COMPUTED]. Server: not run.
+  K_T, W_T, M_K or the dust above P_R the first test fails [COMPUTED]. Server (2026-11-21, sat1): 4/4 [MEASURED];
+  `close_feeds_probe` 8/8 and `close_s_feed_probe` 6/6 still pass.
 
 ## Still needed (all local)
 1. S H2 feed: done in sim and on the server [MEASURED]. Still to wire, its inputs: F_S on and off (the spit after T's retract
    event) and G_S's hold off after S's extension (drive A), or F_S alone (drives B, C); after drive A, the return.
-2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [COMPUTED]; `close_trigger_probe`
-   to run on a satellite. Left: DP on as a block event after P12's retract.
+2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [MEASURED: `close_trigger_probe`
+   4/4 on sat1]. Left: DP on as a block event after P12's retract.
 3. Depowers: T's done (W_T, K_T) [COMPUTED]. Left: DP off after P6's extension.
 4. Z_T/RB_T reset: P_R re-extends, a down-pusher pushes RB_T to (1,5,-1); (1,7,-1) is now the bus's support. Also the
    return of RB_ST and its glass, RB12 and G, K, K_T.
@@ -145,7 +146,7 @@ the order is T first, P12 after; and DP (stage 2) is still a command, its on and
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
-`close_trigger_probe` on a satellite; then DP's on and off (stage 2), which the trigger chain leaves a command. The
+DP's on and off (stage 2), which the trigger chain leaves a command. The
 probes drive P10 and V (stages 3 and 4) by command: their close feeds are not designed here.
 
 The scripts are in `scripts/door2/close_layout/` (constraints.py/.txt, constraints_P6stage2.txt, feeds.py/.txt,
