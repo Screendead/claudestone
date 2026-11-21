@@ -4,7 +4,7 @@ A Run is O(-1) (the stable state before the input) followed by O(0..n), where O(
 world after tick t's block-entity phase and tick 0 is the tick the input repeater's output
 changes. Everything here is pure: the runner that probes the world lives elsewhere.
 
-Movement model (door_harness_design.md section 0): a push or pull started in tick s shows a
+Movement model: a push or pull started in tick s shows a
 moving_piston at the destination with saved progress (progressO) 0.0 at O(s) and 0.5 at
 O(s+1), and the real block at O(s+2). A retraction that meets a still-moving block places it
 early, at O(s+1). A 0-gt move is never seen moving: the cell simply changes at O(s). The
@@ -22,10 +22,6 @@ AIR, DOOR, SURFACE, MOVING, HEAD, OTHER = 0, 1, 2, 3, 4, 9
 # A quartz-like wall reads DOOR when door and surface material share a block, since the probe
 # tests the door tag first; both look like hallway composition from inside.
 COMPOSITION = frozenset({DOOR, SURFACE})
-# An air cell in a wall shows whatever is behind it, which the probe does not see.
-HOLES_ARE_CIRCUITRY = True
-# "No entities visible": an invisible entity is not visible.
-INVISIBLE_ENTITIES_COUNT = False
 
 QUIET_TICKS = 40
 MAX_PERIOD = 64
@@ -39,7 +35,7 @@ OPPOSITE = {"north": "south", "south": "north", "west": "east",
 
 LIGHT, DARK = "L", "D"  # no circuitry and no entities visible / no circuitry visible
 COLUMNS = ("front", "opened", "closed", "opening", "closing")
-TIERS = {  # section 2.1.4 table, read from the Door Rules doc
+TIERS = {  # the Door Rules seamless tier table
     "SUPER": (LIGHT, LIGHT, LIGHT, LIGHT, LIGHT),
     "FULL": (LIGHT, LIGHT, LIGHT, None, None),
     "SEMI": (DARK, DARK, None, None, None),
@@ -355,9 +351,10 @@ def exposure(obs: Observation, h: Hallway, cells: frozenset[Pos]) -> str | None:
             return None
         if c.code == MOVING and (c.moving.source or c.moving.moved not in COMPOSITION):
             return None
-        if HOLES_ARE_CIRCUITRY and c.code == AIR and p in h.surface:
+        # An air cell in a wall shows whatever is behind it, which the probe does not see.
+        if c.code == AIR and p in h.surface:
             return None
-    seen = any(e.cells & cells for e in obs.entities if INVISIBLE_ENTITIES_COUNT or not e.invisible)
+    seen = any(e.cells & cells for e in obs.entities if not e.invisible)
     return DARK if seen else LIGHT
 
 

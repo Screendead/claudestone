@@ -30,9 +30,6 @@ MARGIN = 2  # layers of observed cells around the build and hallway; the outermo
 # Voxel-shape merging treats coordinates within 1e-7 as one (IndirectMerger), so a hitbox
 # overlapping a cell by no more than this doesn't stop a block being placed there.
 TOUCH = 1e-7
-# Exception 4 read by its "i.e.": a hitbox occupies only cells where it stops a hand-placed
-# block, and only blocksBuilding entities do. False counts every entity's overlapped cells.
-PLACEMENT_BLOCKING_ONLY = True
 
 
 @dataclass(frozen=True)
@@ -168,7 +165,7 @@ def entity_cells(entity: Entity) -> set[Pos]:
     kind = bare(entity.id)
     if kind not in ENTITY_DIMS:
         raise KeyError(f"unknown entity type {entity.id!r}")
-    if PLACEMENT_BLOCKING_ONLY and kind not in BLOCKS_BUILDING:
+    if kind not in BLOCKS_BUILDING:
         return set()
     return aabb_cells(hitbox(entity))
 

@@ -1,4 +1,4 @@
-"""Function text for watching a piston door tick by tick (design sections 2.2 and 4).
+"""Function text for watching a piston door tick by tick.
 
 Two probes, both run under `execute positioned <build origin>` like `probe_functions`:
 
@@ -52,10 +52,6 @@ CLASSES = ((HEAD, "minecraft:piston_head"), (MOVING, "minecraft:moving_piston"),
 # Occupancy region: build bounds and hallway, grown this far on every side and clamped
 # to the plot.
 MARGIN = 2
-# Rules 4.2 exempt "outer-surface and hallway blocks that fit the type"; a block of the
-# surface material elsewhere (a support under dust, say) is circuitry. True exempts the
-# material wherever it stands, as the design's first draft did.
-SURFACE_EXEMPT_ANYWHERE = False
 
 
 def box_cells(box: Box) -> list[Pos]:
@@ -188,7 +184,7 @@ def occupancy_functions(bounds: Box, hallway: list[Box], static: set[Pos], surfa
         if pos in static or (track is not None and pos not in track):
             continue
         p = _at(pos)
-        on_surface = SURFACE_EXEMPT_ANYWHERE or pos in surface
+        on_surface = pos in surface
         exempt = f"unless block {p} {DOOR_TAG}" + (f" unless block {p} {SURFACE_TAG}" if on_surface else "")
         moved_exempt = "".join(f" unless data block {p} {{source:0b,blockState:{form}}}"
                                for m in door_ids + (surface_ids if on_surface else []) for form in _state_forms(m))
