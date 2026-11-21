@@ -12,7 +12,7 @@ No structural obstruction; full close not yet shown end to end.
   block's new cell (flags 276/324) [SOURCED PistonBaseBlock.java:172,259-261,302,347-349]. So QC feeds at (1,5,1)/(1,6,0)
   power T but never wake it in c0; the dead end's G12b fix is insufficient [MEASURED control].
 - P6 and T fixed with no change to opening blocks; volume unchanged 1728 [COMPUTED].
-- Open knot: S's H2 feed. Shown in the simulator on 2026-11-21: section "S H2 feed" below.
+- S's H2 feed: shown in the simulator and on a satellite on 2026-11-21: section "S H2 feed" below.
 
 Close order [SOURCED plan_common.txt]: 0 P12 retract | 1 T, P9, P1-P6 | 2 P11 | 3 P10 | 4 V H2 | 5 S H2 | 6 P8 | 7 Q H2 | 8 P7
 
@@ -34,7 +34,7 @@ Server: close_feeds_probe.redstone.yaml, 8/8 pass [MEASURED]; mutated copy faile
 - Refuted [COMPUTED]: RB_T pusher at (0,6,-1) east (G12 powers it while open).
 - 0 gt close INFERRED only (no spit relays in the probe).
 
-## S H2 feed (2026-11-21; simulator only, server run pending)
+## S H2 feed (2026-11-21; simulator, then server)
 Option (a) works; (b) and (c) were not needed. Opening and the nine blocks unchanged: open-state diff none, box still 1728
 [COMPUTED s_feed.txt]. Stage 5: V spits S into (1,3,0); S fires there, pushes C to (1,1,0) and is spat itself.
 - Blocks: F_S sticky piston (1,5,3) facing north, retracted; RB_F redstone block (1,5,2). For a pull inside the phase:
@@ -65,12 +65,14 @@ Option (a) works; (b) and (c) were not needed. Opening and the nine blocks uncha
   (1,6,3) for F_S; glass set and cleared at (1,5,0) is the update T's depower must deliver (item 3). Controls fail:
   no feed; no pull; pull at 3 gt; RB_F spat before T's retract; T landing lit over an empty (1,3,0).
 - Server: `close_s_feed_probe` (A, B, C and three controls; 18 cells and DS's level checked against the simulator at
-  the deciding ticks), lint clean, not run yet. Its steps, read back from the YAML and replayed in the simulator, pass
+  the deciding ticks) passes 6/6 on sat1, and `close_feeds_probe` still 8/8 [MEASURED 2026-11-21]. Drive A's pull inside
+  one phase matches the simulator at every check, mid-pull moving pistons included; at A's end RB_F is at (2,5,1), G_S
+  and F_S are retracted and every down-facing sticky piston is in [MEASURED]. Its steps, read back from the YAML and replayed in the simulator, pass
   6/6; without F_S or RB_F A, B and C fail; without G_S A fails, B and C pass [COMPUTED export_s_feed]. Drive A's use
   inside one phase (the 0 gt close) is INFERRED: commands cannot order events inside a phase.
 
 ## Still needed (all local)
-1. S H2 feed: the server run of `close_s_feed_probe`. Then its inputs: F_S on and off (the spit after T's retract
+1. S H2 feed: done in sim and on the server [MEASURED]. Still to wire, its inputs: F_S on and off (the spit after T's retract
    event) and G_S's hold off after S's extension (drive A), or F_S alone (drives B, C); after drive A, the return.
 2. Trigger order: E0, NP12 kill, then T feed, P_R release, DP, each a later FIFO event.
 3. Depowers: spit relay after T's extension (DT off); one after P6's extension (DP off).
@@ -80,7 +82,7 @@ Option (a) works; (b) and (c) were not needed. Opening and the nine blocks uncha
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
-Server run: `python -m scripts.try close_s_feed_probe`. Then the starter part, which adopts the trigger order above and
+The starter part, which adopts the trigger order above and
 takes FT/DT/CT, P_R, FP/DP/CP and F_S/RB_F (G_S/HOLD_G for drive A) as fixed inputs. The S probe drives P10 and V
 (stages 3 and 4) by command: their close feeds are not designed here.
 
