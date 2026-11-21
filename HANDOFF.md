@@ -44,12 +44,6 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
 4. `lightless`: definition and block list fixed, `light_checks` step written; left, its first satellite run and the
    `docs/MECHANICS.md` entry.
 
-## Calls waiting on Jack
-
-- **Ask Squid how they time and tier doors** (opened 2026-11-21, issue #24): the 0-tick timing reading, whether
-  plain "Seamless" means FULL, the Feb 2023 record's reset time, version and world, and whether a seamless 16x16
-  can hold the unrestricted Fastest title. Unanswered, the smaller-3x3 front is dropped under the strictest reading.
-
 ## Calls
 
 - **Ask Squid how they time and tier doors** (2026-11-21). Jack's answer, verbatim: "B · Assume the strictest reading".
