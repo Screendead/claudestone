@@ -44,6 +44,12 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
 4. `lightless`: definition and block list fixed, `light_checks` step written; left, its first satellite run and the
    `docs/MECHANICS.md` entry.
 
+## Calls waiting on Jack
+
+- **Ask Squid how they time and tier doors** (opened 2026-11-21, issue #24): the 0-tick timing reading, whether
+  plain "Seamless" means FULL, the Feb 2023 record's reset time, version and world, and whether a seamless 16x16
+  can hold the unrestricted Fastest title. Unanswered, the smaller-3x3 front is dropped under the strictest reading.
+
 ## Queued
 
 - **Showreel.** A 60–90 s hype reel for the README, socials and Discord (Jack, 2026-09-30): original Csound music, no voiceover, captions; Remotion motion graphics, terminal scenes and trace animations from real repo data; Chunky renders (on the desktop) and a Replay Mod session Jack records. **On hold (Jack, 2026-09-30): no changes or work on the video until Jack says.** Draft 1 rendered 2026-09-30 (`showreel/out/draft.mp4`, 76.8 s, gitignored); Chunky and Replay shots are placeholder cards; open items in `showreel/README.md` and the storyboard. Rendered media and Mojang assets stay out of git.
