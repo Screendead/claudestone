@@ -1107,3 +1107,7 @@ Labels: SOURCED / MEASURED / COMPUTED / INFERRED.
   * Every hand cell's arrival from gr, gs and gf is the same as odd_south's; from gz and sz (ZB arrival, rebuild) 2 gt
     earlier (ZARR rerouted), from gc the close kick's cells 2 gt later than the first try and then exact.
   * Size 72x29x47 (door_cycle box 72x29x45 = 93,960 against 99,900): the controller also stops at x -15 (-16 before).
+- 2026-11-21 MEASURED (issue #43, Docker satellites dsat1-3, 1069 s): both tests of the 72x29 door16_quart_compact
+  pass; door_cycle open R 9218 (H1/R1 9216), close R 448, front L, tier QUART, volume 93,960 = 72x29x45 (box
+  (0,0,2)-(71,28,46), 0 heads), as the generator says; the final every-block check found nothing wrong. Open is 16 gt
+  faster than the 74-wide build's 9234. Spec regenerated with --measured; the showroom slot has not been looked at by eye.
