@@ -1,5 +1,5 @@
 name: light_checks_torch_not_dust
-description: 'Counts the light checks the server queues, with perf, while each of three lever-driven lines switches on and off. A redstone torch turned off and on queues at least one; a 15-long dust line and a 4-repeater line queue none, though every dust cell changes power and every repeater turns on. Levers are clicked, so the harness adds no block changes of its own. This is the check behind the lightless trait: dust, repeaters and comparators carry a signal without light updates; torches, lamps and the rest of redstone/traits.LIGHT do not.'
+description: 'Counts the light checks the server queues, with perf, while each of three lever-driven lines switches on and off. A redstone torch turned off and on queues at least one; a 14-long dust line and a 4-repeater line queue none, though every dust cell changes power and every repeater turns on. Only checks queued in the server''s ticks count, not those inside the harness''s own commands, so the dust line is fed through a repeater: it switches in the repeater''s tick, not inside the lever click. This is the check behind the lightless trait: dust, repeaters and comparators carry a signal without light updates; torches, lamps and the rest of redstone/traits.LIGHT do not.'
 traits: [pistonless, entityless]
 palette:
   .: air
@@ -9,7 +9,7 @@ palette:
   l: {name: dust_lever, block: 'lever[face=floor,facing=east]'}
   D: {name: d1, block: 'redstone_wire[east=side,west=side]'}
   d: redstone_wire[east=side,west=side]
-  E: {name: d15, block: 'redstone_wire[east=side,west=side]'}
+  E: {name: d14, block: 'redstone_wire[east=side,west=side]'}
   m: {name: rep_lever, block: 'lever[face=floor,facing=east]'}
   r: repeater[facing=west]
   R: {name: r4, block: 'repeater[facing=west]'}
@@ -23,7 +23,7 @@ layers:
   1: |
     ST..............
     ................
-    lDdddddddddddddE
+    lrDddddddddddddE
     ................
     mrrrR...........
   2: |
@@ -51,11 +51,11 @@ tests:
       max: 0
       steps:
       - use: dust_lever
-      - wait: 2
-      - level: {d1: 15, d15: 1}
+      - wait: 4
+      - level: {d1: 15, d14: 2}
       - use: dust_lever
-      - wait: 2
-      - level: {d1: 0, d15: 0}
+      - wait: 4
+      - level: {d1: 0, d14: 0}
 - name: a repeater line switched on and off queues none
   steps:
   - light_checks:
