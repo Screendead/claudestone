@@ -6,9 +6,13 @@ python -m scripts.door16.pairs_ctrlq OUT.yaml N PAIRS [--name NAME] [--open T] [
 
 door16_quart_compact, byte for byte (about a minute):
 python -m scripts.door16.pairs_ctrlq library/door/door16_quart_compact.redstone.yaml 8 8 --v2 \
-    --compact scripts/door16/odd_south.py --colour --name door16_quart_compact --open 13000 --close 1500 \
-    --measured "door_cycle on satellites: open R 9234, close R 448, front L, tier QUART, volume 99,900 = 74x30x45 \
-against the 96-wide v4b's 129,600 and door16_quart's 213,840 = 108x30x66"
+    --compact scripts/door16/low_snakes.py --colour --name door16_quart_compact --open 13000 --close 1500 \
+    --measured "door_cycle on satellites: open R 9218, close R 448, front L, tier QUART, volume 93,960 = 72x29x45 \
+against the 74-wide build's 99,900, v4b's 129,600 and door16_quart's 213,840 = 108x30x66, open 16 gt faster"
+
+scripts/door16/odd_south.py instead of low_snakes.py gives the 74x30 build (close snakes on the bottom routing row),
+measured with --measured "door_cycle on satellites: open R 9234, close R 448, front L, tier QUART, volume 99,900 = \
+74x30x45 against the 96-wide v4b's 129,600 and door16_quart's 213,840 = 108x30x66"
 
 scripts/door16/final.py instead of odd_south.py gives the 96-wide v4b (odd lines out west), measured with
 --measured "door_cycle on dsats: open R 9234, close R 448, front L, tier QUART, volume 129,600 = 96x30x45 \
@@ -206,6 +210,14 @@ if __name__ == '__main__':
             desc += (" The odd bands' spit and hold lines run south along z beside the band instead of out west, "
                      "which takes the build from 96 to 74 blocks wide; the hold line's turn into its column is placed "
                      "by hand, since the router never lays a block beside the spit line.")
+        if -7 not in ctrlq.L3.ROWS:
+            desc += (" The bottom routing row is gone: the close kick's and second close pulse's snakes sit in the rows "
+                     "above it, bulb B's pulse needs no snake of its own, the routes keep off the input feed, and every "
+                     "route that never used that row is kept (pin_v3.pkl). The input feed still needs its supports one "
+                     "below the lever cell, so this frees one layer, and the controller no longer reaches the outermost "
+                     "column on each side: 72x29x45. Open, store and hold timings and the close kick are unchanged, "
+                     "bulb B's second toggle too; the second close spit comes 6 gt earlier and the rebuild after the "
+                     "ZB arrival 2 gt earlier.")
     if COLOUR:
         key = '; '.join(f"{c[0].replace('_', ' ')}: {' '.join(w for w in c[1:] if w)}" for c in colourq.CLASSES.values())
         desc += (" Colour key (plain stone recoloured to concrete by circuit, traced by redstone.circuits from the "
