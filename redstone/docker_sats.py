@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import servers
-from .rcon import PROPERTIES, Rcon
+from .rcon import Rcon, read_password
 from .servers import ROOT, Server
 
 HOST_FILE = ROOT / "docker_host"
@@ -73,10 +73,6 @@ run = subprocess.run  # replaced by a fake in the offline tests
 
 class DesktopError(RuntimeError):
     pass
-
-
-def _password() -> str:
-    return re.search(r"^rcon\.password=(.*)$", PROPERTIES.read_text(), re.M).group(1)
 
 
 def _once(argv: list[str], timeout: float, stdin: bytes | None = None, merge: bool = False,
@@ -161,10 +157,10 @@ def docker(*args: str, **kw):
     return call(docker_argv(*args), **kw)
 
 
-def reachable(timeout: float = 5) -> bool:
+def reachable() -> bool:
     """Whether the desktop's Docker answers."""
     try:
-        return docker("version", "--format", "{{.Server.Version}}", timeout=timeout).returncode == 0
+        return docker("version", "--format", "{{.Server.Version}}", timeout=5).returncode == 0
     except DesktopError:
         return False
 
@@ -173,15 +169,6 @@ def running(timeout: float = 30) -> set[str]:
     """Names of the dsat containers running on the desktop."""
     out = docker("ps", "--filter", "name=^dsat", "--format", "{{.Names}}", timeout=timeout).stdout.decode()
     return set(out.split())
-
-
-def running_satellites(timeout: float = 5) -> list["DockerSatellite"]:
-    """The dsats whose containers are running, busy or not, in order. Makes sure a reaper
-    is watching them: containers can outlive the process that started them."""
-    names = running(timeout)
-    if names:
-        _spawn_reaper()
-    return [s for s in DOCKER_SATELLITES if s.name in names]
 
 
 def _mark_age() -> float | None:
@@ -230,25 +217,29 @@ def _mark_down() -> None:
     DOWN_FILE.write_text(HOST)
 
 
-def available(timeout: float = 5) -> list["DockerSatellite"]:
-    """The running dsats, for choosing a server: [] with no host configured, or when the
-    desktop does not answer (remembered for DOWN_SECONDS)."""
+def available() -> list["DockerSatellite"]:
+    """The running dsats, busy or not, in order, for choosing a server: [] with no host
+    configured, or when the desktop does not answer (remembered for DOWN_SECONDS). Makes
+    sure a reaper watches them: containers can outlive the process that started them."""
     if HOST is None or _marked_down():
         return []
     try:
-        return running_satellites(timeout)
+        names = running(5)
     except DesktopError:
         _mark_down()
         return []
+    if names:
+        _spawn_reaper()
+    return [s for s in DOCKER_SATELLITES if s.name in names]
 
 
-def start_spare(timeout: float = 5):
+def start_spare():
     """Start a dsat that is not running and hold its rig.lock: (lock, sat), the lock the
     caller's to close, or None when every dsat runs or the desktop fails."""
     if HOST is None or _marked_down():
         return None
     try:
-        names = running(timeout)
+        names = running(5)
     except DesktopError:
         _mark_down()
         return None
@@ -299,8 +290,6 @@ def _listeners(port: int) -> set[int] | None:
 
 @dataclass(frozen=True)
 class DockerSatellite(Server):
-    image: str = IMAGE
-
     def level_name(self) -> str:
         return LEVEL
 
@@ -371,7 +360,7 @@ class DockerSatellite(Server):
         try:
             docker("run", "-d", "--name", self.name, "-e", "RCON_PASSWORD", "-e", f"MEMORY={self.memory}",
                    "-p", f"127.0.0.1:{self.rcon_port}:25575",
-                   self.image, env={**os.environ, "RCON_PASSWORD": _password()}, retry=False, timeout=60)
+                   IMAGE, env={**os.environ, "RCON_PASSWORD": read_password()}, retry=False, timeout=60)
         except DesktopError:
             if self.name not in running():
                 raise
@@ -380,20 +369,15 @@ class DockerSatellite(Server):
     def log(self) -> Path:
         return self.dir / "harness.log"
 
-    def save_logs(self) -> bool:
-        """The container's output into harness.log, and its crash reports (a watchdog
-        crash's thread dump goes there, not to stdout) into crash-reports/."""
+    def _remove(self) -> bool:
+        """Save the container's output into harness.log and its crash reports (a watchdog
+        crash's thread dump goes there, not to stdout) into crash-reports/, then remove it.
+        Whether there was one."""
         p = docker("logs", self.name, merge=True, check=False)
         if p.returncode != 0:
             return False
         self.log.write_bytes(p.stdout)
         docker("cp", f"{self.name}:{REMOTE_CRASHES}", str(self.dir), check=False, retry=False)
-        return True
-
-    def _remove(self) -> bool:
-        """Save the container's logs and remove it. Whether there was one."""
-        if not self.save_logs():
-            return False
         docker("rm", "-f", self.name, check=False)
         return True
 
@@ -436,13 +420,6 @@ DOCKER_SATELLITES = [DockerSatellite(f"dsat{i}", ROOT / "satellites" / f"dsat{i}
 BY_NAME = {s.name: s for s in DOCKER_SATELLITES}
 
 
-def idle(sat: DockerSatellite, minutes: float) -> bool:
-    try:
-        return time.time() - sat.lock.stat().st_mtime > minutes * 60
-    except FileNotFoundError:
-        return True
-
-
 def stop_idle(minutes: float = IDLE_MINUTES) -> list[str]:
     """Stop each running dsat whose rig.lock is free and untouched for `minutes`. The lock
     is held while it stops, so no test can take the satellite meanwhile. A held lock is
@@ -462,7 +439,7 @@ def stop_idle(minutes: float = IDLE_MINUTES) -> list[str]:
             except BlockingIOError:
                 os.utime(sat.lock)
                 continue
-            if missing or idle(sat, minutes):
+            if missing or time.time() - sat.lock.stat().st_mtime > minutes * 60:
                 done.append(sat.stop())
     if len(done) < len(names):
         _spawn_reaper()

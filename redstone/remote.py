@@ -15,8 +15,7 @@ would; the laptop reads its stdout as it goes:
 and does everything else (locks, plot records, events, showroom, mirroring) itself. The
 trace is written here from the container's text, so it is byte for byte the local one.
 
-A container of an image without python3 (built before this) runs the test the old way,
-command by command through the forward.
+A container of an image without python3 runs the test command by command through the forward.
 """
 
 import base64
@@ -51,7 +50,7 @@ HEARTBEAT = 5
 # starved container; if the desktop still answers, the wait goes on up to STALL seconds.
 SILENCE = 45
 STALL = 300
-CONTAINER_PROPERTIES = Path("/srv/server.properties")
+CONTAINER_DIR = Path("/srv")
 CONTAINER_LOCK = Path("/tmp/redstone-harness.lock")
 RCON_WAIT = 60  # a container just started by another process may not listen yet
 
@@ -94,8 +93,8 @@ def _portable(e: BaseException) -> BaseException:
         return RuntimeError(f"{type(e).__name__}: {e}")
 
 
-def _rcon(factory, wait: float = RCON_WAIT):
-    deadline = time.time() + wait
+def _rcon(factory):
+    deadline = time.time() + RCON_WAIT
     while True:
         try:
             return factory(port=25575)
@@ -105,7 +104,7 @@ def _rcon(factory, wait: float = RCON_WAIT):
             time.sleep(0.2)
 
 
-def serve(job: dict, out=None, rcon_factory=None, server_dir: Path = Path("/srv")) -> None:
+def serve(job: dict, out=None, rcon_factory=None) -> None:
     """Run one test on this machine's server and report on `out` (the real stdout)."""
     from . import rcon as rcon_module
 
@@ -131,7 +130,7 @@ def serve(job: dict, out=None, rcon_factory=None, server_dir: Path = Path("/srv"
     beating.start()
     watch.emit = lambda kind, **fields: send({"watch": ["emit", [kind], fields]})
     watch.set_status = lambda plot, text: send({"watch": ["set_status", [plot, text], {}]})
-    rcon_module.PROPERTIES = server_dir / CONTAINER_PROPERTIES.name
+    rcon_module.PROPERTIES = CONTAINER_DIR / "server.properties"
     spec, test = job["spec"], job["test"]
     report: dict = {"result": None, "error": None, "release_error": None, "loaded": Build(), "trace": None}
     try:
@@ -141,7 +140,7 @@ def serve(job: dict, out=None, rcon_factory=None, server_dir: Path = Path("/srv"
             fcntl.flock(held, fcntl.LOCK_EX)
             rig = None
             try:
-                server = Server(job["server"], server_dir, 25565, 25575, "1G")
+                server = Server(job["server"], CONTAINER_DIR, 25565, 25575, "1G")
                 rig = Rig(_rcon(rcon_factory or Rcon), tuple(job["origin"]), tuple(job["size"]), job["plot"],
                           server=server, display=Display(send))
                 rig.heading, rig.owner = job["heading"], job.get("owner")
@@ -183,7 +182,7 @@ def program(job: dict) -> bytes:
     return base64.b64encode(text.encode()) + b"\n"
 
 
-# dsats whose container has no python3 (an image from before remote runs), per process.
+# dsats whose container has no python3, per process.
 NO_PYTHON: set[str] = set()
 
 

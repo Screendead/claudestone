@@ -57,7 +57,7 @@ def fake(monkeypatch):
     monkeypatch.setattr(ds, "HOST", HOST)
     monkeypatch.setattr(ds, "run", f)
     monkeypatch.setattr(ds, "_listeners", lambda port: None)
-    monkeypatch.setattr(ds, "_password", lambda: "s3cret")
+    monkeypatch.setattr(ds, "read_password", lambda: "s3cret")
     monkeypatch.setattr(ds, "_spawn_reaper", lambda: None)
     return f
 
