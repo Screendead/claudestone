@@ -3,7 +3,6 @@ against a fake RCON."""
 
 import json
 import math
-import os
 import random
 import time
 
@@ -214,17 +213,17 @@ def test_sources_read_new_events_and_wait_for_a_whole_line(tmp_path):
     events = tmp_path / "events.jsonl"
     events.write_text(json.dumps({"kind": "test", "plot": "main", "server": "main", "spec": "old",
                                   "box": [0, 0, 0, 1, 1, 1], "time": 1}) + "\n")
-    src = w.Sources(events, tmp_path, tmp_path / "traces", start=100)
-    assert src.poll(100) == []  # what was there before the director started is not news
+    src = w.Sources(events, tmp_path, start=100)
+    assert src.poll() == []  # what was there before the director started is not news
     ev = {"kind": "test", "plot": "main", "server": "main", "spec": "s", "test": "t",
           "box": [128, 56, 128, 131, 58, 129], "time": 101}
     line = json.dumps(ev)
     with open(events, "a") as f:
         f.write(line[:10])
-    assert src.poll(101) == []
+    assert src.poll() == []
     with open(events, "a") as f:
         f.write(line[10:] + "\n" + json.dumps(dict(ev, kind="result", passed=False, time=102)) + "\n")
-    got = src.poll(102)
+    got = src.poll()
     assert [(s.kind, s.status, s.priority) for s in got] == [("test", "running", w.LIVE),
                                                              ("result", "fail", w.FAIL)]
     assert got[0].box == (128, 56, 128, 131, 58, 129)
@@ -240,30 +239,13 @@ def test_event_shots_only_for_what_stands_on_main():
 
 def test_sources_find_new_and_updated_showroom_entries(tmp_path):
     _showroom(tmp_path, "and", {"a": _entry(50)})
-    src = w.Sources(tmp_path / "none.jsonl", tmp_path, tmp_path / "traces", start=100)
-    assert src.poll(100) == []
+    src = w.Sources(tmp_path / "none.jsonl", tmp_path, start=100)
+    assert src.poll() == []
     _showroom(tmp_path, "and", {"a": _entry(110), "b": _entry(111, "fail", (6, 0)), "c": _entry(112, slot=(12, 0))})
-    got = {s.spec: s for s in src.poll(112)}
+    got = {s.spec: s for s in src.poll()}
     assert got["a"].priority == w.PLAIN and got["b"].priority == w.FAIL and got["c"].priority == w.NEW
     assert got["c"].detail.startswith("new")
-    assert src.poll(113) == []
-
-
-def test_sources_fall_back_to_traces_while_the_event_log_is_quiet(tmp_path):
-    spec = tmp_path / "x.redstone.yaml"
-    spec.write_text("x")
-    traces = tmp_path / "traces" / "x"
-    traces.mkdir(parents=True)
-    src = w.Sources(tmp_path / "none.jsonl", tmp_path, tmp_path / "traces", start=time.time() - 5)
-    src._main_box = lambda path: (128, 56, 128, 130, 57, 129)
-    (traces / "t.json").write_text(json.dumps({"spec": str(spec), "name": "x", "test": "a \"b\"",
-                                               "sparse": True, "failures": ["tick 3: no"], "frames": []}))
-    got = src.poll(time.time())
-    assert [(s.spec, s.detail, s.status) for s in got] == [("x", 'a "b"', "fail")]
-    assert src.poll(time.time()) == []
-    (tmp_path / "none.jsonl").write_text("")
-    os.utime(traces / "t.json", (time.time() + 1, time.time() + 1))
-    assert src.poll(time.time()) == []  # the event log is live: it has this test already
+    assert src.poll() == []
 
 
 # ---- director ------------------------------------------------------------------------------
@@ -308,7 +290,7 @@ class FakeRcon:
 
 
 def _director(tmp_path, rcon, **cfg):
-    src = w.Sources(tmp_path / "events.jsonl", tmp_path, tmp_path / "traces", start=0)
+    src = w.Sources(tmp_path / "events.jsonl", tmp_path, start=0)
     return w.Director(rcon, src, dict(CFG, **cfg), state_path=tmp_path / "state.json", config_path=None,
                       status_dir=tmp_path / "status", showroom=tmp_path, fallback="creative")
 

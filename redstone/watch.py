@@ -7,9 +7,7 @@ fight over them. It reads what happened from files the harness writes anyway:
 - server/watch/events.jsonl: `test` (a build was loaded, with its world box) and `result`
   events from redstone.spec, appended by `emit`;
 - server/watch/status/<plot>.json: the latest progress line of a test, from `set_status`;
-- server/showroom/<plot>.json: each variant stood in a showroom slot, with its result;
-- traces/<spec>/<test>.json: finished main-plot tests, used only while events.jsonl is quiet
-  (a pytest started before the events existed).
+- server/showroom/<plot>.json: each variant stood in a showroom slot, with its result.
 
 Every online player on main is watched (tag `watch`, spectator mode) unless opted out with
 `python -m scripts.watch off` or, in game, `/trigger watch_off` (`/trigger watch_on` opts back
@@ -30,7 +28,7 @@ import subprocess
 import sys
 import time
 import traceback
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from .plots import MAIN, PLOTS, SURFACE
@@ -46,7 +44,6 @@ LOCK = DIR / "director.lock"
 PID = DIR / "director.pid"
 LOG = DIR / "director.log"
 SHOWROOM = ROOT / "showroom"
-TRACES = ROOT.parent / "traces"
 EVENTS_MAX = 1 << 20
 TAG = "watch"
 TRIGGERS = {"watch_off": True, "watch_on": False}  # trigger objective -> whether it opts out
@@ -68,7 +65,7 @@ DEFAULTS = {
     "aspect": 16 / 9,
     "margin": 0.85,      # of the half field of view the build may fill
     "elevation": 35.0,
-    "motion": "dolly",   # "dolly": slide sideways; "orbit": swing round the build (tp camera only, see EntityCamera)
+    "motion": "dolly",   # "dolly": slide sideways; "orbit": swing round the build (an entity camera turns in 1.4° steps)
     "sway": 20.0,        # degrees either side of north an orbit swings
     "dolly": 0.2,        # how far a dolly slides either side, as a fraction of the distance
     "period": 60.0,      # seconds per full swing
@@ -569,35 +566,23 @@ def slot_obstacles(plot: str, spec: str, showroom: Path = SHOWROOM) -> list[Box]
 
 
 class Sources:
-    """New shots since the last poll, from the event log, the showroom files and, while the
-    event log is quiet, finished main-plot traces."""
+    """New shots since the last poll, from the event log and the showroom files."""
 
-    def __init__(self, events: Path = EVENTS, showroom: Path = SHOWROOM, traces: Path = TRACES,
-                 start: float | None = None):
-        self.events, self.showroom, self.traces = events, showroom, traces
+    def __init__(self, events: Path = EVENTS, showroom: Path = SHOWROOM, start: float | None = None):
+        self.events, self.showroom = events, showroom
         self.start = time.time() if start is None else start
         self.offset, self.inode = None, None
         self.known = {s.key: s.time for s in showroom_shots(showroom)}
-        self.trace_seen: dict[Path, float] = {}
         self.last_main: Shot | None = None
-        self._box_cache: dict[str, tuple[float, Box | None]] = {}
 
-    def poll(self, now: float) -> list[Shot]:
-        out = self._events(now) + self._showroom()
-        if not self._events_recent(now):
-            out += self._traces()
+    def poll(self) -> list[Shot]:
+        out = self._events() + self._showroom()
         for s in out:
             if s.plot == MAIN.name:
                 self.last_main = s
         return out
 
-    def _events_recent(self, now: float) -> bool:
-        try:
-            return now - self.events.stat().st_mtime < 600
-        except OSError:
-            return False
-
-    def _events(self, now: float) -> list[Shot]:
+    def _events(self) -> list[Shot]:
         try:
             st = self.events.stat()
         except OSError:
@@ -633,65 +618,6 @@ class Sources:
                 out.append(s)
             self.known[s.key] = max(s.time, before or 0)
         return out
-
-    def _traces(self) -> list[Shot]:
-        out = []
-        try:
-            dirs = list(os.scandir(self.traces))
-        except OSError:
-            return []
-        for d in dirs:
-            if not d.is_dir():
-                continue
-            for f in os.scandir(d.path):
-                try:
-                    m = f.stat().st_mtime
-                except OSError:
-                    continue
-                p = Path(f.path)
-                if m <= self.start or self.trace_seen.get(p) == m:
-                    continue
-                self.trace_seen[p] = m
-                shot = self._trace_shot(p, m)
-                if shot:
-                    out.append(shot)
-        return sorted(out, key=lambda s: s.time)
-
-    def _trace_shot(self, path: Path, mtime: float) -> Shot | None:
-        try:
-            with open(path) as f:
-                head = f.read(1 << 16)
-        except OSError:
-            return None
-        m = re.search(r'"spec": "([^"]*)", "name": "([^"]*)", "test": "((?:[^"\\]|\\.)*)"', head)
-        if not m:
-            return None
-        box = self._main_box(m.group(1))
-        if box is None:
-            return None
-        failed = not re.search(r'"failures": \[\]', head)
-        test = json.loads(f'"{m.group(3)}"')
-        return Shot(MAIN.name, m.group(2), box, "result", "fail" if failed else "pass", mtime,
-                    FAIL if failed else LIVE, test)
-
-    def _main_box(self, spec_path: str) -> Box | None:
-        """Where a spec's build stood in the main plot, if it fits there."""
-        try:
-            mtime = os.stat(spec_path).st_mtime
-            cached = self._box_cache.get(spec_path)
-            if cached and cached[0] == mtime:
-                return cached[1]
-            from .fileformat import load
-            build = load(spec_path).build
-            box = None
-            if build.blocks:
-                lo, hi = build.bounds()
-                if all(a >= 0 and b < s for a, b, s in zip(lo, hi, MAIN.size)):
-                    box = world_box(MAIN.origin, build)
-            self._box_cache[spec_path] = (mtime, box)
-            return box
-        except Exception:
-            return None
 
 
 def event_shot(e: dict) -> Shot | None:
@@ -839,7 +765,6 @@ class EntityCamera:
         """Jump every camera to `pose`: teleport_duration 0 first, the teleport a tick later
         (a tick's entity data goes out after its position), the glide duration after that."""
         self.pose = pose
-        x, y, z, yaw, pitch = pose
         each = f"execute as {CAM_SELECTOR} run data merge entity @s "
         self.rcon.cmd(each + "{teleport_duration:0}")
         self.snap = [(now + SNAP_STEP, lambda: self._tp(self.pose)),
@@ -983,7 +908,7 @@ class Director:
             self.camera.sync(self.watched, now)
             self.due["players"] = now + 1
         if now >= self.due["events"]:
-            for shot in self.sources.poll(now):
+            for shot in self.sources.poll():
                 self.scheduler.offer(shot, now)
             self.due["events"] = now + 0.5
         if now >= self.due["tick"]:
