@@ -48,7 +48,8 @@ Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within
 Workflow part "S H2 feed in the top pocket", option (a) first; starter part adopts the trigger order above and takes
 FT/DT/CT, P_R, FP/DP/CP as fixed inputs.
 
-Scratch files (constraints.py/.txt, constraints_P6stage2.txt, feeds.py/.txt, puller.py/.txt, export_feeds.py,
-run_local.py, traces) stay in the Mac's gitignored door2 backup; the specs are in the library:
+The scripts are in `scripts/door2/close_layout/` (constraints.py/.txt, constraints_P6stage2.txt, feeds.py/.txt,
+puller.py/.txt, export_feeds.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the
+simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening) and `library/mechanics/close_feeds_probe.redstone.yaml`.
 Re-run: `python -m scripts.try close_feeds_probe`
