@@ -1,0 +1,635 @@
+name: door_reset_top
+description: 'Door part 5 (top reset, lane 3), X2 half: resets the opening relay X2 and its payloads after the close edge
+  E0, restores NV and NB, and re-arms X2 with no command. Door coordinates (design_c) = spec - (2,-2,9). The scene starts
+  in the open state; E0 is the real input (I_A sticky, K_in, R_in, lever from part 1, as fixtures). Part blocks: X2 (1,7,-3)
+  becomes a STICKY piston; its face block is a slime S1 (home (1,7,-4)) carrying C_cut (home (1,7,-5)) in line and RB_X (moved
+  to (2,7,-4), where it feeds NB''s first dust (3,7,-4); NB''s dust at (2,7,-4) is gone) beside it, so X2''s retract brings
+  all three home. ARM_X2 (1,8,-4) is removed (S1 would drag it). Hold: K_in -> dust (1,8,-1) on glass (1,7,-1) -> dust (2,8,-1)
+  on stone (2,7,-1) -> repeater (2,7,-2) facing south (delay h=1) on glass (2,6,-2) -> stone (2,7,-3) beside X2, so X2 stays
+  powered through E0 (c0 g) and is updated when the hold drops. Arm (silent): NB -> dust (4,8,-3) on glass (4,7,-3) -> repeater
+  (3,8,-3) facing east (delay a=1) on glass (3,7,-3) -> stone (2,8,-3), a QC cell of X2 that is not next to X2, so its power
+  changes never update X2. Cells moved through: (1,7,-4..-6), (2,7,-4..-5). Measured (tick numbers as plan_common: cN = drive
+  in:0 + wait N+2; lever: use + wait N+1): R_in: X2 held at c0 and c1; hold off at c2 d, X2 retracts in c2 g, C_cut leaves
+  the NV step, NV live at c2 and the V and P8 stand-ins extend at c2; X2, S1, C_cut and RB_X land at c4 j, NB live at c4;
+  arm on at c6; nothing changes for 40 gt after. Lever: every reset tick one earlier (release c1, NB c3, arm c5), because
+  K_in drops between ticks. Then the real input reopens it: X2 fires at t0 (NB 0), C_cut cuts NV at t2; three cycles each
+  way. Controls: with the hold repeater removed, X2 resets at E0 and NV is live at c0; after the last close, one fixture update
+  beside X2 fires it (NB 0). Load note: a closed-state build must load the arm repeater unpowered so it arms X2 silently after
+  settle (loaded powered, the whole-door opening failed, most likely because X2 fired on the harness update pass). Not in
+  this part: Z_T and RB_T (fixtures here) stay as the opening left them (Z_T extended, powered through QC by RB_T at (1,6,-1));
+  returning RB_T needs a separate mover loop.'
+traits:
+- piston_based
+- tick_accurate
+palette:
+  .: air
+  A:
+    block: quartz_block
+    fixture: true
+  B:
+    block: stone
+    fixture: true
+  C:
+    block: redstone_wire[north=side,south=side,power=0]
+    fixture: true
+  D:
+    block: redstone_wire[north=side,south=side,power=0]
+    name: nvv
+    fixture: true
+  E:
+    block: sticky_piston[facing=east,extended=false]
+    name: v
+    fixture: true
+  F:
+    block: redstone_wire[east=side,south=side,power=0]
+    fixture: true
+  G:
+    block: glass
+    fixture: true
+  H:
+    block: redstone_wire[east=side,west=side,power=0]
+    fixture: true
+  I:
+    block: repeater[facing=west,delay=1,powered=true]
+    fixture: true
+  J:
+    block: piston[facing=up,extended=true]
+    name: zt
+    fixture: true
+  K:
+    block: redstone_block
+    fixture: true
+  L:
+    block: piston_head[facing=up,type=normal,short=false]
+    fixture: true
+  M:
+    block: redstone_wire[east=side,north=side,west=side,power=0]
+    name: nva
+    fixture: true
+  N:
+    block: piston_head[facing=down,type=sticky,short=false]
+    fixture: true
+  O: stone
+  P: slime_block
+  Q: piston_head[facing=north,type=sticky,short=false]
+  R:
+    block: sticky_piston[facing=north,extended=true]
+    name: x2
+  S:
+    block: sticky_piston[facing=down,extended=true]
+    name: ia
+    fixture: true
+  T: glass
+  U:
+    block: redstone_wire[east=side,west=side,power=15]
+    name: hd
+  V:
+    block: lever[face=floor,facing=north,powered=false]
+    name: lever
+    fixture: true
+  W: redstone_block
+  X:
+    block: repeater[facing=south,delay=1,powered=true]
+    name: hold
+  Y: redstone_wire[east=side,west=side,power=14]
+  Z:
+    block: sticky_piston[facing=down,extended=false]
+    name: p8
+    fixture: true
+  a:
+    block: redstone_wire[east=side,west=side,power=0]
+    name: nb
+    fixture: true
+  b:
+    block: repeater[facing=east,delay=1,powered=false]
+    name: arm
+  c:
+    block: redstone_wire[east=side,west=side,power=0]
+    name: nvp
+    fixture: true
+  d:
+    block: redstone_wire[east=side,south=side,west=side,power=0]
+    fixture: true
+  e: redstone_wire[north=side,west=side,power=0]
+  f:
+    block: redstone_wire[north=side,west=side,power=0]
+    fixture: true
+  g:
+    block: redstone_wire[south=side,west=side,power=0]
+    fixture: true
+  h:
+    block: redstone_wire[east=side,west=side,power=0]
+    name: nbe
+    fixture: true
+  i:
+    input: in
+layers:
+  0: |
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    .A......
+    .A......
+    .A......
+    ........
+  1: |
+    ........
+    ........
+    ........
+    ........
+    ........
+    .B......
+    .C......
+    .C......
+    .D......
+    .E......
+  2: |
+    ........
+    ........
+    ........
+    ........
+    .B......
+    .C......
+    ........
+    ........
+    ...J...G
+    .....ZGG
+  3: |
+    ........
+    ........
+    ........
+    .BGGGGGG
+    .C.....G
+    .......G
+    .......G
+    ...K...B
+    ...L...C
+    ......cf
+  4: |
+    ........
+    ........
+    ...B....
+    .FHMHHHg
+    .......C
+    ....GG.C
+    .......C
+    ...NT..C
+    ...K....
+    ........
+  5: |
+    ........
+    ...K....
+    ...C....
+    ...O....
+    ...PW...
+    ...Q.aGG
+    ...ROTT.
+    ..GSX...
+    ...TO...
+    ........
+  6: |
+    ........
+    ........
+    ........
+    ........
+    ........
+    ......dh
+    ....Obe.
+    .iIB....
+    ...UY...
+    ........
+  7: |
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...V....
+    ........
+    ........
+tests:
+- name: 'repeater input: close, reset, reopen, three cycles'
+  initial:
+    in: 1
+  settle: 20
+  steps:
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+  - check: if block ~3 ~5 ~5 piston_head
+  - check: if block ~3 ~5 ~4 slime_block
+  - check: if block ~3 ~5 ~3 stone
+  - check: if block ~4 ~5 ~4 redstone_block
+  - check: if block ~4 ~5 ~5 air
+  - expect:
+      x2: 1
+      hold: 1
+      arm: 0
+      nva: 0
+      nb: 0
+      v: 0
+      p8: 0
+      ia: 1
+  - repeat:
+      times: 3
+      steps:
+      - drive:
+          in: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+      - check: if block ~3 ~5 ~5 piston_head
+      - check: if block ~3 ~5 ~4 slime_block
+      - check: if block ~3 ~5 ~3 stone
+      - check: if block ~4 ~5 ~4 redstone_block
+      - check: if block ~4 ~5 ~5 air
+      - expect:
+          x2: 1
+          nva: 0
+          nb: 0
+          arm: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~7 moving_piston
+      - expect:
+          x2: 1
+          nva: 0
+          nb: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+      - check: if block ~3 ~5 ~3 stone
+      - expect:
+          x2: 1
+          nva: 0
+          hold: 1
+      - wait: 1
+      - check: if block ~3 ~5 ~6 moving_piston
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~3 ~5 ~4 moving_piston
+      - check: if block ~4 ~5 ~5 moving_piston
+      - expect:
+          hold: 0
+          nva: 1
+          nvv: 1
+          nvp: 1
+          v: 1
+          p8: 1
+          nb: 0
+          arm: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~5 moving_piston
+      - expect:
+          nb: 0
+          arm: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - expect:
+          x2: 0
+          nb: 1
+          nbe: 1
+          arm: 0
+      - wait: 1
+      - expect:
+          arm: 0
+          x2: 0
+      - wait: 1
+      - expect:
+          arm: 1
+          x2: 0
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - wave:
+          x2: '0000000000000000000000000000000000000000'
+          arm: '1111111111111111111111111111111111111111'
+          nb: '1111111111111111111111111111111111111111'
+          nva: '1111111111111111111111111111111111111111'
+          hold: '0000000000000000000000000000000000000000'
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - log: execute if block ~3 ~2 ~8 piston[facing=up,extended=true]
+      - log: execute if block ~3 ~4 ~8 redstone_block
+      - log: execute if block ~3 ~3 ~8 piston_head
+      - log: execute if block ~3 ~4 ~7 redstone_block
+      - drive:
+          in: 1
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - expect:
+          x2: 0
+          nb: 1
+      - wait: 1
+      - check: if block ~3 ~5 ~5 moving_piston
+      - check: if block ~3 ~5 ~4 moving_piston
+      - check: if block ~3 ~5 ~3 moving_piston
+      - check: if block ~4 ~5 ~4 moving_piston
+      - expect:
+          x2: 1
+          nb: 0
+          nbe: 0
+          nva: 1
+      - wait: 1
+      - expect:
+          x2: 1
+          nva: 1
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+      - check: if block ~3 ~5 ~5 piston_head
+      - check: if block ~3 ~5 ~4 slime_block
+      - check: if block ~3 ~5 ~3 stone
+      - check: if block ~4 ~5 ~4 redstone_block
+      - check: if block ~4 ~5 ~5 air
+      - expect:
+          x2: 1
+          nva: 0
+          nvv: 0
+          nb: 0
+      - wave:
+          x2: '11111111111111111111'
+          nva: '00000000000000000000'
+          nb: '00000000000000000000'
+          hold: '11111111111111111111'
+          arm: '00000000000000000000'
+  - drive:
+      in: 0
+  - wait: 1
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+  - check: if block ~3 ~5 ~5 piston_head
+  - check: if block ~3 ~5 ~4 slime_block
+  - check: if block ~3 ~5 ~3 stone
+  - check: if block ~4 ~5 ~4 redstone_block
+  - check: if block ~4 ~5 ~5 air
+  - expect:
+      x2: 1
+      nva: 0
+      nb: 0
+      arm: 0
+  - wait: 1
+  - check: if block ~3 ~5 ~7 moving_piston
+  - expect:
+      x2: 1
+      nva: 0
+      nb: 0
+  - wait: 1
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+  - check: if block ~3 ~5 ~3 stone
+  - expect:
+      x2: 1
+      nva: 0
+      hold: 1
+  - wait: 1
+  - check: if block ~3 ~5 ~6 moving_piston
+  - check: if block ~3 ~5 ~3 air
+  - check: if block ~3 ~5 ~4 moving_piston
+  - check: if block ~4 ~5 ~5 moving_piston
+  - expect:
+      hold: 0
+      nva: 1
+      nvv: 1
+      nvp: 1
+      v: 1
+      p8: 1
+      nb: 0
+      arm: 0
+  - wait: 1
+  - check: if block ~3 ~5 ~5 moving_piston
+  - expect:
+      nb: 0
+      arm: 0
+  - wait: 1
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+  - check: if block ~3 ~5 ~5 slime_block
+  - check: if block ~3 ~5 ~4 stone
+  - check: if block ~3 ~5 ~3 air
+  - check: if block ~4 ~5 ~5 redstone_block
+  - check: if block ~4 ~5 ~4 air
+  - expect:
+      x2: 0
+      nb: 1
+      nbe: 1
+      arm: 0
+  - wait: 1
+  - expect:
+      arm: 0
+      x2: 0
+  - wait: 1
+  - expect:
+      arm: 1
+      x2: 0
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+  - check: if block ~3 ~5 ~5 slime_block
+  - check: if block ~3 ~5 ~4 stone
+  - check: if block ~3 ~5 ~3 air
+  - check: if block ~4 ~5 ~5 redstone_block
+  - check: if block ~4 ~5 ~4 air
+  - wave:
+      x2: '0000000000000000000000000000000000000000'
+      arm: '1111111111111111111111111111111111111111'
+      nb: '1111111111111111111111111111111111111111'
+      nva: '1111111111111111111111111111111111111111'
+      hold: '0000000000000000000000000000000000000000'
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+  - check: if block ~3 ~5 ~5 slime_block
+  - check: if block ~3 ~5 ~4 stone
+  - check: if block ~3 ~5 ~3 air
+  - check: if block ~4 ~5 ~5 redstone_block
+  - check: if block ~4 ~5 ~4 air
+  - log: execute if block ~3 ~2 ~8 piston[facing=up,extended=true]
+  - log: execute if block ~3 ~4 ~8 redstone_block
+  - log: execute if block ~3 ~3 ~8 piston_head
+  - log: execute if block ~3 ~4 ~7 redstone_block
+  - run: setblock ~2 ~5 ~6 stone
+  - run: setblock ~2 ~5 ~6 air
+  - wait: 1
+  - check: if block ~3 ~5 ~5 moving_piston
+  - check: if block ~4 ~5 ~4 moving_piston
+  - expect:
+      x2: 1
+      nb: 0
+      nbe: 0
+- name: 'control: without the hold, X2 resets at E0 and NV relives at c0'
+  initial:
+    in: 1
+  settle: 20
+  steps:
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+  - check: if block ~3 ~5 ~5 piston_head
+  - check: if block ~3 ~5 ~4 slime_block
+  - check: if block ~3 ~5 ~3 stone
+  - check: if block ~4 ~5 ~4 redstone_block
+  - check: if block ~4 ~5 ~5 air
+  - expect:
+      x2: 1
+      hold: 1
+      arm: 0
+      nva: 0
+      nb: 0
+      v: 0
+      p8: 0
+      ia: 1
+  - run: setblock ~4 ~5 ~7 air
+  - wait: 2
+  - expect:
+      x2: 1
+      nva: 0
+  - drive:
+      in: 0
+  - wait: 1
+  - expect:
+      x2: 1
+      nva: 0
+  - wait: 1
+  - check: if block ~3 ~5 ~6 moving_piston
+  - check: if block ~3 ~5 ~3 air
+  - expect:
+      x2: 0
+      nva: 1
+      v: 1
+      p8: 1
+- name: 'lever input: close, reset, reopen, three cycles'
+  initial:
+    in: 1
+  settle: 20
+  steps:
+  - use: lever
+  - wait: 4
+  - drive:
+      in: 0
+  - wait: 20
+  - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+  - check: if block ~3 ~5 ~5 piston_head
+  - check: if block ~3 ~5 ~4 slime_block
+  - check: if block ~3 ~5 ~3 stone
+  - check: if block ~4 ~5 ~4 redstone_block
+  - check: if block ~4 ~5 ~5 air
+  - expect:
+      x2: 1
+      hold: 1
+      arm: 0
+      nva: 0
+      nb: 0
+      v: 0
+      p8: 0
+      ia: 1
+  - repeat:
+      times: 3
+      steps:
+      - use: lever
+      - wait: 1
+      - check: if block ~3 ~5 ~7 moving_piston
+      - expect:
+          x2: 1
+          nva: 0
+          nb: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~6 moving_piston
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~3 ~5 ~4 moving_piston
+      - check: if block ~4 ~5 ~5 moving_piston
+      - expect:
+          hold: 0
+          nva: 1
+          nvv: 1
+          nvp: 1
+          v: 1
+          p8: 1
+          nb: 0
+          arm: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~5 moving_piston
+      - expect:
+          nb: 0
+          arm: 0
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - expect:
+          x2: 0
+          nb: 1
+          nbe: 1
+          arm: 0
+      - wait: 1
+      - expect:
+          arm: 0
+          x2: 0
+      - wait: 1
+      - expect:
+          arm: 1
+          x2: 0
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - wave:
+          x2: '0000000000000000000000000000000000000000'
+          arm: '1111111111111111111111111111111111111111'
+          nb: '1111111111111111111111111111111111111111'
+          nva: '1111111111111111111111111111111111111111'
+          hold: '0000000000000000000000000000000000000000'
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=false]
+      - check: if block ~3 ~5 ~5 slime_block
+      - check: if block ~3 ~5 ~4 stone
+      - check: if block ~3 ~5 ~3 air
+      - check: if block ~4 ~5 ~5 redstone_block
+      - check: if block ~4 ~5 ~4 air
+      - log: execute if block ~3 ~2 ~8 piston[facing=up,extended=true]
+      - log: execute if block ~3 ~4 ~8 redstone_block
+      - log: execute if block ~3 ~3 ~8 piston_head
+      - log: execute if block ~3 ~4 ~7 redstone_block
+      - use: lever
+      - wait: 1
+      - check: if block ~3 ~5 ~5 moving_piston
+      - check: if block ~3 ~5 ~4 moving_piston
+      - check: if block ~3 ~5 ~3 moving_piston
+      - check: if block ~4 ~5 ~4 moving_piston
+      - expect:
+          x2: 1
+          nb: 0
+          nbe: 0
+          nva: 1
+      - wait: 1
+      - expect:
+          x2: 1
+          nva: 1
+      - wait: 1
+      - check: if block ~3 ~5 ~6 sticky_piston[facing=north,extended=true]
+      - check: if block ~3 ~5 ~5 piston_head
+      - check: if block ~3 ~5 ~4 slime_block
+      - check: if block ~3 ~5 ~3 stone
+      - check: if block ~4 ~5 ~4 redstone_block
+      - check: if block ~4 ~5 ~5 air
+      - expect:
+          x2: 1
+          nva: 0
+          nvv: 0
+          nb: 0
+      - wave:
+          x2: '11111111111111111111'
+          nva: '00000000000000000000'
+          nb: '00000000000000000000'
+          hold: '11111111111111111111'
+          arm: '00000000000000000000'

@@ -1,0 +1,3228 @@
+name: ref_walvischris_abs8
+description: '8-bit two''s-complement absolute value, out = |in| mod 256 (-128 stays 128), one two-layer slice per bit stacked at pitch 2 in y (lever k at y=2k+3 with output lamp k directly beside it, bit
+  7 / sign on top), from subtract comparators, repeaters, dust and wool. No pistons, no containers. Source (SOURCED): mattbatwings'' Logical Redstone Archive OTHERARITH006 "8 bit absolute value" by WalvisChris
+  (endorsed by Waffle), tagged Tested & Functional, https://discord.com/channels/1361854816837435433/1474739638450126929. README claims: 8-bit signed input, 8-bit output, 6 ticks, "I just added a inverted
+  adder and a toggle based on the signed bit", not made fast or small, the sign (MSB) must feed the staircase at the bottom. Harness changes: none to the circuit; the 8 levers and 8 lamps are named cells,
+  and the stripped light and power states are rebuilt by the update pass. The wool and glass are kept white. Tests drive the levers with `use` (a truth_table input would be a redstone block, not the lever,
+  so the hard-power path is the original) and walk all 256 inputs in Gray code order, one lever per step, each followed by 24 gt before the lamps are read (the first version waited 8 gt and failed 96 of
+  256 rows, which is the 12 gt delay and not a logic error). Measured (MEASURED, one satellite): all 256 inputs give |in| mod 256; a per-tick trace of the whole walk shows every output lamp settling 2 to
+  12 gt after a lever click (rise 2 to 6 gt, fall 6 to 10 gt, lamp turn-off included). The slowest edge, 12 gt = 6 redstone ticks, is a glitch: going from 0x40 to 0xC0 (64 to -64) out7 spikes on at +2 and
+  off at +12 while the sign is still travelling to the bottom torch, so a consumer must sample the outputs 12 gt after the input changes (INFERRED cause); the final value after 12 gt matches the README''s
+  6 ticks (12 gt). Wave tests pin 0 to 0x80 (out7 rises at +2), 0x80 to 0x81 (out0-6 rise at +6, out7 falls at +10), 0x80 to 0 (out7 falls at +10) and that glitch. Size 13x19x7. Mechanism (INFERRED from
+  a trace of signals at rest, not traced comparator by comparator): the MSB lever drives dust down a diagonal staircase on the far (south) side to the wall torch at the bottom (4,1,2); with the sign clear
+  that torch is lit and feeds a second dust ladder up the west side whose strength steps down by 1 per layer (15 at y=3 to 1 at y=17), and with the sign set the torch is off and the ladder is 0. Each slice''s
+  subtract comparator sees that ladder and its own bit, so the ladder is the sign-controlled invert enable and the strength gradient stands in for per-bit gating, giving out_k = in_k xor (sign and any lower
+  bit set), the same function as the invert-and-increment adder the README describes.'
+traits: []
+palette:
+  .: air
+  A: white_wool
+  B: white_stained_glass
+  ): redstone_wall_torch[facing=east]
+  C: redstone_wire[east=none,north=side,south=side,west=none]
+  D: redstone_wire[east=none,north=side,south=up,west=none]
+  E: redstone_wire[east=side,north=none,south=side,west=none]
+  F: redstone_wire[east=none,north=none,south=side,west=side]
+  G: repeater[delay=1,facing=east]
+  H: redstone_wire[east=side,north=none,south=none,west=up]
+  I: comparator[facing=east,mode=subtract]
+  J: redstone_wire[east=none,north=side,south=side,west=side]
+  K: redstone_wire[east=side,north=side,south=none,west=none]
+  M: redstone_wire[east=side,north=side,south=none,west=side]
+  N: redstone_wire[east=none,north=side,south=none,west=up]
+  O: redstone_wire[east=side,north=side,south=side,west=side]
+  P: redstone_wire[east=side,north=none,south=none,west=side]
+  Q: redstone_wire[east=none,north=side,south=up,west=up]
+  T: redstone_wire[east=none,north=up,south=side,west=none]
+  V: redstone_wire[east=none,north=side,south=none,west=side]
+  W: redstone_wire[east=up,north=none,south=none,west=side]
+  X: redstone_wire[east=none,north=up,south=none,west=side]
+  Y: redstone_wire[east=none,north=none,south=side,west=up]
+  Z: redstone_wire[east=none,north=side,south=up,west=side]
+  a:
+    name: in0
+    block: lever[face=wall,facing=east]
+  p:
+    name: out0
+    block: redstone_lamp
+  b:
+    name: in1
+    block: lever[face=wall,facing=east]
+  q:
+    name: out1
+    block: redstone_lamp
+  c:
+    name: in2
+    block: lever[face=wall,facing=east]
+  r:
+    name: out2
+    block: redstone_lamp
+  d:
+    name: in3
+    block: lever[face=wall,facing=east]
+  s:
+    name: out3
+    block: redstone_lamp
+  e:
+    name: in4
+    block: lever[face=wall,facing=east]
+  t:
+    name: out4
+    block: redstone_lamp
+  f:
+    name: in5
+    block: lever[face=wall,facing=east]
+  u:
+    name: out5
+    block: redstone_lamp
+  g:
+    name: in6
+    block: lever[face=wall,facing=east]
+  v:
+    name: out6
+    block: redstone_lamp
+  h:
+    name: in7
+    block: lever[face=wall,facing=east]
+  w:
+    name: out7
+    block: redstone_lamp
+layers:
+  0: '.............
+
+    .............
+
+    .............
+
+    ...A.........
+
+    ...A.........
+
+    ...A.........
+
+    .............
+
+    '
+  1: '.......AA.A..
+
+    ......BAA..B.
+
+    ...A)..AA....
+
+    ...C...AAA...
+
+    ...C.........
+
+    ...D.........
+
+    ...A.........
+
+    '
+  2: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A..A.AIJ..B.
+
+    .A....AKMGA..
+
+    .AAAA.AAAAA..
+
+    .............
+
+    ..AN.........
+
+    '
+  3: '.......AA.A..
+
+    pAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAa
+
+    .KPPPAIPPPV..
+
+    .............
+
+    .AH..........
+
+    '
+  4: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAA..
+
+    .............
+
+    .PB..........
+
+    '
+  5: '.......AA.A..
+
+    qAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAb
+
+    .KPPPAIPPPV..
+
+    .............
+
+    .AGA.........
+
+    '
+  6: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAA..
+
+    .............
+
+    ...WA........
+
+    '
+  7: '.......AA.A..
+
+    rAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAc
+
+    .KPPPAIPPPV..
+
+    .............
+
+    ....WA.......
+
+    '
+  8: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAA..
+
+    .............
+
+    .....WA......
+
+    '
+  9: '.......AA.A..
+
+    sAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAd
+
+    .KPPPAIPPPV..
+
+    .............
+
+    ......WA.....
+
+    '
+  10: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAA..
+
+    .............
+
+    .......WA....
+
+    '
+  11: '.......AA.A..
+
+    tAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAe
+
+    .KPPPAIPPPV..
+
+    .............
+
+    ........WA...
+
+    '
+  12: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAA..
+
+    .............
+
+    .........WA..
+
+    '
+  13: '.......AA.A..
+
+    uAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAf
+
+    .KPPPAIPPPV..
+
+    .............
+
+    ..........WA.
+
+    '
+  14: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAA..
+
+    ...........A.
+
+    ...........X.
+
+    '
+  15: '.......AA.A..
+
+    vAOAIPBAA..B.
+
+    .C.BQ..AA..T.
+
+    .C..A)FAAACAg
+
+    .KPPPAIPPPVA.
+
+    ...........T.
+
+    .............
+
+    '
+  16: '.......EFAGA.
+
+    ..A.AAHIJ..D.
+
+    .A.WB.AIJ..B.
+
+    .A..C.AKMGA..
+
+    .AAAA.AAAAAY.
+
+    .............
+
+    .............
+
+    '
+  17: '.............
+
+    wAOAIP.......
+
+    .C..Z......C.
+
+    .C..A)FAAACAh
+
+    .KPPPAIPPPM..
+
+    .............
+
+    .............
+
+    '
+  18: '.............
+
+    .............
+
+    .............
+
+    ....C........
+
+    ....A........
+
+    .............
+
+    .............
+
+    '
+tests:
+- name: all 256 inputs, one lever at a time (Gray code), out = |in| mod 256
+  steps:
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in5
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in6
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in5
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in7
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in5
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 0
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 0
+      out7: 0
+  - use: in6
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 0
+      out6: 1
+      out7: 0
+  - use: in5
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 0
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in4
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 0
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in3
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 0
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in2
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 0
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in1
+  - wait: 24
+  - expect:
+      out0: 1
+      out1: 1
+      out2: 1
+      out3: 1
+      out4: 1
+      out5: 1
+      out6: 1
+      out7: 0
+  - use: in0
+  - wait: 24
+  - expect:
+      out0: 0
+      out1: 0
+      out2: 0
+      out3: 0
+      out4: 0
+      out5: 0
+      out6: 0
+      out7: 1
+- name: 'delay, 0 to 0x80 (-128): out7 lights 2 gt after the click, nothing else moves'
+  steps:
+  - wait: 24
+  - use: in7
+  - wave:
+      out7: '001111111111111111111111'
+      out0: '000000000000000000000000'
+      out6: '000000000000000000000000'
+- name: 'delay, 0x80 (-128) to 0x81 (-127): out0-6 rise 6 gt after the click, out7 falls 10 gt after'
+  steps:
+  - wait: 24
+  - use: in7
+  - wait: 24
+  - use: in0
+  - wave:
+      out0: '000000111111111111111111'
+      out6: '000000111111111111111111'
+      out7: '111111111100000000000000'
+- name: 'delay, 0x80 (-128) back to 0: out7 falls 10 gt after the click'
+  steps:
+  - wait: 24
+  - use: in7
+  - wait: 24
+  - use: in7
+  - wave:
+      out7: '111111111100000000000000'
+- name: 'glitch, 0x40 to 0xC0 (64 to -64): out7 pulses on from 2 to 12 gt after the click, a 10 gt spike while the sign is still reaching the bottom torch, then settles to 64 (slowest edge, 12 gt)'
+  steps:
+  - wait: 24
+  - use: in6
+  - wait: 24
+  - use: in7
+  - wave:
+      out7: '001111111111000000000000'
+      out6: '111111111111111111111111'

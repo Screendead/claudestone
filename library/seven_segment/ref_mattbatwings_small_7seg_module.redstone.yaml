@@ -1,0 +1,202 @@
+name: ref_mattbatwings_small_7seg_module
+description: 'Rebuild of DISMODULE003 Small 7seg Display Module (mattbatwings, endorsed; Recommended, Tested & Functional; https://discord.com/channels/1361854816837435433/1472417446517407744): wiring for a 3x5 lamp seven-segment display. SOURCED: README says only "Wiring to display 7 segments 3x5 display". Size 5x6x4 (lamps at z=3 face south; viewer looks north, so x=0 is the viewer''s left), 69 blocks. How (INFERRED, then confirmed by the test): each segment has one input dust line entering from the north edge, one input per y layer (top y5, ul/ur y4 at x0/x4, mid y3, bl/br y2 at x0/x4, bottom y1), so the seven inputs sit on separate cells of the same face. Layers sit at a 1-block pitch; gray wool caps over every side dust cut the diagonal dust links between neighbouring layers (dust steps up or down only past a non-conductor), and the x=2 spine of wool supports the bar lines. The side segments snake from the x0/x4 edge to the lamp at x1/x3 so the vertical segments need no lamp beside them. Each segment dust points into one driven lamp, a conductor that lights its touching lamps, which gives the shared corner pixels of a 3x5 font: top_l = top|ul, mid_l = mid|ul|bl, bot_r = bot|br and so on; bled lamps pass nothing on. Same display idea as seg_lamp_3x5 (black concrete caps, 3x6x2, inputs behind); this one trades size for spreading the inputs over one face with wool caps. Harness change: the inputs are redstone blocks at z=-1 (outside the 5x6x4 size) feeding the dust line start; the original has bare dust ends. MEASURED: all 128 combinations of the seven inputs give exactly the expected 13 lamps (corners as ORs), lit with no delay and off 4 game ticks later (the lamp turn-off delay).'
+traits: [compact, vertical, entityless, pistonless, silent, tick_accurate]
+palette:
+  .: air
+  A: gray_wool
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: redstone_wire[east=side,north=side,south=none,west=none]
+  D: redstone_wire[east=none,north=none,south=side,west=side]
+  E: redstone_wire[east=side,north=none,south=side,west=none]
+  F: redstone_wire[east=none,north=side,south=none,west=side]
+  t: {input: top}
+  v: {input: ul}
+  u: {input: ur}
+  m: {input: mid}
+  w: {input: bl}
+  r: {input: br}
+  b: {input: bot}
+  G: {name: top_l, block: redstone_lamp}
+  H: {name: top_c, block: redstone_lamp}
+  I: {name: top_r, block: redstone_lamp}
+  J: {name: ul_l, block: redstone_lamp}
+  K: {name: ur_l, block: redstone_lamp}
+  N: {name: mid_l, block: redstone_lamp}
+  O: {name: mid_c, block: redstone_lamp}
+  P: {name: mid_r, block: redstone_lamp}
+  Q: {name: bl_l, block: redstone_lamp}
+  S: {name: br_l, block: redstone_lamp}
+  X: {name: bot_l, block: redstone_lamp}
+  Y: {name: bot_c, block: redstone_lamp}
+  Z: {name: bot_r, block: redstone_lamp}
+layers:
+  0: |
+    .....
+    ..A..
+    ..A..
+    ..A..
+    .....
+  1: |
+    ..b..
+    A.B.A
+    AABAA
+    .ABA.
+    .XYZ.
+  2: |
+    w...r
+    B.A.B
+    CDAEF
+    .BAB.
+    .QAS.
+  3: |
+    ..m..
+    A.B.A
+    AABAA
+    .ABA.
+    .NOP.
+  4: |
+    v...u
+    B.A.B
+    CDAEF
+    .BAB.
+    .JAK.
+  5: |
+    ..t..
+    ..B..
+    .ABA.
+    .ABA.
+    .GHI.
+tests:
+- name: every_segment_combination
+  delay: 4
+  delays: {top_c: {rise: 0, fall: 4}}
+  truth_table: |
+    top ul ur mid bl br bot | top_l top_c top_r ul_l ur_l mid_l mid_c mid_r bl_l br_l bot_l bot_c bot_r
+    0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 1 1 1
+    0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 1 0 1 0 0 1
+    0 0 0 0 0 1 1 | 0 0 0 0 0 0 0 1 0 1 1 1 1
+    0 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0 1 0 1 0 0
+    0 0 0 0 1 0 1 | 0 0 0 0 0 1 0 0 1 0 1 1 1
+    0 0 0 0 1 1 0 | 0 0 0 0 0 1 0 1 1 1 1 0 1
+    0 0 0 0 1 1 1 | 0 0 0 0 0 1 0 1 1 1 1 1 1
+    0 0 0 1 0 0 0 | 0 0 0 0 0 1 1 1 0 0 0 0 0
+    0 0 0 1 0 0 1 | 0 0 0 0 0 1 1 1 0 0 1 1 1
+    0 0 0 1 0 1 0 | 0 0 0 0 0 1 1 1 0 1 0 0 1
+    0 0 0 1 0 1 1 | 0 0 0 0 0 1 1 1 0 1 1 1 1
+    0 0 0 1 1 0 0 | 0 0 0 0 0 1 1 1 1 0 1 0 0
+    0 0 0 1 1 0 1 | 0 0 0 0 0 1 1 1 1 0 1 1 1
+    0 0 0 1 1 1 0 | 0 0 0 0 0 1 1 1 1 1 1 0 1
+    0 0 0 1 1 1 1 | 0 0 0 0 0 1 1 1 1 1 1 1 1
+    0 0 1 0 0 0 0 | 0 0 1 0 1 0 0 1 0 0 0 0 0
+    0 0 1 0 0 0 1 | 0 0 1 0 1 0 0 1 0 0 1 1 1
+    0 0 1 0 0 1 0 | 0 0 1 0 1 0 0 1 0 1 0 0 1
+    0 0 1 0 0 1 1 | 0 0 1 0 1 0 0 1 0 1 1 1 1
+    0 0 1 0 1 0 0 | 0 0 1 0 1 1 0 1 1 0 1 0 0
+    0 0 1 0 1 0 1 | 0 0 1 0 1 1 0 1 1 0 1 1 1
+    0 0 1 0 1 1 0 | 0 0 1 0 1 1 0 1 1 1 1 0 1
+    0 0 1 0 1 1 1 | 0 0 1 0 1 1 0 1 1 1 1 1 1
+    0 0 1 1 0 0 0 | 0 0 1 0 1 1 1 1 0 0 0 0 0
+    0 0 1 1 0 0 1 | 0 0 1 0 1 1 1 1 0 0 1 1 1
+    0 0 1 1 0 1 0 | 0 0 1 0 1 1 1 1 0 1 0 0 1
+    0 0 1 1 0 1 1 | 0 0 1 0 1 1 1 1 0 1 1 1 1
+    0 0 1 1 1 0 0 | 0 0 1 0 1 1 1 1 1 0 1 0 0
+    0 0 1 1 1 0 1 | 0 0 1 0 1 1 1 1 1 0 1 1 1
+    0 0 1 1 1 1 0 | 0 0 1 0 1 1 1 1 1 1 1 0 1
+    0 0 1 1 1 1 1 | 0 0 1 0 1 1 1 1 1 1 1 1 1
+    0 1 0 0 0 0 0 | 1 0 0 1 0 1 0 0 0 0 0 0 0
+    0 1 0 0 0 0 1 | 1 0 0 1 0 1 0 0 0 0 1 1 1
+    0 1 0 0 0 1 0 | 1 0 0 1 0 1 0 1 0 1 0 0 1
+    0 1 0 0 0 1 1 | 1 0 0 1 0 1 0 1 0 1 1 1 1
+    0 1 0 0 1 0 0 | 1 0 0 1 0 1 0 0 1 0 1 0 0
+    0 1 0 0 1 0 1 | 1 0 0 1 0 1 0 0 1 0 1 1 1
+    0 1 0 0 1 1 0 | 1 0 0 1 0 1 0 1 1 1 1 0 1
+    0 1 0 0 1 1 1 | 1 0 0 1 0 1 0 1 1 1 1 1 1
+    0 1 0 1 0 0 0 | 1 0 0 1 0 1 1 1 0 0 0 0 0
+    0 1 0 1 0 0 1 | 1 0 0 1 0 1 1 1 0 0 1 1 1
+    0 1 0 1 0 1 0 | 1 0 0 1 0 1 1 1 0 1 0 0 1
+    0 1 0 1 0 1 1 | 1 0 0 1 0 1 1 1 0 1 1 1 1
+    0 1 0 1 1 0 0 | 1 0 0 1 0 1 1 1 1 0 1 0 0
+    0 1 0 1 1 0 1 | 1 0 0 1 0 1 1 1 1 0 1 1 1
+    0 1 0 1 1 1 0 | 1 0 0 1 0 1 1 1 1 1 1 0 1
+    0 1 0 1 1 1 1 | 1 0 0 1 0 1 1 1 1 1 1 1 1
+    0 1 1 0 0 0 0 | 1 0 1 1 1 1 0 1 0 0 0 0 0
+    0 1 1 0 0 0 1 | 1 0 1 1 1 1 0 1 0 0 1 1 1
+    0 1 1 0 0 1 0 | 1 0 1 1 1 1 0 1 0 1 0 0 1
+    0 1 1 0 0 1 1 | 1 0 1 1 1 1 0 1 0 1 1 1 1
+    0 1 1 0 1 0 0 | 1 0 1 1 1 1 0 1 1 0 1 0 0
+    0 1 1 0 1 0 1 | 1 0 1 1 1 1 0 1 1 0 1 1 1
+    0 1 1 0 1 1 0 | 1 0 1 1 1 1 0 1 1 1 1 0 1
+    0 1 1 0 1 1 1 | 1 0 1 1 1 1 0 1 1 1 1 1 1
+    0 1 1 1 0 0 0 | 1 0 1 1 1 1 1 1 0 0 0 0 0
+    0 1 1 1 0 0 1 | 1 0 1 1 1 1 1 1 0 0 1 1 1
+    0 1 1 1 0 1 0 | 1 0 1 1 1 1 1 1 0 1 0 0 1
+    0 1 1 1 0 1 1 | 1 0 1 1 1 1 1 1 0 1 1 1 1
+    0 1 1 1 1 0 0 | 1 0 1 1 1 1 1 1 1 0 1 0 0
+    0 1 1 1 1 0 1 | 1 0 1 1 1 1 1 1 1 0 1 1 1
+    0 1 1 1 1 1 0 | 1 0 1 1 1 1 1 1 1 1 1 0 1
+    0 1 1 1 1 1 1 | 1 0 1 1 1 1 1 1 1 1 1 1 1
+    1 0 0 0 0 0 0 | 1 1 1 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 1 | 1 1 1 0 0 0 0 0 0 0 1 1 1
+    1 0 0 0 0 1 0 | 1 1 1 0 0 0 0 1 0 1 0 0 1
+    1 0 0 0 0 1 1 | 1 1 1 0 0 0 0 1 0 1 1 1 1
+    1 0 0 0 1 0 0 | 1 1 1 0 0 1 0 0 1 0 1 0 0
+    1 0 0 0 1 0 1 | 1 1 1 0 0 1 0 0 1 0 1 1 1
+    1 0 0 0 1 1 0 | 1 1 1 0 0 1 0 1 1 1 1 0 1
+    1 0 0 0 1 1 1 | 1 1 1 0 0 1 0 1 1 1 1 1 1
+    1 0 0 1 0 0 0 | 1 1 1 0 0 1 1 1 0 0 0 0 0
+    1 0 0 1 0 0 1 | 1 1 1 0 0 1 1 1 0 0 1 1 1
+    1 0 0 1 0 1 0 | 1 1 1 0 0 1 1 1 0 1 0 0 1
+    1 0 0 1 0 1 1 | 1 1 1 0 0 1 1 1 0 1 1 1 1
+    1 0 0 1 1 0 0 | 1 1 1 0 0 1 1 1 1 0 1 0 0
+    1 0 0 1 1 0 1 | 1 1 1 0 0 1 1 1 1 0 1 1 1
+    1 0 0 1 1 1 0 | 1 1 1 0 0 1 1 1 1 1 1 0 1
+    1 0 0 1 1 1 1 | 1 1 1 0 0 1 1 1 1 1 1 1 1
+    1 0 1 0 0 0 0 | 1 1 1 0 1 0 0 1 0 0 0 0 0
+    1 0 1 0 0 0 1 | 1 1 1 0 1 0 0 1 0 0 1 1 1
+    1 0 1 0 0 1 0 | 1 1 1 0 1 0 0 1 0 1 0 0 1
+    1 0 1 0 0 1 1 | 1 1 1 0 1 0 0 1 0 1 1 1 1
+    1 0 1 0 1 0 0 | 1 1 1 0 1 1 0 1 1 0 1 0 0
+    1 0 1 0 1 0 1 | 1 1 1 0 1 1 0 1 1 0 1 1 1
+    1 0 1 0 1 1 0 | 1 1 1 0 1 1 0 1 1 1 1 0 1
+    1 0 1 0 1 1 1 | 1 1 1 0 1 1 0 1 1 1 1 1 1
+    1 0 1 1 0 0 0 | 1 1 1 0 1 1 1 1 0 0 0 0 0
+    1 0 1 1 0 0 1 | 1 1 1 0 1 1 1 1 0 0 1 1 1
+    1 0 1 1 0 1 0 | 1 1 1 0 1 1 1 1 0 1 0 0 1
+    1 0 1 1 0 1 1 | 1 1 1 0 1 1 1 1 0 1 1 1 1
+    1 0 1 1 1 0 0 | 1 1 1 0 1 1 1 1 1 0 1 0 0
+    1 0 1 1 1 0 1 | 1 1 1 0 1 1 1 1 1 0 1 1 1
+    1 0 1 1 1 1 0 | 1 1 1 0 1 1 1 1 1 1 1 0 1
+    1 0 1 1 1 1 1 | 1 1 1 0 1 1 1 1 1 1 1 1 1
+    1 1 0 0 0 0 0 | 1 1 1 1 0 1 0 0 0 0 0 0 0
+    1 1 0 0 0 0 1 | 1 1 1 1 0 1 0 0 0 0 1 1 1
+    1 1 0 0 0 1 0 | 1 1 1 1 0 1 0 1 0 1 0 0 1
+    1 1 0 0 0 1 1 | 1 1 1 1 0 1 0 1 0 1 1 1 1
+    1 1 0 0 1 0 0 | 1 1 1 1 0 1 0 0 1 0 1 0 0
+    1 1 0 0 1 0 1 | 1 1 1 1 0 1 0 0 1 0 1 1 1
+    1 1 0 0 1 1 0 | 1 1 1 1 0 1 0 1 1 1 1 0 1
+    1 1 0 0 1 1 1 | 1 1 1 1 0 1 0 1 1 1 1 1 1
+    1 1 0 1 0 0 0 | 1 1 1 1 0 1 1 1 0 0 0 0 0
+    1 1 0 1 0 0 1 | 1 1 1 1 0 1 1 1 0 0 1 1 1
+    1 1 0 1 0 1 0 | 1 1 1 1 0 1 1 1 0 1 0 0 1
+    1 1 0 1 0 1 1 | 1 1 1 1 0 1 1 1 0 1 1 1 1
+    1 1 0 1 1 0 0 | 1 1 1 1 0 1 1 1 1 0 1 0 0
+    1 1 0 1 1 0 1 | 1 1 1 1 0 1 1 1 1 0 1 1 1
+    1 1 0 1 1 1 0 | 1 1 1 1 0 1 1 1 1 1 1 0 1
+    1 1 0 1 1 1 1 | 1 1 1 1 0 1 1 1 1 1 1 1 1
+    1 1 1 0 0 0 0 | 1 1 1 1 1 1 0 1 0 0 0 0 0
+    1 1 1 0 0 0 1 | 1 1 1 1 1 1 0 1 0 0 1 1 1
+    1 1 1 0 0 1 0 | 1 1 1 1 1 1 0 1 0 1 0 0 1
+    1 1 1 0 0 1 1 | 1 1 1 1 1 1 0 1 0 1 1 1 1
+    1 1 1 0 1 0 0 | 1 1 1 1 1 1 0 1 1 0 1 0 0
+    1 1 1 0 1 0 1 | 1 1 1 1 1 1 0 1 1 0 1 1 1
+    1 1 1 0 1 1 0 | 1 1 1 1 1 1 0 1 1 1 1 0 1
+    1 1 1 0 1 1 1 | 1 1 1 1 1 1 0 1 1 1 1 1 1
+    1 1 1 1 0 0 0 | 1 1 1 1 1 1 1 1 0 0 0 0 0
+    1 1 1 1 0 0 1 | 1 1 1 1 1 1 1 1 0 0 1 1 1
+    1 1 1 1 0 1 0 | 1 1 1 1 1 1 1 1 0 1 0 0 1
+    1 1 1 1 0 1 1 | 1 1 1 1 1 1 1 1 0 1 1 1 1
+    1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 1 0 1 0 0
+    1 1 1 1 1 0 1 | 1 1 1 1 1 1 1 1 1 0 1 1 1
+    1 1 1 1 1 1 0 | 1 1 1 1 1 1 1 1 1 1 1 0 1
+    1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1

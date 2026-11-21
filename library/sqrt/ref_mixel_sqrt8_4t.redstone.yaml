@@ -1,0 +1,1001 @@
+name: ref_mixel_sqrt8_4t
+description: '8-bit to 4-bit floored square root as a 4-tick combinational lookup table (a sum-of-products PLA) by Mixel, Uni and Hahahahah5 (endorsed by Mixel; Hahahahah5 gave the concept and the PLA mapping). Source: Logical Redstone Archive SQRT004_4_Tick_Square_Root_Lookup_Table (SQRT004_4tsqrt.schem), https://discord.com/channels/1361854816837435433/1473618906676596758 (README SOURCED: tagged Tested & Functional and Recommended; 8 bit input, 4 bit floored square root, 4 redstone ticks). Size 19x28x11 as tested (the schem is 19x28x12). Input bit k is at (7,2k+1,1), LSB at y=1 (MEASURED by a single-bit probe), outputs q0..q3 are the lamps at (7,18/20/22/24,1). Harness changes: the .schem has no inputs and its 8 levers sit on lamps (a lever strongly powers its lamp and the lamp powers the dust beside it); each lever and lamp became one input cell where a redstone block powers the same neighbouring dust directly, as in ref_mixel_cle_adder_8bit_3t. The four output lamps are kept as the named outputs; nothing else changed (stone, wool, glass, dust, torches, comparators, targets and repeaters are the skeleton''s blocks). MEASURED on 26.3: all three tests pass: the perfect squares and their neighbours, and all 256 inputs in Gray-code order and in descending order, so every output matches floor(sqrt(n)) for every n; every output edge is 8 gt rise and 12 gt fall (the 4 gt lamp on each fall, as in the other lamp-output specs), so the README''s 4 redstone ticks holds to the diode and the same for every input and output. How it works (INFERRED from the layers, not traced cell by cell): each input bit has a 2-layer cell stacked in y at pitch 2 (lamp, dust, target and a comparator on a column at x=7..10) that fans the bit out to true and complement dust lines; the 12 columns at x=2..18 are the PLA product terms, running up from y=3 to y=25 as torch-and-wool stacks (the ''NOR plane''), and the four z=6 rows OR them into the outputs. Because every term sees the bit in the same tick, latency does not depend on the input value. Also observed once (MEASURED): after one failed test in the same run the next test failed on its first row, and passed alone and on two clean reruns; probably left-over state from the failed test, not the design.'
+traits:
+- pistonless
+- entityless
+- torch_based
+palette:
+  .: air
+  A: light_gray_wool
+  C: redstone_wire[east=side,north=none,south=side,west=none]
+  D: redstone_wire[east=none,north=none,south=side,west=side]
+  E: redstone_wire[east=side,north=none,south=none,west=side]
+  F: target
+  G: redstone_wire[east=none,north=side,south=side,west=up]
+  H: comparator[facing=west,mode=compare]
+  n: redstone_wall_torch[facing=north]
+  I: redstone_wire[east=none,north=side,south=up,west=none]
+  J: redstone_wire[east=up,north=side,south=none,west=up]
+  K: redstone_wire[east=up,north=none,south=side,west=up]
+  u: redstone_wall_torch[facing=south]
+  M: light_gray_stained_glass
+  N: redstone_wire[east=side,north=side,south=side,west=none]
+  O: redstone_wire[east=side,north=up,south=none,west=none]
+  P: redstone_wire[east=side,north=side,south=none,west=side]
+  Q: comparator[facing=north,mode=compare]
+  T: redstone_wire[east=none,north=side,south=side,west=none]
+  U: redstone_wire[east=none,north=side,south=none,west=side]
+  V: redstone_wire[east=none,north=up,south=side,west=none]
+  '*': redstone_torch
+  W: redstone_wire[east=side,north=none,south=side,west=side]
+  X: redstone_wire[east=side,north=side,south=side,west=side]
+  Y: redstone_wire[east=side,north=none,south=up,west=side]
+  Z: redstone_wire[east=side,north=none,south=none,west=up]
+  b: repeater[delay=1,facing=east]
+  c: redstone_wire[east=up,north=side,south=up,west=up]
+  d: redstone_wire[east=up,north=side,south=side,west=up]
+  e: redstone_wire[east=side,north=none,south=up,west=none]
+  f: repeater[delay=1,facing=north]
+  g: redstone_wire[east=none,north=side,south=side,west=side]
+  h: repeater[delay=1,facing=south]
+  ): redstone_wall_torch[facing=east]
+  i: redstone_wire[east=up,north=up,south=none,west=none]
+  (: redstone_wall_torch[facing=west]
+  j: redstone_wire[east=none,north=none,south=up,west=side]
+  k: redstone_wire[east=side,north=up,south=none,west=side]
+  l: redstone_wire[east=none,north=side,south=none,west=up]
+  m: redstone_wire[east=side,north=side,south=none,west=none]
+  Α:
+    input: i0
+  Β:
+    input: i1
+  Γ:
+    input: i2
+  Δ:
+    input: i3
+  Ε:
+    input: i4
+  Ζ:
+    input: i5
+  Η:
+    input: i6
+  Θ:
+    input: i7
+  Ι:
+    name: q0
+    output: q0
+    block: redstone_lamp
+  Κ:
+    name: q1
+    output: q1
+    block: redstone_lamp
+  Λ:
+    name: q2
+    output: q2
+    block: redstone_lamp
+  Μ:
+    name: q3
+    output: q3
+    block: redstone_lamp
+layers:
+  0: |
+    ...................
+    ........AA.........
+    .......A.A.........
+    .........A.........
+    ..........A........
+    ...................
+    ....A.A.A..........
+    ...................
+    ...................
+    ...................
+    ...................
+    ...................
+  1: |
+    ...................
+    .......ΑCD.........
+    .......EFG.........
+    ........AHA........
+    ....n..AAAI........
+    ....F.....A........
+    ..AAJAKAKAA........
+    ......F.F..........
+    ......u.u..........
+    ...................
+    ...................
+    ...................
+  2: |
+    ...................
+    ........AA.........
+    ...A.A.ACM.........
+    .......ANF.........
+    ..A.A..OPQM........
+    ..F..A...AT........
+    .FPE.E.E.EU........
+    .u.A.A.A...........
+    ......A.A..........
+    ...................
+    ...A.A.A...........
+    ...................
+  3: |
+    ...................
+    ...A.A.ΒCD.........
+    ...V.V.CFG.........
+    ..A.An.TAHA........
+    ..V.VA.MAAI........
+    ..*..I....A........
+    ..AAAAAAAAA........
+    .A.V.V.V...........
+    ...A.AIAI..........
+    ...u.uAuA..........
+    ...I.I.I...........
+    ...A.A.A...........
+  4: |
+    ...................
+    ...I.I..AA.........
+    ...M.M.ACM.A.A.....
+    ..I.I..ANF.........
+    ..M.M..OPQM........
+    A..A.....ATA.A.....
+    .AEWEXEWEYUA.A.....
+    AZ.......A...AAA...
+    ....AAM.M.....A...A
+    ......V.V....A.A...
+    ...M.M.M.A...A.A...
+    ...V.V.V...........
+  5: |
+    ...................
+    ...M.M.ΓCD.A.A.....
+    ...V.V.CFG.V.V.....
+    ..MnM..TAHAn.n.....
+    A.VAV..MAAIA.A.....
+    V..T......AT.T.....
+    AbAAAAAAAMAcAdAAAAA
+    e...uA...TAA.TfV..u
+    A...IfI.IA...AIA..I
+    ....AAM.Mu.A.fAf..A
+    ...I.I.I.I...I.I...
+    ...M.M.M.A...A.A...
+  6: |
+    ...................
+    ...T.T..AA.I.I.....
+    ...M.M.ACM.M.M.....
+    ..T.T..ANF.........
+    I.M.M..OPQM...A.A..
+    MA...A...ATA.......
+    ..EEEWEEEEXMEMEWEEE
+    M..A.TAAAANg..AMA..
+    V...MAMAMAFFAAM.A.M
+    ....V.T.T.uf..V...V
+    ...M.M.M.M.A.M.M...
+    ...T.T.T.V...V.V...
+  7: |
+    ...................
+    ...M.M.ΔCD.M.M.....
+    ...V.V.CFG.V.V.....
+    ..M.Mn.TAHA...A.A..
+    M.V.VA.MAAI...V.V..
+    OEn..I....A...n.n..
+    ..AAAAAAAAAKAKAAAAA
+    IA.V.AfVfVAFuFfVf..
+    M..AIfIfIf.fIfIAI.I
+    ...uMAMAMAAAAAMuA.M
+    ...I.I.I.I.I.I.I...
+    ...M.M.M.M.A.M.M...
+  8: |
+    ...................
+    ...T.T..AA.T.T.....
+    ...M.M.ACM.M.M.A.A.
+    ..T.TA.ANF.A..I.I..
+    I.M.M..OPQM...M.M.A
+    M.MA.M...ATA...A.AA
+    .AEWEXEWEWPMEMEWEEE
+    Mf.MATA....A..AMAA.
+    TA..M.MAM.A.MAM.M.M
+    ...MT.T.T.V.V.TMVAT
+    ...M.M.M.M.M.M.M.A.
+    ...T.T.T.T.V.T.T...
+  9: |
+    ...................
+    ...M.M.ΕCD.M.M.A.A.
+    ...V.V.CFG.V.V.V.V.
+    ..MnMn.TAHAh..MnMnA
+    M.VAVA.MAAIA).VAVAV
+    V.hI.I....AT...I.Ih
+    ..AAAAAAAAAdAKAAAAA
+    I..Vf.fAu..T.FfVfV.
+    M..AI.IfI.IAIfIAIAI
+    ...fM.MAM.MuMAMfMfM
+    ...I.I.I.I.I.I.I.I.
+    ...M.M.M.M.M.M.M.A.
+  10: |
+    ...................
+    ...T.T..AA.T.T.I.I.
+    ...M.M.ACM.M.M.M.M.
+    ..T.TA.ANF.A.AT.T.I
+    I.M.M..OPQM.A.M.M.M
+    MA.M.M...ATA.AA...A
+    ..EXEPEWEYPMEMEXEXE
+    M.A...ATMAA.A.A..M.
+    iA..MAMAM.M.M.MAM.M
+    ....T.V.V.V.T.T.T.T
+    ...M.M.M.M.M.M.M.M.
+    ...T.T.T.T.T.T.T.V.
+  11: |
+    ...................
+    ...M.M.ΖCD.M.M.M.M.
+    ...V.V.CFG.V.V.V.V.
+    ..MnMn.TAHAhAhM.M.M
+    M.VAVA.MAAIAVAV.V.V
+    OD.I.I....AT.Th.n.h
+    .(AAAAAAAMAJAJAAAAA
+    I.f.uAfAfTf.f.fA.V.
+    MEA.IfIfIAI.I.IfIAI
+    ....MAMAMuM.M.MAMuM
+    ...I.I.I.I.I.I.I.I.
+    ...M.M.M.M.M.M.M.M.
+  12: |
+    ...................
+    ...T.T..AA.T.T.T.T.
+    ...M.M.ACM.M.M.M.M.
+    ..T.TA.ANF..IAT.T.T
+    I.M.M..OPQM.M.M.MAM
+    MAAM.M...ATAAAA.MA.
+    ..EPEXEWEYPMEMEWEWE
+    M.AAMT.TAA.....TMMA
+    iA..MAM.M.M.MAMAM.M
+    ...AT.V.VMV.V.T.TAT
+    ...M.M.M.M.M.M.M.M.
+    ...T.T.T.T.T.T.T.T.
+  13: |
+    ...................
+    ...M.M.ΗCD.M.M.M.M.
+    ...V.V.CFG.V.V.V.V.
+    ..MnMn.TAHA.MhM.MAM
+    M.VAVA.MAAI.VAV.VhV
+    ODhI.I....A.hTh.hI.
+    .(AAAAAAAMAKAdAAAAA
+    I.fVfAu.fT.F.FuAfVf
+    MZAAIfI.IAeujfIfIAI
+    ...fMAM.MfM.MAMAMuM
+    ...I.I.I.I.I.I.I.I.
+    ...M.M.M.M.M.M.M.M.
+  14: |
+    ...................
+    ...I.T..AA.T.T.T.T.
+    ...M.M.ACM.M.M.M.M.
+    ..TMTA.ANF..I.I.I.T
+    I.M.M..OPQM.M.M.M.M
+    MAAM..A..AT..A.A...
+    ..EXEXkYEYPME.EWEXE
+    M...AT.A.AAAAA.TAM.
+    O.AAM.M.M.M.M.M.M.M
+    ....T.V.VAVAV.T.T.T
+    ...M.M.M.M.M.M.M.M.
+    ...T.T.T.T.T.T.T.T.
+  15: |
+    ...................
+    ...M.M.ΘCD.M.M.M.M.
+    ...V.V.CFl.V.V.V.V.
+    ..MhM..TA...MnMnM.M
+    M.VAV.A.AAI.VAVAV.V
+    ODhI..T...A..I.I..n
+    .(AAAAMMAMAKAAAAAAA
+    I.uAf..T.TfTfV..fV.
+    M.IfI.IAIAIAIAI.IAI
+    ..AAM.MuMfMfMuM.MuM
+    ...I.I.I.I.I.I.I.I.
+    ...M.M.M.M.M.M.M.M.
+  16: |
+    ...................
+    ...I.I..A..I.I.I.I.
+    ...M.M.AC..M.M.M.M.
+    A.I.I..ANF..IAI.I.I
+    V.M.M.*.mQ..M.M.M.M
+    ......A..AT........
+    ..EXEEEEEEP.EXEPEWE
+    ...T...A.A.........
+    I.M.M.M.M.M.M.M.M.M
+    A.V.V.V.V.V.V.V.V.V
+    ...M.M.M.M.M.M.M.M.
+    ...V.V.V.V.V.V.V.V.
+  17: |
+    ...................
+    ........AM.........
+    A..T.T.....T.T.T.T.
+    T..A.A.....A.A.A.A.
+    ..T.T.A.....T.T.T.T
+    ..A.A.......A.A.A.A
+    ...................
+    ..A.A.A.A.A.A.A.A.A
+    ..T.T.T.T.T.T.T.T.T
+    T..A.A.A.A.A.A.A.A.
+    A..T.T.T.T.T.T.T.T.
+    ...................
+  18: |
+    ...................
+    .......ΙEj.........
+    *..A.A...A.A.A.A.A.
+    A..*.*...M.*.*.*.*.
+    ..A.A.*A....A.A.A.A
+    ..*.*.......*.*.*.*
+    ...................
+    ..*.*.*.*.*.*.*.*.*
+    ..A.A.A.A.A.A.A.A.A
+    A..*.*.*.*.*.*.*.*.
+    *..A.A.A.A.A.A.A.A.
+    ...................
+  19: |
+    ...................
+    ...A.A..AM.A.A.A.A.
+    A..V.V...T.V.V.V.V.
+    V.AAAA.A.I.AAAAAAAA
+    ..V.V.AV.A..V.V.V.V
+    ..A.A....M..A.A.A.A
+    ...................
+    ..A.A.A.A.A.A.A.A.A
+    ..I.I.I.I.I.I.I.I.I
+    I.AAAAAAAAAAAAAAAAA
+    A..I.I.I.I.I.I.I.I.
+    ...A.A.A.A.A.A.A.A.
+  20: |
+    ...................
+    ...I.I.ΚEj.I.I.I.I.
+    I..M.M...A.M.M.M.M.
+    M.I.I..I.M..I.I.I.I
+    ..MAMA.M.T..MAM.M.M
+    A.A.A....I....A...A
+    .AAAAAAAAAAAAAAAAA.
+    A...A.A.A.....A.A..
+    ..MAMAMAMAMAMAMAMAM
+    M.V.V.V.V.V.V.V.V.V
+    V..M.M.M.M.M.M.M.M.
+    ...V.V.V.V.V.V.V.V.
+  21: |
+    ...................
+    ........AM.M.M.M.M.
+    ...T.T...T.V.V.V.V.
+    T..A.A.M.I..MAM.M.M
+    A.TfTf.V.A..VfV.V.V
+    f.fAfA...M...Af...f
+    AEPEXEWEWPEEEEXEWEA
+    h..AhAhAhA.A.AhAhA.
+    A.IhThThThIhIhIhIhI
+    T.MA.A.A.AMAMAMAMAM
+    ...T.T.T.T.T.I.I.I.
+    .............M.M.M.
+  22: |
+    ...................
+    .......ΛEj.I.I.I.I.
+    .........A.M.M.M.M.
+    .......I.M..I.I.I.I
+    .......M.T.AM.M.M.M
+    .........I..A...A.A
+    .........AAAAAAAAA.
+    ..........A.A.A.A.A
+    ..M.......M.M.MAM.M
+    ..V.......V.V.V.V.V
+    .............M.M.M.
+    .............V.V.V.
+  23: |
+    ...................
+    ........AM...M.M.M.
+    .........T.T.V.V.V.
+    .......M.I.A..M.M..
+    .......V.A.fT.V.V.T
+    .........M.Af...f.f
+    .........mWEXEWEXEA
+    ..........h.h.hAh.h
+    ..I.......T.T.ThI.I
+    ..M............AM.M
+    .............I.T.I.
+    .............M...M.
+  24: |
+    ...................
+    .......ΜEj...I.I.I.
+    .........A...M.M.M.
+    .......I.M....I.I..
+    .......M.T...AMAMA.
+    .........I....A.A..
+    .........AAAAAAAAA.
+    ................A.A
+    ..M..........A..MAM
+    ..V.............V.V
+    .............M...M.
+    .............V...V.
+  25: |
+    ...................
+    ...................
+    .........T...T.T.T.
+    .......M.I...A.A.A.
+    .......V.A...fTfTf.
+    .........M...AfAfA.
+    .........mEEEEPEXEA
+    .............A..hAh
+    ..I..........h..ThT
+    ..M..........A...A.
+    .............T...T.
+    ...................
+  26: |
+    ...................
+    ...................
+    ...................
+    .......I...........
+    .......M.T.........
+    .......A.I.........
+    ...AAAAAAA.........
+    ..A................
+    ..M................
+    ..V................
+    ...................
+    ...................
+  27: |
+    ...................
+    ...................
+    ...................
+    ...................
+    .......T...........
+    .......f...........
+    ..AEEEEPEU.........
+    ..h................
+    ..T................
+    ...................
+    ...................
+    ...................
+tests:
+- name: perfect squares and their neighbours
+  truth_table: |
+    i0 i1 i2 i3 i4 i5 i6 i7 | q0 q1 q2 q3
+    0 0 0 0 0 0 0 0 | 0 0 0 0
+    1 0 0 0 0 0 0 0 | 1 0 0 0
+    1 1 0 0 0 0 0 0 | 1 0 0 0
+    0 0 1 0 0 0 0 0 | 0 1 0 0
+    0 0 0 1 0 0 0 0 | 0 1 0 0
+    1 0 0 1 0 0 0 0 | 1 1 0 0
+    1 1 1 1 0 0 0 0 | 1 1 0 0
+    0 0 0 0 1 0 0 0 | 0 0 1 0
+    0 0 0 1 1 0 0 0 | 0 0 1 0
+    1 0 0 1 1 0 0 0 | 1 0 1 0
+    1 1 0 0 0 1 0 0 | 1 0 1 0
+    0 0 1 0 0 1 0 0 | 0 1 1 0
+    0 0 0 0 1 1 0 0 | 0 1 1 0
+    1 0 0 0 1 1 0 0 | 1 1 1 0
+    1 1 1 1 1 1 0 0 | 1 1 1 0
+    0 0 0 0 0 0 1 0 | 0 0 0 1
+    0 0 0 0 1 0 1 0 | 0 0 0 1
+    1 0 0 0 1 0 1 0 | 1 0 0 1
+    1 1 0 0 0 1 1 0 | 1 0 0 1
+    0 0 1 0 0 1 1 0 | 0 1 0 1
+    0 0 0 1 1 1 1 0 | 0 1 0 1
+    1 0 0 1 1 1 1 0 | 1 1 0 1
+    1 1 1 1 0 0 0 1 | 1 1 0 1
+    0 0 0 0 1 0 0 1 | 0 0 1 1
+    0 0 0 1 0 1 0 1 | 0 0 1 1
+    1 0 0 1 0 1 0 1 | 1 0 1 1
+    1 1 0 0 0 0 1 1 | 1 0 1 1
+    0 0 1 0 0 0 1 1 | 0 1 1 1
+    0 0 0 0 0 1 1 1 | 0 1 1 1
+    1 0 0 0 0 1 1 1 | 1 1 1 1
+    1 1 1 1 1 1 1 1 | 1 1 1 1
+    0 0 0 0 0 0 0 0 | 0 0 0 0
+  delay: 12
+- name: all 256 inputs
+  truth_table: |
+    i0 i1 i2 i3 i4 i5 i6 i7 | q0 q1 q2 q3
+    0 0 0 0 0 0 0 0 | 0 0 0 0
+    1 0 0 0 0 0 0 0 | 1 0 0 0
+    1 1 0 0 0 0 0 0 | 1 0 0 0
+    0 1 0 0 0 0 0 0 | 1 0 0 0
+    0 1 1 0 0 0 0 0 | 0 1 0 0
+    1 1 1 0 0 0 0 0 | 0 1 0 0
+    1 0 1 0 0 0 0 0 | 0 1 0 0
+    0 0 1 0 0 0 0 0 | 0 1 0 0
+    0 0 1 1 0 0 0 0 | 1 1 0 0
+    1 0 1 1 0 0 0 0 | 1 1 0 0
+    1 1 1 1 0 0 0 0 | 1 1 0 0
+    0 1 1 1 0 0 0 0 | 1 1 0 0
+    0 1 0 1 0 0 0 0 | 1 1 0 0
+    1 1 0 1 0 0 0 0 | 1 1 0 0
+    1 0 0 1 0 0 0 0 | 1 1 0 0
+    0 0 0 1 0 0 0 0 | 0 1 0 0
+    0 0 0 1 1 0 0 0 | 0 0 1 0
+    1 0 0 1 1 0 0 0 | 1 0 1 0
+    1 1 0 1 1 0 0 0 | 1 0 1 0
+    0 1 0 1 1 0 0 0 | 1 0 1 0
+    0 1 1 1 1 0 0 0 | 1 0 1 0
+    1 1 1 1 1 0 0 0 | 1 0 1 0
+    1 0 1 1 1 0 0 0 | 1 0 1 0
+    0 0 1 1 1 0 0 0 | 1 0 1 0
+    0 0 1 0 1 0 0 0 | 0 0 1 0
+    1 0 1 0 1 0 0 0 | 0 0 1 0
+    1 1 1 0 1 0 0 0 | 0 0 1 0
+    0 1 1 0 1 0 0 0 | 0 0 1 0
+    0 1 0 0 1 0 0 0 | 0 0 1 0
+    1 1 0 0 1 0 0 0 | 0 0 1 0
+    1 0 0 0 1 0 0 0 | 0 0 1 0
+    0 0 0 0 1 0 0 0 | 0 0 1 0
+    0 0 0 0 1 1 0 0 | 0 1 1 0
+    1 0 0 0 1 1 0 0 | 1 1 1 0
+    1 1 0 0 1 1 0 0 | 1 1 1 0
+    0 1 0 0 1 1 0 0 | 1 1 1 0
+    0 1 1 0 1 1 0 0 | 1 1 1 0
+    1 1 1 0 1 1 0 0 | 1 1 1 0
+    1 0 1 0 1 1 0 0 | 1 1 1 0
+    0 0 1 0 1 1 0 0 | 1 1 1 0
+    0 0 1 1 1 1 0 0 | 1 1 1 0
+    1 0 1 1 1 1 0 0 | 1 1 1 0
+    1 1 1 1 1 1 0 0 | 1 1 1 0
+    0 1 1 1 1 1 0 0 | 1 1 1 0
+    0 1 0 1 1 1 0 0 | 1 1 1 0
+    1 1 0 1 1 1 0 0 | 1 1 1 0
+    1 0 0 1 1 1 0 0 | 1 1 1 0
+    0 0 0 1 1 1 0 0 | 1 1 1 0
+    0 0 0 1 0 1 0 0 | 0 1 1 0
+    1 0 0 1 0 1 0 0 | 0 1 1 0
+    1 1 0 1 0 1 0 0 | 0 1 1 0
+    0 1 0 1 0 1 0 0 | 0 1 1 0
+    0 1 1 1 0 1 0 0 | 0 1 1 0
+    1 1 1 1 0 1 0 0 | 0 1 1 0
+    1 0 1 1 0 1 0 0 | 0 1 1 0
+    0 0 1 1 0 1 0 0 | 0 1 1 0
+    0 0 1 0 0 1 0 0 | 0 1 1 0
+    1 0 1 0 0 1 0 0 | 0 1 1 0
+    1 1 1 0 0 1 0 0 | 0 1 1 0
+    0 1 1 0 0 1 0 0 | 0 1 1 0
+    0 1 0 0 0 1 0 0 | 1 0 1 0
+    1 1 0 0 0 1 0 0 | 1 0 1 0
+    1 0 0 0 0 1 0 0 | 1 0 1 0
+    0 0 0 0 0 1 0 0 | 1 0 1 0
+    0 0 0 0 0 1 1 0 | 1 0 0 1
+    1 0 0 0 0 1 1 0 | 1 0 0 1
+    1 1 0 0 0 1 1 0 | 1 0 0 1
+    0 1 0 0 0 1 1 0 | 1 0 0 1
+    0 1 1 0 0 1 1 0 | 0 1 0 1
+    1 1 1 0 0 1 1 0 | 0 1 0 1
+    1 0 1 0 0 1 1 0 | 0 1 0 1
+    0 0 1 0 0 1 1 0 | 0 1 0 1
+    0 0 1 1 0 1 1 0 | 0 1 0 1
+    1 0 1 1 0 1 1 0 | 0 1 0 1
+    1 1 1 1 0 1 1 0 | 0 1 0 1
+    0 1 1 1 0 1 1 0 | 0 1 0 1
+    0 1 0 1 0 1 1 0 | 0 1 0 1
+    1 1 0 1 0 1 1 0 | 0 1 0 1
+    1 0 0 1 0 1 1 0 | 0 1 0 1
+    0 0 0 1 0 1 1 0 | 0 1 0 1
+    0 0 0 1 1 1 1 0 | 0 1 0 1
+    1 0 0 1 1 1 1 0 | 1 1 0 1
+    1 1 0 1 1 1 1 0 | 1 1 0 1
+    0 1 0 1 1 1 1 0 | 1 1 0 1
+    0 1 1 1 1 1 1 0 | 1 1 0 1
+    1 1 1 1 1 1 1 0 | 1 1 0 1
+    1 0 1 1 1 1 1 0 | 1 1 0 1
+    0 0 1 1 1 1 1 0 | 1 1 0 1
+    0 0 1 0 1 1 1 0 | 0 1 0 1
+    1 0 1 0 1 1 1 0 | 0 1 0 1
+    1 1 1 0 1 1 1 0 | 0 1 0 1
+    0 1 1 0 1 1 1 0 | 0 1 0 1
+    0 1 0 0 1 1 1 0 | 0 1 0 1
+    1 1 0 0 1 1 1 0 | 0 1 0 1
+    1 0 0 0 1 1 1 0 | 0 1 0 1
+    0 0 0 0 1 1 1 0 | 0 1 0 1
+    0 0 0 0 1 0 1 0 | 0 0 0 1
+    1 0 0 0 1 0 1 0 | 1 0 0 1
+    1 1 0 0 1 0 1 0 | 1 0 0 1
+    0 1 0 0 1 0 1 0 | 1 0 0 1
+    0 1 1 0 1 0 1 0 | 1 0 0 1
+    1 1 1 0 1 0 1 0 | 1 0 0 1
+    1 0 1 0 1 0 1 0 | 1 0 0 1
+    0 0 1 0 1 0 1 0 | 1 0 0 1
+    0 0 1 1 1 0 1 0 | 1 0 0 1
+    1 0 1 1 1 0 1 0 | 1 0 0 1
+    1 1 1 1 1 0 1 0 | 1 0 0 1
+    0 1 1 1 1 0 1 0 | 1 0 0 1
+    0 1 0 1 1 0 1 0 | 1 0 0 1
+    1 1 0 1 1 0 1 0 | 1 0 0 1
+    1 0 0 1 1 0 1 0 | 1 0 0 1
+    0 0 0 1 1 0 1 0 | 1 0 0 1
+    0 0 0 1 0 0 1 0 | 0 0 0 1
+    1 0 0 1 0 0 1 0 | 0 0 0 1
+    1 1 0 1 0 0 1 0 | 0 0 0 1
+    0 1 0 1 0 0 1 0 | 0 0 0 1
+    0 1 1 1 0 0 1 0 | 0 0 0 1
+    1 1 1 1 0 0 1 0 | 0 0 0 1
+    1 0 1 1 0 0 1 0 | 0 0 0 1
+    0 0 1 1 0 0 1 0 | 0 0 0 1
+    0 0 1 0 0 0 1 0 | 0 0 0 1
+    1 0 1 0 0 0 1 0 | 0 0 0 1
+    1 1 1 0 0 0 1 0 | 0 0 0 1
+    0 1 1 0 0 0 1 0 | 0 0 0 1
+    0 1 0 0 0 0 1 0 | 0 0 0 1
+    1 1 0 0 0 0 1 0 | 0 0 0 1
+    1 0 0 0 0 0 1 0 | 0 0 0 1
+    0 0 0 0 0 0 1 0 | 0 0 0 1
+    0 0 0 0 0 0 1 1 | 1 0 1 1
+    1 0 0 0 0 0 1 1 | 1 0 1 1
+    1 1 0 0 0 0 1 1 | 1 0 1 1
+    0 1 0 0 0 0 1 1 | 1 0 1 1
+    0 1 1 0 0 0 1 1 | 0 1 1 1
+    1 1 1 0 0 0 1 1 | 0 1 1 1
+    1 0 1 0 0 0 1 1 | 0 1 1 1
+    0 0 1 0 0 0 1 1 | 0 1 1 1
+    0 0 1 1 0 0 1 1 | 0 1 1 1
+    1 0 1 1 0 0 1 1 | 0 1 1 1
+    1 1 1 1 0 0 1 1 | 0 1 1 1
+    0 1 1 1 0 0 1 1 | 0 1 1 1
+    0 1 0 1 0 0 1 1 | 0 1 1 1
+    1 1 0 1 0 0 1 1 | 0 1 1 1
+    1 0 0 1 0 0 1 1 | 0 1 1 1
+    0 0 0 1 0 0 1 1 | 0 1 1 1
+    0 0 0 1 1 0 1 1 | 0 1 1 1
+    1 0 0 1 1 0 1 1 | 0 1 1 1
+    1 1 0 1 1 0 1 1 | 0 1 1 1
+    0 1 0 1 1 0 1 1 | 0 1 1 1
+    0 1 1 1 1 0 1 1 | 0 1 1 1
+    1 1 1 1 1 0 1 1 | 0 1 1 1
+    1 0 1 1 1 0 1 1 | 0 1 1 1
+    0 0 1 1 1 0 1 1 | 0 1 1 1
+    0 0 1 0 1 0 1 1 | 0 1 1 1
+    1 0 1 0 1 0 1 1 | 0 1 1 1
+    1 1 1 0 1 0 1 1 | 0 1 1 1
+    0 1 1 0 1 0 1 1 | 0 1 1 1
+    0 1 0 0 1 0 1 1 | 0 1 1 1
+    1 1 0 0 1 0 1 1 | 0 1 1 1
+    1 0 0 0 1 0 1 1 | 0 1 1 1
+    0 0 0 0 1 0 1 1 | 0 1 1 1
+    0 0 0 0 1 1 1 1 | 1 1 1 1
+    1 0 0 0 1 1 1 1 | 1 1 1 1
+    1 1 0 0 1 1 1 1 | 1 1 1 1
+    0 1 0 0 1 1 1 1 | 1 1 1 1
+    0 1 1 0 1 1 1 1 | 1 1 1 1
+    1 1 1 0 1 1 1 1 | 1 1 1 1
+    1 0 1 0 1 1 1 1 | 1 1 1 1
+    0 0 1 0 1 1 1 1 | 1 1 1 1
+    0 0 1 1 1 1 1 1 | 1 1 1 1
+    1 0 1 1 1 1 1 1 | 1 1 1 1
+    1 1 1 1 1 1 1 1 | 1 1 1 1
+    0 1 1 1 1 1 1 1 | 1 1 1 1
+    0 1 0 1 1 1 1 1 | 1 1 1 1
+    1 1 0 1 1 1 1 1 | 1 1 1 1
+    1 0 0 1 1 1 1 1 | 1 1 1 1
+    0 0 0 1 1 1 1 1 | 1 1 1 1
+    0 0 0 1 0 1 1 1 | 1 1 1 1
+    1 0 0 1 0 1 1 1 | 1 1 1 1
+    1 1 0 1 0 1 1 1 | 1 1 1 1
+    0 1 0 1 0 1 1 1 | 1 1 1 1
+    0 1 1 1 0 1 1 1 | 1 1 1 1
+    1 1 1 1 0 1 1 1 | 1 1 1 1
+    1 0 1 1 0 1 1 1 | 1 1 1 1
+    0 0 1 1 0 1 1 1 | 1 1 1 1
+    0 0 1 0 0 1 1 1 | 1 1 1 1
+    1 0 1 0 0 1 1 1 | 1 1 1 1
+    1 1 1 0 0 1 1 1 | 1 1 1 1
+    0 1 1 0 0 1 1 1 | 1 1 1 1
+    0 1 0 0 0 1 1 1 | 1 1 1 1
+    1 1 0 0 0 1 1 1 | 1 1 1 1
+    1 0 0 0 0 1 1 1 | 1 1 1 1
+    0 0 0 0 0 1 1 1 | 0 1 1 1
+    0 0 0 0 0 1 0 1 | 0 0 1 1
+    1 0 0 0 0 1 0 1 | 0 0 1 1
+    1 1 0 0 0 1 0 1 | 0 0 1 1
+    0 1 0 0 0 1 0 1 | 0 0 1 1
+    0 1 1 0 0 1 0 1 | 0 0 1 1
+    1 1 1 0 0 1 0 1 | 0 0 1 1
+    1 0 1 0 0 1 0 1 | 0 0 1 1
+    0 0 1 0 0 1 0 1 | 0 0 1 1
+    0 0 1 1 0 1 0 1 | 1 0 1 1
+    1 0 1 1 0 1 0 1 | 1 0 1 1
+    1 1 1 1 0 1 0 1 | 1 0 1 1
+    0 1 1 1 0 1 0 1 | 1 0 1 1
+    0 1 0 1 0 1 0 1 | 1 0 1 1
+    1 1 0 1 0 1 0 1 | 1 0 1 1
+    1 0 0 1 0 1 0 1 | 1 0 1 1
+    0 0 0 1 0 1 0 1 | 0 0 1 1
+    0 0 0 1 1 1 0 1 | 1 0 1 1
+    1 0 0 1 1 1 0 1 | 1 0 1 1
+    1 1 0 1 1 1 0 1 | 1 0 1 1
+    0 1 0 1 1 1 0 1 | 1 0 1 1
+    0 1 1 1 1 1 0 1 | 1 0 1 1
+    1 1 1 1 1 1 0 1 | 1 0 1 1
+    1 0 1 1 1 1 0 1 | 1 0 1 1
+    0 0 1 1 1 1 0 1 | 1 0 1 1
+    0 0 1 0 1 1 0 1 | 1 0 1 1
+    1 0 1 0 1 1 0 1 | 1 0 1 1
+    1 1 1 0 1 1 0 1 | 1 0 1 1
+    0 1 1 0 1 1 0 1 | 1 0 1 1
+    0 1 0 0 1 1 0 1 | 1 0 1 1
+    1 1 0 0 1 1 0 1 | 1 0 1 1
+    1 0 0 0 1 1 0 1 | 1 0 1 1
+    0 0 0 0 1 1 0 1 | 1 0 1 1
+    0 0 0 0 1 0 0 1 | 0 0 1 1
+    1 0 0 0 1 0 0 1 | 0 0 1 1
+    1 1 0 0 1 0 0 1 | 0 0 1 1
+    0 1 0 0 1 0 0 1 | 0 0 1 1
+    0 1 1 0 1 0 0 1 | 0 0 1 1
+    1 1 1 0 1 0 0 1 | 0 0 1 1
+    1 0 1 0 1 0 0 1 | 0 0 1 1
+    0 0 1 0 1 0 0 1 | 0 0 1 1
+    0 0 1 1 1 0 0 1 | 0 0 1 1
+    1 0 1 1 1 0 0 1 | 0 0 1 1
+    1 1 1 1 1 0 0 1 | 0 0 1 1
+    0 1 1 1 1 0 0 1 | 0 0 1 1
+    0 1 0 1 1 0 0 1 | 0 0 1 1
+    1 1 0 1 1 0 0 1 | 0 0 1 1
+    1 0 0 1 1 0 0 1 | 0 0 1 1
+    0 0 0 1 1 0 0 1 | 0 0 1 1
+    0 0 0 1 0 0 0 1 | 1 1 0 1
+    1 0 0 1 0 0 0 1 | 1 1 0 1
+    1 1 0 1 0 0 0 1 | 1 1 0 1
+    0 1 0 1 0 0 0 1 | 1 1 0 1
+    0 1 1 1 0 0 0 1 | 1 1 0 1
+    1 1 1 1 0 0 0 1 | 1 1 0 1
+    1 0 1 1 0 0 0 1 | 1 1 0 1
+    0 0 1 1 0 0 0 1 | 1 1 0 1
+    0 0 1 0 0 0 0 1 | 1 1 0 1
+    1 0 1 0 0 0 0 1 | 1 1 0 1
+    1 1 1 0 0 0 0 1 | 1 1 0 1
+    0 1 1 0 0 0 0 1 | 1 1 0 1
+    0 1 0 0 0 0 0 1 | 1 1 0 1
+    1 1 0 0 0 0 0 1 | 1 1 0 1
+    1 0 0 0 0 0 0 1 | 1 1 0 1
+    0 0 0 0 0 0 0 1 | 1 1 0 1
+  max_delay: 12
+- name: all 256 inputs descending
+  truth_table: |
+    i0 i1 i2 i3 i4 i5 i6 i7 | q0 q1 q2 q3
+    1 1 1 1 1 1 1 1 | 1 1 1 1
+    0 1 1 1 1 1 1 1 | 1 1 1 1
+    1 0 1 1 1 1 1 1 | 1 1 1 1
+    0 0 1 1 1 1 1 1 | 1 1 1 1
+    1 1 0 1 1 1 1 1 | 1 1 1 1
+    0 1 0 1 1 1 1 1 | 1 1 1 1
+    1 0 0 1 1 1 1 1 | 1 1 1 1
+    0 0 0 1 1 1 1 1 | 1 1 1 1
+    1 1 1 0 1 1 1 1 | 1 1 1 1
+    0 1 1 0 1 1 1 1 | 1 1 1 1
+    1 0 1 0 1 1 1 1 | 1 1 1 1
+    0 0 1 0 1 1 1 1 | 1 1 1 1
+    1 1 0 0 1 1 1 1 | 1 1 1 1
+    0 1 0 0 1 1 1 1 | 1 1 1 1
+    1 0 0 0 1 1 1 1 | 1 1 1 1
+    0 0 0 0 1 1 1 1 | 1 1 1 1
+    1 1 1 1 0 1 1 1 | 1 1 1 1
+    0 1 1 1 0 1 1 1 | 1 1 1 1
+    1 0 1 1 0 1 1 1 | 1 1 1 1
+    0 0 1 1 0 1 1 1 | 1 1 1 1
+    1 1 0 1 0 1 1 1 | 1 1 1 1
+    0 1 0 1 0 1 1 1 | 1 1 1 1
+    1 0 0 1 0 1 1 1 | 1 1 1 1
+    0 0 0 1 0 1 1 1 | 1 1 1 1
+    1 1 1 0 0 1 1 1 | 1 1 1 1
+    0 1 1 0 0 1 1 1 | 1 1 1 1
+    1 0 1 0 0 1 1 1 | 1 1 1 1
+    0 0 1 0 0 1 1 1 | 1 1 1 1
+    1 1 0 0 0 1 1 1 | 1 1 1 1
+    0 1 0 0 0 1 1 1 | 1 1 1 1
+    1 0 0 0 0 1 1 1 | 1 1 1 1
+    0 0 0 0 0 1 1 1 | 0 1 1 1
+    1 1 1 1 1 0 1 1 | 0 1 1 1
+    0 1 1 1 1 0 1 1 | 0 1 1 1
+    1 0 1 1 1 0 1 1 | 0 1 1 1
+    0 0 1 1 1 0 1 1 | 0 1 1 1
+    1 1 0 1 1 0 1 1 | 0 1 1 1
+    0 1 0 1 1 0 1 1 | 0 1 1 1
+    1 0 0 1 1 0 1 1 | 0 1 1 1
+    0 0 0 1 1 0 1 1 | 0 1 1 1
+    1 1 1 0 1 0 1 1 | 0 1 1 1
+    0 1 1 0 1 0 1 1 | 0 1 1 1
+    1 0 1 0 1 0 1 1 | 0 1 1 1
+    0 0 1 0 1 0 1 1 | 0 1 1 1
+    1 1 0 0 1 0 1 1 | 0 1 1 1
+    0 1 0 0 1 0 1 1 | 0 1 1 1
+    1 0 0 0 1 0 1 1 | 0 1 1 1
+    0 0 0 0 1 0 1 1 | 0 1 1 1
+    1 1 1 1 0 0 1 1 | 0 1 1 1
+    0 1 1 1 0 0 1 1 | 0 1 1 1
+    1 0 1 1 0 0 1 1 | 0 1 1 1
+    0 0 1 1 0 0 1 1 | 0 1 1 1
+    1 1 0 1 0 0 1 1 | 0 1 1 1
+    0 1 0 1 0 0 1 1 | 0 1 1 1
+    1 0 0 1 0 0 1 1 | 0 1 1 1
+    0 0 0 1 0 0 1 1 | 0 1 1 1
+    1 1 1 0 0 0 1 1 | 0 1 1 1
+    0 1 1 0 0 0 1 1 | 0 1 1 1
+    1 0 1 0 0 0 1 1 | 0 1 1 1
+    0 0 1 0 0 0 1 1 | 0 1 1 1
+    1 1 0 0 0 0 1 1 | 1 0 1 1
+    0 1 0 0 0 0 1 1 | 1 0 1 1
+    1 0 0 0 0 0 1 1 | 1 0 1 1
+    0 0 0 0 0 0 1 1 | 1 0 1 1
+    1 1 1 1 1 1 0 1 | 1 0 1 1
+    0 1 1 1 1 1 0 1 | 1 0 1 1
+    1 0 1 1 1 1 0 1 | 1 0 1 1
+    0 0 1 1 1 1 0 1 | 1 0 1 1
+    1 1 0 1 1 1 0 1 | 1 0 1 1
+    0 1 0 1 1 1 0 1 | 1 0 1 1
+    1 0 0 1 1 1 0 1 | 1 0 1 1
+    0 0 0 1 1 1 0 1 | 1 0 1 1
+    1 1 1 0 1 1 0 1 | 1 0 1 1
+    0 1 1 0 1 1 0 1 | 1 0 1 1
+    1 0 1 0 1 1 0 1 | 1 0 1 1
+    0 0 1 0 1 1 0 1 | 1 0 1 1
+    1 1 0 0 1 1 0 1 | 1 0 1 1
+    0 1 0 0 1 1 0 1 | 1 0 1 1
+    1 0 0 0 1 1 0 1 | 1 0 1 1
+    0 0 0 0 1 1 0 1 | 1 0 1 1
+    1 1 1 1 0 1 0 1 | 1 0 1 1
+    0 1 1 1 0 1 0 1 | 1 0 1 1
+    1 0 1 1 0 1 0 1 | 1 0 1 1
+    0 0 1 1 0 1 0 1 | 1 0 1 1
+    1 1 0 1 0 1 0 1 | 1 0 1 1
+    0 1 0 1 0 1 0 1 | 1 0 1 1
+    1 0 0 1 0 1 0 1 | 1 0 1 1
+    0 0 0 1 0 1 0 1 | 0 0 1 1
+    1 1 1 0 0 1 0 1 | 0 0 1 1
+    0 1 1 0 0 1 0 1 | 0 0 1 1
+    1 0 1 0 0 1 0 1 | 0 0 1 1
+    0 0 1 0 0 1 0 1 | 0 0 1 1
+    1 1 0 0 0 1 0 1 | 0 0 1 1
+    0 1 0 0 0 1 0 1 | 0 0 1 1
+    1 0 0 0 0 1 0 1 | 0 0 1 1
+    0 0 0 0 0 1 0 1 | 0 0 1 1
+    1 1 1 1 1 0 0 1 | 0 0 1 1
+    0 1 1 1 1 0 0 1 | 0 0 1 1
+    1 0 1 1 1 0 0 1 | 0 0 1 1
+    0 0 1 1 1 0 0 1 | 0 0 1 1
+    1 1 0 1 1 0 0 1 | 0 0 1 1
+    0 1 0 1 1 0 0 1 | 0 0 1 1
+    1 0 0 1 1 0 0 1 | 0 0 1 1
+    0 0 0 1 1 0 0 1 | 0 0 1 1
+    1 1 1 0 1 0 0 1 | 0 0 1 1
+    0 1 1 0 1 0 0 1 | 0 0 1 1
+    1 0 1 0 1 0 0 1 | 0 0 1 1
+    0 0 1 0 1 0 0 1 | 0 0 1 1
+    1 1 0 0 1 0 0 1 | 0 0 1 1
+    0 1 0 0 1 0 0 1 | 0 0 1 1
+    1 0 0 0 1 0 0 1 | 0 0 1 1
+    0 0 0 0 1 0 0 1 | 0 0 1 1
+    1 1 1 1 0 0 0 1 | 1 1 0 1
+    0 1 1 1 0 0 0 1 | 1 1 0 1
+    1 0 1 1 0 0 0 1 | 1 1 0 1
+    0 0 1 1 0 0 0 1 | 1 1 0 1
+    1 1 0 1 0 0 0 1 | 1 1 0 1
+    0 1 0 1 0 0 0 1 | 1 1 0 1
+    1 0 0 1 0 0 0 1 | 1 1 0 1
+    0 0 0 1 0 0 0 1 | 1 1 0 1
+    1 1 1 0 0 0 0 1 | 1 1 0 1
+    0 1 1 0 0 0 0 1 | 1 1 0 1
+    1 0 1 0 0 0 0 1 | 1 1 0 1
+    0 0 1 0 0 0 0 1 | 1 1 0 1
+    1 1 0 0 0 0 0 1 | 1 1 0 1
+    0 1 0 0 0 0 0 1 | 1 1 0 1
+    1 0 0 0 0 0 0 1 | 1 1 0 1
+    0 0 0 0 0 0 0 1 | 1 1 0 1
+    1 1 1 1 1 1 1 0 | 1 1 0 1
+    0 1 1 1 1 1 1 0 | 1 1 0 1
+    1 0 1 1 1 1 1 0 | 1 1 0 1
+    0 0 1 1 1 1 1 0 | 1 1 0 1
+    1 1 0 1 1 1 1 0 | 1 1 0 1
+    0 1 0 1 1 1 1 0 | 1 1 0 1
+    1 0 0 1 1 1 1 0 | 1 1 0 1
+    0 0 0 1 1 1 1 0 | 0 1 0 1
+    1 1 1 0 1 1 1 0 | 0 1 0 1
+    0 1 1 0 1 1 1 0 | 0 1 0 1
+    1 0 1 0 1 1 1 0 | 0 1 0 1
+    0 0 1 0 1 1 1 0 | 0 1 0 1
+    1 1 0 0 1 1 1 0 | 0 1 0 1
+    0 1 0 0 1 1 1 0 | 0 1 0 1
+    1 0 0 0 1 1 1 0 | 0 1 0 1
+    0 0 0 0 1 1 1 0 | 0 1 0 1
+    1 1 1 1 0 1 1 0 | 0 1 0 1
+    0 1 1 1 0 1 1 0 | 0 1 0 1
+    1 0 1 1 0 1 1 0 | 0 1 0 1
+    0 0 1 1 0 1 1 0 | 0 1 0 1
+    1 1 0 1 0 1 1 0 | 0 1 0 1
+    0 1 0 1 0 1 1 0 | 0 1 0 1
+    1 0 0 1 0 1 1 0 | 0 1 0 1
+    0 0 0 1 0 1 1 0 | 0 1 0 1
+    1 1 1 0 0 1 1 0 | 0 1 0 1
+    0 1 1 0 0 1 1 0 | 0 1 0 1
+    1 0 1 0 0 1 1 0 | 0 1 0 1
+    0 0 1 0 0 1 1 0 | 0 1 0 1
+    1 1 0 0 0 1 1 0 | 1 0 0 1
+    0 1 0 0 0 1 1 0 | 1 0 0 1
+    1 0 0 0 0 1 1 0 | 1 0 0 1
+    0 0 0 0 0 1 1 0 | 1 0 0 1
+    1 1 1 1 1 0 1 0 | 1 0 0 1
+    0 1 1 1 1 0 1 0 | 1 0 0 1
+    1 0 1 1 1 0 1 0 | 1 0 0 1
+    0 0 1 1 1 0 1 0 | 1 0 0 1
+    1 1 0 1 1 0 1 0 | 1 0 0 1
+    0 1 0 1 1 0 1 0 | 1 0 0 1
+    1 0 0 1 1 0 1 0 | 1 0 0 1
+    0 0 0 1 1 0 1 0 | 1 0 0 1
+    1 1 1 0 1 0 1 0 | 1 0 0 1
+    0 1 1 0 1 0 1 0 | 1 0 0 1
+    1 0 1 0 1 0 1 0 | 1 0 0 1
+    0 0 1 0 1 0 1 0 | 1 0 0 1
+    1 1 0 0 1 0 1 0 | 1 0 0 1
+    0 1 0 0 1 0 1 0 | 1 0 0 1
+    1 0 0 0 1 0 1 0 | 1 0 0 1
+    0 0 0 0 1 0 1 0 | 0 0 0 1
+    1 1 1 1 0 0 1 0 | 0 0 0 1
+    0 1 1 1 0 0 1 0 | 0 0 0 1
+    1 0 1 1 0 0 1 0 | 0 0 0 1
+    0 0 1 1 0 0 1 0 | 0 0 0 1
+    1 1 0 1 0 0 1 0 | 0 0 0 1
+    0 1 0 1 0 0 1 0 | 0 0 0 1
+    1 0 0 1 0 0 1 0 | 0 0 0 1
+    0 0 0 1 0 0 1 0 | 0 0 0 1
+    1 1 1 0 0 0 1 0 | 0 0 0 1
+    0 1 1 0 0 0 1 0 | 0 0 0 1
+    1 0 1 0 0 0 1 0 | 0 0 0 1
+    0 0 1 0 0 0 1 0 | 0 0 0 1
+    1 1 0 0 0 0 1 0 | 0 0 0 1
+    0 1 0 0 0 0 1 0 | 0 0 0 1
+    1 0 0 0 0 0 1 0 | 0 0 0 1
+    0 0 0 0 0 0 1 0 | 0 0 0 1
+    1 1 1 1 1 1 0 0 | 1 1 1 0
+    0 1 1 1 1 1 0 0 | 1 1 1 0
+    1 0 1 1 1 1 0 0 | 1 1 1 0
+    0 0 1 1 1 1 0 0 | 1 1 1 0
+    1 1 0 1 1 1 0 0 | 1 1 1 0
+    0 1 0 1 1 1 0 0 | 1 1 1 0
+    1 0 0 1 1 1 0 0 | 1 1 1 0
+    0 0 0 1 1 1 0 0 | 1 1 1 0
+    1 1 1 0 1 1 0 0 | 1 1 1 0
+    0 1 1 0 1 1 0 0 | 1 1 1 0
+    1 0 1 0 1 1 0 0 | 1 1 1 0
+    0 0 1 0 1 1 0 0 | 1 1 1 0
+    1 1 0 0 1 1 0 0 | 1 1 1 0
+    0 1 0 0 1 1 0 0 | 1 1 1 0
+    1 0 0 0 1 1 0 0 | 1 1 1 0
+    0 0 0 0 1 1 0 0 | 0 1 1 0
+    1 1 1 1 0 1 0 0 | 0 1 1 0
+    0 1 1 1 0 1 0 0 | 0 1 1 0
+    1 0 1 1 0 1 0 0 | 0 1 1 0
+    0 0 1 1 0 1 0 0 | 0 1 1 0
+    1 1 0 1 0 1 0 0 | 0 1 1 0
+    0 1 0 1 0 1 0 0 | 0 1 1 0
+    1 0 0 1 0 1 0 0 | 0 1 1 0
+    0 0 0 1 0 1 0 0 | 0 1 1 0
+    1 1 1 0 0 1 0 0 | 0 1 1 0
+    0 1 1 0 0 1 0 0 | 0 1 1 0
+    1 0 1 0 0 1 0 0 | 0 1 1 0
+    0 0 1 0 0 1 0 0 | 0 1 1 0
+    1 1 0 0 0 1 0 0 | 1 0 1 0
+    0 1 0 0 0 1 0 0 | 1 0 1 0
+    1 0 0 0 0 1 0 0 | 1 0 1 0
+    0 0 0 0 0 1 0 0 | 1 0 1 0
+    1 1 1 1 1 0 0 0 | 1 0 1 0
+    0 1 1 1 1 0 0 0 | 1 0 1 0
+    1 0 1 1 1 0 0 0 | 1 0 1 0
+    0 0 1 1 1 0 0 0 | 1 0 1 0
+    1 1 0 1 1 0 0 0 | 1 0 1 0
+    0 1 0 1 1 0 0 0 | 1 0 1 0
+    1 0 0 1 1 0 0 0 | 1 0 1 0
+    0 0 0 1 1 0 0 0 | 0 0 1 0
+    1 1 1 0 1 0 0 0 | 0 0 1 0
+    0 1 1 0 1 0 0 0 | 0 0 1 0
+    1 0 1 0 1 0 0 0 | 0 0 1 0
+    0 0 1 0 1 0 0 0 | 0 0 1 0
+    1 1 0 0 1 0 0 0 | 0 0 1 0
+    0 1 0 0 1 0 0 0 | 0 0 1 0
+    1 0 0 0 1 0 0 0 | 0 0 1 0
+    0 0 0 0 1 0 0 0 | 0 0 1 0
+    1 1 1 1 0 0 0 0 | 1 1 0 0
+    0 1 1 1 0 0 0 0 | 1 1 0 0
+    1 0 1 1 0 0 0 0 | 1 1 0 0
+    0 0 1 1 0 0 0 0 | 1 1 0 0
+    1 1 0 1 0 0 0 0 | 1 1 0 0
+    0 1 0 1 0 0 0 0 | 1 1 0 0
+    1 0 0 1 0 0 0 0 | 1 1 0 0
+    0 0 0 1 0 0 0 0 | 0 1 0 0
+    1 1 1 0 0 0 0 0 | 0 1 0 0
+    0 1 1 0 0 0 0 0 | 0 1 0 0
+    1 0 1 0 0 0 0 0 | 0 1 0 0
+    0 0 1 0 0 0 0 0 | 0 1 0 0
+    1 1 0 0 0 0 0 0 | 1 0 0 0
+    0 1 0 0 0 0 0 0 | 1 0 0 0
+    1 0 0 0 0 0 0 0 | 1 0 0 0
+    0 0 0 0 0 0 0 0 | 0 0 0 0
+  max_delay: 12

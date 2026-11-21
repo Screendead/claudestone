@@ -1,0 +1,395 @@
+name: ref_samosthesage_hex_fifo
+description: "Source (SOURCED): HEX005 Hex FIFO Register, SamosTheSage, endorsed by mattbatwings, tagged Recommended, Tested & Functional, mattbatwings' Logical Redstone Archive (HEX_hex-gadgets); Discord https://discord.com/channels/1361854816837435433/1472411232592990209 . README claim: a first in, first out register for hex numbers. Size 21x2x33 (flat, 2 tall), 4 slots. Interface (INFERRED from the blocks, then MEASURED): push = change the note of the note block at z=k (k=0..14) with `run: setblock`, which stores the value k+1 (1..15; 0 means empty so it cannot be stored); the observer beside it pulses a repeater onto a 15-long dust bus, the pulse decays to k+1 at the bus end, and a subtract comparator reads it. Each slot is a comparator ring (dust, X compare/subtract, dust, Y subtract) that holds its strength with no decay; the value is shown as a lamp line (strength s lights s lamps) read here as the dust at x=14 (line0 is the entry slot, line3 the output slot). A slot's subtract comparator Q passes its value on to the next slot only while that slot is empty (the next slot's occupied flag, a repeater, feeds Q's side), and the same Q output is fed through a repeater to the slot's own Y comparator side, which cuts its ring: a move, not a copy. So values fall through to the first free slot and the lever (clk) is a pop: it feeds the same cut side of the output slot. Level-sensitive: held on it keeps draining, a pulse pops one and everything behind shifts forward. Harness changes: the lever's support at (18,0,32) is white_wool instead of lime_wool so `use` can click it (the harness only emulates plain supports); the dust cells at x=14 of each lamp line are named line0..3; the lamps, and the lamp supports are kept. The note blocks keep the schematic's notes, which are only a start state. MEASURED on a laptop satellite: (1) on placement every observer fires and the bus stores a 15 in the output slot (load_junk), so every test first holds the lever for 40 ticks to drain it; (2) values 1..15 each come out of line3 unchanged (every_value), order is first in first out across 4 slots with first-pushed in line3 (fifo_order); (3) a push is not accepted when 4 slots are full: the fifth value is dropped, not overwritten (full_drops_fifth); (4) push to line0 +10 gt, one slot every 2 gt, each slot lit 4 gt while the value passes, so line3 +16 gt (push_timing); (5) pop: lever on, output slot clears +6 gt, the next value arrives in line3 +10 gt (pop_timing); the lever pulse must be at least 3 gt: 2 gt pops nothing, 3 gt pops one (pop_pulse_width); (6) a second push 8 gt after the first is kept, 6 gt after is lost (push_gap_8, push_gap_6), 1 and 2 gt after replaces the first (explored, not tested). INFERRED, not tested: that a hand-built copy placed observers-last needs the same drain."
+traits: [flat, pistonless, entityless, analog, comparator_based, observer_based]
+palette:
+  '.': air
+  A: cyan_wool
+  L: redstone_lamp
+  B: lime_wool
+  C: note_block[instrument=harp,note=15]
+  D: observer[facing=west]
+  E: repeater[delay=2,facing=west]
+  F: redstone_wire[east=none,north=none,south=side,west=side]
+  G: note_block[instrument=harp,note=3]
+  H: redstone_wire[east=none,north=side,south=side,west=side]
+  I: note_block[instrument=harp,note=2]
+  J: note_block[instrument=harp,note=0]
+  K: note_block[instrument=harp,note=4]
+  M: note_block[instrument=harp,note=8]
+  N: note_block[instrument=harp,note=5]
+  O: note_block[instrument=harp,note=7]
+  P: redstone_wire[east=side,north=none,south=side,west=none]
+  Q: comparator[facing=north,mode=subtract]
+  T: repeater[delay=1,facing=south]
+  U: redstone_wire[east=side,north=none,south=none,west=side]
+  V: comparator[facing=east,mode=compare]
+  W: redstone_wire[east=side,north=side,south=side,west=side]
+  X: comparator[facing=west,mode=subtract]
+  Y: comparator[facing=east,mode=subtract]
+  Z: redstone_wire[east=none,north=side,south=side,west=none]
+  b:
+    name: clk
+    block: lever[face=floor,facing=east]
+  r:
+    name: line0
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  s:
+    name: line1
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  t:
+    name: line2
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  u:
+    name: line3
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  w: white_wool
+layers:
+  0: |
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................AA...
+    ................A....
+    LLLLLLLLLLLLLLLA.A.A.
+    ..................A.A
+    ................AAA..
+    ................A.A..
+    LLLLLLLLLLLLLLLA.A.A.
+    ..................A.A
+    ................AAA..
+    ................A.A..
+    LLLLLLLLLLLLLLLA.A.A.
+    ..................A.A
+    ................AAA..
+    ................A.A..
+    LLLLLLLLLLLLLLLA.A.A.
+    ..................A.A
+    ..................B..
+    ..................w..
+  1: |
+    ..............CDEF...
+    ..............GDEH...
+    ..............IDEH...
+    ..............JDEH...
+    ..............IDEH...
+    ..............IDEH...
+    ..............KDEH...
+    ..............MDEH...
+    ..............NDEH...
+    ..............NDEH...
+    ..............ODEH...
+    ..............NDEH...
+    ..............KDEH...
+    ..............GDEH...
+    ..............NDEH...
+    ................PQ...
+    ................TA...
+    UUUUUUUUUUUUUUrVAWAXA
+    .................AYAW
+    ................PQT..
+    ................TAZ..
+    UUUUUUUUUUUUUUsVAWAXA
+    .................AYAW
+    ................PQT..
+    ................TAZ..
+    UUUUUUUUUUUUUUtVAWAXA
+    .................AYAW
+    ................PQT..
+    ................TAZ..
+    UUUUUUUUUUUUUUuVAWAXA
+    .................AYAW
+    ..................T..
+    ..................b..
+tests:
+- name: fifo_order
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 5}
+  - run: setblock ~14 ~1 ~8 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 9, line3: 5}
+  - run: setblock ~14 ~1 ~13 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 14, line2: 9, line3: 5}
+  - run: setblock ~14 ~1 ~1 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 2, line1: 14, line2: 9, line3: 5}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 2, line2: 14, line3: 9}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 2, line3: 14}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 2}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+- name: every_value
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~0 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 1}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~1 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 2}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~2 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 3}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~3 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 4}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 5}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~5 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 6}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~6 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 7}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~7 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 8}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~8 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 9}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~9 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 10}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~10 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 11}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~11 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 12}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~12 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 13}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~13 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 14}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+  - run: setblock ~14 ~1 ~14 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 15}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+- name: full_drops_fifth
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~2 note_block[instrument=harp,note=20]
+  - wait: 40
+  - run: setblock ~14 ~1 ~6 note_block[instrument=harp,note=21]
+  - wait: 40
+  - run: setblock ~14 ~1 ~10 note_block[instrument=harp,note=20]
+  - wait: 40
+  - run: setblock ~14 ~1 ~14 note_block[instrument=harp,note=21]
+  - wait: 40
+  - level: {line0: 15, line1: 11, line2: 7, line3: 3}
+  - run: setblock ~14 ~1 ~5 note_block[instrument=harp,note=20]
+  - wait: 40
+  - level: {line0: 15, line1: 11, line2: 7, line3: 3}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 15, line2: 11, line3: 7}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 15, line3: 11}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 15}
+  - use: clk
+  - wait: 4
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 0}
+- name: load_junk
+  steps:
+  - level: {line0: 0, line1: 0, line2: 0, line3: 15}
+- name: push_timing
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wave:
+        line0: '000000000011110000000000'
+        line1: '000000000000111100000000'
+        line2: '000000000000001111000000'
+        line3: '000000000000000011111111'
+- name: pop_timing
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wait: 40
+  - run: setblock ~14 ~1 ~8 note_block[instrument=harp,note=20]
+  - wait: 40
+  - use: clk
+  - wave:
+        line3: '111'
+  - use: clk
+  - wave:
+        line3: '111000011111111'
+- name: pop_pulse_width
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wait: 40
+  - run: setblock ~14 ~1 ~8 note_block[instrument=harp,note=20]
+  - wait: 40
+  - use: clk
+  - wait: 2
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 9, line3: 5}
+  - use: clk
+  - wait: 3
+  - use: clk
+  - wait: 40
+  - level: {line0: 0, line1: 0, line2: 0, line3: 9}
+- name: push_gap_8
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wait: 8
+  - run: setblock ~14 ~1 ~8 note_block[instrument=harp,note=21]
+  - wait: 60
+  - level: {line0: 0, line1: 0, line2: 9, line3: 5}
+- name: push_gap_6
+  steps:
+  - use: clk
+  - wait: 40
+  - use: clk
+  - wait: 10
+  - run: setblock ~14 ~1 ~4 note_block[instrument=harp,note=21]
+  - wait: 6
+  - run: setblock ~14 ~1 ~8 note_block[instrument=harp,note=21]
+  - wait: 60
+  - level: {line0: 0, line1: 0, line2: 0, line3: 5}

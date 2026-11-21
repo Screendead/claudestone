@@ -1,0 +1,448 @@
+name: ref_llucas_torchless_a
+description: >-
+  Rebuild of LLucas's "Torchless A" 3-to-8 decoder from mattbatwings' Logical Redstone
+  Archive, entry DECODE007 Super Tiny Torchless Decoders (Discord:
+  https://discord.com/channels/1361854816837435433/1474839116058460321, endorsed by Mixel,
+  tagged Tested and Functional, schematic DECODE007_smalltorchlessa). SOURCED claims: 3 wide,
+  regular torchless decoder, flipped 3-bit input, 8 inverted (active-low) outputs, 1 tick with
+  1 signal strength out, not expandable. No torches: every comparator reads a barrel packed
+  with redstone dust as a constant analog source, so the logic is subtract and compare
+  comparators on dust at set strengths. Changes for the harness: the three wall levers (each
+  hung on a redstone lamp) became the redstone-block inputs a b c standing where the lamps
+  were, the lamp-sign was dropped, the 8 output lamps are the named outputs o0..o7, and each
+  barrel was refilled with the same strength of dust packed from slot 0 (the original slot
+  layout differs; the comparator reads only fullness). MEASURED on 26.3: output o_k is lit-low
+  only for 4a+2b+c = k, so a is the high bit and every other output stays lit. Changing an
+  input releases the old output after 2 ticks and pulls the new one low after 6 ticks, for
+  every input and for all three flipping at once, with no glitch on any other output (all
+  other lines stay lit through the change). The archive's 1 tick is consistent with redstone
+  ticks (2 game ticks) to the first output change, the release at 2 game ticks (INFERRED); the
+  full switch to the new code takes 6 game ticks. Size 3x11x18. How it works (INFERRED, not
+  traced cell by cell): the barrels fix strengths 3 to 12, each of the three input lines is
+  fed through subtract comparators against those strengths in 2 compare/subtract stages per
+  output, and the final comparator lights a wool block through dust so the lamp lights unless
+  the code matches.
+traits: [silent, pistonless, entityless, comparator_based, container_based, tick_accurate]
+palette:
+  .: air
+  A: red_wool
+  B: red_stained_glass
+  C: redstone_wire[north=up,east=none,south=side,west=none]
+  D: redstone_wire[north=side,south=up,east=none,west=none]
+  E: comparator[mode=compare,facing=west]
+  F: redstone_wire[north=up,east=none,west=side,south=none]
+  G: redstone_wire[east=none,south=side,west=none,north=up]
+  H: barrel
+  I: redstone_wire[north=side,east=side,south=up,west=none]
+  J: comparator[mode=subtract,facing=north]
+  K: comparator[facing=north,mode=compare]
+  M: redstone_wire[north=up,east=side,west=none,south=side]
+  N: comparator[facing=west,mode=subtract]
+  O: redstone_wire[south=up,west=side,east=none,north=none]
+  P: redstone_wire[south=side,east=none,west=none,north=side]
+  Q: redstone_wire[south=side,east=side,west=none,north=side]
+  T: comparator[mode=subtract,facing=west]
+  U: comparator[facing=south,mode=compare]
+  V: redstone_wire[west=none,east=none,south=up,north=side]
+  W: redstone_wire[east=none,north=side,south=side,west=none]
+  X: redstone_wire[north=side,east=side,west=none,south=side]
+  Y: comparator[facing=north,mode=subtract]
+  Z: redstone_wire[north=up,east=none,west=none,south=side]
+  b: redstone_wire[south=up,west=none,north=side,east=none]
+  c: redstone_wire[north=side,east=none,west=none,south=side]
+  d: redstone_wire[south=up,north=side,west=none,east=side]
+  e: redstone_wire[south=side,east=none,north=up,west=none]
+  f: comparator[mode=compare,facing=north]
+  h: redstone_wire[east=side,north=none,south=side,west=none]
+  i: redstone_wire[north=none,south=up,east=none,west=side]
+  j: redstone_wire[south=side,west=none,east=none,north=side]
+  k: redstone_wire[east=none,north=up,south=side,west=none]
+  l: redstone_wire[east=none,south=up,west=none,north=side]
+  m: redstone_wire[east=none,west=none,north=up,south=side]
+  p: redstone_wire[east=none,west=none,south=up,north=side]
+  q: redstone_wire[north=up,south=side,west=none,east=none]
+  r: redstone_wire[east=none,west=none,north=side,south=up]
+  s: redstone_wire[west=none,south=side,east=none,north=up]
+  t: redstone_wire[south=up,east=none,north=side,west=none]
+  w: redstone_wire[north=side,south=side,west=none,east=none]
+  x: redstone_wire[east=side,south=none,north=side,west=none]
+  y: redstone_wire[east=none,west=none,south=side,north=up]
+  z: redstone_wire[east=none,south=side,west=side,north=up]
+  '0': redstone_wire[north=up,east=side,south=side,west=none]
+  '1': redstone_wire[west=side,east=none,south=up,north=side]
+  '2': redstone_wire[north=side,west=none,south=side,east=side]
+  '3': redstone_wire[south=up,north=side,east=none,west=none]
+  '4': redstone_wire[east=side,west=none,north=side,south=side]
+  '5': comparator[mode=subtract,facing=south]
+  '6': redstone_wire[west=none,north=side,east=side,south=up]
+  '7': comparator[facing=west,mode=compare]
+  '8': redstone_wire[north=up,south=side,west=side,east=none]
+  '9': redstone_wire[south=up,east=none,north=side,west=side]
+  α: redstone_wire[east=side,south=up,west=none,north=side]
+  β: redstone_wire[south=side,west=none,north=up,east=none]
+  γ: redstone_wire[north=side,west=none,east=none,south=up]
+  δ: redstone_wire[south=side,east=side,west=none,north=none]
+  ε: redstone_wire[north=none,south=up,west=side,east=none]
+  ζ: redstone_wire[west=none,north=side,south=side,east=none]
+  η: redstone_wire[west=none,south=up,east=none,north=side]
+  θ: redstone_wire[north=up,west=none,south=side,east=none]
+  ι: redstone_wire[east=none,north=side,west=none,south=up]
+  κ: redstone_wire[west=none,north=up,south=side,east=none]
+  λ: redstone_wire[east=none,south=up,north=side,west=none]
+  μ: redstone_wire[north=side,west=none,east=none,south=side]
+  ν: redstone_wire[north=side,east=side,west=none,south=none]
+  ξ: redstone_wire[west=none,east=none,south=side,north=up]
+  π: redstone_wire[south=up,west=none,east=none,north=side]
+  ρ: redstone_wire[west=none,north=up,south=up,east=none]
+  σ: redstone_wire[north=up,east=none,west=none,south=up]
+  τ: redstone_wire[south=side,north=up,west=none,east=none]
+  υ: redstone_wire[east=side,north=up,west=none,south=up]
+  φ: comparator[facing=south,mode=subtract]
+  χ: redstone_wire[south=up,north=up,east=none,west=none]
+  ψ: redstone_wire[east=none,north=up,west=none,south=side]
+  ω: redstone_wire[east=none,north=side,south=up,west=none]
+  Γ: redstone_wire[west=none,north=up,east=side,south=up]
+  Δ: redstone_wire[north=up,south=side,east=none,west=none]
+  Θ: redstone_wire[east=side,south=side,west=none,north=none]
+  Λ: redstone_wire[west=side,south=up,north=none,east=none]
+  Ξ: redstone_wire[east=none,west=none,north=side,south=side]
+  Π: redstone_wire[north=side,east=side,south=side,west=none]
+  Σ: redstone_wire[south=side,north=up,east=none,west=none]
+  Φ: redstone_wire[south=up,north=side,west=side,east=none]
+  Ψ: redstone_wire[south=side,north=side,east=none,west=none]
+  Ω: redstone_wire[west=none,east=none,north=up,south=side]
+  б: redstone_wire[west=side,south=up,east=none,north=side]
+  в: redstone_wire[north=side,south=side,west=none,east=side]
+  г: redstone_wire[south=up,north=side,east=none,west=side]
+  д: redstone_wire[west=none,north=side,east=none,south=side]
+  ж: redstone_wire[west=none,east=side,south=none,north=side]
+  з: redstone_wire[north=side,west=none,south=up,east=none]
+  й: redstone_wire[north=none,south=side,west=up,east=none]
+  к: redstone_wire[west=up,east=none,north=side,south=side]
+  л: redstone_wire[north=side,south=side,east=none,west=up]
+  м: redstone_wire[south=side,west=up,north=side,east=none]
+  н: redstone_wire[north=side,west=up,south=side,east=none]
+  п: redstone_wire[east=none,north=side,south=side,west=up]
+  т: redstone_wire[west=up,east=none,south=side,north=side]
+  ф: redstone_wire[east=none,north=side,south=none,west=up]
+  ц: redstone_wire[north=none,south=none,east=side,west=side]
+  ч: redstone_wire[west=none,south=side,east=side,north=none]
+  ш: redstone_wire[east=side,south=none,west=none,north=side]
+  щ: redstone_wire[north=none,south=side,west=none,east=side]
+  ъ: redstone_wire[east=side,west=none,south=none,north=side]
+  ы: redstone_wire[west=none,north=none,south=side,east=side]
+  ь: redstone_wire[west=side,north=none,south=none,east=side]
+  ❶:
+    input: a
+  ❷:
+    input: b
+  ❸:
+    input: c
+  ①:
+    output: o0
+    block: redstone_lamp
+  ②:
+    output: o1
+    block: redstone_lamp
+  ③:
+    output: o2
+    block: redstone_lamp
+  ④:
+    output: o3
+    block: redstone_lamp
+  ⑤:
+    output: o4
+    block: redstone_lamp
+  ⑥:
+    output: o5
+    block: redstone_lamp
+  ⑦:
+    output: o6
+    block: redstone_lamp
+  ⑧:
+    output: o7
+    block: redstone_lamp
+  Ⅰ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:27}]}
+  Ⅱ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:18}]}
+  Ⅲ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:36}]}
+  Ⅳ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:41}]}
+  Ⅴ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:45}]}
+  Ⅵ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:9}]}
+  Ⅶ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:50}]}
+  Ⅷ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:31}]}
+  Ⅸ: barrel{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:22}]}
+layers:
+  2: |
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ...A..
+    ...A..
+    ....AB
+    ......
+    ...A..
+    ...AA.
+    .....B
+    ......
+    ......
+    ......
+    ......
+  3: |
+    ......
+    ......
+    ......
+    ......
+    ......
+    ....A.
+    ...BAB
+    ...A..
+    ...AA.
+    ...CA.
+    ...D.B
+    ...AEF
+    ...AA.
+    ...GⅨB
+    ...IJB
+    ...AAG
+    ...AA.
+    .....B
+    ......
+    ......
+  4: |
+    ......
+    ......
+    ......
+    ....A.
+    ...BⅣB
+    ...AK.
+    ...MNO
+    ...P.B
+    ...QTA
+    ...BU.
+    ...BⅤV
+    ...WⅠB
+    ...XYB
+    ....AZ
+    .....b
+    ...cⅠB
+    ...dYB
+    ...AAe
+    ...AA.
+    .....B
+  5: |
+    ......
+    ......
+    ....Ⅰ.
+    ....f.
+    ..❶hNi
+    ...jAB
+    ...BAB
+    ...A.k
+    ...AAl
+    ...m.B
+    ...p.B
+    ...AAq
+    ...A.r
+    ...AAB
+    ....AB
+    ...A.s
+    ...BAt
+    ...wⅧB
+    ...xJB
+    ....Ay
+  6: |
+    ......
+    ......
+    ......
+    ....A.
+    ...BⅧB
+    ...Afz
+    ...0N1
+    ...WⅢB
+    ...2JB
+    ....AC
+    ....A3
+    ...45B
+    ...wⅢB
+    ...678
+    ...AE9
+    ...CⅢB
+    ...αJB
+    ...AAβ
+    ...AAγ
+    .....B
+  7: |
+    ......
+    ......
+    ....Ⅱ.
+    ....J.
+    ..❷δNε
+    ...ζ.B
+    .....B
+    ...A.q
+    .....η
+    ...A.B
+    .....B
+    ...AAθ
+    .....ι
+    ...B.B
+    ...P.B
+    ...BAκ
+    .....λ
+    ...μⅣB
+    ...νYB
+    ....Aξ
+  8: |
+    ......
+    ......
+    ......
+    ....A.
+    ...BAB
+    ...A.G
+    ...AAπ
+    ...ρ.B
+    ...AAB
+    ...σAτ
+    ...AAb
+    ...υφB
+    ...AⅤB
+    ...χAψ
+    ...AAω
+    ...ΓφB
+    ...AⅤB
+    ...A.Δ
+    ...AAr
+    .....B
+  9: |
+    ......
+    ......
+    ....Ⅵ.
+    ....K.
+    ..❸ΘTΛ
+    ...ΞⅦB
+    ...ΠYB
+    ....AΣ
+    ...2NΦ
+    ....UB
+    ...ΨⅠB
+    .....Ω
+    ...XTб
+    ....UB
+    ...wⅤB
+    .....y
+    ...вTг
+    ...дⅦB
+    ...жYB
+    ....Am
+  10: |
+    ......
+    ......
+    ......
+    ......
+    .....B
+    .....Z
+    .....з
+    .....B
+    .....B
+    .....e
+    .....V
+    .....B
+    .....B
+    .....k
+    .....3
+    .....B
+    .....B
+    .....q
+    .....з
+    .....B
+  11: |
+    ......
+    ......
+    ......
+    ...A..
+    ...①Aй
+    ......
+    ......
+    ...②Aк
+    ...③Aл
+    ......
+    ......
+    ...④Aм
+    ...⑤Aн
+    ......
+    ......
+    ...⑥Aп
+    ...⑦Aт
+    ......
+    ......
+    ...⑧Aф
+  12: |
+    ......
+    ......
+    ......
+    ......
+    ....ц.
+    ......
+    ......
+    ....ч.
+    ....ш.
+    ......
+    ......
+    ....щ.
+    ....ъ.
+    ......
+    ......
+    ....ы.
+    ....ж.
+    ......
+    ......
+    ....ь.
+tests:
+- name: active_low_one_hot
+  max_delay: 6
+  truth_table: |
+    a b c | o0 o1 o2 o3 o4 o5 o6 o7
+    0 0 0 | 0 1 1 1 1 1 1 1
+    0 0 1 | 1 0 1 1 1 1 1 1
+    0 1 0 | 1 1 0 1 1 1 1 1
+    0 1 1 | 1 1 1 0 1 1 1 1
+    1 0 0 | 1 1 1 1 0 1 1 1
+    1 0 1 | 1 1 1 1 1 0 1 1
+    1 1 0 | 1 1 1 1 1 1 0 1
+    1 1 1 | 1 1 1 1 1 1 1 0
+    0 0 0 | 0 1 1 1 1 1 1 1
+    1 1 1 | 1 1 1 1 1 1 1 0
+    0 1 1 | 1 1 1 0 1 1 1 1
+    1 0 0 | 1 1 1 1 0 1 1 1
+    0 0 1 | 1 0 1 1 1 1 1 1
+    1 1 0 | 1 1 1 1 1 1 0 1
+    0 1 0 | 1 1 0 1 1 1 1 1
+    1 0 1 | 1 1 1 1 1 0 1 1
+    0 0 0 | 0 1 1 1 1 1 1 1
+- name: single_bit_waves
+  steps:
+  - drive: {a: 1}
+  - wave: {o0: '0011111111', o1: '1111111111', o2: '1111111111', o3: '1111111111', o4: '1111110000', o5: '1111111111', o6: '1111111111', o7: '1111111111'}
+  - wait: 10
+  - drive: {a: 0, b: 1}
+  - wave: {o0: '1111111111', o1: '1111111111', o2: '1111110000', o3: '1111111111', o4: '0011111111', o5: '1111111111', o6: '1111111111', o7: '1111111111'}
+  - wait: 10
+  - drive: {b: 0, c: 1}
+  - wave: {o0: '1111111111', o1: '1111110000', o2: '0011111111', o3: '1111111111', o4: '1111111111', o5: '1111111111', o6: '1111111111', o7: '1111111111'}
+  - wait: 10
+  - drive: {c: 0}
+  - wave: {o0: '1111110000', o1: '0011111111', o2: '1111111111', o3: '1111111111', o4: '1111111111', o5: '1111111111', o6: '1111111111', o7: '1111111111'}
+  - wait: 10
+- name: all_bits_flip_at_once
+  steps:
+  - drive: {a: 1, b: 1, c: 1}
+  - wave: {o0: '0011111111', o1: '1111111111', o2: '1111111111', o3: '1111111111', o4: '1111111111', o5: '1111111111', o6: '1111111111', o7: '1111110000'}
+  - wait: 10
+  - drive: {a: 0, b: 0, c: 0}
+  - wave: {o0: '1111110000', o1: '1111111111', o2: '1111111111', o3: '1111111111', o4: '1111111111', o5: '1111111111', o6: '1111111111', o7: '0011111111'}

@@ -1,0 +1,679 @@
+name: ref_walvischris_signum_5bit
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive OTHERARITH004 "5 bit instant signum" (author WalvisChris, endorsed by Waffle [Wueffi], Tested & Functional; https://discord.com/channels/1361854816837435433/1474464251015069737).
+  README claims: 5-bit two''s-complement signum (0 -> 0, positive -> 1, negative -> -1 = 11111), 5 bits in and out, speed 0 ticks. Built 11x10x3 as rebuilt. Inputs are five levers in0..in4 on the east face
+  at y=1,3,5,7,9 (in0 least significant, in4 the sign bit at the top), outputs the lamps lamp0..lamp4 on the west face at the same heights (lamp0 = bit 0 of the result). Harness changes: the lever-bearing
+  redstone lamps (x=9) are white_concrete because the harness only emulates lever clicks on plain full blocks (the concrete hard-powers the dust beside it exactly as the lamp did; the lamps there only showed
+  the input); two dust ends are named (or_dust, sign_dust) so the 0-tick fall can be read, because a redstone lamp takes 4 gt to go out; the targets are kept (they carry the dust power to the lamps). How
+  it works (INFERRED from the blocks, confirmed by the tests): out0 = nonzero = b0|b1|b2|b3|b4 and out1..out4 = b4. Two diagonal dust staircases climb the x axis with the levers, each step one block up
+  (glass under the up-links is non-conducting, so dust climbs and descends it, wool under the rest). The z=0 staircase is a wired OR: each of in0..in3''s hard-powered block feeds a dust link that zigzags
+  up through glass to a junction at (8,6,0)/(7,7,0), then the line steps down-west one block per step to (1,1,0), which points into the target in front of lamp0. The z=2 staircase carries in4: it starts
+  at (9,9,2), drops to (8,8,2), splits to the y=9 row (west along y=9 into lamp4''s target) and down-west one step per layer; at each odd y the staircase links up-west onto a row that runs west into that
+  lamp''s target, and its last step (1,1,2) also points into lamp0''s target, so the sign lights lamp0 as well. No repeater, torch or comparator: dust and lamps only, so the signal is instant and the cost
+  is dust decay (the weakest input path still reaches the lamps above 0). MEASURED (trace and tests): all 32 inputs by Gray code and 22 multi-lever jumps give out = signum; every lamp comes on in the tick
+  of the lever click (0 gt) and the dust ends go out in that tick too; a lamp itself goes out 4 gt after its feed drops, which is the lamp''s own off delay, not the circuit''s.
+
+  MEASURED dust strengths at the far ends: or_dust reads 3 with in0 alone (the longest OR path, 12 dust steps), sign_dust reads 7 with in4 alone.'
+traits:
+- pistonless
+- entityless
+- vertical
+- compact
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  A: magenta_wool
+  B: magenta_stained_glass
+  C: redstone_wire[east=up,north=none,south=side,west=none]
+  D: redstone_wire[east=side,north=none,south=none,west=up]
+  E: target
+  G: redstone_wire[east=up,north=side,south=none,west=none]
+  H: redstone_wire[east=up,north=none,south=none,west=side]
+  I: redstone_wire[east=up,north=none,south=none,west=up]
+  J: redstone_wire[east=side,north=side,south=none,west=none]
+  K: redstone_wire[east=side,north=none,south=none,west=side]
+  M: redstone_wire[east=side,north=none,south=up,west=up]
+  N: redstone_wire[east=none,north=side,south=side,west=none]
+  L: redstone_lamp
+  W: white_concrete
+  a:
+    name: in0
+    block: lever[face=wall,facing=east]
+  p:
+    name: lamp0
+    block: redstone_lamp
+  b:
+    name: in1
+    block: lever[face=wall,facing=east]
+  q:
+    name: lamp1
+    block: redstone_lamp
+  c:
+    name: in2
+    block: lever[face=wall,facing=east]
+  r:
+    name: lamp2
+    block: redstone_lamp
+  d:
+    name: in3
+    block: lever[face=wall,facing=east]
+  s:
+    name: lamp3
+    block: redstone_lamp
+  e:
+    name: in4
+    block: lever[face=wall,facing=east]
+  t:
+    name: lamp4
+    block: redstone_lamp
+  X:
+    name: or_dust
+    block: redstone_wire[east=up,north=none,south=side,west=none]
+  Y:
+    name: sign_dust
+    block: redstone_wire[east=side,north=side,south=none,west=none]
+layers:
+  0: '.A.......B.
+
+    ...........
+
+    .A.........
+
+    '
+  1: '.XA.....BD.
+
+    pE.......Wa
+
+    .GA........
+
+    '
+  2: '..HA....HB.
+
+    ...........
+
+    .BIA.......
+
+    '
+  3: '...HA...BD.
+
+    qE.......Wb
+
+    .J.HA......
+
+    '
+  4: '....HA..HB.
+
+    ...........
+
+    .AABIA.....
+
+    '
+  5: '.....HA.BD.
+
+    rE.......Wc
+
+    .JKK.HA....
+
+    '
+  6: '......HAM..
+
+    ........A..
+
+    .AAAABIA...
+
+    '
+  7: '.......K...
+
+    sE......NWd
+
+    .JKKKK.HA..
+
+    '
+  8: '...........
+
+    ........A..
+
+    .AAAAAABIA.
+
+    '
+  9: '...........
+
+    tE.......We
+
+    .YKKKKKK.K.
+
+    '
+tests:
+- name: all 32 inputs, one lever at a time (Gray code), out = signum in 5-bit two's complement
+  steps:
+  - wait: 8
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in2
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in3
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in2
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in2
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in3
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in2
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in1
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+- name: 'jumps: several levers flipped in one tick (-1, min, max, wrap neighbours)'
+  steps:
+  - wait: 8
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - use: in1
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in1
+  - use: in3
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in1
+  - use: in2
+  - use: in3
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 1
+      lamp1: 1
+      lamp2: 1
+      lamp3: 1
+      lamp4: 1
+  - use: in0
+  - use: in1
+  - use: in2
+  - use: in3
+  - use: in4
+  - wait: 8
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+      lamp4: 0
+- name: 'zero tick: in0 alone lights lamp0 and its dust on the tick of the click; dust drops at once, lamp 4 gt later'
+  steps:
+  - wait: 8
+  - use: in0
+  - wave:
+      or_dust: '11111'
+      lamp0: '11111'
+      sign_dust: '00000'
+      lamp1: '00000'
+      lamp4: '00000'
+  - use: in0
+  - wave:
+      or_dust: '00000'
+      lamp0: '1111000'
+- name: 'zero tick: the sign lever lights all five lamps and both dust ends on the tick of the click, both edges'
+  steps:
+  - wait: 8
+  - use: in4
+  - wave:
+      lamp0: '11111'
+      lamp1: '11111'
+      lamp2: '11111'
+      lamp3: '11111'
+      lamp4: '11111'
+      sign_dust: '11111'
+      or_dust: '00000'
+  - use: in4
+  - wave:
+      or_dust: '00000'
+      sign_dust: '00000'
+      lamp0: '1111000'
+      lamp1: '1111000'
+      lamp2: '1111000'
+      lamp3: '1111000'
+      lamp4: '1111000'
+- name: 'dust strength at the far ends: in0 (longest OR path) and in4 (longest sign path)'
+  steps:
+  - wait: 8
+  - use: in0
+  - wait: 4
+  - level:
+      or_dust: 3
+  - use: in0
+  - use: in4
+  - wait: 4
+  - level:
+      sign_dust: 7

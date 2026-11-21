@@ -1,0 +1,465 @@
+name: ref_mattbatwings_accumulator_8bit
+description: "Rebuild of mattbatwings' 8-bit Manual Accumulator, Logical Redstone Archive OTHERSEQ001, https://discord.com/channels/1361854816837435433/1472418022231642244 (README SOURCED: adds a number to the total using an adder and a register; inputs an 8-bit number and an Add button; output the 8-bit total; tested and functional). 11x18x9, a 2-layer cell per bit stacked at y3,5,...,17 (bit 0 at the bottom) over a 2-layer base holding the Add button. Number levers a0..a7 at x0,z7 (attached to the wool at x1), total lamps q0..q7 at x1,z4, Add button at (0,1,7), and a lever cin at (7,2,6) that the README does not mention: it is the adder's carry-in (MEASURED: with it on an add gives total + number + 1). Harness changes: magenta_wool -> white_wool and the lamp each number lever sat on (x1,z7) is white_wool, because the harness emulates a lever only on plain blocks (the lamp only displayed the input). How it works: the number is a lever-powered wool beside a comparator-and-dust adder per bit; pressing Add (INFERRED from traces) sends a dust line along the base whose strength falls 15 to 3, then a pulse up the x=10 column, which carries strengths 15 down to 1 over the bits at rest, and latches each bit's sum into its register stage. There is no clear input; the total starts at 0 and can only be wrapped past 255. MEASURED: sums mod 256 over 17 adds including carry-in, zero, 255+1 (all eight carries) and 128+128 (top carry dropped); carries do not ripple in time: after an add every bit rises 8 gt after the click and every bit falls 12 gt after it (all eight falling together on 255+1, and mixed rise and fall on 15+1), as in the mattbatwings counters; the total ignores the levers and cin after the add."
+traits: [entityless, pistonless, torch_based]
+palette:
+  .: air
+  A: white_wool
+  B: redstone_wire[east=side,north=none,south=side,west=none]
+  C: redstone_wire[east=side,north=none,south=none,west=side]
+  D: redstone_wire[east=side,north=none,south=side,west=side]
+  E: comparator[facing=west,mode=subtract]
+  F: redstone_wire[east=none,north=side,south=side,west=none]
+  G: redstone_wire[east=side,north=side,south=none,west=none]
+  H: repeater[delay=2,facing=west]
+  I: redstone_wire[east=none,north=side,south=none,west=side]
+  u: redstone_wall_torch[facing=south]
+  J: magenta_stained_glass
+  M: oak_wall_sign[facing=west,waterlogged=false]
+  N: redstone_wire[east=up,north=none,south=none,west=side]
+  O: comparator[facing=south,mode=subtract]
+  P: repeater[delay=1,facing=south]
+  R: redstone_block
+  T: redstone_wire[east=none,north=none,south=side,west=side]
+  U: repeater[delay=1,facing=east]
+  V: redstone_wire[east=none,north=up,south=none,west=side]
+  n: redstone_wall_torch[facing=north]
+  W: target
+  L: redstone_lamp
+  X: repeater[delay=1,facing=west]
+  Y: redstone_wire[east=side,north=up,south=side,west=side]
+  Z: redstone_wire[east=side,north=side,south=side,west=none]
+  b: redstone_wire[east=side,north=none,south=side,west=up]
+  ): redstone_wall_torch[facing=east]
+  c: redstone_wire[east=none,north=side,south=up,west=side]
+  d: lever[face=wall,facing=west]
+  e: redstone_wire[east=side,north=side,south=none,west=side]
+  f: redstone_wire[east=none,north=side,south=up,west=none]
+  g: redstone_wire[east=none,north=none,south=side,west=up]
+  h: comparator[facing=north,mode=compare]
+  i: redstone_wire[east=up,north=side,south=none,west=none]
+  j: redstone_wire[east=none,north=up,south=side,west=none]
+  k: redstone_wire[east=none,north=side,south=side,west=side]
+  '0': {name: a0, block: 'lever[face=wall,facing=west]'}
+  l: {name: q0, block: redstone_lamp}
+  '1': {name: a1, block: 'lever[face=wall,facing=west]'}
+  m: {name: q1, block: redstone_lamp}
+  '2': {name: a2, block: 'lever[face=wall,facing=west]'}
+  o: {name: q2, block: redstone_lamp}
+  '3': {name: a3, block: 'lever[face=wall,facing=west]'}
+  p: {name: q3, block: redstone_lamp}
+  '4': {name: a4, block: 'lever[face=wall,facing=west]'}
+  q: {name: q4, block: redstone_lamp}
+  '5': {name: a5, block: 'lever[face=wall,facing=west]'}
+  r: {name: q5, block: redstone_lamp}
+  '6': {name: a6, block: 'lever[face=wall,facing=west]'}
+  s: {name: q6, block: redstone_lamp}
+  '7': {name: a7, block: 'lever[face=wall,facing=west]'}
+  t: {name: q7, block: redstone_lamp}
+  y: {name: add, block: 'stone_button[face=wall,facing=west]'}
+  z: {name: cin, block: 'lever[face=wall,facing=south]'}
+layers:
+  0: |
+    .AAAAAAAAA.
+    .A....AAA..
+    .A.........
+    .A.........
+    .A.........
+    .A.........
+    .A.........
+    ...........
+    ...........
+  1: |
+    .BCCCCDCECA
+    .F....GHI.u
+    .F.........
+    .F.....J...
+    .F...AA....
+    .F...AA....
+    .F.........
+    yA.........
+    MJ.........
+  2: |
+    .AAAAAAAA..
+    .A......AAA
+    .A..J......
+    .A....ANA..
+    ..AJABO....
+    ...AAPFAA..
+    ...AAA.zR..
+    ..AAAA.....
+    ...........
+  3: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .lXYTAA.A..
+    ...ZEAAbO..
+    ...ZECA)c..
+    0AXeeXA)J..
+    ...........
+  4: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A..Jg.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  5: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .mXYTAA.A..
+    ...ZEAJbO..
+    ...ZECA)c..
+    1AXeeXA)J..
+    ...........
+  6: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A..Jg.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  7: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .oXYTAA.A..
+    ...ZEAJbO..
+    ...ZECA)c..
+    2AXeeXA)J..
+    ...........
+  8: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A..Jg.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  9: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .pXYTAA.A..
+    ...ZEAJbO..
+    ...ZECA)c..
+    3AXeeXA)J..
+    ...........
+  10: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A..Jg.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  11: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .qXYTAA.A..
+    ...ZEAJbO..
+    ...ZECA)c..
+    4AXeeXA)J..
+    ...........
+  12: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A..Jg.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  13: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .rXYTAA.A..
+    ...ZEAJbO..
+    ...ZECA)c..
+    5AXeeXA)J..
+    ...........
+  14: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A..Jg.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  15: |
+    .BCCCCCCT.J
+    .F......PUV
+    .F.nNJ..W..
+    .F.A.A.JI..
+    .sXYTAA.A..
+    ...ZEAJbO..
+    ...ZECA)c..
+    6AXeeXA)J..
+    ...........
+  16: |
+    .AAAAAAAA.f
+    .A......AAJ
+    .A...T.....
+    .A.F.hANA..
+    ..AJAZO....
+    ...AAPiJA..
+    ...AAA..J..
+    ..AAAA.Aj..
+    ...........
+  17: |
+    .BCCCCCCT..
+    .F......PUI
+    .F......W..
+    .F.A....I..
+    .tXDTA..A..
+    ...ZEA.DO..
+    ...ZECA)k..
+    7AXeeXA)...
+    ...........
+tests:
+- name: sums
+  steps:
+  - wait: 20
+  - use: a0
+  - use: a2
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}  # +5+0
+  - use: a0
+  - use: a2
+  - use: a3
+  - use: a6
+  - use: a7
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 1, q4: 0, q5: 0, q6: 1, q7: 1}  # +200+0
+  - use: a2
+  - use: a3
+  - use: a5
+  - use: a7
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}  # +100+0
+  - use: a2
+  - use: a5
+  - use: a6
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}  # +0+0
+  - use: cin
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}  # +0+1
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - use: cin
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}  # +255+0
+  - use: a4
+  - use: a5
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}  # +207+0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a6
+  - use: a7
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}  # +1+0
+  - use: a0
+  - use: a7
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +128+0
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}  # +128+0
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +127+0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +1+0
+  - use: a2
+  - use: a4
+  - use: a6
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 1, q5: 0, q6: 1, q7: 1}  # +85+0
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - use: cin
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +170+1
+  - use: a1
+  - use: a3
+  - use: a5
+  - use: a7
+  - use: cin
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +0+0
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - use: cin
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +255+1
+  - wait: 4
+  - use: add
+  - wait: 50
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}  # +255+1
+- name: carry_chain
+  steps:
+  - wait: 20
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - wait: 4
+  - use: add
+  - wait: 60
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - wait: 4
+  - use: add
+  - wave: {q0: '11111111111100000000', q1: '11111111111100000000', q2: '11111111111100000000', q3: '11111111111100000000', q4: '11111111111100000000', q5: '11111111111100000000', q6: '11111111111100000000', q7: '11111111111100000000'}
+- name: all_bits_rise
+  steps:
+  - wait: 20
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - wait: 4
+  - use: add
+  - wave: {q0: '000000001111111111', q1: '000000001111111111', q2: '000000001111111111', q3: '000000001111111111', q4: '000000001111111111', q5: '000000001111111111', q6: '000000001111111111', q7: '000000001111111111'}
+- name: rise_and_fall_mixed
+  steps:
+  - wait: 20
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - wait: 4
+  - use: add
+  - wait: 60
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0}
+  - use: a1
+  - use: a2
+  - use: a3
+  - wait: 4
+  - use: add
+  - wave: {q0: '111111111111000000', q1: '111111111111000000', q2: '111111111111000000', q3: '111111111111000000', q4: '000000001111111111'}
+- name: holds_when_inputs_move
+  steps:
+  - wait: 20
+  - use: a0
+  - use: a5
+  - wait: 4
+  - use: add
+  - wait: 60
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: a0
+  - use: a1
+  - use: a2
+  - use: a3
+  - use: a4
+  - use: a5
+  - use: a6
+  - use: a7
+  - use: cin
+  - wait: 60
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - use: cin
+  - use: a6
+  - wait: 60
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}

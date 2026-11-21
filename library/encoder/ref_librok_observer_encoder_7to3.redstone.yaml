@@ -1,0 +1,136 @@
+name: ref_librok_observer_encoder_7to3
+description: >-
+  LiBRoK's ENCODE006 7-to-3 observer encoder, rebuilt from the Logical Redstone Archive (mattbatwings), Discord https://discord.com/channels/1361854816837435433/1479225971637751852 (SOURCED: authors LiBRoK, endorsed Waffle; 7 levers in, 3 bits out, 1t; each toggled lever impulses its binary code). 5x5x5. Each lever sits on a redstone lamp with an observer facing it; any lamp change (either edge) makes the observer fire 1t from its back, and yellow/light-blue/pink wool + dust OR the seven observers into three target-block/repeater outputs b0,b1,b2 (INFERRED from the layout; the code table is MEASURED). Harness change: the levers became redstone-block drivers c1..c7 (named by the code each emits) because the harness only emulates lever clicks on plain full blocks; a redstone block lights the lamp the same way. Output is a 2 game-tick (1 redstone tick, matching the README's 1t) pulse on the three output repeaters (MEASURED): high 4 game ticks after a lever turns on and 8 after it turns off (the lamp's own 4 game-tick off delay). Two levers at once give the OR of their codes. The build fires all three outputs once while it is placed (MEASURED, tick 4); tests settle 30 ticks first.
+palette:
+  .: air
+  L: redstone_lamp
+  B: observer[facing=north]
+  C: yellow_wool
+  D: light_blue_wool
+  E: pink_wool
+  F: redstone_wire[east=up,north=none,south=side,west=none]
+  G: redstone_wire[east=none,north=side,south=side,west=none]
+  H: redstone_wire[east=none,north=none,south=side,west=up]
+  I: target
+  K: yellow_stained_glass
+  M: redstone_wire[east=none,north=side,south=none,west=side]
+  N: lime_wool
+  O: redstone_wire[east=side,north=side,south=none,west=none]
+  P: pink_stained_glass
+  Q: redstone_wire[east=side,north=none,south=side,west=none]
+  T: redstone_wire[east=none,north=none,south=side,west=side]
+  U: redstone_wire[east=up,north=side,south=none,west=none]
+  V: redstone_wire[east=none,north=side,south=none,west=up]
+  W: redstone_wire[east=side,north=none,south=none,west=side]
+  '1': {input: c1}
+  '2': {input: c2}
+  '3': {input: c3}
+  '4': {input: c4}
+  '5': {input: c5}
+  '6': {input: c6}
+  '7': {input: c7}
+  J: {output: b0, block: 'repeater[delay=1,facing=north]'}
+  j: {output: b1, block: 'repeater[delay=1,facing=north]'}
+  k: {output: b2, block: 'repeater[delay=1,facing=north]'}
+layers:
+  0: |
+    ..2..
+    ..L..
+    ..B..
+    C.D.E
+    .....
+    C.D.E
+  1: |
+    .3.6.
+    .L.L.
+    .B.B.
+    FCGEH
+    I.I.I
+    J.j.k
+  2: |
+    ..7..
+    ..L..
+    CHBFE
+    KMNOP
+    .....
+    .....
+  3: |
+    .1.4.
+    .L.L.
+    QB.BT
+    UC.EV
+    .....
+    .....
+  4: |
+    ..5..
+    ..L..
+    ..B..
+    .WNW.
+    .....
+    .....
+tests:
+- name: code1
+  settle: 30
+  steps:
+  - drive: {c1: 1}
+  - wave: {b0: '000011000', b1: '000000000', b2: '000000000'}
+  - wait: 10
+  - drive: {c1: 0}
+  - wave: {b0: '0000000011000', b1: '0000000000000', b2: '0000000000000'}
+- name: code2
+  settle: 30
+  steps:
+  - drive: {c2: 1}
+  - wave: {b0: '000000000', b1: '000011000', b2: '000000000'}
+  - wait: 10
+  - drive: {c2: 0}
+  - wave: {b0: '0000000000000', b1: '0000000011000', b2: '0000000000000'}
+- name: code3
+  settle: 30
+  steps:
+  - drive: {c3: 1}
+  - wave: {b0: '000011000', b1: '000011000', b2: '000000000'}
+  - wait: 10
+  - drive: {c3: 0}
+  - wave: {b0: '0000000011000', b1: '0000000011000', b2: '0000000000000'}
+- name: code4
+  settle: 30
+  steps:
+  - drive: {c4: 1}
+  - wave: {b0: '000000000', b1: '000000000', b2: '000011000'}
+  - wait: 10
+  - drive: {c4: 0}
+  - wave: {b0: '0000000000000', b1: '0000000000000', b2: '0000000011000'}
+- name: code5
+  settle: 30
+  steps:
+  - drive: {c5: 1}
+  - wave: {b0: '000011000', b1: '000000000', b2: '000011000'}
+  - wait: 10
+  - drive: {c5: 0}
+  - wave: {b0: '0000000011000', b1: '0000000000000', b2: '0000000011000'}
+- name: code6
+  settle: 30
+  steps:
+  - drive: {c6: 1}
+  - wave: {b0: '000000000', b1: '000011000', b2: '000011000'}
+  - wait: 10
+  - drive: {c6: 0}
+  - wave: {b0: '0000000000000', b1: '0000000011000', b2: '0000000011000'}
+- name: code7
+  settle: 30
+  steps:
+  - drive: {c7: 1}
+  - wave: {b0: '000011000', b1: '000011000', b2: '000011000'}
+  - wait: 10
+  - drive: {c7: 0}
+  - wave: {b0: '0000000011000', b1: '0000000011000', b2: '0000000011000'}
+- name: quiet_when_idle
+  settle: 30
+  steps:
+  - wave: {b0: '0000000000', b1: '0000000000', b2: '0000000000'}
+- name: two_levers_or
+  settle: 30
+  steps:
+  - drive: {c1: 1, c2: 1}
+  - wave: {b0: '000011000', b1: '000011000', b2: '000000000'}

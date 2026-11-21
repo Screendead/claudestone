@@ -1,0 +1,2508 @@
+name: ref_tlamp_updown_load_counter
+description: 'Rebuild of tlamp''s compact up/down counter with load (endorsed by Mixel), Logical Redstone Archive COUNT004_UpDown_counter_with_load, https://discord.com/channels/1361854816837435433/1472880052722204738. README claims (SOURCED): counts up, down and loads any 8-bit number; inputs an 8-bit number, a load button, a count button and an up/down lever; output 8-bit number; count 4 ticks, load 6 ticks; the lamps light faster than they go out but the signal is synchronous; tested and functional. Size 13x18x8 as built (base 7x9 in the README): a control base at y1-3 and a two-layer cell per bit at y3,5,...,17 (bit 0 at the bottom); output lamp q_i at (4,y,2), data lamp ld_i at (8,y,4). Harness changes: yellow_wool -> white_wool (the harness only emulates a button or lever on plain full blocks, and the colour does nothing); each data lever sat on its lamp ld_i (the lamp only displays the data; the subtract comparator beside it reads the lever-powered lamp), which the harness cannot click, so a fixture repeater[facing=east] on a fixture wool block feeds the lamp strongly instead, fed by the input cell d_i beside it (same strong power; one extra redstone tick on the data path, settled long before any load); names: bk the birch button (load), bo the oak button (count), ud the lever (on = count down), q0..q7 output lamps. How it works (INFERRED from traces of every dust, torch, repeater and comparator, not from the author): each bit is a repeater (x5,z4) used as a latch. A repeater beside it (x5,z5), fed from an idle-high dust bus that zigzags up the stack through glass blocks (x4/5,z7), locks it, so the bit holds while the bus is high. The count button goes through a comparator whose side input is the same button delayed by a 2-tick repeater, which makes a 4 gt pulse; a torch inverts it and the bus falls for 4 gt. A torch in each cell (x3,z7) lights when its bit is 0 (up) and re-feeds the bus above it, so the fall reaches bit k only when bits 0..k-1 are all 1: the dust carry chain. A bit the fall reaches is unlocked while its input repeater (x6,z5) is still on in that tick and takes 1 where it held 0; the other bits'' comparators (x2,x3,z5) feed back so a set bit''s input is off, which turns it back off: a toggle. The up/down lever feeds a second zigzag (x1/2,z2) that swaps which state lights the torch, so the chain follows 1s going down. Load: the load button drops the right-hand zigzag (x7/8,z2) that normally holds each data comparator (x7,z4) at 0 and raises the left one (x0/1,z7) that switches off the booster torches, so each bit takes its data lamp. The lamps ld_i, q_i go on 4 gt before the previous value goes off, which is the ''asynchronous'' look the README mentions. MEASURED (26.3, satellite, button pressed at tick 0): count, a lamp turns on at +10 gt and the lamp it replaces goes off at +14 gt (wave on q0, q1 in count_timing); load, a lamp turns on at +12 gt (6 redstone ticks, which matches the README''s 6) and off at +16 gt (load_timing). The README''s 4 ticks for a count is the 8 gt from the pulse comparator (on at +2 gt) to the lamp, INFERRED; from the button it is 10 gt. MEASURED passes: 0 counts up to 63 one press at a time with every output checked each step; 63 counts down to 0; loads of 0xA5, 0x5A, 0x00, 0x80, 0x01, 0x7F, 0xC3, 0xFE, each overwriting the one before; load then count up and down; carries into bit 5 (0x9F -> 0xA0, 0xBE -> 0xBF); borrows (0x40 -> 0x3F, 0x20 -> 0x1F, 0x01 -> 0x00, 0xC3 -> 0xC0); switching direction mid-count; data changed without a load is ignored. MEASURED FAILURES, so this is not a working 8-bit counter in 26.3: (1) a carry into bit 6 is lost, 63 + 1 gives 0 (not 64) and 127 + 1 gives 0 (not 128); (2) 0xFF cannot be held, loading it settles to 0x7F, because bit 7 is locked only while some booster torch below it is lit and with bits 0..6 all 1 the bus has decayed to 0 at bit 7''s cell, so its latch is open and copies its input 0; counting down from 0 gives 0x3F (not 0xFF) and loading 0x80 while counting down gives 0x00 for the same reason, and 0x80 counting down to 0x7F is therefore not reachable; (3) wrap 255 -> 0 follows. Cause (MEASURED, the dust strengths in the trace): the bus loses 2 per stage and starts at 14, so with all lower bits at their blocking value stage 6''s input repeater (x6,z5) sees 0 and stage 7''s lock sees 0; the original schematic''s resting strengths match this build (they are the same dust, apart from the stored count 0x93 the schematic was saved in), so the limit is in the design, not the rebuild. The defect_ tests assert these results as measured and must be changed if a fix makes them fail.'
+traits:
+- vertical
+- torch_based
+- comparator_based
+- pistonless
+- entityless
+palette:
+  .: air
+  A: white_wool
+  B: yellow_stained_glass
+  u: redstone_wall_torch[facing=south]
+  C: redstone_wire[east=none,north=side,south=side,west=none]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: redstone_wire[east=none,north=side,south=side,west=side]
+  F: redstone_wire[east=side,north=none,south=up,west=none]
+  G: redstone_wire[east=side,north=side,south=side,west=side]
+  H: redstone_wire[east=up,north=side,south=none,west=none]
+  '*': redstone_torch
+  I: oak_wall_sign[facing=north,waterlogged=false]
+  J: lever[face=wall,facing=east]
+  (: redstone_wall_torch[facing=west]
+  K: birch_button[face=wall,facing=east]
+  M: redstone_wire[east=up,north=none,south=side,west=none]
+  L: redstone_lamp
+  N: redstone_wire[east=up,north=side,south=side,west=none]
+  O: repeater[delay=1,facing=north]
+  P: comparator[facing=south,mode=compare]
+  Q: redstone_wire[east=side,north=none,south=side,west=none]
+  T: redstone_wire[east=none,north=none,south=side,west=side]
+  U: repeater[delay=1,facing=east]
+  V: redstone_wire[east=side,north=none,south=side,west=side]
+  W: comparator[facing=east,mode=subtract]
+  X: comparator[facing=north,mode=subtract]
+  Y: repeater[delay=1,facing=south]
+  Z: redstone_wire[east=side,north=side,south=side,west=none]
+  b: repeater[delay=2,facing=east]
+  c: redstone_wire[east=side,north=none,south=none,west=up]
+  ): redstone_wall_torch[facing=east]
+  d: redstone_wire[east=side,north=side,south=none,west=up]
+  e: redstone_wire[east=side,north=side,south=none,west=side]
+  f: oak_button[face=wall,facing=east]
+  g: redstone_wire[east=up,north=none,south=none,west=side]
+  h: oak_sign[rotation=12,waterlogged=false]
+  i: redstone_wire[east=none,north=side,south=none,west=side]
+  R:
+    block: repeater[delay=1,facing=east]
+    fixture: true
+  S:
+    block: white_wool
+    fixture: true
+  '1':
+    input: d0
+  '!':
+    name: q0
+    block: redstone_lamp
+  '9':
+    name: ld0
+    block: redstone_lamp
+  '2':
+    input: d1
+  '@':
+    name: q1
+    block: redstone_lamp
+  '0':
+    name: ld1
+    block: redstone_lamp
+  '3':
+    input: d2
+  $:
+    name: q2
+    block: redstone_lamp
+  '[':
+    name: ld2
+    block: redstone_lamp
+  '4':
+    input: d3
+  '%':
+    name: q3
+    block: redstone_lamp
+  ']':
+    name: ld3
+    block: redstone_lamp
+  '5':
+    input: d4
+  ^:
+    name: q4
+    block: redstone_lamp
+  '{':
+    name: ld4
+    block: redstone_lamp
+  '6':
+    input: d5
+  '&':
+    name: q5
+    block: redstone_lamp
+  '}':
+    name: ld5
+    block: redstone_lamp
+  '7':
+    input: d6
+  '~':
+    name: q6
+    block: redstone_lamp
+  <:
+    name: ld6
+    block: redstone_lamp
+  '8':
+    input: d7
+  '|':
+    name: q7
+    block: redstone_lamp
+  '>':
+    name: ld7
+    block: redstone_lamp
+  '-':
+    name: ud
+    block: lever[face=wall,facing=east]
+  +:
+    name: bk
+    block: birch_button[face=wall,facing=east]
+  '=':
+    name: bo
+    block: oak_button[face=wall,facing=east]
+layers:
+  0: |
+    .............
+    .............
+    ........A....
+    ........A....
+    ........A....
+    .AAAAAAAA....
+    BA......A....
+    .............
+  1: |
+    .............
+    ........A....
+    ........u....
+    ........C....
+    ........C....
+    .ADDDDDDE....
+    Fu......C....
+    B.......A....
+  2: |
+    .............
+    ........G....
+    .B.....B.....
+    .A..A..A.....
+    ..AA.AAA.S...
+    .AAAAAA......
+    ..A..AA..AAA.
+    HB...BB.*AA..
+  3: |
+    .I......I....
+    .A-....(A+...
+    .MB.!..NB....
+    .O..P..O.....
+    .AQTAUVW9R1..
+    .DXXDYY......
+    ..CA.ZE..QbD.
+    BcA)Bde(AWDA=
+  4: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB....h.
+  5: |
+    .............
+    .............
+    .MB.@..MB....
+    .O..P..O.....
+    .AQTAUAW0R2..
+    .DXXDYY......
+    ..CA.ZE......
+    BcA)Bdi......
+  6: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB......
+  7: |
+    .............
+    .............
+    .MB.$..MB....
+    .O..P..O.....
+    .AQTAUAW[R3..
+    .DXXDYY......
+    ..CA.ZE......
+    BcA)Bdi......
+  8: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB......
+  9: |
+    .............
+    .............
+    .MB.%..MB....
+    .O..P..O.....
+    .AQTAUAW]R4..
+    .DXXDYY......
+    ..CA.ZE......
+    BcA)Bdi......
+  10: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB......
+  11: |
+    .............
+    .............
+    .MB.^..MB....
+    .O..P..O.....
+    .AQTAUAW{R5..
+    .DXXDYY......
+    ..CA.ZE......
+    BcA)Bdi......
+  12: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB......
+  13: |
+    .............
+    .............
+    .MB.&..MB....
+    .O..P..O.....
+    .AQTAUAW}R6..
+    .DXXDYY......
+    ..CA.ZE......
+    BcA)Bdi......
+  14: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB......
+  15: |
+    .............
+    .............
+    .MB.~..MB....
+    .O..P..O.....
+    .AQTAUAW<R7..
+    .DXXDYY......
+    ..CA.ZE......
+    BcA)Bdi......
+  16: |
+    .............
+    .............
+    .Bc....Bc....
+    .A..A..A.....
+    ..AA.A.A.S...
+    .AAAAAA......
+    ..A..AA......
+    gB.AgBB......
+  17: |
+    .............
+    .............
+    .Q..|..Q.....
+    .O..P..O.....
+    .AQTAUAW>R8..
+    .DXXDYY......
+    ..CA.ZE......
+    .DA).ei......
+tests:
+- name: up_from_0_to_63
+  steps:
+  - wait: 20
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+- name: down_from_63_to_0
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 0
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: ud
+  - wait: 20
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: load_values
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - drive:
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 1
+      d4: 1
+      d5: 0
+      d6: 1
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+  - drive:
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 0
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - drive:
+      d0: 0
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+- name: load_then_up
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+- name: up_carry_into_bit5
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 0
+      d6: 0
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - drive:
+      d0: 0
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 0
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 1
+- name: down_borrow
+  steps:
+  - wait: 20
+  - use: ud
+  - wait: 20
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      d0: 1
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: down_from_high
+  steps:
+  - wait: 20
+  - use: ud
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 1
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 1
+- name: direction_switch
+  steps:
+  - wait: 20
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: ud
+  - wait: 20
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: ud
+  - wait: 20
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: data_ignored_without_load
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 1
+      d5: 0
+      d6: 1
+      d7: 0
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - drive:
+      d0: 0
+      d1: 1
+      d2: 0
+      d3: 1
+      d4: 0
+      d5: 1
+      d6: 0
+      d7: 1
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+  - wait: 40
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+- name: count_timing
+  steps:
+  - wait: 20
+  - use: bo
+  - wave:
+      q0: '0000000000111111'
+      q1: '0000000000000000'
+  - wait: 60
+  - use: bo
+  - wave:
+      q0: '11111111111111000000'
+      q1: '00000000001111111111'
+  - wait: 60
+- name: load_timing
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 0
+      d2: 1
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+  - use: bk
+  - wave:
+      q0: '000000000000111111'
+      q1: '000000000000000000'
+      q2: '000000000000111111'
+  - wait: 60
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 0
+  - use: bk
+  - wave:
+      q0: '111111111111111100'
+      q2: '111111111111111100'
+  - wait: 60
+- name: defect_carry_into_bit6_is_lost
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 0
+      d7: 0
+  - use: bk
+  - wait: 60
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 0
+  - use: bk
+  - wait: 60
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: defect_0xff_cannot_be_held
+  steps:
+  - wait: 20
+  - drive:
+      d0: 1
+      d1: 1
+      d2: 1
+      d3: 1
+      d4: 1
+      d5: 1
+      d6: 1
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 0
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: defect_down_bit7_and_borrow
+  steps:
+  - wait: 20
+  - use: ud
+  - wait: 20
+  - use: bo
+  - wait: 60
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - drive:
+      d0: 0
+      d1: 0
+      d2: 0
+      d3: 0
+      d4: 0
+      d5: 0
+      d6: 0
+      d7: 1
+  - use: bk
+  - wait: 60
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0

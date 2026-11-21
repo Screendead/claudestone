@@ -1,0 +1,50 @@
+name: ref_unknown_config_clock
+description: 'MEASURED (26.3, satellite): default delays 4/4 give period 20, clk 10 on, pulse 8 ticks starting 2 ticks after clk rises; period repeater 2 gives period 12; pulse repeater d gives a 2d-tick pulse for d>=2 and for d=1 no pulse at all (cause inferred: the side input arrives in the tick the comparator would turn on); lamp output lags the pulse fall by 4 ticks (lamp off delay), so the pulse is read at cmp_pulse. Rebuild of mattbatwings'' Logical Redstone Archive OTHERSEQ003 "Configurable clock" (endorsed by mattbatwings, Tested & Functional; Discord https://discord.com/channels/1361854816837435433/1472422044858585242; author not named in the README). SOURCED: a clock with configurable period and pulse length; the delay into the side of the first comparator sets the period, the delay into the side of the second sets the pulse length. Size 8x2x2 (lever and output lamp included). INFERRED: comparator cmp_period (x=7, output west) has the lever on a wool block behind it, and its own output, run west along the dust and through the delay-4 repeater rep_period, returns on its north side, so out = 15 - delayed(out), the clock_comparator_repeater loop; the same dust line also feeds the back of cmp_pulse (x=3) and, through the delay-4 repeater rep_pulse, its side, so cmp_pulse = in - delayed(in) turns each rising edge into a pulse as long as rep_pulse''s delay. Harness changes: none beyond naming cells; the lamp is the output.'
+traits: [compact, flat, horizontal, comparator_based, pistonless, entityless]
+palette:
+  .: air
+  A: white_concrete
+  W: white_concrete
+  B: redstone_wire
+  C: {name: rep_pulse, block: 'repeater[delay=4,facing=east]'}
+  D: redstone_wire
+  E: {name: rep_period, block: 'repeater[delay=4,facing=west]'}
+  F: redstone_wire
+  L: {name: lamp, output: out, block: redstone_lamp}
+  G: redstone_wire
+  H: {name: cmp_pulse, block: 'comparator[facing=east,mode=subtract]'}
+  h: {name: cmp_period, block: 'comparator[facing=east,mode=subtract]'}
+  I: {name: clk, block: redstone_wire}
+  J: {name: lever, block: 'lever[face=wall,facing=east]'}
+layers:
+  0: |
+    ...WWWWW..
+    .WWWWWWW..
+  1: |
+    ...BCDEF..
+    LGGHGIGhAJ
+tests:
+- name: 'default delays 4/4: period 20, clock 10 on, pulse 8 on'
+  steps:
+  - use: lever
+  - wave: {clk: '0011111111110000000000111111111100000000001111111111000000000011', cmp_pulse: '0000111111110000000000001111111100000000000011111111000000000000'}
+- name: 'period repeater 2: period 12; pulse repeater 2: 4-tick pulse'
+  steps:
+  - run: setblock ~4 ~1 ~0 repeater[delay=2,facing=east]
+  - run: setblock ~6 ~1 ~0 repeater[delay=2,facing=west]
+  - {wait: 20}
+  - use: lever
+  - wave: {clk: '0011111100000011111100000011111100000011', cmp_pulse: '0000111100000000111100000000111100000000'}
+- name: 'pulse repeater 3 gives a 6-tick pulse, period unchanged'
+  steps:
+  - run: setblock ~4 ~1 ~0 repeater[delay=3,facing=east]
+  - run: setblock ~6 ~1 ~0 repeater[delay=4,facing=west]
+  - {wait: 20}
+  - use: lever
+  - wave: {clk: '0011111111110000000000111111111100000000001111111111000000000011', cmp_pulse: '0000111111000000000000001111110000000000000011111100000000000000'}
+- name: 'pulse repeater 1: no pulse at all (the side input cancels the rise in the same tick)'
+  steps:
+  - run: setblock ~4 ~1 ~0 repeater[delay=1,facing=east]
+  - {wait: 20}
+  - use: lever
+  - wave: {clk: '00111111111100000000001111111111000000000011', cmp_pulse: '00000000000000000000000000000000000000000000'}

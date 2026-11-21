@@ -1,0 +1,510 @@
+name: ref_powsi_small_bin_to_hex
+description: "Small Binary to Hex by Powsi and Aminotreal (LRA BINTOHEX001, endorsed by mattbatwings, Discord https://discord.com/channels/1361854816837435433/1472408772789145665): four levers b8 b4 b2 b1 become the hex digit as the signal strength 0-15 of the output dust `out`, README speed 3 ticks (SOURCED). 5x6x6 (51 blocks). Harness changes: lime concrete -> white concrete (the lever tests only emulate plain supports) and the labelling signs dropped; barrels are filled with 6, 12, 26 and 6 totems of undying (read from the schematic; one per slot, so 1+floor(14n/27) = 4, 7, 14, 4). How it works (INFERRED, checked against the traces): out = (4*m + 3) - (3 - n) with m = 2*b8+b4 and n = 2*b2+b1; each upper bit's constant (the 4 and 7 and 14 barrels, 2 for the cauldron) is passed or cancelled by a compare comparator whose side is the inverted lever, a powered b8 repeater drives a quartz block to 15 over the 7-barrel reading, and a subtract comparator takes the low-pair value off the high-pair value. MEASURED: all 16 values correct from 0, by Gray walk, set and clear with several levers flipped in one tick, and complement jumps with all four changing; every case settles within 6 game ticks (3 redstone ticks, matching the README), and 0 to 1 is exactly 6."
+palette:
+  .: air
+  B: white_concrete
+  D: quartz_block
+  E: redstone_wire[east=none,north=side,south=side,west=none]
+  F: repeater[delay=1,facing=north]
+  G: redstone_wire[east=side,north=none,south=side,west=none]
+  H: comparator[facing=east,mode=compare]
+  J: comparator[facing=west,mode=subtract]
+  K: comparator[facing=north,mode=subtract]
+  M: redstone_wire[east=none,north=up,south=none,west=side]
+  N: redstone_wire[east=none,north=side,south=up,west=none]
+  O: comparator[facing=west,mode=compare]
+  P: redstone_wire[east=side,north=none,south=none,west=side]
+  Q: water_cauldron[level=2]
+  a:
+    name: b8
+    block: lever[face=wall,facing=north]
+  b:
+    name: b4
+    block: lever[face=wall,facing=north]
+  c:
+    name: b2
+    block: lever[face=wall,facing=north]
+  d:
+    name: b1
+    block: lever[face=wall,facing=north]
+  s: barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1}]}
+  t: barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1}]}
+  u: barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1},{Slot:6b,id:"minecraft:totem_of_undying",count:1},{Slot:7b,id:"minecraft:totem_of_undying",count:1},{Slot:8b,id:"minecraft:totem_of_undying",count:1},{Slot:9b,id:"minecraft:totem_of_undying",count:1},{Slot:10b,id:"minecraft:totem_of_undying",count:1},{Slot:11b,id:"minecraft:totem_of_undying",count:1},{Slot:12b,id:"minecraft:totem_of_undying",count:1},{Slot:13b,id:"minecraft:totem_of_undying",count:1},{Slot:14b,id:"minecraft:totem_of_undying",count:1},{Slot:15b,id:"minecraft:totem_of_undying",count:1},{Slot:16b,id:"minecraft:totem_of_undying",count:1},{Slot:17b,id:"minecraft:totem_of_undying",count:1},{Slot:18b,id:"minecraft:totem_of_undying",count:1},{Slot:19b,id:"minecraft:totem_of_undying",count:1},{Slot:20b,id:"minecraft:totem_of_undying",count:1},{Slot:21b,id:"minecraft:totem_of_undying",count:1},{Slot:22b,id:"minecraft:totem_of_undying",count:1},{Slot:23b,id:"minecraft:totem_of_undying",count:1},{Slot:24b,id:"minecraft:totem_of_undying",count:1},{Slot:25b,id:"minecraft:totem_of_undying",count:1}]}
+  o:
+    name: out
+    block: redstone_wire[east=none,north=side,south=side,west=none]
+layers:
+  0: |
+    .a.b.
+    .B.B.
+    .DDD.
+    ..D..
+    .....
+    .....
+  1: |
+    .....
+    .E.E.
+    .FGHs
+    tDJD.
+    ...DD
+    ...B.
+  2: |
+    .....
+    .....
+    .....
+    ...ED
+    ...KM
+    ...o.
+  3: |
+    .c.d.
+    .B.B.
+    ..DD.
+    ...DE
+    .....
+    .....
+  4: |
+    .....
+    .N.E.
+    .uOK.
+    .DDJD
+    .D...
+    .....
+  5: |
+    .....
+    .....
+    .E...
+    sOP..
+    QOD..
+    .....
+tests:
+- name: gray walk, one lever at a time
+  steps:
+  - wait: 10
+  - level:
+      out: 0
+  - use: b1
+  - wait: 6
+  - level:
+      out: 1
+  - use: b2
+  - wait: 6
+  - level:
+      out: 3
+  - use: b1
+  - wait: 6
+  - level:
+      out: 2
+  - use: b4
+  - wait: 6
+  - level:
+      out: 6
+  - use: b1
+  - wait: 6
+  - level:
+      out: 7
+  - use: b2
+  - wait: 6
+  - level:
+      out: 5
+  - use: b1
+  - wait: 6
+  - level:
+      out: 4
+  - use: b8
+  - wait: 6
+  - level:
+      out: 12
+  - use: b1
+  - wait: 6
+  - level:
+      out: 13
+  - use: b2
+  - wait: 6
+  - level:
+      out: 15
+  - use: b1
+  - wait: 6
+  - level:
+      out: 14
+  - use: b4
+  - wait: 6
+  - level:
+      out: 10
+  - use: b1
+  - wait: 6
+  - level:
+      out: 11
+  - use: b2
+  - wait: 6
+  - level:
+      out: 9
+  - use: b1
+  - wait: 6
+  - level:
+      out: 8
+- name: every value set from 0 and cleared (levers clicked in one tick)
+  steps:
+  - wait: 10
+  - level:
+      out: 0
+  - use: b1
+  - wait: 6
+  - level:
+      out: 1
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b2
+  - wait: 6
+  - level:
+      out: 2
+  - use: b2
+  - wait: 6
+  - level:
+      out: 0
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 3
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b4
+  - wait: 6
+  - level:
+      out: 4
+  - use: b4
+  - wait: 6
+  - level:
+      out: 0
+  - use: b4
+  - use: b1
+  - wait: 6
+  - level:
+      out: 5
+  - use: b4
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 6
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 0
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 7
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - wait: 6
+  - level:
+      out: 8
+  - use: b8
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b1
+  - wait: 6
+  - level:
+      out: 9
+  - use: b8
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b2
+  - wait: 6
+  - level:
+      out: 10
+  - use: b8
+  - use: b2
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 11
+  - use: b8
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b4
+  - wait: 6
+  - level:
+      out: 12
+  - use: b8
+  - use: b4
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b4
+  - use: b1
+  - wait: 6
+  - level:
+      out: 13
+  - use: b8
+  - use: b4
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 14
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 15
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+- name: complement jumps (all four levers change together)
+  steps:
+  - wait: 10
+  - level:
+      out: 0
+  - wait: 6
+  - level:
+      out: 0
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 15
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 1
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 14
+  - use: b8
+  - use: b4
+  - wait: 6
+  - level:
+      out: 2
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 13
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 3
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 12
+  - use: b8
+  - wait: 6
+  - level:
+      out: 4
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 11
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 5
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 10
+  - use: b8
+  - use: b4
+  - wait: 6
+  - level:
+      out: 6
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 9
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 7
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 8
+  - wait: 6
+  - level:
+      out: 8
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 7
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 9
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 6
+  - use: b8
+  - use: b4
+  - wait: 6
+  - level:
+      out: 10
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 5
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 11
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 4
+  - use: b8
+  - wait: 6
+  - level:
+      out: 12
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 3
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 13
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 2
+  - use: b8
+  - use: b4
+  - wait: 6
+  - level:
+      out: 14
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 1
+  - use: b8
+  - use: b4
+  - use: b2
+  - wait: 6
+  - level:
+      out: 15
+  - use: b8
+  - use: b4
+  - use: b2
+  - use: b1
+  - wait: 6
+  - level:
+      out: 0
+- name: rise from 0 to 1 takes 6 ticks
+  steps:
+  - wait: 10
+  - use: b1
+  - wave:
+      out: '0000001'
+traits:
+- analog

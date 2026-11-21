@@ -1,0 +1,197 @@
+name: ref_mattbatwings_button_keypad
+description: "Phone keypad of 10 stone buttons (1 2 3 / 4 5 6 / 7 8 9 / 0), each with its own active-low output line (high idle, low while its key is held); the lines leave at the north face on x=0,2,4 at y=7 (keys 1-3), 5 (4-6), 3 (7-9) and 1 (key 0), two blocks apart. Source (SOURCED): mattbatwings, Logical Redstone Archive INTERFACE003_Button_Keypad, tagged Tested and Functional, Recommended; https://discord.com/channels/1361854816837435433/1472388736200478883. Size 5x8x5; buttons face south, so the player stands south of it. Harness change: support blocks are smooth_stone instead of iron_block, because use only emulates plain full supports; both are full opaque conductors, so the circuit is the same. How it works (INFERRED from the layout, consistent with the tests): a pressed button strongly powers the block it sits on and switches off the wall torch on that block; each key has one torch and one dust line to the north face, and the lines are kept apart by a block or a top slab between them (dust climbs over a top slab, which does not cut the link). Key 0 has no torch of its own at the button: its powered block feeds the dust under it, which powers the support block of a lower torch. MEASURED: all 10 lines fall 2 ticks after the click and rise 21 ticks after it (the button holds 20); keys pressed together pull only their own lines. Not in the README: while key 0 is held, key 8's line stays high (key 0 is masked onto it), so key 8 pressed with key 0 is not seen."
+palette:
+  .: air
+  A: smooth_stone
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  n: redstone_wall_torch[facing=north]
+  C: smooth_stone_slab[type=top,waterlogged=false]
+  D: redstone_wire[east=side,north=side,south=side,west=side]
+  E: redstone_wire[east=up,north=side,south=none,west=none]
+  F: redstone_wire[east=none,north=side,south=none,west=up]
+  H: redstone_wire[east=none,north=none,south=side,west=side]
+  I: redstone_wire[east=side,north=none,south=side,west=none]
+  J: redstone_wire[east=side,north=side,south=none,west=none]
+  K: redstone_wire[east=none,north=side,south=none,west=side]
+  '1': {output: o1, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  a: {name: k1, block: 'stone_button[face=wall,facing=south]'}
+  '2': {output: o2, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  b: {name: k2, block: 'stone_button[face=wall,facing=south]'}
+  '3': {output: o3, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  c: {name: k3, block: 'stone_button[face=wall,facing=south]'}
+  '4': {output: o4, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  d: {name: k4, block: 'stone_button[face=wall,facing=south]'}
+  '5': {output: o5, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  e: {name: k5, block: 'stone_button[face=wall,facing=south]'}
+  '6': {output: o6, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  f: {name: k6, block: 'stone_button[face=wall,facing=south]'}
+  '7': {output: o7, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  g: {name: k7, block: 'stone_button[face=wall,facing=south]'}
+  '8': {output: o8, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  h: {name: k8, block: 'stone_button[face=wall,facing=south]'}
+  '9': {output: o9, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  i: {name: k9, block: 'stone_button[face=wall,facing=south]'}
+  '0': {output: o0, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  j: {name: k0, block: 'stone_button[face=wall,facing=south]'}
+layers:
+  0: |
+    ..A..
+    ..A..
+    .....
+    .....
+    .....
+  1: |
+    ..0..
+    ..B..
+    ..n..
+    ..A..
+    .....
+  2: |
+    A.A.A
+    A.A.A
+    ..C..
+    ..D..
+    .....
+  3: |
+    7.8.9
+    EABAF
+    ..B..
+    ..A..
+    ..j..
+  4: |
+    A.A.A
+    CHAIC
+    AnnnA
+    .AAA.
+    .ghi.
+  5: |
+    4.5.6
+    BABAB
+    JnnnK
+    .AAA.
+    .def.
+  6: |
+    A.A.A
+    A.A.A
+    AnnnA
+    .AAA.
+    .abc.
+  7: |
+    1.2.3
+    B.B.B
+    BAAAB
+    .....
+    .....
+tests:
+- name: idle, every line high
+  settle: 20
+  steps:
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+- name: each key pulls only its own line low
+  steps:
+  - use: k1
+  - wait: 4
+  - expect: {o1: 0, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k2
+  - wait: 4
+  - expect: {o1: 1, o2: 0, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k3
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 0, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k4
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 0, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k5
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 0, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k6
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 0, o7: 1, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k7
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 0, o8: 1, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k8
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 0, o9: 1, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k9
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 0, o0: 1}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+  - use: k0
+  - wait: 4
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 0}
+  - wait: 24
+  - expect: {o1: 1, o2: 1, o3: 1, o4: 1, o5: 1, o6: 1, o7: 1, o8: 1, o9: 1, o0: 1}
+- name: line timing after a click
+  steps:
+  - use: k1
+  - wave: {o1: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k2
+  - wave: {o2: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k3
+  - wave: {o3: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k4
+  - wave: {o4: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k5
+  - wave: {o5: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k6
+  - wave: {o6: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k7
+  - wave: {o7: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k8
+  - wave: {o8: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k9
+  - wave: {o9: '11000000000000000000011111111'}
+  - wait: 30
+  - use: k0
+  - wave: {o0: '11000000000000000000011111111'}
+  - wait: 30
+- name: several keys at once pull their own lines
+  steps:
+  - {use: k1}
+  - {use: k5}
+  - {use: k9}
+  - {use: k7}
+  - {use: k0}
+  - {wait: 4}
+  - expect: {o1: 0, o5: 0, o9: 0, o7: 0, o0: 0, o2: 1, o3: 1, o4: 1, o6: 1, o8: 1}
+  - {wait: 24}
+  - expect: {o1: 1, o5: 1, o9: 1, o7: 1, o0: 1}
+- name: held key 0 masks key 8
+  steps:
+  - {use: k0}
+  - {wait: 2}
+  - {use: k8}
+  - {wait: 4}
+  - expect: {o0: 0, o8: 1}
+  - {wait: 30}
+  - expect: {o0: 1, o8: 1}
+  - {use: k8}
+  - {use: k0}
+  - {wait: 4}
+  - expect: {o0: 0, o8: 1}

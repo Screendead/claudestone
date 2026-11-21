@@ -1,0 +1,961 @@
+name: ref_mattbatwings_tristate_register
+description: 'mattbatwings-endorsed 8-bit tristate register from the Logical Redstone Archive (REGISTER002 Tristate Register, https://discord.com/channels/1361854816837435433/1472729369951867113; README claims SOURCED: read
+  and write at 10 Hz, 2 tick read (3 with a standard decoder), active-low read and write lines, reading while writing outputs 0). Size 8x18x4, one vertical slice per bit. Per bit: a data repeater (bit) held by a barrel-fed
+  comparator lock (lock) is the storage; a hopper-fed comparator (container constant 1) plus a wall torch on a target block is the tristate output. Both lines drive one dust staircase on glass; the barrels'' redstone counts
+  (signal 14 14 12 10 8 6 4 2, read from the schematic) match the dust loss so the write line is exactly the barrel strength at every bit (lock open) and the hold line one below (lock closed). Harness changes: the 8 data levers
+  sat on redstone lamps and the read and write levers on black wool, which the lever emulation cannot click, so those supports are smooth_stone and white_wool (same conductor); the read/write levers start on (idle) as saved;
+  names bit0..7, q0..7 (the output lamps), torch0, bus0, lock0, rdrep added for probes. How it works (INFERRED, then confirmed by the tests): read lever on = repeater rdrep drives the bus at 13..1 down the tower, so each lock
+  sees barrel - bus = 1 and holds, and bus > 0 at the output block turns the torch off (output 0). Read lever off and write lever on = bus 0: torch relights, F = 1 - max(torch, bit) so the torch ends equal to the bit, output
+  q = bit. Write lever off = bus at barrel strength, lock opens, the data repeater follows its lamp, output forced 0. MEASURED on a satellite: all tests pass; read lever to output 4 ticks (rdrep 2 + torch 2; bus to output
+  2, matching the README''s 2 tick read), deselect 4 ticks to the torch and 8 to the lamp (lamp off delay), write lever to lock open 4 ticks, data in the repeater 6 ticks, minimum write pulse 2 ticks (1 tick pulse failed in
+  a probe).'
+traits:
+- vertical
+- lockable
+- comparator_based
+- torch_based
+- container_based
+- pistonless
+- entityless
+palette:
+  .: air
+  A: black_wool
+  B: oak_wall_sign[facing=south,waterlogged=false]
+  C:
+    name: read
+    block: lever[face=wall,facing=south,powered=true]
+  D: repeater[delay=1,facing=west]
+  '*': redstone_torch
+  E: hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:22}]}
+  n: redstone_wall_torch[facing=north]
+  F: comparator[facing=north,mode=subtract]
+  G: repeater[delay=1,facing=east]
+  L: redstone_lamp
+  I: target
+  J: redstone_wire[east=up,north=side,south=none,west=side]
+  K: redstone_wire[east=side,north=none,south=none,west=up]
+  M: comparator[facing=south,mode=subtract]
+  N: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:64}]}
+  O: redstone_wire[east=none,north=side,south=side,west=none]
+  P: black_stained_glass
+  Q: redstone_wire[east=up,north=none,south=none,west=up]
+  T: redstone_wire[east=side,north=none,south=none,west=side]
+  U: redstone_wire[east=side,north=side,south=none,west=side]
+  W:
+    name: write
+    block: lever[face=wall,facing=south,powered=true]
+  s: smooth_stone
+  w: white_wool
+  a:
+    name: d0
+    block: lever[face=wall,facing=east]
+  i:
+    name: q0
+    block: redstone_lamp
+  '0':
+    name: bit0
+    block: repeater[delay=1,facing=east]
+  b:
+    name: d1
+    block: lever[face=wall,facing=east]
+  j:
+    name: q1
+    block: redstone_lamp
+  '1':
+    name: bit1
+    block: repeater[delay=1,facing=east]
+  c:
+    name: d2
+    block: lever[face=wall,facing=east]
+  k:
+    name: q2
+    block: redstone_lamp
+  '2':
+    name: bit2
+    block: repeater[delay=1,facing=east]
+  R: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64}]}
+  d:
+    name: d3
+    block: lever[face=wall,facing=east]
+  l:
+    name: q3
+    block: redstone_lamp
+  '3':
+    name: bit3
+    block: repeater[delay=1,facing=east]
+  S: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64}]}
+  e:
+    name: d4
+    block: lever[face=wall,facing=east]
+  m:
+    name: q4
+    block: redstone_lamp
+  '4':
+    name: bit4
+    block: repeater[delay=1,facing=east]
+  V: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64}]}
+  f:
+    name: d5
+    block: lever[face=wall,facing=east]
+  o:
+    name: q5
+    block: redstone_lamp
+  '5':
+    name: bit5
+    block: repeater[delay=1,facing=east]
+  X: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64}]}
+  g:
+    name: d6
+    block: lever[face=wall,facing=east]
+  p:
+    name: q6
+    block: redstone_lamp
+  '6':
+    name: bit6
+    block: repeater[delay=1,facing=east]
+  Y: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64}]}
+  h:
+    name: d7
+    block: lever[face=wall,facing=east]
+  q:
+    name: q7
+    block: redstone_lamp
+  '7':
+    name: bit7
+    block: repeater[delay=1,facing=east]
+  Z: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64}]}
+  t:
+    name: torch0
+    block: redstone_wall_torch[facing=north]
+  u:
+    name: bus0
+    block: redstone_wire[east=up,north=side,south=none,west=side]
+  v:
+    name: lock0
+    block: comparator[facing=south,mode=subtract]
+  x:
+    name: rdrep
+    block: repeater[delay=1,facing=west]
+layers:
+  0: |
+    ........
+    ........
+    .A.w....
+    .B.W....
+  1: |
+    ........
+    ..AAAA..
+    wxA*AA..
+    C.......
+  2: |
+    ..E.....
+    AtFGG0sa
+    AIuAKv..
+    .....N..
+  3: |
+    i.......
+    OAAAAA..
+    O.PQPA..
+    ........
+  4: |
+    ..E.....
+    AnFGG1sb
+    AIJPKM..
+    .....N..
+  5: |
+    j.......
+    OAAAAA..
+    O.PTPA..
+    ........
+  6: |
+    ..E.....
+    AnFGG2sc
+    AIJPKM..
+    .....R..
+  7: |
+    k.......
+    OAAAAA..
+    O.PTPA..
+    ........
+  8: |
+    ..E.....
+    AnFGG3sd
+    AIJPKM..
+    .....S..
+  9: |
+    l.......
+    OAAAAA..
+    O.PTPA..
+    ........
+  10: |
+    ..E.....
+    AnFGG4se
+    AIJPKM..
+    .....V..
+  11: |
+    m.......
+    OAAAAA..
+    O.PTPA..
+    ........
+  12: |
+    ..E.....
+    AnFGG5sf
+    AIJPKM..
+    .....X..
+  13: |
+    o.......
+    OAAAAA..
+    O.PTPA..
+    ........
+  14: |
+    ..E.....
+    AnFGG6sg
+    AIJPKM..
+    .....Y..
+  15: |
+    p.......
+    OAAAAA..
+    O.PQPA..
+    ........
+  16: |
+    ..E.....
+    AnFGG7sh
+    AIU.TM..
+    .....Z..
+  17: |
+    q.......
+    OA......
+    O.......
+    ........
+tests:
+- name: words write then read back, data moves after the write are ignored
+  steps:
+  - wait: 2
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+  - use: read
+  - wait: 8
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: read
+  - wait: 8
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 1
+      q7: 1
+  - use: read
+  - wait: 8
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+  - use: read
+  - wait: 8
+- name: walking one through every bit
+  steps:
+  - wait: 2
+  - use: d0
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d0
+  - use: d1
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d1
+  - use: d2
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d2
+  - use: d3
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d3
+  - use: d4
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d4
+  - use: d5
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d5
+  - use: d6
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 1
+      q7: 0
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 1
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+- name: reading while writing outputs 0, the write still lands
+  steps:
+  - wait: 2
+  - use: d0
+  - use: d1
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 4
+  - use: write
+  - wait: 8
+  - wait: 6
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+      q6: 0
+      q7: 0
+  - use: read
+  - wait: 8
+- name: a 2 tick write pulse stores the word
+  steps:
+  - wait: 2
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 6
+  - use: write
+  - wait: 2
+  - use: write
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 6
+  - use: read
+  - wait: 8
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 1
+      q6: 0
+      q7: 1
+- name: 'read timing: 4 ticks from the read lever to the output, 2 of them from the bus'
+  steps:
+  - wait: 2
+  - use: d0
+  - wait: 6
+  - use: write
+  - wait: 8
+  - use: write
+  - wait: 8
+  - use: read
+  - wave:
+      torch0: '0000111111'
+      q0: '0000111111'
+  - wait: 6
+  - use: read
+  - wave:
+      torch0: '1111000000'
+      q0: '1111111100'
+- name: 'write timing: lock opens 4 ticks after the write lever, data lands 6 ticks after'
+  steps:
+  - wait: 2
+  - use: d0
+  - wait: 6
+  - use: write
+  - wave:
+      lock0: '1111000000'
+      bit0: '0000001111'
+  - wait: 6
+  - use: write
+  - wave:
+      lock0: '0000111111'
+      bit0: '1111111111'

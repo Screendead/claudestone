@@ -1,0 +1,190 @@
+name: ref_mattbatwings_classic_selector_panel
+description: 'Rebuild of INTERFACE002 Classic Selector Panel by mattbatwings (Logical Redstone Archive, Tested & Functional, Recommended; https://discord.com/channels/1361854816837435433/1472385503960764561):
+  four buttons, four lamps, pressing one lights its lamp and clears the others, built from torch-loop SR latches on a shared clear bus. 7x4x9. Harness changes: orange_wool where a button hangs is white_wool
+  (the harness only emulates plain supports). Measured: radio behaviour over 7 presses, lamp of the pressed button lights 6 ticks after the press, the previous lamp is out 10 ticks
+  after; on load all four lamps are lit until the first press.'
+palette:
+  .: air
+  A: orange_concrete
+  n: redstone_wall_torch[facing=north]
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: repeater[delay=1,facing=south]
+  D: redstone_wire[east=side,north=side,south=none,west=none]
+  E: redstone_wire[east=side,north=none,south=none,west=side]
+  F: redstone_wire[east=side,north=side,south=none,west=side]
+  G: redstone_wire[east=none,north=side,south=none,west=side]
+  u: redstone_wall_torch[facing=south]
+  '1':
+    name: lamp0
+    block: redstone_lamp
+  w:
+    name: btn0
+    block: stone_button[face=wall,facing=south]
+  '2':
+    name: lamp1
+    block: redstone_lamp
+  x:
+    name: btn1
+    block: stone_button[face=wall,facing=south]
+  '3':
+    name: lamp2
+    block: redstone_lamp
+  y:
+    name: btn2
+    block: stone_button[face=wall,facing=south]
+  '4':
+    name: lamp3
+    block: redstone_lamp
+  z:
+    name: btn3
+    block: stone_button[face=wall,facing=south]
+  W: white_wool
+layers:
+  0: '.......
+
+    .......
+
+    .......
+
+    A.A.A.A
+
+    A.A.A.A
+
+    AAAAAAA
+
+    .......
+
+    .......
+
+    .......
+
+    '
+  1: '.......
+
+    n.n.n.n
+
+    A.A.A.A
+
+    B.B.B.B
+
+    C.C.C.C
+
+    DEFEFEG
+
+    A.A.A.A
+
+    .......
+
+    .......
+
+    '
+  2: '1.2.3.4
+
+    A.A.A.A
+
+    A.A.A.A
+
+    u.u.u.u
+
+    n.n.n.n
+
+    A.A.A.A
+
+    C.C.C.C
+
+    W.W.W.W
+
+    w.x.y.z
+
+    '
+  3: '.......
+
+    B.B.B.B
+
+    B.B.B.B
+
+    n.n.n.n
+
+    A.A.A.A
+
+    .......
+
+    .......
+
+    .......
+
+    .......
+
+    '
+tests:
+- name: radio
+  steps:
+  - use: btn0
+  - wait: 40
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+  - use: btn2
+  - wait: 40
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 1
+      lamp3: 0
+  - use: btn1
+  - wait: 40
+  - expect:
+      lamp0: 0
+      lamp1: 1
+      lamp2: 0
+      lamp3: 0
+  - use: btn3
+  - wait: 40
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 0
+      lamp3: 1
+  - use: btn3
+  - wait: 40
+  - expect:
+      lamp0: 0
+      lamp1: 0
+      lamp2: 0
+      lamp3: 1
+  - use: btn0
+  - wait: 40
+  - expect:
+      lamp0: 1
+      lamp1: 0
+      lamp2: 0
+      lamp3: 0
+  - use: btn1
+  - wait: 40
+  - expect:
+      lamp0: 0
+      lamp1: 1
+      lamp2: 0
+      lamp3: 0
+- name: press timing
+  steps:
+  - use: btn1
+  - wait: 40
+  - use: btn2
+  - wave:
+      lamp1: '11111111110000000000'
+      lamp2: '00000011111111111111'
+      lamp0: '00000000000000000000'
+      lamp3: '00000000000000000000'
+- name: re-pressing the selected button does not blink
+  steps:
+  - use: btn3
+  - wait: 40
+  - use: btn3
+  - wave:
+      lamp3: '111111111111111111111111111111'
+      lamp0: '000000000000000000000000000000'
+      lamp1: '000000000000000000000000000000'
+      lamp2: '000000000000000000000000000000'

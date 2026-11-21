@@ -1,0 +1,192 @@
+name: ref_mattbatwings_small_priority
+description: >-
+  mattbatwings' Small Priority Circuit (Logical Redstone Archive OTHERCOMB005, discord.com/channels/1361854816837435433/1472424700461191179;
+  README: outputs the rightmost input, unsynced due to rippling, size grows linearly per input). Four rows, one per input, 7x2x10.
+  Row k: a lever on a block strongly powers it; a torch on that block (burns off when the lever is on) feeds dust into a
+  wool block that carries a second torch whose lamp is the output, and that second torch's output rides dust and a
+  repeater into the next row's wool, switching its torch off. So the first lever on (a0, the north row) wins; one-hot
+  lamps. Changed: the lever's lamp (display of the input) is white concrete because the harness cannot flip a lever
+  on a lamp; levers are flipped by steps (use), not inputs, because a lever strongly powers its block, which a redstone-block driver
+  does not. MEASURED on a laptop satellite in 26.3: all 16 input combinations give the one-hot of the lowest-numbered set lever;
+  lead lever on: its lamp lights 4 gt later and the next row's falls at 12 gt; off: lamp falls 8 gt (lamp off delay 4);
+  worst ripple (a0 off with only a3 also on): o3 rises 12 gt after the click.
+palette:
+  .: air
+  A: yellow_wool
+  '#': white_concrete
+  (: redstone_wall_torch[facing=west]
+  B: redstone_wire[east=side,north=none,south=none,west=side]
+  D: redstone_wire[east=side,north=side,south=none,west=none]
+  E: redstone_wire[east=none,north=none,south=side,west=side]
+  F: repeater[delay=1,facing=north]
+  '0': {output: o0, block: redstone_lamp}
+  '1': {output: o1, block: redstone_lamp}
+  '2': {output: o2, block: redstone_lamp}
+  '3': {output: o3, block: redstone_lamp}
+  a: {name: lv0, block: 'lever[face=wall,facing=east]'}
+  b: {name: lv1, block: 'lever[face=wall,facing=east]'}
+  c: {name: lv2, block: 'lever[face=wall,facing=east]'}
+  d: {name: lv3, block: 'lever[face=wall,facing=east]'}
+layers:
+  0: |
+    ...A...
+    .AA....
+    ..A....
+    ...A...
+    .AA....
+    ..A....
+    ...A...
+    .AA....
+    ..A....
+    ...A...
+  1: |
+    0(AB(#a
+    .DE....
+    ..F....
+    1(AB(#b
+    .DE....
+    ..F....
+    2(AB(#c
+    .DE....
+    ..F....
+    3(AB(#d
+tests:
+- name: v0000
+  settle: 30
+  steps:
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+- name: v0001
+  settle: 30
+  steps:
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+- name: v0010
+  settle: 30
+  steps:
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+- name: v0011
+  settle: 30
+  steps:
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+- name: v0100
+  settle: 30
+  steps:
+  - use: lv1
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v0101
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v0110
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v0111
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v1000
+  settle: 30
+  steps:
+  - use: lv0
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1001
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1010
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1011
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1100
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1101
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1110
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1111
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: lead_taken
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - use: lv0
+  - wave: {o0: '0000111111111111', o1: '1111111111110000'}
+- name: lead_released
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - use: lv0
+  - wave: {o0: '1111111100000000', o1: '0000000011111111'}
+- name: far_row_wins
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv3
+  - wait: 60
+  - use: lv0
+  - wave: {o0: '1111111100000000000000000000000000000000', o3: '0000000000001111111111111111111111111111'}

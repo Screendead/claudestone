@@ -1,0 +1,625 @@
+name: ref_mattbatwings_shift003_bidir_load
+description: "Rebuild of LRA entry SHIFT003 \"Bi-directional Shift Register w/ Load\" by mattbatwings (Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472419123198824530). SOURCED from the README: pistonless, 8-bit number in on levers, Load / Shift up / Shift down buttons, 8-bit output. Size: schematic 11x18x9 (lime wool tower, one bit per 2 layers, 8 output lamps on the east face, data levers on lamps at the west). As rebuilt 12x18x9 (try; one extra west column for the driver cells). Harness changes: (1) the harness only emulates levers and buttons on plain full blocks, and these sit on lamps and wool, so each data lever (on a lamp) and each of the three buttons (on lime wool) is a repeater[delay=1] pointing east into that block, on a smooth_stone support added under it, fed by an input cell behind it: the same strong power into the block plus 2 gt of repeater delay (the lever's x=2 cell moved to x=3, input d0..d7 at x=2; button inputs at x=0). (2) The two oak signs are dropped. Inputs: d0..d7 level (1 = lever up, bit i), b1 = shift up, b4 = load, b7 = shift down (the buttons are the three on the west face at z=1, 4, 7; which does what found by trying: b4 loads, b1 shifts toward q7, b7 toward q0; the README does not say). A press is drive 1, wait, drive 0. Outputs q0..q7 are the lamps; q0 is the lowest layer (y=3), q7 the top (y=17). MEASURED (all PASS): load copies the levers into the register and replaces the old value (0xA5, 0x3C, 0xFF, 0x00, 0x81), later lever changes do nothing; up shifts toward q7 and the top bit falls off, zeros enter at q0 (a 1 walked through all 8 places and out, 0xA5 three times); down mirrors it; a mixed up/down run loses bits at the ends; a button held 80 gt shifts once; load after shifts works. Latency from the driver edge to the lamp: rise 14 gt, fall 18 gt for up, down and load (wave tests; includes my 2 gt repeater and the lamp's own 4 gt turn-off). Speed: a 20 gt press (a stone button's length) is what the original gets; MEASURED here with the repeater driver a 3 gt press passes and a 2 gt press drops shifts, and back-to-back presses pass 6 in a row at 3 on 5 off and 4 on 4 off (period 8 gt) but drop shifts at periods of 7 (3 on 4 off, 4 on 3 off) and below (also 3 on 3 off, 4 on 2 off, 5 on 2 off, 6 on 2 off); the README states no speed. INFERRED, not traced: each slice is a lever-fed lamp, a subtract comparator that reads it on load, and subtract comparators in the layers between slices (the 'b' cells at z=1 and z=7 facing east) that pass a neighbour bit up or down; the memory is built from comparator and dust loops with no torches in the stack (the only torches sit on the top and bottom wool)."
+palette:
+  .: air
+  A: lime_wool
+  B: redstone_wire[east=side,north=none,south=side,west=none]
+  C: redstone_wire[east=side,north=none,south=none,west=side]
+  D: comparator[facing=west,mode=subtract]
+  E: redstone_wire[east=none,north=side,south=side,west=none]
+  F: stone_button[face=wall,facing=west]
+  G: redstone_wire[east=side,north=side,south=none,west=none]
+  H: repeater[delay=2,facing=west]
+  I: redstone_wire[east=none,north=side,south=none,west=side]
+  n: redstone_wall_torch[facing=north]
+  J: repeater[delay=1,facing=north]
+  K: repeater[delay=2,facing=south]
+  M: repeater[delay=1,facing=west]
+  ): redstone_wall_torch[facing=east]
+  N: repeater[delay=1,facing=south]
+  O: redstone_wire[east=none,north=none,south=side,west=side]
+  '*': redstone_torch
+  Q: lime_stained_glass
+  T: redstone_wire[east=side,north=none,south=none,west=up]
+  U: redstone_wire[east=side,north=up,south=none,west=side]
+  V: lever[face=wall,facing=west]
+  L: redstone_lamp
+  W: redstone_wire[east=none,north=side,south=side,west=side]
+  X: redstone_wire[east=up,north=side,south=side,west=none]
+  Y: redstone_wire[east=side,north=none,south=up,west=side]
+  Z: redstone_wire[east=side,north=none,south=up,west=none]
+  b: comparator[facing=east,mode=subtract]
+  c: redstone_wire[east=up,north=none,south=none,west=side]
+  d: redstone_wire[east=none,north=up,south=none,west=side]
+  e: redstone_wire[east=side,north=side,south=none,west=side]
+  f: redstone_wire[east=side,north=none,south=side,west=side]
+  g: redstone_wire[east=side,north=side,south=side,west=none]
+  S: smooth_stone
+  R: repeater[delay=1,facing=west]
+  0: {input: d0}
+  1: {name: q0, block: 'redstone_lamp'}
+  2: {input: d1}
+  3: {name: q1, block: 'redstone_lamp'}
+  4: {input: d2}
+  5: {name: q2, block: 'redstone_lamp'}
+  6: {input: d3}
+  7: {name: q3, block: 'redstone_lamp'}
+  8: {input: d4}
+  9: {name: q4, block: 'redstone_lamp'}
+  a: {input: d5}
+  h: {name: q5, block: 'redstone_lamp'}
+  i: {input: d6}
+  j: {name: q6, block: 'redstone_lamp'}
+  k: {input: d7}
+  l: {name: q7, block: 'redstone_lamp'}
+  m: {input: b1}
+  o: {input: b4}
+  p: {input: b7}
+layers:
+  0: |
+    ...AAA.A.....
+    .S.AAA.A.....
+    .......A.....
+    ..AA.A.A.....
+    .S.A.AA......
+    ..AA...A.....
+    .......A.....
+    .S.AAA.A.....
+    ...AAA.A.....
+  1: |
+    ...BCDAE.....
+    mRAGHI.E.....
+    ....n..E.....
+    ..CDAE.J.....
+    oRAK.GMA)....
+    ..CI...N.....
+    .......E.....
+    pRABHO.E.....
+    ...GCDAE.....
+  2: |
+    ......*......
+    .............
+    ....A.AAAQA..
+    .....AA.A.A..
+    ...S.AA.A..A.
+    ......A.A.A..
+    ......AQAAA..
+    .............
+    ......*......
+  3: |
+    ......AAA....
+    .......QAA...
+    ...QTABCMUO..
+    .....JE.N.E..
+    ..0RLDW.XQAM1
+    ......E.J.E..
+    ......GYMCI..
+    .......AAQ...
+    ......AAA....
+  4: |
+    .....QTMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    .....QTMI....
+  5: |
+    .....cQAA....
+    .......QAA...
+    ...QTABeMUO..
+    .....JE.N.E..
+    ..2RLDW.XQAM3
+    ......E.J.E..
+    ......GYMfI..
+    .......AAQ...
+    .....cQAA....
+  6: |
+    .....QTMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    .....QTMI....
+  7: |
+    .....cQAA....
+    .......QAA...
+    ...QTABeMUO..
+    .....JE.N.E..
+    ..4RLDW.XQAM5
+    ......E.J.E..
+    ......GYMfI..
+    .......AAQ...
+    .....cQAA....
+  8: |
+    .....QTMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    .....QTMI....
+  9: |
+    .....cQAA....
+    .......QAA...
+    ...QTABeMUO..
+    .....JE.N.E..
+    ..6RLDW.XQAM7
+    ......E.J.E..
+    ......GYMfI..
+    .......AAQ...
+    .....cQAA....
+  10: |
+    .....QTMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    .....QTMI....
+  11: |
+    .....cQAA....
+    .......QAA...
+    ...QTABeMUO..
+    .....JE.N.E..
+    ..8RLDW.XQAM9
+    ......E.J.E..
+    ......GYMfI..
+    .......AAQ...
+    .....cQAA....
+  12: |
+    .....QTMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    .....QTMI....
+  13: |
+    .....cQAA....
+    .......QAA...
+    ...QTABeMUO..
+    .....JE.N.E..
+    ..aRLDW.XQAMh
+    ......E.J.E..
+    ......GYMfI..
+    .......AAQ...
+    .....cQAA....
+  14: |
+    .....QTMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    .....QTMI....
+  15: |
+    .....cQAA....
+    .......QAA...
+    ...QTABeMUO..
+    .....JE.N.E..
+    ..iRLDW.XQAMj
+    ......E.J.E..
+    ......GYMfI..
+    .......AAQ...
+    .....cQAA....
+  16: |
+    ......CMO....
+    .......ZbO...
+    ...cQ.AAAQA..
+    .....AA.A.A..
+    ...S.AA.QT.A.
+    ......A.A.A..
+    ......AQAAA..
+    .......Gbd...
+    ......CMI....
+  17: |
+    .............
+    .........A...
+    ....CABeMCO..
+    .....JE.N.E..
+    ..kRLDW.g.AMl
+    ......E.J.E..
+    ......GCMfI..
+    .......A.....
+    .............
+tests:
+- name: load replaces the register
+  steps:
+  - drive: {d0: 1, d1: 0, d2: 1, d3: 0, d4: 0, d5: 1, d6: 0, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - drive: {d0: 0, d1: 0, d2: 1, d3: 1, d4: 1, d5: 1, d6: 0, d7: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 1, q4: 1, q5: 1, q6: 0, q7: 0}
+  - drive: {d0: 1, d1: 1, d2: 1, d3: 1, d4: 1, d5: 1, d6: 1, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1, q7: 1}
+  - drive: {d0: 0, d1: 0, d2: 0, d3: 0, d4: 0, d5: 0, d6: 0, d7: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {d0: 1, d1: 0, d2: 0, d3: 0, d4: 0, d5: 0, d6: 0, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+- name: register holds when the data levers change
+  steps:
+  - drive: {d0: 0, d1: 1, d2: 0, d3: 1, d4: 1, d5: 0, d6: 1, d7: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+  - drive: {d0: 1, d1: 1, d2: 1, d3: 1, d4: 1, d5: 1, d6: 1, d7: 1}
+  - wait: 20
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 1, q5: 0, q6: 1, q7: 0}
+- name: up walks a 1 to q7 and off the end
+  steps:
+  - drive: {d0: 1, d1: 0, d2: 0, d3: 0, d4: 0, d5: 0, d6: 0, d7: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: up on 10100101
+  steps:
+  - drive: {d0: 1, d1: 0, d2: 1, d3: 0, d4: 0, d5: 1, d6: 0, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 1, q4: 0, q5: 0, q6: 1, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 1}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+- name: down walks a 1 to q0 and off the end
+  steps:
+  - drive: {d0: 0, d1: 0, d2: 0, d3: 0, d4: 0, d5: 0, d6: 0, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: down on 10100101
+  steps:
+  - drive: {d0: 1, d1: 0, d2: 1, d3: 0, d4: 0, d5: 1, d6: 0, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 1, q3: 0, q4: 0, q5: 1, q6: 0, q7: 1}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 1, q5: 0, q6: 1, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 1, q4: 0, q5: 1, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 1, q5: 0, q6: 0, q7: 0}
+- name: up and down mixed lose bits at the ends
+  steps:
+  - drive: {d0: 1, d1: 1, d2: 0, d3: 0, d4: 0, d5: 0, d6: 1, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 1}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 0, q2: 0, q3: 0, q4: 0, q5: 1, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 1}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+- name: a held button shifts once
+  steps:
+  - drive: {d0: 0, d1: 0, d2: 0, d3: 1, d4: 1, d5: 0, d6: 0, d7: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+  - drive: {b1: 1}
+  - wait: 80
+  - drive: {b1: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 80
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 1, q4: 1, q5: 0, q6: 0, q7: 0}
+- name: load after shifts
+  steps:
+  - drive: {d0: 0, d1: 0, d2: 0, d3: 0, d4: 1, d5: 1, d6: 1, d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 1, q5: 1, q6: 1, q7: 1}
+  - drive: {b1: 1}
+  - wait: 20
+  - drive: {b1: 0}
+  - wait: 40
+  - drive: {d0: 1, d1: 1, d2: 1, d3: 1, d4: 0, d5: 0, d6: 0, d7: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 1, q4: 0, q5: 0, q6: 0, q7: 0}
+  - drive: {b7: 1}
+  - wait: 20
+  - drive: {b7: 0}
+  - wait: 40
+  - expect: {q0: 1, q1: 1, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: latency up (press to lamps)
+  steps:
+  - drive: {d1: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 30
+  - drive: {b1: 1}
+  - wave: {q1: '1111111111111111110000', q2: '0000000000000011111111'}
+- name: latency down
+  steps:
+  - drive: {d1: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 30
+  - drive: {b7: 1}
+  - wave: {q1: '1111111111111111110000', q0: '0000000000000011111111'}
+- name: latency load
+  steps:
+  - drive: {d3: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wave: {q3: '0000000000000011111111'}
+  - drive: {b4: 0, d3: 0}
+  - wait: 10
+  - drive: {b4: 1}
+  - wave: {q3: '1111111111111111110000'}
+- name: back-to-back presses, 3 on 5 off
+  steps:
+  - drive: {d0: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 30
+  - repeat:
+      times: 6
+      steps:
+      - drive: {b1: 1}
+      - wait: 3
+      - drive: {b1: 0}
+      - wait: 5
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+- name: back-to-back down presses, 3 on 5 off
+  steps:
+  - drive: {d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 30
+  - repeat:
+      times: 6
+      steps:
+      - drive: {b7: 1}
+      - wait: 3
+      - drive: {b7: 0}
+      - wait: 5
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}
+- name: back-to-back presses, 4 on 4 off
+  steps:
+  - drive: {d0: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 30
+  - repeat:
+      times: 6
+      steps:
+      - drive: {b1: 1}
+      - wait: 4
+      - drive: {b1: 0}
+      - wait: 4
+  - wait: 40
+  - expect: {q0: 0, q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0}
+- name: back-to-back down presses, 4 on 4 off
+  steps:
+  - drive: {d7: 1}
+  - wait: 10
+  - drive: {b4: 1}
+  - wait: 20
+  - drive: {b4: 0}
+  - wait: 30
+  - repeat:
+      times: 6
+      steps:
+      - drive: {b7: 1}
+      - wait: 4
+      - drive: {b7: 0}
+      - wait: 4
+  - wait: 40
+  - expect: {q0: 0, q1: 1, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0}

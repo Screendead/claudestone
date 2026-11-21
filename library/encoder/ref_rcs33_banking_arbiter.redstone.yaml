@@ -1,0 +1,402 @@
+name: ref_rcs33_banking_arbiter
+description: 'RCS_33''s choose-n banking arbiter (Logical Redstone Archive OTHERCOMB008, endorsed by Waffle [Wueffi], tagged Tested & Functional;
+  discord.com/channels/1361854816837435433/1472643720863027313; README: chooses n set bits out of a k-wide vector by left/right priority, but
+  unlike the normal arbiter does not guarantee n when at least n are set; 1 t per k/5 wire delay, 2 t per n/4). The schematic is n=4, k=10 (two
+  5-bit modules), here 21x6x31. INFERRED from tracing the blocks, then MEASURED: bit j belongs to bank j mod 4, and the bank is one dust chain
+  running south along its own column (x=11,13,15,17), 3 dust per bit, with a dust step under a glass block between bits (dust descends diagonally
+  past glass) and a repeater at the start, the middle and the end of the chain (every 5 bits, to renew the signal). Input j (lever, lamp and a
+  dust staircase in the source) climbs 5 dust to a bus at y=5 on bit j''s north side and a repeater drops it onto its bank''s chain head at strength
+  15. Bit j''s output is a subtract comparator, whose rear is 15 (minus a dust gap) from a repeater fed by a target block the input dust powers,
+  and whose side is a dust reading the bank''s chain level just before bit j. If any earlier bit of the bank is set (chain level at least 1) the
+  comparator''s output falls below the length of the dust line to its lamp (the line is as long as the comparator''s rear minus 1, so the lamp
+  needs the side to be exactly 0). So out j is on when in j is set, no earlier bit of its bank is set, and the bank''s disable is off: the lowest
+  (north-most) set bit of each bank is chosen, at most 4 outputs. The disable inputs are the repeaters at the north end of the four chains (x=11..17,
+  one per bank): a signal there floods the whole chain and blocks the bank. Harness changes: the source''s levers on lamps are driver cells (the
+  redstone block powers the same dust at 15; a redstone block cannot power the lamp-and-lever pair as a lever does); the duplicate lamp under
+  each input and output lamp, the gold stacking markers and a stray concrete block are dropped; the design shifts one block south so the disable
+  inputs fit. Tests (all vs a reference function, 2^14 inputs sampled): every single bit, bank collisions (0,4,8 / 1,5,9 / 2,6 / 3,7), chains
+  crossing the middle repeater, the README''s vector, each and combined disables, 40 random vectors. MEASURED: all pass on a laptop satellite
+  in 26.3; every output rises 4 gt after its input (repeater 2 + comparator 2) and falls 8 gt (lamp off delay 4 on top), and a bit that is released
+  by a clear chain in the second module rises 6 or falls 10 (the module-end repeater adds 2).'
+traits:
+- compact
+- comparator_based
+palette:
+  .: air
+  '#': white_concrete
+  B: target
+  C: redstone_wire[east=side,north=up,south=none,west=side]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  F: redstone_wire[east=none,north=up,south=side,west=none]
+  G: repeater[delay=1,facing=north]
+  H: comparator[facing=east,mode=subtract]
+  I: redstone_wire[east=none,north=side,south=up,west=none]
+  J: redstone_wire[east=side,north=side,south=side,west=side]
+  K: redstone_wire[east=none,north=side,south=side,west=none]
+  M: white_stained_glass
+  N: redstone_wire[east=none,north=up,south=up,west=none]
+  O: redstone_wire[east=none,north=none,south=side,west=up]
+  a:
+    input: in0
+  '0':
+    output: out0
+    block: redstone_lamp
+  b:
+    input: in1
+  '1':
+    output: out1
+    block: redstone_lamp
+  c:
+    input: in2
+  '2':
+    output: out2
+    block: redstone_lamp
+  d:
+    input: in3
+  '3':
+    output: out3
+    block: redstone_lamp
+  e:
+    input: in4
+  '4':
+    output: out4
+    block: redstone_lamp
+  f:
+    input: in5
+  '5':
+    output: out5
+    block: redstone_lamp
+  g:
+    input: in6
+  '6':
+    output: out6
+    block: redstone_lamp
+  h:
+    input: in7
+  '7':
+    output: out7
+    block: redstone_lamp
+  i:
+    input: in8
+  '8':
+    output: out8
+    block: redstone_lamp
+  j:
+    input: in9
+  '9':
+    output: out9
+    block: redstone_lamp
+  p:
+    input: dis0
+  q:
+    input: dis1
+  r:
+    input: dis2
+  s:
+    input: dis3
+layers:
+  0: |
+    ......................
+    ......................
+    ...................##.
+    .................##...
+    .###############.#....
+    ...................##.
+    ...............#..#...
+    .#################....
+    ...................##.
+    .............#....#...
+    .#################....
+    ...................##.
+    ...........#......#...
+    .#################....
+    ...................##.
+    .................##...
+    .###############.#....
+    ...................##.
+    ...............#..#...
+    .#################....
+    ...................##.
+    .............#....#...
+    .#################....
+    ...................##.
+    ...........#......#...
+    .#################....
+    ...................##.
+    .................##...
+    .###############.#....
+    ...................##.
+    ...............#..#...
+    .#################....
+  1: |
+    ......................
+    ..................##..
+    ...........#.#.#.#BCDa
+    .................FG...
+    0DDDDDDDDDDDDDDD#H##..
+    ...........#.#.#.#BCDb
+    ...............F..G...
+    1DDDDDDDDDDDDDDHDD##..
+    ...........#.#.#.#BCDc
+    .............F....G...
+    2DDDDDDDDDDDDHDDDD##..
+    ...........#.#.#.#BCDd
+    ...........F......G...
+    3DDDDDDDDDDHDDDDDD##..
+    ...........#.#.#.#BCDe
+    .................FG...
+    4DDDDDDDDDDDDDDD#H##..
+    ...........#.#.#.#BCDf
+    ...............F..G...
+    5DDDDDDDDDDDDDDHDD##..
+    ...........#.#.#.#BCDg
+    .............F....G...
+    6DDDDDDDDDDDDHDDDD##..
+    ...........#.#.#.#BCDh
+    ...........F......G...
+    7DDDDDDDDDDHDDDDDD##..
+    ...........#.#.#.#BCDi
+    .................FG...
+    8DDDDDDDDDDDDDDD#H##..
+    ...........#.#.#.#BCDj
+    ...............F..G...
+    9DDDDDDDDDDDDDDHDD##..
+  2: |
+    ......................
+    ...........#.#.#.#.I..
+    ...........J.J.J.K.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........J.J.K.J.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+    ...........N.N.N.N.M..
+    ...........M.M.M.M....
+    ...........#.#.#.#.I..
+  3: |
+    ...........s.r.q.p....
+    ...........G.G.G.G.M..
+    ...........#.#.#.#.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........G.G.G.G.M..
+    ...........#.#.#.#.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........K.K.K.K.M..
+    ...........M.M.M.M.F..
+    ...........K.K.K.K....
+    ...........G.G.G.G.M..
+  4: |
+    ......................
+    ...........########O..
+    .................G....
+    .................#....
+    ...........########O..
+    ...............G......
+    ...............#......
+    ...........########O..
+    .............G........
+    .............#........
+    ...........########O..
+    ...........G..........
+    ...........#..........
+    ...........########O..
+    .................G....
+    .................#....
+    ...........########O..
+    ...............G......
+    ...............#......
+    ...........########O..
+    .............G........
+    .............#........
+    ...........########O..
+    ...........G..........
+    ...........#..........
+    ...........########O..
+    .................G....
+    .................#....
+    ...........########O..
+    ...............G......
+    ...............#......
+    ...........########O..
+  5: |
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+    ......................
+    ......................
+    ...........DDDDDDDD...
+tests:
+- name: empty_and_singles
+  truth_table: |
+    in0 in1 in2 in3 in4 in5 in6 in7 in8 in9 dis0 dis1 dis2 dis3 | out0 out1 out2 out3 out4 out5 out6 out7 out8 out9
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 0 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0 0
+    0 0 0 1 0 0 0 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0 0
+    0 0 0 0 1 0 0 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 1 0 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0 0
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0 0
+    0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 0 0 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0
+  delay: 8
+- name: banks_first_wins
+  truth_table: |
+    in0 in1 in2 in3 in4 in5 in6 in7 in8 in9 dis0 dis1 dis2 dis3 | out0 out1 out2 out3 out4 out5 out6 out7 out8 out9
+    1 0 0 0 1 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 1 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 0 0 1 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0 0
+    1 0 0 0 1 0 0 0 1 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 1 0 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 1 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 0 0 0 1 0 0 0 0 | 0 0 0 0 0 1 0 0 0 0
+    0 1 0 0 0 1 0 0 0 1 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 1 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0 0
+    0 0 0 1 0 0 0 1 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0 0
+    1 0 0 1 0 0 0 1 0 0 0 0 0 0 | 1 0 0 1 0 0 0 0 0 0
+    0 1 1 1 1 0 0 0 0 0 0 0 0 0 | 0 1 1 1 1 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0 0 0
+    0 0 0 0 1 1 1 1 1 1 0 0 0 0 | 0 0 0 0 1 1 1 1 0 0
+    0 0 0 0 0 0 0 0 1 1 0 0 0 0 | 0 0 0 0 0 0 0 0 1 1
+    0 0 0 0 0 1 1 1 1 0 0 0 0 0 | 0 0 0 0 0 1 1 1 1 0
+    1 0 0 0 0 0 0 0 0 1 0 0 0 0 | 1 0 0 0 0 0 0 0 0 1
+    0 0 0 1 1 0 0 1 1 0 0 0 0 0 | 0 0 0 1 1 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0
+  delay: 10
+- name: readme_vector
+  truth_table: |
+    in0 in1 in2 in3 in4 in5 in6 in7 in8 in9 dis0 dis1 dis2 dis3 | out0 out1 out2 out3 out4 out5 out6 out7 out8 out9
+    1 0 1 1 0 1 0 1 1 1 0 0 0 0 | 1 0 1 1 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0
+  delay: 8
+- name: disable_layers
+  truth_table: |
+    in0 in1 in2 in3 in4 in5 in6 in7 in8 in9 dis0 dis1 dis2 dis3 | out0 out1 out2 out3 out4 out5 out6 out7 out8 out9
+    1 1 1 1 1 1 1 1 1 1 1 0 0 0 | 0 1 1 1 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 0 1 0 0 | 1 0 1 1 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 0 0 1 0 | 1 1 0 1 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 0 0 0 1 | 1 1 1 0 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 1 1 0 0 | 0 0 1 1 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 0 0 1 1 | 1 1 0 0 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 1 0 1 0 | 0 1 0 1 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 0 0
+    1 1 0 0 1 1 0 0 1 0 1 0 0 0 | 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 0 0 0 1 0 1 0 0 | 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 0 0 1 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0 0 0
+  delay: 8
+- name: random_vectors
+  truth_table: |
+    in0 in1 in2 in3 in4 in5 in6 in7 in8 in9 dis0 dis1 dis2 dis3 | out0 out1 out2 out3 out4 out5 out6 out7 out8 out9
+    0 1 1 0 0 0 0 0 0 0 0 1 0 0 | 0 0 1 0 0 0 0 0 0 0
+    0 1 0 1 0 0 1 1 1 1 0 0 1 0 | 0 1 0 1 0 0 0 0 1 0
+    1 1 0 0 1 0 0 1 0 0 0 0 1 0 | 1 1 0 0 0 0 0 1 0 0
+    0 1 1 1 1 1 0 0 0 1 0 0 0 0 | 0 1 1 1 1 0 0 0 0 0
+    0 1 0 1 1 0 0 1 0 0 0 0 1 0 | 0 1 0 1 1 0 0 0 0 0
+    1 1 0 1 0 0 0 0 0 1 1 0 0 0 | 0 1 0 1 0 0 0 0 0 0
+    1 0 0 1 1 1 1 0 0 1 0 1 0 0 | 1 0 0 1 0 0 1 0 0 0
+    1 0 1 0 0 0 0 0 1 1 0 1 0 0 | 1 0 1 0 0 0 0 0 0 0
+    1 0 1 0 0 0 0 0 1 1 0 1 0 0 | 1 0 1 0 0 0 0 0 0 0
+    1 0 1 0 0 1 0 1 0 1 0 0 0 1 | 1 0 1 0 0 1 0 0 0 0
+    0 1 0 0 0 0 0 1 1 0 0 0 0 0 | 0 1 0 0 0 0 0 1 1 0
+    0 0 1 1 0 0 1 1 0 1 0 0 0 0 | 0 0 1 1 0 0 0 0 0 1
+    1 1 1 1 1 1 0 0 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0 0 0
+    1 1 1 1 1 0 1 0 1 0 1 0 0 0 | 0 1 1 1 0 0 0 0 0 0
+    0 1 1 1 1 1 1 0 1 0 0 0 0 0 | 0 1 1 1 1 0 0 0 0 0
+    0 1 1 0 0 1 0 0 1 0 0 1 0 0 | 0 0 1 0 0 0 0 0 1 0
+    0 0 1 1 1 0 0 1 0 1 0 0 1 1 | 0 0 0 0 1 0 0 0 0 1
+    1 0 0 0 1 0 1 1 1 0 0 1 0 0 | 1 0 0 0 0 0 1 1 0 0
+    0 0 1 1 0 1 0 0 0 0 0 0 0 1 | 0 0 1 0 0 1 0 0 0 0
+    0 0 0 0 1 1 0 1 0 0 0 0 1 0 | 0 0 0 0 1 1 0 1 0 0
+    1 0 0 0 1 0 1 1 1 1 0 0 0 0 | 1 0 0 0 0 0 1 1 0 1
+    1 1 0 1 1 1 0 1 1 1 0 0 0 1 | 1 1 0 0 0 0 0 0 0 0
+    1 1 0 1 1 0 0 1 1 1 0 1 0 0 | 1 0 0 1 0 0 0 0 0 0
+    0 0 0 1 0 1 0 1 0 1 0 0 0 0 | 0 0 0 1 0 1 0 0 0 0
+    1 0 0 1 1 1 1 1 1 0 0 0 0 0 | 1 0 0 1 0 1 1 0 0 0
+    0 0 0 1 1 1 1 0 1 0 0 0 0 0 | 0 0 0 1 1 1 1 0 0 0
+    1 1 1 1 1 1 1 0 1 1 0 0 0 0 | 1 1 1 1 0 0 0 0 0 0
+    1 1 1 1 0 0 0 0 0 1 0 0 0 0 | 1 1 1 1 0 0 0 0 0 0
+    0 0 0 0 1 0 1 1 0 0 0 0 0 0 | 0 0 0 0 1 0 1 1 0 0
+    0 0 0 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 1 1 0 1 0 0 0
+    1 0 1 0 0 0 1 1 0 1 0 0 0 0 | 1 0 1 0 0 0 0 1 0 1
+    1 1 0 0 0 1 1 1 1 1 0 0 0 0 | 1 1 0 0 0 0 1 1 0 0
+    0 0 0 1 0 1 0 0 1 1 0 0 0 0 | 0 0 0 1 0 1 0 0 1 0
+    1 1 0 0 1 0 0 1 0 0 0 0 0 0 | 1 1 0 0 0 0 0 1 0 0
+    1 0 1 0 1 1 0 0 1 0 0 0 0 1 | 1 0 1 0 0 1 0 0 0 0
+    1 1 1 0 1 1 0 0 0 1 0 0 0 0 | 1 1 1 0 0 0 0 0 0 0
+    0 0 1 1 0 0 0 0 0 0 0 0 0 0 | 0 0 1 1 0 0 0 0 0 0
+    0 1 1 0 1 1 0 0 1 1 0 0 0 0 | 0 1 1 0 1 0 0 0 0 0
+    0 1 1 1 0 1 0 1 0 1 0 1 0 0 | 0 0 1 1 0 0 0 0 0 0
+    0 0 1 1 1 0 1 0 0 1 1 0 0 0 | 0 0 1 1 0 0 0 0 0 1
+  delay: 10
+_delay: 1

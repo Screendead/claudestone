@@ -1,0 +1,1230 @@
+name: ref_mattbatwings_shift_regs_vertical_load
+description: "Rebuild of mattbatwings' two 8-bit shift registers with parallel load, Logical Redstone Archive SHIFT001 (Up & Down versions), https://discord.com/channels/1361854816837435433/1472418543231438858 (README SOURCED: an upward and a downward shift register, both with load; input an 8-bit number, a Load button and a Shift button; output an 8-bit number; tested and functional, recommended). Two independent 8x7-footprint towers in one 8x25 file, 17 high, base at y1 and a 2-layer cell per bit from y4 (bit 0 at the bottom): tower a (z0-6) shifts up (bit k to bit k+1, a 0 enters at bit 0), tower b (z18-24) shifts down (bit k+1 to bit k, a 0 enters at bit 7). Harness changes: lime_wool -> white_wool (the harness only emulates plain white wool as a lever or button support); the lamp each data lever sat on (x3,z2 / x3,z20) is white_wool, because the lamp only displayed the data and the comparator beside it reads the lever-powered block either way; the decorative signs are dropped; levers named a_d0..a_d7 / b_d0..b_d7, load buttons a_btn1 / b_btn1 (z1), shift buttons a_btn3 / b_btn3 (z3), output lamps a_q0..a_q7 / b_q0..b_q7 (a: x7,z6 in the lever layers; b: x7,z24 in the layers below them). How it works (INFERRED from the layout and from full per-tick traces of a load and a shift): each bit is a delay-1 repeater (x6,z2) used as a lock latch: a repeater locked from the side by another repeater (x6,z1) holds its value. Three dust ladders climb the tower: x6/x7,z0 (lock line), x3/x4,z0 (data mask line, used by Load) and x3/x4,z4 (shift line, used by Shift); all three are held HIGH at rest (the dust power decays 15 -> 0 with height, but each stage re-powers its own repeater). The base (y1) turns each button press into inverted pulses with a comparator that subtracts a 2 gt delayed copy of itself from the press, then a repeater: load drops the data-mask ladder, 2 gt later the lock ladder, and raises them back in the same order, so for a few ticks every stage's comparator (x4,z2) is unmasked and passes its lever's value onto the stage's node (x5,z2) while the stage's latch is unlocked, so the latch copies the lever. Shift drops the shift ladder and the lock ladder: the shift ladder unmasks each stage's output comparator (x6,z3 odd layer, subtract mode, rear = the stored bit read from the dust sitting on the latch's output wool), which passes the stored bit through a dust that climbs one layer (tower a, up) or descends to the node (tower b, which reads the bit of the stage above) to the neighbouring stage's node, in the window while every latch is unlocked; the latch (delay 1) and the output comparator (delay 1) both read the old value before any latch has changed, so there is no race and no master-slave pair is needed: the whole tower shifts in one pulse. The bit lamp is a repeater -> wool -> lamp chain off the same latch output. MEASURED: both towers load 0xA5, 0x5A, 0xFF, 0x00, 0x01, 0x80 (each checked unchanged by the lever change before Load), and shift 0x01, 0x80, 0xA5, 0xFF eight times each with the exact value after every shift (up: bit 7 falls off the end and zeros enter at bit 0; down the mirror image); levers moved after a load change nothing until Load is pressed again; a Load over a shifted 0xFF loads 0; two shifts a stone-button period (24 gt) apart both take effect. Timing at the lamps: after a Load or Shift press the new lamp is lit at +12 gt and the old lamp is dark at +16 gt (the 4 gt gap is the redstone lamp's own off delay, so the lamps show the old and the new bit lit together for 4 gt)."
+traits:
+- entityless
+- pistonless
+- torch_based
+palette:
+  .: air
+  A: white_wool
+  B: redstone_wire[east=side,north=none,south=none,west=side]
+  C: comparator[facing=west,mode=subtract]
+  D: repeater[delay=1,facing=west]
+  F: repeater[delay=2,facing=west]
+  G: redstone_wire[east=none,north=side,south=none,west=side]
+  H: redstone_wire[east=none,north=side,south=side,west=none]
+  I: redstone_wire[east=none,north=none,south=side,west=side]
+  '*': redstone_torch
+  K: lime_stained_glass
+  M: redstone_wire[east=none,north=up,south=side,west=none]
+  N: repeater[delay=1,facing=north]
+  O: redstone_wire[east=none,north=none,south=side,west=up]
+  P: redstone_wire[east=up,north=none,south=side,west=none]
+  T: redstone_wire[east=none,north=none,south=up,west=side]
+  U: redstone_wire[east=side,north=none,south=none,west=up]
+  V: redstone_wire[east=side,north=none,south=up,west=side]
+  W: redstone_wire[east=up,north=none,south=none,west=side]
+  X: redstone_wire[east=side,north=up,south=none,west=none]
+  Y: comparator[facing=east,mode=subtract]
+  Z: redstone_wire[east=side,north=side,south=none,west=none]
+  b: redstone_wire[east=none,north=up,south=side,west=side]
+  c: redstone_wire[east=side,north=none,south=side,west=side]
+  d: redstone_wire[east=side,north=none,south=side,west=none]
+  À:
+    name: a_btn1
+    block: stone_button[face=wall,facing=west]
+  Á:
+    name: a_btn3
+    block: stone_button[face=wall,facing=west]
+  Â:
+    name: b_btn1
+    block: stone_button[face=wall,facing=west]
+  Ã:
+    name: b_btn3
+    block: stone_button[face=wall,facing=west]
+  Ä:
+    name: b_q0
+    block: redstone_lamp
+  Å:
+    name: a_d0
+    block: lever[face=wall,facing=west]
+  Æ:
+    name: a_q0
+    block: redstone_lamp
+  Ç:
+    name: b_d0
+    block: lever[face=wall,facing=west]
+  È:
+    name: b_q1
+    block: redstone_lamp
+  É:
+    name: a_d1
+    block: lever[face=wall,facing=west]
+  Ê:
+    name: a_q1
+    block: redstone_lamp
+  Ë:
+    name: b_d1
+    block: lever[face=wall,facing=west]
+  Ì:
+    name: b_q2
+    block: redstone_lamp
+  Í:
+    name: a_d2
+    block: lever[face=wall,facing=west]
+  Î:
+    name: a_q2
+    block: redstone_lamp
+  Ï:
+    name: b_d2
+    block: lever[face=wall,facing=west]
+  Ð:
+    name: b_q3
+    block: redstone_lamp
+  Ñ:
+    name: a_d3
+    block: lever[face=wall,facing=west]
+  Ò:
+    name: a_q3
+    block: redstone_lamp
+  Ó:
+    name: b_d3
+    block: lever[face=wall,facing=west]
+  Ô:
+    name: b_q4
+    block: redstone_lamp
+  Õ:
+    name: a_d4
+    block: lever[face=wall,facing=west]
+  Ö:
+    name: a_q4
+    block: redstone_lamp
+  Ø:
+    name: b_d4
+    block: lever[face=wall,facing=west]
+  Ù:
+    name: b_q5
+    block: redstone_lamp
+  Ú:
+    name: a_d5
+    block: lever[face=wall,facing=west]
+  Û:
+    name: a_q5
+    block: redstone_lamp
+  Ü:
+    name: b_d5
+    block: lever[face=wall,facing=west]
+  Ý:
+    name: b_q6
+    block: redstone_lamp
+  Þ:
+    name: a_d6
+    block: lever[face=wall,facing=west]
+  ß:
+    name: a_q6
+    block: redstone_lamp
+  à:
+    name: b_d6
+    block: lever[face=wall,facing=west]
+  á:
+    name: b_q7
+    block: redstone_lamp
+  â:
+    name: a_d7
+    block: lever[face=wall,facing=west]
+  ã:
+    name: a_q7
+    block: redstone_lamp
+  ä:
+    name: b_d7
+    block: lever[face=wall,facing=west]
+layers:
+  0: |
+    .AAA.A..
+    ..AA..A.
+    ......A.
+    ..AA..A.
+    .AAA.A..
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    .AAA.A..
+    ..AA..A.
+    ......A.
+    ..AA..A.
+    .AAA.A..
+    ........
+    ........
+  1: |
+    .BBCADA.
+    ÀAFG..H.
+    ......H.
+    ÁAFI..H.
+    .BBCADA.
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    .BBCADA.
+    ÂAFG..H.
+    ......H.
+    ÃAFI..H.
+    .BBCADA.
+    ........
+    ........
+  2: |
+    ....*.*.
+    ........
+    ........
+    ........
+    ....*...
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ....*.*.
+    ........
+    ........
+    .......K
+    ....*..A
+    ........
+    ........
+  3: |
+    ....A.A.
+    ....A.A.
+    ....AAAK
+    ........
+    ....A..A
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ....A.A.
+    ....A.A.
+    ....AKAA
+    .......M
+    ....A..N
+    .......A
+    .......Ä
+  4: |
+    ...KO.PK
+    ....N.N.
+    ..ÅACBDT
+    .....KAA
+    ...KU.AN
+    .......A
+    .......Æ
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..ÇACVDI
+    .....AAK
+    ...KU.AA
+    ........
+    ........
+  5: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ...WKAHA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ...WKAHN
+    .......A
+    .......È
+  6: |
+    ...KO.PK
+    ....N.N.
+    ..ÉACcDT
+    .....KAA
+    ...KUDAN
+    .......A
+    .......Ê
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..ËACVDI
+    .....AAK
+    ...KUDAA
+    ........
+    ........
+  7: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ...WKAHA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ...WKAHN
+    .......A
+    .......Ì
+  8: |
+    ...KO.PK
+    ....N.N.
+    ..ÍACcDT
+    .....KAA
+    ...KUDAN
+    .......A
+    .......Î
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..ÏACVDI
+    .....AAK
+    ...KUDAA
+    ........
+    ........
+  9: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ...WKAHA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ...WKAHN
+    .......A
+    .......Ð
+  10: |
+    ...KO.PK
+    ....N.N.
+    ..ÑACcDT
+    .....KAA
+    ...KUDAN
+    .......A
+    .......Ò
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..ÓACVDI
+    .....AAK
+    ...KUDAA
+    ........
+    ........
+  11: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ...WKAHA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ...WKAHN
+    .......A
+    .......Ô
+  12: |
+    ...KO.PK
+    ....N.N.
+    ..ÕACcDT
+    .....KAA
+    ...KUDAN
+    .......A
+    .......Ö
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..ØACVDI
+    .....AAK
+    ...KUDAA
+    ........
+    ........
+  13: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ...WKAHA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ...WKAHN
+    .......A
+    .......Ù
+  14: |
+    ...KO.PK
+    ....N.N.
+    ..ÚACcDT
+    .....KAA
+    ...KUDAN
+    .......A
+    .......Û
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..ÜACVDI
+    .....AAK
+    ...KUDAA
+    ........
+    ........
+  15: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ...WKAHA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ...WKAHN
+    .......A
+    .......Ý
+  16: |
+    ...KO.PK
+    ....N.N.
+    ..ÞACcDT
+    .....KAA
+    ....BDAN
+    .......A
+    .......ß
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...KO.PK
+    ....N.N.
+    ..àACVDI
+    .....AAK
+    ....BDAA
+    ........
+    ........
+  17: |
+    ...WK.KU
+    ....A.A.
+    ....AAAK
+    .....XYG
+    ......HA
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ...WK.KU
+    ....A.A.
+    ....AKAA
+    .....ZYb
+    ......HN
+    .......A
+    .......á
+  18: |
+    ....I.d.
+    ....N.N.
+    ..âACcDT
+    .......A
+    .......N
+    .......A
+    .......ã
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ....I.d.
+    ....N.N.
+    ..äACBDI
+    .....A..
+    ........
+    ........
+    ........
+  19: |
+    ........
+    ........
+    ........
+    .......H
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+tests:
+- name: 'up: load 0xA5 0x5A 0xFF 0x00 0x01 0x80'
+  steps:
+  - {wait: 20}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_d0}
+  - {use: a_d2}
+  - {use: a_d5}
+  - {use: a_d7}
+  - {wait: 10}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 0, a_q2: 1, a_q3: 0, a_q4: 0, a_q5: 1, a_q6: 0, a_q7: 1}}
+  - {use: a_d0}
+  - {use: a_d1}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {use: a_d6}
+  - {use: a_d7}
+  - {wait: 10}
+  - {expect: {a_q0: 1, a_q1: 0, a_q2: 1, a_q3: 0, a_q4: 0, a_q5: 1, a_q6: 0, a_q7: 1}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 1, a_q2: 0, a_q3: 1, a_q4: 1, a_q5: 0, a_q6: 1, a_q7: 0}}
+  - {use: a_d0}
+  - {use: a_d2}
+  - {use: a_d5}
+  - {use: a_d7}
+  - {wait: 10}
+  - {expect: {a_q0: 0, a_q1: 1, a_q2: 0, a_q3: 1, a_q4: 1, a_q5: 0, a_q6: 1, a_q7: 0}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 1, a_q2: 1, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_d0}
+  - {use: a_d1}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {use: a_d6}
+  - {use: a_d7}
+  - {wait: 10}
+  - {expect: {a_q0: 1, a_q1: 1, a_q2: 1, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_d0}
+  - {wait: 10}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_d0}
+  - {use: a_d7}
+  - {wait: 10}
+  - {expect: {a_q0: 1, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 1}}
+- name: 'up: load 0x01 then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: a_d0}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 1, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 1, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 1, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 1, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 1, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 1, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+- name: 'up: load 0x80 then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: a_d7}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+- name: 'up: load 0xa5 then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: a_d0}
+  - {use: a_d2}
+  - {use: a_d5}
+  - {use: a_d7}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 0, a_q2: 1, a_q3: 0, a_q4: 0, a_q5: 1, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 1, a_q2: 0, a_q3: 1, a_q4: 0, a_q5: 0, a_q6: 1, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 1, a_q3: 0, a_q4: 1, a_q5: 0, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 1, a_q4: 0, a_q5: 1, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 1, a_q5: 0, a_q6: 1, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 1, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 1, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+- name: 'up: load 0xff then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: a_d0}
+  - {use: a_d1}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {use: a_d6}
+  - {use: a_d7}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 1, a_q2: 1, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 1, a_q2: 1, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 1, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+- name: 'up: levers alone change nothing, load replaces the shifted value'
+  steps:
+  - {wait: 20}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {use: a_d0}
+  - {use: a_d1}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {use: a_d6}
+  - {use: a_d7}
+  - {wait: 10}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 1, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 1, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 1, a_q5: 1, a_q6: 1, a_q7: 1}}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 1, a_q1: 1, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 1, a_q7: 1}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 1, a_q2: 1, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 1}}
+- name: 'up: load 0 over a shifted 0xFF'
+  steps:
+  - {wait: 20}
+  - {use: a_d0}
+  - {use: a_d1}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {use: a_d6}
+  - {use: a_d7}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {use: a_d0}
+  - {use: a_d1}
+  - {use: a_d2}
+  - {use: a_d3}
+  - {use: a_d4}
+  - {use: a_d5}
+  - {use: a_d6}
+  - {use: a_d7}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+  - {use: a_btn3}
+  - {wait: 40}
+  - {expect: {a_q0: 0, a_q1: 0, a_q2: 0, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}}
+- name: 'down: load 0xA5 0x5A 0xFF 0x00 0x01 0x80'
+  steps:
+  - {wait: 20}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_d0}
+  - {use: b_d2}
+  - {use: b_d5}
+  - {use: b_d7}
+  - {wait: 10}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 1, b_q3: 0, b_q4: 0, b_q5: 1, b_q6: 0, b_q7: 1}}
+  - {use: b_d0}
+  - {use: b_d1}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {use: b_d6}
+  - {use: b_d7}
+  - {wait: 10}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 1, b_q3: 0, b_q4: 0, b_q5: 1, b_q6: 0, b_q7: 1}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 0, b_q3: 1, b_q4: 1, b_q5: 0, b_q6: 1, b_q7: 0}}
+  - {use: b_d0}
+  - {use: b_d2}
+  - {use: b_d5}
+  - {use: b_d7}
+  - {wait: 10}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 0, b_q3: 1, b_q4: 1, b_q5: 0, b_q6: 1, b_q7: 0}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 1, b_q6: 1, b_q7: 1}}
+  - {use: b_d0}
+  - {use: b_d1}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {use: b_d6}
+  - {use: b_d7}
+  - {wait: 10}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 1, b_q6: 1, b_q7: 1}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_d0}
+  - {wait: 10}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_d0}
+  - {use: b_d7}
+  - {wait: 10}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 1}}
+- name: 'down: load 0x01 then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: b_d0}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+- name: 'down: load 0x80 then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 1}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 1, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 1, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 1, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 1, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 1, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+- name: 'down: load 0xa5 then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: b_d0}
+  - {use: b_d2}
+  - {use: b_d5}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 1, b_q3: 0, b_q4: 0, b_q5: 1, b_q6: 0, b_q7: 1}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 0, b_q3: 0, b_q4: 1, b_q5: 0, b_q6: 1, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 1, b_q4: 0, b_q5: 1, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 1, b_q3: 0, b_q4: 1, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 0, b_q3: 1, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 1, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+- name: 'down: load 0xff then shift 8 times'
+  steps:
+  - {wait: 20}
+  - {use: b_d0}
+  - {use: b_d1}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {use: b_d6}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 1, b_q6: 1, b_q7: 1}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 1, b_q6: 1, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 1, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+- name: 'down: levers alone change nothing, load replaces the shifted value'
+  steps:
+  - {wait: 20}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {use: b_d0}
+  - {use: b_d1}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {use: b_d6}
+  - {use: b_d7}
+  - {wait: 10}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 1, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 1, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 1, b_q3: 1, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 1, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 1, b_q7: 1}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 1, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 1, b_q6: 1, b_q7: 0}}
+- name: 'down: load 0 over a shifted 0xFF'
+  steps:
+  - {wait: 20}
+  - {use: b_d0}
+  - {use: b_d1}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {use: b_d6}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {use: b_d0}
+  - {use: b_d1}
+  - {use: b_d2}
+  - {use: b_d3}
+  - {use: b_d4}
+  - {use: b_d5}
+  - {use: b_d6}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+  - {use: b_btn3}
+  - {wait: 40}
+  - {expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 0, b_q6: 0, b_q7: 0}}
+- name: 'up: timing, load rises at +12, shift rises at +12 and the old bit goes dark at +16'
+  steps:
+  - {wait: 20}
+  - {use: a_d0}
+  - {wait: 10}
+  - {use: a_btn1}
+  - wave: {a_q0: '000000000000111111111111111111', a_q1: '000000000000000000'}
+  - {wait: 20}
+  - {use: a_btn3}
+  - wave: {a_q0: '1111111111111111000000', a_q1: '000000000000111111', a_q2: '000000000000000000'}
+- name: 'down: timing, load rises at +12, shift rises at +12 and the old bit goes dark at +16'
+  steps:
+  - {wait: 20}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - wave: {b_q7: '000000000000111111111111111111', b_q6: '000000000000000000'}
+  - {wait: 20}
+  - {use: b_btn3}
+  - wave: {b_q7: '1111111111111111000000', b_q6: '000000000000111111', b_q5: '000000000000000000'}
+- name: 'up: two shifts one button period apart (24 gt)'
+  steps:
+  - {wait: 20}
+  - {use: a_d0}
+  - {wait: 10}
+  - {use: a_btn1}
+  - {wait: 40}
+  - {use: a_btn3}
+  - {wait: 24}
+  - {use: a_btn3}
+  - {wait: 40}
+  - expect: {a_q0: 0, a_q1: 0, a_q2: 1, a_q3: 0, a_q4: 0, a_q5: 0, a_q6: 0, a_q7: 0}
+- name: 'down: two shifts one button period apart (24 gt)'
+  steps:
+  - {wait: 20}
+  - {use: b_d7}
+  - {wait: 10}
+  - {use: b_btn1}
+  - {wait: 40}
+  - {use: b_btn3}
+  - {wait: 24}
+  - {use: b_btn3}
+  - {wait: 40}
+  - expect: {b_q0: 0, b_q1: 0, b_q2: 0, b_q3: 0, b_q4: 0, b_q5: 1, b_q6: 0, b_q7: 0}

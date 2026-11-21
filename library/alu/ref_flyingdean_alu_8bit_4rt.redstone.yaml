@@ -1,0 +1,622 @@
+name: ref_flyingdean_alu_8bit_4rt
+description: 'Rebuild of ALU003 small 4rt alu, an 8-bit ALU by Flyingdean (endorsed by mattbatwings, Logical Redstone Archive, https://discord.com/channels/1361854816837435433/1472702174076342422), based on Aminotreal''s 3rt comparator carry adder. SOURCED: 9x10 footprint, inputs A and B (8 bit), !A, !B, Xor, And, Cin, Rsh, outputs C (8 bit) and Cout, 4rt for all operations. Eight bit slices of two layers stacked in y (bit 0 at the bottom, Cout lamp on top), A on the east lever column and B on the west one, container constants (barrels of wooden shovels, taken from the .schem block entities: strength 15 or 14, plus a 11/10/8/6/4/2/0 ladder up the middle column) read by compare and subtract comparators. Harness changes: each lever (the 16 operand levers, !A !B Xor And Cin Rsh) is a fixture repeater into the same lamp (a lever hard-powers the block it hangs on, a driver redstone block does not), so every input arrives 2 gt late (the delays below include that); signs and two stray glass corners dropped; the build is padded one cell on each side for the input cells. MEASURED (26.3, lamps read; falls include the lamp''s 4 gt, fixture repeater 2 gt): ops follow the control table when Cin is set as the table says, and the lamp-side rise is 8 gt (4rt) for add, xor, or, and, rsh sum bits; cout rise is 10 gt (5rt) for add; ~ outputs (not, xnor, nor, nand) rise in 14 gt (7rt); subtract cout rises in 16 gt (8rt). So 4rt holds for add, xor, or, and, rsh but not for every operation. Control levers (!A !B Xor And Cin Rsh): add 000000; A-B 010010 (with !A 100010 gives B-A, not A-B); ~A + B 100000 (so ~A needs B=0; ~B needs A=0); xor 001000; xnor !A or !B + Xor; or 111100; nor 110110; and 000110 (And and Cin both set; And alone gives (A and B) - 1); nand 001100; rsh 101111 gives A>>1 when B=0 and 011111 gives B>>1 when A=0 (a mixed A and B is not a plain shift). The table''s grey cells (either !A or !B) are not interchangeable everywhere: xnor is the same either way, subtract gives A-B with !B and B-A with !A, and rsh with !A shifts A while !B shifts B.'
+traits: [compact, vertical, pistonless, entityless, comparator_based, container_based, torch_based]
+palette:
+  '.': air
+  'L': redstone_lamp
+  'D': gray_concrete
+  'E': gray_stained_glass
+  '*': redstone_torch
+  'I': redstone_wire[east=side,north=none,south=side,west=none]
+  'J': repeater[delay=1,facing=east]
+  'K': redstone_wire[east=side,north=none,south=none,west=up]
+  'R': redstone_block
+  'M': comparator[facing=east,mode=subtract]
+  'N': redstone_wire[east=side,north=none,south=none,west=side]
+  'O': redstone_wire[east=none,north=side,south=up,west=none]
+  'P': redstone_wire[east=side,north=side,south=side,west=side]
+  'Q': redstone_wire[east=side,north=none,south=up,west=none]
+  'T': repeater[delay=1,facing=south]
+  'n': redstone_wall_torch[facing=north]
+  'U': repeater[delay=1,facing=west]
+  'V': comparator[facing=north,mode=subtract]
+  '(': redstone_wall_torch[facing=west]
+  'W': target
+  'X': redstone_wire[east=none,north=none,south=up,west=side]
+  'Y': redstone_wire[east=side,north=up,south=none,west=none]
+  'Z': redstone_wire[east=side,north=side,south=none,west=up]
+  'b': redstone_wire[east=side,north=up,south=none,west=side]
+  'c': comparator[facing=north,mode=compare]
+  'e': redstone_wire[east=none,north=up,south=side,west=side]
+  'f': redstone_wire[east=side,north=side,south=side,west=none]
+  'g': comparator[facing=west,mode=subtract]
+  'u': redstone_wall_torch[facing=south]
+  'h': redstone_wire[east=none,north=side,south=side,west=none]
+  'j': repeater[delay=2,facing=west]
+  'k': redstone_wire[east=side,north=none,south=side,west=side]
+  'l': redstone_wire[east=none,north=side,south=side,west=side]
+  'm': repeater[delay=2,facing=south]
+  'p': comparator[facing=west,mode=compare]
+  'q': redstone_wire[east=none,north=none,south=side,west=side]
+  'r': redstone_wire[east=none,north=up,south=none,west=up]
+  ')': redstone_wall_torch[facing=east]
+  's': redstone_wire[east=side,north=side,south=up,west=side]
+  't': redstone_wire[east=none,north=none,south=side,west=up]
+  'w': comparator[facing=east,mode=compare]
+  'x': redstone_wire[east=side,north=side,south=none,west=none]
+  'y': redstone_wire[east=up,north=none,south=none,west=side]
+  'z': redstone_wire[east=none,north=up,south=side,west=none]
+  '0': redstone_wire[east=side,north=up,south=side,west=none]
+  '1': redstone_wire[east=side,north=side,south=none,west=side]
+  '2': redstone_wire[east=none,north=side,south=none,west=side]
+  '3': repeater[delay=1,facing=north]
+  'a': {block: 'repeater[facing=west,delay=1]', fixture: true}
+  'o': {input: andm}
+  'v': {input: nB}
+  'S': {block: 'repeater[facing=east,delay=1]', fixture: true}
+  '4': {input: nA}
+  '5': {input: rsh}
+  '6': {block: 'repeater[facing=south,delay=1]', fixture: true}
+  '7': {input: cin}
+  '8': {name: c0, block: redstone_lamp}
+  '9': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1},{Slot:15b,id:"minecraft:wooden_shovel",count:1},{Slot:16b,id:"minecraft:wooden_shovel",count:1},{Slot:17b,id:"minecraft:wooden_shovel",count:1},{Slot:18b,id:"minecraft:wooden_shovel",count:1},{Slot:19b,id:"minecraft:wooden_shovel",count:1},{Slot:20b,id:"minecraft:wooden_shovel",count:1},{Slot:21b,id:"minecraft:wooden_shovel",count:1},{Slot:22b,id:"minecraft:wooden_shovel",count:1},{Slot:23b,id:"minecraft:wooden_shovel",count:1},{Slot:24b,id:"minecraft:wooden_shovel",count:1},{Slot:25b,id:"minecraft:wooden_shovel",count:1},{Slot:26b,id:"minecraft:wooden_shovel",count:1}]}'
+  'À': {block: 'repeater[facing=north,delay=1]', fixture: true}
+  'Á': {input: b0}
+  'Â': {input: a0}
+  'Ã': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1},{Slot:15b,id:"minecraft:wooden_shovel",count:1},{Slot:16b,id:"minecraft:wooden_shovel",count:1},{Slot:17b,id:"minecraft:wooden_shovel",count:1},{Slot:18b,id:"minecraft:wooden_shovel",count:1},{Slot:19b,id:"minecraft:wooden_shovel",count:1},{Slot:20b,id:"minecraft:wooden_shovel",count:1},{Slot:21b,id:"minecraft:wooden_shovel",count:1},{Slot:22b,id:"minecraft:wooden_shovel",count:1},{Slot:23b,id:"minecraft:wooden_shovel",count:1},{Slot:24b,id:"minecraft:wooden_shovel",count:1},{Slot:25b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ä': {input: xorm}
+  'Å': {name: c1, block: redstone_lamp}
+  'Æ': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1},{Slot:15b,id:"minecraft:wooden_shovel",count:1},{Slot:16b,id:"minecraft:wooden_shovel",count:1},{Slot:17b,id:"minecraft:wooden_shovel",count:1},{Slot:18b,id:"minecraft:wooden_shovel",count:1},{Slot:19b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ç': {input: b1}
+  'È': {input: a1}
+  'É': {name: c2, block: redstone_lamp}
+  'Ê': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1},{Slot:15b,id:"minecraft:wooden_shovel",count:1},{Slot:16b,id:"minecraft:wooden_shovel",count:1},{Slot:17b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ë': {input: b2}
+  'Ì': {input: a2}
+  'Í': {name: c3, block: redstone_lamp}
+  'Î': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1},{Slot:10b,id:"minecraft:wooden_shovel",count:1},{Slot:11b,id:"minecraft:wooden_shovel",count:1},{Slot:12b,id:"minecraft:wooden_shovel",count:1},{Slot:13b,id:"minecraft:wooden_shovel",count:1},{Slot:14b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ï': {input: b3}
+  'Ð': {input: a3}
+  'Ñ': {name: c4, block: redstone_lamp}
+  'Ò': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1},{Slot:6b,id:"minecraft:wooden_shovel",count:1},{Slot:7b,id:"minecraft:wooden_shovel",count:1},{Slot:8b,id:"minecraft:wooden_shovel",count:1},{Slot:9b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ó': {input: b4}
+  'Ô': {input: a4}
+  'Õ': {name: c5, block: redstone_lamp}
+  'Ö': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1},{Slot:2b,id:"minecraft:wooden_shovel",count:1},{Slot:3b,id:"minecraft:wooden_shovel",count:1},{Slot:4b,id:"minecraft:wooden_shovel",count:1},{Slot:5b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ø': {input: b5}
+  'Ù': {input: a5}
+  'Ú': {name: c6, block: redstone_lamp}
+  'Û': 'barrel[facing=up]{Items:[{Slot:0b,id:"minecraft:wooden_shovel",count:1},{Slot:1b,id:"minecraft:wooden_shovel",count:1}]}'
+  'Ü': {input: b6}
+  'Ý': {input: a6}
+  'Þ': {name: c7, block: redstone_lamp}
+  'ß': 'barrel[facing=up]{Items:[]}'
+  'à': {input: b7}
+  'á': {input: a7}
+  'â': {name: cout, block: redstone_lamp}
+  'ã': {block: gray_concrete, fixture: true}
+layers:
+  0: |
+    ..............
+    ..............
+    .ã............
+    ..............
+    .ã............
+    ............ã.
+    ..............
+    ..............
+    ..............
+    ............ã.
+    ..............
+    ..........ã...
+    ..............
+  1: |
+    ..............
+    ..............
+    oaL...........
+    ..............
+    vaL...........
+    ...........LS4
+    ..............
+    .......DD.E...
+    .......DD.....
+    ......E..D.LS5
+    ..........L...
+    ..........6...
+    ..........7...
+  2: |
+    ..............
+    ..............
+    ..*.....ED....
+    .........D....
+    ..*.DD.....D..
+    ..D..EED...*..
+    ........DE....
+    .......IJDK...
+    .....RDMN.....
+    ......ODDJD*..
+    ......8.D.P...
+    ..............
+    ..............
+  3: |
+    ..............
+    .....ã.....ã..
+    ..D.....QMD...
+    ...DDD..DTD...
+    ..DnUVDDD(WX..
+    ..YWDZbcD9.D..
+    .......DNe....
+    .ã.DDEDDDfE...
+    .....YgDDWD...
+    ......EVbu.D..
+    ......hDJD....
+    ..............
+    ..............
+  4: |
+    .....Á.....Â..
+    .....À.....À..
+    ..*E9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..DE....
+    ÄaLKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......Å.DNuD..
+    ..............
+    ..............
+  5: |
+    ..............
+    .....ã.....ã..
+    ..DKDpD.QMD...
+    ...DDDVwÆTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DNe....
+    ..yEDEDDDfE...
+    .....YpDEWD...
+    ......EVbu.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  6: |
+    .....Ç.....È..
+    .....À.....À..
+    ..yE9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..DE....
+    ..EKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......É.DNuE..
+    ..............
+    ..............
+  7: |
+    ..............
+    .....ã.....ã..
+    ..EKDpD.QMD...
+    ...DDDVwÊTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DNe....
+    ..yEDEDDDfE...
+    .....YpDEWD...
+    ......EVbu.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  8: |
+    .....Ë.....Ì..
+    .....À.....À..
+    ..yE9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..DE....
+    ..EKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......Í.DNuE..
+    ..............
+    ..............
+  9: |
+    ..............
+    .....ã.....ã..
+    ..EKDpD.QMD...
+    ...DDDVwÎTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DNe....
+    ..yEDEDDDfE...
+    .....YpDEWD...
+    ......EVbu.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  10: |
+    .....Ï.....Ð..
+    .....À.....À..
+    ..yE9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..DE....
+    ..EKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......Ñ.DNuE..
+    ..............
+    ..............
+  11: |
+    ..............
+    .....ã.....ã..
+    ..EKDpD.QMD...
+    ...DDDVwÒTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DNe....
+    ..yEDEDDDfE...
+    .....YpDEWD...
+    ......EVbu.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  12: |
+    .....Ó.....Ô..
+    .....À.....À..
+    ..yE9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..DE....
+    ..EKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......Õ.DNuE..
+    ..............
+    ..............
+  13: |
+    ..............
+    .....ã.....ã..
+    ..EKDpD.QMD...
+    ...DDDVwÖTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DNe....
+    ..yEDEDDDfE...
+    .....YpDEWD...
+    ......EVbu.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  14: |
+    .....Ø.....Ù..
+    .....À.....À..
+    ..yE9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..DE....
+    ..EKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......Ú.DNuE..
+    ..............
+    ..............
+  15: |
+    ..............
+    .....ã.....ã..
+    ..EKDpD.QMD...
+    ...DDDVwÛTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DNe....
+    ..yEDEDDDfE...
+    .....YpDEWD...
+    ......EVbu.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  16: |
+    .....Ü.....Ý..
+    .....À.....À..
+    ..yE9L..EDhL..
+    ..DjVNDDhDMÃ..
+    ..O.DDIkl.mE..
+    ..E.IEEWpqDr..
+    ....W)..D.....
+    ..EKUspkJDt...
+    .....EDwX.h...
+    ......ODE.WX..
+    ......Þ.DNuE..
+    ..............
+    ..............
+  17: |
+    ..............
+    .....ã.....ã..
+    ..EKDpD.QMD...
+    ...DDDVwßTD...
+    ..EnUVDDD(WX..
+    ..YWDZbcD9xE..
+    .......DyD....
+    ..yEDED..0....
+    .....xpD.WD...
+    .......V1u.E..
+    ......hDJD.z..
+    ..............
+    ..............
+  18: |
+    .....à.....á..
+    .....À.....À..
+    ..N.9L....hL..
+    ..DjVN..hDMÃ..
+    ..h.D.Ikl.m...
+    ....I..WpDW2..
+    ....W)...q....
+    ...NU1UD..R...
+    .....D.3..h...
+    ......(W..Wq..
+    ......âh.Nu...
+    ..............
+    ..............
+tests:
+- name: add
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 | 0 1 1 1 1 1 1 1 1
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 0 0 0 0 0 | 1 0 0 0 0 1 1 1 0
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 0 0
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 0 0 0 0 0 | 1 0 0 0 0 1 1 1 0
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+- name: add_carry_in
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 | 1 0 0 0 0 0 0 0 0
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 1 0 | 1 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 | 1 0 0 0 0 0 0 1 0
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 1 0 | 1 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 1 0 | 1 1 1 1 1 1 1 1 1
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 0 0 0 1 0 | 0 1 0 0 0 1 1 1 0
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 1 0
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 1 0 | 1 0 0 0 0 0 0 0 1
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 1 0 | 1 0 0 0 0 0 0 0 1
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 0 0 0 1 0 | 0 1 0 0 0 1 1 1 0
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+- name: sub_a_minus_b
+  settle: 30
+  delay: 20
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 0 0 1 0 | 0 1 1 1 1 1 1 1 1
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 0 0 1 0 | 1 1 1 1 1 1 1 1 1
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 1 0 0 1 0 | 0 1 1 1 1 1 1 0 1
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 1 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 1 0 0 1 0 | 1 1 0 1 0 1 0 1 0
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 1 0 0 1 0 | 1 0 0 1 0 1 1 0 1
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 1 0 0 1 0 | 1 0 0 1 0 0 1 0 1
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 1 0 0 1 0 | 0 0 0 0 0 1 1 1 1
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 0 0 1 0 | 0 1 0 0 0 0 0 0 0
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 1 0 0 1 0 | 1 1 1 0 1 0 0 1 0
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 0 0 1 0 | 1 1 1 1 1 0 0 0 0
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 0 0 1 0 | 1 0 0 0 0 0 0 0 0
+- name: sub_b_minus_a
+  settle: 30
+  delay: 20
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 1 0 0 0 1 0 | 0 1 0 0 0 0 0 0 0
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 0 0 0 1 0 | 1 0 0 0 0 0 0 0 0
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 0 0 1 0 | 0 1 0 0 0 0 0 1 0
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 1 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 0 | 0 0 0 0 0 0 0 0 1
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 1 0 0 0 1 0 | 1 0 1 0 1 0 1 0 1
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 1 0 0 0 1 0 | 1 1 1 0 1 0 0 1 0
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 1 0 0 0 1 0 | 1 1 1 0 1 1 0 1 0
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 | 0 0 0 0 0 1 0 0 0
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 0 | 0 1 1 1 1 1 1 1 1
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 1 0 0 0 1 0 | 1 0 0 1 0 1 1 0 1
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 1 0 0 0 1 0 | 1 0 0 0 0 1 1 1 1
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 0 | 1 1 1 1 1 1 1 1 1
+- name: not_a_with_b_zero
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+      1 0 1 0 0 1 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 1 0 1 1 0 1 0 0
+      0 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 1 0 1 0 0 1 0 1 0
+      1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 1 1 1 1 1 1 1 0
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 1 1 1 1 1 1 1 0 0
+- name: not_b_with_a_zero
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+      0 0 0 0 0 0 0 0 1 0 1 0 0 1 0 1 0 1 0 0 0 0 | 0 1 0 1 1 0 1 0 0
+      0 0 0 0 0 0 0 0 0 1 0 1 1 0 1 0 0 1 0 0 0 0 | 1 0 1 0 0 1 0 1 0
+      0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 | 0 1 1 1 1 1 1 1 0
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0 | 1 1 1 1 1 1 1 0 0
+- name: xor
+  settle: 30
+  delay: 14
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 0 0 0 | 0 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 | 0 1 1 1 1 1 1 0 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 0 1 0 0 0 | 1 0 0 1 1 0 0 1 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 0 1 0 0 0 | 1 1 1 1 1 1 1 0 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 | 0 0 0 0 0 1 1 1 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 0 0 0 | 0 1 1 1 1 1 1 1 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 0 1 0 0 0 | 1 0 0 1 1 0 0 1 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+- name: xnor_via_not_b
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 0 0 0 | 1 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 1 1 0 0 0 | 1 0 0 0 0 0 0 1 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 1 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 1 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 1 1 0 0 0 | 0 1 1 0 0 1 1 0 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 1 1 0 0 0 | 0 0 0 0 0 0 0 1 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 | 1 1 1 1 1 0 0 0 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 1 0 0 0 | 1 0 0 0 0 0 0 0 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 1 1 0 0 0 | 0 1 1 0 0 1 1 0 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+- name: xnor_via_not_a
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 1 0 1 0 0 0 | 1 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 1 0 1 0 0 0 | 1 0 0 0 0 0 0 1 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 1 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 0 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 1 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 1 0 1 0 0 0 | 0 1 1 0 0 1 1 0 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 1 0 1 0 0 0 | 0 0 0 0 0 0 0 1 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 1 0 1 0 0 0 | 1 1 1 1 1 0 0 0 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 0 0 | 1 0 0 0 0 0 0 0 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 1 0 1 0 0 0 | 0 1 1 0 0 1 1 0 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 1 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 0 0 | 0 0 0 0 0 0 0 0 x
+- name: or
+  settle: 30
+  delay: 14
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 1 1 1 1 0 0 | 1 1 1 1 1 1 1 0 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 1 1 1 1 0 0 | 0 0 0 0 0 0 0 1 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 1 1 1 1 0 0 | 1 0 1 1 1 1 0 1 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 1 1 1 1 0 0 | 1 1 1 1 1 1 1 0 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 1 1 1 1 0 0 | 0 0 0 0 1 1 1 1 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 1 1 1 1 0 0 | 1 0 1 1 1 1 0 1 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+- name: nor
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 1 1 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 1 1 0 1 1 0 | 0 0 0 0 0 0 0 1 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 1 1 0 1 1 0 | 1 1 1 1 1 1 1 0 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 1 1 0 1 1 0 | 0 1 0 0 0 0 1 0 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 1 1 0 1 1 0 | 0 0 0 0 0 0 0 1 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 1 1 0 1 1 0 | 1 1 1 1 0 0 0 0 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 1 1 0 1 1 0 | 0 1 0 0 0 0 1 0 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+- name: and
+  settle: 30
+  delay: 14
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 1 1 0 | 1 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 0 0 1 1 0 | 1 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 1 1 0 | 0 0 0 0 0 0 0 1 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 0 0 1 1 0 | 0 0 1 0 0 1 0 0 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 1 1 0 | 0 0 0 0 1 0 0 0 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 1 1 0 | 1 0 0 0 0 0 0 0 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 0 0 1 1 0 | 0 0 1 0 0 1 0 0 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 1 1 0 | 0 0 0 0 0 0 0 0 x
+- name: nand
+  settle: 30
+  delay: 16
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 0 0 | 0 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 0 0 1 1 0 0 | 0 1 1 1 1 1 1 1 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 1 1 0 0 | 1 1 1 1 1 1 1 0 x
+      1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 0 0 | 0 0 0 0 0 0 0 0 x
+      1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 0 0 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      1 0 1 0 0 1 0 1 0 0 1 1 1 1 0 0 0 0 1 1 0 0 | 1 1 0 1 1 0 1 1 x
+      0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 0 0 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      0 0 0 0 1 1 1 1 0 0 0 0 1 0 0 0 0 0 1 1 0 0 | 1 1 1 1 0 1 1 1 x
+      1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 1 0 0 | 0 1 1 1 1 1 1 1 x
+      0 0 1 1 1 1 0 0 1 0 1 0 0 1 0 1 0 0 1 1 0 0 | 1 1 0 1 1 0 1 1 x
+      1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 0 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 1 0 0 | 1 1 1 1 1 1 1 1 x
+- name: rsh_a_with_b_zero
+  settle: 30
+  delay: 14
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 0 0 0 0 0 0 0 0 x
+      1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 1 1 1 1 1 1 1 0 x
+      1 0 1 0 0 1 0 1 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 0 1 0 0 1 0 1 0 x
+      0 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 1 0 1 1 0 1 0 0 x
+      1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 0 0 0 0 0 0 1 0 x
+      1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 1 1 1 1 1 1 0 0 x
+      0 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 0 0 1 1 1 | 1 1 1 1 1 1 1 0 x
+- name: rsh_b_with_a_zero
+  settle: 30
+  delay: 14
+  truth_table: |
+      a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 nA nB xorm andm cin rsh | c0 c1 c2 c3 c4 c5 c6 c7 cout
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 1 1 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 0 1 1 1 | 1 1 1 1 1 1 1 0 x
+      0 0 0 0 0 0 0 0 1 0 1 0 0 1 0 1 0 1 0 1 1 1 | 0 1 0 0 1 0 1 0 x
+      0 0 0 0 0 0 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 1 | 1 0 1 1 0 1 0 0 x
+      0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 1 1 1 | 0 0 0 0 0 0 0 0 x
+      0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 1 1 1 | 0 0 0 0 0 0 1 0 x
+      0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 0 0 1 0 1 1 1 | 1 1 1 1 1 1 0 0 x
+      0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 0 1 0 1 1 1 | 1 1 1 1 1 1 1 0 x

@@ -1,0 +1,192 @@
+name: ref_mattbatwings_fast_priority
+description: >-
+  mattbatwings' Fast Priority Circuit (Logical Redstone Archive OTHERCOMB006, discord.com/channels/1361854816837435433/1472424912982642832;
+  README: outputs the rightmost input, synchronized and fast, 2 ticks). Four levers to four lamps, 10x3x7. Each lever's signal runs west
+  along a dust row; row k above it passes through subtract comparators (side-fed by the dust of the rows before) that cancel the
+  lower-index inputs, with repeaters and glass bridges (dust up over yellow glass) crossing rows. Changed: the lever's display
+  lamp is white concrete (the harness cannot flip a lever on a lamp); levers are flipped by steps (use). MEASURED on a laptop satellite
+  in 26.3: all 16 combinations give the one-hot of the lowest-numbered (north-most) set lever; every output rises exactly 4 gt
+  (2 redstone ticks, matching the README) after the click whichever row, and a taken-over output falls 8 gt (the lamp's 4 gt
+  off delay after the same 4), so the circuit is synchronized with no ripple.
+palette:
+  .: air
+  A: yellow_wool
+  '#': white_concrete
+  B: repeater[delay=2,facing=east]
+  C: redstone_wire[east=side,north=none,south=side,west=side]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: redstone_wire[east=side,north=none,south=up,west=side]
+  G: repeater[delay=1,facing=north]
+  H: yellow_stained_glass
+  I: comparator[facing=east,mode=subtract]
+  J: repeater[delay=1,facing=east]
+  K: redstone_wire[east=side,north=none,south=none,west=up]
+  M: redstone_wire[east=none,north=side,south=side,west=none]
+  N: redstone_wire[east=side,north=side,south=none,west=none]
+  '0': {output: o0, block: redstone_lamp}
+  '1': {output: o1, block: redstone_lamp}
+  '2': {output: o2, block: redstone_lamp}
+  '3': {output: o3, block: redstone_lamp}
+  a: {name: lv0, block: 'lever[face=wall,facing=east]'}
+  b: {name: lv1, block: 'lever[face=wall,facing=east]'}
+  c: {name: lv2, block: 'lever[face=wall,facing=east]'}
+  d: {name: lv3, block: 'lever[face=wall,facing=east]'}
+layers:
+  0: |
+    .AAAAAAA..
+    ..A.......
+    .AAA.AAA..
+    ....A.....
+    .AAAAA.A..
+    ......A...
+    .AAAAAAA..
+  1: |
+    0BCDEDDD#a
+    ..G.H.....
+    1DIJAKED#b
+    ....G.H...
+    2DDDIJAK#c
+    ......G...
+    3DDDDDIJ#d
+  2: |
+    ..........
+    ....M.....
+    ....N.....
+    ......M...
+    ......N...
+    ..........
+    ..........
+tests:
+- name: v0000
+  settle: 30
+  steps:
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 0}
+- name: v0001
+  settle: 30
+  steps:
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 0, o3: 1}
+- name: v0010
+  settle: 30
+  steps:
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+- name: v0011
+  settle: 30
+  steps:
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 0, o2: 1, o3: 0}
+- name: v0100
+  settle: 30
+  steps:
+  - use: lv1
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v0101
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v0110
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v0111
+  settle: 30
+  steps:
+  - use: lv1
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 0, o1: 1, o2: 0, o3: 0}
+- name: v1000
+  settle: 30
+  steps:
+  - use: lv0
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1001
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1010
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1011
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1100
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1101
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1110
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv2
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: v1111
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv1
+  - use: lv2
+  - use: lv3
+  - wait: 40
+  - expect: {o0: 1, o1: 0, o2: 0, o3: 0}
+- name: a3_alone_rises
+  settle: 30
+  steps:
+  - wait: 40
+  - use: lv3
+  - wave: {o3: '000011111111', o0: '000000000000'}
+- name: a0_takes_over_from_a3
+  settle: 30
+  steps:
+  - use: lv3
+  - wait: 40
+  - use: lv0
+  - wave: {o0: '000011111111', o3: '111111110000'}
+- name: a0_released_to_a3
+  settle: 30
+  steps:
+  - use: lv0
+  - use: lv3
+  - wait: 40
+  - use: lv0
+  - wave: {o0: '111111110000', o3: '000011111111'}

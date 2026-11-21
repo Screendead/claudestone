@@ -1,0 +1,156 @@
+name: ref_unknown_redcoder_3wide
+description: "Source (SOURCED): mattbatwings' Logical Redstone Archive REDCODE002, '3-wide Redcoder' (no author listed, endorsed by mattbatwings, Tested & Functional; Discord https://discord.com/channels/1361854816837435433/1472406662005653629): hex number in, 16b one-hot out. 18x3x4 as rebuilt. A signal-strength to one-hot decoder made of two decaying dust thermometers one block apart (INFERRED, confirmed by the per-strength tests). The comparator at x=16,y=1,z=2 pushes strength s into the wool at x=15; that strongly powers the dust at x=14,y=1, which decays 1 per block west along y=1, and the dust above it at x=15,y=2, which climbs to a second line on y=3 that starts one block weaker. At column x the y=1 line is lit iff s >= 15-x and the y=3 line iff s >= 16-x. The y=1 dust powers a target block that turns its wall torch off; the y=3 dust powers the wool under a delay-2 repeater (facing south: input z=2, output z=0) that powers the wool above that torch; the standing torch on that wool is the output, lit iff the y=1 line is lit and the y=3 line is not, that is s = 15-x. Output o<s> is column 15-s; s=0 lights nothing (the sixteenth bit is the absence). Column 14 has a subtract comparator in place of the repeater, fed by a barrel holding one item through a compare comparator: it subtracts 1 from the strength there because column 14's y=3 dust is fed by the climb at s, not s-1 (MEASURED: with an empty barrel s=1 lights nothing). Changed for the harness (the schematic has no input): a hopper at x=17 as the comparator's container, set with data merge (fixture, outside the size). The post gives no speed. MEASURED: each strength s0..s15 lights exactly its line; the new line is on 6 ticks after the hopper changes, rising and falling alike (the first 2 are the input comparator); going 8 to 9 the new line rises at 6 and the old drops at 8 (two lines for two ticks), going 9 to 8 the new rises at 8 and the old drops at 6 (no line for two ticks), because the two thermometer paths differ in length."
+traits: [analog, silent, pistonless, entityless]
+palette:
+  .: air
+  A: gray_wool
+  B: glass
+  n: redstone_wall_torch[facing=north]
+  C: target
+  D: redstone_wire[east=side,north=side,south=none,west=none]
+  E: redstone_wire[east=side,north=side,south=none,west=side]
+  F: redstone_wire[east=none,north=side,south=none,west=side]
+  G: comparator[facing=east,mode=compare]
+  H: repeater[delay=2,facing=south]
+  I: comparator[facing=south,mode=subtract]
+  J: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'
+  K: redstone_wire[east=none,north=side,south=none,west=up]
+  M: redstone_wire[east=side,north=none,south=none,west=side]
+  P: {name: in, block: 'hopper[facing=down]', fixture: true}
+  a: {output: o15, block: redstone_torch}
+  b: {output: o14, block: redstone_torch}
+  c: {output: o13, block: redstone_torch}
+  d: {output: o12, block: redstone_torch}
+  e: {output: o11, block: redstone_torch}
+  f: {output: o10, block: redstone_torch}
+  g: {output: o9, block: redstone_torch}
+  h: {output: o8, block: redstone_torch}
+  i: {output: o7, block: redstone_torch}
+  j: {output: o6, block: redstone_torch}
+  k: {output: o5, block: redstone_torch}
+  l: {output: o4, block: redstone_torch}
+  m: {output: o3, block: redstone_torch}
+  o: {output: o2, block: redstone_torch}
+  p: {output: o1, block: redstone_torch}
+layers:
+  0: |
+    ..................
+    ..................
+    AAAAAAAAAAAAAAA.AB
+  1: |
+    nnnnnnnnnnnnnnn...
+    CCCCCCCCCCCCCCCA..
+    DEEEEEEEEEEEEEFAGP
+  2: |
+    AAAAAAAAAAAAAAA...
+    HHHHHHHHHHHHHHIGJ.
+    AAAAAAAAAAAAAAAK..
+  3: |
+    abcdefghijklmop...
+    ..................
+    MMMMMMMMMMMMMMM...
+tests:
+- name: s0
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s1
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:1}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 1}
+- name: s2
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:23}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 1, o1: 0}
+- name: s3
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:46}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 1, o2: 0, o1: 0}
+- name: s4
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:5}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 1, o3: 0, o2: 0, o1: 0}
+- name: s5
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:28}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 1, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s6
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:51}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 1, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s7
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:10}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 1, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s8
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 1, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s9
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 1, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s10
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:14}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 0, o10: 1, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s11
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:37}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 0, o11: 1, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s12
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:60}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 0, o12: 1, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s13
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:19}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 0, o13: 1, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s14
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:42}]}'}
+  - {wait: 12}
+  - expect: {o15: 0, o14: 1, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: s15
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'}
+  - {wait: 12}
+  - expect: {o15: 1, o14: 0, o13: 0, o12: 0, o11: 0, o10: 0, o9: 0, o8: 0, o7: 0, o6: 0, o5: 0, o4: 0, o3: 0, o2: 0, o1: 0}
+- name: rise
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[]}'}
+  - {wait: 20}
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - wave: {o8: '00000011111111'}
+- name: fall
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 20}
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[]}'}
+  - wave: {o8: '11111100000000'}
+- name: step up 8->9 overlaps two ticks
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - {wait: 20}
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - wave: {o8: '111111110000000', o9: '000000111111111'}
+- name: step down 9->8 gaps two ticks
+  steps:
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:55}]}'}
+  - {wait: 20}
+  - {run: 'data merge block ~17 ~1 ~2 {Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:32}]}'}
+  - wave: {o8: '000000001111111', o9: '111111000000000'}

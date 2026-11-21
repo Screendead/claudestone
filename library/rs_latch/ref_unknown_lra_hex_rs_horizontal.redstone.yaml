@@ -1,0 +1,108 @@
+name: ref_unknown_lra_hex_rs_horizontal
+description: >-
+  Rebuild of Logical Redstone Archive LFF001 "Horizontal Hex Set-Reset (SR) Latch"
+  (author not named in the README; https://discord.com/channels/1361854816837435433/1472421213807575081).
+  SOURCED: becomes Set when set is pressed, or Reset when reset is pressed ("hex" = it
+  stores a signal strength 0-15). Traced and MEASURED: the data input is the dust ds at the
+  south end (the yellow-wool marker); comparator f carries it into the wool above it, dust dm
+  carries it to the subtract comparator g, and g's output goes into the wool beside ds, which
+  strongly powers ds again: a comparator loop that holds the strength with no decay. The
+  button powers dust dh, the side input of g, so g falls to 0 for as long as it is held and
+  g and ds fall 4 gt after the press and f and dm 6 gt. Comparator c in the north-west corner reads nothing (always 0 in
+  these tests; its input cell is empty air), kept as built; rep, the repeater that carries
+  the button to dh, is also kept. Set strength is whatever arrives at ds (dust takes the
+  maximum, so a larger value overwrites and a smaller one is ignored, MEASURED below).
+  Harness changes: the set side is a fixture comparator src reading a fixture composter
+  pot (levels 3, 6, 8; 7 ripens by itself), the wool under the button is plain white, and the
+  yellow marker wool is white. 3x3x5 as built (the fixtures extend it to 7 rows).
+traits: [pistonless]
+palette:
+  .: air
+  A: white_wool
+  C: {name: c, block: 'comparator[facing=north,mode=compare]'}
+  D: {name: dm, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  E: {name: rep, block: 'repeater[delay=1,facing=north]'}
+  F: {name: f, block: 'comparator[facing=south,mode=compare]'}
+  G: {name: g, block: 'comparator[facing=north,mode=subtract]'}
+  H: {name: dh, block: 'redstone_wire[east=none,north=side,south=none,west=side]'}
+  Y: {name: ds, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  I: {name: btn, block: 'stone_button[face=floor,facing=south]'}
+  W: {fixture: true, block: white_wool}
+  S: {name: src, fixture: true, block: 'comparator[facing=south,mode=compare]'}
+  P: {name: pot, fixture: true, block: 'composter[level=0]'}
+layers:
+  0: |
+    A..
+    A..
+    .AA
+    AAA
+    A..
+    W..
+    W..
+  1: |
+    ...
+    C.A
+    ADE
+    FGH
+    YA.
+    S..
+    P..
+  2: |
+    ...
+    ..I
+    ...
+    ...
+    ...
+    ...
+    ...
+tests:
+- name: hold and reset
+  steps:
+  - {wait: 20}
+  - run: setblock ~0 ~1 ~6 composter[level=3]
+  - {wait: 10}
+  - run: setblock ~0 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {ds: 3, f: 3, g: 3}
+  - use: btn
+  - {wait: 20}
+  - level: {ds: 0, f: 0, g: 0}
+  - run: setblock ~0 ~1 ~6 composter[level=6]
+  - {wait: 10}
+  - run: setblock ~0 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {ds: 6, f: 6, g: 6}
+  - use: btn
+  - {wait: 20}
+  - level: {ds: 0, f: 0, g: 0}
+  - run: setblock ~0 ~1 ~6 composter[level=8]
+  - {wait: 10}
+  - run: setblock ~0 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {ds: 8, f: 8, g: 8}
+  - use: btn
+  - {wait: 20}
+  - level: {ds: 0, f: 0, g: 0}
+- name: max wins
+  steps:
+  - {wait: 20}
+  - run: setblock ~0 ~1 ~6 composter[level=8]
+  - {wait: 10}
+  - run: setblock ~0 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {g: 8}
+  - run: setblock ~0 ~1 ~6 composter[level=3]
+  - {wait: 20}
+  - level: {g: 8}
+  - run: setblock ~0 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {g: 8, ds: 8}
+- name: reset drain timing
+  steps:
+  - {wait: 20}
+  - run: setblock ~0 ~1 ~6 composter[level=6]
+  - {wait: 20}
+  - run: setblock ~0 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - use: btn
+  - wave: {g: '11110000', ds: '11110000', f: '1111110000', dm: '1111110000'}

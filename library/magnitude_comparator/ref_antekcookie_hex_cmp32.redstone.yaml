@@ -1,0 +1,8649 @@
+name: ref_antekcookie_hex_cmp32
+description: 'Reference rebuild of OTHERCOMB018 "32 bit Hex Comparator" from mattbatwings'' Logical Redstone Archive (author AntekCookie; endorsed by Mixel; Tested & Functional; README speed "10rt"; https://discord.com/channels/1361854816837435433/1495474063286603948). SOURCED: compares two 32-bit hex values (eight hex digits each) and lights one of three flags, A<B, A>B, A=B. Rebuilt: 5x16x14 as placed. Eight identical 2-layer stages at y=1+2k (k = digit, y=15 the MSB, MEASURED), the same comparator tree as the 8-bit OTHERCOMB017 (library/magnitude_comparator/ref_antekcookie_cmp8) with the input end changed: each digit is a signal strength 0-15, not a bit. A digit''s input is a container behind a compare comparator (INFERRED: A at x=0, B at x=3, z=13, MEASURED by the tests: A is the x=0 side, and lt lights when B is larger); the schematic holds no containers (undefined blocks), so the harness adds 16 barrels as fixtures and the tests set the strength with insert (27 stacks of 64 stone is 15, strength s needs ceil((s-1)*27/14) stacks). INFERRED from the layers: a digit''s pair of strengths goes through compare and subtract comparators (a-b and b-a, saturating at 0) into per-digit gt/lt dust and a per-digit target block, and the shared top layers 14-15 reduce the eight stages to three lamps with compare comparators, a torch and targets as in cmp8. Harness changes: the three output lamps kept as outputs eq, lt, gt; the two signs per stage dropped; barrels added behind the input comparators. MEASURED: 4 tests pass: 17 edge vectors plus one-digit-differs for all 8 digits both ways; 24 random pairs sharing a random-length prefix; all 256 digit pairs of the lowest digit; all 256 digit pairs of the top digit with lower digits A=0000000 B=FFFFFFF (so only the top digit decides unless equal, then B wins); every one waits 26 ticks. Timing (MEASURED over 57 transitions, edges plus random, changes at any digit): rises eq 16, lt 18, gt 14 gt; falls eq 20, lt 24, gt 18 gt, the same for the lowest and the top digit (the stages work in parallel, only the reduction layers differ), so the outputs are right 24 gt (12 rt) after the change. The README''s 10rt (20 gt) holds for eq falling, gt falling and all rises but not lt falling (24 gt). Not glitch-free: on the change gt -> equal, eq and lt are both lit from tick 16 until lt falls at 24; the timing test pins these waves tick by tick for 16 transitions.'
+traits:
+- analog
+- comparator_based
+- container_based
+- silent
+- pistonless
+- entityless
+palette:
+  .: air
+  A: orange_stained_glass
+  B: orange_wool
+  D: redstone_wire[east=none,north=up,south=side,west=none]
+  E: repeater[delay=1,facing=south]
+  F: redstone_wire[east=side,north=none,south=none,west=side]
+  G: comparator[facing=south,mode=subtract]
+  H: target
+  I: redstone_wire[east=none,north=side,south=side,west=side]
+  J: comparator[facing=south,mode=compare]
+  K: redstone_wire[east=side,north=side,south=none,west=none]
+  M: redstone_wire[east=none,north=side,south=up,west=none]
+  N: redstone_wire[east=side,north=side,south=side,west=side]
+  O: repeater[delay=1,facing=west]
+  P: comparator[facing=east,mode=subtract]
+  n: redstone_wall_torch[facing=north]
+  Q: redstone_wire[east=none,north=side,south=none,west=side]
+  T: redstone_wire[east=side,north=side,south=side,west=none]
+  a:
+    name: a0
+    block: barrel[facing=up,open=false]
+    fixture: true
+  i:
+    name: b0
+    block: barrel[facing=up,open=false]
+    fixture: true
+  b:
+    name: a1
+    block: barrel[facing=up,open=false]
+    fixture: true
+  j:
+    name: b1
+    block: barrel[facing=up,open=false]
+    fixture: true
+  c:
+    name: a2
+    block: barrel[facing=up,open=false]
+    fixture: true
+  k:
+    name: b2
+    block: barrel[facing=up,open=false]
+    fixture: true
+  d:
+    name: a3
+    block: barrel[facing=up,open=false]
+    fixture: true
+  l:
+    name: b3
+    block: barrel[facing=up,open=false]
+    fixture: true
+  e:
+    name: a4
+    block: barrel[facing=up,open=false]
+    fixture: true
+  m:
+    name: b4
+    block: barrel[facing=up,open=false]
+    fixture: true
+  f:
+    name: a5
+    block: barrel[facing=up,open=false]
+    fixture: true
+  o:
+    name: b5
+    block: barrel[facing=up,open=false]
+    fixture: true
+  g:
+    name: a6
+    block: barrel[facing=up,open=false]
+    fixture: true
+  p:
+    name: b6
+    block: barrel[facing=up,open=false]
+    fixture: true
+  h:
+    name: a7
+    block: barrel[facing=up,open=false]
+    fixture: true
+  q:
+    name: b7
+    block: barrel[facing=up,open=false]
+    fixture: true
+  V:
+    output: eq
+    block: redstone_lamp
+  W:
+    output: lt
+    block: redstone_lamp
+  X:
+    output: gt
+    block: redstone_lamp
+layers:
+  0: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  1: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    a..i.
+    .....
+  2: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    M..M.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  3: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    b..j.
+    .....
+  4: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    M..M.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  5: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    c..k.
+    .....
+  6: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    M..M.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  7: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    d..l.
+    .....
+  8: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    M..M.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  9: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    e..m.
+    .....
+  10: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    M..M.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  11: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    f..o.
+    .....
+  12: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    M..M.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  13: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    A..A.
+    DBBD.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    g..p.
+    .....
+  14: |
+    .....
+    B.BB.
+    .B.B.
+    .B.B.
+    .BB..
+    MBBM.
+    A..A.
+    .BB..
+    BBBB.
+    ..B..
+    BBBB.
+    .B...
+    B..B.
+    B..B.
+    .....
+  15: |
+    V..W.
+    NBOG.
+    BPnQ.
+    .EBOX
+    .TG..
+    .JJ..
+    KHHQ.
+    .EE..
+    FGGF.
+    BHIB.
+    JJJJ.
+    BKHB.
+    J..J.
+    h..q.
+    .....
+  16: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+tests:
+- name: edges and per-digit
+  steps:
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: &id001
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - insert:
+      cell: a1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: a2
+      clear: true
+      items: *id001
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: a3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+      items: *id001
+  - insert:
+      cell: b4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+      items: *id001
+  - insert:
+      cell: b6
+      clear: true
+      items: *id001
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: &id002
+      - id: stone
+        count: 64
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b4
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b6
+      clear: true
+      items: *id001
+  - insert:
+      cell: a7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id001
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+      items: *id001
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+      items: *id001
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+      items: *id001
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: &id004
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b7
+      clear: true
+      items: &id003
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+      items: *id001
+  - insert:
+      cell: a7
+      clear: true
+      items: *id003
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id001
+  - insert:
+      cell: a1
+      clear: true
+      items: &id005
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b1
+      clear: true
+      items: *id005
+  - insert:
+      cell: a2
+      clear: true
+      items: *id005
+  - insert:
+      cell: b2
+      clear: true
+      items: *id005
+  - insert:
+      cell: a3
+      clear: true
+      items: &id006
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b3
+      clear: true
+      items: *id006
+  - insert:
+      cell: a4
+      clear: true
+      items: &id007
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b4
+      clear: true
+      items: *id007
+  - insert:
+      cell: a5
+      clear: true
+      items: &id008
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b5
+      clear: true
+      items: *id008
+  - insert:
+      cell: a6
+      clear: true
+      items: *id005
+  - insert:
+      cell: b6
+      clear: true
+      items: *id005
+  - insert:
+      cell: a7
+      clear: true
+      items: *id007
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+      items: *id001
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+      items: *id001
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+      items: *id001
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+      items: *id001
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id003
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - insert:
+      cell: a1
+      clear: true
+      items: *id004
+  - insert:
+      cell: b1
+      clear: true
+      items: *id004
+  - insert:
+      cell: a2
+      clear: true
+      items: &id009
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b2
+      clear: true
+      items: *id009
+  - insert:
+      cell: a3
+      clear: true
+      items: &id010
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b3
+      clear: true
+      items: *id010
+  - insert:
+      cell: a4
+      clear: true
+      items: &id011
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b4
+      clear: true
+      items: *id011
+  - insert:
+      cell: a5
+      clear: true
+      items: &id012
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b5
+      clear: true
+      items: *id012
+  - insert:
+      cell: a6
+      clear: true
+      items: &id013
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: b6
+      clear: true
+      items: *id013
+  - insert:
+      cell: a7
+      clear: true
+      items: *id002
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: &id015
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id002
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+- name: random pairs, shared prefix
+  steps:
+  - insert:
+      cell: a0
+      clear: true
+      items: *id012
+  - insert:
+      cell: b0
+      clear: true
+      items: &id014
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: a1
+      clear: true
+      items: *id010
+  - insert:
+      cell: b1
+      clear: true
+      items: *id004
+  - insert:
+      cell: a2
+      clear: true
+      items: *id002
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: a3
+      clear: true
+      items: *id004
+  - insert:
+      cell: b3
+      clear: true
+      items: *id004
+  - insert:
+      cell: a4
+      clear: true
+      items: *id005
+  - insert:
+      cell: b4
+      clear: true
+      items: *id005
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+      items: *id006
+  - insert:
+      cell: b6
+      clear: true
+      items: *id006
+  - insert:
+      cell: a7
+      clear: true
+      items: *id003
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id014
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id011
+  - insert:
+      cell: a2
+      clear: true
+      items: *id003
+  - insert:
+      cell: b2
+      clear: true
+      items: *id011
+  - insert:
+      cell: a3
+      clear: true
+      items: *id007
+  - insert:
+      cell: b3
+      clear: true
+      items: *id005
+  - insert:
+      cell: a4
+      clear: true
+      items: *id009
+  - insert:
+      cell: b4
+      clear: true
+      items: *id011
+  - insert:
+      cell: b5
+      clear: true
+      items: *id013
+  - insert:
+      cell: a6
+      clear: true
+      items: *id004
+  - insert:
+      cell: b6
+      clear: true
+      items: *id004
+  - insert:
+      cell: a7
+      clear: true
+      items: *id012
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id009
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - insert:
+      cell: a1
+      clear: true
+      items: *id008
+  - insert:
+      cell: b1
+      clear: true
+      items: *id008
+  - insert:
+      cell: a2
+      clear: true
+      items: *id015
+  - insert:
+      cell: b2
+      clear: true
+      items: *id015
+  - insert:
+      cell: a3
+      clear: true
+      items: *id010
+  - insert:
+      cell: b3
+      clear: true
+      items: *id010
+  - insert:
+      cell: a4
+      clear: true
+      items: *id010
+  - insert:
+      cell: b4
+      clear: true
+      items: *id010
+  - insert:
+      cell: a5
+      clear: true
+      items: *id009
+  - insert:
+      cell: b5
+      clear: true
+      items: *id009
+  - insert:
+      cell: a6
+      clear: true
+      items: *id009
+  - insert:
+      cell: b6
+      clear: true
+      items: *id009
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id007
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id006
+  - insert:
+      cell: b1
+      clear: true
+      items: *id015
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+      items: *id008
+  - insert:
+      cell: a3
+      clear: true
+      items: *id015
+  - insert:
+      cell: b3
+      clear: true
+      items: *id013
+  - insert:
+      cell: a4
+      clear: true
+      items: *id014
+  - insert:
+      cell: b4
+      clear: true
+      items: *id003
+  - insert:
+      cell: b5
+      clear: true
+      items: *id011
+  - insert:
+      cell: a6
+      clear: true
+      items: *id010
+  - insert:
+      cell: b6
+      clear: true
+      items: *id010
+  - insert:
+      cell: a7
+      clear: true
+      items: *id009
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id010
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - insert:
+      cell: a1
+      clear: true
+      items: *id008
+  - insert:
+      cell: b1
+      clear: true
+      items: *id008
+  - insert:
+      cell: a2
+      clear: true
+      items: *id001
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+      items: *id015
+  - insert:
+      cell: a4
+      clear: true
+      items: *id006
+  - insert:
+      cell: b4
+      clear: true
+      items: *id006
+  - insert:
+      cell: a5
+      clear: true
+      items: *id015
+  - insert:
+      cell: b5
+      clear: true
+      items: *id015
+  - insert:
+      cell: a6
+      clear: true
+      items: *id013
+  - insert:
+      cell: b6
+      clear: true
+      items: *id013
+  - insert:
+      cell: a7
+      clear: true
+      items: *id008
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id007
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+      items: *id014
+  - insert:
+      cell: b2
+      clear: true
+      items: *id014
+  - insert:
+      cell: a3
+      clear: true
+      items: *id006
+  - insert:
+      cell: b3
+      clear: true
+      items: *id006
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+      items: *id003
+  - insert:
+      cell: b5
+      clear: true
+      items: *id003
+  - insert:
+      cell: a6
+      clear: true
+      items: *id002
+  - insert:
+      cell: b6
+      clear: true
+      items: *id002
+  - insert:
+      cell: a7
+      clear: true
+      items: *id010
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id006
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - insert:
+      cell: a1
+      clear: true
+      items: *id006
+  - insert:
+      cell: b1
+      clear: true
+      items: *id006
+  - insert:
+      cell: a2
+      clear: true
+      items: *id005
+  - insert:
+      cell: b2
+      clear: true
+      items: *id005
+  - insert:
+      cell: a3
+      clear: true
+      items: *id004
+  - insert:
+      cell: b3
+      clear: true
+      items: *id004
+  - insert:
+      cell: a4
+      clear: true
+      items: *id012
+  - insert:
+      cell: b4
+      clear: true
+      items: *id012
+  - insert:
+      cell: a5
+      clear: true
+      items: *id009
+  - insert:
+      cell: b5
+      clear: true
+      items: *id009
+  - insert:
+      cell: a6
+      clear: true
+      items: *id010
+  - insert:
+      cell: b6
+      clear: true
+      items: *id010
+  - insert:
+      cell: a7
+      clear: true
+      items: *id002
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id013
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - insert:
+      cell: a1
+      clear: true
+      items: *id007
+  - insert:
+      cell: b1
+      clear: true
+      items: *id008
+  - insert:
+      cell: a2
+      clear: true
+      items: *id002
+  - insert:
+      cell: b2
+      clear: true
+      items: *id011
+  - insert:
+      cell: a3
+      clear: true
+      items: *id015
+  - insert:
+      cell: b3
+      clear: true
+      items: *id006
+  - insert:
+      cell: a4
+      clear: true
+      items: *id006
+  - insert:
+      cell: b4
+      clear: true
+      items: *id008
+  - insert:
+      cell: a5
+      clear: true
+      items: *id012
+  - insert:
+      cell: b5
+      clear: true
+      items: *id012
+  - insert:
+      cell: a6
+      clear: true
+      items: *id005
+  - insert:
+      cell: b6
+      clear: true
+      items: *id005
+  - insert:
+      cell: a7
+      clear: true
+      items: *id003
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id015
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - insert:
+      cell: a1
+      clear: true
+      items: *id011
+  - insert:
+      cell: b1
+      clear: true
+      items: *id011
+  - insert:
+      cell: a2
+      clear: true
+      items: *id013
+  - insert:
+      cell: b2
+      clear: true
+      items: *id013
+  - insert:
+      cell: a3
+      clear: true
+      items: *id010
+  - insert:
+      cell: b3
+      clear: true
+      items: *id010
+  - insert:
+      cell: a4
+      clear: true
+      items: *id015
+  - insert:
+      cell: b4
+      clear: true
+      items: *id015
+  - insert:
+      cell: a5
+      clear: true
+      items: *id008
+  - insert:
+      cell: b5
+      clear: true
+      items: *id008
+  - insert:
+      cell: a6
+      clear: true
+      items: *id015
+  - insert:
+      cell: b6
+      clear: true
+      items: *id015
+  - insert:
+      cell: a7
+      clear: true
+      items: *id013
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id005
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - insert:
+      cell: a1
+      clear: true
+      items: *id003
+  - insert:
+      cell: a2
+      clear: true
+      items: *id006
+  - insert:
+      cell: b2
+      clear: true
+      items: *id006
+  - insert:
+      cell: a3
+      clear: true
+      items: *id004
+  - insert:
+      cell: b3
+      clear: true
+      items: *id004
+  - insert:
+      cell: a4
+      clear: true
+      items: *id002
+  - insert:
+      cell: b4
+      clear: true
+      items: *id002
+  - insert:
+      cell: a5
+      clear: true
+      items: *id014
+  - insert:
+      cell: b5
+      clear: true
+      items: *id014
+  - insert:
+      cell: a6
+      clear: true
+      items: *id013
+  - insert:
+      cell: b6
+      clear: true
+      items: *id013
+  - insert:
+      cell: a7
+      clear: true
+      items: *id002
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id012
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - insert:
+      cell: a1
+      clear: true
+      items: *id007
+  - insert:
+      cell: b1
+      clear: true
+      items: *id007
+  - insert:
+      cell: a2
+      clear: true
+      items: *id011
+  - insert:
+      cell: b2
+      clear: true
+      items: *id002
+  - insert:
+      cell: a3
+      clear: true
+      items: *id011
+  - insert:
+      cell: b3
+      clear: true
+      items: *id011
+  - insert:
+      cell: a4
+      clear: true
+      items: *id009
+  - insert:
+      cell: b4
+      clear: true
+      items: *id006
+  - insert:
+      cell: a5
+      clear: true
+      items: *id008
+  - insert:
+      cell: b5
+      clear: true
+      items: *id007
+  - insert:
+      cell: a6
+      clear: true
+      items: *id001
+  - insert:
+      cell: b6
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id003
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - insert:
+      cell: a1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+      items: *id011
+  - insert:
+      cell: a2
+      clear: true
+      items: *id008
+  - insert:
+      cell: b2
+      clear: true
+      items: *id014
+  - insert:
+      cell: a3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+      items: *id005
+  - insert:
+      cell: b4
+      clear: true
+      items: *id005
+  - insert:
+      cell: a5
+      clear: true
+      items: *id010
+  - insert:
+      cell: b5
+      clear: true
+      items: *id010
+  - insert:
+      cell: a6
+      clear: true
+      items: *id005
+  - insert:
+      cell: b6
+      clear: true
+      items: *id005
+  - insert:
+      cell: a7
+      clear: true
+      items: *id011
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: a2
+      clear: true
+      items: *id013
+  - insert:
+      cell: b2
+      clear: true
+      items: *id013
+  - insert:
+      cell: a3
+      clear: true
+      items: *id010
+  - insert:
+      cell: b3
+      clear: true
+      items: *id010
+  - insert:
+      cell: a4
+      clear: true
+      items: *id008
+  - insert:
+      cell: b4
+      clear: true
+      items: *id008
+  - insert:
+      cell: a5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+      items: *id010
+  - insert:
+      cell: b6
+      clear: true
+      items: *id010
+  - insert:
+      cell: a7
+      clear: true
+      items: *id014
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id001
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id003
+  - insert:
+      cell: b1
+      clear: true
+      items: *id010
+  - insert:
+      cell: a2
+      clear: true
+      items: *id006
+  - insert:
+      cell: b2
+      clear: true
+      items: *id008
+  - insert:
+      cell: a3
+      clear: true
+      items: *id015
+  - insert:
+      cell: b3
+      clear: true
+      items: *id015
+  - insert:
+      cell: a4
+      clear: true
+      items: *id002
+  - insert:
+      cell: b4
+      clear: true
+      items: *id002
+  - insert:
+      cell: a5
+      clear: true
+      items: *id006
+  - insert:
+      cell: b5
+      clear: true
+      items: *id006
+  - insert:
+      cell: a6
+      clear: true
+      items: *id013
+  - insert:
+      cell: b6
+      clear: true
+      items: *id013
+  - insert:
+      cell: a7
+      clear: true
+      items: *id006
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id006
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - insert:
+      cell: a1
+      clear: true
+      items: *id006
+  - insert:
+      cell: b1
+      clear: true
+      items: *id006
+  - insert:
+      cell: a2
+      clear: true
+      items: *id015
+  - insert:
+      cell: b2
+      clear: true
+      items: *id007
+  - insert:
+      cell: a3
+      clear: true
+      items: *id005
+  - insert:
+      cell: b3
+      clear: true
+      items: *id006
+  - insert:
+      cell: a4
+      clear: true
+      items: *id003
+  - insert:
+      cell: b4
+      clear: true
+      items: *id003
+  - insert:
+      cell: a5
+      clear: true
+      items: *id008
+  - insert:
+      cell: b5
+      clear: true
+      items: *id008
+  - insert:
+      cell: a6
+      clear: true
+      items: *id003
+  - insert:
+      cell: b6
+      clear: true
+      items: *id003
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id001
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - insert:
+      cell: b1
+      clear: true
+      items: *id010
+  - insert:
+      cell: a2
+      clear: true
+      items: *id009
+  - insert:
+      cell: a3
+      clear: true
+      items: *id010
+  - insert:
+      cell: b3
+      clear: true
+      items: *id013
+  - insert:
+      cell: a4
+      clear: true
+      items: *id011
+  - insert:
+      cell: b4
+      clear: true
+      items: *id011
+  - insert:
+      cell: a6
+      clear: true
+      items: *id006
+  - insert:
+      cell: b6
+      clear: true
+      items: *id006
+  - insert:
+      cell: a7
+      clear: true
+      items: *id005
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id004
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - insert:
+      cell: a1
+      clear: true
+      items: *id010
+  - insert:
+      cell: b1
+      clear: true
+      items: *id002
+  - insert:
+      cell: a2
+      clear: true
+      items: *id005
+  - insert:
+      cell: b2
+      clear: true
+      items: *id010
+  - insert:
+      cell: b3
+      clear: true
+      items: *id004
+  - insert:
+      cell: a4
+      clear: true
+      items: *id009
+  - insert:
+      cell: b4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+      items: *id002
+  - insert:
+      cell: a6
+      clear: true
+      items: *id003
+  - insert:
+      cell: b6
+      clear: true
+      items: *id003
+  - insert:
+      cell: a7
+      clear: true
+      items: *id015
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id005
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - insert:
+      cell: a1
+      clear: true
+      items: *id007
+  - insert:
+      cell: b1
+      clear: true
+      items: *id013
+  - insert:
+      cell: a2
+      clear: true
+      items: *id002
+  - insert:
+      cell: b2
+      clear: true
+      items: *id014
+  - insert:
+      cell: a3
+      clear: true
+      items: *id009
+  - insert:
+      cell: b3
+      clear: true
+      items: *id009
+  - insert:
+      cell: a4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+      items: *id010
+  - insert:
+      cell: b5
+      clear: true
+      items: *id010
+  - insert:
+      cell: a6
+      clear: true
+      items: *id008
+  - insert:
+      cell: b6
+      clear: true
+      items: *id008
+  - insert:
+      cell: a7
+      clear: true
+      items: *id012
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id012
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - insert:
+      cell: b1
+      clear: true
+      items: *id007
+  - insert:
+      cell: a2
+      clear: true
+      items: *id003
+  - insert:
+      cell: b2
+      clear: true
+      items: *id003
+  - insert:
+      cell: a3
+      clear: true
+      items: *id014
+  - insert:
+      cell: b3
+      clear: true
+      items: *id014
+  - insert:
+      cell: a4
+      clear: true
+      items: *id006
+  - insert:
+      cell: b4
+      clear: true
+      items: *id006
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+      items: *id006
+  - insert:
+      cell: b6
+      clear: true
+      items: *id006
+  - insert:
+      cell: a7
+      clear: true
+      items: *id004
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id006
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - insert:
+      cell: a1
+      clear: true
+      items: *id015
+  - insert:
+      cell: b1
+      clear: true
+      items: *id011
+  - insert:
+      cell: a2
+      clear: true
+      items: *id008
+  - insert:
+      cell: b2
+      clear: true
+      items: *id005
+  - insert:
+      cell: a3
+      clear: true
+      items: *id015
+  - insert:
+      cell: b3
+      clear: true
+      items: *id006
+  - insert:
+      cell: a4
+      clear: true
+      items: *id012
+  - insert:
+      cell: b4
+      clear: true
+      items: *id007
+  - insert:
+      cell: a5
+      clear: true
+      items: *id015
+  - insert:
+      cell: b5
+      clear: true
+      items: *id007
+  - insert:
+      cell: a6
+      clear: true
+      items: *id002
+  - insert:
+      cell: b6
+      clear: true
+      items: *id002
+  - insert:
+      cell: a7
+      clear: true
+      items: *id006
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id014
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id007
+  - insert:
+      cell: a2
+      clear: true
+      items: *id006
+  - insert:
+      cell: b2
+      clear: true
+      items: *id007
+  - insert:
+      cell: a3
+      clear: true
+      items: *id013
+  - insert:
+      cell: b3
+      clear: true
+      items: *id014
+  - insert:
+      cell: a4
+      clear: true
+      items: *id011
+  - insert:
+      cell: b4
+      clear: true
+      items: *id008
+  - insert:
+      cell: a5
+      clear: true
+      items: *id009
+  - insert:
+      cell: b5
+      clear: true
+      items: *id011
+  - insert:
+      cell: a6
+      clear: true
+      items: *id001
+  - insert:
+      cell: b6
+      clear: true
+      items: *id008
+  - insert:
+      cell: a7
+      clear: true
+      items: *id014
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id015
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - insert:
+      cell: a1
+      clear: true
+      items: *id003
+  - insert:
+      cell: b1
+      clear: true
+      items: *id003
+  - insert:
+      cell: a2
+      clear: true
+      items: *id010
+  - insert:
+      cell: b2
+      clear: true
+      items: *id010
+  - insert:
+      cell: a3
+      clear: true
+      items: *id014
+  - insert:
+      cell: a4
+      clear: true
+      items: *id014
+  - insert:
+      cell: b4
+      clear: true
+      items: *id014
+  - insert:
+      cell: a5
+      clear: true
+      items: *id001
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+      items: *id015
+  - insert:
+      cell: b6
+      clear: true
+      items: *id015
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id001
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id011
+  - insert:
+      cell: b1
+      clear: true
+      items: *id014
+  - insert:
+      cell: a2
+      clear: true
+      items: *id015
+  - insert:
+      cell: b2
+      clear: true
+      items: *id011
+  - insert:
+      cell: a3
+      clear: true
+      items: *id001
+  - insert:
+      cell: b3
+      clear: true
+      items: *id002
+  - insert:
+      cell: a4
+      clear: true
+      items: *id015
+  - insert:
+      cell: b4
+      clear: true
+      items: *id015
+  - insert:
+      cell: a5
+      clear: true
+      items: *id008
+  - insert:
+      cell: b5
+      clear: true
+      items: *id004
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+      items: *id005
+  - insert:
+      cell: a7
+      clear: true
+      items: *id007
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: a0
+      clear: true
+      items: *id003
+  - insert:
+      cell: a1
+      clear: true
+      items: *id001
+  - insert:
+      cell: b1
+      clear: true
+      items: *id012
+  - insert:
+      cell: a2
+      clear: true
+      items: *id004
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: a3
+      clear: true
+      items: *id002
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+      items: *id004
+  - insert:
+      cell: b5
+      clear: true
+      items: *id015
+  - insert:
+      cell: a6
+      clear: true
+      items: *id003
+  - insert:
+      cell: b6
+      clear: true
+      items: *id003
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+- name: all 256 pairs of the lowest digit
+  steps:
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id002
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id013
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id012
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id011
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id010
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id009
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id004
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id003
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id015
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id008
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id006
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id014
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id007
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id005
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a0
+      clear: true
+      items: *id001
+  - insert:
+      cell: b0
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 1
+      lt: 0
+      gt: 0
+- name: all 256 pairs of the top digit, lower digits A=0 B=F
+  steps:
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+      items: *id001
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id001
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+      items: *id001
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+      items: *id001
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+      items: *id001
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+      items: *id001
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+      items: *id001
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id002
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id013
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id012
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id011
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id010
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id009
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id004
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id003
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id015
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id008
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id006
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id014
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id007
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id005
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+  - insert:
+      cell: a7
+      clear: true
+      items: *id001
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id002
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id013
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id012
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id011
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id010
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id009
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id004
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id003
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id015
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id008
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id006
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id014
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id007
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id005
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 0
+      gt: 1
+  - insert:
+      cell: b7
+      clear: true
+      items: *id001
+  - wait: 26
+  - expect:
+      eq: 0
+      lt: 1
+      gt: 0
+- name: 'timing: output waves after single-digit and carry-chain changes'
+  steps:
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wait: 26
+  - insert:
+      cell: a7
+      clear: true
+      items: &id016
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - wave:
+      eq: '11111111111111111111000000'
+      lt: '00000000000000000000000000'
+      gt: '00000000000000111111111111'
+  - insert:
+      cell: a7
+      clear: true
+  - wave:
+      eq: '00000000000000001111111111'
+      lt: '00000000000000001111111100'
+      gt: '11111111111111111100000000'
+  - insert:
+      cell: a0
+      clear: true
+      items: &id017
+      - id: stone
+        count: 64
+  - wave:
+      eq: '11111111111111111111000000'
+      lt: '00000000000000000000000000'
+      gt: '00000000000000111111111111'
+  - insert:
+      cell: a0
+      clear: true
+  - wave:
+      eq: '00000000000000001111111111'
+      lt: '00000000000000001111111100'
+      gt: '11111111111111111100000000'
+  - insert:
+      cell: b7
+      clear: true
+      items: *id016
+  - wave:
+      eq: '11111111111111111100000000'
+      lt: '00000000000000000011111111'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: b7
+      clear: true
+  - wave:
+      eq: '00000000000000111111111111'
+      lt: '11111111111111111111110000'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: b0
+      clear: true
+      items: *id017
+  - wave:
+      eq: '11111111111111111100000000'
+      lt: '00000000000000000011111111'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: b0
+      clear: true
+  - wave:
+      eq: '00000000000000111111111111'
+      lt: '11111111111111111111110000'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: a0
+      clear: true
+      items: &id018
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - insert:
+      cell: a1
+      clear: true
+      items: *id018
+  - insert:
+      cell: a2
+      clear: true
+      items: *id018
+  - insert:
+      cell: a3
+      clear: true
+      items: *id018
+  - insert:
+      cell: a4
+      clear: true
+      items: *id018
+  - insert:
+      cell: a5
+      clear: true
+      items: *id018
+  - insert:
+      cell: a6
+      clear: true
+      items: *id018
+  - insert:
+      cell: b7
+      clear: true
+      items: *id017
+  - wave:
+      eq: '11111111111111111100000000'
+      lt: '00000000000000000011111111'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+      items: *id018
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+      items: *id018
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+      items: *id018
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+      items: *id018
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+      items: *id018
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+      items: *id018
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+      items: *id018
+  - insert:
+      cell: a7
+      clear: true
+      items: *id017
+  - insert:
+      cell: b7
+      clear: true
+  - wave:
+      eq: '00000000000000000000000000'
+      lt: '11111111111111111111000000'
+      gt: '00000000000000111111111111'
+  - insert:
+      cell: a0
+      clear: true
+      items: *id018
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+      items: *id018
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+      items: *id018
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+      items: *id018
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+      items: *id018
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+      items: *id018
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+      items: *id018
+  - insert:
+      cell: b6
+      clear: true
+  - insert:
+      cell: a7
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+      items: *id017
+  - wave:
+      eq: '00000000000000000000000000'
+      lt: '00000000000000001111111111'
+      gt: '11111111111111111100000000'
+  - insert:
+      cell: b0
+      clear: true
+      items: *id018
+  - insert:
+      cell: b1
+      clear: true
+      items: *id018
+  - insert:
+      cell: b2
+      clear: true
+      items: *id018
+  - insert:
+      cell: b3
+      clear: true
+      items: *id018
+  - insert:
+      cell: b4
+      clear: true
+      items: *id018
+  - insert:
+      cell: b5
+      clear: true
+      items: *id018
+  - insert:
+      cell: b6
+      clear: true
+      items: *id018
+  - insert:
+      cell: a7
+      clear: true
+      items: *id018
+  - insert:
+      cell: b7
+      clear: true
+      items: *id018
+  - wave:
+      eq: '00000000000000111111111111'
+      lt: '11111111111111111111110000'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: a0
+      clear: true
+      items:
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+      - id: stone
+        count: 64
+  - wave:
+      eq: '11111111111111111100000000'
+      lt: '00000000000000000011111111'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: a0
+      clear: true
+      items: *id018
+  - wave:
+      eq: '00000000000000111111111111'
+      lt: '11111111111111111111110000'
+      gt: '00000000000000000000000000'
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b7
+      clear: true
+  - wave:
+      eq: '11111111111111111100000000'
+      lt: '00000000000000000000000000'
+      gt: '00000000000000111111111111'
+  - insert:
+      cell: a0
+      clear: true
+      items: *id018
+  - insert:
+      cell: a1
+      clear: true
+      items: *id018
+  - insert:
+      cell: a2
+      clear: true
+      items: *id018
+  - insert:
+      cell: a3
+      clear: true
+      items: *id018
+  - insert:
+      cell: a4
+      clear: true
+      items: *id018
+  - insert:
+      cell: a5
+      clear: true
+      items: *id018
+  - insert:
+      cell: a6
+      clear: true
+      items: *id018
+  - insert:
+      cell: a7
+      clear: true
+  - wave:
+      eq: '00000000000000001111111111'
+      lt: '00000000000000001111111100'
+      gt: '11111111111111111100000000'
+  - insert:
+      cell: a0
+      clear: true
+  - insert:
+      cell: b0
+      clear: true
+  - insert:
+      cell: a1
+      clear: true
+  - insert:
+      cell: b1
+      clear: true
+  - insert:
+      cell: a2
+      clear: true
+  - insert:
+      cell: b2
+      clear: true
+  - insert:
+      cell: a3
+      clear: true
+  - insert:
+      cell: b3
+      clear: true
+  - insert:
+      cell: a4
+      clear: true
+  - insert:
+      cell: b4
+      clear: true
+  - insert:
+      cell: a5
+      clear: true
+  - insert:
+      cell: b5
+      clear: true
+  - insert:
+      cell: a6
+      clear: true
+  - insert:
+      cell: b6
+      clear: true
+  - wave:
+      eq: '11111111111111111111111111'
+      lt: '00000000000000000000000000'
+      gt: '00000000000000000000000000'

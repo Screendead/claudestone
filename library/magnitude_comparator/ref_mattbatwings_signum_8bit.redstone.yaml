@@ -1,0 +1,1042 @@
+name: ref_mattbatwings_signum_8bit
+description: "Rebuild of OTHERARITH005 '8 bit instant signum' by mattbatwings (Logical Redstone Archive, Tested & Functional, Recommended; https://discord.com/channels/1361854816837435433/1474480601082892420). SOURCED: 8-bit input, 8-bit output, 0 ticks. 5x16x5, 118 blocks, dust and levers only. Eight levers b0..b7 (two's complement, b7 the sign, one every 2 y from y=1) each strong-power a wool block that feeds dust; each stage ends in a target block with a lamp beside it, the lamps l0..l7 being the 8 output bits. MEASURED: l0 = (input != 0) and l1..l7 = b7, so the output is 0x00 for 0, 0x01 for 1..127 and 0xFF for -128..-1 (all 256 inputs in a Gray-code sweep, plus simultaneous multi-bit changes such as 0x7F<->0x80 and 0x55<->0xAA); a lone low bit lights l0 only. Timing MEASURED: a lamp lights in the same tick as the lever click (wave 0) and goes dark 4 gt later, vanilla lamp turn-off delay, so the 0 ticks is the dust network and the 4 is the lamp, not the logic. INFERRED from the block layout: the OR of the 7 low bits climbs the stack as a dust ladder to l0 (dust adds no delay), and b7 is carried back down a second dust ladder to every target; a target block is a conductor dust can connect to from either side, so two dust lines pointing at it are an OR for the lamp beside it. Harness changes: orange_wool -> white_wool (same conduction; lint only lets `use` click a lever on stone-like blocks); lever and lamp block states otherwise as in the schematic; levers are driven by `use` steps because a driver redstone block does not strong-power the wool the way a lever does."
+traits: [vertical, pistonless, entityless]
+palette:
+  .: air
+  'A': 'white_wool'
+  'B': 'redstone_wire[east=side,north=none,south=side,west=none]'
+  'C': 'redstone_wire[east=side,north=up,south=none,west=side]'
+  'D': 'redstone_wire[east=side,north=none,south=none,west=side]'
+  '0': {name: l0, block: 'redstone_lamp'}
+  'E': 'target'
+  'a': {name: b0, block: 'lever[face=wall,facing=east]'}
+  'F': 'redstone_wire[east=up,north=side,south=none,west=none]'
+  'G': 'redstone_wire[east=up,north=none,south=side,west=up]'
+  'H': 'orange_stained_glass'
+  'I': 'redstone_wire[east=none,north=none,south=up,west=up]'
+  'J': 'redstone_wire[east=side,north=none,south=up,west=none]'
+  'K': 'redstone_wire[east=none,north=none,south=side,west=side]'
+  'M': 'redstone_wire[east=none,north=side,south=side,west=none]'
+  '1': {name: l1, block: 'redstone_lamp'}
+  'b': {name: b1, block: 'lever[face=wall,facing=east]'}
+  'N': 'redstone_wire[east=side,north=side,south=none,west=none]'
+  'O': 'redstone_wire[east=none,north=side,south=none,west=up]'
+  'P': 'redstone_wire[east=side,north=up,south=none,west=none]'
+  '2': {name: l2, block: 'redstone_lamp'}
+  'c': {name: b2, block: 'lever[face=wall,facing=east]'}
+  'Q': 'redstone_wire[east=up,north=side,south=side,west=none]'
+  '3': {name: l3, block: 'redstone_lamp'}
+  'd': {name: b3, block: 'lever[face=wall,facing=east]'}
+  '4': {name: l4, block: 'redstone_lamp'}
+  'e': {name: b4, block: 'lever[face=wall,facing=east]'}
+  '5': {name: l5, block: 'redstone_lamp'}
+  'f': {name: b5, block: 'lever[face=wall,facing=east]'}
+  '6': {name: l6, block: 'redstone_lamp'}
+  'g': {name: b6, block: 'lever[face=wall,facing=east]'}
+  'R': 'redstone_wire[east=up,north=none,south=none,west=up]'
+  '7': {name: l7, block: 'redstone_lamp'}
+  'h': {name: b7, block: 'lever[face=wall,facing=east]'}
+layers:
+  0: |
+    .....
+    .AAA.
+    .....
+    .A...
+    .....
+  1: |
+    ..A..
+    .BCD.
+    0E.Aa
+    .FA..
+    .....
+  2: |
+    .AGA.
+    ...A.
+    .....
+    .HI..
+    ..A..
+  3: |
+    .J.K.
+    .A.M.
+    1E.Ab
+    .N...
+    .AO..
+  4: |
+    .....
+    .FAA.
+    .....
+    .A...
+    .P...
+  5: |
+    ..A..
+    ..CD.
+    2E.Ac
+    .QA..
+    .....
+  6: |
+    .AGA.
+    ...A.
+    .....
+    .HI..
+    ..A..
+  7: |
+    .J.K.
+    .A.M.
+    3E.Ad
+    .N...
+    .AO..
+  8: |
+    .....
+    .FAA.
+    .....
+    .A...
+    .P...
+  9: |
+    ..A..
+    ..CD.
+    4E.Ae
+    .QA..
+    .....
+  10: |
+    .AGA.
+    ...A.
+    .....
+    .HI..
+    ..A..
+  11: |
+    .J.K.
+    .A.M.
+    5E.Af
+    .N...
+    .AO..
+  12: |
+    .....
+    .FAA.
+    .....
+    .A...
+    .P...
+  13: |
+    .....
+    ..DD.
+    6E.Ag
+    .QA..
+    .....
+  14: |
+    .....
+    .....
+    .....
+    .HRA.
+    .....
+  15: |
+    .....
+    .....
+    7E.Ah
+    .N.D.
+    .....
+tests:
+- name: gray code sweep of all 256 inputs
+  steps:
+  - expect: {l0: 0, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b5
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b6
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b5
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b5
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b6
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b5
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b4
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b3
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b2
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b7
+  - wait: 6
+- name: simultaneous multi-bit changes
+  steps:
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 0, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 6
+  - expect: {l0: 0, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b2
+  - use: b4
+  - use: b6
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - use: b2
+  - use: b4
+  - use: b6
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+  - use: b0
+  - use: b7
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - wait: 6
+  - expect: {l0: 1, l1: 1, l2: 1, l3: 1, l4: 1, l5: 1, l6: 1, l7: 1}
+  - use: b0
+  - use: b7
+  - wait: 6
+  - expect: {l0: 0, l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, l7: 0}
+
+  - wait: 6
+- name: negative input lights every lamp at once
+  steps:
+  - use: b7
+  - wave: {l0: '11111', l1: '11111', l2: '11111', l3: '11111', l4: '11111', l5: '11111', l6: '11111', l7: '11111'}
+  - use: b7
+  - wave: {l0: '1111000', l1: '1111000', l2: '1111000', l3: '1111000', l4: '1111000', l5: '1111000', l6: '1111000', l7: '1111000'}
+- name: lone low bit lights only l0
+  steps:
+  - use: b3
+  - wave: {l0: '11111', l1: '00000', l2: '00000', l3: '00000', l4: '00000', l5: '00000', l6: '00000', l7: '00000'}
+  - use: b3
+  - wave: {l0: '1111000', l1: '0000000', l7: '0000000'}

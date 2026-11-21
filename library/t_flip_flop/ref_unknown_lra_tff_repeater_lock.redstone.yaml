@@ -1,0 +1,68 @@
+name: ref_unknown_lra_tff_repeater_lock
+description: >-
+  Rebuild of the second (lower) version in Logical Redstone Archive LFF005 "Toggle (T)
+  Flip-flop (2 versions, pistonless)" (author not named in the README;
+  https://discord.com/channels/1361854816837435433/1472422839108898927). SOURCED: toggles
+  whenever the input is pressed. The first (upper) version has dust that floats over air
+  and an unpowered column; it is not rebuilt (it was not shown to work). Parts: the same
+  button pulse generator as ref_unknown_lra_dlatch (comparator cmp with a 2-tick repeater
+  feeding its side, so cmp outputs a 4 gt pulse) switches the torch t off; the torch's dust
+  K powers both the data repeater feed (into hold's dust) and the lock repeater lockrep, so
+  while t is lit the repeater hold (lamp q behind it) is locked and its input is high.
+  INFERRED from the timings, not isolated: toggling is a race. In the pulse, lockrep and
+  feed both fall at the same tick; an unlocked hold that is off still acts on its input as
+  it was and turns on 2 gt later, then the lock returns before its input fall can turn it
+  off; an unlocked hold that is on sees the fall first and turns off. MEASURED: press at
+  tick 0: cmp 2, t falls 4, lockrep and feed fall 6, hold rises 8 and the lock returns
+  10; from on, hold falls 8 and the lamp, which has a 4 gt turn-off delay, goes dark at
+  12. Six presses toggle six times. Harness changes: button named cell used with use,
+  the red wool is white (buttons need plain blocks), the sibling version is dropped.
+  9x2x3 as built, plus the lamp row.
+traits: [pistonless, entityless]
+palette:
+  .: air
+  A: white_wool
+  q: {name: q, block: redstone_lamp}
+  B: redstone_wire[east=side,north=none,south=side,west=none]
+  C: repeater[delay=2,facing=east]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: {name: hold, block: 'repeater[delay=1,facing=south]'}
+  F: {name: lockrep, block: 'repeater[delay=1,facing=east]'}
+  M: {name: feed, block: 'repeater[delay=1,facing=east]'}
+  I: redstone_wire[east=none,north=none,south=side,west=side]
+  J: redstone_wire[east=side,north=side,south=none,west=none]
+  K: redstone_wire[east=side,north=side,south=none,west=side]
+  '(': {name: t, block: 'redstone_wall_torch[facing=west]'}
+  G: {name: cmp, block: 'comparator[facing=east,mode=subtract]'}
+  H: {name: btn, block: 'stone_button[face=wall,facing=east]'}
+layers:
+  0: |
+    .........
+    AAA..AAA.
+    AAA..AA..
+  1: |
+    q........
+    EFI..BCD.
+    JMK(AGDAH
+tests:
+- name: toggles
+  steps:
+  - {wait: 20}
+  - expect: {q: 0, t: 1, lockrep: 1}
+  - repeat:
+      times: 3
+      steps:
+      - use: btn
+      - {wait: 40}
+      - expect: {q: 1}
+      - use: btn
+      - {wait: 40}
+      - expect: {q: 0}
+- name: timing
+  steps:
+  - {wait: 20}
+  - use: btn
+  - wave: {cmp: '001111000000', t: '111100001111', lockrep: '111111000011', hold: '000000001111', q: '000000001111'}
+  - {wait: 30}
+  - use: btn
+  - wave: {hold: '111111110000', q: '111111111111', t: '111100001111'}

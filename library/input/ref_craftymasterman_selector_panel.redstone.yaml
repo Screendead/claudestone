@@ -1,0 +1,310 @@
+name: ref_craftymasterman_selector_panel
+description: >-
+  Radio-button selector, five rows 1 wide: pressing a row lights its copper bulb and darkens the one that was lit. Source: mattbatwings' Logical Redstone Archive, INTERFACE001_Modern_Selector_Panel (INTERFACE001_modern_selector.schem), by CraftyMasterman, endorsed by mattbatwings, tags Recommended and Tested & Functional, Discord https://discord.com/channels/1361854816837435433/1472385072261763346. Size 3x4x5, 5 rows of one 3x4 slice, all blocks as in the schematic (the README says 'a modern, 1 wide design for a selector panel using copper bulbs'). Harness changes: update_pass strict (a normal pass pulses all 10 observers, which lights every bulb at load); presses are run steps (setblock the powered stone_button, clone its wool, wait 20 gt, setblock it unpowered, clone), because `use` only emulates buttons on plain full blocks and these hang on wool. MEASURED: it selects one row per press for all 20 ordered transitions between 5 rows; the lit bulb goes dark 6 gt after the press (b new +0, comparator +2, observer E pulse +4, old row's observer D +6); dust over glass is why it works (orange_concrete in its place lights all five bulbs); the button must be held 4 gt or the row is not marked. DEFECTS, MEASURED: pressing the lit row again turns it off but leaves its dropper triggered, so the next press of another row lights that row again (two lit); a hold under 4 gt leaves the row lit but unmarked, so the next press leaves it lit. INFERRED mechanism: bulb toggles on a button's wool; its comparator turns the bulb state into a powered edge for observer E, whose pulse feeds the dust line of all rows (15 minus distance); each dust change updates its row's dropper, which re-reads whether the wool above its observer is powered and clears (button not held) or sets (button held) its triggered flag; observer D watches that flag, and its pulse into the wool toggles the bulb, so the old row switches itself off.
+update_pass: strict
+palette:
+  .: air
+  '#': orange_stained_glass
+  A: {name: d0, block: 'dropper[facing=up]'}
+  B: {name: d1, block: 'dropper[facing=up]'}
+  C: {name: d2, block: 'dropper[facing=up]'}
+  D: {name: d3, block: 'dropper[facing=up]'}
+  E: {name: d4, block: 'dropper[facing=up]'}
+  F: {name: r0, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  G: {name: r1, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  H: {name: r2, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  I: {name: r3, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  J: {name: r4, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  K: {name: o0, block: 'observer[facing=down]'}
+  L: {name: o1, block: 'observer[facing=down]'}
+  M: {name: o2, block: 'observer[facing=down]'}
+  N: {name: o3, block: 'observer[facing=down]'}
+  O: {name: o4, block: 'observer[facing=down]'}
+  P: {name: e0, block: 'observer[facing=up]'}
+  Q: {name: e1, block: 'observer[facing=up]'}
+  R: {name: e2, block: 'observer[facing=up]'}
+  S: {name: e3, block: 'observer[facing=up]'}
+  T: {name: e4, block: 'observer[facing=up]'}
+  U: {name: w0, block: 'orange_wool'}
+  V: {name: w1, block: 'orange_wool'}
+  W: {name: w2, block: 'orange_wool'}
+  X: {name: w3, block: 'orange_wool'}
+  Y: {name: w4, block: 'orange_wool'}
+  Z: {name: s0, block: 'stone_button[face=wall,facing=east]'}
+  a: {name: s1, block: 'stone_button[face=wall,facing=east]'}
+  b: {name: s2, block: 'stone_button[face=wall,facing=east]'}
+  c: {name: s3, block: 'stone_button[face=wall,facing=east]'}
+  d: {name: s4, block: 'stone_button[face=wall,facing=east]'}
+  e: {name: c0, block: 'comparator[facing=east,mode=compare]'}
+  f: {name: c1, block: 'comparator[facing=east,mode=compare]'}
+  g: {name: c2, block: 'comparator[facing=east,mode=compare]'}
+  h: {name: c3, block: 'comparator[facing=east,mode=compare]'}
+  i: {name: c4, block: 'comparator[facing=east,mode=compare]'}
+  j: {name: b0, block: 'waxed_copper_bulb'}
+  k: {name: b1, block: 'waxed_copper_bulb'}
+  l: {name: b2, block: 'waxed_copper_bulb'}
+  m: {name: b3, block: 'waxed_copper_bulb'}
+  n: {name: b4, block: 'waxed_copper_bulb'}
+layers:
+  0: |
+    #A.
+    #B.
+    #C.
+    #D.
+    #E.
+  1: |
+    FK.
+    GL.
+    HM.
+    IN.
+    JO.
+  2: |
+    PUZ
+    QVa
+    RWb
+    SXc
+    TYd
+  3: |
+    ej.
+    fk.
+    gl.
+    hm.
+    in.
+tests:
+- name: one row lit after every press, all 20 transitions
+  steps:
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - expect: {"b0": 1, "d0": 1, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 1, "d4": 1}
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 1, "d3": 1, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 1, "d4": 1}
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 1, "d2": 1, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 1, "d4": 1}
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 1, "d1": 1, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 1, "d4": 1}
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - expect: {"b0": 1, "d0": 1, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 1, "d3": 1, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 1, "d2": 1, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 1, "d3": 1, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 1, "d1": 1, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~3 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~3 ~1 ~2 ~3 ~1 ~2 ~3 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 1, "d3": 1, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - expect: {"b0": 1, "d0": 1, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 1, "d2": 1, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 1, "d1": 1, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 1, "d2": 1, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - expect: {"b0": 1, "d0": 1, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 1, "d1": 1, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - expect: {"b0": 1, "d0": 1, "b1": 0, "d1": 0, "b2": 0, "d2": 0, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+- name: timing 0 then 4
+  steps:
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wave: {"b4": "11111111111111", "b0": "11111100000000", "c4": "00111111111111", "e4": "00001100000000", "o0": "00000011000000"}
+- name: timing 4 then 0
+  steps:
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~4 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~4 ~1 ~2 ~4 ~1 ~2 ~4 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wave: {"b0": "11111111111111", "b4": "11111100000000", "c0": "00111111111111", "e0": "00001100000000", "o4": "00000011000000"}
+- name: timing 1 then 2
+  steps:
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~1 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~1 ~1 ~2 ~1 ~1 ~2 ~1 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wave: {"b2": "11111111111111", "b1": "11111100000000", "c2": "00111111111111", "e2": "00001100000000", "o1": "00000011000000"}
+- name: repress leaves a stale marker
+  steps:
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {"b0": 0, "d0": 0, "b1": 0, "d1": 0, "b2": 1, "d2": 1, "b3": 0, "d3": 0, "b4": 0, "d4": 0}
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {b2: 0, d2: 1}
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 20
+  - expect: {b0: 1, b2: 1}
+- name: hold 4 gt marks the row
+  steps:
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 4
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 30
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {b2: 1, d2: 1, b0: 0, d0: 0}
+- name: hold 3 gt leaves the row unmarked, so the next press lights two
+  steps:
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 3
+  - run: setblock ~2 ~2 ~0 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~0 ~1 ~2 ~0 ~1 ~2 ~0 replace force
+  - wait: 30
+  - expect: {b0: 1, d0: 0}
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=true]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - run: setblock ~2 ~2 ~2 stone_button[face=wall,facing=east,powered=false]
+  - run: clone ~1 ~2 ~2 ~1 ~2 ~2 ~1 ~2 ~2 replace force
+  - wait: 20
+  - expect: {b2: 1, d2: 1, b0: 1, d0: 0}

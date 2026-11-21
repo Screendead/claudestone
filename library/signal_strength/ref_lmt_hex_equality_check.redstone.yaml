@@ -1,0 +1,884 @@
+name: ref_lmt_hex_equality_check
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEX008 ''Modular Hex Equality Check'' (author lmt., endorsed by Mixel, Tested & Functional; Discord https://discord.com/channels/1361854816837435433/1518214260050759680), the Single Module schematic: TRUE when the 1-nibble signal-strength input equals the strength of its two barrels (the two barrels must hold the same strength). README claims 2 wide, stackable left/right (staggered) and up/down, 6gt. 6x2x5 as rebuilt (the y=1 barrel under the first subtract comparator is a plain support block). How it works (INFERRED, confirmed by the 16x16 tests): the input s enters the rear of a compare comparator G whose side is barrel B2 (reference r): G passes s only when s >= r, else 0, onto the dust F. Subtract comparator D2 reads barrel B2 behind it (r) with F as its side: r - s'' is non-zero exactly when s'' < r, i.e. s < r (r > 0). Subtract comparator D reads F behind it (s'') with the compare comparator E on its side, which relays barrel B1 (r): s'' - r is non-zero exactly when s > r. Each of D and D2 outputs into a wool block beside the dust C; either one powers C, which powers the wool under the wall torch and turns it off. The torch is the output: lit iff s == r. The wool blocks hard-powered by D and D2 do not count as comparator side inputs (see docs/MECHANICS.md comparator_side_input_sources), which is why D2''s wool beside D does nothing. Changed for the harness: a fixture compare comparator at the dust''s input end reading a fixture barrel (src) gives the input strength s, set with data merge; the barrels carry the stone count for strength 0-15. Barrels named ref_a (B1) and ref_b (B2). MEASURED: all 256 (r, s) pairs give out = (s == r); with s changed in the fixture container the output flips 8 gt later in both directions, 2 gt of which are the fixture comparator, so 6 gt from the input end, matching the README claim of 6gt. Built size 4x2x5 (fixtures excluded); the 2-wide figure belongs to the stacked module, not rebuilt.'
+traits: [analog, comparator_based, container_based, silent, pistonless, entityless]
+palette:
+  .: air
+  A: light_gray_wool
+  C: 'barrel[facing=up,open=false]'
+  n: {output: out, block: 'redstone_wall_torch[facing=north]'}
+  W: redstone_wire[east=side,north=side,south=side,west=side]
+  D: comparator[facing=south,mode=subtract]
+  E: comparator[facing=east,mode=compare]
+  F: redstone_wire[east=none,north=side,south=side,west=side]
+  G: comparator[facing=south,mode=compare]
+  P: {name: ref_a, block: 'barrel[facing=up,open=false]'}
+  Q: {name: ref_b, block: 'barrel[facing=up,open=false]'}
+  c: {block: 'comparator[facing=south,mode=compare]', fixture: true}
+  S: {name: src, block: 'barrel[facing=up,open=false]', fixture: true}
+  a: {block: light_gray_wool, fixture: true}
+layers:
+  1: |
+    ..n...
+    ..A...
+    ...CA.
+    ..AA..
+    ...A..
+    ...a..
+    ......
+  2: |
+    ......
+    ..WA..
+    ..ADEP
+    ..DF..
+    ..QG..
+    ...c..
+    ...S..
+tests:
+- name: 'r=0, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=1, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=2, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=3, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=4, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=5, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=6, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=7, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=8, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=9, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=10, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=11, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=12, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=13, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=14, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 1}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 0}
+- name: 'r=15, s=0..15'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:1}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:60}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:55}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:51}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:46}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:42}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:28}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:23}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:19}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:14}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:10}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:5}]}'
+  - wait: 8
+  - expect: {out: 0}
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}'
+  - wait: 8
+  - expect: {out: 1}
+- name: 'delay s 7 -> 8 (equal to unequal)'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wait: 10
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wave: {out: '111111110000'}
+- name: 'delay s 8 -> 7 (unequal to equal)'
+  steps:
+  - run: 'data merge block ~2 ~2 ~4 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - run: 'data merge block ~5 ~2 ~2 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:32}]}'
+  - wait: 10
+  - run: 'data merge block ~3 ~2 ~6 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:37}]}'
+  - wave: {out: '000000001111'}

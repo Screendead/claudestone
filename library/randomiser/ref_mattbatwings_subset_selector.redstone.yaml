@@ -1,0 +1,1073 @@
+name: ref_mattbatwings_subset_selector
+description: |-
+  Rebuild of mattbatwings' "Subset Selector (from 2048)" from his Logical Redstone Archive, entry
+  RANDOM001 (Discord: https://discord.com/channels/1361854816837435433/1472398216610844844, tagged
+  Tested and Functional and Recommended, schematic RANDOM001_subset_selector). SOURCED from the README:
+  4 input bits on levers, a button starts it, the output is a 4-bit one-hot pulse, and given any
+  subset of the inputs it picks one input of that subset at random; needs the block-drops game rule on
+  (26.3 name `block_drops`, formerly doTileDrops). Size 24x11x27 (the archive's 24x10x27 plus one layer, see below).
+  HOW IT WORKS (INFERRED from the traces and the container NBT, then each step MEASURED):
+  each of the 15 non-empty subsets owns a column of (hopper, dropper, dispenser, piston, comparator)
+  at x = 9..21 (lower copy, y 1..4, the 7 subsets that contain lever 1) and x = 9..23 (upper copy, y 6..9,
+  the 8 that do not). The dropper and dispenser of a column hold shulker boxes of 1, 3, 5 or 7 full stacks of
+  redstone (comparator strength 1..4), one box per member of the subset, split between the two containers as
+  the author left them. Lever k feeds a subtract comparator whose side input is a lit torch; the button's
+  pulse (stone button, 20 ticks) turns those torches off for the pulse, so the levers are sampled once,
+  then each lever line is carried along the x axis by a decaying dust line and a staggered tap per
+  column (dust strength falls 1 a block, so each column sees a different level) switches off exactly
+  the column line of the subset that matches. That column's torch pulses the repeater into the
+  dropper, which moves one shulker box up into the dispenser (a dropper above a container feeds it),
+  and the dispenser, powered in the same tick through the dropper block, places a RANDOM one of its
+  boxes (a dispenser picks uniformly among its occupied slots, which is the whole source of randomness)
+  in front of it. A comparator reads the placed box (strength 1..4), a piston above it destroys the box
+  (a shulker box has a destroy push reaction), which drops as an item with its contents because
+  block_drops is on and falls into the hopper below, which carries it back into the dropper: the column
+  is reset with every box where it started. The strength then goes through a merging tree of comparators
+  into a dust line whose length is the strength (a thermometer), two staggered copies of it turn that into a
+  one-hot row of torches, and a dust/wool route per row drives a 2-tick repeater into a lamp. Lever k picks lamp
+  out k (strength 5-k); the compactness comes from using container fullness as the 4-way code and
+  the dispenser as the random source, so no counter or LFSR is needed.
+  HARNESS CHANGES: the four lever supports (redstone lamps) and the wool under the button became white wool,
+  because the harness emulates a click only on plain full blocks (a lamp conducts power the same way);
+  the two glass corner markers are dropped; the shulker boxes are rebuilt from the schematic's block-entity
+  NBT without their custom names and lore; the block states are the schematic's saved ones (with dust
+  power and torch state), so the build is quiet at placement, update_pass all. Levers are named lever1..4
+  (the z = 20, 22, 24, 26 rows), the button go, the lamps out1..out4 (the z = 0, 2, 4, 6 rows).
+  DEFECT FOUND AND REPAIRED: as archived, an upper-copy column cannot light out2: the torch row that
+  selects strength 3 sits at (13,9,3), and the lower copy lights its lamp through blocks one layer above the torch
+  (a wool at (13,5,3), dust at (12,5,3)), which for the upper copy would be at y = 10, outside the
+  schematic. So subsets {2}, {2,3}, {2,4} and {2,3,4} (every subset with lever 2 and without lever 1)
+  never pulse out2: MEASURED 0 of 30 presses on {2}, and on {2,3}, {2,4}, {2,3,4} out2 never lit
+  in 30 presses while the other members did, so those presses give nothing 40 to 50 percent of the time. The
+  test as_archived_lone_input2_is_dead proves it by removing five blocks. The repair is five blocks that
+  mirror the lower route a layer higher: wool (13,10,3) on the torch, dust (12,10,3) and (12,10,2),
+  wool (12,9,2) as the dust's support and wool (12,10,4) so the lamp-4 dust at (12,9,4) does not climb onto the new
+  dust (without it out3 lit falsely when only lever 2 was on). That it is what the author had is a guess
+  (INFERRED from the cropped height); the repair is mine. With it all 15 subsets pass.
+  MEASURED on 26.3: for every subset, 40 presses at 60-tick spacing each gave exactly one lamp, always a member,
+  and every member at least once (the tests), 160 presses of {1,2,3,4} gave each lamp 20 to 60 times (uniform
+  within 3 sigma). The lamp lights 36 game ticks after the click and stays lit 8 ticks (pulse_timing); with
+  no lever on the button gives nothing, and a lever alone gives nothing. Presses 45 ticks apart also worked
+  (12 of 12 on {3}); faster was not tried. With block_drops off the first press destroys the box for good and
+  every container is empty afterwards. One stray item entity is present all the time and is not part of the design.
+traits:
+- container_based
+- comparator_based
+- torch_based
+- piston_based
+- analog
+update_pass: all
+palette:
+  .: air
+  A: magenta_wool
+  B: blue_wool
+  C: hopper[enabled=true,facing=south]
+  D: dropper[facing=up,triggered=false]{Items:[{Slot:0b,id:"minecraft:light_blue_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}},{slot:5,item:{id:"minecraft:redstone",count:64}},{slot:6,item:{id:"minecraft:redstone",count:64}}]}}]}
+  E: dropper[facing=up,triggered=false]{Items:[{Slot:0b,id:"minecraft:light_blue_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}},{slot:5,item:{id:"minecraft:redstone",count:64}},{slot:6,item:{id:"minecraft:redstone",count:64}}]}},{Slot:1b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}},{Slot:2b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  F: dropper[facing=up,triggered=false]{Items:[{Slot:0b,id:"minecraft:magenta_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}}]}}]}
+  G: repeater[delay=1,facing=south,locked=false,powered=false]
+  H: redstone_wall_torch[facing=north,lit=false]
+  I: redstone_wire[east=none,north=side,power=15,south=side,west=none]
+  J: redstone_wire[east=none,north=side,power=14,south=side,west=none]
+  K: redstone_wire[east=none,north=side,power=13,south=side,west=none]
+  L: redstone_wire[east=none,north=side,power=12,south=side,west=none]
+  M: green_wool
+  N: repeater[delay=1,facing=north,locked=false,powered=false]
+  O: redstone_wire[east=none,north=side,power=11,south=side,west=none]
+  P: redstone_wire[east=none,north=side,power=10,south=side,west=none]
+  Q: light_gray_wool
+  R: comparator[facing=south,mode=compare,powered=false]
+  S: dispenser[facing=north,triggered=false]{Items:[{Slot:1b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  T: dispenser[facing=north,triggered=false]{Items:[{Slot:1b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}}]}
+  U: dispenser[facing=north,triggered=false]
+  V: dispenser[facing=north,triggered=false]{Items:[{Slot:0b,id:"minecraft:light_blue_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}},{slot:5,item:{id:"minecraft:redstone",count:64}},{slot:6,item:{id:"minecraft:redstone",count:64}}]}}]}
+  W: dispenser[facing=north,triggered=false]{Items:[{Slot:1b,id:"minecraft:magenta_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}}]}},{Slot:2b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  X: dispenser[facing=north,triggered=false]{Items:[{Slot:0b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}},{Slot:2b,id:"minecraft:magenta_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}}]}}]}
+  Y: dispenser[facing=north,triggered=false]{Items:[{Slot:0b,id:"minecraft:light_blue_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}},{slot:5,item:{id:"minecraft:redstone",count:64}},{slot:6,item:{id:"minecraft:redstone",count:64}}]}},{Slot:2b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}},{Slot:3b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  Z: redstone_wall_torch[facing=north,lit=true]
+  a: redstone_wire[east=up,north=none,power=0,south=none,west=up]
+  b: repeater[delay=1,facing=west,locked=false,powered=false]
+  c: repeater[delay=1,facing=east,locked=false,powered=false]
+  d: redstone_wall_torch[facing=west,lit=true]
+  e: target[power=0]
+  f: redstone_wire[east=none,north=none,power=0,south=side,west=side]
+  g: redstone_wire[east=none,north=side,power=0,south=side,west=side]
+  h: redstone_wire[east=up,north=side,power=0,south=none,west=none]
+  i: redstone_wire[east=side,north=side,power=0,south=side,west=side]
+  j: comparator[facing=west,mode=compare,powered=false]
+  k: comparator[facing=east,mode=compare,powered=false]
+  l: piston[extended=false,facing=down]
+  m: redstone_wire[east=side,north=none,power=0,south=none,west=up]
+  n: redstone_wire[east=side,north=none,power=0,south=none,west=side]
+  o: redstone_wire[east=up,north=none,power=0,south=none,west=side]
+  p: redstone_wire[east=none,north=up,power=0,south=side,west=none]
+  q: redstone_wall_torch[facing=west,lit=false]
+  r: redstone_wire[east=none,north=side,power=0,south=none,west=side]
+  s: redstone_wire[east=none,north=none,power=0,south=side,west=up]
+  t:
+    name: lever1
+    block: lever[face=wall,facing=west]
+  u: white_wool
+  v: comparator[facing=west,mode=subtract,powered=false]
+  w:
+    name: lever2
+    block: lever[face=wall,facing=west]
+  x:
+    name: lever3
+    block: lever[face=wall,facing=west]
+  y:
+    name: lever4
+    block: lever[face=wall,facing=west]
+  z: orange_wool
+  α: dropper[facing=up,triggered=false]{Items:[{Slot:0b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  β: dropper[facing=up,triggered=false]{Items:[{Slot:0b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}}]}
+  γ: dropper[facing=up,triggered=false]
+  δ: redstone_wire[east=none,north=side,power=9,south=side,west=none]
+  ε: redstone_wall_torch[facing=east,lit=true]
+  ζ:
+    name: out1
+    block: redstone_lamp
+  η: repeater[delay=2,facing=east,locked=false,powered=false]
+  θ:
+    name: out2
+    block: redstone_lamp
+  ι:
+    name: out3
+    block: redstone_lamp
+  κ:
+    name: out4
+    block: redstone_lamp
+  λ: dispenser[facing=north,triggered=false]{Items:[{Slot:0b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  μ: dispenser[facing=north,triggered=false]{Items:[{Slot:0b,id:"minecraft:magenta_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}},{slot:3,item:{id:"minecraft:redstone",count:64}},{slot:4,item:{id:"minecraft:redstone",count:64}}]}},{Slot:1b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}}]}
+  ν: dispenser[facing=north,triggered=false]{Items:[{Slot:0b,id:"minecraft:orange_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}},{slot:1,item:{id:"minecraft:redstone",count:64}},{slot:2,item:{id:"minecraft:redstone",count:64}}]}},{Slot:2b,id:"minecraft:white_shulker_box",count:1,components:{"minecraft:container":[{slot:0,item:{id:"minecraft:redstone",count:64}}]}}]}
+  ξ:
+    name: go
+    block: stone_button[face=floor,facing=east]
+  ο: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  π: repeater[delay=3,facing=north,locked=false,powered=false]
+  ρ: comparator[facing=north,mode=subtract,powered=false]
+  ς: redstone_wire
+layers:
+  0: |
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    .........A.A.A.A.A.A.A..
+    ........................
+    ........................
+    .........A.A.A.A.A.A.A..
+    .........A.A.A.A.A.A.A..
+    .........A.A.A.A.A.A.A..
+    .........A.A.A.A.A.A.A..
+    .........AAA.A.A.A.A.A..
+    .........A.A.A.A.A.A.A..
+    .........A.A.A.AAA.A.A..
+    .........A.A.A.A.A.A.A..
+  1: |
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    .........B.B.B.B.B.B.B..
+    .........C.C.C.C.C.C.C..
+    .........D.D.E.F.D.D.F..
+    .........G.G.G.G.G.G.G..
+    .........H.H.H.H.H.H.H..
+    .........A.A.A.A.A.A.A..
+    .........I.I.I.I.I.I.I..
+    .........J.J.J.J.J.J.J..
+    .........K.K.K.I.I.I.I..
+    .........LMJMJ.J.J.J.J..
+    .........KNI.I.K.K.I.I..
+    .........JMJ.J.LMJ.J.J..
+    .........I.K.I.ONI.K.I..
+    .........JML.JMPMJML.J..
+  2: |
+    ........................
+    ........................
+    ................Q.......
+    ................Q.......
+    ................Q.......
+    ................Q.......
+    ................Q.......
+    ................Q.......
+    .............B.B.B.B....
+    ............B.......B...
+    ...........B.B.....B.B..
+    ..........B...B...B...B.
+    .........B.B.B.B.B.B.B..
+    .........R.R.R.R.R.R.R..
+    ........................
+    .........S.T.U.V.W.X.Y..
+    ........................
+    ........................
+    ........................
+    .........Z.Z.Z.Z.Z.Z.Z..
+    ......MMMMMMMMMMMMMMMM..
+    ...............Z.Z.Z.Z..
+    ......MMMMaMbMMMMMMMMM..
+    ...........Z.Z.....Z.Z..
+    ......MMMMcMMMMMaMMMMM..
+    .........Z...Z...Z...Z..
+    ......MMMMbMMMbMMMbMMM..
+  3: |
+    ........................
+    .............Q..........
+    ..............defQ......
+    ..............degQ......
+    ..............degQ......
+    ..............degQ......
+    ................RQ......
+    ................hQ......
+    ............BiBjBkBiB...
+    ............R.......R...
+    ..........BiBiB...BiBiB.
+    ..........R...R...R...R.
+    .........iBiBiBiBiBiBiB.
+    .........B.B.B.B.B.B.B..
+    .........l.l.l.l.l.l.l..
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    .....Mmbnnnnnnnnnnnnnn..
+    ........................
+    .....Mmbnn.oMMmnnnnnnn..
+    ........................
+    .....MmboMMmnnnn.nnnnn..
+    ........................
+    .....MmbnoMMmoMMmoMMmn..
+  4: |
+    .............Q..........
+    .............p..........
+    .............qQcef......
+    ............QqQceg......
+    .............qQceg......
+    .............qQceg......
+    .............Q...R......
+    .................r......
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ..M.Mn..................
+    ....M...................
+    ..M.Mn......nn..........
+    ........................
+    ..M.Mn...nn.............
+    ....M...................
+    ..M.Mn....nn..nn..nn....
+  5: |
+    ............Qs..........
+    ........................
+    ............Q...........
+    ............pQ..........
+    .............Q..........
+    .............Q..........
+    ............Qm..........
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    .........A.A.A.A.A.A.A.A
+    ........................
+    ........................
+    .........A.A.A.A.A.A.A.A
+    tubMvM...A.A.A.A.A.A.A.A
+    ....I....A.AAA.AAA.AAA.A
+    wubMvM...A.A.A.A.A.A.A.A
+    .........AAA.A.A.A.A.A.A
+    xubMvM...A.A.A.A.A.A.A.A
+    ....I....A.A.A.AAA.A.A.A
+    yubMvM...A.A.A.A.A.A.A.A
+  6: |
+    .........z.Qm...........
+    ........................
+    .........z.Qs...........
+    ........................
+    .........z.QQm..........
+    ........................
+    .........z.Qm...........
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    .........B.B.B.B.B.B.B.B
+    .........C.C.C.C.C.C.C.C
+    .........α.β.β.F.F.γ.F.D
+    .........G.G.G.G.G.G.G.G
+    ...uM....H.H.H.H.H.H.H.H
+    ...MM....A.A.A.A.A.A.A.A
+    ...MM....δ.O.O.K.K.K.K.J
+    ...M.oMM.PMLML.JMJ.JMJ.I
+    ...Mε....O.KNK.INI.INI.J
+    ...M.oMM.LMJMJ.JMJ.JMJMK
+    ...M.....KNI.I.K.K.I.I.L
+    ...M.oMM.JMJ.J.LMJ.J.JMO
+    ...Mε....I.K.I.ONI.K.I.P
+    ...M.oMM.JML.JMPMJML.JMδ
+  7: |
+    ........ζηQn............
+    ........................
+    ........θηQn....Q.......
+    ................Q.......
+    ........ιηQnn...Q.......
+    ................Q.......
+    ........κηQn....Q.......
+    ................Q.......
+    .............B.B.B.B....
+    ............B.......B...
+    ...........B.B.....B.B..
+    ..........B...B...B...B.
+    .........B.B.B.B.B.B.B.B
+    .........R.R.R.R.R.R.R.R
+    ........................
+    .........U.U.λ.U.S.μ.ν.U
+    ........................
+    ...ξf...................
+    ...οπ...................
+    ...ρr...................
+    ...ο..nbMMcMaMMMaMMMaMMε
+    ...ο...........Z.Z.Z.Z..
+    ...ο..nbMMaMbMMMMMMMMMbM
+    ...ο.......Z.Z.....Z.Z..
+    ...ο..nbMMcMMMMMaMMMMMbM
+    ...ο.....Z...Z...Z...Z..
+    ...ο..nbMMbMMMbMMMbMMMbM
+  8: |
+    ..........oQQQ..........
+    .............Q..........
+    ..........oQ..defQ......
+    ..............degQ......
+    ..........oQQ.degQ......
+    ..............degQ......
+    ..........oQQQ..RQ......
+    ................hQ......
+    ............BiBjBkBiB...
+    ............R.......R...
+    ..........BiBiB...BiBiB.
+    ..........R...R...R...R.
+    .........iBi.iBi.iBi.iBi
+    .........B.B.B.B.B.B.B.B
+    .........l.l.l.l.l.l.l.l
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........oMMm.nnn.nnn.nn.
+    ........................
+    ........nn.oMMmnnnnnnn..
+    ........................
+    ........oMMmnnnn.nnnnn..
+    ........................
+    ........noMMmoMMmoMMmn..
+  9: |
+    ...........nnf..........
+    .............ο..........
+    ...........nuqQcef......
+    ...........QQqQceg......
+    ...........nnqQceg......
+    .............qQceg......
+    ...........nnr...R......
+    .................r......
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    .........nn.............
+    ........................
+    ............nn..........
+    ........................
+    .........nn.............
+    ........................
+    ..........nn..nn..nn....
+  10: |
+    ........................
+    ........................
+    ............ς...........
+    ............ςu..........
+    ............u...........
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+    ........................
+tests:
+- name: quiet_after_placement
+  settle: 0
+  steps:
+  - expect_items: {cell: [11, 6, 15], item: orange_shulker_box, count: 1}
+  - wave:
+      out1: '0000000000000000000000000000000000000000'
+      out2: '0000000000000000000000000000000000000000'
+      out3: '0000000000000000000000000000000000000000'
+      out4: '0000000000000000000000000000000000000000'
+- name: subset_1
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_2
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever2
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_3
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever3
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_4
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_12
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever2
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_13
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever3
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_14
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_23
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever2
+  - use: lever3
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_24
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever2
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_34
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever3
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_123
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever2
+  - use: lever3
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_124
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever2
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_134
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever3
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_234
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever2
+  - use: lever3
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: subset_1234
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever2
+  - use: lever3
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 40
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: unless score o1 ss matches 0
+  - check: unless score o2 ss matches 0
+  - check: unless score o3 ss matches 0
+  - check: unless score o4 ss matches 0
+  - check: if score t ss matches 40
+  finally:
+  - scoreboard objectives remove ss
+- name: uniform_1234
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever1
+  - use: lever2
+  - use: lever3
+  - use: lever4
+  - wait: 20
+  - repeat:
+      times: 160
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 20..60
+  - check: if score o2 ss matches 20..60
+  - check: if score o3 ss matches 20..60
+  - check: if score o4 ss matches 20..60
+  - check: if score t ss matches 160
+  finally:
+  - scoreboard objectives remove ss
+- name: as_archived_lone_input2_is_dead
+  steps:
+  - run: scoreboard objectives add ss dummy
+  - run: setblock ~12 ~10 ~2 air
+  - run: setblock ~12 ~10 ~3 air
+  - run: setblock ~13 ~10 ~3 air
+  - run: setblock ~12 ~10 ~4 air
+  - run: setblock ~12 ~9 ~2 air
+  - run: scoreboard players set o1 ss 0
+  - run: scoreboard players set o2 ss 0
+  - run: scoreboard players set o3 ss 0
+  - run: scoreboard players set o4 ss 0
+  - use: lever2
+  - wait: 20
+  - repeat:
+      times: 12
+      steps:
+      - use: go
+      - wait: 40
+      - run: execute if block ~8 ~7 ~0 redstone_lamp[lit=true] run scoreboard players add o1 ss 1
+      - run: execute if block ~8 ~7 ~2 redstone_lamp[lit=true] run scoreboard players add o2 ss 1
+      - run: execute if block ~8 ~7 ~4 redstone_lamp[lit=true] run scoreboard players add o3 ss 1
+      - run: execute if block ~8 ~7 ~6 redstone_lamp[lit=true] run scoreboard players add o4 ss 1
+      - wait: 20
+  - run: scoreboard players set t ss 0
+  - run: scoreboard players operation t ss += o1 ss
+  - run: scoreboard players operation t ss += o2 ss
+  - run: scoreboard players operation t ss += o3 ss
+  - run: scoreboard players operation t ss += o4 ss
+  - check: if score o1 ss matches 0
+  - check: if score o2 ss matches 0
+  - check: if score o3 ss matches 0
+  - check: if score o4 ss matches 0
+  - check: if score t ss matches 0
+  finally:
+  - scoreboard objectives remove ss
+- name: pulse_timing
+  steps:
+  - use: lever3
+  - wait: 20
+  - use: go
+  - wave:
+      out3: '000000000000000000000000000000000000111111110'
+      out1: '000000000000000000000000000000000000000000000'
+      out2: '000000000000000000000000000000000000000000000'
+      out4: '000000000000000000000000000000000000000000000'
+- name: lever_alone_is_quiet
+  steps:
+  - use: lever1
+  - use: lever2
+  - use: lever3
+  - use: lever4
+  - wave:
+      out1: '0000000000000000000000000000000000000000000000000000000000000000'
+      out2: '0000000000000000000000000000000000000000000000000000000000000000'
+      out3: '0000000000000000000000000000000000000000000000000000000000000000'
+      out4: '0000000000000000000000000000000000000000000000000000000000000000'
+- name: button_with_no_input_is_quiet
+  steps:
+  - use: go
+  - wave:
+      out1: '0000000000000000000000000000000000000000000000000000000000000000'
+      out2: '0000000000000000000000000000000000000000000000000000000000000000'
+      out3: '0000000000000000000000000000000000000000000000000000000000000000'
+      out4: '0000000000000000000000000000000000000000000000000000000000000000'
+- name: needs_block_drops
+  steps:
+  - run: gamerule block_drops false
+  - use: lever3
+  - wait: 20
+  - use: go
+  - wait: 60
+  - expect_items: {cell: [11, 6, 15], empty: true}
+  - expect_items: {cell: [11, 6, 14], empty: true}
+  - expect_items: {cell: [11, 7, 15], empty: true}
+  - use: go
+  - wave:
+      out3: '0000000000000000000000000000000000000000000000000000'
+  finally:
+  - gamerule block_drops true
+- name: shulker_returns_to_dropper
+  steps:
+  - use: lever3
+  - wait: 20
+  - use: go
+  - wait: 60
+  - expect_items: {cell: [11, 6, 15], item: orange_shulker_box, count: 1}
+  - expect_items: {cell: [11, 6, 14], empty: true}
+  - expect_items: {cell: [11, 7, 15], empty: true}

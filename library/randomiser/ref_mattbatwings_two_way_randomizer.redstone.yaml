@@ -1,0 +1,110 @@
+name: ref_mattbatwings_two_way_randomizer
+description: "Rebuilt from LRA entry RANDOM002 '2 way Randomizer' (no author listed, endorsed by mattbatwings; https://discord.com/channels/1361854816837435433/1472398246973538495). SOURCED: a button press gives signal strength 1 or 2, 50/50. 3x3x5, 14 blocks. Harness changes: the schematic's dropper holds one redstone (slot 0) and one wooden axe (slot 1), put in the dropper's state here; the stone button is clicked by run steps (setblock powered plus a clone of the dropper, released after 20 ticks) because the harness only emulates buttons on plain full blocks. Lamps ge1 (strength >= 1) and ge2 (>= 2) are the outputs, read off the dust and wool; cmp is the comparator. How it works (INFERRED, each part checked by a test): the pressed button hard-powers the dropper, which (1) switches off the wall torch on its side, so the dust that holds the comparator's side input at 15 goes dark and the subtract comparator passes the dropper's fill level, (2) fires after 4 ticks, picking a random non-empty slot and pushing that item up into the hopper, and (3) hard-powers the hopper above it, locking it, so the item stays in the hopper for the whole press. The fill level is 1 + floor(14 * sum(count / stack size) / 9): with both items 1.0156 gives 2; if the axe (a whole slot unit) is taken only the redstone's 1/64 is left and the level is 1; if the redstone is taken the axe's 1.0 is left and the level is 2. A random slot with two items is 50/50, so the outcome is 1 or 2 equally. On release the hopper unlocks and returns the item. Compact because the dropper's random slot is the only source of randomness and one block does the latch (hopper lock), the gate (torch) and the read-out (comparator). MEASURED: idle all dark; lamp ge1 lights 4 ticks after the click and goes dark 7 or 8 ticks after release; two redstones always read 1, two axes always read 2 (so the item type decides the level); 60 presses gave 35, 31, 23, 30 twos in four runs; the hopper holds exactly one item during the press and the dropper again holds both afterwards."
+traits: [compact, container_based, comparator_based]
+palette:
+  .: air
+  L: {output: ge1, block: redstone_lamp}
+  K: {output: ge2, block: redstone_lamp}
+  A: white_wool
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: {name: cmp, block: 'comparator[facing=south,mode=subtract]'}
+  D: redstone_wire[east=none,north=none,south=side,west=side]
+  E: {name: dr, block: 'dropper[facing=up]{Items:[{Slot:0b,id:"minecraft:redstone",count:1},{Slot:1b,id:"minecraft:wooden_axe",count:1}]}'}
+  ): redstone_wall_torch[facing=east]
+  F: stone_button[face=wall,facing=south]
+  G: {name: hp, block: 'hopper[facing=down]'}
+layers:
+  0: |
+    KA.
+    LA.
+    .AA
+    ...
+    ...
+  1: |
+    .B.
+    .B.
+    .CD
+    .E)
+    .F.
+  2: |
+    ...
+    ...
+    ...
+    .G.
+    ...
+tests:
+- name: idle, torch lit, comparator off, lamps dark
+  steps:
+  - level: {cmp: 0}
+  - expect: {ge1: 0, ge2: 0}
+  - wave: {ge1: '0000', ge2: '0000'}
+- name: press timing, lamp on 4 ticks after the click, off 7 or 8 after release
+  steps:
+  - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=true]
+  - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+  - wave: {ge1: '00001111111111111111'}
+  - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=false]
+  - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+  - wave: {ge1: '1111111x0000'}
+- name: result 1 or 2 held for the whole press, then redstone and axe both back
+  steps:
+  - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=true]
+  - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+  - {wait: 6}
+  - expect: {ge1: 1}
+  - expect_items: {cell: hp, count: 1}
+  - {wait: 14}
+  - expect: {ge1: 1}
+  - expect_items: {cell: hp, count: 1}
+  - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=false]
+  - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+  - {wait: 30}
+  - expect: {ge1: 0, ge2: 0}
+  - expect_items: {cell: hp, empty: true}
+  - expect_items: {cell: dr, item: redstone, count: 1}
+  - expect_items: {cell: dr, item: wooden_axe, count: 1}
+- name: two redstone always give 1 (the stackable item weighs 1/64 of a slot)
+  steps:
+  - insert: {cell: dr, clear: true, items: [{id: redstone}, {id: redstone}]}
+  - repeat:
+      times: 4
+      steps:
+      - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=true]
+      - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+      - {wait: 10}
+      - expect: {ge1: 1, ge2: 0}
+      - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=false]
+      - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+      - {wait: 30}
+- name: two wooden axes always give 2 (the unstackable item weighs a full slot)
+  steps:
+  - insert: {cell: dr, clear: true, items: [{id: wooden_axe}, {id: wooden_axe}]}
+  - repeat:
+      times: 4
+      steps:
+      - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=true]
+      - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+      - {wait: 10}
+      - expect: {ge1: 1, ge2: 1}
+      - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=false]
+      - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+      - {wait: 30}
+- name: 50/50 over 60 presses, 15 to 45 twos
+  steps:
+  - run: scoreboard objectives add rnd2 dummy
+  - run: scoreboard players set twos rnd2 0
+  - repeat:
+      times: 60
+      steps:
+      - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=true]
+      - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+      - {wait: 10}
+      - expect: {ge1: 1}
+      - run: execute if block ~0 ~0 ~0 redstone_lamp[lit=true] run scoreboard players add twos rnd2 1
+      - run: setblock ~1 ~1 ~4 stone_button[face=wall,facing=south,powered=false]
+      - run: clone ~1 ~1 ~3 ~1 ~1 ~3 ~1 ~1 ~3 replace force
+      - {wait: 30}
+  - log: scoreboard players get twos rnd2
+  - check: if score twos rnd2 matches 15..45
+  finally:
+  - scoreboard objectives remove rnd2

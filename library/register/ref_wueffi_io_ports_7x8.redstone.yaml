@@ -1,0 +1,2251 @@
+name: ref_wueffi_io_ports_7x8
+description: 'Waffle [Wueffi]''s WafPortsV2, seven single-bus 8-bit I/O ports (Logical Redstone Archive IOPORT001_WafPortsV2, tag Tested & Functional, https://discord.com/channels/1361854816837435433/1472533176319479910). README (SOURCED): 4 blocks wide per port, 3915 blocks volume, 7 binary 8-bit inputs and 7 8-bit outputs on one bus, 3rt read and 6rt write, control and feedback lines top to bottom Data Out, Toggle Write (off = read, on = write), Address bit 2, 1, 0. Here the 26.3 build is 31x29x9 (x west-east, y layers, z north-south), 3248 blocks. ONLY PART OF THE README HOLDS IN 26.3, see FAILS. Harness changes: (1) the 27 signs and 7 player heads are decoration and left out; the 127 barrels that hold the comparator constants (119 hold one item, strength 1, 8 hold 27 full stacks, strength 15) hold sticks instead of player heads (same stack size, same strength). (2) The schem has no inputs: the address bits a0,a1,a2 and wrt are redstone-block drivers at (29,3/5/7/9,7) in front of the east-facing repeaters at x=28 (INFERRED from the repeaters and the signs, MEASURED: they decode and strobe); the bus lanes busd0..busd7 are drivers at (29,14+2b,7) feeding the east end of lane b, and the lane is read as the dust bus0..bus7 at (28,14+2b,7) (INFERRED, MEASURED); the output lamps are out<port>_<bit> at x=15+2i (i=0 is port 7), y=13+2b or 14+2b, z=3. (3) The data inputs are the 56 front levers, which hang on lamps so `use` cannot click them: tests flip them (and the front buttons) with `run: setblock` plus a `clone` of the lamp or concrete behind, which is what a click does. Layout (INFERRED from the schem, checked by traces): port $7..$1 inputs stand at x=1,3,..,13 and outputs at x=15,17,..,27, bit b in the layer pair y=13+2b and 14+2b (odd x-spacing alternates the two layers); an input is a lever on a lamp, a repeater, a subtract comparator that subtracts a mask dust T and a compare comparator whose side reads a barrel of strength 1; T is a dust staircase that loses one level per layer and is switched off by the port''s request torches; an output is a repeater chain locked by a subtract comparator that reads a strength-1 barrel minus a write-enable dust C, so the lamp holds when C is 0; the address is decoded by dust staircases on the three address lines that go dark only for the matching port. MEASURED on satellites: WRITE works for all seven ports: with a=n and wrt on, the bus lanes latch into port n''s lamps and no other port changes (seven distinct bytes, then 0xFF everywhere, then 0x00 into one port), nothing is written with wrt off or with address 0 and wrt on; the lamp lights exactly 18 gt after wrt rises (C rises 10 gt after wrt, the chain adds 8) and the lock is back only 12 gt after wrt falls, so the bus must stay valid at least 12 gt after wrt falls: dropping it 10 gt after wrt falls erases the write. READ by address alone works only for port 1: with a=1 and wrt off the lanes show port 1''s lever byte, 14 gt after the address changes (to the east end of the lane), and wrt on blanks it. Ports 2 to 7 do NOT read by address and wrt off: with a=n nothing reaches the bus until the port''s front button (the one above the ''WRITE PORT $n'' sign: (3,11,2) (7,11,2) (11,11,2) for ports 6, 4, 2 and (1,12,2) (5,12,2) (9,12,2) for ports 7, 5, 3) is also pressed, and then the byte appears. A structural search found no other source for the second request torch of those ports: it sits on a block that only the front button powers, so this is the published file, not a placement artefact; the README names no button. FAILS: (a) the ''binary'' bus is not clean: the mask T falls from 15 at layer 14 to 2 at layer 28, so an unselected port''s lever for bit b still gives subtract output 15 minus T, the regenerating repeater at x=14 lifts it to a full signal, and port n puts its bits n to 6 on the shared lanes whether or not it is addressed (port 3 all on and address 1 gives lanes 3 to 6 high; port 1 leaks lanes 1 to 6, port 7 none, lane 7 never) and in these runs the data out line rose only with a button or the port-7 test lever, never with an address alone. (b) 3rt/6rt is not met: read 14 gt (7rt) and write 18 gt (9rt) as measured at the east lane and the lamp. Not tested: the Data Out feedback line, the RESET buttons of the output ports, repeated back-to-back transfers.'
+traits:
+- comparator_based
+- container_based
+- pistonless
+- entityless
+- vertical
+palette:
+  .: air
+  A: gray_stained_glass
+  B: gray_concrete
+  C: redstone_wire[east=none,north=up,south=side,west=none]
+  D: repeater[delay=1,facing=south]
+  n: redstone_wall_torch[facing=north]
+  E: air
+  F: redstone_wire[east=none,north=side,south=up,west=none]
+  G: redstone_wire[east=side,north=none,south=none,west=up]
+  H: redstone_wire[east=side,north=none,south=none,west=side]
+  I: redstone_wire[east=up,north=none,south=none,west=side]
+  J: repeater[delay=1,facing=east]
+  K: redstone_wire[east=side,north=up,south=side,west=none]
+  M: target
+  N: air
+  L: redstone_lamp
+  O: redstone_wire[east=none,north=side,south=side,west=none]
+  P: redstone_wire[east=side,north=none,south=side,west=none]
+  '*': redstone_torch
+  Q: redstone_wire[east=side,north=up,south=side,west=side]
+  u: redstone_wall_torch[facing=south]
+  T: redstone_wire[east=none,north=up,south=side,west=side]
+  U: stone_button[face=wall,facing=north]
+  V: lever[face=wall,facing=west]
+  W: repeater[delay=1,facing=north]
+  X: redstone_wire[east=side,north=side,south=none,west=side]
+  Y: repeater[delay=1,facing=west]
+  Z: redstone_wire[east=up,north=side,south=none,west=side]
+  b: redstone_wire[east=side,north=side,south=side,west=side]
+  c: barrel[facing=up,open=false]{Items:[{Slot:13b,id:"minecraft:stick",count:1}]}
+  d: redstone_wire[east=side,north=side,south=none,west=none]
+  e: lever[face=wall,facing=north]
+  f: comparator[facing=north,mode=subtract]
+  g: comparator[facing=north,mode=compare]
+  h: comparator[facing=east,mode=compare]
+  i: comparator[facing=east,mode=subtract]
+  j: redstone_wire[east=none,north=side,south=none,west=side]
+  k: air
+  l: redstone_wire[east=none,north=side,south=side,west=side]
+  m: barrel[facing=south,open=false]{Items:[{Slot:0b,id:"minecraft:stick",count:64},{Slot:1b,id:"minecraft:stick",count:64},{Slot:2b,id:"minecraft:stick",count:64},{Slot:3b,id:"minecraft:stick",count:64},{Slot:4b,id:"minecraft:stick",count:64},{Slot:5b,id:"minecraft:stick",count:64},{Slot:6b,id:"minecraft:stick",count:64},{Slot:7b,id:"minecraft:stick",count:64},{Slot:8b,id:"minecraft:stick",count:64},{Slot:9b,id:"minecraft:stick",count:64},{Slot:10b,id:"minecraft:stick",count:64},{Slot:11b,id:"minecraft:stick",count:64},{Slot:12b,id:"minecraft:stick",count:64},{Slot:13b,id:"minecraft:stick",count:64},{Slot:14b,id:"minecraft:stick",count:64},{Slot:15b,id:"minecraft:stick",count:64},{Slot:16b,id:"minecraft:stick",count:64},{Slot:17b,id:"minecraft:stick",count:64},{Slot:18b,id:"minecraft:stick",count:64},{Slot:19b,id:"minecraft:stick",count:64},{Slot:20b,id:"minecraft:stick",count:64},{Slot:21b,id:"minecraft:stick",count:64},{Slot:22b,id:"minecraft:stick",count:64},{Slot:23b,id:"minecraft:stick",count:64},{Slot:24b,id:"minecraft:stick",count:64},{Slot:25b,id:"minecraft:stick",count:64},{Slot:26b,id:"minecraft:stick",count:64}]}
+  p: air
+  q: barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:stick",count:64},{Slot:1b,id:"minecraft:stick",count:64},{Slot:2b,id:"minecraft:stick",count:64},{Slot:3b,id:"minecraft:stick",count:64},{Slot:4b,id:"minecraft:stick",count:64},{Slot:5b,id:"minecraft:stick",count:64},{Slot:6b,id:"minecraft:stick",count:64},{Slot:7b,id:"minecraft:stick",count:64},{Slot:8b,id:"minecraft:stick",count:64},{Slot:9b,id:"minecraft:stick",count:64},{Slot:10b,id:"minecraft:stick",count:64},{Slot:11b,id:"minecraft:stick",count:64},{Slot:12b,id:"minecraft:stick",count:64},{Slot:13b,id:"minecraft:stick",count:64},{Slot:14b,id:"minecraft:stick",count:64},{Slot:15b,id:"minecraft:stick",count:64},{Slot:16b,id:"minecraft:stick",count:64},{Slot:17b,id:"minecraft:stick",count:64},{Slot:18b,id:"minecraft:stick",count:64},{Slot:19b,id:"minecraft:stick",count:64},{Slot:20b,id:"minecraft:stick",count:64},{Slot:21b,id:"minecraft:stick",count:64},{Slot:22b,id:"minecraft:stick",count:64},{Slot:23b,id:"minecraft:stick",count:64},{Slot:24b,id:"minecraft:stick",count:64},{Slot:25b,id:"minecraft:stick",count:64},{Slot:26b,id:"minecraft:stick",count:64}]}
+  一:
+    input: a0
+  丁:
+    input: a1
+  丂:
+    input: a2
+  七:
+    input: wrt
+  丄:
+    name: data_out
+    block: repeater[delay=1,facing=west]
+  丅:
+    input: busd0
+  丆:
+    name: bus0
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  万:
+    name: out7_0
+    block: redstone_lamp
+  丈:
+    name: out6_0
+    block: redstone_lamp
+  三:
+    name: out5_0
+    block: redstone_lamp
+  上:
+    name: out4_0
+    block: redstone_lamp
+  下:
+    name: out3_0
+    block: redstone_lamp
+  丌:
+    name: out2_0
+    block: redstone_lamp
+  不:
+    name: out1_0
+    block: redstone_lamp
+  与:
+    input: busd1
+  丏:
+    name: bus1
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  丐:
+    name: out7_1
+    block: redstone_lamp
+  丑:
+    name: out6_1
+    block: redstone_lamp
+  丒:
+    name: out5_1
+    block: redstone_lamp
+  专:
+    name: out4_1
+    block: redstone_lamp
+  且:
+    name: out3_1
+    block: redstone_lamp
+  丕:
+    name: out2_1
+    block: redstone_lamp
+  世:
+    name: out1_1
+    block: redstone_lamp
+  丗:
+    input: busd2
+  丘:
+    name: bus2
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  丙:
+    name: out7_2
+    block: redstone_lamp
+  业:
+    name: out6_2
+    block: redstone_lamp
+  丛:
+    name: out5_2
+    block: redstone_lamp
+  东:
+    name: out4_2
+    block: redstone_lamp
+  丝:
+    name: out3_2
+    block: redstone_lamp
+  丞:
+    name: out2_2
+    block: redstone_lamp
+  丟:
+    name: out1_2
+    block: redstone_lamp
+  丠:
+    input: busd3
+  両:
+    name: bus3
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  丢:
+    name: out7_3
+    block: redstone_lamp
+  丣:
+    name: out6_3
+    block: redstone_lamp
+  两:
+    name: out5_3
+    block: redstone_lamp
+  严:
+    name: out4_3
+    block: redstone_lamp
+  並:
+    name: out3_3
+    block: redstone_lamp
+  丧:
+    name: out2_3
+    block: redstone_lamp
+  丨:
+    name: out1_3
+    block: redstone_lamp
+  丩:
+    input: busd4
+  个:
+    name: bus4
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  丫:
+    name: out7_4
+    block: redstone_lamp
+  丬:
+    name: out6_4
+    block: redstone_lamp
+  中:
+    name: out5_4
+    block: redstone_lamp
+  丮:
+    name: out4_4
+    block: redstone_lamp
+  丯:
+    name: out3_4
+    block: redstone_lamp
+  丰:
+    name: out2_4
+    block: redstone_lamp
+  丱:
+    name: out1_4
+    block: redstone_lamp
+  串:
+    input: busd5
+  丳:
+    name: bus5
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  临:
+    name: out7_5
+    block: redstone_lamp
+  丵:
+    name: out6_5
+    block: redstone_lamp
+  丶:
+    name: out5_5
+    block: redstone_lamp
+  丷:
+    name: out4_5
+    block: redstone_lamp
+  丸:
+    name: out3_5
+    block: redstone_lamp
+  丹:
+    name: out2_5
+    block: redstone_lamp
+  为:
+    name: out1_5
+    block: redstone_lamp
+  主:
+    input: busd6
+  丼:
+    name: bus6
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  丽:
+    name: out7_6
+    block: redstone_lamp
+  举:
+    name: out6_6
+    block: redstone_lamp
+  丿:
+    name: out5_6
+    block: redstone_lamp
+  乀:
+    name: out4_6
+    block: redstone_lamp
+  乁:
+    name: out3_6
+    block: redstone_lamp
+  乂:
+    name: out2_6
+    block: redstone_lamp
+  乃:
+    name: out1_6
+    block: redstone_lamp
+  乄:
+    input: busd7
+  久:
+    name: bus7
+    block: redstone_wire[east=side,north=none,south=none,west=side]
+  乆:
+    name: out7_7
+    block: redstone_lamp
+  乇:
+    name: out6_7
+    block: redstone_lamp
+  么:
+    name: out5_7
+    block: redstone_lamp
+  义:
+    name: out4_7
+    block: redstone_lamp
+  乊:
+    name: out3_7
+    block: redstone_lamp
+  之:
+    name: out2_7
+    block: redstone_lamp
+  乌:
+    name: out1_7
+    block: redstone_lamp
+layers:
+  0: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ..............................A
+    .............................AB
+  1: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ...A...A...A...A...A...A...A...
+    ...A...A...A...A...A...A...A...
+    ...............................
+    ..............................A
+  2: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    ...A...A...A...A...A...A...A...
+    .A.C.A.C.A.C.A.C.A.C.A.C.A.C...
+    ...D...D...D...n.A.n.A.n.A.n...
+    ..ABA.ABA.ABA.ABA.ABA.ABA.ABB..
+    ...........................E...
+  3: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    .A.F.A.F.A.F.A.F.A.F.A.F.A.F...
+    .C.A.C.A.C.A.C.A.C.A.C.A.C.A...
+    .n.A.n.A.n.A.n.A.D.A.D.A.D.A...
+    .BGHIBGHIBGHJBGHIBGHIBGHIBGHJ一.
+    ...............................
+  4: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    .F.A.F.A.F.A.F.A.F.A.F.A.F.A...
+    .A.C.A.C.A.C.A.C.A.C.A.C.A.C...
+    ...n.A.D...n.A.n.A.D.A.n.A.D...
+    .HABAHABAHABAHABAHABAHABAHABB..
+    ...........................E...
+  5: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    .A.F.A.F.A.F.A.F.A.F.A.F.A.F...
+    .C.A.C.A.C.A.C.A.C.A.C.A.C.A...
+    .n.A.D.A.n.A.D.A.n.A.D.A.n.A...
+    .BGHIBGHIBGHJBGHIBGHIBGHIBGHJ丁.
+    ...............................
+  6: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    .F.A.F.A.F.A.F.A.F.A.F.A.F.A...
+    .A.C.A.C.A.C.A.C.A.C.A.C.A.C...
+    .A.n.A.n.A.D.A.n.A.n.A.D.A.D...
+    .HABAHABAHABAHABAHABAHABAHABB..
+    ...........................E...
+  7: |
+    ...............................
+    ...............................
+    ...............................
+    ...............................
+    .A.F.A.F.A.F.A.F.A.F.A.F.A.F...
+    .C.A.C.A.C.A.C.A.C.A.C.A.C.A...
+    .n.A.n.A.D.A.D.A.n.A.n.A.D.A...
+    .BGHIBGHIBGHJBGHIBGHIBGHIBGHJ丂.
+    ...............................
+  8: |
+    BBBBBBBBBBBBBBBBBBBBBBBBBBBBB..
+    BBBBBBBBBBBBBBBBBBBBBBBBBBBBB..
+    BBBBBBBBBBBBBBBBBBBBBBBBBBBBB..
+    ...............................
+    .F.A.F.A.F.A.F.A.F.A.F.A.F.A...
+    .A.KMA.KMA.KMA.C.A.C.A.C.A.C...
+    .A.D.A.D.A.D.A.n.A.n.A.n.A.n...
+    .HABAHABAHABAHABAHABAHABAHABB..
+    ...........................E...
+  9: |
+    ...............................
+    ...............................
+    .N...N...N...N.................
+    BBBLBBBLBBBLBBBBBBBBBBBBBBBBB..
+    .A.O.A.O.A.O.A.PMA.PMA.PMA.PM..
+    .KM.*QM.*QM.*QM.uT..uT..uT..u..
+    .D...D...D...D...n...n...n.....
+    .BGHIBGHIBGHJBGHIBGHIBGHIBGHJ七.
+    ...............................
+  10: |
+    ...............................
+    ...............................
+    ...N...N...N...................
+    BLBBBLBBBLBBBLBBBBBBBBBBBBBBB..
+    .O.B.O.B.O.B.O...PM..PM..PM....
+    ..*BM.*BM.*BM.*BB.u.B.u.B.u.B..
+    ...B...B...B...Bu...u...u...u..
+    .HABAHABAHABAHAA.HAA.HAA.HABB..
+    ...........................E...
+  11: |
+    ...............................
+    ...............................
+    .N.U.N.U.N.U.N.................
+    BBBBBBBBBBBBBBBBBBBBBBBBBBBBB..
+    .B.PM..PM..PM.....n.B.n.B.n.B..
+    VBMW*.MW*.MW*.MWn.B.n.B.n.B.n..
+    .B.O...O...O...WB...B...B...B..
+    .BGXIBGXIBGXIBYZBBGIBBGIBBGH丄..
+    ...............................
+  12: |
+    ...............................
+    ...............................
+    .U.N.U.N.U.N.U..U.N.U.N.U.N.U..
+    BBBBBBbBBBbBBBbBBBBBBBBBBBBBB..
+    .PMB*.BB*.BB*.BB..BBW.BBW.BBW..
+    .O.BB.*BB.*BB.*BB.uBB.uBB.uBB..
+    .W.cB..cB..cB..cB..cB..cB..cB..
+    .dAA.HAA.HAA.HAAHHAAHHAAHHAA...
+    ...............................
+  13: |
+    ...............................
+    ...............................
+    ...e...e...e....N.U.N.U.N.U.N..
+    ABALABALABALABA万AAB三AAB下AAB不A..
+    .B*WBB*WBB*WBB*DABWDABWDABWDA..
+    .BBfTBBfTBBfTBBDCBBDCBBDCBBDC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBGZB..
+    ...............................
+  14: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA丈AAA上AAA丌AAA..
+    .WBBFWBBFWBBFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHXAAHXAAHjAAHXAAHXAAHXAA丆丅.
+    ...............................
+  15: |
+    ...............................
+    ...............................
+    ...e...e...e...................
+    AkALAkALAkALAkA丐AkA丒AkA且AkA世A..
+    .BFWABFWABFWABFDABFDABFDABFDA..
+    .BAfTBAfTBAfTBADCBADCBADCBADC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBGZB..
+    ...............................
+  16: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA丑AAA专AAA丕AAA..
+    .WABFWABFWABFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHXAAHXAAHjAAHXAAHXAAHXAA丏与.
+    ...............................
+  17: |
+    ...............................
+    ...............................
+    ...e...e...e...................
+    AAALAAALAAALAAA丙AAA丛AAA丝AAA丟A..
+    .BFWABFWABFWABFDABFDABFDABFDA..
+    .BAfTBAfTBAfTBADCBADCBADCBADC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBGZB..
+    ...............................
+  18: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA业AAA东AAA丞AAA..
+    .WABFWABFWABFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHXAAHXAAHjAAHXAAHXAAHXAA丘丗.
+    ...............................
+  19: |
+    ...............................
+    ...............................
+    ...e...e...e...................
+    AAALAAALAAALAAA丢AAA两AAA並AAA丨A..
+    .BFWABFWABFWABFDABFDABFDABFDA..
+    .BAfTBAfTBAfTBADCBADCBADCBADC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBGZB..
+    ...............................
+  20: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA丣AAA严AAA丧AAA..
+    .WABFWABFWABFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHXAAHXAAHjAAHXAAHXAAHXAA両丠.
+    ...............................
+  21: |
+    ...............................
+    ...............................
+    ...e...e...e...................
+    AAALAAALAAALAAA丫AAA中AAA丯AAA丱A..
+    .BFWABFWABFWABFDABFDABFDABFDA..
+    .BAfTBAfTBAfTBADCBADCBADCBADC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBHZBBHZBBYZBBGZBBGZBBGZB..
+    ...............................
+  22: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA丬AAA丮AAA丰AAA..
+    .WABFWABFWABFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHjAAHjAAHjAAHXAAHXAAHXAA个丩.
+    ...............................
+  23: |
+    ...............................
+    ...............................
+    ...e...e...e...................
+    AAALAAALAAALAAA临AAA丶AAA丸AAA为A..
+    .BFWABFWABFWABFDABFDABFDABFDA..
+    .BAfTBAfTBAfTBADCBADCBADCBADC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBHZB..
+    ...............................
+  24: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA丵AAA丷AAA丹AAA..
+    .WABFWABFWABFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHXAAHXAAHjAAHXAAHXAAHjAA丳串.
+    ...............................
+  25: |
+    ...............................
+    ...............................
+    ...e...e...e...................
+    AAALAAALAAALAAA丽AAA丿AAA乁AAA乃A..
+    .BFWABFWABFWABFDABFDABFDABFDA..
+    .BAfTBAfTBAfTBADCBADCBADCBADC..
+    .cBghcBghcBghcBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBGZB..
+    ...............................
+  26: |
+    ...............................
+    ...............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA举AAA乀AAA乂AAA..
+    .WABFWABFWABFWABFDABFDABFDABF..
+    .fTBAfTBAfTBAfTBADCBADCBADCBA..
+    .ghcBghcBghcBghcBDicBDicBDicB..
+    .dAAHXAAHXAAHjAAHXAAHXAAHXAA丼主.
+    ...............................
+  27: |
+    A..............................
+    ...............................
+    ...e...e...e...................
+    AAALAAALAAALAAA乆AAA么AAA乊AAA乌A..
+    .BFW.BFW.BFW.BFD.BFD.BFD.BFD...
+    .BAflBAflBAflBADOBADOBADOBADO..
+    .mBghmBghmBghmBDicBDicBDicBDic.
+    .BGZBBGZBBGZBBYZBBGZBBGZBBHZB..
+    ...............................
+  28: |
+    BA.............................
+    Ap.............................
+    .e...e...e...e.................
+    ALAAALAAALAAALAAA乇AAA义AAA之AAA..
+    .W...W...W...W...D...D...D.....
+    .fl..fl..fl..fl..DO..DO..DO....
+    .ghq.ghq.ghq.ghq.Dic.Dic.Dic...
+    .d..HX..HX..Hj..HX..HX..Hj..久乄.
+    ...............................
+tests:
+- name: write_each_port_holds
+  settle: 40
+  steps:
+  - drive:
+      busd0: 1
+      busd1: 0
+      busd2: 1
+      busd3: 0
+      busd4: 0
+      busd5: 1
+      busd6: 0
+      busd7: 1
+      a0: 1
+      a1: 0
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 0
+      out2_2: 0
+      out2_3: 0
+      out2_4: 0
+      out2_5: 0
+      out2_6: 0
+      out2_7: 0
+      out3_0: 0
+      out3_1: 0
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 0
+      out3_7: 0
+      out4_0: 0
+      out4_1: 0
+      out4_2: 0
+      out4_3: 0
+      out4_4: 0
+      out4_5: 0
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 0
+      out5_5: 0
+      out5_6: 0
+      out5_7: 0
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 0
+      busd1: 1
+      busd2: 0
+      busd3: 1
+      busd4: 1
+      busd5: 0
+      busd6: 1
+      busd7: 0
+      a0: 0
+      a1: 1
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 1
+      out2_2: 0
+      out2_3: 1
+      out2_4: 1
+      out2_5: 0
+      out2_6: 1
+      out2_7: 0
+      out3_0: 0
+      out3_1: 0
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 0
+      out3_7: 0
+      out4_0: 0
+      out4_1: 0
+      out4_2: 0
+      out4_3: 0
+      out4_4: 0
+      out4_5: 0
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 0
+      out5_5: 0
+      out5_6: 0
+      out5_7: 0
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 1
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 1
+      out2_2: 0
+      out2_3: 1
+      out2_4: 1
+      out2_5: 0
+      out2_6: 1
+      out2_7: 0
+      out3_0: 1
+      out3_1: 1
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 1
+      out3_7: 1
+      out4_0: 0
+      out4_1: 0
+      out4_2: 0
+      out4_3: 0
+      out4_4: 0
+      out4_5: 0
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 0
+      out5_5: 0
+      out5_6: 0
+      out5_7: 0
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 1
+      out2_2: 0
+      out2_3: 1
+      out2_4: 1
+      out2_5: 0
+      out2_6: 1
+      out2_7: 0
+      out3_0: 1
+      out3_1: 1
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 1
+      out3_7: 1
+      out4_0: 0
+      out4_1: 0
+      out4_2: 1
+      out4_3: 1
+      out4_4: 1
+      out4_5: 1
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 0
+      out5_5: 0
+      out5_6: 0
+      out5_7: 0
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 0
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 1
+      out2_2: 0
+      out2_3: 1
+      out2_4: 1
+      out2_5: 0
+      out2_6: 1
+      out2_7: 0
+      out3_0: 1
+      out3_1: 1
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 1
+      out3_7: 1
+      out4_0: 0
+      out4_1: 0
+      out4_2: 1
+      out4_3: 1
+      out4_4: 1
+      out4_5: 1
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 1
+      out5_5: 1
+      out5_6: 1
+      out5_7: 1
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 1
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 1
+      out2_2: 0
+      out2_3: 1
+      out2_4: 1
+      out2_5: 0
+      out2_6: 1
+      out2_7: 0
+      out3_0: 1
+      out3_1: 1
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 1
+      out3_7: 1
+      out4_0: 0
+      out4_1: 0
+      out4_2: 1
+      out4_3: 1
+      out4_4: 1
+      out4_5: 1
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 1
+      out5_5: 1
+      out5_6: 1
+      out5_7: 1
+      out6_0: 1
+      out6_1: 1
+      out6_2: 1
+      out6_3: 1
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 1
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 1
+      a0: 1
+      a1: 1
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+      out2_0: 0
+      out2_1: 1
+      out2_2: 0
+      out2_3: 1
+      out2_4: 1
+      out2_5: 0
+      out2_6: 1
+      out2_7: 0
+      out3_0: 1
+      out3_1: 1
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 1
+      out3_7: 1
+      out4_0: 0
+      out4_1: 0
+      out4_2: 1
+      out4_3: 1
+      out4_4: 1
+      out4_5: 1
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 1
+      out5_5: 1
+      out5_6: 1
+      out5_7: 1
+      out6_0: 1
+      out6_1: 1
+      out6_2: 1
+      out6_3: 1
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 1
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 1
+- name: write_zero_clears_one_port
+  settle: 40
+  steps:
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 0
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 0
+      a1: 1
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 1
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 0
+      a1: 0
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 0
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 0
+      a1: 1
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 1
+      a2: 1
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 1
+      out1_2: 1
+      out1_3: 1
+      out1_4: 1
+      out1_5: 1
+      out1_6: 1
+      out1_7: 1
+      out2_0: 1
+      out2_1: 1
+      out2_2: 1
+      out2_3: 1
+      out2_4: 1
+      out2_5: 1
+      out2_6: 1
+      out2_7: 1
+      out3_0: 1
+      out3_1: 1
+      out3_2: 1
+      out3_3: 1
+      out3_4: 1
+      out3_5: 1
+      out3_6: 1
+      out3_7: 1
+      out4_0: 1
+      out4_1: 1
+      out4_2: 1
+      out4_3: 1
+      out4_4: 1
+      out4_5: 1
+      out4_6: 1
+      out4_7: 1
+      out5_0: 1
+      out5_1: 1
+      out5_2: 1
+      out5_3: 1
+      out5_4: 1
+      out5_5: 1
+      out5_6: 1
+      out5_7: 1
+      out6_0: 1
+      out6_1: 1
+      out6_2: 1
+      out6_3: 1
+      out6_4: 1
+      out6_5: 1
+      out6_6: 1
+      out6_7: 1
+      out7_0: 1
+      out7_1: 1
+      out7_2: 1
+      out7_3: 1
+      out7_4: 1
+      out7_5: 1
+      out7_6: 1
+      out7_7: 1
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 1
+      a1: 1
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - drive:
+      wrt: 0
+  - wait: 24
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 1
+      out1_2: 1
+      out1_3: 1
+      out1_4: 1
+      out1_5: 1
+      out1_6: 1
+      out1_7: 1
+      out2_0: 1
+      out2_1: 1
+      out2_2: 1
+      out2_3: 1
+      out2_4: 1
+      out2_5: 1
+      out2_6: 1
+      out2_7: 1
+      out3_0: 0
+      out3_1: 0
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 0
+      out3_7: 0
+      out4_0: 1
+      out4_1: 1
+      out4_2: 1
+      out4_3: 1
+      out4_4: 1
+      out4_5: 1
+      out4_6: 1
+      out4_7: 1
+      out5_0: 1
+      out5_1: 1
+      out5_2: 1
+      out5_3: 1
+      out5_4: 1
+      out5_5: 1
+      out5_6: 1
+      out5_7: 1
+      out6_0: 1
+      out6_1: 1
+      out6_2: 1
+      out6_3: 1
+      out6_4: 1
+      out6_5: 1
+      out6_6: 1
+      out6_7: 1
+      out7_0: 1
+      out7_1: 1
+      out7_2: 1
+      out7_3: 1
+      out7_4: 1
+      out7_5: 1
+      out7_6: 1
+      out7_7: 1
+- name: no_write_without_wrt
+  settle: 40
+  steps:
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 1
+      a1: 0
+      a2: 1
+  - wait: 40
+  - expect:
+      out1_0: 0
+      out1_1: 0
+      out1_2: 0
+      out1_3: 0
+      out1_4: 0
+      out1_5: 0
+      out1_6: 0
+      out1_7: 0
+      out2_0: 0
+      out2_1: 0
+      out2_2: 0
+      out2_3: 0
+      out2_4: 0
+      out2_5: 0
+      out2_6: 0
+      out2_7: 0
+      out3_0: 0
+      out3_1: 0
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 0
+      out3_7: 0
+      out4_0: 0
+      out4_1: 0
+      out4_2: 0
+      out4_3: 0
+      out4_4: 0
+      out4_5: 0
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 0
+      out5_5: 0
+      out5_6: 0
+      out5_7: 0
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+  - drive:
+      busd0: 1
+      busd1: 1
+      busd2: 1
+      busd3: 1
+      busd4: 1
+      busd5: 1
+      busd6: 1
+      busd7: 1
+      a0: 0
+      a1: 0
+      a2: 0
+      wrt: 1
+  - wait: 40
+  - expect:
+      out1_0: 0
+      out1_1: 0
+      out1_2: 0
+      out1_3: 0
+      out1_4: 0
+      out1_5: 0
+      out1_6: 0
+      out1_7: 0
+      out2_0: 0
+      out2_1: 0
+      out2_2: 0
+      out2_3: 0
+      out2_4: 0
+      out2_5: 0
+      out2_6: 0
+      out2_7: 0
+      out3_0: 0
+      out3_1: 0
+      out3_2: 0
+      out3_3: 0
+      out3_4: 0
+      out3_5: 0
+      out3_6: 0
+      out3_7: 0
+      out4_0: 0
+      out4_1: 0
+      out4_2: 0
+      out4_3: 0
+      out4_4: 0
+      out4_5: 0
+      out4_6: 0
+      out4_7: 0
+      out5_0: 0
+      out5_1: 0
+      out5_2: 0
+      out5_3: 0
+      out5_4: 0
+      out5_5: 0
+      out5_6: 0
+      out5_7: 0
+      out6_0: 0
+      out6_1: 0
+      out6_2: 0
+      out6_3: 0
+      out6_4: 0
+      out6_5: 0
+      out6_6: 0
+      out6_7: 0
+      out7_0: 0
+      out7_1: 0
+      out7_2: 0
+      out7_3: 0
+      out7_4: 0
+      out7_5: 0
+      out7_6: 0
+      out7_7: 0
+- name: bus_dropped_10gt_after_wrt_falls_erases_write
+  settle: 40
+  steps:
+  - drive:
+      busd0: 1
+      busd1: 0
+      busd2: 1
+      busd3: 0
+      busd4: 0
+      busd5: 1
+      busd6: 0
+      busd7: 1
+      a0: 1
+      a1: 0
+      a2: 0
+  - wait: 4
+  - drive:
+      wrt: 1
+  - wait: 30
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 1
+      out1_3: 0
+      out1_4: 0
+      out1_5: 1
+      out1_6: 0
+      out1_7: 1
+  - drive:
+      wrt: 0
+  - wait: 10
+  - drive:
+      busd0: 0
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 0
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      out1_0: 0
+      out1_1: 0
+      out1_2: 0
+      out1_3: 0
+      out1_4: 0
+      out1_5: 0
+      out1_6: 0
+      out1_7: 0
+- name: write_latency
+  settle: 40
+  steps:
+  - drive:
+      busd0: 1
+      busd1: 0
+      busd2: 0
+      busd3: 0
+      busd4: 0
+      busd5: 0
+      busd6: 0
+      busd7: 0
+      a0: 1
+      a1: 0
+      a2: 0
+  - wait: 10
+  - drive:
+      wrt: 1
+  - wave:
+      out1_0: '0000000000000000001'
+  - wait: 10
+  - expect:
+      out1_0: 1
+      out1_1: 0
+      out1_2: 0
+      out1_3: 0
+      out1_4: 0
+      out1_5: 0
+      out1_6: 0
+      out1_7: 0
+- name: read_port_1_by_address
+  settle: 40
+  steps:
+  - run: setblock ~13 ~14 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~13 ~14 ~3 ~13 ~14 ~3 ~13 ~14 ~3 replace force
+  - run: setblock ~13 ~18 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~13 ~18 ~3 ~13 ~18 ~3 ~13 ~18 ~3 replace force
+  - run: setblock ~13 ~24 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~13 ~24 ~3 ~13 ~24 ~3 ~13 ~24 ~3 replace force
+  - run: setblock ~13 ~28 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~13 ~28 ~3 ~13 ~28 ~3 ~13 ~28 ~3 replace force
+  - wait: 20
+  - drive:
+      a0: 1
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      bus0: 1
+      bus1: 0
+      bus2: 1
+      bus3: 0
+      bus4: 0
+      bus5: 1
+      bus6: 0
+      bus7: 1
+  - drive:
+      wrt: 1
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 1
+      bus3: 0
+      bus4: 0
+      bus5: 1
+      bus6: 0
+      bus7: 0
+  - drive:
+      wrt: 0
+  - wait: 30
+  - expect:
+      bus0: 1
+      bus1: 0
+      bus2: 1
+      bus3: 0
+      bus4: 0
+      bus5: 1
+      bus6: 0
+      bus7: 1
+- name: read_latency_port_1
+  settle: 40
+  steps:
+  - run: setblock ~13 ~14 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~13 ~14 ~3 ~13 ~14 ~3 ~13 ~14 ~3 replace force
+  - wait: 20
+  - drive:
+      a0: 1
+  - wave:
+      bus0: '000000000000001'
+  - wait: 10
+  - expect:
+      bus0: 1
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+- name: read_port_2_needs_panel_button
+  settle: 40
+  steps:
+  - run: setblock ~11 ~15 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~11 ~15 ~3 ~11 ~15 ~3 ~11 ~15 ~3 replace force
+  - run: setblock ~11 ~19 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~11 ~19 ~3 ~11 ~19 ~3 ~11 ~19 ~3 replace force
+  - run: setblock ~11 ~21 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~11 ~21 ~3 ~11 ~21 ~3 ~11 ~21 ~3 replace force
+  - run: setblock ~11 ~25 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~11 ~25 ~3 ~11 ~25 ~3 ~11 ~25 ~3 replace force
+  - wait: 20
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 1
+      bus4: 1
+      bus5: 0
+      bus6: 1
+      bus7: 0
+  - drive:
+      a0: 0
+      a1: 1
+      a2: 0
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 1
+      bus4: 1
+      bus5: 0
+      bus6: 1
+      bus7: 0
+  - run: setblock ~11 ~11 ~2 stone_button[face=wall,facing=north,powered=true]
+  - run: clone ~11 ~11 ~3 ~11 ~11 ~3 ~11 ~11 ~3 replace force
+  - wait: 10
+  - expect:
+      bus0: 0
+      bus1: 1
+      bus2: 0
+      bus3: 1
+      bus4: 1
+      bus5: 0
+      bus6: 1
+      bus7: 0
+  - run: setblock ~11 ~11 ~2 stone_button[face=wall,facing=north,powered=false]
+  - run: clone ~11 ~11 ~3 ~11 ~11 ~3 ~11 ~11 ~3 replace force
+  - wait: 40
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 1
+      bus4: 1
+      bus5: 0
+      bus6: 1
+      bus7: 0
+- name: read_port_3_needs_panel_button
+  settle: 40
+  steps:
+  - run: setblock ~9 ~14 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~14 ~3 ~9 ~14 ~3 ~9 ~14 ~3 replace force
+  - run: setblock ~9 ~16 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~16 ~3 ~9 ~16 ~3 ~9 ~16 ~3 replace force
+  - run: setblock ~9 ~26 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~26 ~3 ~9 ~26 ~3 ~9 ~26 ~3 replace force
+  - run: setblock ~9 ~28 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~28 ~3 ~9 ~28 ~3 ~9 ~28 ~3 replace force
+  - wait: 20
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 1
+      bus7: 0
+  - drive:
+      a0: 1
+      a1: 1
+      a2: 0
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 1
+      bus7: 0
+  - run: setblock ~9 ~12 ~2 stone_button[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~12 ~3 ~9 ~12 ~3 ~9 ~12 ~3 replace force
+  - wait: 10
+  - expect:
+      bus0: 1
+      bus1: 1
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 1
+      bus7: 1
+  - run: setblock ~9 ~12 ~2 stone_button[face=wall,facing=north,powered=false]
+  - run: clone ~9 ~12 ~3 ~9 ~12 ~3 ~9 ~12 ~3 replace force
+  - wait: 40
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 1
+      bus7: 0
+- name: read_port_4_needs_panel_button
+  settle: 40
+  steps:
+  - run: setblock ~7 ~17 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~7 ~17 ~3 ~7 ~17 ~3 ~7 ~17 ~3 replace force
+  - run: setblock ~7 ~19 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~7 ~19 ~3 ~7 ~19 ~3 ~7 ~19 ~3 replace force
+  - run: setblock ~7 ~21 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~7 ~21 ~3 ~7 ~21 ~3 ~7 ~21 ~3 replace force
+  - run: setblock ~7 ~23 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~7 ~23 ~3 ~7 ~23 ~3 ~7 ~23 ~3 replace force
+  - wait: 20
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 1
+      bus5: 1
+      bus6: 0
+      bus7: 0
+  - drive:
+      a0: 0
+      a1: 0
+      a2: 1
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 1
+      bus5: 1
+      bus6: 0
+      bus7: 0
+  - run: setblock ~7 ~11 ~2 stone_button[face=wall,facing=north,powered=true]
+  - run: clone ~7 ~11 ~3 ~7 ~11 ~3 ~7 ~11 ~3 replace force
+  - wait: 10
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 1
+      bus3: 1
+      bus4: 1
+      bus5: 1
+      bus6: 0
+      bus7: 0
+  - run: setblock ~7 ~11 ~2 stone_button[face=wall,facing=north,powered=false]
+  - run: clone ~7 ~11 ~3 ~7 ~11 ~3 ~7 ~11 ~3 replace force
+  - wait: 40
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 1
+      bus5: 1
+      bus6: 0
+      bus7: 0
+- name: read_port_5_needs_panel_button
+  settle: 40
+  steps:
+  - run: setblock ~5 ~22 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~5 ~22 ~3 ~5 ~22 ~3 ~5 ~22 ~3 replace force
+  - run: setblock ~5 ~24 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~5 ~24 ~3 ~5 ~24 ~3 ~5 ~24 ~3 replace force
+  - run: setblock ~5 ~26 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~5 ~26 ~3 ~5 ~26 ~3 ~5 ~26 ~3 replace force
+  - run: setblock ~5 ~28 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~5 ~28 ~3 ~5 ~28 ~3 ~5 ~28 ~3 replace force
+  - wait: 20
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 1
+      bus6: 1
+      bus7: 0
+  - drive:
+      a0: 1
+      a1: 0
+      a2: 1
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 1
+      bus6: 1
+      bus7: 0
+  - run: setblock ~5 ~12 ~2 stone_button[face=wall,facing=north,powered=true]
+  - run: clone ~5 ~12 ~3 ~5 ~12 ~3 ~5 ~12 ~3 replace force
+  - wait: 10
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 1
+      bus5: 1
+      bus6: 1
+      bus7: 1
+  - run: setblock ~5 ~12 ~2 stone_button[face=wall,facing=north,powered=false]
+  - run: clone ~5 ~12 ~3 ~5 ~12 ~3 ~5 ~12 ~3 replace force
+  - wait: 40
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 1
+      bus6: 1
+      bus7: 0
+- name: read_port_6_needs_panel_button
+  settle: 40
+  steps:
+  - run: setblock ~3 ~13 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~3 ~13 ~3 ~3 ~13 ~3 ~3 ~13 ~3 replace force
+  - run: setblock ~3 ~15 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~3 ~15 ~3 ~3 ~15 ~3 ~3 ~15 ~3 replace force
+  - run: setblock ~3 ~17 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~3 ~17 ~3 ~3 ~17 ~3 ~3 ~17 ~3 replace force
+  - run: setblock ~3 ~19 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~3 ~19 ~3 ~3 ~19 ~3 ~3 ~19 ~3 replace force
+  - wait: 20
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+  - drive:
+      a0: 0
+      a1: 1
+      a2: 1
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+  - run: setblock ~3 ~11 ~2 stone_button[face=wall,facing=north,powered=true]
+  - run: clone ~3 ~11 ~3 ~3 ~11 ~3 ~3 ~11 ~3 replace force
+  - wait: 10
+  - expect:
+      bus0: 1
+      bus1: 1
+      bus2: 1
+      bus3: 1
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+  - run: setblock ~3 ~11 ~2 stone_button[face=wall,facing=north,powered=false]
+  - run: clone ~3 ~11 ~3 ~3 ~11 ~3 ~3 ~11 ~3 replace force
+  - wait: 40
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+- name: read_port_7_needs_panel_button
+  settle: 40
+  steps:
+  - run: setblock ~1 ~14 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~1 ~14 ~3 ~1 ~14 ~3 ~1 ~14 ~3 replace force
+  - run: setblock ~1 ~28 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~1 ~28 ~3 ~1 ~28 ~3 ~1 ~28 ~3 replace force
+  - wait: 20
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+  - drive:
+      a0: 1
+      a1: 1
+      a2: 1
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+  - run: setblock ~1 ~12 ~2 stone_button[face=wall,facing=north,powered=true]
+  - run: clone ~1 ~12 ~3 ~1 ~12 ~3 ~1 ~12 ~3 replace force
+  - wait: 10
+  - expect:
+      bus0: 1
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 1
+  - run: setblock ~1 ~12 ~2 stone_button[face=wall,facing=north,powered=false]
+  - run: clone ~1 ~12 ~3 ~1 ~12 ~3 ~1 ~12 ~3 replace force
+  - wait: 40
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 0
+      bus4: 0
+      bus5: 0
+      bus6: 0
+      bus7: 0
+- name: unselected_ports_leak_into_bus
+  settle: 40
+  steps:
+  - run: setblock ~9 ~14 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~14 ~3 ~9 ~14 ~3 ~9 ~14 ~3 replace force
+  - run: setblock ~9 ~16 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~16 ~3 ~9 ~16 ~3 ~9 ~16 ~3 replace force
+  - run: setblock ~9 ~18 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~18 ~3 ~9 ~18 ~3 ~9 ~18 ~3 replace force
+  - run: setblock ~9 ~20 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~20 ~3 ~9 ~20 ~3 ~9 ~20 ~3 replace force
+  - run: setblock ~9 ~22 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~22 ~3 ~9 ~22 ~3 ~9 ~22 ~3 replace force
+  - run: setblock ~9 ~24 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~24 ~3 ~9 ~24 ~3 ~9 ~24 ~3 replace force
+  - run: setblock ~9 ~26 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~26 ~3 ~9 ~26 ~3 ~9 ~26 ~3 replace force
+  - run: setblock ~9 ~28 ~2 lever[face=wall,facing=north,powered=true]
+  - run: clone ~9 ~28 ~3 ~9 ~28 ~3 ~9 ~28 ~3 replace force
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 1
+      bus4: 1
+      bus5: 1
+      bus6: 1
+      bus7: 0
+  - drive:
+      a0: 1
+      a1: 0
+      a2: 0
+  - wait: 30
+  - expect:
+      bus0: 0
+      bus1: 0
+      bus2: 0
+      bus3: 1
+      bus4: 1
+      bus5: 1
+      bus6: 1
+      bus7: 0

@@ -1,0 +1,2749 @@
+name: ref_librok_register8_dual_read
+description: 'LiBRoK''s 8-bit register with two read ports (LRA REGISTER004, Tested & Functional, endorsed by Wueffi; https://discord.com/channels/1361854816837435433/1479218770601054409): inputs are an
+  8-bit number on levers d0..d7, a write button and read levers rd1 and rd2; outputs are two 8-bit lamp rows a0..a7 (shown while rd1 is on) and b0..b7 (while rd2 is on), 0 otherwise. 7x19x14, one bit per
+  2 layers. Each bit is stored TWICE, in a repeater locked from the south (a stand-in for a second read port): copy A at (0,y,10), copy B at (3,y+1,10), both fed from the same data lever through dust, each
+  unlocked by the one shared lock line (a zigzag of dust on glass up x=1/2, z=11) and each read through a subtract comparator whose side input is a read-off line, so the comparator passes the latch only
+  while its read line is off. Write: the button''s wool powers a repeater into a subtract comparator whose side input is the same signal through a delay-3 repeater, so the comparator emits a fixed pulse;
+  a repeater and a target turn it off a torch that feeds the lock line, which drops for 4 game ticks. Read: each read lever turns a target-on-torch inverter off, which lets a column of dust on glass release
+  every bit''s comparator side input. Harness changes: the supports of the levers and the button (the 8 data lamps, and orange, yellow and blue wool) are white_wool, since the harness only clicks a lever
+  or button on a plain block; the data-lamp displays are lost, nothing else changed. README claims (SOURCED): 2t write, 3t read. MEASURED here from the click: the lock line is open 4 game ticks (2 redstone
+  ticks), the latches take the data 12 game ticks after the click, a read shows its row 12 game ticks after the click and clears 16 after it is released, the same for bit 0 and bit 7 and both ports; the
+  3t read is not reproduced from the lever (INFERRED: it is the comparator-to-lamp part, 6 game ticks). Tested: 12 written values read back on each port alone and both with the data levers cleared, overwrite,
+  data changes without a write, a write during a read.'
+traits:
+- vertical
+- lockable
+- comparator_based
+- torch_based
+- pistonless
+- entityless
+- reset_safe
+- survival_friendly
+palette:
+  .: air
+  A: orange_wool
+  B: yellow_wool
+  C: redstone_wire[east=side,north=none,south=side,west=none]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: lever[face=wall,facing=east]
+  F: target
+  G: redstone_wire[east=side,north=side,south=none,west=none]
+  H: blue_wool
+  I: light_blue_stained_glass
+  J: light_blue_wool
+  '*': redstone_torch
+  K: repeater[delay=1,facing=east]
+  M: comparator[facing=east,mode=subtract]
+  N: stone_button[face=wall,facing=east]
+  u: redstone_wall_torch[facing=south]
+  O: repeater[delay=3,facing=east]
+  P: pink_stained_glass
+  Q: redstone_wire[east=none,north=up,south=side,west=none]
+  T: magenta_wool
+  U: repeater[delay=1,facing=south]
+  V: orange_stained_glass
+  W: redstone_wire[east=none,north=side,south=side,west=none]
+  X: repeater[delay=1,facing=north]
+  Y: comparator[facing=south,mode=subtract]
+  Z: redstone_wire[east=none,north=side,south=none,west=up]
+  b: redstone_wire[east=none,north=side,south=up,west=none]
+  c: pink_wool
+  d: repeater[delay=1,facing=west]
+  L: redstone_lamp
+  e: redstone_wire[east=side,north=none,south=side,west=side]
+  f: redstone_wire[east=up,north=side,south=none,west=none]
+  g: blue_stained_glass
+  h: redstone_wire[east=side,north=side,south=none,west=side]
+  i: yellow_stained_glass
+  '0':
+    name: d0
+    block: lever[face=wall,facing=east]
+  '1':
+    name: a0
+    block: redstone_lamp
+  '2':
+    name: b0
+    block: redstone_lamp
+  '3':
+    name: d1
+    block: lever[face=wall,facing=east]
+  '4':
+    name: a1
+    block: redstone_lamp
+  '5':
+    name: b1
+    block: redstone_lamp
+  '6':
+    name: d2
+    block: lever[face=wall,facing=east]
+  '7':
+    name: a2
+    block: redstone_lamp
+  '8':
+    name: b2
+    block: redstone_lamp
+  '9':
+    name: d3
+    block: lever[face=wall,facing=east]
+  a:
+    name: a3
+    block: redstone_lamp
+  j:
+    name: b3
+    block: redstone_lamp
+  k:
+    name: d4
+    block: lever[face=wall,facing=east]
+  l:
+    name: a4
+    block: redstone_lamp
+  m:
+    name: b4
+    block: redstone_lamp
+  n:
+    name: d5
+    block: lever[face=wall,facing=east]
+  o:
+    name: a5
+    block: redstone_lamp
+  p:
+    name: b5
+    block: redstone_lamp
+  q:
+    name: d6
+    block: lever[face=wall,facing=east]
+  r:
+    name: a6
+    block: redstone_lamp
+  s:
+    name: b6
+    block: redstone_lamp
+  t:
+    name: d7
+    block: lever[face=wall,facing=east]
+  v:
+    name: a7
+    block: redstone_lamp
+  w:
+    name: b7
+    block: redstone_lamp
+  '#': white_wool
+  x:
+    name: write
+    block: stone_button[face=wall,facing=east]
+  y:
+    name: rd1
+    block: lever[face=wall,facing=east]
+  z:
+    name: rd2
+    block: lever[face=wall,facing=east]
+  R:
+    name: lock
+    block: redstone_wire[east=up,north=side,south=none,west=none]
+  S:
+    name: lA0
+    block: repeater[delay=1,facing=south]
+  '!':
+    name: lB0
+    block: repeater[delay=1,facing=south]
+  $:
+    name: lA7
+    block: repeater[delay=1,facing=south]
+  '%':
+    name: lB7
+    block: repeater[delay=1,facing=south]
+layers:
+  0: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .AAAA..
+    .......
+    .......
+    ..BBB..
+    .......
+    .......
+    .......
+    .......
+    .......
+  1: |
+    .......
+    .......
+    .......
+    .......
+    .......
+    .CDDD#y
+    .F.....
+    ..F....
+    ..GDD#z
+    .......
+    ..HHH..
+    ...HHH.
+    .......
+    .......
+  2: |
+    .......
+    I......
+    .......
+    J......
+    .......
+    JA.....
+    .*.....
+    JA*....
+    .......
+    AA.....
+    AFKMK#x
+    .uHGOD.
+    P......
+    .......
+  3: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FA.T...
+    WXB....
+    JABT...
+    YDBB...
+    SKFB...
+    FHZH...
+    b..c...
+    ccccc..
+  4: |
+    CDDdD1.
+    I......
+    dDDed2.
+    J..U...
+    .b.T...
+    JV.W...
+    ..BU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFd!...
+    .RgF...
+    P..W...
+    GDDhK#0
+  5: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    UKFB...
+    FgZ....
+    b..c...
+    ccccc..
+  6: |
+    CDDdD4.
+    I......
+    dDDed5.
+    J..U...
+    .b.T...
+    JV.W...
+    ..iU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFdU...
+    .fgF...
+    P..W...
+    GDDhK#3
+  7: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    UKFB...
+    FgZ....
+    b..c...
+    ccccc..
+  8: |
+    CDDdD7.
+    I......
+    dDDed8.
+    J..U...
+    .b.T...
+    JV.W...
+    ..iU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFdU...
+    .fgF...
+    P..W...
+    GDDhK#6
+  9: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    UKFB...
+    FgZ....
+    b..c...
+    ccccc..
+  10: |
+    CDDdDa.
+    I......
+    dDDedj.
+    J..U...
+    .b.T...
+    JV.W...
+    ..iU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFdU...
+    .fgF...
+    P..W...
+    GDDhK#9
+  11: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    UKFB...
+    FgZ....
+    b..c...
+    ccccc..
+  12: |
+    CDDdDl.
+    I......
+    dDDedm.
+    J..U...
+    .b.T...
+    JV.W...
+    ..iU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFdU...
+    .fgF...
+    P..W...
+    GDDhK#k
+  13: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    UKFB...
+    FgZ....
+    b..c...
+    ccccc..
+  14: |
+    CDDdDo.
+    I......
+    dDDedp.
+    J..U...
+    .b.T...
+    JV.W...
+    ..iU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFdU...
+    .fgF...
+    P..W...
+    GDDhK#n
+  15: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    JV.....
+    UQ.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    UKFB...
+    FgZ....
+    b..c...
+    ccccc..
+  16: |
+    CDDdDr.
+    I......
+    dDDeds.
+    J..U...
+    .b.T...
+    JV.W...
+    ..iU...
+    JAQT...
+    ..XW...
+    AAGY...
+    AFdU...
+    .fgF...
+    P..W...
+    GDDhK#q
+  17: |
+    JJJJJ..
+    Q......
+    TTTTT..
+    U..T...
+    J......
+    UW.T...
+    FAbT...
+    WXi....
+    JABT...
+    YDBB...
+    $KFB...
+    FgZ....
+    b..c...
+    ccccc..
+  18: |
+    CDDdDv.
+    .......
+    dDDedw.
+    ...U...
+    ...T...
+    ...W...
+    ...U...
+    ..WT...
+    ..XW...
+    .AGY...
+    .Fd%...
+    .G.F...
+    ...W...
+    GDDhK#t
+tests:
+- name: write_00_read
+  steps:
+  - wait: 4
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_ff_read
+  steps:
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 1
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_a5_read
+  steps:
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 1
+      a3: 0
+      a4: 0
+      a5: 1
+      a6: 0
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 1
+      a3: 0
+      a4: 0
+      a5: 1
+      a6: 0
+      a7: 1
+      b0: 1
+      b1: 0
+      b2: 1
+      b3: 0
+      b4: 0
+      b5: 1
+      b6: 0
+      b7: 1
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_5a_read
+  steps:
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 1
+      a2: 0
+      a3: 1
+      a4: 1
+      a5: 0
+      a6: 1
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 1
+      a2: 0
+      a3: 1
+      a4: 1
+      a5: 0
+      a6: 1
+      a7: 0
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_01_read
+  steps:
+  - use: d0
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_80_read
+  steps:
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_0f_read
+  steps:
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_f0_read
+  steps:
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_33_read
+  steps:
+  - use: d0
+  - use: d1
+  - use: d4
+  - use: d5
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - use: d1
+  - use: d4
+  - use: d5
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 0
+      a3: 0
+      a4: 1
+      a5: 1
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 0
+      a3: 0
+      a4: 1
+      a5: 1
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_cc_read
+  steps:
+  - use: d2
+  - use: d3
+  - use: d6
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d2
+  - use: d3
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 1
+      a3: 1
+      a4: 0
+      a5: 0
+      a6: 1
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 1
+      a3: 1
+      a4: 0
+      a5: 0
+      a6: 1
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 1
+      b7: 1
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_7e_read
+  steps:
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 0
+      b0: 0
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: write_81_read
+  steps:
+  - use: d0
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 1
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 1
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+- name: overwrite
+  steps:
+  - use: d0
+  - use: d2
+  - use: d5
+  - use: d7
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 0
+      a2: 1
+      a3: 0
+      a4: 0
+      a5: 1
+      a6: 0
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: rd1
+  - wait: 24
+  - use: write
+  - wait: 30
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 1
+      a2: 0
+      a3: 1
+      a4: 1
+      a5: 0
+      a6: 1
+      a7: 0
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 1
+      b4: 1
+      b5: 0
+      b6: 1
+      b7: 0
+- name: data_without_write_ignored
+  steps:
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: d0
+  - use: d1
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - use: d0
+  - use: d1
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+  - use: d0
+  - use: d1
+  - use: d3
+  - use: d4
+  - use: d6
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 1
+      a3: 1
+      a4: 1
+      a5: 1
+      a6: 0
+      a7: 0
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+      b4: 1
+      b5: 1
+      b6: 0
+      b7: 0
+  - use: rd1
+  - use: rd2
+  - wait: 24
+- name: write_while_both_read
+  steps:
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: rd1
+  - use: rd2
+  - wait: 20
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - use: d6
+  - use: d7
+  - wait: 10
+  - expect:
+      a0: 1
+      a1: 1
+      a2: 1
+      a3: 1
+      a4: 0
+      a5: 0
+      a6: 0
+      a7: 0
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+      b4: 0
+      b5: 0
+      b6: 0
+      b7: 0
+  - use: write
+  - wait: 30
+  - expect:
+      a0: 0
+      a1: 0
+      a2: 0
+      a3: 0
+      a4: 1
+      a5: 1
+      a6: 1
+      a7: 1
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+      b4: 1
+      b5: 1
+      b6: 1
+      b7: 1
+- name: write_timing
+  steps:
+  - use: d0
+  - use: d7
+  - wait: 10
+  - use: write
+  - wave:
+      lock: '11111111000011'
+      lA0: '00000000000011'
+      lB0: '00000000000011'
+      lA7: '00000000000011'
+      lB7: '00000000000011'
+- name: read_timing_a0
+  steps:
+  - use: d0
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: d0
+  - wait: 10
+  - use: rd1
+  - wave:
+      a0: '0000000000001'
+  - wait: 20
+  - use: rd1
+  - wave:
+      a0: '11111111111111110'
+- name: read_timing_a7
+  steps:
+  - use: d7
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: d7
+  - wait: 10
+  - use: rd1
+  - wave:
+      a7: '0000000000001'
+  - wait: 20
+  - use: rd1
+  - wave:
+      a7: '11111111111111110'
+- name: read_timing_b0
+  steps:
+  - use: d0
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: d0
+  - wait: 10
+  - use: rd2
+  - wave:
+      b0: '0000000000001'
+  - wait: 20
+  - use: rd2
+  - wave:
+      b0: '11111111111111110'
+- name: read_timing_b7
+  steps:
+  - use: d7
+  - wait: 10
+  - use: write
+  - wait: 30
+  - use: d7
+  - wait: 10
+  - use: rd2
+  - wave:
+      b7: '0000000000001'
+  - wait: 20
+  - use: rd2
+  - wave:
+      b7: '11111111111111110'

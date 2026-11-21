@@ -1,0 +1,997 @@
+name: ref_louparmi_hex_cca_16nibbles
+description: 'Rebuild of mattbatwings'' Logical Redstone Archive ADD012 ''Hexadecimal Carry Cancel Adder (hex_cca_16nibbles)'' (author LouParmi, endorsed by Mixel, Tested & Functional; https://discord.com/channels/1361854816837435433/1502358261431799818). SOURCED from the README: 16 nibbles (64 bits),
+  6 ticks, 5 Hz pipelineable, 10x12 footprint, 19 high, carry in and out, double density, Java only. Placed with update_pass strict from the .schem with its saved block states, power levels and comparator OutputSignal (the default update pass recomputes dust shapes and changes the saved ones); the baseline
+  then holds still for 30 ticks (MEASURED). Lever at (6,2,6) is the carry in, lamp (7,18,7) the carry out. INCOMPLETE: the second operand''s port was not found, so the addition is NOT demonstrated. MEASURED with composter-fed comparators as drivers outside the box: nibble i (layer y=i+3) takes an analog
+  strength on dust (0,y,5) (z=6 on odd y) and its result is the dust at (6,y,0) (z=11 on odd y), the corner dust (9,y-1,.) of the layer below reads (a_y + 1) mod 16 and the result dust is that minus one by dust decay (a for a 0-8, 0 for a 15), independent of every other layer (tests result_is_a_and_corner_is_next_nibble_plus_1_*,
+  6 of 6 runs identical); a strong source on the neighbouring target (0,y,4) merges with the dust (max, not sum) and no other face cell tried (every wall cell of layer 8 driven at strength 5 together with a=3) gave a sum. The lever starts a dust stair at x=8, z=5/6 that decays one per layer (15 at y=3
+  down to 1 at y=17), but it did not change any sum, even with a=15 on layers 3-5 (observed_lever_leaves_sums_unchanged). Latency from the input dust (0,8,5): 8 gt to the result dust, 10 gt to the corner dust (MEASURED, latency_probe); the README''s 6 ticks is not checked since no two-operand sum could
+  be driven. INFERRED: layer y-1 computes nibble y''s result from a_y read through the dust-over-quartz link at (0,y,6) and the 15 - a inversion (2,y,.), constants from redstone blocks and a cake (signal 2), and the decay stair carries the carry as a distance code.'
+traits: []
+update_pass: strict
+palette:
+  .: air
+  A: cake[bites=6]
+  B: comparator[facing=north,mode=compare,powered=false]{OutputSignal:0}
+  C: comparator[facing=north,mode=subtract,powered=false]{OutputSignal:0}
+  D: comparator[facing=north,mode=subtract,powered=true]{OutputSignal:15}
+  E: comparator[facing=south,mode=compare,powered=false]{OutputSignal:0}
+  F: comparator[facing=south,mode=subtract,powered=false]{OutputSignal:0}
+  G: comparator[facing=south,mode=subtract,powered=true]{OutputSignal:15}
+  H: comparator[facing=west,mode=compare,powered=false]{OutputSignal:0}
+  I: comparator[facing=west,mode=compare,powered=true]{OutputSignal:15}
+  J: comparator[facing=west,mode=compare,powered=true]{OutputSignal:1}
+  K: comparator[facing=west,mode=subtract,powered=false]{OutputSignal:0}
+  L: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:1}
+  M: comparator[facing=west,mode=subtract,powered=true]{OutputSignal:2}
+  N: lever[face=floor,facing=east,powered=false]
+  O: light_blue_stained_glass
+  P: quartz_block
+  Q: redstone_block
+  R: redstone_lamp[lit=false]
+  S: redstone_wire[east=none,north=none,power=0,south=side,west=side]
+  T: redstone_wire[east=none,north=none,power=0,south=up,west=side]
+  U: redstone_wire[east=none,north=none,power=1,south=up,west=side]
+  V: redstone_wire[east=none,north=none,power=14,south=side,west=side]
+  W: redstone_wire[east=none,north=none,power=15,south=side,west=side]
+  X: redstone_wire[east=none,north=none,power=2,south=side,west=side]
+  Y: redstone_wire[east=none,north=side,power=0,south=none,west=side]
+  Z: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  a: redstone_wire[east=none,north=side,power=14,south=none,west=side]
+  b: redstone_wire[east=none,north=side,power=15,south=none,west=side]
+  c: redstone_wire[east=none,north=side,power=15,south=side,west=none]
+  d: redstone_wire[east=none,north=side,power=2,south=none,west=side]
+  e: redstone_wire[east=none,north=up,power=0,south=none,west=side]
+  f: redstone_wire[east=none,north=up,power=1,south=none,west=side]
+  g: redstone_wire[east=side,north=none,power=0,south=none,west=side]
+  h: redstone_wire[east=side,north=none,power=0,south=side,west=none]
+  i: redstone_wire[east=side,north=none,power=1,south=up,west=none]
+  j: redstone_wire[east=side,north=none,power=15,south=none,west=side]
+  k: redstone_wire[east=side,north=none,power=15,south=side,west=none]
+  l: redstone_wire[east=side,north=none,power=15,south=side,west=side]
+  m: redstone_wire[east=side,north=none,power=15,south=up,west=none]
+  n: redstone_wire[east=side,north=side,power=0,south=none,west=none]
+  o: redstone_wire[east=side,north=side,power=0,south=side,west=side]
+  p: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  q: redstone_wire[east=side,north=side,power=15,south=none,west=none]
+  r: redstone_wire[east=side,north=side,power=15,south=none,west=side]
+  s: redstone_wire[east=side,north=side,power=15,south=side,west=side]
+  t: redstone_wire[east=side,north=up,power=1,south=none,west=none]
+  u: redstone_wire[east=side,north=up,power=15,south=none,west=none]
+  v: repeater[delay=1,facing=north,locked=false,powered=false]
+  w: repeater[delay=1,facing=west,locked=false,powered=false]
+  x: repeater[delay=1,facing=west,locked=false,powered=true]
+  y: repeater[delay=2,facing=west,locked=false,powered=false]
+  z: target[power=0]
+  '0':
+    output: s3
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '1':
+    output: s4
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '2':
+    output: s5
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '3':
+    output: s6
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '4':
+    output: s7
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '5':
+    output: s8
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '6':
+    output: s9
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '7':
+    output: s10
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '8':
+    output: s11
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  '9':
+    output: s12
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  α:
+    output: s13
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  β:
+    output: s14
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  γ:
+    output: s15
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  δ:
+    output: s16
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  ε:
+    output: s17
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  ζ:
+    output: s18
+    block: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  η:
+    output: c2
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  θ:
+    output: c3
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  ι:
+    output: c4
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  κ:
+    output: c5
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  λ:
+    output: c6
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  μ:
+    output: c7
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  ν:
+    output: c8
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  ξ:
+    output: c9
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  ο:
+    output: c10
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  π:
+    output: c11
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  ρ:
+    output: c12
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  ς:
+    output: c13
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  σ:
+    output: c14
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  τ:
+    output: c15
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  υ:
+    output: c16
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  φ:
+    output: c17
+    block: redstone_wire[east=side,north=side,power=1,south=side,west=side]
+  χ:
+    name: lever
+    block: lever[face=floor,facing=east,powered=false]
+  ψ:
+    name: cin_lamp
+    block: redstone_lamp[lit=false]
+  ω:
+    name: cout_lamp
+    block: redstone_lamp[lit=false]
+  А:
+    name: st4
+    block: redstone_wire[east=none,north=none,power=0,south=up,west=side]
+  Б:
+    name: st10
+    block: redstone_wire[east=none,north=none,power=0,south=up,west=side]
+  В:
+    name: st17
+    block: redstone_wire[east=none,north=side,power=0,south=none,west=side]
+layers:
+  0: |
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ........P.
+    .......P..
+    ......P.PP
+    .....P....
+    ........PP
+    ..........
+  1: |
+    ..........
+    ........PP
+    .....P....
+    ......P.PP
+    ..........
+    ..........
+    ......ψPo.
+    P......v.Q
+    .PP..PsPxC
+    ...PPxPPPP
+    ..PP.PP.tF
+    ....PP.P.P
+  2: |
+    ....PP.P.P
+    ..PP.PP.iC
+    ...PPxPPPP
+    .PP..PsPxF
+    P........Q
+    ...PP.PP..
+    PPP...χwP.
+    BPPP.P....
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPη
+  3: |
+    ..P.kVPJPθ
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoP.PQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPP0P.P
+  4: |
+    ..kQPP1P.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzА.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPι
+  5: |
+    ..P.kVPJPκ
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoPwPQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPP2P.P
+  6: |
+    ..kQPP3P.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzT.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPλ
+  7: |
+    ..P.kVPJPμ
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoPwPQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPP4P.P
+  8: |
+    ..kQPP5P.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzT.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPν
+  9: |
+    ..P.kVPJPξ
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoPwPQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPP6P.P
+  10: |
+    ..kQPP7P.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzБ.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPο
+  11: |
+    ..P.kVPJPπ
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoPwPQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPP8P.P
+  12: |
+    ..kQPP9P.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzT.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPρ
+  13: |
+    ..P.kVPJPς
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoPwPQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPPαP.P
+  14: |
+    ..kQPPβP.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzT.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZPP
+    .PPxWPAMX.
+    ..jIzLU.OP
+    ..P.qaPJPσ
+  15: |
+    ..P.kVPJPτ
+    ..jIzLf.OP
+    .PPxbPAMd.
+    PgGP.EPZPP
+    EPPP.P.P..
+    PPPjxPmFO.
+    gHGPP.Oze.
+    zHrKPoPwPQ
+    .PPc.PjzxC
+    .gGPPxPPPP
+    ..zP.PO.tF
+    ..qQPPγP.P
+  16: |
+    ..kQPPδP.P
+    ..zP.PO.iC
+    .gDPPxPPPP
+    .PPc.PjzxF
+    zHlKPoPwPQ
+    gHDPP.OzT.
+    PPPjxPuCO.
+    BPPP.P.P..
+    PgDP.BPZ..
+    .PPxWPAMX.
+    ..jIzLU...
+    ..P.qaPJPυ
+  17: |
+    ..P.kVPJPφ
+    ..jIzLf...
+    .PPxbPAMd.
+    PgGP.EPZ..
+    EPPP.PPP..
+    PPPjxPkF..
+    hHGPP.OzВ.
+    zHrKPoPwP.
+    .PPc......
+    .gG.......
+    ..z.......
+    ..qQ.Pε...
+  18: |
+    ..kQ.Pζ...
+    ..z.......
+    .gD.......
+    .PPc...P..
+    zHlKPgyS..
+    nHDP...z..
+    P.PjxPxC..
+    .......ω..
+    ..........
+    ..........
+    ..........
+    ..........
+tests:
+- name: result_is_a_and_corner_is_next_nibble_plus_1_mixed
+  settle: 30
+  steps:
+  - &id001
+    run: fill ~-3 ~0 ~-3 ~-1 ~19 ~14 stone
+  - &id002
+    run: fill ~-3 ~0 ~-3 ~-1 ~19 ~14 air
+  - &id003
+    run: fill ~10 ~0 ~-3 ~12 ~19 ~14 stone
+  - &id004
+    run: fill ~10 ~0 ~-3 ~12 ~19 ~14 air
+  - &id005
+    run: fill ~0 ~0 ~-3 ~9 ~19 ~-1 stone
+  - &id006
+    run: fill ~0 ~0 ~-3 ~9 ~19 ~-1 air
+  - &id007
+    run: fill ~0 ~0 ~12 ~9 ~19 ~14 stone
+  - &id008
+    run: fill ~0 ~0 ~12 ~9 ~19 ~14 air
+  - &id009
+    run: setblock ~-1 ~2 ~6 stone
+  - &id010
+    run: setblock ~-1 ~3 ~6 comparator[facing=west,mode=compare]
+  - &id011
+    run: setblock ~-1 ~3 ~5 stone
+  - &id012
+    run: setblock ~-1 ~4 ~5 comparator[facing=west,mode=compare]
+  - &id013
+    run: setblock ~-1 ~4 ~6 stone
+  - &id014
+    run: setblock ~-1 ~5 ~6 comparator[facing=west,mode=compare]
+  - &id015
+    run: setblock ~-1 ~5 ~5 stone
+  - &id016
+    run: setblock ~-1 ~6 ~5 comparator[facing=west,mode=compare]
+  - &id017
+    run: setblock ~-1 ~6 ~6 stone
+  - &id018
+    run: setblock ~-1 ~7 ~6 comparator[facing=west,mode=compare]
+  - &id019
+    run: setblock ~-1 ~7 ~5 stone
+  - &id020
+    run: setblock ~-1 ~8 ~5 comparator[facing=west,mode=compare]
+  - &id021
+    run: setblock ~-1 ~8 ~6 stone
+  - &id022
+    run: setblock ~-1 ~9 ~6 comparator[facing=west,mode=compare]
+  - &id023
+    run: setblock ~-1 ~9 ~5 stone
+  - &id024
+    run: setblock ~-1 ~10 ~5 comparator[facing=west,mode=compare]
+  - &id025
+    run: setblock ~-1 ~10 ~6 stone
+  - &id026
+    run: setblock ~-1 ~11 ~6 comparator[facing=west,mode=compare]
+  - &id027
+    run: setblock ~-1 ~11 ~5 stone
+  - &id028
+    run: setblock ~-1 ~12 ~5 comparator[facing=west,mode=compare]
+  - &id029
+    run: setblock ~-1 ~12 ~6 stone
+  - &id030
+    run: setblock ~-1 ~13 ~6 comparator[facing=west,mode=compare]
+  - &id031
+    run: setblock ~-1 ~13 ~5 stone
+  - &id032
+    run: setblock ~-1 ~14 ~5 comparator[facing=west,mode=compare]
+  - &id033
+    run: setblock ~-1 ~14 ~6 stone
+  - &id034
+    run: setblock ~-1 ~15 ~6 comparator[facing=west,mode=compare]
+  - &id035
+    run: setblock ~-1 ~15 ~5 stone
+  - &id036
+    run: setblock ~-1 ~16 ~5 comparator[facing=west,mode=compare]
+  - &id037
+    run: setblock ~-1 ~16 ~6 stone
+  - &id038
+    run: setblock ~-1 ~17 ~6 comparator[facing=west,mode=compare]
+  - &id039
+    run: setblock ~-1 ~17 ~5 stone
+  - &id040
+    run: setblock ~-1 ~18 ~5 comparator[facing=west,mode=compare]
+  - wait: 8
+  - run: setblock ~-2 ~3 ~6 air
+  - run: setblock ~-2 ~4 ~5 composter[level=1]
+  - run: setblock ~-2 ~5 ~6 composter[level=2]
+  - run: setblock ~-2 ~6 ~5 composter[level=3]
+  - run: setblock ~-2 ~7 ~6 composter[level=4]
+  - run: setblock ~-2 ~8 ~5 composter[level=5]
+  - run: setblock ~-2 ~9 ~6 composter[level=6]
+  - run: setblock ~-2 ~10 ~5 composter[level=8]
+  - run: setblock ~-2 ~11 ~6 redstone_block
+  - run: setblock ~-2 ~12 ~5 composter[level=2]
+  - run: setblock ~-2 ~13 ~6 air
+  - run: setblock ~-2 ~14 ~5 composter[level=6]
+  - run: setblock ~-2 ~15 ~6 composter[level=8]
+  - run: setblock ~-2 ~16 ~5 composter[level=3]
+  - run: setblock ~-2 ~17 ~6 redstone_block
+  - run: setblock ~-2 ~18 ~5 composter[level=1]
+  - wait: 40
+  - level:
+      s3: 0
+      s4: 1
+      s5: 2
+      s6: 3
+      s7: 4
+      s8: 5
+      s9: 6
+      s10: 8
+      s11: 0
+      s12: 2
+      s13: 0
+      s14: 6
+      s15: 8
+      s16: 3
+      s17: 0
+      s18: 1
+      c2: 1
+      c3: 2
+      c4: 3
+      c5: 4
+      c6: 5
+      c7: 6
+      c8: 7
+      c9: 9
+      c10: 0
+      c11: 3
+      c12: 1
+      c13: 7
+      c14: 9
+      c15: 4
+      c16: 0
+      c17: 2
+- name: result_is_a_and_corner_is_next_nibble_plus_1_all_max
+  settle: 30
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  - *id040
+  - wait: 8
+  - run: setblock ~-2 ~3 ~6 redstone_block
+  - run: setblock ~-2 ~4 ~5 redstone_block
+  - run: setblock ~-2 ~5 ~6 redstone_block
+  - run: setblock ~-2 ~6 ~5 redstone_block
+  - run: setblock ~-2 ~7 ~6 redstone_block
+  - run: setblock ~-2 ~8 ~5 redstone_block
+  - run: setblock ~-2 ~9 ~6 redstone_block
+  - run: setblock ~-2 ~10 ~5 redstone_block
+  - run: setblock ~-2 ~11 ~6 redstone_block
+  - run: setblock ~-2 ~12 ~5 redstone_block
+  - run: setblock ~-2 ~13 ~6 redstone_block
+  - run: setblock ~-2 ~14 ~5 redstone_block
+  - run: setblock ~-2 ~15 ~6 redstone_block
+  - run: setblock ~-2 ~16 ~5 redstone_block
+  - run: setblock ~-2 ~17 ~6 redstone_block
+  - run: setblock ~-2 ~18 ~5 redstone_block
+  - wait: 40
+  - level:
+      s3: 0
+      s4: 0
+      s5: 0
+      s6: 0
+      s7: 0
+      s8: 0
+      s9: 0
+      s10: 0
+      s11: 0
+      s12: 0
+      s13: 0
+      s14: 0
+      s15: 0
+      s16: 0
+      s17: 0
+      s18: 0
+      c2: 0
+      c3: 0
+      c4: 0
+      c5: 0
+      c6: 0
+      c7: 0
+      c8: 0
+      c9: 0
+      c10: 0
+      c11: 0
+      c12: 0
+      c13: 0
+      c14: 0
+      c15: 0
+      c16: 0
+      c17: 0
+- name: result_is_a_and_corner_is_next_nibble_plus_1_alternating
+  settle: 30
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  - *id040
+  - wait: 8
+  - run: setblock ~-2 ~3 ~6 composter[level=6]
+  - run: setblock ~-2 ~4 ~5 composter[level=8]
+  - run: setblock ~-2 ~5 ~6 composter[level=6]
+  - run: setblock ~-2 ~6 ~5 composter[level=8]
+  - run: setblock ~-2 ~7 ~6 composter[level=6]
+  - run: setblock ~-2 ~8 ~5 composter[level=8]
+  - run: setblock ~-2 ~9 ~6 composter[level=6]
+  - run: setblock ~-2 ~10 ~5 composter[level=8]
+  - run: setblock ~-2 ~11 ~6 composter[level=6]
+  - run: setblock ~-2 ~12 ~5 composter[level=8]
+  - run: setblock ~-2 ~13 ~6 composter[level=6]
+  - run: setblock ~-2 ~14 ~5 composter[level=8]
+  - run: setblock ~-2 ~15 ~6 composter[level=6]
+  - run: setblock ~-2 ~16 ~5 composter[level=8]
+  - run: setblock ~-2 ~17 ~6 composter[level=6]
+  - run: setblock ~-2 ~18 ~5 composter[level=8]
+  - wait: 40
+  - level:
+      s3: 6
+      s4: 8
+      s5: 6
+      s6: 8
+      s7: 6
+      s8: 8
+      s9: 6
+      s10: 8
+      s11: 6
+      s12: 8
+      s13: 6
+      s14: 8
+      s15: 6
+      s16: 8
+      s17: 6
+      s18: 8
+      c2: 7
+      c3: 9
+      c4: 7
+      c5: 9
+      c6: 7
+      c7: 9
+      c8: 7
+      c9: 9
+      c10: 7
+      c11: 9
+      c12: 7
+      c13: 9
+      c14: 7
+      c15: 9
+      c16: 7
+      c17: 9
+- name: result_is_a_and_corner_is_next_nibble_plus_1_zeros
+  settle: 30
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  - *id040
+  - wait: 8
+  - run: setblock ~-2 ~3 ~6 air
+  - run: setblock ~-2 ~4 ~5 air
+  - run: setblock ~-2 ~5 ~6 air
+  - run: setblock ~-2 ~6 ~5 air
+  - run: setblock ~-2 ~7 ~6 air
+  - run: setblock ~-2 ~8 ~5 air
+  - run: setblock ~-2 ~9 ~6 air
+  - run: setblock ~-2 ~10 ~5 air
+  - run: setblock ~-2 ~11 ~6 air
+  - run: setblock ~-2 ~12 ~5 air
+  - run: setblock ~-2 ~13 ~6 air
+  - run: setblock ~-2 ~14 ~5 air
+  - run: setblock ~-2 ~15 ~6 air
+  - run: setblock ~-2 ~16 ~5 air
+  - run: setblock ~-2 ~17 ~6 air
+  - run: setblock ~-2 ~18 ~5 air
+  - wait: 40
+  - level:
+      s3: 0
+      s4: 0
+      s5: 0
+      s6: 0
+      s7: 0
+      s8: 0
+      s9: 0
+      s10: 0
+      s11: 0
+      s12: 0
+      s13: 0
+      s14: 0
+      s15: 0
+      s16: 0
+      s17: 0
+      s18: 0
+      c2: 1
+      c3: 1
+      c4: 1
+      c5: 1
+      c6: 1
+      c7: 1
+      c8: 1
+      c9: 1
+      c10: 1
+      c11: 1
+      c12: 1
+      c13: 1
+      c14: 1
+      c15: 1
+      c16: 1
+      c17: 1
+- name: carry_in_lever_stair_decays_one_per_layer
+  settle: 30
+  steps:
+  - wait: 10
+  - run: setblock ~6 ~2 ~6 lever[face=floor,facing=east,powered=true]
+  - wait: 60
+  - level:
+      st4: 14
+      st10: 8
+      st17: 1
+- name: observed_lever_leaves_sums_unchanged
+  settle: 30
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  - *id040
+  - wait: 8
+  - run: setblock ~-2 ~3 ~6 redstone_block
+  - run: setblock ~-2 ~4 ~5 redstone_block
+  - run: setblock ~-2 ~5 ~6 redstone_block
+  - run: setblock ~-2 ~6 ~5 composter[level=2]
+  - run: setblock ~-2 ~7 ~6 air
+  - run: setblock ~-2 ~8 ~5 air
+  - run: setblock ~-2 ~9 ~6 air
+  - run: setblock ~-2 ~10 ~5 air
+  - run: setblock ~-2 ~11 ~6 air
+  - run: setblock ~-2 ~12 ~5 air
+  - run: setblock ~-2 ~13 ~6 air
+  - run: setblock ~-2 ~14 ~5 air
+  - run: setblock ~-2 ~15 ~6 air
+  - run: setblock ~-2 ~16 ~5 air
+  - run: setblock ~-2 ~17 ~6 air
+  - run: setblock ~-2 ~18 ~5 air
+  - run: setblock ~6 ~2 ~6 lever[face=floor,facing=east,powered=true]
+  - wait: 60
+  - level:
+      s3: 0
+      s4: 0
+      s5: 0
+      s6: 2
+      s7: 0
+      s8: 0
+      s9: 0
+      s10: 0
+      s11: 0
+      s12: 0
+      s13: 0
+      s14: 0
+      s15: 0
+      s16: 0
+      s17: 0
+      s18: 0
+      c2: 0
+      c3: 0
+      c4: 0
+      c5: 3
+      c6: 1
+      c7: 1
+      c8: 1
+      c9: 1
+      c10: 1
+      c11: 1
+      c12: 1
+      c13: 1
+      c14: 1
+      c15: 1
+      c16: 1
+      c17: 1
+- name: latency_probe
+  settle: 30
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  - *id011
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  - *id040
+  - wait: 8
+  - run: setblock ~-2 ~8 ~5 composter[level=5]
+  - wait: 20
+  - level:
+      s8: 5
+      c7: 6

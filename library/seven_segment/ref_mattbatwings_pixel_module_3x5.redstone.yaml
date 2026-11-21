@@ -1,0 +1,288 @@
+name: ref_mattbatwings_pixel_module_3x5
+description: "Rebuild of DISMODULE004 3x5 Display Module (mattbatwings, endorsed; Recommended, Tested & Functional; https://discord.com/channels/1361854816837435433/1472417759399776308). SOURCED: README says only \"Wiring to display any pattern on a 1x1 density 3x5 display\", with a .schem. Size 5x10x11 (lamps in a 3-wide, 5-tall block at the south face z=10, y=2..6, x=1..3; the viewer stands south looking north, so x=1 is the viewer's left), 288 blocks. What it does (MEASURED): 15 independent inputs, one per pixel, so any of the 2^15 patterns of a 3x5 font can be shown; the inputs sit on the north face as 3 dust lines (x=0, 2, 4) in each of the 5 odd layers y=1,3,5,7,9, and input at (y, x) lights the lamp at (y+1, x/2+1), so the bottom input row drives the bottom lamp row and the left input the viewer's left pixel. No pixel depends on another, unlike seg_lamp_3x5 where 7 segment inputs share corner pixels. How (INFERRED from the layers, confirmed pixel by pixel by the test): the three lines of a layer are squeezed into columns x=1..3 (x=0 and x=4 dust bends in through targets at z=2, x=2 through a repeater and wool), and each layer is its own horizontal lane running south, with every even layer between lanes capped in gray wool so dust and repeaters in neighbouring lanes never link. The lowest lane (y=1) is repeaters and dust straight to a wool block under its lamp; the next ones end in a repeater into wool beside the lamp, so the lamp is hard-powered by the conductor. The upper rows (y=7, 9 and the lamp rows at y=5, 6) route down and invert with torches at z=9 that sit beside their lamps and are switched off by a power-1 dust from the comparator layer at y=6: two barrels at x=0 and x=4 hold 26 milk buckets each (unstackable, strength 14), comparators read them and subtract-mode comparators leave a constant signal 1 that the pixel's own signal cancels. The barrel contents are logic; without them the y=7 row lights only with all three inputs on (MEASURED while debugging this rebuild). Harness change: the inputs are redstone blocks at z=-1 (outside the 5x10x11 size) feeding the dust line starts, the original has bare dust ends; barrel contents are taken from the .schem block entities (the parsed archive JSON dropped them). MEASURED: one table of 98 rows (all off, each pixel alone, each pixel off with the rest on, all on, digits 0-9 of a 3x5 font, 40 seeded random patterns) gives exactly the matching lamps lit. Delays come from those rows and are worst cases over them, not over all 2^15 patterns: rise 4 gt (bottom row corners) to 10 gt (middle row), fall always rise + 4 (the lamp's own turn-off delay). Slowest row is the middle one, which crosses the comparator layer."
+traits: [compact, vertical, entityless, pistonless, silent]
+palette:
+  .: air
+  .: air
+  A: gray_wool
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: redstone_wire[east=side,north=side,south=none,west=none]
+  D: redstone_wire[east=none,north=none,south=side,west=side]
+  E: repeater[delay=1,facing=north]
+  F: redstone_wire[east=side,north=none,south=side,west=none]
+  G: redstone_wire[east=none,north=side,south=none,west=side]
+  H: target
+  I: redstone_wire[east=side,north=side,south=side,west=side]
+  u: redstone_wall_torch[facing=south]
+  J: redstone_wire[east=side,north=none,south=none,west=side]
+  K: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:milk_bucket",count:1},{Slot:1b,id:"minecraft:milk_bucket",count:1},{Slot:2b,id:"minecraft:milk_bucket",count:1},{Slot:3b,id:"minecraft:milk_bucket",count:1},{Slot:4b,id:"minecraft:milk_bucket",count:1},{Slot:5b,id:"minecraft:milk_bucket",count:1},{Slot:6b,id:"minecraft:milk_bucket",count:1},{Slot:7b,id:"minecraft:milk_bucket",count:1},{Slot:8b,id:"minecraft:milk_bucket",count:1},{Slot:9b,id:"minecraft:milk_bucket",count:1},{Slot:10b,id:"minecraft:milk_bucket",count:1},{Slot:11b,id:"minecraft:milk_bucket",count:1},{Slot:12b,id:"minecraft:milk_bucket",count:1},{Slot:13b,id:"minecraft:milk_bucket",count:1},{Slot:14b,id:"minecraft:milk_bucket",count:1},{Slot:15b,id:"minecraft:milk_bucket",count:1},{Slot:16b,id:"minecraft:milk_bucket",count:1},{Slot:17b,id:"minecraft:milk_bucket",count:1},{Slot:18b,id:"minecraft:milk_bucket",count:1},{Slot:19b,id:"minecraft:milk_bucket",count:1},{Slot:20b,id:"minecraft:milk_bucket",count:1},{Slot:21b,id:"minecraft:milk_bucket",count:1},{Slot:22b,id:"minecraft:milk_bucket",count:1},{Slot:23b,id:"minecraft:milk_bucket",count:1},{Slot:24b,id:"minecraft:milk_bucket",count:1},{Slot:25b,id:"minecraft:milk_bucket",count:1}]}'
+  M: comparator[facing=west,mode=compare]
+  N: comparator[facing=north,mode=subtract]
+  O: comparator[facing=north,mode=compare]
+  P: redstone_wire[east=side,north=side,south=none,west=side]
+  Q: gray_stained_glass
+  '0': {name: l2x1, block: redstone_lamp}
+  '1': {name: l2x2, block: redstone_lamp}
+  '2': {name: l2x3, block: redstone_lamp}
+  '3': {name: l3x1, block: redstone_lamp}
+  '4': {name: l3x2, block: redstone_lamp}
+  '5': {name: l3x3, block: redstone_lamp}
+  '6': {name: l4x1, block: redstone_lamp}
+  '7': {name: l4x2, block: redstone_lamp}
+  '8': {name: l4x3, block: redstone_lamp}
+  '9': {name: l5x1, block: redstone_lamp}
+  '!': {name: l5x2, block: redstone_lamp}
+  '%': {name: l5x3, block: redstone_lamp}
+  '&': {name: l6x1, block: redstone_lamp}
+  '*': {name: l6x2, block: redstone_lamp}
+  '+': {name: l6x3, block: redstone_lamp}
+  q: {input: i1x0}
+  r: {input: i1x2}
+  s: {input: i1x4}
+  t: {input: i3x0}
+  v: {input: i3x2}
+  w: {input: i3x4}
+  x: {input: i5x0}
+  y: {input: i5x2}
+  z: {input: i5x4}
+  k: {input: i7x0}
+  j: {input: i7x2}
+  h: {input: i7x4}
+  g: {input: i9x0}
+  f: {input: i9x2}
+  d: {input: i9x4}
+layers:
+  0: |
+    .....
+    A.A.A
+    AAAAA
+    .....
+    .AAA.
+    .....
+    .AAA.
+    .....
+    .AAA.
+    .....
+    .AAA.
+    .....
+  1: |
+    q.r.s
+    B.B.B
+    CDEFG
+    .HAH.
+    .EIE.
+    .AAA.
+    .IEI.
+    .AAA.
+    .EIE.
+    .AAA.
+    .IEI.
+    .AAA.
+  2: |
+    .....
+    A.A.A
+    AAAAA
+    .....
+    .AAA.
+    .AAA.
+    .....
+    .AAA.
+    .....
+    .AAA.
+    .....
+    .012.
+  3: |
+    t.v.w
+    B.B.B
+    CDEFG
+    .HAH.
+    .EBE.
+    .EBE.
+    .AAA.
+    .EEE.
+    .AAA.
+    .EEE.
+    .AAA.
+    .345.
+  4: |
+    .....
+    A.A.A
+    AAAAA
+    .E.E.
+    .A.A.
+    .uAu.
+    .EEE.
+    .AAA.
+    .EEE.
+    .AAA.
+    .uuu.
+    .678.
+  5: |
+    x.y.z
+    B.B.B
+    CJEFG
+    ..A..
+    ..u..
+    ..B..
+    .AA..
+    A...A
+    AAAAA
+    .AAA.
+    .uuu.
+    .9!%.
+  6: |
+    .....
+    A.A.A
+    AAAAA
+    .....
+    .....
+    .AAA.
+    KMN.K
+    OAAAO
+    CNONP
+    .CPG.
+    .QQQ.
+    .&*+.
+  7: |
+    k.j.h
+    B.B.B
+    CDEFG
+    .HAH.
+    .uuu.
+    .EBE.
+    .A.A.
+    .I.I.
+    .....
+    .AAA.
+    .EIE.
+    .AAA.
+  8: |
+    .....
+    A.A.A
+    AAAAA
+    .....
+    .AQA.
+    .....
+    .QAQ.
+    .....
+    .AAA.
+    .IEI.
+    ..A..
+    .....
+  9: |
+    g.f.d
+    B.B.B
+    CDEFG
+    .HAH.
+    .EIE.
+    .AAA.
+    .IEI.
+    .AAA.
+    .EIE.
+    .A.A.
+    .....
+    .....
+tests:
+- name: every_pixel_follows_its_input
+  settle: 20
+  delays: {l2x1: {rise: 4, fall: 8}, l2x2: {rise: 6, fall: 10}, l2x3: {rise: 4, fall: 8}, l3x1: {rise: 8, fall: 12}, l3x2: {rise: 6, fall: 10}, l3x3: {rise: 8, fall: 12}, l4x1: {rise: 10, fall: 14}, l4x2: {rise: 10, fall: 14}, l4x3: {rise: 10, fall: 14}, l5x1: {rise: 8, fall: 12}, l5x2: {rise: 10, fall: 14}, l5x3: {rise: 8, fall: 12}, l6x1: {rise: 6, fall: 10}, l6x2: {rise: 6, fall: 10}, l6x3: {rise: 6, fall: 10}}
+  truth_table: |
+    i1x0 i1x2 i1x4 i3x0 i3x2 i3x4 i5x0 i5x2 i5x4 i7x0 i7x2 i7x4 i9x0 i9x2 i9x4 | l2x1 l2x2 l2x3 l3x1 l3x2 l3x3 l4x1 l4x2 l4x3 l5x1 l5x2 l5x3 l6x1 l6x2 l6x3
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 | 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 | 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 | 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 | 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 | 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 | 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 | 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 0 1 1 0 1 1 0 1 1 1 1 | 1 1 1 1 0 1 1 0 1 1 0 1 1 1 1
+    1 1 1 0 1 0 0 1 0 1 1 0 0 1 0 | 1 1 1 0 1 0 0 1 0 1 1 0 0 1 0
+    1 1 1 1 0 0 1 1 1 0 0 1 1 1 1 | 1 1 1 1 0 0 1 1 1 0 0 1 1 1 1
+    1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 | 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1
+    0 0 1 0 0 1 1 1 1 1 0 1 1 0 1 | 0 0 1 0 0 1 1 1 1 1 0 1 1 0 1
+    1 1 1 0 0 1 1 1 1 1 0 0 1 1 1 | 1 1 1 0 0 1 1 1 1 1 0 0 1 1 1
+    1 1 1 1 0 1 1 1 1 1 0 0 1 1 1 | 1 1 1 1 0 1 1 1 1 1 0 0 1 1 1
+    0 0 1 0 0 1 0 0 1 0 0 1 1 1 1 | 0 0 1 0 0 1 0 0 1 0 0 1 1 1 1
+    1 1 1 1 0 1 1 1 1 1 0 1 1 1 1 | 1 1 1 1 0 1 1 1 1 1 0 1 1 1 1
+    1 1 1 0 0 1 1 1 1 1 0 1 1 1 1 | 1 1 1 0 0 1 1 1 1 1 0 1 1 1 1
+    0 0 1 1 0 0 1 1 0 0 1 1 1 0 0 | 0 0 1 1 0 0 1 1 0 0 1 1 1 0 0
+    0 1 0 0 0 0 1 0 1 1 1 1 1 1 0 | 0 1 0 0 0 0 1 0 1 1 1 1 1 1 0
+    1 0 0 0 1 0 1 1 1 1 1 1 1 0 1 | 1 0 0 0 1 0 1 1 1 1 1 1 1 0 1
+    0 1 0 1 0 0 1 1 0 0 1 1 0 1 0 | 0 1 0 1 0 0 1 1 0 0 1 1 0 1 0
+    1 0 0 1 1 1 0 0 0 1 1 1 0 0 1 | 1 0 0 1 1 1 0 0 0 1 1 1 0 0 1
+    0 0 0 0 0 1 1 1 0 0 1 1 1 0 1 | 0 0 0 0 0 1 1 1 0 0 1 1 1 0 1
+    1 1 1 0 1 1 0 1 1 1 1 1 0 1 1 | 1 1 1 0 1 1 0 1 1 1 1 1 0 1 1
+    0 1 0 0 1 1 1 1 1 1 0 0 0 1 1 | 0 1 0 0 1 1 1 1 1 1 0 0 0 1 1
+    1 1 1 0 1 0 1 1 1 1 1 0 0 0 1 | 1 1 1 0 1 0 1 1 1 1 1 0 0 0 1
+    0 1 0 1 0 1 0 0 1 1 0 1 0 0 1 | 0 1 0 1 0 1 0 0 1 1 0 1 0 0 1
+    0 1 1 0 0 0 0 1 0 1 1 0 1 0 1 | 0 1 1 0 0 0 0 1 0 1 1 0 1 0 1
+    1 1 1 1 1 1 1 1 0 1 0 0 0 1 1 | 1 1 1 1 1 1 1 1 0 1 0 0 0 1 1
+    0 0 1 1 1 0 0 1 0 0 0 0 0 1 0 | 0 0 1 1 1 0 0 1 0 0 0 0 0 1 0
+    0 1 0 0 1 0 0 1 0 0 1 0 1 1 0 | 0 1 0 0 1 0 0 1 0 0 1 0 1 1 0
+    1 0 0 0 0 0 0 1 0 0 1 1 0 1 0 | 1 0 0 0 0 0 0 1 0 0 1 1 0 1 0
+    1 1 0 1 1 0 0 0 0 0 0 0 1 0 0 | 1 1 0 1 1 0 0 0 0 0 0 0 1 0 0
+    1 1 0 1 0 1 1 1 1 1 1 0 1 1 0 | 1 1 0 1 0 1 1 1 1 1 1 0 1 1 0
+    0 0 1 0 0 0 1 1 1 0 1 0 1 1 1 | 0 0 1 0 0 0 1 1 1 0 1 0 1 1 1
+    1 1 1 0 0 0 1 0 1 0 1 0 0 1 1 | 1 1 1 0 0 0 1 0 1 0 1 0 0 1 1
+    1 0 1 0 1 0 1 0 0 1 0 0 1 0 0 | 1 0 1 0 1 0 1 0 0 1 0 0 1 0 0
+    0 1 0 0 1 0 0 0 1 1 1 0 0 0 0 | 0 1 0 0 1 0 0 0 1 1 1 0 0 0 0
+    0 0 1 0 0 0 0 0 1 1 1 1 1 1 1 | 0 0 1 0 0 0 0 0 1 1 1 1 1 1 1
+    0 1 0 1 0 1 1 0 1 0 0 0 1 1 1 | 0 1 0 1 0 1 1 0 1 0 0 0 1 1 1
+    0 0 1 0 0 1 0 1 1 1 0 1 0 1 1 | 0 0 1 0 0 1 0 1 1 1 0 1 0 1 1
+    1 0 0 1 0 1 1 0 1 1 0 1 0 1 0 | 1 0 0 1 0 1 1 0 1 1 0 1 0 1 0
+    1 0 1 0 0 0 0 1 0 0 1 0 0 0 1 | 1 0 1 0 0 0 0 1 0 0 1 0 0 0 1
+    0 0 1 0 1 0 0 0 0 1 1 0 1 1 1 | 0 0 1 0 1 0 0 0 0 1 1 0 1 1 1
+    0 0 1 1 1 1 1 0 0 1 1 0 1 0 1 | 0 0 1 1 1 1 1 0 0 1 1 0 1 0 1
+    0 1 0 1 1 0 1 1 1 1 1 0 1 0 1 | 0 1 0 1 1 0 1 1 1 1 1 0 1 0 1
+    1 0 1 0 0 0 1 1 0 0 0 1 1 1 0 | 1 0 1 0 0 0 1 1 0 0 0 1 1 1 0
+    1 1 1 0 0 0 0 1 1 0 1 1 1 0 0 | 1 1 1 0 0 0 0 1 1 0 1 1 1 0 0
+    0 1 1 0 1 1 1 1 0 1 1 0 0 1 0 | 0 1 1 0 1 1 1 1 0 1 1 0 0 1 0
+    0 0 0 0 1 1 0 0 1 0 0 0 0 1 1 | 0 0 0 0 1 1 0 0 1 0 0 0 0 1 1
+    1 0 1 1 1 1 1 1 1 1 0 0 0 0 0 | 1 0 1 1 1 1 1 1 1 1 0 0 0 0 0
+    1 0 1 0 0 0 0 1 0 1 0 0 1 0 0 | 1 0 1 0 0 0 0 1 0 1 0 0 1 0 0
+    0 1 0 0 1 0 1 1 1 1 0 0 0 0 1 | 0 1 0 0 1 0 1 1 1 1 0 0 0 0 1
+    0 0 0 1 0 1 1 0 0 1 0 0 0 1 1 | 0 0 0 1 0 1 1 0 0 1 0 0 0 1 1
+    1 0 1 0 1 1 0 1 1 1 1 0 1 0 1 | 1 0 1 0 1 1 0 1 1 1 1 0 1 0 1
+    1 1 1 1 1 0 0 0 1 1 0 1 0 0 0 | 1 1 1 1 1 0 0 0 1 1 0 1 0 0 0
+    0 0 1 0 0 0 0 0 1 1 0 0 0 1 1 | 0 0 1 0 0 0 0 0 1 1 0 0 0 1 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

@@ -1,0 +1,1358 @@
+name: ref_mattbatwings_counter_updown_load
+description: 'Rebuild of mattbatwings'' 8-bit Up/Down Counter with Load, Logical Redstone Archive COUNT002, https://discord.com/channels/1361854816837435433/1472420753168404642 (README SOURCED: counts up, counts down or loads a new number; inputs an 8-bit number, a Load button, a Count button and an Up/down lever; output an 8-bit number; tested and functional). 19x18x4, a vertical stack: base cells at y1-6 hold the up/down lever (0,1,1), the load button (0,3,1) and the count button (0,5,1), then one 2-layer cell per bit at y7,9,...,17 (bit 0 at the bottom); data levers d0..d5 at x1,z0 of each bit cell, output trapdoors q0..q5 at (9,y,3). MEASURED DISCREPANCY: the schematic has six bit cells, six data levers and six trapdoors, not eight, and the count wraps 63 -> 0 and 0 -> 63, so this is a 6-bit counter; no cell of the stack holds a seventh or eighth bit (the y3 and y5 cells carry the load and count buttons instead, and nothing there toggles on a count). Harness changes: orange wool -> white_wool (the harness emulates a button or lever only on plain white wool; every lamp the levers and buttons sat on became white_wool as well, the original lamps only displayed the lever); the iron trapdoors q0..q5 are the readout (open = bit set; INFERRED from the only cells that follow the count, MEASURED that they equal the counter''s value after every operation) and were saved with y7 and y9 open, which is now open=false so the build starts consistent; names for the controls and outputs. How it works (INFERRED from traces, only the measured parts are certain): a count press feeds a pulse (comparator minus delayed side, the same edge trick as ref_mattbatwings_counter_8bit_3x3) onto a dust ladder zigzagging up x17/x18 that reaches every bit cell in the same tick, so the counter is synchronous. The bit itself is held by the torch (10,y,0), repeater (12,y,0) and target block (13,y,0) loop: a count flips exactly those, and the trapdoor follows through the dust and repeater line along z2. Two south-facing subtract comparators at (13,y,1) and (14,y,1) and a four-dust decay line (strengths 15 down to 11 at (12..15,y,2)) per bit are the toggle gate; the carry/borrow path and the up/down mux were not traced further. Load: each bit cell has a comparator at (4,y,0) reading the lever-powered wool; the load pulse first sets every bit that is 0 and then clears the bits whose lever is 0. MEASURED: a count press at tick T changes every output that changes at T+10, up or down, carry or not (0->1, 1->2, 31->32, 63->0, down 32->31 and 0->63 checked by wave over 14 ticks, with no glitch on any bit); a load press at T gives the final value at T+18 at the latest. Bits whose lever and state are both 0 pulse high for 2 gt (T+16..T+17) and fall at T+18; a bit that is 1 and loads 0 falls at T+16, 0 loading 1 rises at T+16, 1 loading 1 stays up (tested 0->42, 42->21, 63->1, 21->0). Counts 0..8, wraps both ways, carries through 15, 31, 47 and 63, loads 42, 21, 0, 63, 1, 32, 5, 58, load while the lever is on down, load over a counted value, up then down then up from 42. Fastest count tested: a press every 24 gt counts every press (70 up and 70 down presses land on 6 and 58); 22 gt lost counts in an earlier 7-press probe, so about 24 gt is the limit with a stone button (20 gt hold, not pinned down).'
+palette:
+  .: air
+  A: white_wool
+  B: oak_wall_sign[facing=west,waterlogged=false]
+  C: lever[face=wall,facing=west]
+  L: redstone_lamp
+  D: redstone_wire[east=none,north=side,south=side,west=none]
+  E: redstone_wire[east=up,north=side,south=none,west=none]
+  F: redstone_wire[east=side,north=none,south=none,west=side]
+  G: redstone_wire[east=up,north=none,south=none,west=side]
+  H: redstone_wire[east=side,north=none,south=side,west=none]
+  I: comparator[facing=west,mode=subtract]
+  J: repeater[delay=1,facing=west]
+  K: stone_button[face=wall,facing=west]
+  M: redstone_wire[east=side,north=side,south=none,west=none]
+  N: repeater[delay=3,facing=west]
+  O: redstone_wire[east=none,north=side,south=none,west=side]
+  P: redstone_wire[east=none,north=side,south=up,west=none]
+  Q: smooth_stone_slab[type=top,waterlogged=false]
+  T: redstone_wire[east=none,north=side,south=none,west=up]
+  U: repeater[delay=3,facing=east]
+  V: repeater[delay=2,facing=west]
+  (: redstone_wall_torch[facing=west]
+  '*': redstone_torch
+  W: redstone_wire[east=side,north=none,south=side,west=up]
+  X: redstone_wire[east=none,north=none,south=side,west=side]
+  Y: repeater[delay=1,facing=east]
+  Z: target
+  b: repeater[delay=1,facing=south]
+  c: redstone_wire[east=side,north=side,south=side,west=side]
+  d: repeater[delay=1,facing=north]
+  e: comparator[facing=south,mode=subtract]
+  f: redstone_wire[east=side,north=none,south=none,west=up]
+  g: redstone_wire[east=side,north=side,south=none,west=side]
+  h: iron_trapdoor[facing=south,half=top,open=true,waterlogged=false]
+  i: redstone_wire[east=side,north=none,south=side,west=side]
+  j: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+  '0':
+    name: updown
+    block: lever[face=wall,facing=west]
+  '1':
+    name: load
+    block: stone_button[face=wall,facing=west]
+  '2':
+    name: count
+    block: stone_button[face=wall,facing=west]
+  '3':
+    name: d0
+    block: lever[face=wall,facing=west]
+  '4':
+    name: d1
+    block: lever[face=wall,facing=west]
+  '5':
+    name: d2
+    block: lever[face=wall,facing=west]
+  '6':
+    name: d3
+    block: lever[face=wall,facing=west]
+  '7':
+    name: d4
+    block: lever[face=wall,facing=west]
+  '8':
+    name: d5
+    block: lever[face=wall,facing=west]
+  '9': white_wool
+  '@': white_wool
+  '#': white_wool
+  $: white_wool
+  '%': white_wool
+  '&': white_wool
+  '!': white_wool
+  '?': white_wool
+  ;: white_wool
+  ':':
+    name: q0
+    block: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+  ',':
+    name: q1
+    block: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+  '~':
+    name: q2
+    block: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+  ^:
+    name: q3
+    block: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+  +:
+    name: q4
+    block: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+  '=':
+    name: q5
+    block: iron_trapdoor[facing=south,half=top,open=false,waterlogged=false]
+layers:
+  0: '...................
+
+    ..A................
+
+    ..A................
+
+    ...................
+
+    '
+  1: 'BA.................
+
+    09D................
+
+    ..EAAAAA...........
+
+    ...................
+
+    '
+  2: '..AAAA.AA..........
+
+    ..AAA.A............
+
+    ...FFFFGA..........
+
+    ...................
+
+    '
+  3: 'BAHFIJAFGA.A.AAAA..
+
+    1@MNO.P............
+
+    ....A.A.GA.A.AAAA..
+
+    ...................
+
+    '
+  4: '..AAAA.AQFAJAFFFGA.
+
+    ..AAA..............
+
+    .....AT..FAJAFFFGA.
+
+    ...................
+
+    '
+  5: 'BAHFIJAUF........GA
+
+    2#MVO..............
+
+    ...(AF...........GA
+
+    ...................
+
+    '
+  6: '...AA.*AA...A.A.AQF
+
+    ....AA.AA...AAAA...
+
+    ...A..A.A.A.AAAAAQF
+
+    ...................
+
+    '
+  7: '.3$FIAAWXQ(AYZXAYFQ
+
+    ....bc.dd...HeeX...
+
+    ..AfAAJAJAJAMgggYFQ
+
+    .........:.........
+
+    '
+  8: '...AA.FQAfA.A.A.AQF
+
+    ....AA.AA...AAAA...
+
+    ..FQ..A.A.A.AAAAAQF
+
+    ...................
+
+    '
+  9: '.4%FIAQiiQ(AYZXAYFQ
+
+    ....bc.dd...HeeX...
+
+    ..QFAAJAJAJAMgggYFQ
+
+    .........,.........
+
+    '
+  10: '...AA.FQAfA.A.A.AQF
+
+    ....AA.AA...AAAA...
+
+    ..FQ..A.A.A.AAAAAQF
+
+    ...................
+
+    '
+  11: '.5&FIAQiiQ(AYZXAYFQ
+
+    ....bc.dd...HeeX...
+
+    ..QFAAJAJAJAMgggYFQ
+
+    .........~.........
+
+    '
+  12: '...AA.FQAfA.A.A.AQF
+
+    ....AA.AA...AAAA...
+
+    ..FQ..A.A.A.AAAAAQF
+
+    ...................
+
+    '
+  13: '.6!FIAQiiQ(AYZXAYFQ
+
+    ....bc.dd...HeeX...
+
+    ..QFAAJAJAJAMgggYFQ
+
+    .........^.........
+
+    '
+  14: '...AA.FQAfA.A.A.AQF
+
+    ....AA.AA...AAAA...
+
+    ..FQ..A.A.A.AAAAAQF
+
+    ...................
+
+    '
+  15: '.7?FIAQiiQ(AYZXAYF.
+
+    ....bc.dd...HeeX...
+
+    ..QFAAJAJAJAMgggYF.
+
+    .........+.........
+
+    '
+  16: '...AA.FQAfA........
+
+    ....AA.AA..........
+
+    ..FQ..A.A..........
+
+    ...................
+
+    '
+  17: '.8;FIA.ii..........
+
+    ....bc.dd..........
+
+    ...FAAJAJA.........
+
+    .........=.........
+
+    '
+tests:
+- name: count up 0..8
+  steps:
+  - wait: 10
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+- name: count up wraps 63 to 0
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+- name: count up carries 31 to 32
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+- name: count up carries 15 to 16 and 47 to 48
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 0
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 1
+      q5: 1
+- name: count down wraps 0 to 63
+  steps:
+  - wait: 10
+  - use: updown
+  - wait: 6
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+- name: count down borrows 32 to 31
+  steps:
+  - wait: 10
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+  - use: updown
+  - wait: 6
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+- name: count down 1 to 0 to 63
+  steps:
+  - wait: 10
+  - use: d0
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: updown
+  - wait: 6
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+- name: load patterns
+  steps:
+  - wait: 10
+  - use: d1
+  - use: d3
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+  - use: d0
+  - use: d2
+  - use: d4
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: d0
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+  - use: d0
+  - use: d2
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+- name: load with the lever on down
+  steps:
+  - wait: 10
+  - use: updown
+  - wait: 6
+  - use: d1
+  - use: d3
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+- name: load then up then down
+  steps:
+  - wait: 10
+  - use: d1
+  - use: d3
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: updown
+  - wait: 6
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: updown
+  - wait: 6
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+- name: load replaces a counted value
+  steps:
+  - wait: 10
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: d0
+  - use: d3
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+  - use: count
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 0
+- name: count up at 24 gt
+  steps:
+  - wait: 10
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - wait: 20
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 1
+      q3: 0
+      q4: 0
+      q5: 0
+- name: count down at 24 gt
+  steps:
+  - wait: 10
+  - use: updown
+  - wait: 6
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - use: count
+  - wait: 24
+  - wait: 20
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 1
+      q5: 1
+- name: count timing 0 to 1
+  steps:
+  - wait: 10
+  - use: count
+  - wave:
+      q0: '00000000001111'
+      q1: '00000000000000'
+      q2: '00000000000000'
+      q3: '00000000000000'
+      q4: '00000000000000'
+      q5: '00000000000000'
+- name: count timing 1 to 2
+  steps:
+  - wait: 10
+  - use: d0
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 0
+  - use: count
+  - wave:
+      q0: '11111111110000'
+      q1: '00000000001111'
+      q2: '00000000000000'
+      q3: '00000000000000'
+      q4: '00000000000000'
+      q5: '00000000000000'
+- name: count timing 31 to 32 all bits at once
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 0
+  - use: count
+  - wave:
+      q0: '11111111110000'
+      q1: '11111111110000'
+      q2: '11111111110000'
+      q3: '11111111110000'
+      q4: '11111111110000'
+      q5: '00000000001111'
+- name: count timing 63 to 0
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: count
+  - wave:
+      q0: '11111111110000'
+      q1: '11111111110000'
+      q2: '11111111110000'
+      q3: '11111111110000'
+      q4: '11111111110000'
+      q5: '11111111110000'
+- name: count timing down 32 to 31
+  steps:
+  - wait: 10
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 0
+      q2: 0
+      q3: 0
+      q4: 0
+      q5: 1
+  - use: updown
+  - wait: 6
+  - use: count
+  - wave:
+      q0: '00000000001111'
+      q1: '00000000001111'
+      q2: '00000000001111'
+      q3: '00000000001111'
+      q4: '00000000001111'
+      q5: '11111111110000'
+- name: count timing down 0 to 63
+  steps:
+  - wait: 10
+  - use: updown
+  - wait: 6
+  - use: count
+  - wave:
+      q0: '00000000001111'
+      q1: '00000000001111'
+      q2: '00000000001111'
+      q3: '00000000001111'
+      q4: '00000000001111'
+      q5: '00000000001111'
+- name: load timing 0 to 42
+  steps:
+  - wait: 10
+  - use: d1
+  - use: d3
+  - use: d5
+  - wait: 4
+  - use: load
+  - wave:
+      q0: '00000000000000001100'
+      q1: '00000000000000001111'
+      q2: '00000000000000001100'
+      q3: '00000000000000001111'
+      q4: '00000000000000001100'
+      q5: '00000000000000001111'
+- name: load timing 42 to 21
+  steps:
+  - wait: 10
+  - use: d1
+  - use: d3
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 0
+      q1: 1
+      q2: 0
+      q3: 1
+      q4: 0
+      q5: 1
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wave:
+      q0: '00000000000000001111'
+      q1: '11111111111111110000'
+      q2: '00000000000000001111'
+      q3: '11111111111111110000'
+      q4: '00000000000000001111'
+      q5: '11111111111111110000'
+- name: load timing 63 to 1
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 1
+      q2: 1
+      q3: 1
+      q4: 1
+      q5: 1
+  - use: d1
+  - use: d2
+  - use: d3
+  - use: d4
+  - use: d5
+  - wait: 4
+  - use: load
+  - wave:
+      q0: '11111111111111111111'
+      q1: '11111111111111110000'
+      q2: '11111111111111110000'
+      q3: '11111111111111110000'
+      q4: '11111111111111110000'
+      q5: '11111111111111110000'
+- name: load timing 21 to 0
+  steps:
+  - wait: 10
+  - use: d0
+  - use: d2
+  - use: d4
+  - wait: 4
+  - use: load
+  - wait: 30
+  - expect:
+      q0: 1
+      q1: 0
+      q2: 1
+      q3: 0
+      q4: 1
+      q5: 0
+  - use: d0
+  - use: d2
+  - use: d4
+  - wait: 4
+  - use: load
+  - wave:
+      q0: '11111111111111110000'
+      q1: '00000000000000001100'
+      q2: '11111111111111110000'
+      q3: '00000000000000001100'
+      q4: '11111111111111110000'
+      q5: '00000000000000001100'
+traits:
+- entityless
+- pistonless
+- torch_based

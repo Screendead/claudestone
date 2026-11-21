@@ -1,0 +1,4457 @@
+name: ref_xoliks_bin_to_dec_8bit
+description: 'Xoliks, Uni and Flyingdean''s BintoDec Converter 4.2 (BINTOBCD003, Logical Redstone Archive, tags Tested & Functional, Recommended, endorsed by mattbatwings; Discord https://discord.com/channels/1361854816837435433/1472406276838260859).
+  SOURCED (README): converts an n-bit binary number to N decimal digits as signal strengths (0-9, one dust per digit, to tile with 7-segment displays), speed 2*b+1 ticks, expandable by 7x4x2 per cell, uses
+  TTP to remove directionality issues. Rebuilt from the .schem block states and barrel items (barrels 4, 8, 9 and 14 are constants read by comparators; the item counts are kept exactly), update_pass all.
+  Harness change: the 8 levers (bit b at y=2b+2, x=0, z=0, bit 0 at the bottom) are kept as named cells b0..b7, but the 8 indicator redstone lamps they hang on are white_concrete, because the harness can
+  only click a lever on a plain full block; the wall torch on each still reads the block. Outputs: the dust at x=6, y=1 at z=5, 9, 13 are ones, tens, hund (0-9 strength each). Size 7x18x15 (1235 blocks).
+  MEASURED: all 256 values give the right three digits, in Gray-code order (one lever per step), in a shuffled order (seed 26, multi-bit changes) and on decimal carries and edges (9, 10, 99, 100, 127, 128,
+  199, 200, 249, 250, 255); every bit alone is right. The outputs settle within 42 gt of the lever click for 0 to 128, 128 to 0, 0 to 255 and 255 to 0 (first output change about 10 gt after the click; at
+  255 the ones digit passes through intermediate values and the tens and hundreds digits last), against 34 gt from the README''s 2*b+1 ticks. The digits are not glitch-free: they run through intermediate
+  values while settling (255: ones 1, 3, 7, 5 then tens 1, 3, 6, 3, 5, then hund 1, 2), and after placement they flicker for about 36 gt. Server dependence: these results hold on sat1-sat6 and dsat1; the
+  same spec on dsat2 and dsat3 settled later than 50 gt for 0 to 128 and, on dsat3, to the wrong value (ones=1 tens=4 hund=2 for 255), so a run pinned there can fail. INFERRED (not tested piecewise): each
+  bit is one 2-layer cell per digit, a stack in y; each cell has an inverting torch and a repeater from its lever, a 14 constant (barrel 14) through a compare comparator, and a side-8 barrel read by a subtract
+  comparator; strength passes up and down the stack as dust and comparators, i.e. a double-dabble style conversion done in signal strength.'
+traits:
+- pistonless
+- entityless
+update_pass: all
+palette:
+  .: air
+  A: magenta_concrete
+  B: blue_concrete
+  C: magenta_stained_glass
+  D: red_concrete
+  E: redstone_wire[east=none,north=none,south=side,west=up]
+  F: barrel[facing=west,open=false]
+  G: comparator[facing=west,mode=subtract]
+  L: white_concrete
+  u: redstone_wall_torch[facing=south]
+  J: repeater[delay=1,facing=north]
+  K: redstone_wire[east=side,north=none,south=side,west=none]
+  M: redstone_wire[east=up,north=none,south=side,west=side]
+  N: redstone_wire[east=side,north=none,south=none,west=side]
+  O: comparator[facing=south,mode=compare]
+  P: barrel[facing=east,open=false]
+  Q: comparator[facing=east,mode=subtract]
+  T: redstone_wire[east=none,north=side,south=side,west=up]
+  U: redstone_wire[east=none,north=up,south=side,west=none]
+  V: redstone_wire[east=side,north=up,south=none,west=side]
+  W: redstone_wire[east=side,north=side,south=none,west=side]
+  X: redstone_wire[east=none,north=none,south=side,west=side]
+  Y: repeater[delay=1,facing=south]
+  Z: redstone_wire[east=none,north=side,south=none,west=side]
+  b: redstone_wire[east=side,north=side,south=none,west=none]
+  c: redstone_wire[east=side,north=none,south=side,west=side]
+  d: glass
+  e: oak_wall_sign[facing=east,waterlogged=false]
+  f: redstone_wire[east=none,north=side,south=side,west=none]
+  R: redstone_block
+  g: barrel[facing=west,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:22}]}
+  h:
+    name: ones
+    block: redstone_wire[east=side,north=side,south=side,west=side]
+  i:
+    name: tens
+    block: redstone_wire[east=side,north=side,south=side,west=side]
+  j:
+    name: hund
+    block: redstone_wire[east=side,north=side,south=side,west=side]
+  k:
+    name: b0
+    block: lever[face=wall,facing=north]
+  l: barrel[facing=east,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:27}]}
+  m: barrel[facing=west,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:64},{Slot:26b,id:"minecraft:redstone",count:63}]}
+  n:
+    name: b1
+    block: lever[face=wall,facing=north]
+  o:
+    name: b2
+    block: lever[face=wall,facing=north]
+  p:
+    name: b3
+    block: lever[face=wall,facing=north]
+  q:
+    name: b4
+    block: lever[face=wall,facing=north]
+  r:
+    name: b5
+    block: lever[face=wall,facing=north]
+  s:
+    name: b6
+    block: lever[face=wall,facing=north]
+  t:
+    name: b7
+    block: lever[face=wall,facing=north]
+  v: barrel[facing=west,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:45}]}
+layers:
+  0: |
+    .......
+    .......
+    .......
+    .......
+    ....A..
+    ....A.B
+    .......
+    .......
+    ....A..
+    ....A.B
+    .......
+    .......
+    ....A..
+    ....A.B
+    .......
+  1: |
+    .......
+    .......
+    .......
+    AAC....
+    .AADE..
+    A..gGAh
+    .......
+    AAC....
+    .AADE..
+    A..gGAi
+    .......
+    AAC....
+    .AADE..
+    A..gGAj
+    .......
+  2: |
+    k......
+    L......
+    u......
+    JKMAA..
+    AGGNC.C
+    OAACAlA
+    mA...AA
+    JKMAA..
+    AGGNC.C
+    OAACAlA
+    mA...AA
+    JKMAA..
+    AGGNC.C
+    OAACAlA
+    mA...AA
+  3: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  4: |
+    n......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  5: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  6: |
+    o......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  7: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  8: |
+    p......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  9: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  10: |
+    q......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  11: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  12: |
+    r......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  13: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  14: |
+    s......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  15: |
+    .......
+    .......
+    .......
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+    AACNQAA
+    .AADTAU
+    AKNVWXY
+    NZ...bZ
+  16: |
+    t......
+    L......
+    u......
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+    JKMAAKX
+    AGGcCOC
+    OAACAlA
+    mA...AA
+  17: |
+    .......
+    de.....
+    .......
+    AACNQvA
+    .AADfAf
+    A.NNWXY
+    NR...bZ
+    AACNQvA
+    .AADfAf
+    A.NNWXY
+    NR...bZ
+    AACNQvA
+    .AADfAf
+    A.NNWXY
+    NR...bZ
+tests:
+- name: settled within 42 gt, 0 to 128
+  settle: 60
+  steps:
+  - use: b7
+  - wave:
+      ones: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx11111111111111
+      tens: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx11111111111111
+      hund: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx11111111111111
+  - wait: 20
+  - level:
+      ones: 8
+      tens: 2
+      hund: 1
+- name: settled within 42 gt, 128 to 0
+  settle: 60
+  steps:
+  - use: b7
+  - wait: 60
+  - use: b7
+  - wave:
+      ones: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00000000000000
+      tens: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00000000000000
+      hund: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00000000000000
+  - wait: 20
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0
+- name: settled within 42 gt, 0 to 255
+  settle: 60
+  steps:
+  - &id001
+    use: b0
+  - &id002
+    use: b1
+  - &id003
+    use: b2
+  - &id004
+    use: b3
+  - &id005
+    use: b4
+  - &id006
+    use: b5
+  - &id007
+    use: b6
+  - &id008
+    use: b7
+  - wave:
+      hund: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx11111111111111
+      tens: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx11111111111111
+      ones: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx11111111111111
+  - wait: 20
+  - level:
+      ones: 5
+      tens: 5
+      hund: 2
+- name: settled within 42 gt, 255 to 0
+  settle: 60
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - wait: 60
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - *id008
+  - wave:
+      hund: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00000000000000
+      tens: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00000000000000
+      ones: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00000000000000
+  - wait: 20
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0
+- name: single bits
+  settle: 60
+  steps: &id009
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 0
+  - use: b1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 0
+  - use: b2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 0
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 0
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 0
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 6
+      hund: 0
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 1
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 0
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 0
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 0
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 0
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 1
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 1
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 1
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 1
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 1
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 0
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 2
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 2
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 2
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 3
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 3
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 2
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 2
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 2
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 2
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 2
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 1
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 1
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 1
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 0
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 4
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 5
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 5
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 5
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 5
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 6
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 6
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 6
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 6
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 5
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 5
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 5
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 5
+      hund: 0
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 4
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 4
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 4
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 4
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 4
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 4
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 4
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 4
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 3
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 3
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 3
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 3
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 3
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 3
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 3
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 0
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 9
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 9
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 9
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 9
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 0
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 1
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 0
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 0
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 0
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 1
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 2
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 2
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 2
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 2
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 2
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 2
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 2
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 1
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 1
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 1
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 1
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 1
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 1
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 1
+      hund: 1
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 8
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 8
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 8
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 8
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 8
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 8
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 8
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 8
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 9
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 9
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 9
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 9
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 9
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 9
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 8
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 8
+      hund: 0
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 7
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 7
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 7
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 7
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 7
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 7
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 7
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 7
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 6
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 6
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 7
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 7
+      hund: 0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 6
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 6
+      hund: 0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 6
+      hund: 0
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 6
+      hund: 0
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 9
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 9
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 9
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 9
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 9
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 9
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 9
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 9
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 0
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 0
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 0
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 0
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 2
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 1
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 1
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 1
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 2
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 2
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 2
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 2
+      hund: 2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 1
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 1
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 1
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 1
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 1
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 4
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 4
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 4
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 4
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 4
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 4
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 4
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 4
+      hund: 2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 5
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 5
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 5
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 5
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 4
+      hund: 2
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 3
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 3
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 3
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 3
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 3
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 3
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 3
+      hund: 2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 2
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 3
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 3
+      hund: 2
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 2
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 2
+      hund: 2
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 2
+      hund: 2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 6
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 6
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 6
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 6
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 6
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 6
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 6
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 6
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 7
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 7
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 7
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 7
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 7
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 7
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 6
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 6
+      hund: 1
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 8
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 8
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 8
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 8
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 9
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 9
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 8
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 8
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 8
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 8
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 8
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 8
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 7
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 7
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 7
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 7
+      hund: 1
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 4
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 4
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 4
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 4
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 5
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 4
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 5
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 5
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 5
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 5
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 5
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 5
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 5
+      hund: 1
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 3
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 3
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 3
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 3
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 4
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 4
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 4
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 4
+      hund: 1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 3
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 3
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 3
+      hund: 1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 3
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 3
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 2
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 1
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0
+- name: count up in Gray-code order, all 256 values
+  settle: 60
+  steps: *id009
+- name: shuffled order, every step a multi-bit change
+  settle: 60
+  steps:
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 4
+      hund: 1
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 3
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 7
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 8
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 5
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 6
+      hund: 0
+  - use: b1
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 2
+      hund: 0
+  - use: b0
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 5
+      hund: 0
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 9
+      hund: 1
+  - use: b0
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 3
+      hund: 2
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 6
+      hund: 0
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 1
+  - use: b1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 4
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 1
+      hund: 2
+  - use: b2
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 5
+      hund: 1
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 4
+      hund: 1
+  - use: b0
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 7
+      hund: 0
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 5
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 1
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b3
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 7
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 9
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 4
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 5
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 7
+      hund: 1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 1
+      hund: 0
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 9
+      hund: 1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 8
+      hund: 0
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 4
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 8
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 4
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 2
+      hund: 1
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 5
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 9
+      hund: 0
+  - use: b1
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 5
+      hund: 1
+  - use: b1
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 9
+      hund: 0
+  - use: b0
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 9
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 4
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 1
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 6
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 8
+      hund: 0
+  - use: b0
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 5
+      hund: 1
+  - use: b0
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 9
+      hund: 1
+  - use: b1
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 3
+      hund: 2
+  - use: b2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 6
+      hund: 1
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 2
+      hund: 1
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 3
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 7
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 0
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 6
+      hund: 0
+  - use: b0
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 4
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 9
+      hund: 1
+  - use: b1
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 9
+      hund: 0
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 6
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 0
+  - use: b0
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 6
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 1
+      hund: 2
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 3
+      hund: 2
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 7
+      hund: 1
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 8
+      hund: 0
+  - use: b3
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 0
+      hund: 1
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 1
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 0
+      hund: 1
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 5
+      hund: 1
+  - use: b2
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 0
+      hund: 1
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 6
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 8
+      hund: 1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 4
+      hund: 0
+  - use: b0
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 8
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 8
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 0
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 8
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 7
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 3
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 7
+      hund: 1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 3
+      hund: 0
+  - use: b1
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 3
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 4
+      hund: 2
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 4
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 8
+      hund: 1
+  - use: b2
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 9
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 2
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 9
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 6
+      hund: 1
+  - use: b2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 1
+  - use: b1
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 1
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 3
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 0
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 1
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 7
+      hund: 0
+  - use: b0
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 8
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 9
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 1
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 8
+      hund: 1
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 4
+      hund: 1
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 7
+      hund: 0
+  - use: b0
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 1
+  - use: b1
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 2
+      hund: 0
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 3
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 4
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 7
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 8
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 4
+      hund: 0
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 4
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 2
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 4
+      hund: 1
+  - use: b0
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 0
+      hund: 0
+  - use: b2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 3
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 6
+      hund: 1
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 1
+      hund: 2
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 8
+      hund: 0
+  - use: b0
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 1
+      hund: 1
+  - use: b1
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 9
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 7
+      hund: 0
+  - use: b2
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 3
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 2
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 6
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 2
+      hund: 0
+  - use: b1
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 9
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 4
+      hund: 2
+  - use: b0
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 7
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 1
+      hund: 1
+  - use: b1
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 1
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 7
+      hund: 1
+  - use: b1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 7
+      hund: 1
+  - use: b0
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 8
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 7
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 2
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 9
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 1
+      hund: 2
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 3
+      hund: 2
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 1
+      hund: 0
+  - use: b2
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 2
+  - use: b2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 4
+      hund: 1
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 4
+      hund: 2
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 2
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 2
+      hund: 0
+  - use: b1
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 1
+      hund: 0
+  - use: b3
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 4
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 5
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 3
+      hund: 2
+  - use: b0
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 9
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 3
+      hund: 2
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 5
+      hund: 0
+  - use: b1
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 6
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 4
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 2
+      hund: 2
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 1
+  - use: b1
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 2
+      hund: 2
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 8
+      hund: 0
+  - use: b0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 8
+      hund: 0
+  - use: b0
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 4
+      hund: 1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 5
+      hund: 2
+  - use: b0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 1
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 3
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 3
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 3
+      hund: 1
+  - use: b1
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 4
+      hund: 2
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 7
+      hund: 0
+  - use: b0
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 8
+      hund: 1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 1
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 5
+      hund: 2
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 9
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 4
+      hund: 2
+  - use: b2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 1
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 5
+      hund: 1
+  - use: b0
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 5
+      hund: 0
+  - use: b1
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 3
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 3
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 5
+      hund: 0
+  - use: b1
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 1
+      hund: 2
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 7
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 0
+      hund: 0
+  - use: b2
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 2
+      hund: 2
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 7
+      hund: 1
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 5
+      hund: 2
+  - use: b2
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 1
+      hund: 2
+  - use: b0
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 8
+      hund: 1
+  - use: b0
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 0
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 2
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 6
+      hund: 0
+  - use: b0
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 4
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 7
+      hund: 1
+  - use: b2
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 8
+      hund: 1
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 1
+      hund: 0
+  - use: b4
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 6
+      tens: 9
+      hund: 1
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 4
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 9
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 3
+      hund: 0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 4
+      hund: 1
+  - use: b1
+  - use: b2
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 4
+      tens: 5
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 1
+      hund: 1
+  - use: b1
+  - use: b3
+  - use: b4
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 5
+      hund: 0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 6
+      hund: 1
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 5
+      hund: 0
+  - use: b0
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 3
+      tens: 3
+      hund: 2
+  - use: b0
+  - use: b3
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 2
+      tens: 9
+      hund: 1
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0
+- name: decimal carries and edges
+  settle: 60
+  steps:
+  - use: b0
+  - wait: 60
+  - level:
+      ones: 1
+      tens: 0
+      hund: 0
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 0
+      hund: 0
+  - use: b0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 1
+      hund: 0
+  - use: b0
+  - use: b3
+  - use: b5
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 9
+      hund: 0
+  - use: b0
+  - use: b1
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b3
+  - use: b4
+  - wait: 60
+  - level:
+      ones: 7
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 8
+      tens: 2
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b6
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 9
+      hund: 1
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 2
+  - use: b0
+  - use: b4
+  - use: b5
+  - wait: 60
+  - level:
+      ones: 9
+      tens: 4
+      hund: 2
+  - use: b0
+  - use: b1
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 5
+      hund: 2
+  - use: b0
+  - use: b2
+  - wait: 60
+  - level:
+      ones: 5
+      tens: 5
+      hund: 2
+  - use: b0
+  - use: b1
+  - use: b2
+  - use: b3
+  - use: b4
+  - use: b5
+  - use: b6
+  - use: b7
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0
+  - wait: 60
+  - level:
+      ones: 0
+      tens: 0
+      hund: 0

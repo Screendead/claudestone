@@ -1,0 +1,169 @@
+name: xor_comparator_bridge_bus4
+description: "Four copies of xor_comparator_bridge stacked at a pitch of 4 (a 4-bit bus, a from the east and b from the west on every level), tested together, and the whole stack tiled again 5 blocks south for 8 bits. Per bit 2x4x4 = 32 blocks."
+traits: [stackable, tileable, comparator_based, silent, lightless, pistonless, entityless]
+palette:
+  .: air
+  '=': smooth_stone
+  '-': redstone_wire
+  '#': white_concrete
+  S: comparator[facing=south,mode=subtract]
+  N: comparator[facing=north,mode=subtract]
+  a: {input: a0}
+  b: {input: b0}
+  o: {output: out0, block: redstone_wire}
+  A: {input: a1}
+  B: {input: b1}
+  O: {output: out1, block: redstone_wire}
+  c: {input: a2}
+  d: {input: b2}
+  p: {output: out2, block: redstone_wire}
+  C: {input: a3}
+  D: {input: b3}
+  P: {output: out3, block: redstone_wire}
+layers:
+  0: |
+    ....
+    .==.
+    .==.
+    ....
+  1: |
+    .#..
+    .S-a
+    b-N.
+    .##.
+  2: |
+    .-..
+    .#..
+    .#..
+    .-o.
+  3: |
+    ....
+    .-..
+    .-..
+    ....
+  4: |
+    ....
+    .==.
+    .==.
+    ....
+  5: |
+    .#..
+    .S-A
+    B-N.
+    .##.
+  6: |
+    .-..
+    .#..
+    .#..
+    .-O.
+  7: |
+    ....
+    .-..
+    .-..
+    ....
+  8: |
+    ....
+    .==.
+    .==.
+    ....
+  9: |
+    .#..
+    .S-c
+    d-N.
+    .##.
+  10: |
+    .-..
+    .#..
+    .#..
+    .-p.
+  11: |
+    ....
+    .-..
+    .-..
+    ....
+  12: |
+    ....
+    .==.
+    .==.
+    ....
+  13: |
+    .#..
+    .S-C
+    D-N.
+    .##.
+  14: |
+    .-..
+    .#..
+    .#..
+    .-P.
+  15: |
+    ....
+    .-..
+    .-..
+    ....
+tests:
+- name: logic
+  truth_table: |
+    a0 b0 a1 b1 a2 b2 a3 b3 | out0 out1 out2 out3
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  0  0  0  0  0  0  | 0    0    0    0   
+  delay: 2
+- name: tile x2 south (8 bits)
+  truth_table: |
+    a0 b0 a1 b1 a2 b2 a3 b3 | out0 out1 out2 out3
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  0  0  0  0  0  0  | 0    0    0    0   
+  delay: 2
+  tile: [0, 0, 5]
+- name: stack x2 (8 bits, pitch 16)
+  truth_table: |
+    a0 b0 a1 b1 a2 b2 a3 b3 | out0 out1 out2 out3
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  1  0  1  1  0  1  | 0    1    0    1   
+    1  0  0  0  0  1  1  1  | 1    0    1    0   
+    1  1  0  1  0  0  1  0  | 0    1    0    1   
+    0  1  1  1  1  0  0  0  | 1    0    1    0   
+    0  0  0  0  0  0  0  0  | 0    0    0    0   
+  delay: 2
+  tile: [0, 16, 0]

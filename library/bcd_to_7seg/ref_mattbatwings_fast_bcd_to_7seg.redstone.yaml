@@ -1,0 +1,633 @@
+name: ref_mattbatwings_fast_bcd_to_7seg
+description: 'Rebuild of NUMDISPLAY001 Fast BCD to 7seg (mattbatwings, endorsed; Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472415095173681264, entry NUMDISPLAY001_Fast_BCD_to_7seg in the Logical Redstone Archive). SOURCED: README says "A fast design to show a BCD number. Synced, but very tall", input 4b. Size 29x23x5 (tall: 23 layers), 5x9 lamp seven-segment face at x=0 looking west (viewer west of it: z=0 is the viewer''s left, so the lamp names l<row><col> count rows from the top and cols from the viewer''s left), 1258 blocks. HARNESS CHANGE: the four levers (x=29) and the lamp each lit through (x=28) are replaced by one redstone-block driver cell at x=28, which powers the x=27 repeater facing east directly; signs dropped. INPUTS i2/i4/i6/i8 are bit 0/1/2/3 (named by the layer they enter on). HOW (INFERRED from the block layout, then confirmed by the tests): (1) y=1..8, four layers, one per bit: the bit''s dust line runs west along z=4 and powers the wool strip under/over it; at each of 10 columns (x=9..25 odd for digits 9..1, x=27 for 0) a torch (bit inverted) or repeater (bit as is) per bit feeds a dust ladder that zigzags up the column on lime/orange glass (glass is a non-conductor so dust steps up past it). The ladder is an OR of the four literals chosen per digit; a torch on top of the column (y=9, y=10 for the zero column) inverts it, so it is lit for exactly that digit (a one-hot decoder; 10-15 light none). (2) y=10..22, seven even layers, one per segment: the digit''s lime wool carries it up a second ladder; on each segment''s layer a repeater (P) at the column of every digit that lights that segment drops it onto the layer''s dust bus along z=4 (the zero column joins through a repeater on the bus end instead), so a bus is an OR of its digits: d bottom {0,2,3,5,6,8}, c {0,1,3,4,5,6,7,8,9}, e {0,2,6,8}, g {2,3,4,5,6,8,9} (no 0), b {0,1,2,3,4,7,8,9}, f {0,4,5,6,8,9}, a top {0,2,3,5,6,7,8,9} (layers 10,12,...,22 in that order); this 7-segment font has no tail on the 9. (3) each bus runs west through a repeater to the lamp wall, where dust, targets and wall torches light the three lamps of its segment. Every segment''s route has the same diode sequence (input repeater, per-bit torch or repeater, top torch, segment repeater, bus repeater), which is INFERRED to be the README''s "synced". MEASURED (26.3, references plot, satellite): digits 0-9 light exactly the expected lamps, all 45 checked (the 24 other lamps stay dark, glitch free through the settle and hold); every one of the 90 digit-to-digit changes (an Eulerian walk of the 10 digits) passes; inputs 10-15 give a blank display (not claimed by the README). Delay from input change to lamp: 14 gt to light, 18 gt to go dark (lamps go out 4 gt after their power), except l10, l14, l50 and l54 (the first lamp below the top bar of f and b, and below the middle bar of e and c), which light at 18 and go dark at 22: those four trail the rest of their segment by 4 gt (cause not traced). For comparison library/bcd_to_7seg/seg_dec_bcd is 17x6x23 and decodes to segment wires in 6 gt, with no lamps.'
+traits:
+- vertical
+- torch_based
+- silent
+- pistonless
+- entityless
+- tick_accurate
+palette:
+  .: air
+  A: orange_stained_glass
+  B: redstone_wire[east=none,north=up,south=side,west=none]
+  C: redstone_wire[east=none,north=side,south=side,west=none]
+  D: repeater[delay=1,facing=south]
+  n: redstone_wall_torch[facing=north]
+  E: redstone_wire[east=side,north=side,south=none,west=none]
+  (: redstone_wall_torch[facing=west]
+  F: orange_wool
+  G: redstone_wire[east=none,north=side,south=up,west=none]
+  I: redstone_wire[east=side,north=none,south=none,west=side]
+  J: repeater[delay=1,facing=east]
+  '*': redstone_torch
+  M: lime_stained_glass
+  N: light_blue_wool
+  O: lime_wool
+  P: repeater[delay=1,facing=north]
+  Q: redstone_wire[east=side,north=side,south=none,west=side]
+  T: redstone_wire[east=none,north=side,south=none,west=side]
+  U: target
+  V: redstone_wire[east=none,north=none,south=side,west=side]
+  W: redstone_wire[east=side,north=side,south=side,west=side]
+  X: repeater[delay=2,facing=east]
+  Y: redstone_wire[east=side,north=none,south=none,west=up]
+  ): redstone_wall_torch[facing=east]
+  Z: redstone_wire[east=up,north=none,south=none,west=side]
+  b: redstone_wire[east=none,north=none,south=up,west=side]
+  À:
+    name: l80
+    block: redstone_lamp
+  Á:
+    name: l81
+    block: redstone_lamp
+  Â:
+    name: l82
+    block: redstone_lamp
+  Ã:
+    name: l83
+    block: redstone_lamp
+  Ä:
+    name: l84
+    block: redstone_lamp
+  Å:
+    name: l70
+    block: redstone_lamp
+  Æ:
+    name: l71
+    block: redstone_lamp
+  Ç:
+    name: l72
+    block: redstone_lamp
+  È:
+    name: l73
+    block: redstone_lamp
+  É:
+    name: l74
+    block: redstone_lamp
+  Ê:
+    name: l60
+    block: redstone_lamp
+  Ë:
+    name: l61
+    block: redstone_lamp
+  Ì:
+    name: l62
+    block: redstone_lamp
+  Í:
+    name: l63
+    block: redstone_lamp
+  Î:
+    name: l64
+    block: redstone_lamp
+  Ï:
+    name: l50
+    block: redstone_lamp
+  Ð:
+    name: l51
+    block: redstone_lamp
+  Ñ:
+    name: l52
+    block: redstone_lamp
+  Ò:
+    name: l53
+    block: redstone_lamp
+  Ó:
+    name: l54
+    block: redstone_lamp
+  Ô:
+    name: l40
+    block: redstone_lamp
+  Õ:
+    name: l41
+    block: redstone_lamp
+  Ö:
+    name: l42
+    block: redstone_lamp
+  ×:
+    name: l43
+    block: redstone_lamp
+  Ø:
+    name: l44
+    block: redstone_lamp
+  Ù:
+    name: l30
+    block: redstone_lamp
+  Ú:
+    name: l31
+    block: redstone_lamp
+  Û:
+    name: l32
+    block: redstone_lamp
+  Ü:
+    name: l33
+    block: redstone_lamp
+  Ý:
+    name: l34
+    block: redstone_lamp
+  Þ:
+    name: l20
+    block: redstone_lamp
+  ß:
+    name: l21
+    block: redstone_lamp
+  à:
+    name: l22
+    block: redstone_lamp
+  á:
+    name: l23
+    block: redstone_lamp
+  â:
+    name: l24
+    block: redstone_lamp
+  ã:
+    name: l10
+    block: redstone_lamp
+  ä:
+    name: l11
+    block: redstone_lamp
+  å:
+    name: l12
+    block: redstone_lamp
+  æ:
+    name: l13
+    block: redstone_lamp
+  ç:
+    name: l14
+    block: redstone_lamp
+  è:
+    name: l00
+    block: redstone_lamp
+  é:
+    name: l01
+    block: redstone_lamp
+  ê:
+    name: l02
+    block: redstone_lamp
+  ë:
+    name: l03
+    block: redstone_lamp
+  ì:
+    name: l04
+    block: redstone_lamp
+  '0':
+    input: i2
+  '1':
+    input: i4
+  '2':
+    input: i6
+  '3':
+    input: i8
+layers:
+  0: |
+    ..............................
+    ..............................
+    .........A.A.A.A.A.A.A.A.A....
+    .........A.A...A...A...A......
+    .........A....................
+  1: |
+    ..............................
+    .........A.A.A.A.A.A.A.A.A....
+    .........B.B.B.B.B.B.B.B.B.A..
+    .........C.D.n.D.n.D.n.D.nA...
+    .........E(FFFFFFFFFFFFFFF.F..
+  2: |
+    ..............................
+    .........G.G.G.G.G.G.G.G.G.A..
+    .........A.A.A.A.A.A.A.A.AFB..
+    .........A.A.....A.A.....AD.A.
+    .........AAIIIIIIIIIIIIIIIFJ0.
+  3: |
+    ..............................
+    .........A.A.A.A.A.A.A.A.A.G..
+    .........B.B.B.B.B.B.B.B.B.A..
+    .........C.D.n.n.D.D.n.n.DA...
+    .........EJFFFFFFFFFFFFFFF.F..
+  4: |
+    ..............................
+    .........G.G.G.G.G.G.G.G.G.A..
+    .........A.A.A.A.A.A.A.A.AFB..
+    .........A.A.........A.A.AD.A.
+    .........AAIIIIIIIIIIIIIIIFJ1.
+  5: |
+    ..............................
+    .........A.A.A.A.A.A.A.A.A.G..
+    .........B.B.B.B.B.B.B.B.B.A..
+    .........C.D.n.n.n.n.D.D.DA...
+    .........EJFFFFFFFFFFFFFFF.F..
+  6: |
+    ..............................
+    .........G.G.G.G.G.G.G.G.G.A..
+    .........A.A.A.A.A.A.A.A.AFB..
+    .........A...A.A.A.A.A.A.AD.A.
+    .........A.IIIIIIIIIIIIIIIFJ2.
+  7: |
+    ..............................
+    .........A.A.A.A.A.A.A.A.A.G..
+    .........B.B.B.B.B.B.B.B.B.A..
+    .........C.n.D.D.D.D.D.D.DA...
+    .........E(FFFFFFFFFFFFFFF.F..
+  8: |
+    .........F.F.F.F.F.F.F.F.F....
+    .........C.C.C.C.C.C.C.C.C.A..
+    ..........................FB..
+    ..........................D.A.
+    ...........IIIIIIIIIIIIIIIFJ3.
+  9: |
+    .........*.*.*.*.*.*.*.*.*.F..
+    ...........................C..
+    .........M.M.M.M.M.M.M.M.M.M..
+    ......N..O.O.O.O.O.O.O.O.O.M..
+    ......NNN.NNNNNNNNNNNNNNN.OM..
+  10: |
+    .........O.O.O.O.O.O.O.O.O.*..
+    ..N......O.O.O.O.O.O.O.O.O.O..
+    ..NNNNN..B.B.B.B.B.B.B.B.B.B..
+    ..N...B....P...P.P...P.P...C..
+    ......EIJNIQIIIQIQIIIQIQINJT..
+  11: |
+    À..N.....C.C.C.C.C.C.C.C.C.O..
+    ÁUV......G.G.G.G.G.G.G.G.G.G..
+    ÂUWXIIV..M.M.M.M.M.M.M.M.M.M..
+    ÃUT......O.O.O.O.O.O.O.O.O.M..
+    Ä..N..NNN.NNNNNNNNNNNNNNN.OM..
+  12: |
+    Å(NW.NNN......................
+    Æ......N.M.M.M.M.M.M.M.M.M.M..
+    Ç......N.B.B.B.B.B.B.B.B.B.B..
+    È......N.P.P.P.P.P.P.P...P.C..
+    É(NW.NYIJNIQIQIQIQIQIQIIINJT..
+  13: |
+    ÊN)(NIIV......................
+    Ë......C.G.G.G.G.G.G.G.G.G.G..
+    Ì......C.M.M.M.M.M.M.M.M.M.M..
+    Í......G.O.O.O.O.O.O.O.O.O.M..
+    ÎN)(NI.NN.NNNNNNNNNNNNNNN.OM..
+  14: |
+    Ï(N...........................
+    Ð.N......M.M.M.M.M.M.M.M.M.M..
+    Ñ.NNNNN..B.B.B.B.B.B.B.B.B.B..
+    Ò.N...N....P...P.......P...C..
+    Ó(N....EJNIQIIIQIIIIIIIQINJT..
+  15: |
+    Ô..N..........................
+    ÕUV......G.G.G.G.G.G.G.G.G.G..
+    ÖUWXIIV..M.M.M.M.M.M.M.M.M.M..
+    ×UT...G..O.O.O.O.O.O.O.O.O.M..
+    Ø..N..NNN.NNNNNNNNNNNNNNN.OM..
+  16: |
+    Ù(NW.NNN......................
+    Ú......N.M.M.M.M.M.M.M.M.M.M..
+    Û........B.B.B.B.B.B.B.B.B.B..
+    Ü........P.P...P.P.P.P.P...C..
+    Ý(NW.NEIJNIQIIIQIQIQIQIQIN.C..
+  17: |
+    ÞN)(NIIV......................
+    ß......G.G.G.G.G.G.G.G.G.G.G..
+    à......N.M.M.M.M.M.M.M.M.M.M..
+    á........O.O.O.O.O.O.O.O.O.M..
+    âN)(NZNNN.NNNNNNNNNNNNNNN.OM..
+  18: |
+    ã(N...........................
+    ä.N......M.M.M.M.M.M.M.M.M.M..
+    å.NNNN.G.B.B.B.B.B.B.B.B.B.B..
+    æ.N....N.P.P.P.....P.P.P.P.C..
+    ç(N...IIJNIQIQIIIIIQIQIQINJT..
+  19: |
+    è.............................
+    éUV......G.G.G.G.G.G.G.G.G.G..
+    êUWXIZN..M.M.M.M.M.M.M.M.M.M..
+    ëUT....G.O.O.O.O.O.O.O.O.O.M..
+    ì......NN.NNNNNNNNNNNNNNN.OM..
+  20: |
+    ..............................
+    .........M.M.M.M.M.M.M.M.M.M..
+    ......b..B.B.B.B.B.B.B.B.B.B..
+    ......N..P.P...P.P.P.......C..
+    .......EJNIQIIIQIQIQIIIIINJT..
+  21: |
+    ..............................
+    .........G.G.G.G.G.G.G.G.G.G..
+    .........M.M.M.M.M.M.M.M.M.M..
+    ......G..O.O.O.O.O.O.O.O.O.M..
+    ......NNN.NNNNNNNNNNNNNNN.OM..
+  22: |
+    ..............................
+    ..............................
+    .........C.C.C.C.C.C.C.C.C.C..
+    .........P.P.P.P.P...P.P...C..
+    ......EIJNIQIQIQIQIIIQIQINJT..
+tests:
+- name: digits_0_to_9
+  truth_table: |
+    i2 i4 i6 i8 | l00 l01 l02 l03 l04 l10 l11 l12 l13 l14 l20 l21 l22 l23 l24 l30 l31 l32 l33 l34 l40 l41 l42 l43 l44 l50 l51 l52 l53 l54 l60 l61 l62 l63 l64 l70 l71 l72 l73 l74 l80 l81 l82 l83 l84
+    0 0 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 1 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    0 0 1 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    1 0 1 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    0 1 1 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 0 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 0 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+  glitch_free: true
+  delay: 22
+  delays:
+    l01:
+      rise: 14
+      fall: 18
+    l02:
+      rise: 14
+      fall: 18
+    l03:
+      rise: 14
+      fall: 18
+    l10:
+      rise: 18
+      fall: 22
+    l14:
+      rise: 18
+      fall: 22
+    l20:
+      rise: 14
+      fall: 18
+    l24:
+      rise: 14
+      fall: 18
+    l30:
+      rise: 14
+      fall: 18
+    l34:
+      rise: 14
+      fall: 18
+    l41:
+      rise: 14
+      fall: 18
+    l42:
+      rise: 14
+      fall: 18
+    l43:
+      rise: 14
+      fall: 18
+    l50:
+      rise: 18
+      fall: 22
+    l54:
+      rise: 18
+      fall: 22
+    l60:
+      rise: 14
+      fall: 18
+    l64:
+      rise: 14
+      fall: 18
+    l70:
+      rise: 14
+      fall: 18
+    l74:
+      rise: 14
+      fall: 18
+    l81:
+      rise: 14
+      fall: 18
+    l82:
+      rise: 14
+      fall: 18
+    l83:
+      rise: 14
+      fall: 18
+- name: every_digit_to_every_digit
+  truth_table: |
+    i2 i4 i6 i8 | l01 l02 l03 l10 l14 l20 l24 l30 l34 l41 l42 l43 l50 l54 l60 l64 l70 l74 l81 l82 l83
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 0 0 1 | 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 1 1 0 | 1 1 1 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 1 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 1
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 0 1 0 | 1 1 1 1 0 1 0 1 0 1 1 1 0 1 0 1 0 1 1 1 1
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 0 1 0 | 0 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 0 0
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    1 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 0 1 1 1 1
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 1 0 0 | 1 1 1 0 1 0 1 0 1 1 1 1 1 0 1 0 1 0 1 1 1
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+    1 0 0 0 | 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0
+    0 0 0 0 | 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 1 1 1 1
+  delay: 22
+  delays:
+    l01:
+      rise: 14
+      fall: 18
+    l02:
+      rise: 14
+      fall: 18
+    l03:
+      rise: 14
+      fall: 18
+    l10:
+      rise: 18
+      fall: 22
+    l14:
+      rise: 18
+      fall: 22
+    l20:
+      rise: 14
+      fall: 18
+    l24:
+      rise: 14
+      fall: 18
+    l30:
+      rise: 14
+      fall: 18
+    l34:
+      rise: 14
+      fall: 18
+    l41:
+      rise: 14
+      fall: 18
+    l42:
+      rise: 14
+      fall: 18
+    l43:
+      rise: 14
+      fall: 18
+    l50:
+      rise: 18
+      fall: 22
+    l54:
+      rise: 18
+      fall: 22
+    l60:
+      rise: 14
+      fall: 18
+    l64:
+      rise: 14
+      fall: 18
+    l70:
+      rise: 14
+      fall: 18
+    l74:
+      rise: 14
+      fall: 18
+    l81:
+      rise: 14
+      fall: 18
+    l82:
+      rise: 14
+      fall: 18
+    l83:
+      rise: 14
+      fall: 18
+- name: non_bcd_inputs_blank
+  truth_table: |
+    i2 i4 i6 i8 | l00 l01 l02 l03 l04 l10 l11 l12 l13 l14 l20 l21 l22 l23 l24 l30 l31 l32 l33 l34 l40 l41 l42 l43 l44 l50 l51 l52 l53 l54 l60 l61 l62 l63 l64 l70 l71 l72 l73 l74 l80 l81 l82 l83 l84
+    0 0 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    0 1 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    1 1 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  delay: 22
+  delays:
+    l01:
+      rise: 14
+      fall: 18
+    l02:
+      rise: 14
+      fall: 18
+    l03:
+      rise: 14
+      fall: 18
+    l10:
+      rise: 18
+      fall: 22
+    l14:
+      rise: 18
+      fall: 22
+    l20:
+      rise: 14
+      fall: 18
+    l24:
+      rise: 14
+      fall: 18
+    l30:
+      rise: 14
+      fall: 18
+    l34:
+      rise: 14
+      fall: 18
+    l41:
+      rise: 14
+      fall: 18
+    l42:
+      rise: 14
+      fall: 18
+    l43:
+      rise: 14
+      fall: 18
+    l50:
+      rise: 18
+      fall: 22
+    l54:
+      rise: 18
+      fall: 22
+    l60:
+      rise: 14
+      fall: 18
+    l64:
+      rise: 14
+      fall: 18
+    l70:
+      rise: 14
+      fall: 18
+    l74:
+      rise: 14
+      fall: 18
+    l81:
+      rise: 14
+      fall: 18
+    l82:
+      rise: 14
+      fall: 18
+    l83:
+      rise: 14
+      fall: 18

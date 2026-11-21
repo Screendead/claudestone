@@ -1,0 +1,747 @@
+name: furnace_array_fhl
+description: |-
+  Entityless 16-furnace array whose 48 slice hoppers (input taps, fuel taps, output hoppers) stay locked except for 2 gt after each of the 16 item waves per 200 gt cycle and 2 flush pulses, built on SP006's wave distributor (Robot, Storage Catalog; rebuilt here as ref_robot_sp006_furnace16). Measured on 26.3 with the same tests as the rebuild: 320 ingots in 4000 gt (1.60 items/s, the 16-furnace ceiling, same as SP006); a 160-item batch spreads evenly (no furnace over 1 raw item at 1000 gt) and fully drains (every tap, furnace and output hopper empty), all 160 in the chest between 3220 and 3420 gt against 2220-2420 for SP006 (the slower tail is the flush clock's 2 pulses per cycle); slice hoppers unlocked 19% of hopper-ticks running and 1.8% idle, against 100% and 100% for SP006. The three feed hoppers under the input and fuel chests are SP006's and stay unlocked in both.
+  What was added to SP006 (its dropper lines, note blocks, observers, lamp, comparator fader, feed and fuel chests are unchanged, one block higher): (1) one repeater per furnace pointing into its front (x=2), fed by a dust trunk (x=3); a powered furnace locks its input tap above, fuel tap beside and output hopper below. (2) The trunk is lit through a block over its middle by a repeater (4,3,9) driven by a subtract comparator (4,3,10) whose rear reads a level-1 composter; an observer (2,8,16) on the fader's y7 source dust fires on each of the 16 waves per 200 gt cycle and its dust pulse reaches the comparator's side, so the trunk drops for 2 gt and every slice hopper is unlocked from 6 to 8 gt after the wave (the item lands at 4; the lamp refires the z1 droppers at 8). A torch, or a comparator facing dust, misses a 2 gt observer pulse; a comparator facing a repeater catches it (library/mechanics/observer_pulse_torch_comparator_priority). (3) The 16-hopper output chain is split into two chains of 8 that meet over a double chest under furnaces 7 and 8 (y=0), so each chain end gets more unlocks than items. (4) A free-running copy of SP006's fader (x 3-4, z 16-22) with an observer on one comparator adds 2 unlocks per cycle at all times, so after a batch the taps push their last item, the furnaces are emptied and the chains drain; without it the end of every batch was stranded (127 of 160 at 2800 gt).
+  Use: raw items into the double chest on top (feed), fuel into the double chest beside it (fuel), ingots from the chest under the middle. Fuel handling is SP006's: one fuel item per raw item reaches each furnace, so the surplus collects in the fuel slots and fuel taps. Size 6x9x23 (1242, against 2x8x23 = 368), 328 blocks against 206: +32 dust, +47 smooth stone, +19 repeaters, +7 comparators, +9 glass, +2 observers, +4 concrete, +1 wall torch, +1 composter; still 51 hoppers. Each furnace keeps the fuel surplus: from a 64-coal batch for 160 items every furnace burned 2 and kept 2, in both builds.
+traits:
+- container_based
+- entityless
+- survival_friendly
+palette:
+  .: air
+  A:
+    name: out2
+    block: chest[facing=east,type=left]
+  B:
+    name: out
+    block: chest[facing=east,type=right]
+  C: hopper[enabled=false,facing=south]
+  D: smooth_stone
+  E: hopper[enabled=false,facing=down]
+  F:
+    name: hout8
+    block: hopper[enabled=false,facing=down]
+  G: hopper[enabled=false,facing=north]
+  H: hopper[enabled=false,facing=east]
+  I:
+    name: f0
+    block: furnace[facing=east,lit=false]
+  J: repeater[facing=east,delay=1,powered=true]
+  K: redstone_wire[north=none,south=side,east=none,west=side]
+  L:
+    name: f1
+    block: furnace[facing=east,lit=false]
+  M: redstone_wire[north=side,south=side,east=none,west=side]
+  N:
+    name: f2
+    block: furnace[facing=east,lit=false]
+  O:
+    name: f3
+    block: furnace[facing=east,lit=false]
+  P:
+    name: f4
+    block: furnace[facing=east,lit=false]
+  Q:
+    name: f5
+    block: furnace[facing=east,lit=false]
+  R:
+    name: f6
+    block: furnace[facing=east,lit=false]
+  S:
+    name: f7
+    block: furnace[facing=east,lit=false]
+  T:
+    name: tfu8
+    block: hopper[enabled=false,facing=east]
+  U:
+    name: f8
+    block: furnace[facing=east,lit=false]
+  V: redstone_wire[north=side,south=side,east=side,west=side]
+  W: redstone_wire[north=none,south=none,east=side,west=side]
+  X:
+    name: f9
+    block: furnace[facing=east,lit=false]
+  Y:
+    name: f10
+    block: furnace[facing=east,lit=false]
+  Z:
+    name: f11
+    block: furnace[facing=east,lit=false]
+  a:
+    name: f12
+    block: furnace[facing=east,lit=false]
+  b:
+    name: f13
+    block: furnace[facing=east,lit=false]
+  c:
+    name: f14
+    block: furnace[facing=east,lit=false]
+  d:
+    name: f15
+    block: furnace[facing=east,lit=false]
+  e: redstone_wire[north=side,south=none,east=none,west=side]
+  f: dropper[facing=down,triggered=false]
+  g: dropper[facing=north,triggered=false]
+  h:
+    name: tin8
+    block: hopper[enabled=false,facing=down]
+  i: repeater[facing=south,delay=1,powered=true]
+  j:
+    name: unlock
+    block: comparator[facing=south,mode=subtract,powered=true]
+  k: redstone_wire[north=none,south=up,east=none,west=side]
+  l: composter[level=1]
+  m: hopper[enabled=true,facing=north]
+  n: white_stained_glass
+  o: note_block[instrument=basedrum,note=0,powered=false]
+  p: redstone_wire[north=side,south=side,east=none,west=none]
+  q: redstone_wire[north=side,south=up,east=none,west=none]
+  r: hopper[enabled=true,facing=down]
+  s: white_concrete
+  t: comparator[facing=north,mode=compare,powered=false]
+  u: repeater[delay=1,facing=south,locked=false,powered=false]
+  v: repeater[delay=3,facing=north,locked=false,powered=false]
+  w: redstone_wall_torch[facing=west,lit=false]
+  x: redstone_wire[east=none,north=side,power=0,south=side,west=none]
+  y:
+    name: fuel
+    block: chest[facing=south,type=right,waterlogged=false]
+  z:
+    name: fuel2
+    block: chest[facing=south,type=left,waterlogged=false]
+  '0': comparator[facing=south,mode=compare,powered=false]
+  '1': redstone_wire[east=side,north=side,power=0,south=side,west=side]
+  '2': redstone_wire[east=side,north=side,power=0,south=none,west=none]
+  '3': redstone_wire[east=none,north=side,power=0,south=none,west=side]
+  '4': repeater[delay=1,facing=north,locked=false,powered=false]
+  '5': observer[facing=up,powered=false]
+  '6':
+    name: feed
+    block: chest[facing=east,type=left,waterlogged=false]
+  '7':
+    name: feed2
+    block: chest[facing=east,type=right,waterlogged=false]
+  '8':
+    name: idle_obs
+    block: observer[facing=down]
+  '9': redstone_torch[lit=true]
+  '!': redstone_lamp[lit=false]
+  $: redstone_wire[north=up,south=side,east=none,west=none]
+  '%': redstone_wire[north=none,south=none,east=side,west=none]
+  '&':
+    name: wave_obs
+    block: observer[facing=west]
+layers:
+  0: |
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    .A....
+    .B....
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+  1: |
+    .CDD..
+    .CDD..
+    .CDD..
+    .CDD..
+    .CDD..
+    .CDD..
+    .CDD..
+    .EDD..
+    .FDDD.
+    .GDD..
+    .GDD..
+    .GDD..
+    .GDD..
+    .GDD..
+    .GDD..
+    .GDD..
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+  2: |
+    HIJK..
+    HLJM..
+    HNJM..
+    HOJM..
+    HPJM..
+    HQJM..
+    HRJM..
+    HSJM..
+    TUJVW.
+    HXJMD.
+    HYJMDD
+    HZJM..
+    HaJM..
+    HbJM..
+    HcJM..
+    HdJe..
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+  3: |
+    fE....
+    gE....
+    gE....
+    gE....
+    gE....
+    gE....
+    gE....
+    gE....
+    gh..D.
+    gE..i.
+    gE..jk
+    gE..lD
+    gE...D
+    gE....
+    gE....
+    gE....
+    g.....
+    m.....
+    .n....
+    ......
+    ......
+    ...nn.
+    ......
+  4: |
+    .f....
+    og....
+    og....
+    og....
+    og....
+    og....
+    og....
+    og....
+    og....
+    og....
+    og....
+    og...p
+    og...q
+    og...D
+    og....
+    og....
+    og..n.
+    rs.nn.
+    .t.nn.
+    .s.nn.
+    ...ss.
+    .n.uv.
+    ...ws.
+  5: |
+    ......
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s.....
+    s....q
+    s....D
+    s.....
+    sr.sx.
+    yz.0t.
+    ...0t.
+    .1.0t.
+    .s.23.
+    .4....
+    .s....
+  6: |
+    ......
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5.....
+    5....q
+    5....D
+    56....
+    .7...D
+    ....8D
+    ......
+    ......
+    nn....
+    .9....
+  7: |
+    ......
+    !.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x.....
+    x....q
+    xn.DDD
+    nn...$
+    nn..%e
+    nn....
+    ss....
+    uv....
+    ws....
+  8: |
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    ......
+    sx&WWM
+    0t....
+    0t....
+    0t....
+    23....
+    ......
+    ......
+tests:
+- name: steady 16 furnaces at 1.6 items per second
+  steps:
+  - insert:
+      cell: feed
+      items:
+      - &id001
+        id: raw_iron
+        count: 64
+      - *id001
+      - *id001
+      - *id001
+      - *id001
+      - *id001
+      - *id001
+      - *id001
+      - *id001
+      - *id001
+  - insert:
+      cell: fuel
+      items:
+      - &id002
+        id: coal
+        count: 64
+      - *id002
+      - *id002
+      - *id002
+      - *id002
+      - *id002
+  - wait: 400
+  - throughput:
+      to: out
+      item: iron_ingot
+      ticks: 4000
+      min: 310
+  - expect_items:
+      cell: out2
+      item: iron_ingot
+      count: 0
+- name: a batch of 160 smelts evenly and drains
+  steps:
+  - insert:
+      cell: feed
+      items:
+      - &id003
+        id: raw_iron
+        count: 64
+      - *id003
+      - id: raw_iron
+        count: 32
+  - insert:
+      cell: fuel
+      items:
+      - id: coal
+        count: 64
+  - wait: 1000
+  - expect_items:
+      cell: f0
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f1
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f2
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f3
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f4
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f5
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f6
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f7
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f8
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f9
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f10
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f11
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f12
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f13
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f14
+      slot: 0
+      item: raw_iron
+      max: 1
+  - expect_items:
+      cell: f15
+      slot: 0
+      item: raw_iron
+      max: 1
+  - wait: 800
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - wait: 200
+  - log: data get block ~1 ~0 ~8 Items
+  - expect_items:
+      cell: out
+      item: iron_ingot
+      count: 160
+  - expect_items:
+      cell: feed
+      empty: true
+  - expect_items:
+      cell: f0
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f0
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f1
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f1
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f2
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f2
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f3
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f3
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f4
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f4
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f5
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f5
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f6
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f6
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f7
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f7
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f8
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f8
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f9
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f9
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f10
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f10
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f11
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f11
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f12
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f12
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f13
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f13
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f14
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f14
+      slot: 2
+      empty: true
+  - expect_items:
+      cell: f15
+      slot: 0
+      empty: true
+  - expect_items:
+      cell: f15
+      slot: 2
+      empty: true
+  - check: unless data block ~1 ~3 ~0 Items[0]
+  - check: unless data block ~1 ~3 ~1 Items[0]
+  - check: unless data block ~1 ~3 ~2 Items[0]
+  - check: unless data block ~1 ~3 ~3 Items[0]
+  - check: unless data block ~1 ~3 ~4 Items[0]
+  - check: unless data block ~1 ~3 ~5 Items[0]
+  - check: unless data block ~1 ~3 ~6 Items[0]
+  - check: unless data block ~1 ~3 ~7 Items[0]
+  - check: unless data block ~1 ~3 ~8 Items[0]
+  - check: unless data block ~1 ~3 ~9 Items[0]
+  - check: unless data block ~1 ~3 ~10 Items[0]
+  - check: unless data block ~1 ~3 ~11 Items[0]
+  - check: unless data block ~1 ~3 ~12 Items[0]
+  - check: unless data block ~1 ~3 ~13 Items[0]
+  - check: unless data block ~1 ~3 ~14 Items[0]
+  - check: unless data block ~1 ~3 ~15 Items[0]
+  - check: unless data block ~1 ~1 ~0 Items[0]
+  - check: unless data block ~1 ~1 ~1 Items[0]
+  - check: unless data block ~1 ~1 ~2 Items[0]
+  - check: unless data block ~1 ~1 ~3 Items[0]
+  - check: unless data block ~1 ~1 ~4 Items[0]
+  - check: unless data block ~1 ~1 ~5 Items[0]
+  - check: unless data block ~1 ~1 ~6 Items[0]
+  - check: unless data block ~1 ~1 ~7 Items[0]
+  - check: unless data block ~1 ~1 ~8 Items[0]
+  - check: unless data block ~1 ~1 ~9 Items[0]
+  - check: unless data block ~1 ~1 ~10 Items[0]
+  - check: unless data block ~1 ~1 ~11 Items[0]
+  - check: unless data block ~1 ~1 ~12 Items[0]
+  - check: unless data block ~1 ~1 ~13 Items[0]
+  - check: unless data block ~1 ~1 ~14 Items[0]
+  - check: unless data block ~1 ~1 ~15 Items[0]
+  - check: unless data block ~0 ~2 ~0 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~1 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~2 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~3 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~4 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~5 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~6 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~7 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~8 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~9 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~10 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~11 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~12 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~13 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~14 Items[{id:"minecraft:raw_iron"}]
+  - check: unless data block ~0 ~2 ~15 Items[{id:"minecraft:raw_iron"}]
+  - log: data get block ~1 ~2 ~0 Items
+  - log: data get block ~1 ~2 ~1 Items
+  - log: data get block ~1 ~2 ~2 Items
+  - log: data get block ~1 ~2 ~3 Items
+  - log: data get block ~1 ~2 ~4 Items
+  - log: data get block ~1 ~2 ~5 Items
+  - log: data get block ~1 ~2 ~6 Items
+  - log: data get block ~1 ~2 ~7 Items
+  - log: data get block ~1 ~2 ~8 Items
+  - log: data get block ~1 ~2 ~9 Items
+  - log: data get block ~1 ~2 ~10 Items
+  - log: data get block ~1 ~2 ~11 Items
+  - log: data get block ~1 ~2 ~12 Items
+  - log: data get block ~1 ~2 ~13 Items
+  - log: data get block ~1 ~2 ~14 Items
+  - log: data get block ~1 ~2 ~15 Items
+- name: idle hopper sample
+  steps:
+  - wait: 100
+  - expect:
+      tin8: 1
+      tfu8: 1
+      hout8: 1
+  - repeat:
+      times: 200
+      steps:
+      - wait: 1
+- name: running hopper sample
+  steps:
+  - insert:
+      cell: feed
+      items:
+      - &id004
+        id: raw_iron
+        count: 64
+      - *id004
+      - *id004
+      - *id004
+  - insert:
+      cell: fuel
+      items:
+      - &id005
+        id: coal
+        count: 64
+      - *id005
+  - wait: 400
+  - repeat:
+      times: 400
+      steps:
+      - wait: 1

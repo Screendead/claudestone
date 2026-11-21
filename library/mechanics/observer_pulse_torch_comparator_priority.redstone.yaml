@@ -1,0 +1,50 @@
+name: observer_pulse_torch_comparator_priority
+description: 'MEASURED: a 2 gt observer pulse is missed by a torch and by a subtract comparator whose output goes into dust, but caught by the same comparator when its output faces a repeater (its output drops to 0 for 2 gt). Three identical observers watch three blocks changed in the same tick. Mechanism (inferred, consistent with the result): the torch and the dust-facing comparator schedule normal-priority ticks queued after the observer''s own turn-off, while a comparator facing a diode schedules a higher priority and runs first.'
+traits: [compact]
+palette:
+  .: air
+  '#': stone
+  S: stone
+  T: {name: trig_a, block: stone}
+  U: {name: trig_b, block: stone}
+  V: {name: trig_c, block: stone}
+  o: observer[facing=west]
+  B: stone
+  t: {name: torch_a, block: 'redstone_wall_torch[facing=east,lit=true]'}
+  R: redstone_block
+  c: comparator[facing=south,mode=subtract]
+  d: {name: dust_b, block: 'redstone_wire[north=side,south=side]'}
+  r: repeater[facing=south,delay=1]
+  e: {name: dust_c, block: 'redstone_wire[north=side,south=side]'}
+layers:
+  0: |
+    ###.
+    ....
+    ....
+    ..#.
+    ..#.
+    ....
+    ....
+    ..#.
+    ..#.
+    ..#.
+    ....
+  1: |
+    ToBt
+    ....
+    ....
+    ..d.
+    Uoc.
+    ..R.
+    ....
+    ..e.
+    ..r.
+    Voc.
+    ..R.
+tests:
+- name: only the comparator facing a repeater catches the pulse
+  steps:
+  - run: setblock ~0 ~1 ~0 cobblestone
+  - run: setblock ~0 ~1 ~4 cobblestone
+  - run: setblock ~0 ~1 ~9 cobblestone
+  - wave: {torch_a: '111111111111', dust_b: '111111111111', dust_c: '111111001111'}

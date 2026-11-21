@@ -1,0 +1,90 @@
+name: ref_unknown_lra_hex_d_latch
+description: >-
+  Rebuild of Logical Redstone Archive LFF003 "Hex Data (D) Latch" (author not named in the
+  README; https://discord.com/channels/1361854816837435433/1472421810598449254). SOURCED:
+  saves the current hex number (a 0-15 signal strength) in the latch. Traced and MEASURED:
+  a redstone block feeds the subtract comparator inv (rear 15), whose side input is the data
+  dust, so inv = 15 - data. The output comparator out takes the clock dust clk at its rear
+  and inv at its side: out = clk - (15 - data), which is data while clk = 15. out feeds the
+  wool beside the data dust, which powers the dust again: while clk is 15 the stored
+  strength is held by that loop, and a larger data value takes over (dust takes the
+  maximum), a smaller one is ignored. The button switches the torch off, so clk is 0 for as
+  long as it is held: out and the loop drop to 0 and the dust shows only the live data;
+  on release out = the data then present. So the click latches the data in whatever its
+  strength, both higher and lower. The comparator 'dummy' at the north-east of clk reads an
+  empty cell and always outputs 0, kept as built. Harness changes: the data input is a
+  fixture comparator src reading a fixture composter pot (levels 3, 6, 8), the wool under the
+  button is white, the yellow marker wool is white. MEASURED: with data 8 present and then
+  removed the latch holds 8; data 3 alone does not lower it; after a click with data 3
+  the dust data falls 8 to 3, 4 gt after the click, 2 gt after the torch goes out. 3x3x5 as built.
+traits: [pistonless]
+palette:
+  .: air
+  A: white_wool
+  W: {fixture: true, block: white_wool}
+  u: {name: torch, block: 'redstone_wall_torch[facing=south]'}
+  C: {name: clk, block: 'redstone_wire[east=side,north=side,south=side,west=none]'}
+  D: {name: dummy, block: 'comparator[facing=north,mode=subtract]'}
+  E: {name: inv, block: 'comparator[facing=east,mode=subtract]'}
+  R: redstone_block
+  F: {name: data, block: 'redstone_wire[east=none,north=side,south=side,west=none]'}
+  O: {name: out, block: 'comparator[facing=north,mode=subtract]'}
+  I: {name: btn, block: 'stone_button[face=floor,facing=south]'}
+  S: {name: src, fixture: true, block: 'comparator[facing=south,mode=compare]'}
+  P: {name: pot, fixture: true, block: 'composter[level=0]'}
+layers:
+  0: |
+    ...
+    .A.
+    AA.
+    AA.
+    .A.
+    .W.
+    .W.
+  1: |
+    A..
+    u..
+    CD.
+    OER
+    AF.
+    .S.
+    .P.
+  2: |
+    I..
+    ...
+    ...
+    ...
+    ...
+    ...
+    ...
+tests:
+- name: hold and resample
+  steps:
+  - {wait: 20}
+  - level: {data: 0, out: 0, clk: 15}
+  - run: setblock ~1 ~1 ~6 composter[level=8]
+  - {wait: 20}
+  - run: setblock ~1 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {data: 8, out: 8, clk: 15}
+  - run: setblock ~1 ~1 ~6 composter[level=3]
+  - {wait: 20}
+  - level: {data: 8, out: 8}
+  - use: btn
+  - {wait: 40}
+  - level: {data: 3, out: 3, clk: 15}
+  - run: setblock ~1 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - level: {data: 3, out: 3}
+  - use: btn
+  - {wait: 40}
+  - level: {data: 0, out: 0, clk: 15}
+- name: click timing
+  steps:
+  - {wait: 20}
+  - run: setblock ~1 ~1 ~6 composter[level=8]
+  - {wait: 20}
+  - run: setblock ~1 ~1 ~6 composter[level=0]
+  - {wait: 20}
+  - use: btn
+  - wave: {torch: '110000000000', clk: '110000000000', out: '111100000000', data: '111100000000'}

@@ -1,0 +1,114 @@
+name: ref_mattbatwings_hex_flat
+description: "Flat hex (0-15 strength) transmission over 16 blocks that keeps the value exactly. A comparator reads a barrel and powers dust column x=0 at the south end; a second dust column x=2 runs parallel, not touching it, and a 1-tick repeater at every row z=2..16 reads column 0 and writes column 2; a comparator at the north end reads column 2 and puts the value on the output dust. Source: mattbatwings' Logical Redstone Archive TRANSMIT002 'Flat Hex Transmission' (endorsed by mattbatwings, Tested & Functional/Recommended; discord.com/channels/1361854816837435433/1472406781304111144); README: 'a way to transmit hex on flat ground quickly', Hex in, Hex out (SOURCED). Why the value survives (INFERRED from the layout, confirmed by the sweep below): column 0 decays one level per block, so strength S leaves exactly its S southernmost cells lit; the repeaters inject a 15 into column 2 at those rows only; the northernmost injection sits S-1 rows short of the line end's 15 rows, so after the decay it reaches the last cell at exactly S. The repeaters only read lit-or-not and the dust decay acts as a ruler, so no per-cell analog part is needed. Harness changes: none to the circuit; the barrel is filled with insert (n full cobblestone stacks, n=1,2,4,6,...,27 give strengths 1..15), the source comparator is named cin and the output dust out. Wool decoration kept. Size 3x2x19. MEASURED: strengths 0..15 all arrive on out at exactly the source strength (level checks), and after a full barrel cin rises at tick 2 and out at tick 6, so the 16-block run costs 4 gt (repeater 2 + output comparator 2)."
+traits: [analog, flat, horizontal, comparator_based, container_based, lightless, silent, pistonless, entityless, survival_friendly]
+palette:
+  ".": "air"
+  "A": "lime_wool"
+  "B": "magenta_wool"
+  "C": "orange_wool"
+  "E": "comparator[facing=south,mode=compare]"
+  "F": "redstone_wire[east=side,north=none,south=side,west=none]"
+  "G": "repeater[delay=1,facing=west]"
+  "H": "redstone_wire[east=none,north=side,south=side,west=side]"
+  "I": "redstone_wire[east=side,north=side,south=side,west=none]"
+  "J": "redstone_wire[east=none,north=side,south=none,west=side]"
+  "o": {"output": "out", "block": "redstone_wire"}
+  "f": {"name": "feed", "block": "barrel[facing=up,open=false]"}
+  "c": {"name": "cin", "block": "comparator[facing=south,mode=compare]"}
+layers:
+  0: |
+    ..A
+    ..B
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    BBB
+    B..
+    C..
+  1: |
+    ..o
+    ..E
+    FGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGH
+    IGJ
+    c..
+    f..
+tests:
+- name: every strength 0-15 arrives unchanged
+  settle: 10
+  steps:
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 1, out: 1}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 2, out: 2}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 3, out: 3}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 4, out: 4}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 5, out: 5}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 6, out: 6}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 7, out: 7}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 8, out: 8}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 9, out: 9}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 10, out: 10}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 11, out: 11}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 12, out: 12}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 13, out: 13}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 14, out: 14}
+  - insert: {cell: feed, clear: true, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wait: 12
+  - level: {cin: 15, out: 15}
+  - insert: {cell: feed, clear: true}
+  - wait: 12
+  - level: {cin: 0, out: 0}
+- name: delay of a full-strength step
+  steps:
+  - insert: {cell: feed, items: [{id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}, {id: cobblestone, count: 64}]}
+  - wave: {cin: '001111111111111', out: '000000111111111'}

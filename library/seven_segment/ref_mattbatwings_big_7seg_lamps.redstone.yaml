@@ -1,0 +1,373 @@
+name: ref_mattbatwings_big_7seg_lamps
+description: 'Big 7-segment display module on a full lamp screen, from mattbatwings'' Logical Redstone Archive (entry DISMODULE001 Big_7seg_Display_Module_Full_lamps, tagged Tested & Functional and Recommended, endorsed by mattbatwings, no author listed; https://discord.com/channels/1361854816837435433/1472417008925671672). README SOURCED: wiring to display 7 segments on a larger display, on a fully lamp screen. Size 5x10x5 as in the source plus one input row, 5x10x6 here. Screen: 5 wide x 9 tall lamps on the south face (z=5), viewer south of it looking north so x=0 is the viewer''s left; a (y=9), g (y=5) and d (y=1) are three lamps wide (x=1..3), f/b (y=6..8) and e/c (y=2..4) are three lamps tall at x=0/x=4. Inputs a b c d e f g are one cell each at z=0. Harness changes: the .schem has no inputs, so a redstone block is placed at each driver cell one cell north of the source''s first dust (a redstone block does not power an adjacent solid block, so the vertical inputs need that dust); the torches and dust that the .schem saved in their all-inputs-off state keep it (torches lit=false, dust power=15 where the schem has them), which the skeleton had stripped. How it works (INFERRED from the blocks, behaviour MEASURED): a horizontal input is a dust line that crosses to three dust cells, each pointing into a target block (dust connects sideways to a target, so it points into it and powers it as a conductor; plain wool would not take the connection) that weakly powers the lamp south of it; no torches, so lit at once. A vertical input is a dust cell on a wool block; it powers the wool, which turns off torch 1; torch 1 sits above the dust feeding wool 2 and powers it, so wool 2 loses power and torch 2 lights its lamp and, being under wool 3, powers wool 3, which lights the middle lamp and turns off torch 3 (which was lit and powering wool 4 above it), so wool 4 loses power and torch 4 lights the top lamp. Three torch stages stacked in a 5x4 column behind the lamps, each wool block both an inverter input and a strong-power source for the next stage, no repeaters. MEASURED on laptop satellites sat1-sat6 and dsat1-dsat3: all 128 combinations of the seven inputs pass, every row checking all 45 lamps (21 segment lamps lit as the table says, 24 others dark); worst delay 12 gt. Per lamp: horizontal segments rise 0 / fall 4; vertical lamps from the bottom up rise 4, 4, 8 and fall 8, 8, 12 (x0y2 x0y3 x0y4, the same at x4 and for y6 y7 y8), so a vertical segment fills in unevenly over 4 gt. Caveat MEASURED: on 3 of 8 unpinned  runs of a single-input f test (and both unpinned runs of the full table in one session) two dark lamps beside the f segment, x0y9 and x1y8, stayed lit (stuck lit, no power) after f rose; every run pinned with REDSTONE_SERVER to sat1-sat6, dsat1-dsat3 or main passed (about 40 runs). The cause is not established; unpinned runs may have started a fresh dsat, but that was not checked.'
+traits:
+- silent
+- entityless
+- pistonless
+- vertical
+palette:
+  .: air
+  A: gray_wool
+  B: redstone_wire[east=none,north=side,south=side,west=none]
+  C: redstone_wire[east=side,north=none,south=side,west=none]
+  D: redstone_wire[east=side,north=side,south=side,west=side]
+  E: redstone_wire[east=none,north=none,south=side,west=side]
+  F: target
+  u: redstone_wall_torch[facing=south]
+  n: redstone_wall_torch[facing=north]
+  G:
+    name: x0y1
+    block: redstone_lamp
+  H:
+    name: x1y1
+    block: redstone_lamp
+  I:
+    name: x2y1
+    block: redstone_lamp
+  J:
+    name: x3y1
+    block: redstone_lamp
+  K:
+    name: x4y1
+    block: redstone_lamp
+  M:
+    name: x0y2
+    block: redstone_lamp
+  N:
+    name: x1y2
+    block: redstone_lamp
+  O:
+    name: x2y2
+    block: redstone_lamp
+  P:
+    name: x3y2
+    block: redstone_lamp
+  Q:
+    name: x4y2
+    block: redstone_lamp
+  R:
+    name: x0y3
+    block: redstone_lamp
+  S:
+    name: x1y3
+    block: redstone_lamp
+  T:
+    name: x2y3
+    block: redstone_lamp
+  U:
+    name: x3y3
+    block: redstone_lamp
+  V:
+    name: x4y3
+    block: redstone_lamp
+  W:
+    name: x0y4
+    block: redstone_lamp
+  X:
+    name: x1y4
+    block: redstone_lamp
+  Y:
+    name: x2y4
+    block: redstone_lamp
+  Z:
+    name: x3y4
+    block: redstone_lamp
+  a:
+    name: x4y4
+    block: redstone_lamp
+  b:
+    name: x0y5
+    block: redstone_lamp
+  c:
+    name: x1y5
+    block: redstone_lamp
+  d:
+    name: x2y5
+    block: redstone_lamp
+  e:
+    name: x3y5
+    block: redstone_lamp
+  f:
+    name: x4y5
+    block: redstone_lamp
+  g:
+    name: x0y6
+    block: redstone_lamp
+  h:
+    name: x1y6
+    block: redstone_lamp
+  i:
+    name: x2y6
+    block: redstone_lamp
+  j:
+    name: x3y6
+    block: redstone_lamp
+  k:
+    name: x4y6
+    block: redstone_lamp
+  l:
+    name: x0y7
+    block: redstone_lamp
+  m:
+    name: x1y7
+    block: redstone_lamp
+  o:
+    name: x2y7
+    block: redstone_lamp
+  p:
+    name: x3y7
+    block: redstone_lamp
+  q:
+    name: x4y7
+    block: redstone_lamp
+  r:
+    name: x0y8
+    block: redstone_lamp
+  s:
+    name: x1y8
+    block: redstone_lamp
+  t:
+    name: x2y8
+    block: redstone_lamp
+  v:
+    name: x3y8
+    block: redstone_lamp
+  w:
+    name: x4y8
+    block: redstone_lamp
+  x:
+    name: x0y9
+    block: redstone_lamp
+  y:
+    name: x1y9
+    block: redstone_lamp
+  z:
+    name: x2y9
+    block: redstone_lamp
+  '0':
+    name: x3y9
+    block: redstone_lamp
+  '1':
+    name: x4y9
+    block: redstone_lamp
+  '2': redstone_wire[east=side,north=side,power=15,south=side,west=side]
+  '3': redstone_wall_torch[facing=south,lit=false]
+  '4':
+    input: a
+  '5':
+    input: g
+  '6':
+    input: d
+  '7':
+    input: f
+  '8':
+    input: b
+  '9':
+    input: e
+  '#':
+    input: c
+layers:
+  0: |
+    .....
+    ..A..
+    ..A..
+    .AAA.
+    .....
+    .....
+  1: |
+    ..6..
+    ..B..
+    A.B.A
+    .CDE.
+    .FFF.
+    GHIJK
+  2: |
+    .....
+    .....
+    2...2
+    A...A
+    3...3
+    MNOPQ
+  3: |
+    .....
+    A...A
+    u...u
+    n...n
+    A...A
+    RSTUV
+  4: |
+    9...#
+    D.A.D
+    ..A..
+    AAAAA
+    3...3
+    WXYZa
+  5: |
+    ..5..
+    ..B..
+    A.B.A
+    .CDE.
+    .FFF.
+    bcdef
+  6: |
+    .....
+    .....
+    2...2
+    A...A
+    3...3
+    ghijk
+  7: |
+    .....
+    A...A
+    u...u
+    n...n
+    A...A
+    lmopq
+  8: |
+    7...8
+    D.A.D
+    ..A..
+    AAAAA
+    3...3
+    rstvw
+  9: |
+    ..4..
+    ..B..
+    ..B..
+    .CDE.
+    .FFF.
+    xyz01
+tests:
+- name: all 128 segment combinations on the 5x9 lamp screen
+  truth_table: |
+    a b c d e f g | x0y1 x1y1 x2y1 x3y1 x4y1 x0y2 x1y2 x2y2 x3y2 x4y2 x0y3 x1y3 x2y3 x3y3 x4y3 x0y4 x1y4 x2y4 x3y4 x4y4 x0y5 x1y5 x2y5 x3y5 x4y5 x0y6 x1y6 x2y6 x3y6 x4y6 x0y7 x1y7 x2y7 x3y7 x4y7 x0y8 x1y8 x2y8 x3y8 x4y8 x0y9 x1y9 x2y9 x3y9 x4y9
+    1 1 1 1 1 1 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 1 1 1 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 1 1 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 1 1 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 1 0 1 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 1 0 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 1 0 0 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 1 0 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 0 1 1 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 0 1 1 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 0 1 0 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 0 1 0 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 0 0 1 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 0 0 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 1 0 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 1 1 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 1 1 1 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 1 1 0 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 1 1 0 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 1 0 1 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 1 0 1 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 1 0 0 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 1 0 0 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 0 1 1 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 0 1 1 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 0 1 0 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 0 1 0 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0
+    1 1 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0
+    1 0 1 1 1 1 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 1 1 1 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 1 1 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 1 1 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 1 0 1 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 1 0 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 1 0 0 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 1 0 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 0 1 1 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 0 1 1 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 0 1 0 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 0 1 0 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 0 0 1 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 0 0 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 1 0 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 1 1 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 1 1 1 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 1 1 0 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 1 1 0 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 1 0 1 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 1 0 1 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 1 0 0 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 1 0 0 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 0 1 1 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 0 1 1 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 0 1 0 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0
+    1 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    1 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+    0 1 1 1 1 1 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 1 1 1 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 1 1 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 1 1 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 1 0 1 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 1 0 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 1 0 0 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 1 0 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 0 1 1 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 0 1 1 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 0 1 0 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 0 1 0 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 0 0 1 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 0 0 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 1 0 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 1 1 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 1 1 1 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 1 1 0 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 1 1 0 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 1 0 1 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 1 0 1 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 1 0 0 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 1 0 0 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 0 1 1 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 0 1 1 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 0 1 0 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 0 1 0 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0
+    0 1 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 1 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0
+    0 0 1 1 1 1 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 1 1 1 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 1 1 0 1 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 1 0 0 | 0 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 1 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 1 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 0 1 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 1 0 0 0 | 0 1 1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 1 1 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 0 1 1 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 0 1 0 1 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 1 0 0 | 0 0 0 0 0 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 1 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 1 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 1 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 1 0 0 0 0 | 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 1 1 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 1 1 1 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 1 1 0 1 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 1 0 0 | 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 1 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 1 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 1 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 1 0 0 0 | 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 1 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 1 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 1 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 1 0 0 | 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 1 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  delay: 12
+  settle: 20

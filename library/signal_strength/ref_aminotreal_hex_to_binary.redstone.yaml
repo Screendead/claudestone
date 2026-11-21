@@ -1,0 +1,358 @@
+name: ref_aminotreal_hex_to_binary
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEXTOBIN001 ''Hex to Binary'' (author Aminotreal, endorsed by mattbatwings, Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472408031865081948; the signs say ''based of LAM, More compact, 2t hex-bin, 2023/7/3''): a hex number (signal strength 0-15) in, 4-bit binary out, README speed 2 ticks. 9x4x18 as rebuilt. Input: a lectern at x=6,z=0 with a 15-page book read by a comparator, so page n+1 gives strength n+1 (1..15); strength 0 is the lectern without its book. Outputs are the dust ends on the south wall, one wire per bit, each lit (any strength > 0, the strength itself is a leftover of the decay) iff its bit is set: b0 at x=9,y=1,z=17, b1 at x=5,y=2,z=17, b2 at x=2,y=1,z=17, b3 at x=1,y=2,z=17. The barrel at x=1,y=2,z=0 holds 6 totems named ''4'' (read from the .schem; the parsed JSON lacks block entities): it is a constant strength-4 source, part of the design, not an input; with it empty b2 is wrong for 9..11. How it works (MEASURED in a trace of every dust and comparator, then INFERRED; the comparator pairs were not each traced): the lectern comparator puts n on a dust zigzag along x=6 that climbs a block every few cells and loses 1 per dust, so it reads n-k at depth k. Repeaters beside it (x=7 facing west, x=5 facing east) light iff the dust there is > 0, which makes a thermometer code of n. Subtract comparators that take two neighbouring thermometer taps (back minus side) fire a full-strength 15 for exactly one value or one pair of values: x=8 comparators fire for n = 1, 5, 9, 13 (y=1) and 3, 7, 11 (y=2), x=4 comparators for n in 2..3, 6..7, 10..11 and 14..15 (the last by a repeater at n >= 14). Those 15s enter the bit-0 wire (x=9 zigzag) and the bit-1 wire (x=3 zigzag) at different depths and every entry still reaches the end at strength >= 1 after decaying along it, so the wire is an OR of its detectors without any gate; bit 2 is a comparator at x=3,z=5 that fires for n in 4..7 OR-ed with a repeater that fires when the subtract comparator at x=2,z=3 (back n-7, side = the constant 4) is > 0, i.e. n >= 12; bit 3 is a back-minus-side comparator pair (target block x=1,y=3,z=1: back n-7, side n-8) that is 1 for n >= 8 and starts the x=1 wire. MEASURED: all 16 values give the right 4 bits 30 gt after the page turn; a count 1..15..0 (every adjacent step, up and down, with the no-book step) changes every output exactly 6 gt after the page turn with no glitch (wave on all four outputs), and 7<->8, 15<->0 flips (all four bits at once) are the same 6 gt: 2 gt for the lectern comparator, then 4 gt = 2 redstone ticks to the outputs, matching the README''s 2 ticks counted from the comparator. Changed for the harness: signs dropped (they only carry the text above); the lectern''s page is set with data modify block ... Page, which updates the comparator, and strength 0 by setblock of the lectern with has_book=false (back with the book to leave 0). The book''s 15 pages are plain strings in the 26.3 written_book_content component.'
+traits: [analog, comparator_based, container_based, silent, pistonless, entityless]
+palette:
+  '.': air
+  A: quartz_block
+  B: light_blue_stained_glass
+  C: {block: 'lectern[facing=north,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{title:"Numbers",author:"Alek145",pages:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]}}},Page:14}', name: lec}
+  D: comparator[facing=north,mode=compare]
+  E: redstone_wire[east=side,north=side,south=side,west=none]
+  F: repeater[delay=1,facing=west]
+  G: redstone_wire[east=side,north=side,south=up,west=up]
+  H: comparator[facing=north,mode=subtract]
+  I: repeater[delay=1,facing=east]
+  J: redstone_wire[east=none,north=side,south=side,west=none]
+  K: redstone_wire[east=none,north=side,south=up,west=none]
+  M: redstone_wire[east=none,north=up,south=side,west=none]
+  N: redstone_wire[east=side,north=up,south=side,west=none]
+  O: redstone_wire[east=side,north=side,south=up,west=none]
+  P: redstone_wire[east=none,north=side,south=none,west=up]
+  Q: repeater[delay=2,facing=east]
+  T: redstone_wire[east=side,north=side,south=side,west=side]
+  U: redstone_wire[east=side,north=side,south=none,west=none]
+  V: repeater[delay=2,facing=west]
+  W: target
+  X: redstone_wire[east=side,north=none,south=none,west=side]
+  Y: redstone_wire[east=none,north=side,south=none,west=side]
+  Z: {block: 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:totem_of_undying",count:1},{Slot:1b,id:"minecraft:totem_of_undying",count:1},{Slot:2b,id:"minecraft:totem_of_undying",count:1},{Slot:3b,id:"minecraft:totem_of_undying",count:1},{Slot:4b,id:"minecraft:totem_of_undying",count:1},{Slot:5b,id:"minecraft:totem_of_undying",count:1}]}', name: k4}
+  b: redstone_wire[east=side,north=none,south=side,west=up]
+  c: redstone_wire[east=none,north=none,south=side,west=side]
+  d: redstone_wire[east=none,north=side,south=up,west=up]
+  e: redstone_wire[east=side,north=none,south=side,west=none]
+  f: redstone_wire[east=side,north=side,south=none,west=side]
+  g: repeater[delay=1,facing=north]
+  h: comparator[facing=east,mode=subtract]
+  i: air
+  j: redstone_wire[east=side,north=none,south=side,west=side]
+  k: air
+  '0': {block: 'redstone_wire[east=none,north=side,south=none,west=side]', output: b0}
+  '1': {block: 'redstone_wire[east=none,north=side,south=side,west=none]', output: b1}
+  '2': {block: 'redstone_wire[east=side,north=side,south=none,west=none]', output: b2}
+  '3': {block: 'redstone_wire[east=none,north=side,south=side,west=none]', output: b3}
+layers:
+  0: |
+    ......A...
+    ......A...
+    ......AA..
+    ......BAA.
+    .....A...B
+    ....AA...B
+    ..B.B.BA..
+    ..A...BAA.
+    ..A..A...B
+    ..A.AA...B
+    ..A.B.BA..
+    ..A...BAA.
+    ..A..A...B
+    ..A.AA...B
+    ..A.B.BA..
+    ..A.AAAAA.
+    ..A...AA.B
+    ..A.....AA
+  1: |
+    ......C...
+    .A.BAAD...
+    ...B.AEFA.
+    .AA.AAGFH.
+    ..AAAIAAAJ
+    .AAAHIAAAK
+    ..M.K.NFAA
+    .AJAA.OFHA
+    .AJAAIAAAM
+    .AJAHIAAAK
+    .AJAP.NFAA
+    .AJA..OFHA
+    .AJAAIAAAM
+    .AJAHIAAAK
+    .AJAP.NFAA
+    .AJAAQTFHA
+    .AJAAAUVAM
+    .A2W.A.AX0
+  2: |
+    .Z........
+    .DAbXc....
+    .AAd.JA...
+    .XHAef....
+    .Aggg.EFA.
+    .gEhA.EFH.
+    .A......AJ
+    .JAeY....J
+    .JAJ..EFA.
+    .JAJ..EFH.
+    .JAE....AJ
+    .JAJ.....J
+    .JAJ..EFA.
+    .JAJ..EFH.
+    .JAE....AJ
+    .JAJ.....J
+    .JAUXcA...
+    .3AA.1....
+  3: |
+    ........iB
+    .Wj.......
+    .Hf.k.....
+    .A.JA.....
+    .T........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+    ..........
+tests:
+- name: hex 0
+  steps:
+  - {run: 'setblock ~6 ~1 ~0 lectern[facing=north,has_book=false] replace'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0}
+- name: hex 1
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 0}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 0}
+- name: hex 2
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 1}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 0}
+- name: hex 3
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 2}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 0}
+- name: hex 4
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 3}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 0}
+- name: hex 5
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 4}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0}
+- name: hex 6
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 5}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 0}
+- name: hex 7
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 6}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 0}
+- name: hex 8
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 7}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1}
+- name: hex 9
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 8}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 1}
+- name: hex 10
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 9}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1}
+- name: hex 11
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 10}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 1}
+- name: hex 12
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 11}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 1}
+- name: hex 13
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 12}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 1}
+- name: hex 14
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 13}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 1}
+- name: hex 15
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 14}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1}
+- name: count up then down
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 0}
+  - wave: {b0: '1111111111111111', b1: '1111110000000000', b2: '1111110000000000', b3: '1111110000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 1}
+  - wave: {b0: '1111110000000000', b1: '0000001111111111', b2: '0000000000000000', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 2}
+  - wave: {b0: '0000001111111111', b1: '1111111111111111', b2: '0000000000000000', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 3}
+  - wave: {b0: '1111110000000000', b1: '1111110000000000', b2: '0000001111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 4}
+  - wave: {b0: '0000001111111111', b1: '0000000000000000', b2: '1111111111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 5}
+  - wave: {b0: '1111110000000000', b1: '0000001111111111', b2: '1111111111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 6}
+  - wave: {b0: '0000001111111111', b1: '1111111111111111', b2: '1111111111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 7}
+  - wave: {b0: '1111110000000000', b1: '1111110000000000', b2: '1111110000000000', b3: '0000001111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 8}
+  - wave: {b0: '0000001111111111', b1: '0000000000000000', b2: '0000000000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 9}
+  - wave: {b0: '1111110000000000', b1: '0000001111111111', b2: '0000000000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 10}
+  - wave: {b0: '0000001111111111', b1: '1111111111111111', b2: '0000000000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 11}
+  - wave: {b0: '1111110000000000', b1: '1111110000000000', b2: '0000001111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 12}
+  - wave: {b0: '0000001111111111', b1: '0000000000000000', b2: '1111111111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 13}
+  - wave: {b0: '1111110000000000', b1: '0000001111111111', b2: '1111111111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 14}
+  - wave: {b0: '0000001111111111', b1: '1111111111111111', b2: '1111111111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 13}
+  - wave: {b0: '1111110000000000', b1: '1111111111111111', b2: '1111111111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 12}
+  - wave: {b0: '0000001111111111', b1: '1111110000000000', b2: '1111111111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 11}
+  - wave: {b0: '1111110000000000', b1: '0000000000000000', b2: '1111111111111111', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 10}
+  - wave: {b0: '0000001111111111', b1: '0000001111111111', b2: '1111110000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 9}
+  - wave: {b0: '1111110000000000', b1: '1111111111111111', b2: '0000000000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 8}
+  - wave: {b0: '0000001111111111', b1: '1111110000000000', b2: '0000000000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 7}
+  - wave: {b0: '1111110000000000', b1: '0000000000000000', b2: '0000000000000000', b3: '1111111111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 6}
+  - wave: {b0: '0000001111111111', b1: '0000001111111111', b2: '0000001111111111', b3: '1111110000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 5}
+  - wave: {b0: '1111110000000000', b1: '1111111111111111', b2: '1111111111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 4}
+  - wave: {b0: '0000001111111111', b1: '1111110000000000', b2: '1111111111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 3}
+  - wave: {b0: '1111110000000000', b1: '0000000000000000', b2: '1111111111111111', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 2}
+  - wave: {b0: '0000001111111111', b1: '0000001111111111', b2: '1111110000000000', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 1}
+  - wave: {b0: '1111110000000000', b1: '1111111111111111', b2: '0000000000000000', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 0}
+  - wave: {b0: '0000001111111111', b1: '1111110000000000', b2: '0000000000000000', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 0}
+  - {run: 'setblock ~6 ~1 ~0 lectern[facing=north,has_book=false] replace'}
+  - wave: {b0: '1111110000000000', b1: '0000000000000000', b2: '0000000000000000', b3: '0000000000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0}
+- name: flip 7 to 8
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 6}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 0}
+  - {run: data modify block ~6 ~1 ~0 Page set value 7}
+  - wave: {b0: '1111110000000000', b1: '1111110000000000', b2: '1111110000000000', b3: '0000001111111111'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1}
+- name: flip 8 to 7
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 7}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1}
+  - {run: data modify block ~6 ~1 ~0 Page set value 6}
+  - wave: {b0: '0000001111111111', b1: '0000001111111111', b2: '0000001111111111', b3: '1111110000000000'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 0}
+- name: flip 15 to 0
+  steps:
+  - {run: data modify block ~6 ~1 ~0 Page set value 14}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1}
+  - {run: 'setblock ~6 ~1 ~0 lectern[facing=north,has_book=false] replace'}
+  - wave: {b0: '1111110000000000', b1: '1111110000000000', b2: '1111110000000000', b3: '1111110000000000'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0}
+- name: flip 0 to 15
+  steps:
+  - {run: 'setblock ~6 ~1 ~0 lectern[facing=north,has_book=false] replace'}
+  - {wait: 30}
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0}
+  - {run: 'setblock ~6 ~1 ~0 lectern[facing=north,has_book=true]{Book:{id:"minecraft:written_book",count:1,components:{"minecraft:written_book_content":{title:"Numbers",author:"Alek145",pages:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]}}},Page:14} replace'}
+  - wave: {b0: '0000001111111111', b1: '0000001111111111', b2: '0000001111111111', b3: '0000001111111111'}
+  - {wait: 30}
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1}

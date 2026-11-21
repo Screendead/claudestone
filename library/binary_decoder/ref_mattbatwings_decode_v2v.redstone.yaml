@@ -1,0 +1,290 @@
+name: ref_mattbatwings_decode_v2v
+description: 'DECODE001 Decoder (vertical to vertical) by mattbatwings, Logical Redstone Archive (endorsed, Tested & Functional; https://discord.com/channels/1361854816837435433/1472425164812587162). README:
+  programmable, expandable 4b decoder, 4b one-hot out if uniquely programmed, 2 ticks (SOURCED; MEASURED here: 4 game ticks = 2 redstone ticks to rise, 8 = 4 redstone ticks to fall, so the claim holds for
+  the rising edge only). Rebuilt block for block, 9x11x7. Harness change: the original puts a lever on each input lamp (q2..q8, hard-powering it so it feeds the back line''s dust); the harness cannot attach
+  a lever to a lamp, so each lamp and lever is one redstone block that powers the same dust at 15. MEASURED: as shipped all four outputs p2..p8 are the same minterm q2 & !q4 & q6 & !q8 (4b match 1010; the
+  other 15 inputs give 0), so ''one-hot'' needs each output programmed differently; deleting one output''s programming torch silences that output (program_by_removal). INFERRED: each output line is the
+  OR of wall torches on its back line, each torch reading a wool powered by one of four dust staircases (one per output); a staircase is held up by a lower torch cut by q2 and an upper torch cut by q6,
+  and q4/q8 feed the staircases to hold them up.'
+palette:
+  .: air
+  A: lime_wool
+  B: redstone_wire[east=none,north=side,south=up,west=none]
+  C: redstone_wire[east=none,north=up,south=side,west=none]
+  n: redstone_wall_torch[facing=north]
+  D: redstone_wire[east=side,north=none,south=none,west=side]
+  E: redstone_wire[east=side,north=none,south=side,west=side]
+  F: redstone_wire[east=up,north=none,south=side,west=none]
+  G: redstone_wire[east=up,north=side,south=side,west=none]
+  H: redstone_wire[east=none,north=side,south=side,west=none]
+  I: target
+  J: redstone_wire[east=side,north=side,south=none,west=none]
+  K: redstone_wire[east=side,north=side,south=none,west=side]
+  N: redstone_wire[east=none,north=none,south=up,west=side]
+  O: redstone_wire[east=none,north=up,south=none,west=side]
+  P: repeater[delay=1,facing=south]
+  Q: redstone_wire[east=none,north=none,south=side,west=up]
+  T: redstone_wire[east=none,north=side,south=none,west=up]
+  U: redstone_wire[east=side,north=none,south=up,west=none]
+  V: redstone_wire[east=side,north=up,south=side,west=none]
+  W: redstone_wire[east=side,north=up,south=none,west=none]
+  p:
+    output: p2
+    block: redstone_lamp
+  a:
+    input: q2
+  q:
+    output: p4
+    block: redstone_lamp
+  b:
+    input: q4
+  r:
+    output: p6
+    block: redstone_lamp
+  c:
+    input: q6
+  s:
+    output: p8
+    block: redstone_lamp
+  d:
+    input: q8
+layers:
+  0: '...........
+
+    ...........
+
+    ...A...A...
+
+    .A...A.....
+
+    ...........
+
+    ...........
+
+    ...........
+
+    '
+  1: '.AAAAAAAA..
+
+    ...........
+
+    .A.B.A.B...
+
+    .C.A.C.A...
+
+    .n...n.....
+
+    .A...A.....
+
+    .AAAAAAAA..
+
+    '
+  2: 'pDEDDDDDD..
+
+    ..n........
+
+    .FA..FA....
+
+    ...GA..GA..
+
+    ...n...n...
+
+    .H.IAH.IA..
+
+    .JDKDKDKDa.
+
+    '
+  3: '.AAAAAAAA..
+
+    ...........
+
+    ..N.A.N.A..
+
+    ..A.O.A.O..
+
+    ....A...A..
+
+    ..A.P.A.P..
+
+    .AAAAAAAA..
+
+    '
+  4: 'qDDEDDDDD..
+
+    ...n.......
+
+    ...AQ..AQ..
+
+    .AT..AT....
+
+    ..A...A....
+
+    ..P...P....
+
+    .DKDDDKDDb.
+
+    '
+  5: '.AAAAAAAA..
+
+    ...........
+
+    .A.U.A.U...
+
+    .V.A.V.A...
+
+    .n...n.....
+
+    .A...A.....
+
+    .AAAAAAAA..
+
+    '
+  6: 'rDDDDDEDD..
+
+    ......n....
+
+    .FA..FA....
+
+    ...GA..GA..
+
+    ...n...n...
+
+    .H.IAH.IA..
+
+    .JDKDKDKDc.
+
+    '
+  7: '.AAAAAAAA..
+
+    ...........
+
+    ..N.A.N.A..
+
+    ..A.O.A.O..
+
+    ....A...A..
+
+    ..A.P.A.P..
+
+    .AAAAAAAA..
+
+    '
+  8: 'sDEDDDDED..
+
+    .......n...
+
+    ...AQ..AQ..
+
+    .AT..AT....
+
+    ..A...A....
+
+    ..P...P....
+
+    .DKDDDKDDd.
+
+    '
+  9: '...........
+
+    ...........
+
+    .A.U.A.U...
+
+    .W.A.W.A...
+
+    ...........
+
+    ...........
+
+    ...........
+
+    '
+  10: '...........
+
+    ...........
+
+    .H...H.....
+
+    ...H...H...
+
+    ...........
+
+    ...........
+
+    ...........
+
+    '
+traits: []
+tests:
+- name: truth table
+  truth_table: 'q2 q4 q6 q8 | p2 p4 p6 p8
+
+    0 0 0 0 | 0 0 0 0
+
+    1 0 0 0 | 0 0 0 0
+
+    0 1 0 0 | 0 0 0 0
+
+    1 1 0 0 | 0 0 0 0
+
+    0 0 1 0 | 0 0 0 0
+
+    1 0 1 0 | 1 1 1 1
+
+    0 1 1 0 | 0 0 0 0
+
+    1 1 1 0 | 0 0 0 0
+
+    0 0 0 1 | 0 0 0 0
+
+    1 0 0 1 | 0 0 0 0
+
+    0 1 0 1 | 0 0 0 0
+
+    1 1 0 1 | 0 0 0 0
+
+    0 0 1 1 | 0 0 0 0
+
+    1 0 1 1 | 0 0 0 0
+
+    0 1 1 1 | 0 0 0 0
+
+    1 1 1 1 | 0 0 0 0
+
+    '
+  settle: 30
+  delays:
+    p2:
+      rise: 4
+      fall: 8
+    p4:
+      rise: 4
+      fall: 8
+    p6:
+      rise: 4
+      fall: 8
+    p8:
+      rise: 4
+      fall: 8
+- name: program_by_removal
+  settle: 30
+  steps:
+  - run: setblock ~3 ~4 ~1 air
+  - wait: 4
+  - drive:
+      q2: 1
+      q6: 1
+  - wait: 16
+  - expect:
+      p2: 1
+      p4: 0
+      p6: 1
+      p8: 1
+  - drive:
+      q4: 1
+  - wait: 16
+  - expect:
+      p2: 0
+      p4: 0
+      p6: 0
+      p8: 0

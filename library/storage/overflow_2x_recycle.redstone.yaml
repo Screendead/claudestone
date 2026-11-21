@@ -1,0 +1,1005 @@
+name: overflow_2x_recycle
+description: 'Overflow stage for the end of a storage hall, with no item entities and no water. Loose items fill an open-able shulker box at 5 items a second through two feed hoppers (round 1''s box_loader_2x_accessible, unchanged except that its unlock hopper now drops the full box into the entry hopper instead of a chest; the 5 items a second needs the loose stream on two hopper lines, so the tests feed it from two barrels where the SP008 rebuild gets one), and the box is swapped at exactly 27 full stacks. Full boxes and boxes from the Box Input hopper go through the entry hopper into a hopper column over 4 double chests. A comparator reads the top column hopper with a redstone block on its side, so it outputs only when that hopper holds 5 boxes, which happens only once every chest and column hopper is full; then dust turns off the torch that locks the recycle hopper under the entry hopper, the recycle hopper takes the boxes the column cannot into 2 double chests (108 boxes), and the lamp lights. Freeing any space in the overflow locks the recycle hopper again and puts the lamp out. Unlike SP008 it has no lava trash for the recycle chests.'
+traits: [container_based, comparator_based, piston_based, entityless, survival_friendly]
+palette:
+  '.': 'air'
+  'A': 'redstone_wire[south=up,east=side]'
+  'B': 'redstone_wire[west=side,east=side]'
+  'C': 'repeater[facing=west,delay=3]'
+  'D': 'stone'
+  'E': {name: 'unlock', block: 'hopper[facing=down,enabled=false]'}
+  'F': 'redstone_wall_torch[facing=south,lit=true]'
+  'G': 'redstone_block'
+  'H': {name: 'feed1', block: 'hopper[facing=south]'}
+  'I': 'redstone_wire[east=side,north=side,south=up]'
+  'J': {name: 'full', block: 'comparator[facing=east]'}
+  'K': {name: 'box', block: 'shulker_box[facing=up]'}
+  'M': 'dispenser[facing=west]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1}]}'
+  'N': 'redstone_wire[north=side,south=side]'
+  'O': {name: 'feed2', block: 'hopper[facing=north]'}
+  'P': {name: 'loose_src1', block: 'barrel[facing=up]', fixture: true}
+  'Q': 'glass'
+  'R': 'smooth_stone_slab[type=top]'
+  'S': 'hopper[facing=down]'
+  'T': 'redstone_wire[north=up,south=side]'
+  'U': {name: 'loose_src2', block: 'barrel[facing=up]', fixture: true}
+  'V': 'redstone_wire[south=side,east=side]'
+  'W': 'repeater[facing=west,delay=4]'
+  'X': {name: 'piston', block: 'sticky_piston[facing=down]'}
+  'Y': 'chest[facing=west]{Items:[{Slot:0b,id:"minecraft:shulker_box",count:1},{Slot:1b,id:"minecraft:shulker_box",count:1},{Slot:2b,id:"minecraft:shulker_box",count:1},{Slot:3b,id:"minecraft:shulker_box",count:1},{Slot:4b,id:"minecraft:shulker_box",count:1},{Slot:5b,id:"minecraft:shulker_box",count:1},{Slot:6b,id:"minecraft:shulker_box",count:1},{Slot:7b,id:"minecraft:shulker_box",count:1}]}'
+  'Z': {name: 'entry', block: 'hopper[facing=south]'}
+  'a': {name: 'ch4', block: 'hopper[facing=south]'}
+  'b': {name: 'dc4a', block: 'chest[facing=south,type=left]'}
+  'c': {name: 'dc4b', block: 'chest[facing=south,type=right]'}
+  'd': {name: 'ch3', block: 'hopper[facing=south]'}
+  'e': {name: 'dc3a', block: 'chest[facing=south,type=left]'}
+  'f': {name: 'dc3b', block: 'chest[facing=south,type=right]'}
+  'g': {name: 'ch2', block: 'hopper[facing=south]'}
+  'h': {name: 'dc2a', block: 'chest[facing=south,type=left]'}
+  'i': {name: 'dc2b', block: 'chest[facing=south,type=right]'}
+  'j': {name: 'ch1', block: 'hopper[facing=south]'}
+  'k': {name: 'dc1a', block: 'chest[facing=south,type=left]'}
+  'm': {name: 'dc1b', block: 'chest[facing=south,type=right]'}
+  'n': {name: 'ovfull', block: 'comparator[facing=west]'}
+  'o': 'redstone_wire[west=side,north=side]'
+  'p': {name: 'rlock', block: 'redstone_wall_torch[facing=west]'}
+  'q': {name: 'lamp', block: 'redstone_lamp'}
+  'r': {name: 'rec_hopper', block: 'hopper[facing=west]'}
+  's': {name: 'rec_a', block: 'chest[facing=north,type=right]'}
+  't': {name: 'rec_b', block: 'chest[facing=north,type=left]'}
+  'u': {name: 'rec_tap', block: 'hopper[facing=down]'}
+  'v': {name: 'rec_c', block: 'chest[facing=north,type=right]'}
+  'w': {name: 'rec_d', block: 'chest[facing=north,type=left]'}
+  'x': {name: 'box_in', block: 'hopper[facing=south]'}
+  'y': {name: 'box_src', block: 'barrel[facing=up]', fixture: true}
+  'z': {block: 'hopper[facing=south]', fixture: true}
+layers:
+  0: |
+    .....
+    .....
+    wv...
+    ..j..
+    .mk..
+  1: |
+    .....
+    .....
+    .u...
+    ..g..
+    .ih..
+  2: |
+    .....
+    .....
+    tsrpD
+    ..dDD
+    .fe..
+  3: |
+    ..z..
+    QQx.q
+    ..Z.N
+    ..ano
+    .cbG.
+  4: |
+    ..y..
+    ABCD.
+    DDEF.
+    .G...
+    .....
+  5: |
+    .....
+    ..H..
+    IJKM.
+    DNO..
+    .....
+  6: |
+    .....
+    ..P..
+    QDRS.
+    TDU..
+    .....
+  7: |
+    .....
+    .....
+    VWXY.
+    .....
+    .....
+tests:
+- name: "loose stone into the box, measured over 1600 gt after 400 gt warm-up"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "loose_src1", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 48}]}
+  - insert: {"cell": "loose_src2", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 48}]}
+  - wait: 400
+  - throughput: {"to": "box", "item": "stone", "ticks": 1600, "min": 1}
+  - log: data get block ~2 ~5 ~2 Items[-1]
+  finally: [scoreboard objectives remove ovf]
+- name: "10 boxes at the box input into an empty overflow: all 10 stored or recycled within 600 gt (the recycled count is logged), nothing lost"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 20
+  - log: 'execute positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - wait: 20
+  - log: 'execute positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - wait: 20
+  - log: 'execute positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - wait: 20
+  - log: 'execute positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - wait: 20
+  - log: 'execute positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - wait: 20
+  - log: 'execute positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - wait: 480
+  - run: 'scoreboard players set #all ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - log: 'scoreboard players get #all ovf'
+  - check: 'if score #all ovf matches 10'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 0..10'
+  - expect_items: {"cell": "box_src", "empty": true}
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "50 boxes into an empty overflow: all 50 stored or recycled (the recycled count is logged), nothing lost"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 300
+  - insert: {"cell": "box_src", "items": [{"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}]}
+  - wait: 900
+  - run: 'scoreboard players set #all ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #all ovf += #c ovf'
+  - log: 'scoreboard players get #all ovf'
+  - check: 'if score #all ovf matches 50'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 0..50'
+  - expect_items: {"cell": "box_src", "empty": true}
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "overflow with 2 free places takes 2 of 6 boxes, the rest go to recycle (count and stray item entities logged), lamp lights"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - wait: 40
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 800
+  - run: 'scoreboard players set #ov ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - log: 'scoreboard players get #ov ovf'
+  - check: 'if score #ov ovf matches 2'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 0..4'
+  - run: 'execute store result score #ent ovf positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - log: 'scoreboard players get #ent ovf'
+  - expect: {lamp: 1}
+  - expect_items: {"cell": "box_src", "empty": true}
+  finally: [scoreboard objectives remove ovf]
+- name: "27 boxes into a full overflow: all reach recycle or stay as counted item entities (logged)"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - wait: 40
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 1200
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 0..27'
+  - run: 'execute store result score #ent ovf positioned ~2 ~5 ~2 if entity @e[type=item,distance=..12]'
+  - log: 'scoreboard players get #ent ovf'
+  - expect_items: {"cell": "box_src", "empty": true}
+  finally: [scoreboard objectives remove ovf]
+- name: "box with 1727 stone and 704 more: within 12000 gt a full box lands in the overflow, 703 in the next box"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "box", "clear": true, "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 63}]}
+  - insert: {"cell": "loose_src1", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 32}]}
+  - insert: {"cell": "loose_src2", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 32}]}
+  - wait: 600
+  - run: 'scoreboard players set #at600 ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at600 ovf += #c ovf'
+  - log: 'scoreboard players get #at600 ovf'
+  - check: 'if score #at600 ovf matches 0..1'
+  - wait: 4200
+  - run: 'scoreboard players set #at4800 ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at4800 ovf += #c ovf'
+  - log: 'scoreboard players get #at4800 ovf'
+  - check: 'if score #at4800 ovf matches 0..1'
+  - wait: 600
+  - run: 'scoreboard players set #at5400 ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at5400 ovf += #c ovf'
+  - log: 'scoreboard players get #at5400 ovf'
+  - check: 'if score #at5400 ovf matches 0..1'
+  - wait: 600
+  - run: 'scoreboard players set #at6000 ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #at6000 ovf += #c ovf'
+  - log: 'scoreboard players get #at6000 ovf'
+  - check: 'if score #at6000 ovf matches 0..1'
+  - wait: 6000
+  - run: 'scoreboard players set #full ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #full ovf += #c ovf'
+  - log: 'scoreboard players get #full ovf'
+  - check: 'if score #full ovf matches 1'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 0'
+  - log: data get block ~2 ~5 ~2 Items
+  - expect_items: {"cell": "box", "item": "stone", "count": 703}
+  - expect_items: {"cell": "feed1", "empty": true}
+  - expect_items: {"cell": "feed2", "empty": true}
+  - expect_items: {"cell": "unlock", "empty": true}
+  - expect_items: {"cell": "entry", "empty": true}
+  - expect_items: {"cell": "box_in", "empty": true}
+  - expect_items: {"cell": "loose_src1", "empty": true}
+  - expect_items: {"cell": "loose_src2", "empty": true}
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "overflow full: box with 1727 stone and 704 more sends its full box to recycle within 12000 gt, lamp lights"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "box", "clear": true, "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 63}]}
+  - insert: {"cell": "loose_src1", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 32}]}
+  - insert: {"cell": "loose_src2", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 32}]}
+  - wait: 12000
+  - run: 'scoreboard players set #ov ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - log: 'scoreboard players get #ov ovf'
+  - check: 'if score #ov ovf matches 0'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 1'
+  - expect: {lamp: 1}
+  - expect_items: {"cell": "box", "item": "stone", "count": 703}
+  - expect_items: {"cell": "feed1", "empty": true}
+  - expect_items: {"cell": "feed2", "empty": true}
+  - expect_items: {"cell": "unlock", "empty": true}
+  - expect_items: {"cell": "entry", "empty": true}
+  - expect_items: {"cell": "box_in", "empty": true}
+  - expect_items: {"cell": "loose_src1", "empty": true}
+  - expect_items: {"cell": "loose_src2", "empty": true}
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "3 free places, a full loose box and 6 input boxes at once: 3 stored, 4 recycled, nothing lost"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "box", "clear": true, "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 63}]}
+  - insert: {"cell": "loose_src1", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 32}]}
+  - insert: {"cell": "loose_src2", "items": [{"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 64}, {"id": "stone", "count": 32}]}
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 12000
+  - run: 'scoreboard players set #ov ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - log: 'scoreboard players get #ov ovf'
+  - check: 'if score #ov ovf matches 3'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 4'
+  - expect: {lamp: 1}
+  - expect_items: {"cell": "box", "item": "stone", "count": 703}
+  - expect_items: {"cell": "feed1", "empty": true}
+  - expect_items: {"cell": "feed2", "empty": true}
+  - expect_items: {"cell": "unlock", "empty": true}
+  - expect_items: {"cell": "entry", "empty": true}
+  - expect_items: {"cell": "box_in", "empty": true}
+  - expect_items: {"cell": "loose_src1", "empty": true}
+  - expect_items: {"cell": "loose_src2", "empty": true}
+  - expect_items: {"cell": "box_src", "empty": true}
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "full, then a player takes 3 boxes from the lowest chest: the next 3 input boxes are stored, the lamp goes off, the 4th is recycled"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 200
+  - expect: {lamp: 1}
+  - run: 'scoreboard players set #rc1 ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc1 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc1 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc1 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc1 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc1 ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc1 ovf += #c ovf'
+  - log: 'scoreboard players get #rc1 ovf'
+  - check: 'if score #rc1 ovf matches 2'
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - wait: 200
+  - expect: {lamp: 0}
+  - insert: {"cell": "box_src", "items": [{"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}]}
+  - wait: 400
+  - expect: {lamp: 1}
+  - run: 'scoreboard players set #ov ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - log: 'scoreboard players get #ov ovf'
+  - check: 'if score #ov ovf matches 3'
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 1'
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "50 boxes into an empty overflow: none recycled"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 300
+  - insert: {"cell": "box_src", "items": [{"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}, {"id": "blue_shulker_box"}]}
+  - wait: 900
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 0'
+  - run: 'scoreboard players set #ov ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~3 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~0 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~1 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~2 ~3 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~3 ~4 Items[{id:"minecraft:blue_shulker_box"}]'
+  - run: 'scoreboard players operation #ov ovf += #c ovf'
+  - log: 'scoreboard players get #ov ovf'
+  - check: 'if score #ov ovf matches 50'
+  finally: [scoreboard objectives remove ovf]
+- name: "27 boxes into a full overflow: all 27 recycled, no item entities"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - wait: 40
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wait: 1200
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 27'
+  - expect: {lamp: 1}
+  - log: 'execute positioned ~2 ~5 ~2 run data get entity @e[type=item,distance=..12,limit=1,sort=nearest]'
+  - check: positioned ~2 ~5 ~2 unless entity @e[type=item,distance=..12]
+  finally: [scoreboard objectives remove ovf]
+- name: "recycle mode holds steady: the lock torch stays off while 6 boxes stream to recycle"
+  steps:
+  - run: scoreboard objectives add ovf dummy
+  - insert: {"cell": "ch4", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch3", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch2", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "ch1", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc1b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc2b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc3b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4a", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "dc4b", "clear": true, "items": [{"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}, {"id": "white_shulker_box"}]}
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}]}
+  - wait: 60
+  - expect: {rlock: 0, lamp: 1}
+  - insert: {"cell": "box_src", "items": [{"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}, {"id": "red_shulker_box"}]}
+  - wave: {"rlock": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "lamp": "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"}
+  - wait: 200
+  - run: 'scoreboard players set #rc ovf 0'
+  - run: 'execute store result score #c ovf if data block ~2 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~2 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~1 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~1 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - run: 'execute store result score #c ovf if data block ~0 ~0 ~2 Items[{id:"minecraft:red_shulker_box"}]'
+  - run: 'scoreboard players operation #rc ovf += #c ovf'
+  - log: 'scoreboard players get #rc ovf'
+  - check: 'if score #rc ovf matches 7'
+  finally: [scoreboard objectives remove ovf]

@@ -1,0 +1,364 @@
+name: ref_fearless_z_cca_8bit_3t5hz
+description: "8-bit 3-tick (5 Hz pipelinable) Carry Cancel Adder (CCA) by FEARLESS_Z, endorsed by mattbatwings. Source: Logical Redstone Archive ADD010 (ADD010_8bit_cca_3t5hz.schem), https://discord.com/channels/1361854816837435433/1472432840980562147 (README, SOURCED: 2 8-bit inputs, 8-bit sum, speed 3 ticks, Tested & Functional). Size 8x19x9 as rebuilt (the schem is 18x22x12 with a margin). Harness changes: the schem has no input blocks, so the input-indicator lamps beside each wall lever become the driver cells (a<k> at x=3 on even layers y=2k+2, b<k> at x=1 on odd layers y=2k+3; a redstone block in the lamp's cell powers the adjacent dust as the lamp hard-powered by its lever did, INFERRED), the floor lever of the carry-in becomes cin (it feeds the bottom stage's repeater from behind; the README names no carry-in), signs and the light blocks are dropped, the sum lamps (x=8, odd layers) are s0..s7 and the lamp on the top layer is cout. Barrel and hopper contents are taken from the schem's block entities (redstone stacks, counts of 64 with a few short slots in the upper hoppers), since the containers are logic constants. MEASURED on a satellite: 20 edge pairs (zero, all ones, 255+1, 127+1, 85+170, wraps), 11 ripple cases through every bit, 40 random pairs and 8 with cin=1 all give the right 8-bit sum and carry out; every sum bit rises in 6 game ticks (3 redstone ticks = the README), falls in 10 (INFERRED: 6 plus the lamp's 4-tick turn-off), cout rises in 8 and falls in 12 (cin=1 can make s7 fall in 8). How it works (INFERRED from the layout, not mutant-tested): one slice is a vertical pair of layers per bit, stacked 2 high; subtract comparators on the two operand dust lines yield propagate/generate levels, the carry travels up the stack as a signal strength stepping through comparators and hoppers holding fixed redstone counts (the comparator outputs read 13, 14, 13..8 up the ladder), dust climbs glass and wool between layers, and a compare comparator plus dust gates the sum bit into the lamp, so every bit sees the nearest generate or kill in the same 6 game ticks. Same family as ref_sloimay_cca_8bit_5hz and ref_don_cca_8bit_3t."
+traits: [comparator_based, container_based, pistonless, entityless, silent, tick_accurate]
+palette:
+  .: air
+  'A': 'light_gray_stained_glass'
+  'B': 'light_gray_wool'
+  'C': 'redstone_wire[east=side,north=none,south=side,west=none]'
+  'D': 'redstone_wire[east=none,north=none,south=up,west=side]'
+  'E': 'redstone_wire[east=side,north=none,south=none,west=side]'
+  'F': 'comparator[facing=south,mode=subtract]'
+  'G': {output: s0, block: redstone_lamp}
+  'H': 'redstone_wire[east=none,north=side,south=side,west=none]'
+  'I': 'repeater[delay=1,facing=south]'
+  'J': 'comparator[facing=south,mode=compare]'
+  'K': 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:4}]}'
+  'L': 'target'
+  'M': 'redstone_wire[east=none,north=side,south=side,west=side]'
+  'N': 'redstone_wire[east=side,north=side,south=side,west=none]'
+  'O': 'comparator[facing=west,mode=compare]'
+  'P': 'redstone_wire[east=side,north=up,south=none,west=none]'
+  'Q': 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:64},{Slot:26b,id:"minecraft:redstone",count:63}]}'
+  'R': 'redstone_wire[east=side,north=side,south=none,west=none]'
+  'S': 'redstone_wire[east=none,north=side,south=up,west=side]'
+  'T': 'hopper[facing=south]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64}]}'
+  'U': 'redstone_wire[east=none,north=side,south=up,west=none]'
+  'V': {output: s1, block: redstone_lamp}
+  'W': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:63}]}'
+  'X': 'comparator[facing=west,mode=subtract]'
+  'Y': 'redstone_wire[east=up,north=side,south=side,west=side]'
+  'Z': 'redstone_wire[east=side,north=side,south=none,west=side]'
+  'a': 'hopper[facing=south]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:63}]}'
+  'b': {output: s2, block: redstone_lamp}
+  'c': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:41}]}'
+  'd': 'redstone_wire[east=up,north=side,south=none,west=side]'
+  'e': 'redstone_wire[east=none,north=side,south=none,west=side]'
+  'f': 'hopper[facing=west]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:41}]}'
+  'g': {output: s3, block: redstone_lamp}
+  'h': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:18}]}'
+  'i': 'hopper[facing=west]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:18}]}'
+  'j': {output: s4, block: redstone_lamp}
+  'k': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:59}]}'
+  'l': 'hopper[facing=west]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:59}]}'
+  'm': {output: s5, block: redstone_lamp}
+  'n': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:36}]}'
+  'o': 'hopper[facing=west]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:36}]}'
+  'p': {output: s6, block: redstone_lamp}
+  'q': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64}]}'
+  'r': 'hopper[facing=south]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64}]}'
+  's': {output: s7, block: redstone_lamp}
+  't': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:56},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:54}]}'
+  'u': 'redstone_wire[east=up,north=side,south=up,west=side]'
+  'v': 'hopper[facing=down]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:54}]}'
+  'w': 'redstone_wall_torch[facing=north]'
+  'x': {output: cout, block: redstone_lamp}
+  'y': 'redstone_wire[east=side,north=side,south=side,west=side]'
+  'z': 'repeater[delay=1,facing=west]'
+  'α': 'barrel[facing=up,open=false]{Items:[{Slot:0b,id:"minecraft:redstone",count:64},{Slot:1b,id:"minecraft:redstone",count:64},{Slot:2b,id:"minecraft:redstone",count:64},{Slot:3b,id:"minecraft:redstone",count:64},{Slot:4b,id:"minecraft:redstone",count:64},{Slot:5b,id:"minecraft:redstone",count:64},{Slot:6b,id:"minecraft:redstone",count:64},{Slot:7b,id:"minecraft:redstone",count:64},{Slot:8b,id:"minecraft:redstone",count:64},{Slot:9b,id:"minecraft:redstone",count:64},{Slot:10b,id:"minecraft:redstone",count:64},{Slot:11b,id:"minecraft:redstone",count:64},{Slot:12b,id:"minecraft:redstone",count:64},{Slot:13b,id:"minecraft:redstone",count:64},{Slot:14b,id:"minecraft:redstone",count:64},{Slot:15b,id:"minecraft:redstone",count:64},{Slot:16b,id:"minecraft:redstone",count:64},{Slot:17b,id:"minecraft:redstone",count:64},{Slot:18b,id:"minecraft:redstone",count:64},{Slot:19b,id:"minecraft:redstone",count:64},{Slot:20b,id:"minecraft:redstone",count:64},{Slot:21b,id:"minecraft:redstone",count:64},{Slot:22b,id:"minecraft:redstone",count:64},{Slot:23b,id:"minecraft:redstone",count:64},{Slot:24b,id:"minecraft:redstone",count:64},{Slot:25b,id:"minecraft:redstone",count:64},{Slot:26b,id:"minecraft:redstone",count:64}]}'
+  'β': {input: a0}
+  'γ': {input: b0}
+  'δ': {input: a1}
+  'ε': {input: b1}
+  'ζ': {input: a2}
+  'η': {input: b2}
+  'θ': {input: a3}
+  'ι': {input: b3}
+  'κ': {input: a4}
+  'λ': {input: b4}
+  'μ': {input: a5}
+  'ν': {input: b5}
+  'ξ': {input: a6}
+  'ο': {input: b6}
+  'π': {input: a7}
+  'ρ': {input: b7}
+  'σ': {input: cin}
+layers:
+  0: |
+    ........
+    .....AA.
+    ...BAA..
+    .....A..
+    ...BA...
+    .....B..
+    .....A..
+    ........
+    ........
+  1: |
+    ........
+    .....CD.
+    ..BEEFBG
+    .AABBH..
+    .AAIJBA.
+    .AABKI..
+    .BA..σ..
+    ........
+    ........
+  2: |
+    ..B.....
+    ..β...A.
+    ..CLAAH.
+    .CM..BB.
+    .NOBBPJ.
+    .NOEF.Q.
+    .RSBT...
+    .BBAA...
+    ........
+  3: |
+    ........
+    .....BU.
+    ..BEEFBV
+    .AABBU..
+    .AAIJAA.
+    .AABL.A.
+    BLWXYA..
+    γRZZJ...
+    ....K...
+  4: |
+    ..B.....
+    ..δ...A.
+    ..CLAAH.
+    .CM..AB.
+    .NOBBPJ.
+    .NOEF.J.
+    .RSAaEB.
+    .BBA....
+    ........
+  5: |
+    ........
+    .....BU.
+    ..BEEFBb
+    .AABBU..
+    .AAIJAA.
+    .AABL.A.
+    BLcXdA..
+    εRZe....
+    ........
+  6: |
+    ..B.....
+    ..ζ...A.
+    ..CLAAH.
+    .CM..AB.
+    .NOBBPJ.
+    .NOEF.J.
+    .RSAfEB.
+    .BBA....
+    ........
+  7: |
+    ........
+    .....BU.
+    ..BEEFBg
+    .AABBU..
+    .AAIJAA.
+    .AABL.A.
+    BLhXdA..
+    ηRZe....
+    ........
+  8: |
+    ..B.....
+    ..θ...A.
+    ..CLAAH.
+    .CM..AB.
+    .NOBBPJ.
+    .NOEF.J.
+    .RSAiEB.
+    .BBA....
+    ........
+  9: |
+    ........
+    .....BU.
+    ..BEEFBj
+    .AABBU..
+    .AAIJAA.
+    .AABL.A.
+    BLkXdA..
+    ιRZe....
+    ........
+  10: |
+    ..B.....
+    ..κ...A.
+    ..CLAAH.
+    .CM..AB.
+    .NOBBPJ.
+    .NOEF.J.
+    .RSAlEB.
+    .BBA....
+    ........
+  11: |
+    ........
+    .....BU.
+    ..BEEFBm
+    .AABBU..
+    .AAIJAA.
+    .AABL.A.
+    BLnXdA..
+    λRZe....
+    ........
+  12: |
+    ..B.....
+    ..μ...A.
+    ..CLAAH.
+    .CM..AB.
+    .NOBBPJ.
+    .NOEF.J.
+    .RSAoEB.
+    .BBA....
+    ........
+  13: |
+    ........
+    .....BU.
+    ..BEEFBp
+    .AABBU..
+    .AAIJAA.
+    .AABL.A.
+    BLqXdA..
+    νRZe....
+    ........
+  14: |
+    ..B.....
+    ..ξ...A.
+    ..CLAAH.
+    .CM..AB.
+    .NOBBPJ.
+    .NOEFAJ.
+    .RSArEB.
+    .BBA....
+    ........
+  15: |
+    ........
+    .....BU.
+    ..BEEFBs
+    .AABBU..
+    .AAIJAA.
+    .AABLOB.
+    BLtXZ...
+    οRZe....
+    ........
+  16: |
+    ..B.....
+    ..π.....
+    ..CL..H.
+    .CM..AB.
+    .NOBBRF.
+    .NOEJ.H.
+    .RuBvA..
+    .BB.....
+    ........
+  17: |
+    ........
+    ......wx
+    ......B.
+    ......y.
+    ......A.
+    ...B.B..
+    BL.EzF..
+    ρRe..α..
+    ........
+  18: |
+    ........
+    ........
+    ........
+    ......B.
+    ......J.
+    .....EL.
+    ........
+    ........
+    ........
+tests:
+- name: edge cases and wraps
+  delay: 12
+  delays: {s0: {rise: 6, fall: 10}, s1: {rise: 6, fall: 10}, s2: {rise: 6, fall: 10}, s3: {rise: 6, fall: 10}, s4: {rise: 6, fall: 10}, s5: {rise: 6, fall: 10}, s6: {rise: 6, fall: 10}, s7: {rise: 6, fall: 10}, cout: {rise: 8, fall: 12}}
+  truth_table: |
+    a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 cout
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 1 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+    0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 0
+    1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 0 1 1 1 1 1 1 1 1
+    0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1
+    1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+    1 0 0 0 0 0 0 0 1 1 1 1 1 1 1 0 | 0 0 0 0 0 0 0 1 0
+    1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 | 1 1 1 1 1 1 1 1 0
+    0 1 0 1 0 1 0 1 1 0 1 0 1 0 1 0 | 1 1 1 1 1 1 1 1 0
+    0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 | 0 0 1 0 1 0 1 0 1
+    1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 | 0 1 0 1 0 1 0 1 0
+    0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+    1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 | 1 1 1 1 1 1 1 1 0
+    1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+- name: ripples to the top
+  max_delay: 12
+  truth_table: |
+    a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 cout
+    1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+    0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 1 1 1 1 1 1 1 1 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+    1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 1 0 0 0 0 0 0 0
+    1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 1 0 0 0 0 0 0
+    1 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 1 0 0 0 0 0
+    1 1 1 1 0 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 1 0 0 0 0
+    1 1 1 1 1 0 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 1 0 0 0
+    1 1 1 1 1 1 0 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 1 0 0
+    1 1 1 1 1 1 1 0 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 1 0
+    1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0
+- name: random sums
+  max_delay: 12
+  truth_table: |
+    a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 | s0 s1 s2 s3 s4 s5 s6 s7 cout
+    0 0 0 0 1 0 0 0 1 1 0 1 1 0 1 1 | 1 1 0 1 0 1 1 1 0
+    1 1 1 0 1 1 1 1 1 1 1 0 0 0 0 0 | 0 1 1 1 1 1 1 1 0
+    1 0 0 1 0 1 1 0 0 0 1 1 0 1 1 1 | 1 0 1 0 1 0 1 0 1
+    1 1 0 1 1 1 1 1 0 1 1 1 0 0 0 1 | 1 0 0 1 0 0 0 1 1
+    0 1 0 0 1 0 1 0 1 0 0 0 1 0 0 0 | 1 1 0 0 0 1 1 0 0
+    0 1 0 1 1 1 1 1 1 1 1 0 0 1 0 1 | 1 0 0 0 0 1 0 1 1
+    0 1 1 0 0 1 0 0 1 1 1 1 1 1 1 0 | 1 0 1 0 0 1 0 1 0
+    0 0 0 1 1 1 0 1 0 1 1 0 1 0 0 0 | 0 1 1 1 0 0 1 1 0
+    1 1 1 0 1 0 1 1 1 1 1 0 0 0 1 0 | 0 1 1 1 1 0 0 0 1
+    1 0 1 0 1 1 0 1 1 1 0 0 0 0 1 1 | 0 0 0 1 1 1 1 0 1
+    1 1 1 0 1 0 1 1 1 0 0 0 1 0 0 1 | 0 0 0 1 0 1 1 0 1
+    0 1 1 0 0 0 0 1 1 0 0 1 0 1 1 1 | 1 1 1 1 0 1 1 0 1
+    1 0 0 1 1 0 1 0 1 1 0 1 1 0 0 1 | 0 0 1 0 1 1 1 1 0
+    1 0 0 1 1 1 0 1 0 0 1 0 0 0 1 0 | 1 0 1 1 1 1 1 1 0
+    1 0 0 1 0 1 1 1 0 1 0 1 1 1 1 0 | 1 1 0 0 0 1 1 0 1
+    1 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 | 1 0 0 0 0 1 0 1 1
+    0 1 1 0 1 0 0 0 0 1 0 0 0 0 0 0 | 0 0 0 1 1 0 0 0 0
+    0 0 0 1 1 1 1 0 0 0 1 0 0 0 1 0 | 0 0 1 1 1 1 0 1 0
+    1 1 0 0 0 1 1 0 1 1 0 1 1 0 0 1 | 0 1 1 1 1 1 1 1 0
+    1 1 0 1 1 1 0 1 0 1 0 1 1 1 1 0 | 1 0 1 0 1 1 0 0 1
+    0 0 0 0 0 1 0 1 0 1 1 0 0 1 1 1 | 0 1 1 0 0 0 0 1 1
+    1 1 1 1 1 0 1 1 0 0 0 0 1 1 1 1 | 1 1 1 1 0 0 1 1 1
+    1 0 0 0 0 1 0 0 0 1 1 0 0 1 0 1 | 1 1 1 0 0 0 1 1 0
+    0 0 0 0 1 0 1 0 0 1 0 0 1 1 1 0 | 0 1 0 0 0 0 1 1 0
+    1 1 0 0 1 0 1 1 0 1 0 1 1 1 1 0 | 1 0 1 1 0 0 1 0 1
+    0 1 0 0 1 0 0 0 0 0 0 0 1 0 0 0 | 0 1 0 0 0 1 0 0 0
+    0 1 1 1 1 1 1 1 0 1 0 1 1 0 0 1 | 0 0 0 1 1 0 0 1 1
+    0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 | 1 0 1 1 0 0 1 0 0
+    0 0 1 1 0 0 1 0 0 0 1 0 0 0 1 1 | 0 0 0 0 1 0 0 0 1
+    1 1 1 1 1 1 0 1 0 0 1 1 0 0 1 0 | 1 1 0 1 0 0 0 0 1
+    1 0 0 1 1 1 0 0 1 0 0 0 1 1 0 0 | 0 1 0 1 0 1 1 0 0
+    0 1 0 0 0 1 1 1 1 0 1 0 1 0 1 0 | 1 1 1 0 1 1 0 0 1
+    1 0 0 0 0 1 1 0 0 1 0 0 1 1 0 1 | 1 1 0 0 1 0 0 0 1
+    1 0 1 1 1 0 1 1 0 0 1 0 1 0 1 1 | 1 0 0 0 1 1 0 1 1
+    0 0 1 0 0 1 1 1 1 0 1 1 1 1 1 0 | 1 0 0 0 0 1 1 0 1
+    0 0 1 1 0 0 0 1 1 0 0 1 0 0 1 0 | 1 0 1 0 1 0 1 1 0
+    1 1 0 1 1 0 1 0 1 0 1 1 1 1 0 0 | 0 0 0 1 1 0 0 1 0
+    0 0 0 1 0 0 0 1 1 0 0 1 0 1 1 1 | 1 0 0 0 1 1 1 0 1
+    0 1 0 1 1 0 0 1 0 0 1 0 1 0 1 0 | 0 1 1 1 0 1 1 1 0
+    1 0 0 1 1 0 1 0 0 1 0 1 1 0 1 0 | 1 1 0 0 1 1 0 1 0
+- name: carry in
+  max_delay: 12
+  truth_table: |
+    a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 cin | s0 s1 s2 s3 s4 s5 s6 s7 cout
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 | 1 0 0 0 0 0 0 0 0
+    1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 | 0 0 0 0 0 0 0 0 1
+    0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 | 0 0 0 0 0 0 0 0 1
+    1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 | 0 0 0 0 0 0 0 0 1
+    1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 1 1 | 0 0 0 0 0 0 0 0 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 | 1 1 1 1 1 1 1 1 1
+    0 0 1 0 0 1 1 0 1 1 0 1 1 0 0 0 1 | 0 0 0 0 0 0 0 1 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 0

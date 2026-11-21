@@ -1,0 +1,525 @@
+name: ref_mattbatwings_hex_to_bin
+description: 'Source (SOURCED): mattbatwings'' Logical Redstone Archive HEXTOBIN002 ''Hex to Binary'' (fast_hex_to_bin.schem; authors mattbatwings and FEARLESS_Z, endorsed by mattbatwings, Tested & Functional, Recommended; Discord https://discord.com/channels/1361854816837435433/1472408343946596476): a hex digit (signal strength 0-15) to 4 bits, README speed 3 ticks. 5x9x17 as rebuilt; the 4 bit outputs are the lamps at x=0, z=1 (y=1,3,5,7 = bit 0..3), the schematic''s own display. Harness changes: the schematic has no input, only the comparator at x=4,y=3,z=1 reading north; a fixture barrel at x=4,y=3,z=0 (on the glass at y=2) is set with data merge to give strength n (stone stacks, mid-band counts). How it works (INFERRED from the layout, confirmed by the 0..15 sweep): the input comparator copies n onto a wool block, which feeds two dust lines, one below it (a zigzag over wool, y=1/y=0, x=4) and one on top (a straight line, y=4); the straight line also climbs a slab-and-dust riser (dust on top slabs, alternating z=0/1 per layer) to a third line (y=6) and a fourth (y=8). Dust loses 1 per block, so each line is a thermometer of n. At a tap a repeater turns ''dust >= 1'' into 15 and feeds the back of a subtract comparator whose side input is a second repeater k blocks further down the same line (k=1 zigzag, 2, 4, none), so the comparator is on exactly when the line is >= 1 at the tap and 0 k blocks later, a window of k values of n. Bit 0 has 8 one-value windows (n=1,3,..15, taps every second pair of dust), bit 1 four two-value windows (2-3, 6-7, 10-11, 14-15), bit 2 two four-value windows (4-7, 12-15), bit 3 one window (>=8, no side input). Each comparator powers a wool block that powers a collector dust line at x=0 (one per bit, stacked 2 apart in y, never touching another bit''s line), which strongly powers the wool under it and so lights the bit''s lamp. Compact because the 4 bit lines share one input and one stack and every tap is a single 2-diode cell; the riser spends
+  the decay of the upper bits'' offset (the line is already 2, 3, 4 weaker where it arrives) in place of extra repeaters. MEASURED: all 16 values give the right 4 bits, 17 changes in a shuffled order too; lamps light 6 gt after the barrel changes (comparator 2, repeater 2, comparator 2 = 3 redstone ticks, matching the README) and go out 10 gt after (the lamp''s 4 gt off delay). Harness caveat (MEASURED): all tests pass on main and on laptop satellites sat2, sat3 and sat4, but on Docker satellites (dsat1..3) the same build fails intermittently, in the default in-container run and in the forwarded one (REDSTONE_REMOTE=0 passed once and failed once): a collector dust line keeps power with no source after load or after a transition (idle shows bit 3 lit, hex 4 lights bit 3, other runs light all four bits), the same cells every time, and the lamps follow the stale dust. The same commands pass on a laptop satellite, so this is a state or ordering difference of the Docker worlds that the design is sensitive to; the cause is not found.'
+traits:
+- analog
+- comparator_based
+- container_based
+- silent
+- pistonless
+- entityless
+palette:
+  .: air
+  A: light_blue_wool
+  B: redstone_wire[east=none,north=up,south=up,west=none]
+  C: comparator[facing=east,mode=subtract]
+  D: repeater[delay=1,facing=east]
+  E: redstone_wire[east=none,north=up,south=side,west=side]
+  F: redstone_wire[east=side,north=side,south=none,west=none]
+  G: redstone_wire[east=none,north=side,south=up,west=side]
+  H: redstone_wire[east=none,north=up,south=side,west=none]
+  I: redstone_wire[east=none,north=up,south=none,west=side]
+  J: glass
+  K: black_wool
+  M: redstone_wire[east=none,north=side,south=side,west=none]
+  N: redstone_wire[east=none,north=none,south=side,west=side]
+  O: redstone_wire[east=none,north=side,south=side,west=side]
+  P: comparator[facing=north,mode=compare]
+  Q: lime_wool
+  T: smooth_stone_slab[type=top,waterlogged=false]
+  U: redstone_wire[east=none,north=side,south=none,west=side]
+  V: purple_wool
+  W: repeater[delay=1,facing=south]
+  X: redstone_wire[east=side,north=none,south=none,west=side]
+  Y: red_wool
+  '0':
+    output: b0
+    block: redstone_lamp
+  '1':
+    output: b1
+    block: redstone_lamp
+  '2':
+    output: b2
+    block: redstone_lamp
+  '3':
+    output: b3
+    block: redstone_lamp
+  S:
+    name: in
+    block: barrel[facing=up,open=false]
+    fixture: true
+layers:
+  0: |
+    .....
+    .....
+    .....
+    .....
+    A.AAA
+    ..AAA
+    .....
+    .....
+    A.AAA
+    ..AAA
+    .....
+    .....
+    A.AAA
+    ..AAA
+    .....
+    .....
+    A.AAA
+  1: |
+    .....
+    0....
+    A.AAA
+    A.AAA
+    BACDE
+    A.FDG
+    A.AAA
+    A.AAA
+    BACDE
+    A.FDG
+    A.AAA
+    A.AAA
+    BACDE
+    A.FDG
+    A.AAA
+    A.AAA
+    HACDI
+  2: |
+    ....J
+    ....K
+    MACDN
+    M.FDO
+    .....
+    M....
+    MACDO
+    M.FDO
+    .....
+    M....
+    MACDO
+    M.FDO
+    .....
+    M....
+    MACDO
+    M.FDO
+    .....
+  3: |
+    ....S
+    1...P
+    Q...Q
+    Q.QQQ
+    Q.Q.Q
+    Q..QQ
+    Q...Q
+    Q.QQQ
+    Q.Q.Q
+    Q..QQ
+    Q...Q
+    Q.QQQ
+    Q.Q.Q
+    Q..QQ
+    Q...Q
+    Q.QQQ
+    .....
+  4: |
+    .....
+    ....T
+    M...M
+    MQCDO
+    M.M.M
+    M.QDO
+    M...M
+    MQCDO
+    M.M.M
+    M.QDO
+    M...M
+    MQCDO
+    M.M.M
+    M.QDO
+    M...M
+    MQCDU
+    .....
+  5: |
+    .....
+    2...M
+    V...T
+    V.VVV
+    V.V.V
+    V.V.V
+    V..VV
+    V...V
+    V...V
+    V...V
+    V...V
+    V.VVV
+    .....
+    .....
+    .....
+    .....
+    .....
+  6: |
+    .....
+    ....T
+    M...M
+    MVCDO
+    M.M.M
+    M.W.M
+    M.VXO
+    M...M
+    M...M
+    M...M
+    M...M
+    MVCDU
+    .....
+    .....
+    .....
+    .....
+    .....
+  7: |
+    .....
+    3...M
+    Y...T
+    Y...Y
+    Y...Y
+    Y.YYY
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+  8: |
+    .....
+    .....
+    M...M
+    M...M
+    M...M
+    MYCDU
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+tests:
+- name: idle
+  steps:
+  - wait: 40
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+- name: hex 0
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+- name: hex 1
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:32}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 0
+- name: hex 2
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:57}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 0
+- name: hex 3
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:53}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 0
+      b3: 0
+- name: hex 4
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:48}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 0
+- name: hex 5
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:43}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 1
+      b3: 0
+- name: hex 6
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:39}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 1
+      b3: 0
+- name: hex 7
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:34}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 0
+- name: hex 8
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:30}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 1
+- name: hex 9
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:25}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 1
+- name: hex 10
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:21}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 1
+- name: hex 11
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:16}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 0
+      b3: 1
+- name: hex 12
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:11}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+- name: hex 13
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:7}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 1
+      b3: 1
+- name: hex 14
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:2}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 1
+      b3: 1
+- name: hex 15
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+- name: jumps between values
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:30}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:34}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:32}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:2}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 1
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:57}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:7}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 1
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:48}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:16}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 0
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:39}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 1
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:25}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 0
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:53}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 0
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:11}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 1
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:43}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 0
+      b2: 1
+      b3: 0
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:21}]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 1
+      b2: 0
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b1: 1
+      b2: 1
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[]}
+  - wait: 12
+  - expect:
+      b0: 0
+      b1: 0
+      b2: 0
+      b3: 0
+- name: delay 0 to 15 rise 6 gt
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}
+  - wave:
+      b0: '0000001111'
+      b1: '0000001111'
+      b2: '0000001111'
+      b3: '0000001111'
+- name: delay 15 to 0 fall 10 gt
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:64},{Slot:19b,id:"stone",count:64},{Slot:20b,id:"stone",count:64},{Slot:21b,id:"stone",count:64},{Slot:22b,id:"stone",count:64},{Slot:23b,id:"stone",count:64},{Slot:24b,id:"stone",count:64},{Slot:25b,id:"stone",count:64},{Slot:26b,id:"stone",count:64}]}
+  - wait: 12
+  - expect:
+      b0: 1
+      b3: 1
+  - run: data merge block ~4 ~3 ~0 {Items:[]}
+  - wave:
+      b0: '11111111110000'
+      b1: '11111111110000'
+      b2: '11111111110000'
+      b3: '11111111110000'
+- name: delay 5 to 10 rises at 6 falls at 10 gt
+  steps:
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:43}]}
+  - wait: 12
+  - run: data merge block ~4 ~3 ~0 {Items:[{Slot:0b,id:"stone",count:64},{Slot:1b,id:"stone",count:64},{Slot:2b,id:"stone",count:64},{Slot:3b,id:"stone",count:64},{Slot:4b,id:"stone",count:64},{Slot:5b,id:"stone",count:64},{Slot:6b,id:"stone",count:64},{Slot:7b,id:"stone",count:64},{Slot:8b,id:"stone",count:64},{Slot:9b,id:"stone",count:64},{Slot:10b,id:"stone",count:64},{Slot:11b,id:"stone",count:64},{Slot:12b,id:"stone",count:64},{Slot:13b,id:"stone",count:64},{Slot:14b,id:"stone",count:64},{Slot:15b,id:"stone",count:64},{Slot:16b,id:"stone",count:64},{Slot:17b,id:"stone",count:64},{Slot:18b,id:"stone",count:21}]}
+  - wave:
+      b0: '1111111111000'
+      b1: '0000001111'
+      b2: '1111111111000'
+      b3: '0000001111'

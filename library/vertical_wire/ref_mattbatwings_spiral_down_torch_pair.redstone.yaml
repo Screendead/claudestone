@@ -1,0 +1,115 @@
+name: ref_mattbatwings_spiral_down_torch_pair
+description: "Downward 2x2 spiral staircase (25 down) with the booster as two torches in series (a wall torch on a wool block inverts, a second wall torch beside re-inverts into a powered 4-way dust junction); like spiral_down_repeater but torch-boosted. 3x26x2. Source: mattbatwings' 'How To Wire Like a Redstone Pro!' world (Java 1.18.2), demo cluster W50 at world origin [-12, 58, -194] (SOURCED: block layout read from the world; the demo is one lever and two lamps).  Changed for the harness: the demo's input lamp under the lever became stone (the harness only emulates a lever on a plain full block; a lamp is a conductor too, so the lever still strongly powers it and the dust beside/below it), everything else is the cluster's blocks, with power/lit/powered state reset so the game recomputes it. The output lamp is cell 'out'; the test clicks the named lever. MEASURED on 26.3 (lever click to lamp): rise 4 gt, fall 8 gt; starts lit after placement, dark by tick 6 (settle 40). Not tested: W47 (same with two torch pairs, 41 tall) and W48 (plain 17-tall spiral, same as vwire_spiral), both skipped for plot height 32 / duplication. The how-it-works wording is INFERRED from the block layout (nothing was traced block by block); the pass shows only that the level arrives. No test shows the booster is necessary."
+palette:
+  .: air
+  A: light_blue_wool
+  o: {output: out, block: redstone_lamp}
+  B: lime_wool
+  C: redstone_wire[east=none,north=up,south=side,west=none]
+  D: redstone_wire[east=up,north=none,south=side,west=none]
+  E: redstone_wire[east=none,north=none,south=up,west=side]
+  F: redstone_wire[east=none,north=side,south=none,west=up]
+  G: redstone_wire[east=side,north=up,south=none,west=none]
+  H: redstone_wire[east=none,north=side,south=side,west=none]
+  n: redstone_wall_torch[facing=north]
+  I: redstone_wire[east=side,north=side,south=side,west=side]
+  u: redstone_wall_torch[facing=south]
+  J: redstone_wire[east=up,north=none,south=none,west=side]
+  K: orange_wool
+  M: {block: stone, fixture: true}
+  l: {name: lever, block: 'lever[face=floor,facing=west]', fixture: true}
+layers:
+  0: |
+    ...
+    AoB
+  1: |
+    A..
+    C..
+  2: |
+    DA.
+    ...
+  3: |
+    .E.
+    .A.
+  4: |
+    ...
+    AF.
+  5: |
+    A..
+    G..
+  6: |
+    H..
+    ...
+  7: |
+    n..
+    A..
+  8: |
+    ...
+    I..
+  9: |
+    A..
+    u..
+  10: |
+    JA.
+    ...
+  11: |
+    .E.
+    .A.
+  12: |
+    ...
+    AF.
+  13: |
+    A..
+    G..
+  14: |
+    DA.
+    ...
+  15: |
+    .E.
+    .A.
+  16: |
+    ...
+    AF.
+  17: |
+    A..
+    G..
+  18: |
+    DA.
+    ...
+  19: |
+    .E.
+    .A.
+  20: |
+    ...
+    AF.
+  21: |
+    A..
+    G..
+  22: |
+    DA.
+    ...
+  23: |
+    .E.
+    .A.
+  24: |
+    ...
+    .H.
+  25: |
+    .K.
+    .M.
+  26: |
+    ...
+    .l.
+tests:
+- name: lever on then off
+  settle: 40
+  steps:
+  - expect: {out: 0}
+  - use: lever
+  - wave: {out: '0000111111'}
+  - wait: 20
+  - expect: {out: 1}
+  - use: lever
+  - wave: {out: '11111111000000'}
+  - wait: 20
+  - expect: {out: 0}

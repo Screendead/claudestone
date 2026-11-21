@@ -1,0 +1,1192 @@
+name: ref_penscii_8bit_to_7seg_2s_comp
+description: "Source (SOURCED): mattbatwings' Logical Redstone Archive NUMDISPLAY007 '8bit to 7seg (with 2s comp switch)' (author Penscii, endorsed by mattbatwings, tags Tested & Functional and Recommended; https://discord.com/channels/1361854816837435433/1472416778675163211). README: 'A display for showing any 8 bit number. Input 8b number, Lever. Use the switch on the side to flip between positive integer (0 - 255) and 2s comp (-128 - 127)'. Source 17x8x34 (130 barrels, 291 comparators, 1890 blocks as placed here), rebuilt block for block from the .schem including each barrel's totem count (INFERRED from item counts, all 14 constants 1..14 match the barrels' custom names: n totems read as 1 + floor(14 n / 27)). Harness changes: the 4 label signs are gone; the 8 indicator lamps the input levers sit on (z=32) and the pink wool under the switch lever are white_wool, because `use` only emulates levers on plain blocks, and white wool conducts like the lamp did (all 512 values below still read right). Inputs: 8 levers bit0..bit7 on the south face at z=33, x=0,2,..,14 (bit k = value 2^k, MEASURED over all 256 values), a switch lever `neg` at x=16 (off = 0..255, on = -128..127). Output: a 3 digit 7-segment screen plus a minus sign on the z=0 face, x=1..3 units, 5..7 tens, 9..11 hundreds, sign lamps x=13,14 at y=4 (the viewer north of it sees +x on the left), 3x5 lamps a digit named dN_yY_xK (K 0 = viewer's right column); a digit is drawn with shared corners (a corner lamp lights if either adjacent segment does; the mid-row corners follow the verticals only), leading zeros blank, 0 shows as a single 0. Measured (MEASURED, 26.3, laptop satellites): a sweep of all 256 values in order, once per switch position, gave the right display for every value and every lamp state in the tests below; the display changes first 40-44 gt after the lever click and is final at most 46 gt after it (distribution over the 256 single steps: last change at 44 in 187, 40 in 50, 46 in 18 steps for the unsigned sweep; 197/48/10 signed); wait 44 in the sweep test fails, 46 passes. The delay is the length of the build, not a delay line: with a full trace a click on bit0 moves down x=0 as a 2 gt per comparator wavefront from z=33 (tick 0) to z=22 (tick 16), through the digit stages to the lamps at z=0 (tick 44), hundreds before tens before units. INFERRED from the levels (MEASURED on 17 sample values): the units digit sits as a 0..9 signal strength at (2,3,17) and feeds a bank of subtract/compare comparators with barrel constants (one per segment pair), the hundreds digit is a 0..2 strength at (9,1,3) and the like, and the sign and magnitude (256 - v for v >= 128 in two's complement mode) come from the switch lever that gates a negate stage; the tens digit never sits as one strength. Tests: 57 values per switch position (0..11, every x9/x0 round number, 99/100/101, 127/128/129, 188/189, 254/255, shuffled), the switch flipped at 200/100/127/128/255/0, and the exact lamp timeline of 29 -> 30."
+traits: [analog, comparator_based, container_based, vertical]
+palette:
+  ".": "air"
+  "A": "black_wool"
+  "B": "pink_wool"
+  "C": "redstone_wire[east=none,north=up,south=side,west=none]"
+  "E": "comparator[facing=west,mode=subtract]"
+  "F": "redstone_wire[east=none,north=side,south=side,west=none]"
+  "G": "comparator[facing=south,mode=compare]"
+  "H": "comparator[facing=east,mode=compare]"
+  "I": "comparator[facing=south,mode=subtract]"
+  "J": "redstone_wire[east=none,north=side,south=none,west=side]"
+  "K": "target"
+  "M": "redstone_wire[east=side,north=side,south=side,west=side]"
+  "N": "repeater[delay=1,facing=west]"
+  "O": "redstone_wire[east=side,north=none,south=none,west=side]"
+  "P": "comparator[facing=north,mode=subtract]"
+  "Q": "redstone_wire[east=side,north=none,south=side,west=none]"
+  "T": "comparator[facing=north,mode=compare]"
+  "n": "redstone_wall_torch[facing=north]"
+  "U": "redstone_wire[east=side,north=none,south=up,west=none]"
+  "V": "redstone_wire[east=none,north=none,south=side,west=side]"
+  "W": "redstone_wire[east=side,north=up,south=none,west=none]"
+  "X": "comparator[facing=east,mode=subtract]"
+  "Y": "comparator[facing=west,mode=compare]"
+  "R": "redstone_block"
+  "Z": "repeater[delay=1,facing=north]"
+  "d": "repeater[delay=1,facing=east]"
+  "e": "redstone_wire[east=side,north=side,south=none,west=none]"
+  "f": "repeater[delay=1,facing=south]"
+  "h": "redstone_wire[east=side,north=side,south=none,west=side]"
+  "i": "redstone_wire[east=none,north=up,south=none,west=side]"
+  "j": "redstone_wire[east=up,north=none,south=none,west=side]"
+  "k": "redstone_wire[east=up,north=none,south=none,west=up]"
+  "l": "redstone_wire[east=up,north=none,south=side,west=none]"
+  "m": "pink_stained_glass"
+  "r": "redstone_wire[east=side,north=side,south=side,west=none]"
+  "s": "redstone_wire[east=none,north=up,south=side,west=side]"
+  "w": "redstone_wire[east=none,north=none,south=side,west=up]"
+  "x": "redstone_wire[east=none,north=side,south=up,west=none]"
+  "y": "repeater[delay=2,facing=south]"
+  "Ā": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "ā": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1},{Slot:16b,id:\"minecraft:totem_of_undying\",count:1},{Slot:17b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Ă": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "ă": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Ą": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1},{Slot:16b,id:\"minecraft:totem_of_undying\",count:1},{Slot:17b,id:\"minecraft:totem_of_undying\",count:1},{Slot:18b,id:\"minecraft:totem_of_undying\",count:1},{Slot:19b,id:\"minecraft:totem_of_undying\",count:1},{Slot:20b,id:\"minecraft:totem_of_undying\",count:1},{Slot:21b,id:\"minecraft:totem_of_undying\",count:1},{Slot:22b,id:\"minecraft:totem_of_undying\",count:1},{Slot:23b,id:\"minecraft:totem_of_undying\",count:1},{Slot:24b,id:\"minecraft:totem_of_undying\",count:1},{Slot:25b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "ą": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Ć": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1},{Slot:16b,id:\"minecraft:totem_of_undying\",count:1},{Slot:17b,id:\"minecraft:totem_of_undying\",count:1},{Slot:18b,id:\"minecraft:totem_of_undying\",count:1},{Slot:19b,id:\"minecraft:totem_of_undying\",count:1},{Slot:20b,id:\"minecraft:totem_of_undying\",count:1},{Slot:21b,id:\"minecraft:totem_of_undying\",count:1},{Slot:22b,id:\"minecraft:totem_of_undying\",count:1},{Slot:23b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "ć": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1},{Slot:16b,id:\"minecraft:totem_of_undying\",count:1},{Slot:17b,id:\"minecraft:totem_of_undying\",count:1},{Slot:18b,id:\"minecraft:totem_of_undying\",count:1},{Slot:19b,id:\"minecraft:totem_of_undying\",count:1},{Slot:20b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Ĉ": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "ĉ": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Ċ": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "ċ": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Č": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1},{Slot:12b,id:\"minecraft:totem_of_undying\",count:1},{Slot:13b,id:\"minecraft:totem_of_undying\",count:1},{Slot:14b,id:\"minecraft:totem_of_undying\",count:1},{Slot:15b,id:\"minecraft:totem_of_undying\",count:1},{Slot:16b,id:\"minecraft:totem_of_undying\",count:1},{Slot:17b,id:\"minecraft:totem_of_undying\",count:1},{Slot:18b,id:\"minecraft:totem_of_undying\",count:1},{Slot:19b,id:\"minecraft:totem_of_undying\",count:1},{Slot:20b,id:\"minecraft:totem_of_undying\",count:1},{Slot:21b,id:\"minecraft:totem_of_undying\",count:1},{Slot:22b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "č": "barrel[facing=up,open=false]{Items:[{Slot:0b,id:\"minecraft:totem_of_undying\",count:1},{Slot:1b,id:\"minecraft:totem_of_undying\",count:1},{Slot:2b,id:\"minecraft:totem_of_undying\",count:1},{Slot:3b,id:\"minecraft:totem_of_undying\",count:1},{Slot:4b,id:\"minecraft:totem_of_undying\",count:1},{Slot:5b,id:\"minecraft:totem_of_undying\",count:1},{Slot:6b,id:\"minecraft:totem_of_undying\",count:1},{Slot:7b,id:\"minecraft:totem_of_undying\",count:1},{Slot:8b,id:\"minecraft:totem_of_undying\",count:1},{Slot:9b,id:\"minecraft:totem_of_undying\",count:1},{Slot:10b,id:\"minecraft:totem_of_undying\",count:1},{Slot:11b,id:\"minecraft:totem_of_undying\",count:1}]}"
+  "Ď": {"output": "d0_y2x0", "block": "redstone_lamp"}
+  "ď": {"output": "d0_y2x1", "block": "redstone_lamp"}
+  "Đ": {"output": "d0_y2x2", "block": "redstone_lamp"}
+  "đ": {"output": "d1_y2x0", "block": "redstone_lamp"}
+  "Ē": {"output": "d1_y2x1", "block": "redstone_lamp"}
+  "ē": {"output": "d1_y2x2", "block": "redstone_lamp"}
+  "Ĕ": {"output": "d2_y2x0", "block": "redstone_lamp"}
+  "ĕ": {"output": "d2_y2x1", "block": "redstone_lamp"}
+  "Ė": {"output": "d2_y2x2", "block": "redstone_lamp"}
+  "ė": {"name": "neg", "block": "lever[face=wall,facing=east]"}
+  "Ę": {"output": "d0_y3x0", "block": "redstone_lamp"}
+  "ę": {"output": "d0_y3x2", "block": "redstone_lamp"}
+  "Ě": {"output": "d1_y3x0", "block": "redstone_lamp"}
+  "ě": {"output": "d1_y3x2", "block": "redstone_lamp"}
+  "Ĝ": {"output": "d2_y3x0", "block": "redstone_lamp"}
+  "ĝ": {"output": "d2_y3x2", "block": "redstone_lamp"}
+  "Ğ": "white_wool"
+  "ğ": {"name": "bit0", "block": "lever[face=wall,facing=south]"}
+  "Ġ": {"name": "bit1", "block": "lever[face=wall,facing=south]"}
+  "ġ": {"name": "bit2", "block": "lever[face=wall,facing=south]"}
+  "Ģ": {"name": "bit3", "block": "lever[face=wall,facing=south]"}
+  "ģ": {"name": "bit4", "block": "lever[face=wall,facing=south]"}
+  "Ĥ": {"name": "bit5", "block": "lever[face=wall,facing=south]"}
+  "ĥ": {"name": "bit6", "block": "lever[face=wall,facing=south]"}
+  "Ħ": {"name": "bit7", "block": "lever[face=wall,facing=south]"}
+  "ħ": {"output": "d0_y4x0", "block": "redstone_lamp"}
+  "Ĩ": {"output": "d0_y4x1", "block": "redstone_lamp"}
+  "ĩ": {"output": "d0_y4x2", "block": "redstone_lamp"}
+  "Ī": {"output": "d1_y4x0", "block": "redstone_lamp"}
+  "ī": {"output": "d1_y4x1", "block": "redstone_lamp"}
+  "Ĭ": {"output": "d1_y4x2", "block": "redstone_lamp"}
+  "ĭ": {"output": "d2_y4x0", "block": "redstone_lamp"}
+  "Į": {"output": "d2_y4x1", "block": "redstone_lamp"}
+  "į": {"output": "d2_y4x2", "block": "redstone_lamp"}
+  "İ": {"output": "sign0", "block": "redstone_lamp"}
+  "ı": {"output": "sign1", "block": "redstone_lamp"}
+  "Ĳ": {"output": "d0_y5x0", "block": "redstone_lamp"}
+  "ĳ": {"output": "d0_y5x2", "block": "redstone_lamp"}
+  "Ĵ": {"output": "d1_y5x0", "block": "redstone_lamp"}
+  "ĵ": {"output": "d1_y5x2", "block": "redstone_lamp"}
+  "Ķ": {"output": "d2_y5x0", "block": "redstone_lamp"}
+  "ķ": {"output": "d2_y5x2", "block": "redstone_lamp"}
+  "ĸ": {"output": "d0_y6x0", "block": "redstone_lamp"}
+  "Ĺ": {"output": "d0_y6x1", "block": "redstone_lamp"}
+  "ĺ": {"output": "d0_y6x2", "block": "redstone_lamp"}
+  "Ļ": {"output": "d1_y6x0", "block": "redstone_lamp"}
+  "ļ": {"output": "d1_y6x1", "block": "redstone_lamp"}
+  "Ľ": {"output": "d1_y6x2", "block": "redstone_lamp"}
+  "ľ": {"output": "d2_y6x0", "block": "redstone_lamp"}
+  "Ŀ": {"output": "d2_y6x1", "block": "redstone_lamp"}
+  "ŀ": {"output": "d2_y6x2", "block": "redstone_lamp"}
+layers:
+  0: |
+    AAAAAAAAAAAAAAAA.
+    .................
+    ..B...B...B......
+    BBB.BBB.BBB......
+    .BB..BB..BB......
+    .BBBBBBBBBBBB....
+    .BBB.BBB.BBB.....
+    .BBB.BBB.BBB.....
+    ..BBB.BBB.BBB....
+    ..BBB.BBB.BBB....
+    ...BB..BB...B....
+    ...B...B.........
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+    ..........B......
+    .......B..B......
+    ..BBBBBB.BB......
+    ...B.B..BB.B.....
+    ...B.B.....B.....
+    .....B.....B.....
+    .................
+    .................
+    .................
+  1: |
+    AAAAAAAAAAAAAAAA.
+    ..B...B...B......
+    ..C...C...C......
+    ĀEBBĀEBBĀEBB.....
+    .FBBBFBBBFBBB....
+    .BGHāBGHāBGHĂBB..
+    .IJBBIJBBIJBBB...
+    .ăBGBăBGBĀBGBB...
+    ..IJBBIJBBIJBBB..
+    ..ĄBGBĄBGBBBGBB..
+    ...IJBBIJBB.F.B..
+    ...ăBB.ăBB.BB....
+    .................
+    .................
+    .................
+    .................
+    .................
+    ...B.............
+    ...BB............
+    BBBBB............
+    ...BBBBBB........
+    .BBBBBBBBBBBB....
+    ...B.BBB.B.BBBB..
+    .....BBBBB.BBBB..
+    .....BBBBBBBBBB..
+    .....BBBBBGBB....
+    .....BBąB.KB.....
+    .BBMBNOPBQJBBBBB.
+    ..BĆBćBBOJBĆBBB..
+    ..BPBPBBB.BTBBB..
+    ..BBBBBBB.BBBBBB.
+    ..............B..
+    .................
+    .................
+  2: |
+    AĎďĐAđĒēAĔĕĖAAAA.
+    .BFB.BFB.BFB.....
+    ...n...n...n.....
+    BBBBBBBBBBBB.....
+    .BBMBBBMBBBMB....
+    .BBBGHĈBGHĈBGHĂ..
+    .BBIJBBIJBBIJB...
+    .BBăBGBăBGBĀBG...
+    ..BBIJBBIJBBIJB..
+    ..BBĄBGBĄBGBBBG..
+    ....BIJ.BIJ.B.F..
+    ...UIăBUIăBUIBB..
+    ...BĆBBBĆBBBĆBB..
+    .................
+    .BB..............
+    ..B.....B..B.....
+    ..B.....B..B.....
+    ..BB....BB.B.....
+    B.BIVBBBB........
+    WOOBGBBBB........
+    BB.IJBXHO........
+    BBYIBXMHBXBMB....
+    B..R.GZG.F.BIHĉ..
+    B....BBĉOI.IMNB..
+    B....ĉYIBIOGGHā..
+    B....BdMIĉ.eK....
+    B....ĉYGG..B...B.
+    BĊEB...BFB.IXBXċ.
+    B.FċEBEIBĊEIGćI..
+    B.B.F.GIXĂfČGTBĞė
+    ..fOIOIĈf.fOIhIi.
+    B.B.B.B.B.B.B.B..
+    .................
+    .................
+  3: |
+    AĘAęAĚAěAĜAĝAAAA.
+    .FBM.FBM.FBM..BB.
+    .nBB.nBB.nBB...B.
+    BBBBBBBBBBBBB..B.
+    .MBBBMBBBMBBB..B.
+    .BGHāBGHāBGHĀBBB.
+    .IJBBIJBBIJBBB.B.
+    .ĂBGBĂBGBĊBGBB.B.
+    ..IJBBIJBBIJBBBB.
+    ..ąBG.ąBG.BBGBBB.
+    ....F.B.F.B.F.BB.
+    .....QI..QI..QIB.
+    ...eOJĆeOJĆeOJĆB.
+    ....B...BBB.BBBB.
+    .REBBBB.BBBBBB.B.
+    ..F.BB..fBBGBB.B.
+    ..BBBB..FBBāBB.B.
+    B.IjBB..BdBkBB.B.
+    C.R...BlmBB..B.B.
+    ...BBNIHĀBBB...B.
+    ąEBBBMB..B.B...B.
+    BF....BBBBBBBBBB.
+    G.....BB.BB...BB.
+    G.....C.BB....CB.
+    G.......BBB....B.
+    G....jBBBB.....B.
+    G......B.BBBBBBČ.
+    IHĄ....BBBBBB.BT.
+    G.......B.BBB.BB.
+    G......BBBBBB.BC.
+    B...B.BBBBBBB.B..
+    C.M.M.M.C.C.C.C..
+    Ğ.Ğ.Ğ.Ğ.Ğ.Ğ.Ğ.Ğ..
+    ğ.Ġ.ġ.Ģ.ģ.Ĥ.ĥ.Ħ..
+  4: |
+    AħĨĩAĪīĬAĭĮįAİıA.
+    .BBB.BBB.BBB..MB.
+    ..MB..MB..MB...f.
+    ĊBBXĊBBXĊBBXĊ..B.
+    .BBFBBBFBBBFB..f.
+    .BBBGHāBGHāBGHĂB.
+    .BBIJBBIJBBIJB.f.
+    .BBĉBGHBăGHBăG.B.
+    ..BBIJBĉIJBĀIJBf.
+    ..BBć.GBć.GBBBGB.
+    ....B.F.B.F.B.Ff.
+    ...BBBBBBBBBBBBB.
+    ...BBBBBBBBBBBBf.
+    ....G...IOB.IXĊB.
+    ...MBXB.FBIVBF.f.
+    ..BĉYI...IMKBF.f.
+    B.IHĉK...GGHāB.f.
+    C.B.OJ...Kh.OI.f.
+    ..B.....OIB..Ĉ.B.
+    ...QO..BBeIĆ...f.
+    ..OJ..BBBBBT...f.
+    ......KEOIBXBHBf.
+    ......rJ.IOB..Ff.
+    ........QI.B...f.
+    ........GIOBBBBB.
+    ......OEBG..BBBB.
+    .......G.BHXXHXR.
+    .......ĆEBEIG.FB.
+    ........F.GĆG.Is.
+    .......OIOIOI.B..
+    F......BFBFBF.C..
+    .......B.B.B.....
+    .................
+    .................
+  5: |
+    AĲAĳAĴAĵAĶAķAAAA.
+    .FBF.FBF.FBF.....
+    .nBF.nBF.nBF.....
+    BBBnBBBnBBB......
+    .MBBBMBBBMBBB....
+    .BGHāBGHāBGHĂ....
+    .IJBBIJBBIJBBB...
+    .ĊBGHBčGHBčGBB...
+    ..IJBĊIJBĊIJBBB..
+    ..ĉBGBĉBGBBBGBB..
+    ....FBB.FBB.FBB..
+    ...BBQIBBQIBBQI..
+    ...WOJĆWOJĆWOJĆ..
+    .........B.......
+    ....BBM....BFB...
+    B....B......I....
+    C....B......B....
+    ..F.BB......BB...
+    ..F.BBB.B...B....
+    ..B..BBwf...B....
+    ..B..BĊEBNO......
+    ..B..B...........
+    ..B..B.....Č.....
+    ..B..B.....P.....
+    ..B..B....BXBdBM.
+    ..B..B.....BNBNB.
+    ..BBBBBBBBBBBBBB.
+    .............BBC.
+    .............BB..
+    .......B.B.B..C..
+    .......G.G.G.....
+    .......Ć.ć.ă.....
+    .................
+    .................
+  6: |
+    AĸĹĺAĻļĽAľĿŀAAAA.
+    .BxB.BxB.BxB.....
+    ..B...B...B......
+    BBB.BBB.BBB......
+    .BBMBBBMBBBMB....
+    .BBBGHāBGHāBG....
+    .BBIJBBIJBBIJB...
+    .BBčBGHBăGHBăG...
+    ..BBIJBčIJBBIJB..
+    ..BBĆBGBĆBGBBBG..
+    ...BBIJBBIJBBIJ..
+    ...QIą.QIą.QIB...
+    ....Ć...Ć...Ć....
+    .................
+    BBBBNEB..........
+    C....f...........
+    .....f......F....
+    ....MB......IXB..
+    ..B.BXĊ.....R.B..
+    ..f..eO.....BBB..
+    ..B..B........B..
+    ..f..f........B..
+    ..B..B........B..
+    ..f..f........B..
+    ..B..B.......āB..
+    ..f..f.....M.TBB.
+    ..BddBdBdBdBdXHs.
+    .............FB..
+    .............Is..
+    .............Č...
+    .................
+    .................
+    .................
+    .................
+  7: |
+    AAAAAAAAAAAAAAAA.
+    .................
+    ..F...F...F......
+    ĀEB.ĀEB.ĀEB......
+    .FB..FB..FB......
+    .BGHāBGHāBGHĂ....
+    .IJB.IJB.IJB.....
+    .ĉBG.ĉBG.ĀBG.....
+    ..IJB.IJB.IJB....
+    ..ăBG.ăBG..BG....
+    ...IJ..IJ..IJ....
+    ...ĉ...ĉ...B.....
+    .................
+    .................
+    QOOO.............
+    .................
+    .................
+    ..............M..
+    ..............B..
+    ............ĄYI..
+    ..............y..
+    ..............y..
+    ..............y..
+    ..............y..
+    ..............f..
+    ..............IV.
+    ..............B..
+    .............BF..
+    .................
+    .................
+    .................
+    .................
+    .................
+    .................
+tests:
+- name: unsigned_0_to_255
+  settle: 100
+  steps:
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit3}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 0, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit4}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+- name: twos_complement_minus128_to_127
+  settle: 100
+  steps:
+  - {use: neg}
+  - {wait: 46}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 0, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit3}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 0, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit3}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit1}
+  - {use: bit4}
+  - {use: bit5}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+- name: switch_flips_between_ranges
+  settle: 100
+  steps:
+  - {use: bit3}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit5}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 0, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit3}
+  - {use: bit4}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 1, d2_y3x2: 0, d2_y2x0: 1, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 0, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 0, d1_y5x2: 1, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 1, d2_y6x1: 1, d2_y6x2: 1, d2_y5x0: 1, d2_y5x2: 0, d2_y4x0: 1, d2_y4x1: 1, d2_y4x2: 1, d2_y3x0: 0, d2_y3x2: 1, d2_y2x0: 1, d2_y2x1: 1, d2_y2x2: 1}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 1, sign1: 1, d0_y6x0: 1, d0_y6x1: 0, d0_y6x2: 0, d0_y5x0: 1, d0_y5x2: 0, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 0, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 0, d0_y2x2: 0, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {use: bit5}
+  - {use: bit6}
+  - {use: bit7}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: neg}
+  - {wait: 46}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 0, d1_y6x1: 0, d1_y6x2: 0, d1_y5x0: 0, d1_y5x2: 0, d1_y4x0: 0, d1_y4x1: 0, d1_y4x2: 0, d1_y3x0: 0, d1_y3x2: 0, d1_y2x0: 0, d1_y2x1: 0, d1_y2x2: 0, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+- name: latency_29_to_30
+  settle: 100
+  steps:
+  - {use: bit0}
+  - {use: bit2}
+  - {use: bit3}
+  - {use: bit4}
+  - {wait: 60}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 1, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 0, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 1, d1_y3x0: 0, d1_y3x2: 1, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+  - {use: bit0}
+  - {use: bit1}
+  - wave: {d0_y3x2: '00000000000000000000000000000000000000001111111', d1_y3x0: '00000000000000000000000000000000000000000011111', d0_y4x1: '11111111111111111111111111111111111111111111000', d1_y3x2: '11111111111111111111111111111111111111111111110', d1_y4x2: '11111111111111111111111111111111111111111111110'}
+  - {wait: 5}
+  - expect: {sign0: 0, sign1: 0, d0_y6x0: 1, d0_y6x1: 1, d0_y6x2: 1, d0_y5x0: 1, d0_y5x2: 1, d0_y4x0: 1, d0_y4x1: 0, d0_y4x2: 1, d0_y3x0: 1, d0_y3x2: 1, d0_y2x0: 1, d0_y2x1: 1, d0_y2x2: 1, d1_y6x0: 1, d1_y6x1: 1, d1_y6x2: 1, d1_y5x0: 1, d1_y5x2: 0, d1_y4x0: 1, d1_y4x1: 1, d1_y4x2: 0, d1_y3x0: 1, d1_y3x2: 0, d1_y2x0: 1, d1_y2x1: 1, d1_y2x2: 1, d2_y6x0: 0, d2_y6x1: 0, d2_y6x2: 0, d2_y5x0: 0, d2_y5x2: 0, d2_y4x0: 0, d2_y4x1: 0, d2_y4x2: 0, d2_y3x0: 0, d2_y3x2: 0, d2_y2x0: 0, d2_y2x1: 0, d2_y2x2: 0}
+

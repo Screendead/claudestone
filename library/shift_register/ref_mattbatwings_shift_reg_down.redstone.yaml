@@ -1,0 +1,370 @@
+name: ref_mattbatwings_shift_reg_down
+description: "Rebuild of LRA entry SHIFT002 \"Shift Registers (Up & Down versions)\" by mattbatwings, the Down version (Discord https://discord.com/channels/1361854816837435433/1472418887638192232; README: input shift button, output 8b number, tags Tested & Functional, Recommended). An 8-bit serial-in shift register stacked vertically, 2 layers per bit: data enters at the top (lever din, y=17) and every press moves the bits one stage DOWN; bit b0 is the top lamp (y=15) and b7 the bottom (y=1), each lamp reading the stage above it. Size 5x18x6 (the second half of the schematic). Changes for the harness: the schem's button and data lever sit on lime wool and a lamp, which the harness cannot emulate (it clicks only plain stone/white_wool supports), so the button's support is white_wool and the data lever's lamp is smooth_stone (same strong power; the original lamp only showed the lever state); the sign and its glass are dropped. HOW (INFERRED from the blocks, confirmed by the tests): each bit is a delay-1 repeater Q facing west, its input the previous stage's output (dust climbing a glass-supported zigzag) and its output the lamp feed and the next stage's input. A second repeater O (delay 1) beside it, fed by a vertical zigzag line (N/V dust alternating z=1/z=0 on glass) locks every Q at once while the line is high. The line is a torch on wool: high at rest, so all Q are locked and hold. A press feeds a subtract comparator (rear = button, side = the button delayed by a delay-2 repeater), which gives a short pulse; the torch inverts it, the line drops for a few gt, every Q unlocks together, copies its input once (2 gt delay, shorter than the window for a second hop) and locks again, so one press is exactly one shift however long the button is held. Lamps are powered by dust lying on a wool block beside each. MEASURED: idle all off; 9 ones then 9 zeros fill and flush the register; the pattern 01001101 plus zeros, and 16 alternating bits, shift exactly one place per press (24 gt apart, a button is 20 gt); a lamp rises 8 gt after the button click and falls 12 gt after it (the lamp's own 4 gt turn-off delay included), every changing bit at the same tick. Faster presses were not established: a stone button cannot be re-pressed inside its 20 gt."
+traits: [vertical, comparator_based]
+palette:
+  '*': redstone_torch
+  '.': air
+  '0': {name: b0, block: redstone_lamp}
+  '1': {name: b1, block: redstone_lamp}
+  '2': {name: b2, block: redstone_lamp}
+  '3': {name: b3, block: redstone_lamp}
+  '4': {name: b4, block: redstone_lamp}
+  '5': {name: b5, block: redstone_lamp}
+  '6': {name: b6, block: redstone_lamp}
+  '7': {name: b7, block: redstone_lamp}
+  A: lime_wool
+  B: comparator[facing=south,mode=subtract]
+  C: redstone_wire[east=none,north=none,south=side,west=side]
+  D: redstone_wire[east=none,north=side,south=side,west=none]
+  E: repeater[delay=2,facing=south]
+  G: redstone_wire[east=side,north=none,south=none,west=side]
+  H: redstone_wire[east=side,north=side,south=none,west=side]
+  I: redstone_wire[east=none,north=side,south=none,west=side]
+  K: lime_stained_glass
+  M: redstone_wire[east=none,north=up,south=none,west=side]
+  N: redstone_wire[east=none,north=up,south=side,west=none]
+  O: repeater[delay=1,facing=north]
+  Q: repeater[delay=1,facing=west]
+  U: redstone_wire[east=side,north=none,south=up,west=none]
+  V: redstone_wire[east=none,north=side,south=up,west=none]
+  X: redstone_wire[east=side,north=side,south=none,west=none]
+  b: {name: btn, block: 'stone_button[face=wall,facing=west]'}
+  d: {name: din, block: 'lever[face=wall,facing=west]'}
+  s: smooth_stone
+  w: white_wool
+layers:
+  0: |
+    .....
+    ...AA
+    ...AA
+    ..AAA
+    .....
+    .....
+  1: |
+    ...A.
+    ...BC
+    ...DE
+    bwGHI
+    ...AK
+    ...7.
+  2: |
+    ...*.
+    ...A.
+    ...A.
+    ..KAA
+    ...GM
+    .....
+  3: |
+    ...A.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...6.
+  4: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  5: |
+    ...K.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...5.
+  6: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  7: |
+    ...K.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...4.
+  8: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  9: |
+    ...K.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...3.
+  10: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  11: |
+    ...K.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...2.
+  12: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  13: |
+    ...K.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...1.
+  14: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  15: |
+    ...K.
+    ...N.
+    ...O.
+    ..UQC
+    ..AAK
+    ...0.
+  16: |
+    ...V.
+    ...K.
+    ...A.
+    ..KAA
+    ..XGM
+    .....
+  17: |
+    .....
+    ...D.
+    ...O.
+    dsGQC
+    ..A..
+    .....
+  18: |
+    .....
+    .....
+    .....
+    .....
+    .....
+    .....
+tests:
+- name: idle
+  steps:
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+- name: shift_in_ones
+  steps:
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1, b4: 1, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 1, b5: 1, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 1, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 1, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+- name: pattern_10110010
+  steps:
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 1, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 1, b2: 0, b3: 0, b4: 1, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 1, b3: 0, b4: 0, b5: 1, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 1, b4: 0, b5: 0, b6: 1, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 1, b5: 0, b6: 0, b7: 1}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 1, b3: 0, b4: 1, b5: 1, b6: 0, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 1, b4: 0, b5: 1, b6: 1, b7: 0}
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 0, b2: 0, b3: 0, b4: 1, b5: 0, b6: 1, b7: 1}
+- name: alternating
+  steps:
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 1, b5: 0, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 1, b5: 0, b6: 1, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 1}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 1, b5: 0, b6: 1, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 1}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 1, b5: 0, b6: 1, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 1}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 1, b5: 0, b6: 1, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 1}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 1, b1: 0, b2: 1, b3: 0, b4: 1, b5: 0, b6: 1, b7: 0}
+  - use: din
+  - use: btn
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 1}
+- name: timing
+  steps:
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wait: 24
+  - use: din
+  - use: btn
+  - wave: {b0: '111111111111000000000000', b1: '000000001111111111111111', b2: '111111111111000000000000', b3: '000000001111111111111111', b4: '111111111111000000000000', b5: '000000001111111111111111', b6: '111111111111000000000000', b7: '000000001111111111111111'}
+  - wait: 24
+  - expect: {b0: 0, b1: 1, b2: 0, b3: 1, b4: 0, b5: 1, b6: 0, b7: 1}
