@@ -396,12 +396,20 @@ def _step(rig, spec, step, rec):
 PERF_LIMIT = 10.0
 PERF_SAVE_WAIT = 30.0  # the report is zipped off the server thread after `perf stop`
 QUEUE_CHECK_LIGHT = re.compile(r"\bqueueCheckLight\((\d+)/")
+PROFILE_ROOT = re.compile(r"^\[00\] ([^(]+)\(")
 
 
 def light_count(profiling: str) -> int:
-    """Light checks queued in a `perf` profiling.txt: every `queueCheckLight(N/...)` line,
-    one per call path (block changes from commands as well as from ticks)."""
-    return sum(int(n) for n in QUEUE_CHECK_LIGHT.findall(profiling))
+    """Light checks queued by the server's ticks in a `perf` profiling.txt: every
+    `queueCheckLight(N/...)` line under the `[00] tick` root. The harness's own commands
+    (`use` clones the lever onto itself) queue theirs under `nextTickWait`, so they are left out."""
+    total, root = 0, None
+    for line in profiling.splitlines():
+        if m := PROFILE_ROOT.match(line):
+            root = m[1]
+        elif root == "tick" and (m := QUEUE_CHECK_LIGHT.search(line)):
+            total += int(m[1])
+    return total
 
 
 def _profiling_reports(folder: Path, before: set[str]) -> list[str] | None:
@@ -446,9 +454,12 @@ def _light_checks(rig, spec, arg, rec):
     finally:
         reply = rig.r.cmd("perf stop")
     took = time.monotonic() - started
-    if not reply.startswith("Stopped") or took >= PERF_LIMIT:
-        return rec.fail(f"light_checks: the steps took {took:.1f} s, past perf's {PERF_LIMIT:.0f} s window "
-                        f"({reply.strip()}); split them")
+    # Over RCON `perf stop` replies with nothing: its message comes once the report is saved.
+    if reply.strip() and not reply.startswith("Stopped"):
+        return rec.fail(f"light_checks: perf stop: {reply.strip()}")
+    if took >= PERF_LIMIT:
+        return rec.fail(f"light_checks: the steps took {took:.1f} s, past perf's {PERF_LIMIT:.0f} s window; "
+                        "split them")
     deadline = time.monotonic() + PERF_SAVE_WAIT
     while (texts := _profiling_reports(folder, before)) is None:
         if time.monotonic() > deadline:
