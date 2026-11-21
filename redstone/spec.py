@@ -3,6 +3,8 @@
 import dataclasses
 import json
 import re
+import time
+import zipfile
 from pathlib import Path
 
 from . import door, watch
@@ -334,7 +336,7 @@ def _failed(ok: bool, reply: str) -> bool:
 
 def _step(rig, spec, step, rec):
     (kind, arg), = step.items()
-    if kind not in ("wait", "repeat"):
+    if kind not in ("wait", "repeat", "light_checks"):
         status(rig, f"{spec.name}: {kind} {_show(kind, arg)}")
     if kind == "drive":
         for name, on in arg.items():
@@ -374,6 +376,8 @@ def _step(rig, spec, step, rec):
         _expect_items(rig, spec, arg, rec)
     elif kind == "throughput":
         _throughput(rig, spec, arg, rec)
+    elif kind == "light_checks":
+        _light_checks(rig, spec, arg, rec)
     elif kind == "repeat":
         times = arg["times"]
         for i in range(times):
@@ -386,6 +390,86 @@ def _step(rig, spec, step, rec):
                 rec.loops.pop()
     else:
         raise ValueError(f"unknown step {kind!r}")
+
+
+# `perf start` records for at most 10 s of wall time, then stops by itself.
+PERF_LIMIT = 10.0
+PERF_SAVE_WAIT = 30.0  # the report is zipped off the server thread after `perf stop`
+QUEUE_CHECK_LIGHT = re.compile(r"\bqueueCheckLight\((\d+)/")
+PROFILE_ROOT = re.compile(r"^\[00\] ([^(]+)\(")
+
+
+def light_count(profiling: str) -> int:
+    """Light checks queued by the server's ticks in a `perf` profiling.txt: every
+    `queueCheckLight(N/...)` line under the `[00] tick` root. The harness's own commands
+    (`use` clones the lever onto itself) queue theirs under `nextTickWait`, so they are left out."""
+    total, root = 0, None
+    for line in profiling.splitlines():
+        if m := PROFILE_ROOT.match(line):
+            root = m[1]
+        elif root == "tick" and (m := QUEUE_CHECK_LIGHT.search(line)):
+            total += int(m[1])
+    return total
+
+
+def _profiling_reports(folder: Path, before: set[str]) -> list[str] | None:
+    """The profiling.txt texts of the first finished report zip in `folder` not in `before`."""
+    for path in sorted(folder.glob("*.zip")):
+        if path.name in before:
+            continue
+        try:
+            with zipfile.ZipFile(path) as z:
+                texts = [z.read(n).decode() for n in z.namelist() if n.endswith("profiling.txt")]
+        except (zipfile.BadZipFile, OSError):
+            continue  # still being written
+        if texts:
+            return texts
+    return None
+
+
+def _light_checks(rig, spec, arg, rec):
+    """Run the inner steps under `perf` and count the light checks the server queued."""
+    rec.frame(f"light_checks {_fmt_levels({k: v for k, v in arg.items() if k != 'steps'})}")
+    frame = rec.frames[-1]
+    server = rig.server
+    # perf profiles the whole server, and its report is a file beside the server.
+    problem = ("perf counts the whole server, and main ticks every plot; run it on a satellite"
+               if server.name == "main" else
+               "a forwarded run can't read the satellite's files; run it in its container"
+               if hasattr(server, "push_datapack") else None)
+    folder = server.dir / "debug" / "profiling"
+    before = {p.name for p in folder.glob("*.zip")} if folder.is_dir() else set()
+    if problem is None:
+        reply = rig.r.cmd("perf start")
+        if not reply.startswith("Started"):
+            problem = f"perf start: {reply}"
+    if problem is not None:
+        for inner in arg["steps"]:  # later steps keep their ticks
+            _step(rig, spec, inner, rec)
+        return rec.fail(f"light_checks: {problem}")
+    started = time.monotonic()
+    try:
+        for inner in arg["steps"]:
+            _step(rig, spec, inner, rec)
+    finally:
+        reply = rig.r.cmd("perf stop")
+    took = time.monotonic() - started
+    # Over RCON `perf stop` replies with nothing: its message comes once the report is saved.
+    if reply.strip() and not reply.startswith("Stopped"):
+        return rec.fail(f"light_checks: perf stop: {reply.strip()}")
+    if took >= PERF_LIMIT:
+        return rec.fail(f"light_checks: the steps took {took:.1f} s, past perf's {PERF_LIMIT:.0f} s window; "
+                        "split them")
+    deadline = time.monotonic() + PERF_SAVE_WAIT
+    while (texts := _profiling_reports(folder, before)) is None:
+        if time.monotonic() > deadline:
+            return rec.fail(f"light_checks: no perf report appeared in {folder}")
+        time.sleep(0.1)
+    got = sum(map(light_count, texts))
+    frame["light_checks"] = got
+    if got != arg.get("count", got) or got < arg.get("min", got) or got > arg.get("max", got):
+        bound = " ".join(f"{k} {arg[k]}" for k in ("count", "min", "max") if k in arg)
+        rec.fail(f"light_checks: {got} light checks queued, expected {bound}")
 
 
 def container(spec: Spec, where) -> Pos:

@@ -116,8 +116,18 @@ tests:
     (`arrived`, `left`, `per_hour` at 20 ticks a second) goes in the trace frame and the
     test result, and `try` prints it: `PASS flow (throughput out 100 in 800 ticks (9000/h))`.
     Start it once the flow is steady: items already in transit count when they arrive.
-- A failing `expect`, `level`, `wave`, `check`, `run`, `insert`, `expect_items` or
-  `throughput` doesn't stop the test: the steps run to the end, so the trace is complete,
+- `light_checks: {max: 0, steps: [...]}` runs the steps under `perf` and counts the light
+  checks the server's ticks queued meanwhile (every `queueCheckLight` under the profile's
+  `tick` root); the count must equal `count` or lie within `min`/`max`, and goes in the
+  trace frame. Checks queued inside the harness's own commands are left out, since a lever
+  click's `clone` alone queues 4: so is a change the design makes on the spot inside a
+  click or `drive` (a lamp lights at once; a copper bulb flips both ways). Put a repeater
+  between the input and such a block, so its change happens in a tick. perf profiles the whole server, so it runs only on a satellite, never on
+  main (a library spec in a folder without a plot builds in main unless
+  `REDSTONE_PLOT=mechanics_1` or `REDSTONE_SERVER=sat1` sends it to one), and within its
+  10 s of wall time, which the steps must fit. It can't nest. `light_checks_torch_not_dust` is the worked example.
+- A failing `expect`, `level`, `wave`, `check`, `run`, `insert`, `expect_items`,
+  `throughput` or `light_checks` doesn't stop the test: the steps run to the end, so the trace is complete,
   and the test fails with the first failure and `(and N more)`.
 - Anything else: `run: <command>` runs any command and `check: <if/unless chain>` fails the
   test unless `execute <chain>` passes; `~` is the build origin. A `run` fails when its
@@ -288,7 +298,8 @@ ultracompact/ultrafast if nothing in the family beats it (`library/INDEX.md`).
 
 `lightless` means the design queues no light checks: no block in it changes light emission
 or dampening, or is shape-occluding (daylight detectors, lecterns, sculk, pistons), when it
-changes state. Dust, repeaters and comparators are fine; see `redstone/traits.LIGHT`.
+changes state. Dust, repeaters and comparators are fine; see `redstone/traits.LIGHT`. To
+show it in the game, wrap a test's steps in `light_checks: {max: 0}`.
 `silent` is about normal operation; the fizz of a torch burning out doesn't count. Sizes
 and `one_wide` leave out driver cells, so they assume inputs arrive from outside the
 footprint; when an input cell sits inside it, say so in the description.

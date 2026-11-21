@@ -153,7 +153,7 @@ GAMERULE_SET = re.compile(r"\bgamerule\s+(?:minecraft:)?(\w+)\s+\S")
 
 
 def _gamerules(steps) -> set[str]:
-    """Gamerules the `run`/`log` steps set, repeat bodies included."""
+    """Gamerules the `run`/`log` steps set, repeat and light_checks bodies included."""
     rules = set()
     for step in steps:
         if not isinstance(step, dict) or len(step) != 1:
@@ -161,7 +161,7 @@ def _gamerules(steps) -> set[str]:
         (kind, arg), = step.items()
         if kind in ("run", "log") and isinstance(arg, str):
             rules |= {m.group(1) for m in GAMERULE_SET.finditer(arg)}
-        elif kind == "repeat" and isinstance(arg, dict) and isinstance(arg.get("steps"), list):
+        elif kind in ("repeat", "light_checks") and isinstance(arg, dict) and isinstance(arg.get("steps"), list):
             rules |= _gamerules(arg["steps"])
     return rules
 
@@ -251,6 +251,19 @@ def _step_problems(spec, steps, at):
             if not isinstance(times, int) or isinstance(times, bool) or times < 1 or not isinstance(inner, list):
                 out.append(f"repeat needs {{times: <positive int>, steps: [...]}}, not {arg!r}")
                 continue
+            out += _step_problems(spec, inner, at)
+        elif kind == "light_checks":
+            inner = arg.get("steps") if isinstance(arg, dict) else None
+            if not isinstance(inner, list) or not inner:
+                out.append(f"light_checks needs {{steps: [...], count/min/max: <n>}}, not {arg!r}")
+                continue
+            out += [f"light_checks: unknown key {k!r}" for k in arg if k not in ("steps", "count", "min", "max")]
+            out += [f"light_checks: {k} {arg[k]!r} is not a count" for k in ("count", "min", "max")
+                    if k in arg and not _count(arg[k])]
+            if not {"count", "min", "max"} & set(arg):
+                out.append("light_checks needs count, min or max")
+            if any(isinstance(st, dict) and "light_checks" in st for st in inner):
+                out.append("light_checks can't nest: perf runs one recording at a time")
             out += _step_problems(spec, inner, at)
         elif kind == "use":
             if arg not in spec.named:

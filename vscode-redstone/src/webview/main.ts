@@ -258,6 +258,12 @@ function stepList(steps: Record<string, unknown>[]): HTMLElement {
       ol.append(el("li", {}, el("span", { cls: "kw " + k, textContent: k }), ` x${r.times ?? "?"}`, stepList(r.steps ?? [])));
       continue;
     }
+    if (k === "light_checks" && typeof v === "object" && v !== null) {
+      const { steps, ...bound } = v as { steps?: Record<string, unknown>[] } & Record<string, unknown>;
+      const limits = Object.entries(bound).map(([a, b]) => `${a}=${b}`).join(" ");
+      ol.append(el("li", {}, el("span", { cls: "kw " + k, textContent: k }), " ", limits, stepList(steps ?? [])));
+      continue;
+    }
     const body = typeof v === "object" && v !== null
       ? Object.entries(v as Record<string, unknown>).map(([a, b]) => `${a}=${b}`).join(" ") : String(v);
     ol.append(el("li", {}, el("span", { cls: "kw " + k, textContent: k }), " ", body));
