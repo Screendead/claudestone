@@ -248,7 +248,7 @@ trace → `package` data pack.
   keyed by y, a glyph palette, inputs (one name may span several cells)/outputs/named
   cells, `fixture` blocks (outside the design's size and traits) and `reserve`d air, and
   tests (`truth_table` with `x` don't-care outputs, `tile` for two copies, `delay`/`max_delay`, per-output-edge `delays`/`max_delays`,
-  `glitch_free`, `reset`, `settle`, `initial` drivers, `steps` of drive/use/wait/expect/level/wave/run/log/check/repeat, `light_checks` (the steps inside it under `perf`, counting the light checks queued; satellites only) and the container steps
+  `glitch_free`, `reset`, `settle`, `initial` drivers, `steps` of drive/use/wait/expect/level/wave/run/log/check/repeat, `light_checks` (the steps inside it under `perf`, counting the light checks its ticks queue; satellites only) and the container steps
   insert/expect_items/throughput (a named cell or [x, y, z]; throughput records items moved and
   a rate per hour in the trace and result), `finally`
   commands), a top-level `update_pass` (all, none, unobserved: observers are set last and the

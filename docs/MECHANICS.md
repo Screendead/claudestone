@@ -131,6 +131,11 @@ Contents: 1 Dust shape and connection; 2 Power delivery and through-block reads;
 **Behaviour:** Dust driven by a redstone block to 15 (and the next dust at 14), sealed in a stone box, leaves light level 0 at both dust cells (`execute unless predicate {type:"location_check",predicate:{light:{light:{min:1}}}}` passes). Control: a lit redstone torch sealed the same way reads exactly 7 at its own cell. From the 26.3 source (not measured): a block state change queues a light check only when emission or dampening differs, or either state uses its shape for light occlusion (`LightEngine.hasDifferentLightProperties`); dust, repeaters and comparators never do, while torches, lamps, copper bulbs, daylight detectors, lecterns, sculk sensors and pistons do. Light checks were not counted directly (`perf` profiling would be needed).
 **Use:** The `lightless` trait means no light checks: dust, repeaters and comparators carry signals without light work; a torch costs one light check per toggle.
 
+### light_checks_torch_not_dust
+**Verdict:** confirmed
+**Behaviour:** Counted with `perf` (the `light_checks` step) on a satellite, over a lever click on, a wait, a click off and a wait. A wall torch on a lever-powered block, turned off and on: 2 light checks, both from scheduled block ticks. A 15-long dust line (15 down to 1, then 0): 0. A line of 4 repeaters (all on, then off): 0. The harness's lever click itself is not free: the `clone` of the lever's support block onto itself queues 4 light checks, under the command rather than the tick, which is why `light_checks` counts only the ticks' checks.
+**Use:** A torch costs one light check per toggle, measured; dust and repeaters cost none. Prove a `lightless` claim by wrapping a test's steps in `light_checks: {max: 0}`.
+
 ---
 
 ## 6. Observers
