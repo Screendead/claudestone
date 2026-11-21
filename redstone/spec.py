@@ -101,9 +101,16 @@ def _watched(rig) -> bool:
     return getattr(rig, "server", None) is not None
 
 
+SIGN_TEXT = 200
+
+
 def _sign(rig: Rig, text: str) -> None:
     """Several plots test in turn, so each shows its progress on its own status sign
     (drawn by scripts.plots) instead of on everyone's screen."""
+    # Vanilla RCON closes the connection on a packet over 1446 bytes, and a step's text can
+    # hold a whole `run` command.
+    if len(text) > SIGN_TEXT:
+        text = text[:SIGN_TEXT - 1] + "…"
     body = rig.heading + [{"text": text, "color": "yellow"}]
     checked(rig.display, f"data merge entity @e[type=text_display,tag=plot_status,tag={rig.plot},limit=1] "
                          f"{{text:{json.dumps({'text': '', 'extra': body})}}}")
