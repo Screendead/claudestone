@@ -1,0 +1,216 @@
+added: 36 blocks (12 dust, 17 glass or stone, 5 pistons, 1 repeater, 1 redstone block); I_A sticky; P_R's HOLD (4,6,-1) gone
+opening, design_c + close feeds + S feed vs + trigger, open-state differences: none
+cell differences outside the added blocks, I_A and its head, HOLD, M_K's head and RB_ST's cell beside DT: none | DT 15
+moved during load: none | powered in the closed state: {'P_R': [(3, 7, 0)], 'K': [(-3, 2, 2)], 'W_T': [], 'K_T': [], 'M_K': [], 'AP': []}
+added pistons moving during the opening: t0g EXTEND M_K@(-4, 3, 1) down; t8g EXTEND AP@(4, 7, 0) west; t10j land rb@(2, 7, 0)
+open state: {'P_R': ((3, 6, -1), 'real', True), 'M_K': ((-4, 3, 1), 'real', True), 'AP': ((4, 7, 0), 'real', True), 'RB_ST': ((2, 7, 0), 'real', None), 'W_T': ((1, 5, 0), 'real', False), 'K_T': ((2, 5, 0), 'real', False), 'K': ((-4, 1, 2), 'real', False)}
+powered in the open state: {'T': [(1, 6, 0)], 'P12': [(0, 6, 0), (0, 7, 0), (0, 6, 1), (1, 6, 0)], 'W_T': [(1, 6, 0), (1, 7, 0), (1, 6, -1)], 'K_T': [(2, 7, 0), (1, 6, 0)], 'K': [(-3, 2, 2)], 'P_R': [(3, 7, -1), (3, 8, -1)], 'M_K': [(-4, 4, 1), (-4, 5, 1)], 'AP': [(4, 7, -1)]}
+other pistons with an added cell among their power sources, open state: {'I_A': [(2, 8, -2)]}
+box, opening: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+box, opening + close through stage 5 (stand-in sources included): x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== the close from the input: stages 0 and 1 in c0, stages 2 to 5 by command
+c-1 [input off]
+c0 []
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g RETRACT M_K@(-4, 3, 1) ev1: retract+PULL WK@(-4, 1, 1)
+   c0g RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g EXTEND K@(-4, 1, 2) up
+   c0g EXTEND T@(1, 4, 0) down
+   c0g EXTEND W_T@(1, 5, 0) north
+   c0g wire (1, 7, 0) power 15->0
+   c0g EXTEND K_T@(2, 5, 0) up
+   c0g RETRACT W_T@(1, 5, 0) ev1: retract
+   c0g RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+   c0g RETRACT K_T@(2, 5, 0) ev2: retract
+   c0g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+c1 [SRC_P on]
+   c1g EXTEND P11@(-2, 3, 0) east
+   c1g EXTEND P6@(-2, 2, 0) east
+c2 [SRC_P off]
+   c2g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   c2g RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0)
+c3 [SRC_10 on]
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g EXTEND M_K@(-4, 3, 1) down
+   c3g EXTEND K_T@(2, 5, 0) up
+   c3g EXTEND P10@(-1, 5, 0) down
+c4 [SRC_10 off, SRC_V on, SRC_F on]
+   c4g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   c4g EXTEND F_S@(1, 5, 3) north
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P5@(4, 1, 0) west
+   c4g EXTEND V@(-1, 3, 0) east
+c5 [SRC_F off, SRC_V off]
+   c5g EXTEND P6@(-2, 2, 0) east
+   c5g RETRACT F_S@(1, 5, 3) ev2: retract+SPIT (1, 5, 1)
+   c5g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   c5g EXTEND W_T@(1, 5, 0) north
+   c5g EXTEND S@(1, 3, 0) down
+   c5g sticky_piston@(1, 4, 0) ev0 resolve failed
+c6 [HOLD_G off]
+   c6g RETRACT G_S@(3, 5, 1) ev1: retract+PULL RB_F@(1, 5, 1)
+   c6g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+   c6g RETRACT W_T@(1, 5, 0) ev1: retract
+c8 []
+   c8g RETRACT AP@(4, 7, 0) ev1: retract
+   c8g EXTEND P10@(-1, 5, 0) down
+   after c0 -> stages 0 and 1 done in one phase: C real at (1,2,0), T spat and retracting, (1,3,0) air; P12 retracting, SP moving into (0,4,0), (0,3,0) air; DT dark; RB_A, RB_T, RB_ST, RB12 and G moving to their rest cells
+   after c12 -> stage 5 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T, P12, P11, V in; SP, TL, Q, TM, P8 where the close needs them; RB_F parked; P7 out over TR at (2,2,0) on NA's relight
+   rest state: {'K': ((-4, 1, 2), 'real', True), 'M_K': ((-4, 3, 1), 'real', True), 'WK': ((-4, 1, 1), 'real', None), 'G': ((-4, 4, 2), 'real', None), 'K_T': ((2, 5, 0), 'real', True), 'SPC': ((2, 7, 0), 'real', None), 'AP': ((4, 7, 0), 'real', False), 'I_A': ((1, 7, -2), 'real', False), 'Z_T': ((1, 4, -1), 'real', False)}
+
+== order (must pass): against the run above
+   dust's neighbour updates in reverse order: done; end-state cells same; piston events of each tick the same set; c0's first five: M_K, P_R, I_A, K, Z_T; Z_T to T's spit in the same order
+   I_A's retract event behind P_R's and M_K's: done; end-state cells same; piston events of each tick the same set; c0's first five: P_R, M_K, I_A, K, Z_T; Z_T to T's spit in the same order
+   both: done; end-state cells same; piston events of each tick the same set; c0's first five: M_K, P_R, I_A, K, Z_T; Z_T to T's spit in the same order
+   variant, no cut over DT (the west branch reads the lit DT up the step and dies with it, in K_T's event): done; c0: I_A, P_R, Z_T, T, W_T, K_T, W_T, M_K, K_T, T, K, P12
+
+== ctl 1: no W_T: T is not updated when DT dies and stays out; P12 is not updated either
+c0 []
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g RETRACT M_K@(-4, 3, 1) ev1: retract+PULL WK@(-4, 1, 1)
+   c0g RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g EXTEND K@(-4, 1, 2) up
+   c0g EXTEND T@(1, 4, 0) down
+c1 [SRC_P on]
+c3 []
+   c3g EXTEND P6@(-2, 2, 0) east
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g wire (1, 7, 0) power 15->0
+   c3g EXTEND K_T@(2, 5, 0) up
+   c3g EXTEND M_K@(-4, 3, 1) down
+c4 []
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P5@(4, 1, 0) west
+   after c0 -> FAILS: T ((1, 4, 0), 'real'); C ((1, 2, 0), 'moving'); W_T (None, None); K_T ((2, 5, 0), 'real'); SPC ((2, 6, 0), 'real'); RB_ST ((2, 7, 0), 'real'); P12 ((0, 5, 0), 'real'); SP ((0, 3, 0), 'real'); (1, 3, 0) moving_piston[facing=down]; (0, 3, 0) quartz[id=SP]; DT 15
+   after c12: {'T': ((1, 4, 0), 'real', False), 'C': ((1, 3, 0), 'real', None), 'P12': ((0, 5, 0), 'real', False), 'SP': ((0, 4, 0), 'real', None), 'Q': ((3, 3, 0), 'real', False), 'RB12': ((-4, 3, 2), 'real', None), 'RB_ST': ((2, 8, 0), 'real', None)} DT 0
+
+== ctl 2: no spacer: K_T's push moves nothing, DT stays lit
+c0 []
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g RETRACT M_K@(-4, 3, 1) ev1: retract+PULL WK@(-4, 1, 1)
+   c0g RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g EXTEND K@(-4, 1, 2) up
+   c0g EXTEND T@(1, 4, 0) down
+   c0g EXTEND W_T@(1, 5, 0) north
+   c0g EXTEND K_T@(2, 5, 0) up
+c1 [SRC_P on]
+c3 []
+   c3g EXTEND P6@(-2, 2, 0) east
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g EXTEND M_K@(-4, 3, 1) down
+c4 []
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P5@(4, 1, 0) west
+   after c0 -> FAILS: T ((1, 4, 0), 'real'); C ((1, 2, 0), 'moving'); W_T ((1, 5, 0), 'real'); K_T ((2, 5, 0), 'real'); SPC (None, None); RB_ST ((2, 7, 0), 'real'); P12 ((0, 5, 0), 'real'); SP ((0, 3, 0), 'real'); (1, 3, 0) moving_piston[facing=down]; (0, 3, 0) quartz[id=SP]; DT 15
+   after c12: {'T': ((1, 4, 0), 'real', True), 'C': ((1, 2, 0), 'real', None), 'P12': ((0, 5, 0), 'real', True), 'SP': ((0, 3, 0), 'real', None), 'Q': ((3, 3, 0), 'real', False), 'RB12': ((-4, 3, 2), 'real', None), 'RB_ST': ((2, 7, 0), 'real', None)} DT 15
+
+== ctl 3: no K_T
+c0 []
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g RETRACT M_K@(-4, 3, 1) ev1: retract+PULL WK@(-4, 1, 1)
+   c0g RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g EXTEND K@(-4, 1, 2) up
+   c0g EXTEND T@(1, 4, 0) down
+   c0g EXTEND W_T@(1, 5, 0) north
+c1 [SRC_P on]
+c3 []
+   c3g EXTEND P6@(-2, 2, 0) east
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g EXTEND M_K@(-4, 3, 1) down
+c4 []
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P5@(4, 1, 0) west
+   after c0 -> FAILS: T ((1, 4, 0), 'real'); C ((1, 2, 0), 'moving'); W_T ((1, 5, 0), 'real'); K_T (None, None); SPC ((2, 6, 0), 'real'); RB_ST ((2, 7, 0), 'real'); P12 ((0, 5, 0), 'real'); SP ((0, 3, 0), 'real'); (1, 3, 0) moving_piston[facing=down]; (0, 3, 0) quartz[id=SP]; DT 15
+   after c12: {'T': ((1, 4, 0), 'real', True), 'C': ((1, 2, 0), 'real', None), 'P12': ((0, 5, 0), 'real', True), 'SP': ((0, 3, 0), 'real', None), 'Q': ((3, 3, 0), 'real', False), 'RB12': ((-4, 3, 2), 'real', None), 'RB_ST': ((2, 7, 0), 'real', None)} DT 15
+
+== ctl 4: no glass beside K: K is not woken, NP12 lives, P12 stays out and P11 shoves the top row
+c0 []
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g RETRACT M_K@(-4, 3, 1) ev1: retract
+   c0g RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g EXTEND T@(1, 4, 0) down
+   c0g EXTEND W_T@(1, 5, 0) north
+   c0g wire (1, 7, 0) power 15->0
+   c0g EXTEND K_T@(2, 5, 0) up
+   c0g RETRACT W_T@(1, 5, 0) ev1: retract
+   c0g RETRACT K_T@(2, 5, 0) ev2: retract
+   c0g RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+c1 [SRC_P on]
+   c1g EXTEND P11@(-2, 3, 0) east
+   c1g EXTEND P6@(-2, 2, 0) east
+c3 []
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g EXTEND M_K@(-4, 3, 1) down
+   c3g EXTEND K_T@(2, 5, 0) up
+c4 []
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P5@(4, 1, 0) west
+   after c0 -> FAILS: RB12 ((-4, 2, 2), 'real'); G ((-4, 3, 2), 'real'); P12 ((0, 5, 0), 'real'); SP ((0, 3, 0), 'real'); (0, 3, 0) quartz[id=SP]
+   after c12: {'T': ((1, 4, 0), 'real', False), 'C': ((1, 2, 0), 'real', None), 'P12': ((0, 5, 0), 'real', True), 'SP': ((1, 3, 0), 'real', None), 'Q': ((3, 3, 0), 'real', False), 'RB12': ((-4, 2, 2), 'real', None), 'RB_ST': ((2, 8, 0), 'real', None)} DT 0
+
+== ctl 5: I_A not sticky (no E0): RB_A keeps Z_T out, T is not woken
+c0 []
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g RETRACT M_K@(-4, 3, 1) ev1: retract+PULL WK@(-4, 1, 1)
+   c0g EXTEND K@(-4, 1, 2) up
+c1 [SRC_P on]
+   c1g EXTEND P11@(-2, 3, 0) east
+   c1g EXTEND P6@(-2, 2, 0) east
+c3 []
+   c3g EXTEND M_K@(-4, 3, 1) down
+c4 []
+   c4g EXTEND T@(1, 4, 0) down
+   after c0 -> FAILS: RB_A ((1, 5, -2), 'real'); Z_T ((1, 4, -1), 'real'); T ((1, 4, 0), 'real'); C ((1, 3, 0), 'real'); W_T ((1, 5, 0), 'real'); K_T ((2, 5, 0), 'real'); SPC ((2, 6, 0), 'real'); RB_ST ((2, 7, 0), 'real'); P12 ((0, 5, 0), 'real'); SP ((0, 3, 0), 'real'); (1, 3, 0) quartz[id=C]; (0, 3, 0) quartz[id=SP]; DT 15
+   after c12: {'T': ((1, 4, 0), 'real', True), 'C': ((2, 3, 0), 'real', None), 'P12': ((0, 5, 0), 'real', True), 'SP': ((1, 2, 0), 'real', None), 'Q': ((4, 3, 0), 'real', False), 'RB12': ((-4, 3, 2), 'real', None), 'RB_ST': ((2, 7, 0), 'real', None)} DT 15
+
+== ctl 6: wrong order: DP lit before c0, P11 fires ahead of P12's retract
+c0 [SRC_P on]
+   c0g EXTEND P11@(-2, 3, 0) east
+   c0g RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g EXTEND P6@(-2, 2, 0) east
+   c0g RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g EXTEND W_T@(1, 5, 0) north
+   c0g wire (1, 7, 0) power 15->0
+   c0g EXTEND K_T@(2, 5, 0) up
+   c0g RETRACT W_T@(1, 5, 0) ev1: retract
+   c0g RETRACT K_T@(2, 5, 0) ev2: retract
+c3 []
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g EXTEND K_T@(2, 5, 0) up
+c4 []
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P5@(4, 1, 0) west
+   after c0 -> FAILS: T ((1, 4, 0), 'real'); C ((2, 3, 0), 'moving'); RB12 ((-4, 2, 2), 'real'); G ((-4, 3, 2), 'real'); P12 ((0, 5, 0), 'real'); SP ((1, 3, 0), 'moving'); S ((0, 3, 0), 'moving'); (1, 3, 0) moving_piston[facing=east]; (0, 3, 0) moving_piston[facing=east]
+   after c12: {'T': ((1, 4, 0), 'real', False), 'C': ((2, 2, 0), 'real', None), 'P12': ((0, 5, 0), 'real', True), 'SP': ((1, 3, 0), 'real', None), 'Q': ((4, 3, 0), 'real', False), 'RB12': ((-4, 2, 2), 'real', None), 'RB_ST': ((2, 8, 0), 'real', None)} DT 0
+
+== ctl 7: AP behind a 3-tick repeater: RB_ST lands at t8 j ahead of P12's head, whose landing updates the lit T
+   open-state differences: {(1, 2, 0): ('air', 'C'), (1, 3, 0): ('C', 'piston_head'), 'T': (((1, 4, 0), 'real', False), ((1, 4, 0), 'real', True))}
+
+== ctl 8: the input off n ticks after it went on (RB_ST lands at t10 j, 12 ticks after the input)
+   after c0: {8: 'FAILS', 9: 'FAILS', 10: 'FAILS', 11: 'done', 12: 'done', 16: 'done'}
