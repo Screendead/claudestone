@@ -33,21 +33,11 @@ tests:
     1 1 | 0
     0 1 | 1
   delay: 5
-- name: edges
+- name: edges, simultaneous and staggered
   steps:
   - expect: {out: 0}
   - drive: {a: 1}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 7
+  - wave: {out: 'x00001xxxxxx'}
   - expect: {out: 1}
   - drive: {b: 1}
   - wait: 1
@@ -55,17 +45,7 @@ tests:
   - wait: 11
   - expect: {out: 0}
   - drive: {a: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 7
+  - wave: {out: 'x00001xxxxxx'}
   - expect: {out: 1}
   - drive: {b: 0}
   - wait: 1
@@ -73,43 +53,18 @@ tests:
   - wait: 11
   - expect: {out: 0}
   - drive: {b: 1}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 9
+  - wave: {out: 'x001xxxxxxxx'}
   - expect: {out: 1}
   - drive: {a: 1}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 9
+  - wave: {out: 'x110xxxxxxxx'}
   - expect: {out: 0}
   - drive: {b: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 0}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 9
+  - wave: {out: 'x001xxxxxxxx'}
   - expect: {out: 1}
   - drive: {a: 0}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 1
-  - expect: {out: 1}
-  - wait: 1
+  - wave: {out: 'x110xxxxxxxx'}
   - expect: {out: 0}
-  - wait: 9
-  - expect: {out: 0}
-- name: simultaneous and staggered
-  steps:
+  - wait: 20
   - drive: {a: 1, b: 1}
   - wait: 16
   - expect: {out: 0}
