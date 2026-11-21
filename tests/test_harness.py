@@ -28,8 +28,9 @@ def test_clear_kills_around_and_above_the_plot():
 
 
 def test_every_building_block_folder_has_a_plot():
-    folders = {p.name for p in LIBRARY.iterdir() if p.is_dir()} - {"mechanics", "builds", "input"}
-    assert {f for f in folders if plot_for(LIBRARY / f / "x.redstone.yaml") is None} == set()
+    files = [p for d in LIBRARY.iterdir() if d.is_dir() and d.name not in {"mechanics", "builds", "input"}
+             for p in d.glob("*.redstone.yaml")]
+    assert {p.parent.name for p in files if plot_for(p) is None} == set()
     assert set(FOLDER_PLOT.values()) <= set(PLOTS)
     assert plot_for(path_of("seg_dec_bcd")).name == "seven_segment"
     assert plot_for(LIBRARY / "mechanics" / "x.redstone.yaml") is None
