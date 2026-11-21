@@ -202,6 +202,9 @@ CONTROLS = {
     "ctl 4": ("no glass beside K: K is not woken, NP12 lives, P12 stays out and P11 shoves the top row", dict(drop=(WK,)), {}),
     "ctl 5": ("I_A not sticky (no E0): RB_A keeps Z_T out, T is not woken", dict(ia=pis("piston", "down", "I_A")), {}),
     "ctl 6": ("wrong order: DP lit before c0, P11 fires ahead of P12's retract", {}, dict(early_dp=True)),
+    "ctl 7": ("the bus ending as a down-step onto M_K (stone (-4,4,0), dust (-4,4,1)): the stone QC-holds M_K one update "
+              "longer than its own dust, and the dust on the stone is three from M_K",
+              dict(drop=((-4, 5, 1),), swap={(-4, 4, 0): STONE, (-4, 4, 1): DUST}), {}),
 }
 SLOW3 = {REP: B("repeater", facing="north", delay=3, powered=False)}
 
@@ -249,6 +252,12 @@ if __name__ == "__main__":
           {st.p["id"]: sorted(c for _, c in power_sources(mine, p) if c in added) for p, st in sorted(mine.b.items())
            if st.n in ("piston", "sticky_piston") and st.p["id"] not in ("T", "P12", "W_T", "K_T", "K", "P_R", "M_K", "AP")
            and any(c in added for _, c in power_sources(mine, p))} or "none")
+    hyp = copy.deepcopy(mine)
+    for c, st in (((-4, 0, 2), pis("sticky_piston", "up", "X", True)), ((-4, 1, 2), B("piston_head", facing="up", sticky=True))):
+        hyp.cmd_set_silent(c, st)
+    print("why RB12 is pushed, not pulled: (-4,2,0) north of it is NA's dust, (-4,2,4) is outside the box, (-4,3,2) above it "
+          "is where G lands, and a sticky piston facing up at (-4,0,2) with its head under RB12 is powered by",
+          [c for _, c in power_sources(hyp, (-4, 0, 2))], "(RB12 itself, by QC)")
     cells = set(v.cumulative_cells(b)[0])
     print("box, opening:", s.box(cells))
 
@@ -301,8 +310,8 @@ if __name__ == "__main__":
         print("   after c12:", {n: at(c1, n) for n in ("T", "C", "P12", "SP", "Q", "RB12", "RB_ST")}, "DT", c1.get(f.DT).p["power"])
     wo, _ = opened(build(swap=SLOW3))
     dif = f.diff(f.snapshot(base), f.snapshot(wo))
-    print("\n== ctl 7: AP behind a 3-tick repeater: RB_ST lands at t8 j ahead of P12's head, whose landing updates the lit T")
+    print("\n== ctl 8: AP behind a 3-tick repeater: RB_ST lands at t8 j ahead of P12's head, whose landing updates the lit T")
     print("   open-state differences:", {k: dif[k] for k in sorted(dif, key=str)} or "none")
-    print("\n== ctl 8: the input off n ticks after it went on (RB_ST lands at t10 j, 12 ticks after the input)")
+    print("\n== ctl 9: the input off n ticks after it went on (RB_ST lands at t10 j, 12 ticks after the input)")
     print("   after c0:", {n: "FAILS" if verdict_c0(run(opened(b, ticks=n)[0], staged(through=2)[:2])[0]) else "done"
                            for n in (8, 9, 10, 11, 12, 16)})
