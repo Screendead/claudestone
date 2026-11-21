@@ -266,7 +266,11 @@ def x_ends(c):
             c.rep((xp - 2, t, ZD + 5), 'east', f'XH{cls}')
             c.block((xp - 3, t, ZD + 5), f'XH{cls}')
             reps = run(c, (xp - 3, t, ZD + 5 + nh), 'north', nh, f'XHP{cls}')
-            hold_goal = ((xp - 3, t, ZD + 6 + nh), 'north')
+            # the line's turn is placed here, not routed: a block south of the line, fed from the east. Any routed
+            # way into this column ends on a block beside the spit line (x = xw - 1), which the router never
+            # allows, and the spit route then has no way past it (PROGRESS.md, "odd lines along z")
+            c.block((xp - 3, t, ZD + 6 + nh), f'XHP{cls}')
+            hold_goal = ((xp - 2, t, ZD + 6 + nh), 'west')
         else:
             nh = COMPACT['nhp_o'] or 8
             reps = run(c, (xp - 1 - nh, t, ZD + 5), 'east', nh, f'XHP{cls}')
