@@ -1087,3 +1087,6 @@ Labels: SOURCED / MEASURED / COMPUTED / INFERRED.
   their supports in -8. Moving the snakes to row -5 as they are (`rows` without -7, origins y -5) collides with the
   logic core (LP, LV, NLV, GS, CNT, ED, DFIRE at x 2..11, z 0..6), so the snakes need new places (or shapes) in
   rows -5..9 that keep their delays (CLOSE2 and CLOSE3 set the close windows).
+- 2026-11-21 MEASURED (issue #38, laptop satellites sat1-3, 222 s): both tests of the 74-wide door16_quart_compact
+  pass; door_cycle open R 9234 (H1/R1 9232), close R 448, front L, tier QUART, volume 99,900 = 74x30x45, the same
+  times as v4b. Spec regenerated with --measured; the showroom slot has not been looked at by eye yet.

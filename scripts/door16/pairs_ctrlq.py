@@ -6,7 +6,9 @@ python -m scripts.door16.pairs_ctrlq OUT.yaml N PAIRS [--name NAME] [--open T] [
 
 door16_quart_compact, byte for byte (about a minute):
 python -m scripts.door16.pairs_ctrlq library/door/door16_quart_compact.redstone.yaml 8 8 --v2 \
-    --compact scripts/door16/odd_south.py --colour --name door16_quart_compact --open 13000 --close 1500
+    --compact scripts/door16/odd_south.py --colour --name door16_quart_compact --open 13000 --close 1500 \
+    --measured "door_cycle on satellites: open R 9234, close R 448, front L, tier QUART, volume 99,900 = 74x30x45 \
+against the 96-wide v4b's 129,600 and door16_quart's 213,840 = 108x30x66"
 
 scripts/door16/final.py instead of odd_south.py gives the 96-wide v4b (odd lines out west), measured with
 --measured "door_cycle on dsats: open R 9234, close R 448, front L, tier QUART, volume 129,600 = 96x30x45 \
