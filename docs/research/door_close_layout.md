@@ -74,7 +74,7 @@ Option (a) works; (b) and (c) were not needed. Opening and the nine blocks uncha
   6/6; without F_S or RB_F A, B and C fail; without G_S A fails, B and C pass [COMPUTED export_s_feed]. Drive A's use
   inside one phase (the 0 gt close) is INFERRED: commands cannot order events inside a phase.
 
-## Trigger chain, stages 0 and 1 (2026-11-21; simulator; the server probe is written, not yet run)
+## Trigger chain, stages 0 and 1 (2026-11-21; simulator; measured on a satellite)
 One falling input runs E0, P_R's release, the NP12 kill, T's extension and spit and P12's retract inside one block-event
 phase, c0 [COMPUTED trigger.txt]. Not as framed in two ways: the T feed is armed in the open state instead of lit in c0, so
 the order is T first, P12 after; and DP (stage 2) is still a command here (its blocks came later: "DP, stage 2: the
@@ -137,9 +137,9 @@ design").
   K_T, W_T, M_K or the dust above P_R the first test fails [COMPUTED]. Server (2026-11-21, sat1): 4/4 [MEASURED];
   `close_feeds_probe` 8/8 and `close_s_feed_probe` 6/6 still pass.
 
-## DP, stage 2: the design (2026-11-21; simulator; the server probe is written, not run)
+## DP, stage 2: the design (2026-11-21; simulator; measured on a satellite)
 Seven blocks light DP after P12's retract and cut it again from the one input: the DP command is gone, the opening is
-unchanged and the feed is home again by itself [COMPUTED dp_off.txt]. Nothing here ran on a server. Not as framed in one
+unchanged and the feed is home again by itself [COMPUTED dp_off.txt; MEASURED 4/4 on sat1, below]. Not as framed in one
 way: P11 is spat, P6 is not (below).
 - Blocks: RB_D, a redstone block at (-3,4,2), south of DP's source cell (-3,4,1); A_D, a sticky piston at (-3,4,3) facing
   north, behind it; Q_D, a stone at (-3,6,3); R_D, a 1-tick repeater at (-2,6,3) facing east on glass (-2,5,3); TAP, a dust
@@ -196,7 +196,12 @@ way: P11 is spat, P6 is not (below).
 - Probe: `close_dp_off_probe` (`export_dp_off`): the run above and three controls (RB_D, the repeater or the tap dust
   removed with setblock air strict before the opening), 52 or 53 cells and the levels of DT, DS, DP and the tap checked
   against the simulator after c0, c2, c3 and later ticks. Its steps, read back from the YAML and replayed in the
-  simulator, pass 4/4; without A_D, Q_D, RB_D or R_D the first test fails [COMPUTED]. Not run on a server.
+  simulator, pass 4/4; without A_D, Q_D, RB_D or R_D the first test fails [COMPUTED]. Server (2026-11-21, sat1): 4/4
+  [MEASURED]. The game orders it as the simulator assumes: after c2 RB_D is at (-3,4,1), A_D out, DP 15, R_D off; after
+  c3 RB_D and P11 are moving, S real at (0,3,0), DP 0, so P11 extends at c3 and is spat. Trace levels: the tap 10 from
+  t32 to t41, 0 from t42 (NP12 killed at c0); DP 15 at t44 (c2), 0 from t45 (c3). The tap dust, R_D and the glass under
+  both are in place after the run (read from the world). `close_trigger_probe` 4/4, `close_feeds_probe` 8/8 and
+  `close_s_feed_probe` 6/6 still pass.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -261,9 +266,9 @@ events of one phase: they show which orders work, not how to get them.
 1. S H2 feed: done in sim and on the server [MEASURED]. Still to wire, its inputs: F_S on and off (the spit after T's retract
    event) and G_S's hold off after S's extension (drive A), or F_S alone (drives B, C); after drive A, the return.
 2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [MEASURED: `close_trigger_probe`
-   4/4 on sat1]. DP on: RB_D's landing at c2 j, P11 out at c3 [COMPUTED dp_off.txt].
+   4/4 on sat1]. DP on: RB_D's landing at c2 j, P11 out at c3 [MEASURED: `close_dp_off_probe` 4/4 on sat1].
 3. Depowers: T's done (W_T, K_T) [COMPUTED]. DP's done for P11: A_D's own head landing releases it and it pulls RB_D
-   right behind P11's extension [COMPUTED dp_off.txt]. P6 is not spat (it extends at c4 on NA): no piston that can take
+   right behind P11's extension [MEASURED: `close_dp_off_probe` 4/4 on sat1]. P6 is not spat (it extends at c4 on NA): no piston that can take
    DP's source away is reached from P6's extension [COMPUTED dp.txt, dp_off_search.txt].
 4. Z_T/RB_T reset: P_R re-extends, a down-pusher pushes RB_T to (1,5,-1); (1,7,-1) is now the bus's support. Also the
    return of RB_ST and its glass, RB12 and G, K, K_T.
@@ -271,8 +276,7 @@ events of one phase: they show which orders work, not how to get them.
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
-Run `close_dp_off_probe` on a satellite: DP's blocks are COMPUTED only, and the run decides whether RB_D lands ahead
-of A_D's head and P11 is spat as the simulator has it. Then the close feeds of P10 and V (stages 3 and 4), which the
+DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A_D's head and P11 is spat). Next, the close feeds of P10 and V (stages 3 and 4), which the
 probes still drive by command, with P10 at c4 or later; the S feed's inputs; and the returns (item 4). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
@@ -283,7 +287,7 @@ dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py), run
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`) and
-`library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; not yet run).
+`library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
