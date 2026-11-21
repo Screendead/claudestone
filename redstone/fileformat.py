@@ -66,6 +66,9 @@
           - throughput: {from: feed, to: [7, 1, 8], item: cobblestone, ticks: 800, min: 90}
                                  # items that reach `to` (or leave `from`) in the next ticks;
                                  # the count and rate per hour go in the trace and the result
+          - light_checks: {max: 0, steps: [{use: lever}, {wait: 4}]}   # light checks the
+                                 # server queues while the steps run (perf; satellites only):
+                                 # count, min and/or max
         finally:                 # commands run after the steps, even when a step failed
           - gamerule advance_time true
 
