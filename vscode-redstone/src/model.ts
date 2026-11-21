@@ -225,7 +225,6 @@ export function applyModel(text: string, model: Model): string {
   return result;
 }
 
-// ---- editing operations (mutate the model in place) ----
 
 export function clone(m: Model): Model { return JSON.parse(JSON.stringify(m)); }
 

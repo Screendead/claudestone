@@ -262,29 +262,3 @@ class FSim:
         if b == "redstone_wire":
             return self.level.get(p, 0)
         return self.out.get(p, 0)
-
-
-def from_spec(spec):
-    return FSim(dict(spec.build.blocks), {n: spec.input_cells(n) for n in spec.inputs})
-
-
-def run_rows(sim, cells, rows, maxwait=60):
-    """rows: list of (inputs dict, expected dict name->0/1/None). Returns worst delay and failures.
-    Delay = last tick at which any expected output was still wrong (conservative)."""
-    worst, fails, per = 0, [], []
-    for i, (vin, vout) in enumerate(rows):
-        for n, v in vin.items():
-            sim.drive(n, v)
-        last_bad = 0
-        for t in range(maxwait):
-            ok = all(v is None or (sim.read(cells[o]) > 0) == bool(v) for o, v in vout.items())
-            if not ok:
-                last_bad = t + 1
-            sim.step()
-        ok = all(v is None or (sim.read(cells[o]) > 0) == bool(v) for o, v in vout.items())
-        if not ok:
-            fails.append((i, vin, vout, {o: sim.read(cells[o]) for o in vout}))
-            last_bad = maxwait
-        worst = max(worst, last_bad)
-        per.append(last_bad)
-    return worst, fails, per

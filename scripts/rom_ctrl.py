@@ -21,7 +21,6 @@ WIRE = "redstone_wire"
 BOX = (48, 16, 40)
 
 PC_PINS = [4, 7, 10, 13]          # east face z
-PIMM_PINS = [19, 22, 25, 28]      # east face z
 LOW_CELLS = [18, 21, 24, 27]      # cell rows of bits 0-3 (bit row = cell + 1 = pimm pin z)
 OP_CELLS = [29, 31, 33, 35]       # cell rows of bits 4-7
 CELLS = LOW_CELLS + OP_CELLS

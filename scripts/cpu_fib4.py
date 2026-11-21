@@ -26,8 +26,8 @@ from scripts.cpu_clock_compact import cpu_clock_compact
 from scripts.rom_ctrl import rom_ctrl
 
 FIB_PROGRAM = [0x10, 0x80, 0x11, 0xA0, 0x90, 0x20, 0xD8, 0xB3, 0xF0] + [0] * 7
-PERIOD, CAP_AT = 122, 92           # measured: 122/92 passes, 120/90 fails; the clock needs CAP_AT <= PERIOD - 30
-CLOCK_L = 12                 # start rise -> first COM at the clock pin (cpu_clock_compact, MEASURED)
+PERIOD, CAP_AT = 122, 92           # 122/92 passes, 120/90 fails; the clock needs CAP_AT <= PERIOD - 30
+CLOCK_L = 12                 # start rise -> first COM at the clock pin (cpu_clock_compact)
 YMAX = 4
 SOLIDS = ("smooth_stone", "white_concrete", "black_concrete")
 PAINTED = ("smooth_stone", "white_concrete")

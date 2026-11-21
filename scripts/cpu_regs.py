@@ -36,10 +36,6 @@ def band_row(net, k):
     return ZB + {"b": 6, "a": 8, "y": 10}[net] + 7 * k
 
 
-def pin_row(net, k):
-    return ZB + {"b": 7, "a": 9, "y": 10}[net] + 7 * k
-
-
 FACING = {(1, 0): "west", (-1, 0): "east", (0, 1): "north", (0, -1): "south"}  # flow -> input side
 
 

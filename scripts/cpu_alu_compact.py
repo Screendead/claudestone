@@ -1,7 +1,7 @@
 """CPU4 ALU, compact: x = n if xsel else b; y = (a - za) + (x xor sub) + sub; co, zo.
 
 Bit k owns z rows 1+8k .. 8+8k; inside the generator Z(d) = 4+8k+d, d = -3..4. The cells are
-the old cpu_alu's (scripts/alu.py: comparator xor bridges, the carry-cancel chain at x=XC, y=2),
+cpu_alu's (scripts/alu.py: comparator xor bridges, the carry-cancel chain at x=XC, y=2),
 with a comparator mux in front: x = (n - NOT xsel) | (b - xsel). a, b and y meet the east face
 (REGS abuts there); n and the controls enter the west face. Control lanes run along z at y=5;
 nets between hand-placed cells are routed by scripts.alu_route.
@@ -419,10 +419,6 @@ def route_all(g, R, terms, shuffle=None):
 
 routed = {}
 paths = []
-
-
-def _clean(g):
-    return [e for e in g.check() if "strong with cc" not in e and "strong with gen" not in e]
 
 
 def build_routed(mutant=None, tries=300):

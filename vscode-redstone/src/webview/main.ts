@@ -82,7 +82,6 @@ function drivenInputs(): Record<string, boolean> {
 
 const traceOpts = () => ({ signals: frame()?.signals ?? null, sparse: !!trace?.sparse, levels: frame()?.levels ?? null });
 
-// ---------- rendering ----------
 
 function fitScale(): number {
   if (!model) return 32;
@@ -335,7 +334,6 @@ function renderFrame() {
   renderTests();
 }
 
-// ---------- editing ----------
 
 function commit(next: Model) {
   model = next;
@@ -454,7 +452,6 @@ function moveLayer(d: number) {
   if (i >= 0 && i < ys.length) { y = ys[i]; renderAll(); }
 }
 
-// ---------- traces ----------
 
 function selectTest(name: string) {
   selectedTest = name;
@@ -486,7 +483,6 @@ function step(d: number) {
   renderFrame();
 }
 
-// ---------- wiring ----------
 
 function wire() {
   setupCanvas();

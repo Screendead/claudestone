@@ -273,14 +273,6 @@ def build_all():
     return g, named, inputs, outputs, goals
 
 
-def build_core():
-    g = Grid((W, 8, D))
-    named, inputs, outputs = {}, {}, {}
-    west_and_bank(g, named)
-    goals = inc_and_mux(g, named)
-    return g, named, inputs, outputs, goals
-
-
 def route(g, goals, ymax=5):
     R = Router(g, ymax=ymax)
     R.keep.add((W - 3, 3, IMM[3]))
