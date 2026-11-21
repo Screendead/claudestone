@@ -1082,3 +1082,8 @@ Labels: SOURCED / MEASURED / COMPUTED / INFERRED.
 - COMPUTED: routes in 57 s (one build); every route but XSPO, XHPO, TAPA and TAPB is identical to v4b's (TAPA/TAPB
   same lengths, re-tuned delays); the timing dict equals v4b's exactly; size 74x30x47, door_cycle box 74x30x45 =
   99,900 against 129,600 (-22.9%). Lint ok. Installed as library/door/door16_quart_compact (door_cycle pending).
+- Next, freeing the two bottom layers (COMPUTED, on odd_south.py): row -7 holds the CLOSEK, CLOSE2 and CLOSE3 snakes'
+  hand cells (CLOSEK 58, CLOSE2 26, CLOSE3 10) and routed cells of STOREO, TAPA, TAPB, ZARR and the close nets, with
+  their supports in -8. Moving the snakes to row -5 as they are (`rows` without -7, origins y -5) collides with the
+  logic core (LP, LV, NLV, GS, CNT, ED, DFIRE at x 2..11, z 0..6), so the snakes need new places (or shapes) in
+  rows -5..9 that keep their delays (CLOSE2 and CLOSE3 set the close windows).
