@@ -10,9 +10,10 @@ Bus   Dust fed by K_in (1,8,-2), lit while the input is on. East branch (2,8,-2)
       stone (3,7,-1) above P_R: P_R's hold, in place of HOLD. (4,8,-2) on stone (4,7,-2) feeds a 4-tick
       repeater (4,7,-1) into AP. West branch from K_in's south side: (1,8,-1), (0,8,-1), (-1,7,-1), (-2,7,-1),
       (-3,7,-1), (-4,6,-1), (-4,5,0), (-4,5,1) on stone (-4,4,1) above M_K. Cuts: stone (1,8,0) over DT (the
-      bus would read DT up the step) and stone (-3,5,0) over DP.
+      west branch would read DT up the step and die only with it) and stone (-3,5,0) over DP.
 E0    I_A sticky (part 1): pulls RB_A home. Level 0.
-P_R   Held by DH. The bus dies in phase d of c0, so P_R's retract is level 0 too. It pulls RB_T; Z_T retracts
+P_R   Held by DH, and in the closed state by RB_ST at (3,7,0), a QC cell. The bus dies in phase d of c0, so
+      P_R's retract is level 0 too. It pulls RB_T; Z_T retracts
       when the second of RB_A and RB_T has left (RB_A's old cell updates Z_T's head), level 1.
 T     The feed is armed in the open state, not in c0: AP (4,7,0), a piston facing west behind the repeater,
       pushes RB_ST from (3,7,0) to (2,7,0), beside DT. It lands at t10 j, after T's last update of the
@@ -41,7 +42,7 @@ import copy, functools
 from scripts.door2.close_layout import feeds as f, puller as pr, s_feed as s
 from scripts.door2.close_layout.feeds import d, B, AIR, power_sources
 
-I_A, K_IN, RB_A_HOME, RB12_UP, G_UP = (1, 7, -2), (1, 8, -2), (1, 6, -2), (-4, 3, 2), (-4, 4, 2)
+I_A, RB_A_HOME, RB12_UP, G_UP = (1, 7, -2), (1, 6, -2), (-4, 3, 2), (-4, 4, 2)
 AP, REP, RB_ST, SRC, UP = (4, 7, 0), (4, 7, -1), (3, 7, 0), (2, 7, 0), (2, 8, 0)
 W_T, K_T, SPC, DH = (1, 5, 0), (2, 5, 0), (2, 6, 0), (3, 8, -1)
 M_K, WK, K, CUT_DT, CUT_DP = (-4, 3, 1), (-4, 1, 1), (-4, 1, 2), (1, 8, 0), (-3, 5, 0)
@@ -189,11 +190,6 @@ def close(b, ticks=None, **kw):
     return w0, w1, lines, frames
 
 
-def result(b, **kw):
-    w0, w1, _, _ = close(b, **kw)
-    return verdict_c0(w0), verdict_end(w1)
-
-
 # name: (title, build keywords, schedule keywords)
 CONTROLS = {
     "ctl 1": ("no W_T: T is not updated when DT dies and stays out; P12 is not updated either", dict(drop=(W_T,)), {}),
@@ -234,7 +230,7 @@ if __name__ == "__main__":
     w, _ = d.make_world(b)
     print("moved during load:", moved or "none", "| powered in the closed state:",
           {n: [c for _, c in power_sources(w, at(w, n)[0])] for n in ("P_R", "K", "W_T", "K_T", "M_K", "AP")})
-    seen, t_in = [], None
+    seen = []
     w.run(4)
     w.cmd_set(f.DRIVER, RB)
     t_in = w.time
