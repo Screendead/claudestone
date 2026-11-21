@@ -218,6 +218,16 @@ if __name__ == "__main__":
           f.diff(f.snapshot(base), f.snapshot(mine)) or "none")
     print("cell differences outside the added blocks, I_A and its head, HOLD, M_K's head and RB_ST's cell beside DT:",
           s.cell_diff(base, mine, set(MINE) | {I_A, RB_A_HOME, pr.HOLD, SRC, (-4, 2, 1), f.DT}), "| DT", mine.get(f.DT).p["power"])
+    wa, wb = d.make_world(s.build())[0], d.make_world(b)[0]
+    differ = []
+    for w in (wa, wb):
+        w.run(4)
+        w.cmd_set(f.DRIVER, RB)
+    for k in range(OPEN_TICKS):
+        wa.tick()
+        wb.tick()
+        differ += [k - 2] * bool(f.diff(f.snapshot(wa), f.snapshot(wb)))
+    print("opening tick by tick, the door's pistons and the door plane:", f"differ at t{differ}" if differ else "the same at every tick")
     w, _ = d.make_world(b)
     print("moved during load:", moved or "none", "| powered in the closed state:",
           {n: [c for _, c in power_sources(w, at(w, n)[0])] for n in ("P_R", "K", "W_T", "K_T", "M_K", "AP")})
