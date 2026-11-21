@@ -14,7 +14,8 @@ No structural obstruction; full close not yet shown end to end.
 - P6 and T fixed with no change to opening blocks; volume unchanged 1728 [COMPUTED].
 - S's H2 feed: shown in the simulator and on a satellite on 2026-11-21: section "S H2 feed" below.
 - Stages 0 and 1 from one input: shown in the simulator on 2026-11-21: section "Trigger chain" below.
-- DP's on and off (stage 2): no design found on 2026-11-21, the command stays: section "DP, stage 2" below.
+- DP's on and off (stage 2): seven blocks, shown in the simulator on 2026-11-21, the command is gone: P11 extends at c3
+  and is spat in that phase; P6 is not spat, it extends at c4 on NA. Section "DP, stage 2: the design" below.
 
 Close order [SOURCED plan_common.txt]: 0 P12 retract | 1 T, P9, P1-P6 | 2 P11 | 3 P10 | 4 V H2 | 5 S H2 | 6 P8 | 7 Q H2 | 8 P7
 
@@ -73,10 +74,11 @@ Option (a) works; (b) and (c) were not needed. Opening and the nine blocks uncha
   6/6; without F_S or RB_F A, B and C fail; without G_S A fails, B and C pass [COMPUTED export_s_feed]. Drive A's use
   inside one phase (the 0 gt close) is INFERRED: commands cannot order events inside a phase.
 
-## Trigger chain, stages 0 and 1 (2026-11-21; simulator; the server probe is written, not yet run)
+## Trigger chain, stages 0 and 1 (2026-11-21; simulator; measured on a satellite)
 One falling input runs E0, P_R's release, the NP12 kill, T's extension and spit and P12's retract inside one block-event
 phase, c0 [COMPUTED trigger.txt]. Not as framed in two ways: the T feed is armed in the open state instead of lit in c0, so
-the order is T first, P12 after; and DP (stage 2) is still a command, its on and off are not designed.
+the order is T first, P12 after; and DP (stage 2) is still a command here (its blocks came later: "DP, stage 2: the
+design").
 - Blocks: 36 (12 dust, 17 glass or stone, 5 pistons, 1 repeater, 1 redstone block), I_A sticky (part 1), HOLD (4,6,-1)
   gone. Opening: open-state diff none, the door's pistons and the door plane the same at every tick, box 1728 through the
   opening and the close [COMPUTED].
@@ -125,7 +127,7 @@ the order is T first, P12 after; and DP (stage 2) is still a command, its on and
   five clean cells; (-4,4,0) and (-3,5,0), item 5's DP cells, are the bus's support and cut, so the DP stand-in is a
   redstone block at (-3,4,1). In the open state T and K_T are powered and not updated, K since the load: one stray
   update fires them.
-- DP, not done. Needed: on after P12's retract event, off after P6's extension, each a block event. P12's retract
+- DP, not done in this step. Needed: on after P12's retract event, off after P6's extension, each a block event. P12's retract
   event updates (0,5,-1), P10 and S; P11's base update reaches (-2,4,0) and (-2,3,-1) after P6 is queued. (-2,4,0) is
   beside DP, so DP's own change updates a piston there, and nothing P11's or P6's push frees can block one as Z_T's
   head blocks W_T [INFERRED].
@@ -135,12 +137,79 @@ the order is T first, P12 after; and DP (stage 2) is still a command, its on and
   K_T, W_T, M_K or the dust above P_R the first test fails [COMPUTED]. Server (2026-11-21, sat1): 4/4 [MEASURED];
   `close_feeds_probe` 8/8 and `close_s_feed_probe` 6/6 still pass.
 
-## DP, stage 2 (2026-11-21; simulator; no design found, the command stays)
-No set of real blocks was found that lights DP and cuts it again, so there is no probe. `dp.py` computes what the on and
-the off need and what the free cells allow; `dp_search.py` screens every one and two added blocks in the 40 free cells of
-x -4..-2, y 2..6, z -1..3, and the same on top of the pusher south of DP's source cell: nothing that passes can be
-built [COMPUTED dp.txt, dp_search.txt]. The on alone has a one-block answer through NA; the off has none. The what-ifs
-below set or clear SRC_P between two block events of one phase: they show which orders work, not how to get them.
+## DP, stage 2: the design (2026-11-21; simulator; measured on a satellite)
+Seven blocks light DP after P12's retract and cut it again from the one input: the DP command is gone, the opening is
+unchanged and the feed is home again by itself [COMPUTED dp_off.txt; MEASURED 4/4 on sat1, below]. Not as framed in one
+way: P11 is spat, P6 is not (below).
+- Blocks: RB_D, a redstone block at (-3,4,2), south of DP's source cell (-3,4,1); A_D, a sticky piston at (-3,4,3) facing
+  north, behind it; Q_D, a stone at (-3,6,3); R_D, a 1-tick repeater at (-2,6,3) facing east on glass (-2,5,3); TAP, a dust
+  at (-1,6,3) on glass (-1,5,3). Opening: open-state diff none, no cell differs outside the seven, the door's pistons and
+  the door plane the same at every tick, nothing moves during the load, DP 0 in the closed and the open state, box 1728
+  through the opening and the close [COMPUTED].
+- Source: A_D out puts RB_D in the source cell, DP 15; pulled, RB_D is a moving block at once, DP 0. At rest RB_D is a
+  second QC source of Y12, which ARM_Z11 holds anyway, and powers nothing else [COMPUTED].
+- Power: A_D's only power is Q_D, two above it (QC), strongly powered by R_D. R_D reads TAP; TAP reads NP12's dust (0,5,3)
+  down the step and its glass passes nothing back: NP12's levels are what they were [COMPUTED]. This is the first pass's
+  third way out, power south of DP that outlives K's event: R_D outlives it by one tick.
+- Armed: NP12 lights at t6 g; that storm updates A_D, which is not powered yet. R_D turns on at t8 d and updates Q_D's
+  neighbours, not A_D: from then A_D is powered and not updated, as T, K_T and K are. One stray update there fires it:
+  RB_D lights DP and P11 shoves the top row [COMPUTED].
+- On: K's event (c0, level 1) kills NP12. H (-3,3,3), the dust under A_D, dies in it and updates A_D, which R_D powers
+  until c2 d: A_D extends at level 2. RB_D lands at c2 j and DP's change updates P11, which extends at c3, level 0:
+  three ticks after P12's retract, as a block event, like P_W's on.
+- Off: R_D turns off at c2 d, again without an update of A_D. A_D's head lands at c2 j right behind RB_D, and the landing
+  updates A_D: unpowered, its retract is queued behind P11's extension. c3, level 0: P11 extends, then A_D pulls RB_D and
+  DP is 0 inside that event; DP's change updates P11, which is spat at level 1: S real at (0,3,0). RB_D and A_D are home
+  at c5 j and R_D stays off (NP12 is dead): the feed leaves nothing to return.
+- What the order rests on [COMPUTED; INFERRED for the game]: a push adds the pushed block's block entity ahead of the
+  head's, and phase j runs them in that order (sim.py move_blocks). With the head ticked first, A_D's retract runs ahead
+  of P11's extension and P11 never fires (what-if in dp_off.txt). Dust's updates reversed, I_A's event last, both: the
+  same piston events in every tick, stage 5 done.
+- P6: P11's extension queues P6 (QC through FP) behind A_D's retract; that event finds FP dark and is dropped, in every
+  order. P6 extends once, at c4, on NA's repeater with P1 to P5, and stays out, where the closed door has it. It is not
+  spat: for that DP must stay lit one event longer. `dp_off_search.py` screens one and two more blocks in the 35 free
+  cells of dp_search's region for a design that spits P6 too: one more, 1 of 560, a dust at (-2,4,0) (DP's change
+  reaches it and its own reaches P6, so P6 is queued with P11); built, the opening differs from t1 (RB11 beside it
+  lights it and DP in the closed state), lit it points into V, and it stands on P11, whose top the game does not take
+  as a support once it extends [INFERRED; the simulator has no rule for support]. Two more: 441 of 152320, 435 of them
+  with that dust and 6 without, four ideas: a dust on NA's dust that ties DP to NA, dp_search's row pusher, a redstone
+  block beside NA's and NV's dust, and a relay above A_D. Built, each fails: the first three move pistons during the
+  load and change the opening, and the relay fires in the opening [COMPUTED dp_off_search.txt, dp_off.txt].
+- The relay, the lead for spitting P6 [COMPUTED as set into the open state, not buildable as it is]: N_X, a piston at
+  (-3,5,3) facing north above A_D and under Q_D, and D_X, a piston at (-3,5,2) facing down in front of it. K's event
+  wakes N_X with A_D, and N_X pushes D_X over the source cell. R_D's turning off at c2 d updates N_X, whose retract
+  (c2 g) updates A_D: unpowered with RB_D still moving, A_D spits it, so DP is lit in c2 g and P11 and P6 extend in c2,
+  a tick earlier. D_X lands at c2 j beside RB11, which powers it, and pushes RB_D down at c3: both are spat, a tick
+  before NA's repeater turns on. RB_D ends at (-3,3,1), beside M_K, and D_X out at (-3,5,1). What stops it: R_D's
+  turning on at t8 d updates N_X too, so the built relay runs in the opening and is spent. It needs N_X held in until
+  c0.
+- Stage 3: P11's head is in (-1,3,0) during c3 and P10 pushes V into that cell, so P10 comes at c4 or later. With stages
+  3 to 5 by command one tick later than in the trigger probe (c4 P10; c5 V and F_S; c6 both off; c7 G_S's hold) stage 5
+  is done: S real at (1,3,0), C at (1,1,0), and outside the seven blocks the end state is cell for cell that of
+  trigger.py's run, where a command lights and cuts DP [COMPUTED].
+- Controls fail [COMPUTED]: no RB_D; no A_D; A_D not sticky (DP stays lit, P11 stays out); no R_D; no TAP; no Q_D; R_D at
+  2 ticks (still on when the head lands, so A_D is not released, and its turning off at c4 d updates nothing); a dust in
+  R_D's place (Q_D is lit by the storm that updates A_D, which fires in the opening); a stone under TAP (NP12's step is
+  cut and the opening differs). The input off fewer than 11 ticks after it went on fails as the trigger chain does.
+- Costs: A_D armed in the open state (above); RB_D as Y12's second QC source, for whatever returns Y12; the cells
+  (-3,4,1) to (-3,4,3), (-3,6,3), (-2,5,3), (-2,6,3), (-1,5,3), (-1,6,3).
+- Probe: `close_dp_off_probe` (`export_dp_off`): the run above and three controls (RB_D, the repeater or the tap dust
+  removed with setblock air strict before the opening), 52 or 53 cells and the levels of DT, DS, DP and the tap checked
+  against the simulator after c0, c2, c3 and later ticks. Its steps, read back from the YAML and replayed in the
+  simulator, pass 4/4; without A_D, Q_D, RB_D or R_D the first test fails [COMPUTED]. Server (2026-11-21, sat1): 4/4
+  [MEASURED]. The game orders it as the simulator assumes: after c2 RB_D is at (-3,4,1), A_D out, DP 15, R_D off; after
+  c3 RB_D and P11 are moving, S real at (0,3,0), DP 0, so P11 extends at c3 and is spat. Trace levels: the tap 10 from
+  t32 to t41, 0 from t42 (NP12 killed at c0); DP 15 at t44 (c2), 0 from t45 (c3). The tap dust, R_D and the glass under
+  both are in place after the run (read from the world). `close_trigger_probe` 4/4, `close_feeds_probe` 8/8 and
+  `close_s_feed_probe` 6/6 still pass.
+
+## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
+This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
+above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
+`dp_search.py` screens every one and two added blocks in the 40 free cells of x -4..-2, y 2..6, z -1..3, and the same on
+top of the pusher south of DP's source cell: nothing that passes can be built [COMPUTED dp.txt, dp_search.txt]. Through
+NA the on alone has a one-block answer and the off has none. The what-ifs below set or clear SRC_P between two block
+events of one phase: they show which orders work, not how to get them.
 - On [COMPUTED]: lit before T's extension event is queued, P11 shoves the top row (ctl 6). Lit after that and before
   P12's retract event, T's head in (1,3,0) stops the push and P11 waits powered; nothing updates P11 or P6 through c1, and
   NA's relight (RB_A landing, c2 j) updates both: they extend at c3. Lit after P12's retract event they extend in c0. T's
@@ -197,32 +266,36 @@ below set or clear SRC_P between two block events of one phase: they show which 
 1. S H2 feed: done in sim and on the server [MEASURED]. Still to wire, its inputs: F_S on and off (the spit after T's retract
    event) and G_S's hold off after S's extension (drive A), or F_S alone (drives B, C); after drive A, the return.
 2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [MEASURED: `close_trigger_probe`
-   4/4 on sat1]. Left: DP on. It may come at any level from 2 of c0 to c2, not only after P12's retract; one piston
-   through NA gives it at c3 [COMPUTED dp.txt].
-3. Depowers: T's done (W_T, K_T) [COMPUTED]. Left: DP off after P6's extension: no piston that can take DP's source
-   away is reached from P11's or P6's extension, and no free cell closes CP's cell at once [COMPUTED dp.txt].
+   4/4 on sat1]. DP on: RB_D's landing at c2 j, P11 out at c3 [MEASURED: `close_dp_off_probe` 4/4 on sat1].
+3. Depowers: T's done (W_T, K_T) [COMPUTED]. DP's done for P11: A_D's own head landing releases it and it pulls RB_D
+   right behind P11's extension [MEASURED: `close_dp_off_probe` 4/4 on sat1]. P6 is not spat (it extends at c4 on NA): no piston that can take
+   DP's source away is reached from P6's extension [COMPUTED dp.txt, dp_off_search.txt].
 4. Z_T/RB_T reset: P_R re-extends, a down-pusher pushes RB_T to (1,5,-1); (1,7,-1) is now the bus's support. Also the
    return of RB_ST and its glass, RB12 and G, K, K_T.
-5. Routing: the bus is laid (east to P_R and AP, west to M_K). DP's trunk: (-3,4,1) free; (-4,4,0), (-3,5,0) taken. The
-   bus's last dust (-4,5,1) keeps a source from resting above (-3,4,1).
+5. Routing: the bus is laid (east to P_R and AP, west to M_K). DP needs no trunk: its tap reads NP12 at (0,5,3).
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
-DP's off (stage 2) is the open item: decide between moving the bus's west end to free (-3,5,1), freeing (-1,4,-1) or
-(-3,6,-1) for P_W's route, and a different feed for P11 and P6 whose source P6's extension can reach (section "DP,
-stage 2"). The probes drive P10 and V (stages 3 and 4) by command: their close feeds are not designed here.
+DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A_D's head and P11 is spat). Next, the close feeds of P10 and V (stages 3 and 4), which the
+probes still drive by command, with P10 at c4 or later; the S feed's inputs; and the returns (item 4). If P6 must be
+spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
+DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
 The scripts are in `scripts/door2/close_layout/` (constraints.py/.txt, constraints_P6stage2.txt, feeds.py/.txt,
 puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.txt, export_trigger.py, dp.py/.txt,
-dp_search.py/.txt), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
-`library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`) and
-`library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`).
+`library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
+`library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`) and
+`library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
-`python -m scripts.try close_trigger_probe`;
+`python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
 `python -m scripts.door2.close_layout.export_trigger`;
 `python -m scripts.door2.close_layout.dp > scripts/door2/close_layout/dp.txt`;
-`python -m scripts.door2.close_layout.dp_search > scripts/door2/close_layout/dp_search.txt` (about an hour)
+`python -m scripts.door2.close_layout.dp_search > scripts/door2/close_layout/dp_search.txt` (about an hour);
+`python -m scripts.door2.close_layout.dp_off > scripts/door2/close_layout/dp_off.txt`;
+`python -m scripts.door2.close_layout.export_dp_off`;
+`python -m scripts.door2.close_layout.dp_off_search > scripts/door2/close_layout/dp_off_search.txt` (about 25 minutes)

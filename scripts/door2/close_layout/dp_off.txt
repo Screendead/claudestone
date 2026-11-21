@@ -1,0 +1,159 @@
+added: 7 blocks (1 redstone block, 1 sticky piston, 1 repeater, 1 dust, 1 stone, 2 glass); no stand-in for DP
+opening, trigger build vs + DP's seven, open-state differences: none
+cell differences outside the added blocks: none | tick by tick, the door's pistons and the door plane: the same at every tick
+moved during load: none | closed state: DP 0 TAP 0 R_D off | A_D powered by nothing
+arming in the opening: t6g level 3 wire (-1, 6, 3) power 0->10; t8d repeater (-2, 6, 3) on
+   A_D's updates in the opening: ['t6g not powered'] | NP12's dust (0,5,3): 11 in the trigger build, 11 here
+open state: {'A_D': ((-3, 4, 3), 'real', False), 'RB_D': ((-3, 4, 2), 'real', None)} | DP 0 | TAP 10 | A_D powered by [('qc', (-3, 6, 3))]
+other pistons with an added cell among their power sources, open state: {'Y12': [(-3, 4, 2)]} | Y12's other sources: [(-2, 4, 2)]
+box, opening: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== the close from the input, no DP command: c-1 to c6
+   c0g level 0 RETRACT I_A@(1, 7, -2) ev1: retract+PULL RB_A@(1, 5, -2)
+   c0g level 0 RETRACT P_R@(3, 6, -1) ev1: retract+PULL RB_T@(1, 6, -1)
+   c0g level 0 RETRACT M_K@(-4, 3, 1) ev1: retract+PULL WK@(-4, 1, 1)
+   c0g level 1 RETRACT Z_T@(1, 4, -1) ev1: retract
+   c0g level 1 wire (-1, 6, 3) power 10->0
+   c0g level 1 EXTEND K@(-4, 1, 2) up
+   c0g level 2 EXTEND T@(1, 4, 0) down
+   c0g level 2 EXTEND W_T@(1, 5, 0) north
+   c0g level 2 EXTEND A_D@(-3, 4, 3) north
+   c0g level 3 EXTEND K_T@(2, 5, 0) up
+   c0g level 4 RETRACT W_T@(1, 5, 0) ev1: retract
+   c0g level 5 RETRACT P12@(0, 5, 0) ev1: retract+PULL SP@(0, 3, 0)
+   c0g level 5 RETRACT K_T@(2, 5, 0) ev2: retract
+   c0g level 5 RETRACT T@(1, 4, 0) ev2: retract+SPIT (1, 2, 0)
+   c2d repeater (-2, 6, 3) off
+   c2j wire (-3, 4, 0) power 0->15
+   c2j land rb@(-3, 4, 1)
+   c2j land piston_head@(-3, 4, 2)
+   c3g level 0 EXTEND P7@(2, 4, 0) down
+   c3g level 0 EXTEND M_K@(-4, 3, 1) down
+   c3g level 0 EXTEND P11@(-2, 3, 0) east
+   c3g level 0 wire (-3, 4, 0) power 15->0
+   c3g level 0 RETRACT A_D@(-3, 4, 3) ev1: retract+PULL RB_D@(-3, 4, 1)
+   c3g level 0 EXTEND K_T@(2, 5, 0) up
+   c3g level 1 sticky_piston@(-2, 2, 0) ev0 dropped (unpowered)
+   c3g level 1 RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+   c4g level 0 EXTEND P4@(-2, 1, 0) east
+   c4g level 0 EXTEND P3@(2, -2, 0) up
+   c4g level 0 EXTEND P2@(1, -2, 0) up
+   c4g level 0 EXTEND P1@(0, -2, 0) up
+   c4g level 0 EXTEND P6@(-2, 2, 0) east
+   c4g level 0 EXTEND P5@(4, 1, 0) west
+   c5j land rb@(-3, 4, 2)
+   stages 0 and 1 -> done in c0 as in the trigger build; c0's piston events without A_D's: the same, in the same order
+   stage 2 -> done: P11 extends once, after P12's retract, and is spat in that phase; S real at (0,3,0), retracted; SP (0,4,0), C (1,2,0), Q (3,3,0); no dust lost, FP there; RB_D and A_D home, DP 0
+   P6: c4 out, stays out; TL real at (0,2,0). Its event queued by P11's extension is dropped (FP dark)
+   A_D's updates, c-1 to c6: ['c0g powered', 'c2j not powered', 'c5j not powered']
+   block events from c0 on whose updates reach P11: ['c3 P11 ev0', 'c3 A_D ev1', 'c3 P11 ev2', 'c4 P6 ev0'] | and in phase j of c2 RB_D's landing (DP's change)
+
+== through stage 5: stages 3 to 5 by command, one tick later than in trigger.py (c4 P10; c5 V and F_S; c6 both off; c7 G_S's hold)
+c3 []
+   c3g EXTEND P7@(2, 4, 0) down
+   c3g EXTEND M_K@(-4, 3, 1) down
+   c3g EXTEND P11@(-2, 3, 0) east
+   c3g RETRACT A_D@(-3, 4, 3) ev1: retract+PULL RB_D@(-3, 4, 1)
+   c3g EXTEND K_T@(2, 5, 0) up
+   c3g sticky_piston@(-2, 2, 0) ev0 dropped (unpowered)
+   c3g RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0)
+c4 [SRC_10 on]
+   c4g EXTEND P10@(-1, 5, 0) down
+   c4g EXTEND P4@(-2, 1, 0) east
+   c4g EXTEND P3@(2, -2, 0) up
+   c4g EXTEND P2@(1, -2, 0) up
+   c4g EXTEND P1@(0, -2, 0) up
+   c4g EXTEND P6@(-2, 2, 0) east
+   c4g EXTEND P5@(4, 1, 0) west
+c5 [SRC_10 off, SRC_V on, SRC_F on]
+   c5g RETRACT P10@(-1, 5, 0) ev2: retract+SPIT (-1, 3, 0)
+   c5g EXTEND F_S@(1, 5, 3) north
+   c5g EXTEND V@(-1, 3, 0) east
+c6 [SRC_F off, SRC_V off]
+   c6g RETRACT F_S@(1, 5, 3) ev2: retract+SPIT (1, 5, 1)
+   c6g RETRACT V@(-1, 3, 0) ev2: retract+SPIT (1, 3, 0)
+   c6g EXTEND W_T@(1, 5, 0) north
+   c6g EXTEND S@(1, 3, 0) down
+   c6g sticky_piston@(1, 4, 0) ev0 resolve failed
+c7 [HOLD_G off]
+   c7g RETRACT G_S@(3, 5, 1) ev1: retract+PULL RB_F@(1, 5, 1)
+   c7g RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+   c7g RETRACT W_T@(1, 5, 0) ev1: retract
+c8 []
+   c8g RETRACT AP@(4, 7, 0) ev1: retract
+   c8g EXTEND P10@(-1, 5, 0) down
+   after c13 -> stage 5 done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T, P12, P11, V in; SP, TL, Q, TM, P8 where the close needs them; RB_F parked; P7 out over TR at (2,2,0) | RB_D ((-3, 4, 2), 'real') A_D ('real', False) DP 0
+   end state against trigger.py's run, where a command lights and cuts DP: cell differences outside the seven blocks: none
+   box, opening + close through stage 5 (stand-in sources included): x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== order (must pass): against the run above
+   dust's neighbour updates in reverse order: stages 0 to 2 done, stage 5 done; piston events of each tick the same set; c3: P11 out, A_D pulls RB_D, P6's event dropped, P11 spat; P6: c4 out
+   I_A's retract event behind P_R's and M_K's: stages 0 to 2 done, stage 5 done; piston events of each tick the same set; c3: P11 out, A_D pulls RB_D, P6's event dropped, P11 spat; P6: c4 out
+   both: stages 0 to 2 done, stage 5 done; piston events of each tick the same set; c3: P11 out, A_D pulls RB_D, P6's event dropped, P11 spat; P6: c4 out
+
+== ctl 1: no RB_D: A_D pushes nothing, DP stays dark
+   opening: the same at every tick | open state: A_D ('real', False) powered by [(-3, 6, 3)] | DP 0
+   close: c0g level 2 EXTEND A_D@(-3, 4, 3) north; c2d repeater (-2, 6, 3) off; c3g level 0 RETRACT A_D@(-3, 4, 3) ev1: retract
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False); RB_D (None, None, None)
+
+== ctl 2: no A_D
+   opening: the same at every tick | open state: A_D (None, None) powered by - | DP 0
+   close: c2d repeater (-2, 6, 3) off
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False); A_D (None, None, None)
+
+== ctl 3: A_D not sticky: RB_D is pushed in and never pulled, DP stays lit and P11 stays out
+   opening: the same at every tick | open state: A_D ('real', False) powered by [(-3, 6, 3)] | DP 0
+   close: c0g level 2 EXTEND A_D@(-3, 4, 3) north; c2d repeater (-2, 6, 3) off; c2j land rb@(-3, 4, 1); c3g level 0 EXTEND P11@(-2, 3, 0) east; c3g level 0 RETRACT A_D@(-3, 4, 3) ev1: retract
+   -> FAILS: P11 not spat; P11 ((-2, 3, 0), 'real', True); RB_D ((-3, 4, 1), 'real', None); DP 15
+
+== ctl 4: no R_D: Q_D is never powered
+   opening: the same at every tick | open state: A_D ('real', False) powered by [] | DP 0
+   close: nothing moves at DP
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False)
+
+== ctl 5: no TAP: R_D never turns on
+   opening: the same at every tick | open state: A_D ('real', False) powered by [] | DP 0
+   close: nothing moves at DP
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False); dust lost at (-1, 6, 3)
+
+== ctl 6: no Q_D: R_D powers nothing
+   opening: the same at every tick | open state: A_D ('real', False) powered by [] | DP 0
+   close: c2d repeater (-2, 6, 3) off
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False)
+
+== ctl 7: R_D at 2 ticks: it is still on when A_D's head lands, so A_D is not released; it turns off at c4 d without an update
+   opening: the same at every tick | open state: A_D ('real', False) powered by [(-3, 6, 3)] | DP 0
+   close: c0g level 2 EXTEND A_D@(-3, 4, 3) north; c2j land rb@(-3, 4, 1); c3g level 0 EXTEND P11@(-2, 3, 0) east; c4d repeater (-2, 6, 3) off
+   -> FAILS: P11 not spat; P11 ((-2, 3, 0), 'real', True); RB_D ((-3, 4, 1), 'real', None); A_D ((-3, 4, 3), 'real', True); DP 15
+
+== ctl 8: a dust in R_D's place (no delay): Q_D is lit by the storm that updates A_D at t6 g, and A_D fires in the opening
+   opening: differ at t[8, 9, 10, 11, 12, 13] | open state: A_D ('real', True) powered by [(-3, 6, 3)] | DP 15
+   close: nothing moves at DP
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; P11 ((-2, 3, 0), 'real', True); SP ((1, 3, 0), 'real', None); C ((2, 2, 0), 'real', None)
+
+== ctl 9: a stone under TAP: NP12's dust (0,5,3) no longer reads (-1,4,3) down the step
+   opening: differ at t[5, 6, 7, 8, 9, 10, 11, 12, 13] | open state: A_D ('real', False) powered by [] | DP 0
+   close: nothing moves at DP
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False); SP ((0, 3, 0), 'real', None)
+
+== what-if (no block does this): A_D's head ticked ahead of RB_D in phase j of c2. A push adds the pushed block's block entity first and the head's last (sim.py move_blocks), and phase j runs them in that order
+   close: c0g level 2 EXTEND A_D@(-3, 4, 3) north; c2j land rb@(-3, 4, 1); c3g level 0 RETRACT A_D@(-3, 4, 3) ev1: retract+PULL RB_D@(-3, 4, 1)
+   -> FAILS: P11 does not extend once after P12's retract; P11 not spat; S ((-1, 3, 0), 'real', False)
+
+== ctl 10: the input off n ticks after it went on (R_D turns on at t8 d; trigger.py's feed is armed at t10 j)
+   stages 0 to 2: {8: 'FAILS', 9: 'FAILS', 10: 'FAILS', 11: 'done', 12: 'done', 16: 'done'}
+
+== cost: A_D is armed in the open state. A glass block set and cleared above it there (one stray update), then 6 ticks:
+    s0g level 0 EXTEND A_D@(-3, 4, 3) north; s2j wire (-3, 4, 0) power 0->15; s2j land rb@(-3, 4, 1); s2j land piston_head@(-3, 4, 2); s3g level 0 EXTEND P11@(-2, 3, 0) east; s3g level 1 EXTEND P6@(-2, 2, 0) east -> {'RB_D': (-3, 4, 1), 'S': (0, 3, 0), 'Q': (4, 3, 0)} DP 15
+
+== P6 spat as well? dp_off_search.txt: one more block in the 35 free cells, 1 of 560 passes; two more, 441 of 152320, 435 of them with that one block and 6 without. Set into the open state they pass; built, none does
+   the one, a dust at (-2, 4, 0), on P11 and beside DP: set into the open state, P6: c3 out, c3 spat, c6 out; -> the rest of stage 2 as above: DP's change reaches the dust and the dust's reaches P6, so P6 is queued at c2 j with P11
+   built: opening: differ at t[1, 2, 3, 4, 5, 6]; closed state: DP 14 (RB11 at (-2,4,1) is beside it); lit, it powers ['P11', 'P6', 'S', 'V']
+   and it stands on P11, whose top is a full face only while it is retracted: the game drops such a dust when the piston extends [INFERRED]; the simulator has no rule for support
+   a dust at (-4,3,0), on NA's dust and beside NA's (-4,3,-1), and a stone at (-4,4,-1) above that one: built, moved during load: ['RETRACT P6', 'RETRACT P4', 'RETRACT P1', 'RETRACT P2', 'RETRACT P3'] | opening: differ at t[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] | open state: A_D in RB_D (-3, 4, 2) DP 0 | close -> FAILS: P11 not spat; S ((1, 3, 0), 'real', False)
+   dp_search's row pusher, a piston (plain or sticky) at (-4,4,-1) facing south, and a redstone block at (-4,4,3): built, moved during load: ['EXTEND A_D', 'EXTEND X', 'EXTEND M_K'] | opening: differ at t[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] | open state: A_D out RB_D (-3, 4, 1) DP 15 | close -> FAILS: P11 does not extend once after P12's retract; P11 not spat
+   a redstone block at (-2,3,-1), beside NA's and NV's dust, under a piston at (-2,4,-1) facing down: built, moved during load: ['RETRACT V', 'EXTEND T'] | opening: differ at t[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] | open state: A_D in RB_D (-3, 4, 2) DP 0 | close -> FAILS: P11 does not extend once after P12's retract; P11 not spat
+   N_X, a piston at (-3,5,3) facing north above A_D, and D_X, a piston (plain or sticky) at (-3,5,2) facing down in front of it: built, moved during load: none | opening: the same at every tick | open state: A_D out RB_D (-3, 3, 1) DP 0 | close -> FAILS: P11 does not extend once after P12's retract; P11 not spat
+   the last of them set into the open state, where N_X is powered by Q_D and not updated (built, R_D's turning on at t8 d updates and fires it):
+      c0g level 2 EXTEND A_D@(-3, 4, 3) north; c0g level 2 EXTEND N_X@(-3, 5, 3) north; c2d repeater (-2, 6, 3) off; c2g level 0 RETRACT N_X@(-3, 5, 3) ev2: retract; c2g level 1 RETRACT A_D@(-3, 4, 3) ev2: retract+SPIT (-3, 4, 1); c2g level 2 EXTEND P11@(-2, 3, 0) east; c2g level 3 EXTEND P6@(-2, 2, 0) east; c3g level 0 EXTEND D_X@(-3, 5, 1) down; c3g level 1 RETRACT P11@(-2, 3, 0) ev2: retract+SPIT (0, 3, 0); c3g level 2 RETRACT P6@(-2, 2, 0) ev2: retract+SPIT (0, 2, 0); c6g level 0 EXTEND P6@(-2, 2, 0) east
+      what it shows: an update of A_D at c2 g, after R_D is off, spits RB_D a tick early, so P11 and P6 are out in c2; and a piston pushed over the source cell at c0 lands at c2 j beside RB11, which powers it, and pushes RB_D down at c3: both spat. RB_D ends at (-3, 3, 1) and D_X out at (-3, 5, 1)

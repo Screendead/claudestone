@@ -1,0 +1,1803 @@
+name: close_dp_off_probe
+description: 'Scratch probe for DP''s on and off, stage 2 of the 3x3 door''s close (door2/close_layout/dp_off.py). Written and replayed in the simulator; not yet run on a server. The design_c door, the
+  close feeds, P_R, the S feed and the trigger chain are fixture; the design is 7 blocks, here in door coordinates (door + (4,3,8) = spec). Redstone block RB_D rests at (-3,4,2), south of the source cell
+  (-3,4,1) of DP (-3,4,0), the dust on the stone that powers P11 (-2,3,0); sticky piston A_D (-3,4,3) faces north behind it. A_D''s only power is stone Q_D (-3,6,3), two above it (quasi-connectivity), strongly
+  powered by a 1-tick repeater R_D (-2,6,3) facing east on glass (-2,5,3). R_D reads the tap, a dust at (-1,6,3) on glass (-1,5,3), which reads NP12''s dust (0,5,3) down the step; the glass passes nothing
+  back. In the opening NP12 lights at t6 and R_D turns on at t8, updating Q_D''s neighbours but not A_D, which waits powered and not updated. The input falls; two ticks later (c0) the trigger chain runs
+  stages 0 and 1 in one block-event phase, and K''s event kills NP12: the dust under A_D dies and updates it, R_D is still on, A_D extends. R_D turns off at c2 with no update of A_D. At the end of c2 RB_D
+  lands at (-3,4,1) and lights DP, whose change updates P11; then A_D''s head lands, which updates A_D, now unpowered. In c3''s block-event phase P11 extends, A_D pulls RB_D (a moving block at once, DP
+  0), and DP''s change updates P11, which is spat: S real at (0,3). P6''s extension, queued by P11''s, finds its feed dark and is dropped; P6 extends at c4 on NA''s repeater with P1 to P5 and stays out.
+  RB_D and A_D are home after c5. Stages 3 to 5 are commands between ticks, one tick later than in close_trigger_probe: c4 a redstone block at (-1,5,1) (P10); c5 removed, blocks at (-1,3,1) (V) and (1,6,3)
+  (F_S); c6 both removed (RB_F spat to (1,5,1), V spat, S fires at (1,3)); c7 G_S''s hold (3,6,1) removed (S spat, C real at (1,1)). Each test checks the frame 5 ticks into the opening and the open state,
+  then the cells the close moves or must leave alone and the levels of DT, DS, DP and the tap against the simulator after c0, c2, c3 and later ticks (after c2: RB_D at (-3,4,1), A_D out, DP 15, R_D off;
+  after c3: RB_D and P11 moving, S at (0,3), DP 0). Controls remove one block with setblock air strict before the opening: RB_D (DP stays dark, P11 stays in), the repeater (A_D is never powered), the tap
+  dust (the repeater never turns on).'
+traits:
+- piston_based
+palette:
+  .: air
+  i:
+    input: in
+  A:
+    block: glass
+    fixture: true
+  B:
+    block: piston[facing=up,extended=false]
+    fixture: true
+  C:
+    block: stone
+    fixture: true
+  D:
+    block: redstone_wire
+    fixture: true
+  E:
+    block: redstone_block
+    fixture: true
+  F:
+    block: sticky_piston[facing=down,extended=false]
+    fixture: true
+  G:
+    block: obsidian
+    fixture: true
+  H:
+    block: repeater[facing=west,delay=1,powered=true]
+    fixture: true
+  I:
+    block: redstone_wire
+    fixture: true
+    name: dp
+  J: redstone_block
+  K: sticky_piston[facing=north,extended=false]
+  L: stone
+  M:
+    block: repeater[facing=north,delay=1,powered=true]
+    fixture: true
+  N:
+    block: sticky_piston[facing=east,extended=true]
+    fixture: true
+  O:
+    block: sticky_piston[facing=east,extended=false]
+    fixture: true
+  P:
+    block: piston[facing=west,extended=false]
+    fixture: true
+  Q: glass
+  R: repeater[facing=east,delay=1,powered=false]
+  S:
+    block: quartz_block
+    fixture: true
+  T:
+    block: piston_head[facing=east,type=sticky]
+    fixture: true
+  U:
+    block: piston_head[facing=down,type=sticky]
+    fixture: true
+  V:
+    block: repeater[facing=north,delay=3,powered=true]
+    fixture: true
+  W:
+    block: sticky_piston[facing=down,extended=true]
+    fixture: true
+  X:
+    block: redstone_wire
+    name: tap
+  Y:
+    block: sticky_piston[facing=up,extended=true]
+    fixture: true
+  Z:
+    block: piston_head[facing=up,type=sticky]
+    fixture: true
+  b:
+    block: repeater[facing=west,delay=1,powered=false]
+    fixture: true
+  c:
+    block: redstone_wire
+    fixture: true
+    name: ds
+  d:
+    block: piston[facing=north,extended=false]
+    fixture: true
+  e:
+    block: sticky_piston[facing=north,extended=false]
+    fixture: true
+  f:
+    block: redstone_wire
+    fixture: true
+    name: dt
+  g:
+    block: piston_head[facing=west,type=sticky]
+    fixture: true
+  h:
+    block: sticky_piston[facing=west,extended=false]
+    fixture: true
+  j:
+    block: sticky_piston[facing=west,extended=true]
+    fixture: true
+  k:
+    block: repeater[facing=north,delay=4,powered=false]
+    fixture: true
+  m:
+    block: repeater[facing=east,delay=1,powered=true]
+    fixture: true
+layers:
+  0: |
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ...AAAA.....
+    ....AAA.....
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+  1: |
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ..CDDDD.....
+    ....MMM.....
+    ....YYY.....
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+  2: |
+    ............
+    ............
+    ............
+    ............
+    ....SSS.....
+    ..C.SSS...A.
+    ..D.SSS...A.
+    ....SSS...A.
+    ....ZZZ..AA.
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+  3: |
+    ............
+    ............
+    ............
+    ............
+    ...S...S..C.
+    .CDS...S..D.
+    ..AS...S..D.
+    ..AS...S..D.
+    ...SSSSSCmD.
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+  4: |
+    ............
+    ............
+    ............
+    ............
+    ...S...SACD.
+    .D.S...S....
+    .CDS...S....
+    ..MS...S....
+    AANTSSSgj...
+    A..S...S....
+    BA.S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+  5: |
+    ............
+    ............
+    ............
+    ..........A.
+    ...S...SDD..
+    ...S...S....
+    .D.S...S....
+    CC.S...SA.A.
+    DHNTSSShh.A.
+    ...S...SB...
+    ED.S...S....
+    .AAS...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+    ...S...S....
+  6: |
+    ............
+    ............
+    ..........C.
+    ..........D.
+    ...CSSSD....
+    ...DSSS.AABB
+    C..DSSS.C..A
+    DD.DSSSDD.DC
+    .CONTFUU..D.
+    F.B.SSS.EEA.
+    GCP.SSSA.AA.
+    .DDASSSA....
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+    ....SSS.....
+  7: |
+    ............
+    ............
+    ..........DC
+    ...C........
+    ...D..D...EE
+    ....CDD.DDEE
+    DCAA..D.D..D
+    .C.A.BDC.A.D
+    AI.USFWWAA..
+    C.E..c..G.D.
+    .JE.GEPDCDD.
+    .K.DA..D....
+    ............
+    ............
+    ............
+    ............
+  8: |
+    ............
+    ............
+    ...CAAAAAA.D
+    ...D.....A.C
+    .........A..
+    ....D....AGG
+    .DDDC....C..
+    C..V.E...D..
+    DC.WFdB.DD..
+    D.G.A.gj....
+    ....AE..D...
+    ..QQDe......
+    ............
+    ............
+    ............
+    ............
+  9: |
+    ............
+    .....C......
+    ...DDDDDDD..
+    .........D.D
+    ......AA.D.C
+    .........D..
+    ....DE...D..
+    DCAA..gjA...
+    ....DCA.....
+    ....D..E....
+    ....D.E.....
+    .LRX........
+    ............
+    ............
+    ............
+    ............
+  10: |
+    .....E......
+    .....D......
+    ............
+    .....C......
+    .....EDDAACD
+    .....d......
+    ....AFAAC...
+    .DDDCA.Ck...
+    ....Cf.EP...
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+  11: |
+    ............
+    ............
+    ............
+    ............
+    ........DDD.
+    ............
+    ...ibCDDD...
+    ....DD.D....
+    .....C......
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+    ............
+tests:
+- name: 'one input: stages 0 and 1 in c0, RB_D in at c2, P11 out and spat in c3, RB_D pulled home; P6 on NA at c4; stages 3 to 5 by command'
+  settle: 20
+  steps:
+  - &id001
+    run: setblock ~10 ~8 ~5 air strict
+  - &id002
+    run: setblock ~11 ~8 ~5 air strict
+  - &id003
+    run: setblock ~4 ~7 ~10 air strict
+  - &id004
+    run: setblock ~8 ~7 ~9 air strict
+  - &id005
+    run: setblock ~2 ~8 ~9 air strict
+  - &id006
+    run: setblock ~0 ~6 ~10 air strict
+  - &id007
+    run: setblock ~5 ~11 ~4 redstone_block strict
+  - wait: 4
+  - drive:
+      in: 1
+  - wait: 5
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 11
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 glass
+  - check: if block ~6 ~10 ~8 redstone_block
+  - check: if block ~6 ~11 ~8 air
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=true]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=true]
+  - check: if block ~6 ~9 ~7 piston_head[facing=west,type=sticky]
+  - check: if block ~5 ~9 ~7 redstone_block
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=false]
+  - check: if block ~0 ~5 ~10 redstone_block
+  - check: if block ~0 ~6 ~10 stone
+  - check: if block ~0 ~7 ~10 air
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=true]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 15
+      ds: 0
+      dp: 0
+      tap: 10
+  - drive:
+      in: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 moving_piston
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 moving_piston
+  - check: if block ~4 ~7 ~8 moving_piston
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 moving_piston
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 moving_piston
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 moving_piston
+  - check: if block ~6 ~11 ~8 moving_piston
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 moving_piston
+  - check: if block ~7 ~9 ~7 moving_piston
+  - check: if block ~6 ~9 ~7 moving_piston
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 moving_piston
+  - check: if block ~0 ~6 ~10 moving_piston
+  - check: if block ~0 ~7 ~10 moving_piston
+  - check: if block ~0 ~6 ~9 moving_piston
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 moving_piston
+  - check: if block ~1 ~7 ~10 moving_piston
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=true]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=true]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=false]
+  - check: if block ~0 ~5 ~9 glass
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 redstone_block
+  - check: if block ~1 ~7 ~10 piston_head[facing=north,type=sticky]
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=true]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 15
+      tap: 0
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 moving_piston
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 air
+  - check: if block ~2 ~6 ~8 moving_piston
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~5 ~8 moving_piston
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 moving_piston
+  - check: if block ~1 ~7 ~11 moving_piston
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - run: setblock ~3 ~8 ~9 redstone_block
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 moving_piston
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 moving_piston
+  - check: if block ~2 ~6 ~8 moving_piston
+  - check: if block ~3 ~5 ~8 moving_piston
+  - check: if block ~4 ~5 ~8 moving_piston
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=true]
+  - check: if block ~3 ~7 ~8 moving_piston
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~5 ~8 moving_piston
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 moving_piston
+  - check: if block ~1 ~7 ~11 moving_piston
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - run: setblock ~3 ~8 ~9 air
+  - run: setblock ~3 ~6 ~9 redstone_block
+  - run: setblock ~5 ~9 ~11 redstone_block
+  - wait: 1
+  - run: setblock ~5 ~9 ~11 air
+  - run: setblock ~3 ~6 ~9 air
+  - wait: 1
+  - run: setblock ~7 ~9 ~9 air
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 moving_piston
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 moving_piston
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 quartz_block
+  - check: if block ~3 ~6 ~8 moving_piston
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 piston_head[facing=east,type=sticky]
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=true]
+  - check: if block ~3 ~7 ~8 air
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 air
+  - check: if block ~5 ~8 ~11 moving_piston
+  - check: if block ~6 ~8 ~9 moving_piston
+  - check: if block ~7 ~8 ~9 moving_piston
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=false]
+  - check: if block ~7 ~10 ~8 air
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 quartz_block
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 piston_head[facing=east,type=sticky]
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=true]
+  - check: if block ~3 ~7 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 air
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 redstone_block
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=false]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+- name: 'without RB_D the piston pushes nothing: DP stays dark, P11 stays in and S at (-1,3) (control)'
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - run: setblock ~1 ~7 ~10 air strict
+  - wait: 4
+  - drive:
+      in: 1
+  - wait: 5
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 11
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 glass
+  - check: if block ~6 ~10 ~8 redstone_block
+  - check: if block ~6 ~11 ~8 air
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=true]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=true]
+  - check: if block ~6 ~9 ~7 piston_head[facing=west,type=sticky]
+  - check: if block ~5 ~9 ~7 redstone_block
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=false]
+  - check: if block ~0 ~5 ~10 redstone_block
+  - check: if block ~0 ~6 ~10 stone
+  - check: if block ~0 ~7 ~10 air
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=true]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 15
+      ds: 0
+      dp: 0
+      tap: 10
+  - drive:
+      in: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 moving_piston
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 moving_piston
+  - check: if block ~4 ~7 ~8 moving_piston
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 moving_piston
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 moving_piston
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 moving_piston
+  - check: if block ~6 ~11 ~8 moving_piston
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 moving_piston
+  - check: if block ~7 ~9 ~7 moving_piston
+  - check: if block ~6 ~9 ~7 moving_piston
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 moving_piston
+  - check: if block ~0 ~6 ~10 moving_piston
+  - check: if block ~0 ~7 ~10 moving_piston
+  - check: if block ~0 ~6 ~9 moving_piston
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=true]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=true]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=false]
+  - check: if block ~0 ~5 ~9 glass
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=true]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 moving_piston
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~5 ~8 moving_piston
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~11 moving_piston
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 piston_head[facing=east,type=sticky]
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=true]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+- name: without the repeater the piston is never powered (control)
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - run: setblock ~2 ~9 ~11 air strict
+  - wait: 4
+  - drive:
+      in: 1
+  - wait: 5
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 11
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 glass
+  - check: if block ~6 ~10 ~8 redstone_block
+  - check: if block ~6 ~11 ~8 air
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=true]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=true]
+  - check: if block ~6 ~9 ~7 piston_head[facing=west,type=sticky]
+  - check: if block ~5 ~9 ~7 redstone_block
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=false]
+  - check: if block ~0 ~5 ~10 redstone_block
+  - check: if block ~0 ~6 ~10 stone
+  - check: if block ~0 ~7 ~10 air
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 15
+      ds: 0
+      dp: 0
+      tap: 10
+  - drive:
+      in: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 moving_piston
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 moving_piston
+  - check: if block ~4 ~7 ~8 moving_piston
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 moving_piston
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 moving_piston
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 moving_piston
+  - check: if block ~6 ~11 ~8 moving_piston
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 moving_piston
+  - check: if block ~7 ~9 ~7 moving_piston
+  - check: if block ~6 ~9 ~7 moving_piston
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 moving_piston
+  - check: if block ~0 ~6 ~10 moving_piston
+  - check: if block ~0 ~7 ~10 moving_piston
+  - check: if block ~0 ~6 ~9 moving_piston
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=false]
+  - check: if block ~0 ~5 ~9 glass
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 moving_piston
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~5 ~8 moving_piston
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 piston_head[facing=east,type=sticky]
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=true]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+      tap: 0
+- name: without the tap dust the repeater never turns on (control)
+  settle: 20
+  steps:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id006
+  - *id007
+  - run: setblock ~3 ~9 ~11 air strict
+  - wait: 4
+  - drive:
+      in: 1
+  - wait: 5
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+  - wait: 11
+  - check: if block ~4 ~3 ~8 air
+  - check: if block ~4 ~4 ~8 air
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~5 ~3 ~8 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~6 ~3 ~8 air
+  - check: if block ~6 ~4 ~8 air
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 quartz_block
+  - check: if block ~5 ~5 ~8 air
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~4 ~6 ~8 quartz_block
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 glass
+  - check: if block ~6 ~10 ~8 redstone_block
+  - check: if block ~6 ~11 ~8 air
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=true]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=true]
+  - check: if block ~6 ~9 ~7 piston_head[facing=west,type=sticky]
+  - check: if block ~5 ~9 ~7 redstone_block
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=true]
+  - check: if block ~5 ~9 ~6 piston_head[facing=down,type=sticky]
+  - check: if block ~5 ~8 ~6 redstone_block
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=false]
+  - check: if block ~0 ~5 ~10 redstone_block
+  - check: if block ~0 ~6 ~10 stone
+  - check: if block ~0 ~7 ~10 air
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 15
+      ds: 0
+      dp: 0
+  - drive:
+      in: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 moving_piston
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 moving_piston
+  - check: if block ~4 ~7 ~8 moving_piston
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 moving_piston
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 moving_piston
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 moving_piston
+  - check: if block ~6 ~11 ~8 moving_piston
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 moving_piston
+  - check: if block ~7 ~9 ~7 moving_piston
+  - check: if block ~6 ~9 ~7 moving_piston
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 moving_piston
+  - check: if block ~5 ~9 ~6 moving_piston
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 moving_piston
+  - check: if block ~0 ~6 ~10 moving_piston
+  - check: if block ~0 ~7 ~10 moving_piston
+  - check: if block ~0 ~6 ~9 moving_piston
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~9 ~8 air
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=false]
+  - check: if block ~0 ~5 ~9 glass
+  - check: if block ~0 ~4 ~9 air
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~6 ~8 quartz_block
+  - check: if block ~6 ~5 ~8 air
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 moving_piston
+  - check: if block ~0 ~4 ~9 moving_piston
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 quartz_block
+  - check: if block ~4 ~5 ~8 air
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 moving_piston
+  - check: if block ~6 ~5 ~8 moving_piston
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
+  - wait: 1
+  - wait: 1
+  - wait: 1
+  - check: if block ~5 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~6 ~8 air
+  - check: if block ~5 ~5 ~8 quartz_block
+  - check: if block ~4 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~4 ~7 ~8 quartz_block
+  - check: if block ~4 ~6 ~8 air
+  - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
+  - check: if block ~5 ~8 ~7 air
+  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~10 ~8 glass
+  - check: if block ~6 ~11 ~8 redstone_block
+  - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
+  - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
+  - check: if block ~5 ~7 ~7 piston[facing=up,extended=false]
+  - check: if block ~7 ~9 ~7 sticky_piston[facing=west,extended=false]
+  - check: if block ~6 ~9 ~7 redstone_block
+  - check: if block ~5 ~9 ~7 air
+  - check: if block ~5 ~10 ~6 sticky_piston[facing=down,extended=false]
+  - check: if block ~5 ~9 ~6 redstone_block
+  - check: if block ~5 ~8 ~6 air
+  - check: if block ~0 ~4 ~10 piston[facing=up,extended=true]
+  - check: if block ~0 ~5 ~10 piston_head[facing=up,type=normal]
+  - check: if block ~0 ~6 ~10 redstone_block
+  - check: if block ~0 ~7 ~10 stone
+  - check: if block ~0 ~6 ~9 sticky_piston[facing=down,extended=true]
+  - check: if block ~0 ~5 ~9 piston_head[facing=down,type=sticky]
+  - check: if block ~0 ~4 ~9 glass
+  - check: if block ~5 ~4 ~8 air
+  - check: if block ~3 ~6 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~2 ~6 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~5 ~8 piston_head[facing=east,type=sticky]
+  - check: if block ~4 ~5 ~8 quartz_block
+  - check: if block ~2 ~5 ~8 sticky_piston[facing=east,extended=true]
+  - check: if block ~3 ~7 ~8 sticky_piston[facing=east,extended=false]
+  - check: if block ~3 ~8 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~6 ~7 ~8 sticky_piston[facing=down,extended=true]
+  - check: if block ~6 ~6 ~8 piston_head[facing=down,type=sticky]
+  - check: if block ~6 ~5 ~8 quartz_block
+  - check: if block ~7 ~7 ~8 sticky_piston[facing=down,extended=false]
+  - check: if block ~7 ~6 ~8 sticky_piston[facing=west,extended=false]
+  - check: if block ~7 ~5 ~8 quartz_block
+  - check: if block ~5 ~8 ~9 air
+  - check: if block ~5 ~8 ~10 redstone_block
+  - check: if block ~5 ~8 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~6 ~8 ~9 piston_head[facing=west,type=sticky]
+  - check: if block ~7 ~8 ~9 sticky_piston[facing=west,extended=true]
+  - check: if block ~1 ~7 ~9 air
+  - check: if block ~1 ~7 ~10 redstone_block
+  - check: if block ~1 ~7 ~11 sticky_piston[facing=north,extended=false]
+  - check: if block ~2 ~9 ~11 repeater[facing=east,delay=1,powered=false]
+  - check: if block ~1 ~9 ~11 stone
+  - check: if block ~1 ~6 ~8 stone
+  - level:
+      dt: 0
+      ds: 0
+      dp: 0
