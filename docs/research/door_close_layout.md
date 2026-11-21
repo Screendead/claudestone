@@ -169,16 +169,14 @@ below set or clear SRC_P between two block events of one phase: they show which 
   of the pistons that could stand there only (-2,2,1) facing west updates one of the three, the piston under the block,
   and nothing powers it there ((-2,4,0) is QC-powered by RB11 through the open state).
 - NA route [COMPUTED]: a sticky piston P_W at (-4,4,-1) facing east has the bus's stone above it and NA's dust north of
-  it, so it is powered except from c0 to c2 j. In the closed state it holds CP at (-2,4,-1) and DP reads NA at 8; P11 does
-  not move (V is in front [INFERRED]). Opening: open-state diff none, the door's pistons and the door plane the same at
-  every tick, box 1728, DP 0. Close: P_W pulls CP into the cut at c0 (level 0), CP lands at c2 j, P_W pushes it out
-  at c3 (level 0) and DP reads NA: P11 extends at level 1 and P6 at level 2, three ticks after P12's retract, as block
-  events; the same with dust's updates reversed and I_A's event last. If NA
-  relights before CP lands, the P11 and P6 events queued then find no power at c3 and are dropped. DP then stays lit:
-  CP's cell takes a block at once only from two cells away (a spit) [INFERRED], and those are r_P10's glass (-1,4,-1),
-  the bus's stone (-3,6,-1), NA's stone and a cell outside the box. Not adopted: it replaces the stand-in's on with an on
-  no command can
-  cut.
+  it, so it is powered except from c0 to c2 j. In the closed state it holds CP at (-2,4,-1) and DP reads NA at 8; P11
+  does not move (V is in front [INFERRED]). Opening: open-state diff none, the door's pistons and the door plane the same
+  at every tick, box 1728, DP 0. Close: P_W pulls CP into the cut at c0 (level 0), CP lands at c2 j, P_W pushes it out at
+  c3 (level 0) and DP reads NA: P11 extends at level 1 and P6 at level 2, three ticks after P12's retract, as block
+  events; the same with dust's updates reversed and I_A's event last. If NA relights before CP lands, the P11 and P6
+  events queued then find no power at c3 and are dropped. DP then stays lit: CP's cell takes a block at once only from
+  two cells away (a spit) [INFERRED], and those are r_P10's glass (-1,4,-1), the bus's stone (-3,6,-1), NA's stone and a
+  cell outside the box. Not adopted: it replaces the stand-in's on with an on no command can cut.
 - Search [COMPUTED dp_search.txt]: blocks set without updates into the open state (a piston may stand powered and not
   extended), then the close from the input with no DP command; a pass needs stages 0 and 1 done, P11 out after P12's
   retract and spat, P6 out and spat, S at (0,3,0), no dust lost, by c6. In the 40 free cells of x -4..-2, y 2..6,
