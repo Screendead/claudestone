@@ -7,27 +7,23 @@ import os
 
 import pytest
 
+from library_specs import load
 from redstone import fileformat, spec
 from redstone.library import name_of, paths
 
 
 def _cases():
     # Other people may be writing library files while this collects; a file that doesn't
-    # load fails test_loads instead of stopping collection.
+    # load fails test_lint's test_library_lints_clean instead of stopping collection.
     for path in paths():
         try:
-            tests = fileformat.load(path).tests
+            tests = load(path).tests
         except Exception:
             continue
         yield from ((path, t["name"]) for t in tests)
 
 
 CASES = list(_cases())
-
-
-@pytest.mark.parametrize("path", paths(), ids=name_of)
-def test_loads(path):
-    fileformat.load(path)
 
 
 @pytest.mark.parametrize("path,name", CASES, ids=[f"{name_of(p)}::{n}" for p, n in CASES])

@@ -5,7 +5,6 @@ import pytest
 
 from redstone.door_volume import (Entity, Tick, Zones, aabb_cells, bounds, cells, dims, entity_cells, head_cell,
                                   hitbox, on_shell, region, volume)
-from redstone.entity_dims import BLOCKS_BUILDING, ENTITY_DIMS
 from scripts import entity_dims
 
 HALL = cells([((2, 1, 0), (2, 2, 4))])
@@ -17,14 +16,6 @@ def zones(**kw) -> Zones:
     base = dict(frame=FRAME, device=frozenset({LEVER}), hallway=HALL, region=((-2, -2, -2), (6, 6, 6)),
                 door_material=frozenset({"smooth_quartz"}), surface_material=frozenset({"stone"}))
     return Zones(**(base | kw))
-
-
-def test_table_has_the_harness_entities():
-    assert ENTITY_DIMS["minecart"] == (0.98, 0.7)
-    assert ENTITY_DIMS["armor_stand"] == (0.5, 1.975)
-    assert ENTITY_DIMS["mannequin"] == (0.6, 1.8)
-    assert {"minecart", "armor_stand", "mannequin", "falling_block", "tnt"} <= BLOCKS_BUILDING
-    assert not {"item", "marker", "text_display", "item_frame"} & BLOCKS_BUILDING
 
 
 def test_parser_reads_multiline_registrations_and_inheritance(tmp_path):

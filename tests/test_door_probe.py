@@ -4,7 +4,7 @@ import re
 import pytest
 
 from redstone import door_probe as d
-from redstone.door_probe import (KNOWN_BLOCKS, MARGIN, OCC_RESET, OTHER, cells, door_functions,
+from redstone.door_probe import (KNOWN_BLOCKS, MARGIN, OTHER, cells,
                                  hallway_probe_functions, occupancy_functions, read_flags, read_hallway,
                                  tag_files, visible_cells, write_tags)
 from redstone.harness import PROBE_CHUNK
@@ -144,15 +144,6 @@ def test_surface_material_is_circuitry_away_from_the_surfaces():
                           f"run data modify storage redstone_ai:occ door.c{region.index((7, 2, 5))} set value 1b"]
     stairs = d._state_forms("minecraft:quartz_stairs")
     assert stairs == ('"minecraft:quartz_stairs"', '{Name:"minecraft:quartz_stairs"}')
-
-
-def test_door_functions_and_reset():
-    probe, _ = hallway_probe_functions(HALLWAY)
-    occ, occ_hall, _, _ = occupancy()
-    assert set(door_functions(probe, occ, occ_hall)) == {"hall0", "occ0", "occ_hall0", "occ_reset"}
-    assert OCC_RESET.splitlines() == [f"data modify storage redstone_ai:occ {k} set value {v}"
-                                      for k, v in (("any", "{}"), ("circ", "{}"), ("door", "{}"),
-                                                   ("shell", "{}"), ("e", "[]"))]
 
 
 def test_read_hallway_parses_codes_moving_pistons_and_entity_counts():

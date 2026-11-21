@@ -255,7 +255,8 @@ trace → `package` data pack.
   showroom use the same pass), a `door:` section (doorway origin/width/height/facing, depth,
   door and surface material, input plus fixture `repeater[delay=1]` or a `lever` flipped like a
   click, tier) and the `door_cycle` test kind. `dump` must round-trip
-  what `load` reads; `tests/test_generated.py` fails if a generated file is stale.
+  what `load` reads; `tests/test_generated.py` fails if a generated file is stale (all but
+  `two_digit_adder`, `cpu_alu_compact` and `cpu_fib4`, which take minutes, unless `REDSTONE_GENERATED=all`).
 - `redstone/harness.py`: `Rig` owns one plot. It clears with `fill … air strict` (no
   item drops), kills non-player entities in it (but not the watch camera), 2 blocks around
   it and up to the build height, waits `FLUSH_TICKS` so burnt-out torches recover, kills again (entity sections

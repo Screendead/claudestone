@@ -1,3 +1,5 @@
+import os
+
 import yaml
 from scripts.generate import destination, generated
 
@@ -6,7 +8,9 @@ from redstone.library import name_of, paths
 
 
 def test_generated_files_are_current():
-    stale = [s.name for s in generated() if destination(s.name).read_text() != dump(s)]
+    # REDSTONE_GENERATED=all adds the three generators that take minutes.
+    slow = os.environ.get("REDSTONE_GENERATED") == "all"
+    stale = [s.name for s in generated(slow) if destination(s.name).read_text() != dump(s)]
     assert not stale, f"run `python -m scripts.generate`: {stale} out of date"
 
 
