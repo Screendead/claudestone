@@ -930,7 +930,7 @@ events of one phase: they show which orders work, not how to get them.
    (2026-11-22, main server): `close_rbt_drives_probe` 4/4, and the six probes re-exported for K_T 23/23. The fix first chosen for RB_T, a piston at (1,7,-1),
    fires in the opening (K_in powers it by QC), and Z_T sticky, W_T sticky or another hold for T do not open it either;
    RB_ST's own route takes eight pistons (rbt_route.txt). The west side goes home from blocks as well [COMPUTED
-   west_drives.txt; not yet measured: `close_west_drives_probe`]: RB12 kicked west and back by P_W (-6,3,2), which RB_W
+   west_drives.txt; MEASURED (2026-11-22, main server): `close_west_drives_probe` 3/3]: RB12 kicked west and back by P_W (-6,3,2), which RB_W
    holds and A_W releases, K and M_K in at the kick, then G and RB12 pushed down together by P_G (-4,6,2), WK left
    beside K by M_K's release, K stopped by G above RB12; one pulse from the east return's line; 34 blocks, no measured
    block changed, box 2520; 24 cells then still differ. G ends at (-4,3,2), not at (-3,3,2), which is Y12's head: its
@@ -968,8 +968,8 @@ re-exported probes pass in game on the re-laid bus (23/23 on the main server, 20
 blocks and MEASURED (rbt_drives.txt: 49 blocks, K_T sticky, box 2160; `close_rbt_drives_probe` 4/4 and the six probes
 re-exported for K_T 23/23 on the main server, 2026-11-22, traits ok): the trigger chain's east side ends as loaded from the
 one input with no command. The west side's return is designed from blocks (west_drives.txt: 34 blocks, no measured block
-changed, box 2520; `close_west_drives_probe` 3/3 in the simulator, not yet run on a server): RB12, K, M_K and WK end as
-loaded, G at (-4,3,2), and NP12 is lit again from c60. Next: measure `close_west_drives_probe`; then the opening's
+changed, box 2520; MEASURED: `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` still 4/4 on the main server,
+2026-11-22, traits ok): RB12, K, M_K and WK end as loaded, G at (-4,3,2), and NP12 is lit again from c60. Next: the opening's
 relays, Y12 first because the lit NP12 waits on it: its two holds (ARM_Z11 and RB_D) away and back without an update,
 G's last cell (Y12 sticky, or a mover from the west), and A_D's shot when NP12 dies; then D9's source and ARM_Z9's
 puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1 with the blocker). If P6 must be
