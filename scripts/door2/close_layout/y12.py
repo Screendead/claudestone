@@ -5,7 +5,7 @@ drives named, not yet a design. Everything printed is COMPUTED on the simulator;
 
 Sticky  Y12 is a sticky piston here. It is a measured block of design_c, a plain piston there. A plain Y12 leaves G
         at (-4,3,2): a block goes east out of that cell only by a piston in (-5,3,2), where P_W's head stands, or by
-        Y12's pull. The opening, the close and the returns are the same at every tick with Y12 sticky (below).
+        Y12's pull. The opening, the close and the returns are the same at every tick with Y12 sticky (west_drives.txt).
 Holds   Y12 is held by ARM_Z11, on it, and by RB_D beside ARM_Z11 (QC). Every cell one step from ARM_Z11 powers Y12
         too, so no one step takes it away; a redstone block powers nothing while it moves. Both blocks are lifted
         one cell and put back, and Y12 is updated while both move.
