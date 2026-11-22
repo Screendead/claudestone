@@ -398,7 +398,8 @@ if __name__ == "__main__":
           "updates, then taken out, P9 updated each time)")
     x = noted(plain, before=pulse(1, 1))
     print("   the plan's order, P9 in stage 1 (out at c1, spat at c2) with P7 on NA at c3:",
-          "; ".join(pv.told(x, "c", lambda m: any(n in m for n in (" P9@", " P7@", " P5@", str(P5))))[:5]), "->", top_row(x))
+          "; ".join(pv.told(x, "c", lambda m: any(n in m for n in (" P9@", " P7@", " P5@", str(P5))))), "->", top_row(x) + ",",
+          "P5", "out" if t.at(x, "P5")[2] else "in (r_P5's turning on at c4 finds R's cell (2,1,0) taken)")
     print("   this order, P9 after stage 5 (S's head is in (1,2,0) from c14 g to its spit in c15 g); done: TM real at (2,2,0), TR at (1,2,0), P9 in")
     for on in (14, 15, 16, 17):
         print(f"   P9 powered before c{on}, released 1 / 2 / 3 gt later:", " / ".join(
