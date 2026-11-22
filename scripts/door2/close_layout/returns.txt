@@ -48,7 +48,7 @@ cells outside the door plane that differ: 41, dust levels apart
       from (-4, 3, 2), north to (-4, 3, 1): M_K there
       from (-4, 3, 2), south to (-4, 3, 3): no mover ((-4, 3, 1): M_K; (-4, 3, 4): outside the box)
    RB_ST down to (2,7,0), SPC taken out first (what-if): a redstone block there fires W_T (DT lit, FT powers W_T, whose head takes (1,5,-1), RB_T's closed cell)
-   SPC (2,7,0) to (2,6,0): K_T's head is in (2,6,0) and RB_T holds K_T. K_T sticky (what-if): opening and close the same but K_T's head is sticky and SPC is real at (2,7,0) instead of moving after c0, c1; any other cell: none | K_T would pull SPC home when it retracts, which needs RB_T gone from (2,6,-1)
+   SPC (2,7,0) to (2,6,0): K_T's head is in (2,6,0) and RB_T holds K_T. K_T is sticky (since rbt_drives.py); as the plain piston it was, opening and close the same but K_T's head is not sticky and SPC is moving, not real, at (2,7,0) after c0, c1; any other cell: none | K_T pulls SPC home when it retracts, which needs RB_T gone from (2,6,-1)
    G (-4,4,2) to (-3,3,2): its closed cell is Y12's head, and Y12 is held by its arm (above)
 
 == what-if (sim only): Z9 returned in place, by command. D9, a piston at (4,5,1) facing down, added; ARM_Z9 out before c13 and back before c27; a redstone block at (4,6,1), D9's stand-in source, before c21 and out before c29
@@ -113,15 +113,15 @@ cells outside the door plane that differ: 41, dust levels apart
 
 == the trap: P_R woken straight after the close (RB_ST set home before c31, a glass block set and cleared beside P_R before c32, H_T's source before c40)
    c32g level 0 EXTEND P_R@(3, 6, -1) west
-   c32g level 1 RETRACT K_T@(2, 5, 0) ev1: retract
+   c32g level 1 RETRACT K_T@(2, 5, 0) ev1: retract+PULL SPC@(2, 7, 0)
    c35g level 0 EXTEND W_T@(1, 5, 0) north
    -> {'RB_T': ((1, 6, -1), 'real', None), 'W_T': ((1, 5, 0), 'real', True), 'K_T': ((2, 5, 0), 'real', False), 'H_T': ((1, 9, -1), 'real', False)} | W_T powered by ['RB_T (1, 6, -1) QC']
       K_T, held by RB_T at (2,6,-1), retracts in P_R's phase; its base lands in the same phase j as RB_T, behind it, and updates W_T, which RB_T at (1,6,-1) powers by QC: W_T's head takes (1,5,-1) and H_T's push stops on it
 
-== what-if (sim only): RB_T returned by command. N_T's stand-in source (3,6,-3) before c32 and out before c34 (the kick); RB_ST out of (2,8,0) and at (3,7,0) before c37; the source again before c38 and out before c43; H_T's stand-in source (1,10,-1) before c45 and out before c48; SPC out of (2,7,0) and at (2,6,0) before c51
+== what-if (sim only): RB_T returned by command. N_T's stand-in source (3,6,-3) before c32 and out before c34 (the kick); RB_ST out of (2,8,0) and at (3,7,0) before c37; the source again before c38 and out before c43; H_T's stand-in source (1,10,-1) before c45 and out before c48; no command for SPC: K_T pulls it home at the kick
    c32g level 0 EXTEND N_T@(2, 6, -3) south
    c34g level 0 RETRACT N_T@(2, 6, -3) ev1: retract+PULL RB_T@(2, 6, -1)
-   c34g level 1 RETRACT K_T@(2, 5, 0) ev1: retract
+   c34g level 1 RETRACT K_T@(2, 5, 0) ev1: retract+PULL SPC@(2, 7, 0)
    c38g level 0 EXTEND N_T@(2, 6, -3) south
    c41g level 0 EXTEND P_R@(3, 6, -1) west
    c43g level 0 RETRACT N_T@(2, 6, -3) ev1: retract
@@ -146,5 +146,5 @@ cells outside the door plane that differ: 41, dust levels apart
       RB_ST home before the kick (c31): P_R, powered, is updated when RB_T is pulled away and extends into the empty cell: FAILS: (1, 5, -1) air; (2, 6, -2) rb[id=RB_T]; T not powered by RB_T | RB_T (2, 6, -2) P_R out W_T in
       no GB: Z_T lifts RB_T alone and H_T's push ends a cell short: FAILS: (1, 5, -1) air; (1, 6, -1) rb[id=RB_T]; Z_T powered by [(1, 6, -1)]; W_T powered by [(1, 6, -1)] | RB_T (1, 6, -1) P_R out W_T in
       no source for H_T: RB_T stays at (1,6,-1): FAILS: (1, 5, -1) air; (1, 6, -1) rb[id=RB_T]; (1, 7, -1) glass[id=GB]; (1, 8, -1) glass[id=GA] | RB_T (1, 6, -1) P_R out W_T in
-      N_T not sticky: no kick, RB_T is never in front of N_T's head: FAILS: (1, 5, -1) air; (3, 6, -1) sticky_piston[extended=False,facing=west,id=P_R]; (2, 6, -1) rb[id=RB_T]; (2, 5, 0) piston[extended=True,facing=up,id=K_T] | RB_T (2, 6, -1) P_R in W_T in
-   K_T made sticky (what-if; a measured block changed), no command for SPC: done: K_T pulls SPC home when the kick releases it | SPC (2, 6, 0)
+      N_T not sticky: no kick, RB_T is never in front of N_T's head: FAILS: (1, 5, -1) air; (3, 6, -1) sticky_piston[extended=False,facing=west,id=P_R]; (2, 6, -1) rb[id=RB_T]; (2, 5, 0) sticky_piston[extended=True,facing=up,id=K_T] | RB_T (2, 6, -1) P_R in W_T in
+      K_T a plain piston, as it was when this what-if was first run (SPC was then set home by command): FAILS: (2, 6, 0) air; (2, 7, 0) glass[id=SPC] | SPC (2, 7, 0)

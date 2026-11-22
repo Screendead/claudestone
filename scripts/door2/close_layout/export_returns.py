@@ -3,8 +3,8 @@ library/mechanics/close_returns_probe.redstone.yaml. The five: D9, the down-push
 RB_T's four, the down-pusher H_T at (1,9,-1), its glass spacers GA (1,7,-1) and GB (1,6,-1) and the kicker N_T at
 (2,6,-3). It measures returns.py's two what-ifs, Z9 returned in place and RB_T returned down the column, each with
 its drives stood in for by commands after the input (ARM_Z9 taken out and set back and a redstone block above D9;
-redstone blocks beside N_T and above H_T, RB_ST and SPC set home). So it is a probe of the mechanisms, not a
-design: the design may have no command after the input. Each test opens the door on the input, drops it, checks
+redstone blocks beside N_T and above H_T, RB_ST set home). So it is a probe of the mechanisms, not a design: the
+design may have no command after the input (RB_T's is rbt_drives.py, probed by close_rbt_drives_probe). Each test opens the door on the input, drops it, checks
 after the ticks that decide it the cells the close moves or must leave alone and the what-if's cells against the
 simulator; the Z9 tests then give Z9 one update (a glass block set under it and taken out) and check whether it
 fires.
@@ -127,12 +127,13 @@ def main():
             "D9: RB9 stays over Z9 and P9's landing fires Z9 again at c25. "
             "RB_T: Z_T lifts RB_T, GB and GA together at t3, so after the close GB is at (1,7,-1), GA at (1,8,-1) and RB_T at "
             "(2,6,-1), where P_R's pull left it and where it holds K_T out by QC. A redstone block beside N_T (its stand-in source, "
-            "(3,6,-3)) before c32 and out before c34: N_T goes out and in and pulls RB_T north to (2,6,-2); K_T retracts. RB_ST is "
+            "(3,6,-3)) before c32 and out before c34: N_T goes out and in and pulls RB_T north to (2,6,-2); K_T, a sticky piston "
+            "since rbt_drives.py, retracts and pulls SPC home to (2,6,0). RB_ST is "
             "taken out of (2,8,0) and set at (3,7,0), its closed cell, before c37: it powers P_R by QC without updating it. The "
             "source again before c38: N_T pushes RB_T back, its landing at the end of c40 updates P_R, and P_R pushes it to (1,6,-1) "
             "at c41; the source out before c43. A redstone block above H_T ((1,10,-1)) before c45: H_T pushes GA, GB and RB_T down "
-            "one cell and RB_T lands at (1,5,-1) at the end of c47; the block out before c48, H_T retracts. SPC is set back at "
-            "(2,6,0) by command before c51. RB_T, GA, GB, P_R, K_T, Z_T, W_T and the S feed's cut are then as the closed state has "
+            "one cell and RB_T lands at (1,5,-1) at the end of c47; the block out before c48, H_T retracts. "
+            "RB_T, GA, GB, P_R, K_T, SPC, Z_T, W_T and the S feed's cut are then as the closed state has "
             "them. The fifth test leaves the kick out (RB_ST home before c31, a glass block set and cleared beside P_R before c32): "
             "K_T's base lands in the same tick as RB_T, behind it, and wakes W_T, which RB_T at (1,6,-1) powers by QC; W_T's head "
             "takes (1,5,-1) and H_T's push at c40 stops on it. The sixth has no source for H_T: RB_T stays at (1,6,-1). "

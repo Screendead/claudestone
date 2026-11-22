@@ -25,8 +25,8 @@ T     The feed is armed in the open state, not in c0: AP (4,7,0), a piston facin
       (level 2). FT also QC-powers P12 through the open state.
 DT off  W_T (1,5,0), a piston facing north above T: powered by FT, blocked by Z_T's head until Z_T's
       retract event, which queues T first and W_T after it (level 2). W_T's extension updates K_T (2,5,0), a
-      piston facing up under glass SPC (2,6,0) and RB_ST: QC-powered by RB_ST and FT, three from DT, so no
-      update since RB_ST landed (level 3). K_T pushes SPC and RB_ST up: DT dies inside K_T's event and its
+      sticky piston facing up under glass SPC (2,6,0) and RB_ST: QC-powered by RB_ST and FT, three from DT, so
+      no update since RB_ST landed (level 3). K_T pushes SPC and RB_ST up: DT dies inside K_T's event and its
       change updates W_T, two below FT (level 4). W_T's retract event updates T, which is spat (level 5):
       the update the S probe's POKE stood in for.
 P12   K (-4,1,2), a piston facing up under RB12, QC-powered by L (-3,2,2), armed from the load: design_c's
@@ -36,7 +36,12 @@ P12   K (-4,1,2), a piston facing up under RB12, QC-powered by L (-3,2,2), armed
       at level 5, after DT is dark: the order is T's 0-tick first, then P12, in one phase.
 Rest  After the close RB_ST is at (2,8,0) and SPC at (2,7,0), RB12 at (-4,3,2) and G at (-4,4,2); RB12 there
       powers M_K (out again from c3, WK back beside K) and K; RB_T at (2,6,-1) QC-powers K_T, which NA's
-      relight updates (out from c3). The return is not designed.
+      relight updates (out from c3, its head under SPC). The east side's return is rbt_drives.py's.
+Sticky K_T is sticky since 2026-11-22 (it was a plain piston when the six probes were first measured): DT's death
+      unpowers it inside its own extension, so it is released at once and spits SPC, which is real at (2,7,0)
+      from c0 g instead of landing at c2 j; RB_ST, the second block of the push, lands at (2,8,0) at c2 j as
+      before, and every other cell of the opening and of the close is the same at every tick (returns.py).
+      The return needs it: when RB_T is lifted off (2,6,-1) K_T retracts and pulls SPC home to (2,6,0).
 
 Probe stand-ins, set by command between ticks: SRC_P (-3,4,1) south of DP ((-4,4,0) is now the bus's
 support) and s_feed.py's SRC_10, SRC_V, SRC_F and HOLD_G.
@@ -62,7 +67,7 @@ BUS_EAST = {(2, 7, -2): GLASS, (2, 8, -2): DUST, (3, 7, -2): GLASS, (3, 8, -2): 
             (4, 7, -2): STONE, (4, 8, -2): DUST}
 ARMING = {(4, 6, -1): GLASS, REP: B("repeater", facing="north", delay=4, powered=False),
           AP: pis("piston", "west", "AP"), RB_ST: B("rb", id="RB_ST")}
-RELAY = {W_T: pis("piston", "north", "W_T"), K_T: pis("piston", "up", "K_T"), SPC: B("glass", id="SPC")}
+RELAY = {W_T: pis("piston", "north", "W_T"), K_T: pis("sticky_piston", "up", "K_T"), SPC: B("glass", id="SPC")}
 BUS_WEST = {(1, 9, -2): DUST, (0, 9, -2): STONE, (0, 10, -2): DUST, (0, 8, -1): GLASS, (0, 9, -1): DUST,
             (-1, 8, -1): STONE, (-1, 9, -1): DUST, (-2, 7, -1): STONE, (-2, 8, -1): DUST, (-3, 6, -1): STONE,
             (-3, 7, -1): DUST, (-4, 5, -1): STONE, (-4, 6, -1): DUST, (-4, 4, 0): GLASS, (-4, 5, 0): DUST,
@@ -157,7 +162,7 @@ def at(w, ident):
 # after the tick c0: stages 0 and 1 done inside one phase
 NEED_C0 = {"RB_A": (RB_A_HOME, "moving"), "RB_T": (pr.HEAD, "moving"), "Z_T": ((1, 4, -1), "moving"),
            "T": ((1, 4, 0), "moving"), "C": ((1, 2, 0), "real"), "W_T": (W_T, "moving"), "K_T": (K_T, "moving"),
-           "SPC": (SRC, "moving"), "RB_ST": (UP, "moving"), "RB12": (RB12_UP, "moving"), "G": (G_UP, "moving"),
+           "SPC": (SRC, "real"), "RB_ST": (UP, "moving"), "RB12": (RB12_UP, "moving"), "G": (G_UP, "moving"),
            "P12": ((0, 5, 0), "moving"), "SP": ((0, 4, 0), "moving"), "S": ((-1, 3, 0), "real"), "P11": ((-2, 3, 0), "real")}
 # 12 ticks after c0, stages 2 to 5 driven by command; P7, P6 and P10 are out again on NA's relight (c2 j)
 NEED_END = {"S": ((1, 3, 0), "real", False), "C": ((1, 1, 0), "real", None), "T": ((1, 4, 0), "real", False),
