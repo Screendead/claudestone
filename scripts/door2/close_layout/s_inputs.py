@@ -287,8 +287,7 @@ if __name__ == "__main__":
     print("\n== after the close (what-if; RB_ST's return is not designed): RB_ST taken out of (2,8,0) by command before c24, to c44")
     print("\n".join("   " + x for x in pv.told(gone) if pv.tick_of(x) >= 24))
     print(f"   RB_ST's neighbours after c{LAST}:", ", ".join(f"{c} " + (PARTS.get(c) or w.get(c).p.get("id") or w.get(c).n) for c in
-                                                             [tuple(a + b_ for a, b_ in zip(RB_UP, x)) for x in DIRS.values()]),
-          "((2,9,0) is outside the box)")
+                                                             [tuple(a + b_ for a, b_ in zip(RB_UP, x)) for x in DIRS.values()]))
     print("   the 13 blocks and the cut cell against the open state:", "the same" if state(gone) == state(mine) else
           {c: (mine.get(c), gone.get(c)) for c in state(mine) if mine.get(c) != gone.get(c)}, "|", levels(gone), "| F_S", pv.fired(gone, "F_S"),
           "| A_C", pv.fired(gone, "A_C"))
