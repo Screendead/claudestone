@@ -573,6 +573,16 @@ if __name__ == "__main__":
         wq.tick()
         lit += [f"{n} {tick_name(k)}" for n, c in (("H_T", H_T), ("N_T", N_T)) if power_sources(wq, c)]
     print("   H_T and N_T powered:", ", ".join(lit) or "never: not in the closed state, nor after any tick of the opening or of the close to c30")
+    hx = copy.deepcopy(ro)
+    hx.log.clear()
+    hx.cmd_set(SRC_H, t.RB)
+    hx.run(4)
+    moved_h = [m.split(":")[0] for _, _, m in hx.log if " H_T@" in m and ("EXTEND" in m or "RETRACT" in m)]
+    hw = pp.noted(hx)
+    print("   H_T's stand-in source set in the open state and left on (what-if): H_T", "moves: " + "; ".join(moved_h) if moved_h else
+          "does not move (powered, and Z_T's head under RB_T stops the push)", "| through the close to c30:",
+          "; ".join(x for x in pv.told(hw) if " H_T@" in x) or "no H_T event,", "cells that differ from the close without it:",
+          sorted(c for c in set(hw.b) | set(ra.b) if hw.get(c) != ra.get(c)))
     print("   the bus dust beside H_T in the open state:", {c: ro.get(c).p["power"] for c in ((1, 9, -2), (0, 9, -1))},
           "| neither points at it: (1,9,-2) runs west up the step and east down it, (0,9,-1) north up the step and west")
 
