@@ -428,6 +428,7 @@ to up (9,2,7) |
 | close_feeds_probe | 8x5x2 | 80 | 9 | - | piston_based | Scratch probe for the door close (door2/close_layout/feeds.py) |
 | close_p10_v_probe | 2x1x1 | 2 | 2 | - | piston_based | Scratch probe for P10 and V, stages 3 and 4 of the 3x3 door's close (door2/close_layout/p10_v.py) |
 | close_s_feed_probe | 3x2x3 | 18 | 5 | - | piston_based | Scratch probe for S's H2 feed in the door close (door2/close_layout/s_feed.py) |
+| close_s_inputs_probe | 4x3x3 | 36 | 13 | - | piston_based | Scratch probe for the S feed's inputs, stage 5 of the 3x3 door's close (door2/close_layout/s_inputs.py) |
 | close_trigger_probe | 9x8x5 | 360 | 36 | - | piston_based | Scratch probe for the close's trigger chain (door2/close_layout/trigger.py) |
 | comparator_block_state_constants | 7x2x4 | 56 | 38 | - | comparator_based, analog, lightless, silent, pistonless, entityless, flat, compact, survival_friendly | Comparators read fixed 0-15 constants from block state alone (cake, end portal frame, beehive, composter, cauldrons, respawn anchor), directly or through a solid block, for item-free subtract-side constants; chiseled bookshelf and crafter need block-entity NBT, and a lone creaking heart reads 0 |
 | comparator_compare_is_ge | 12x2x15 | 360 | 206 | - | flat, analog, comparator_based, survival_friendly | Compare mode passes the rear strength when rear >= side (ties pass) else 0; subtract gives max(rear - side, 0) |

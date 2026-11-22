@@ -19,6 +19,9 @@ No structural obstruction; full close not yet shown end to end.
 - P10 and V (stages 3 and 4): two blocks, shown in the simulator on 2026-11-22, both commands are gone: P10 extends at c8
   on design_c's own repeater and V at c11 on a repeater from NA into NV; neither is spat. Section "P10 and V, stages 3 and
   4" below.
+- The S feed's inputs (stage 5): thirteen blocks, shown in the simulator on 2026-11-22, the last commands are gone: the
+  close runs through stage 5 from the one falling input. F_S is out from c10 to c15 on a repeater that reads RB_ST and a
+  stone that cuts its feed; RB_F goes home by itself and G_S is taken out. Section "The S feed's inputs, stage 5" below.
 
 Close order [SOURCED plan_common.txt]: 0 P12 retract | 1 T, P9, P1-P6 | 2 P11 | 3 P10 | 4 V H2 | 5 S H2 | 6 P8 | 7 Q H2 | 8 P7
 
@@ -268,6 +271,76 @@ no block, and neither P10 nor V is spat (below).
   to c17, so P8 stays in. `close_dp_off_probe` 4/4, `close_trigger_probe` 4/4, `close_s_feed_probe` 6/6 and
   `close_feeds_probe` 8/8 still pass.
 
+## The S feed's inputs, stage 5 (2026-11-22; simulator; not yet run on a server)
+Thirteen blocks take the last three commands out of the close: stages 0 to 5 run from the one falling input with no
+command after it, and the opening is unchanged [COMPUTED s_inputs.txt]. Not as framed in two ways: the drive is C, not A,
+so nothing is spat and G_S and its hold are taken out; and the feed is cut, not turned off.
+- Blocks: R_F, a 4-tick repeater at (2,8,1) facing north on glass (2,7,1); dust D_1 (2,8,2) on glass (2,7,2) and D_2
+  (1,8,2) on stone (1,7,2); dust D_F (1,7,3) on stone Q_F (1,6,3), which is above F_S; R_C, a 1-tick repeater at (0,8,2)
+  facing east on glass (0,7,2); stone Q_C (-1,8,2); A_C, a sticky piston at (-1,8,3) facing east; stone C_F (0,8,3).
+  Eight work and five carry them. Taken out: G_S (3,5,1), its head (2,5,1) and HOLD_G (3,6,1). Opening: open-state diff
+  none, no cell differs outside the 13 and G_S's three, the door's pistons and the door plane the same at every tick,
+  nothing moves during the load, no added cell changes in the opening, no piston has an added cell among its power
+  sources in the closed or the open state, box 1728 through the opening and the close [COMPUTED].
+- Drive: C of the S feed, F_S alone. A needs two inputs, a pulse on F_S that ends within 2 gt and a hold that falls at
+  c14 to c16, and leaves RB_F parked beside P7. C needs one: F_S out from c9 or c10 and released at c14 (behind S's
+  event), c15 or c16; out from c8 or c11, or released at c13 or c17, it fails [COMPUTED by command on SRC_F]. With G_S and
+  HOLD_G left in the run is the same, event for event.
+- Source: RB_ST, the trigger chain's redstone block. K_T's push in c0 leaves it at (2,8,0), where it lands at c2 j; it
+  is at (3,7,0) in the closed state and at (2,7,0) in the open state, so R_F, which reads (2,8,0), is off through both
+  and through the opening [COMPUTED]. Why RB_ST [INFERRED]: R_F needs a level that rises in the close and is off in the
+  closed and the open state; NA and NV rise north of the door plane, and NP12 and the tap, south of it, fall in c0.
+- On: R_F turns on at c10 d: D_1 15, D_2 14, D_F 13, one step down from D_2 (the stone under D_2 passes it; on glass
+  D_F stays dark). D_F powers Q_F and its change updates F_S, two below it, as DT does W_T. F_S extends at c10 g and
+  stays out; RB_F lands at (1,5,1) at c12 j and DS reads 15. S is moving in from c11 g, so T, which RB_F powers by QC,
+  cannot push; S lands on the lit cell at c13 j, checks itself ahead of T's update and extends at c14, and T's event
+  fails on the extended S, as in p10_v's run.
+- Cut: R_C reads D_2 and turns on at c12 d; Q_C powers A_C, which pushes C_F from (0,8,3) to (1,8,3), the cell above
+  D_F and beside D_2. C_F lands at c14 j and cuts the step both ways, as C_cut cuts NV at t2 j: D_F reads 0 in that
+  phase and its change updates F_S.
+- Off: c15 g, level 0, F_S retracts and pulls RB_F, a moving block at once: DS 0 inside that event, S is updated and
+  spat at level 1, one tick after its extension: C real at (1,1,0), (1,2,0) air. W_T retracts with it. RB_F, F_S and S
+  are home at c17 j.
+- Why a cut [COMPUTED the delays; INFERRED the rest]: a repeater's pulse is at least its delay long, so R_F alone holds
+  F_S out to c18 or longer, and R_F is the only delay that turns F_S on at c10 (1 to 3 ticks fail). R_C reads the line
+  above the cut, so A_C stays out and D_F stays dark while RB_ST is up. A cut driven from below the cut, or from RB_F's
+  arrival, lets go as soon as it has worked, and F_S would fire again.
+- After: R_F and R_C stay on and A_C out. With RB_ST taken out of (2,8,0) by command (its return is not designed),
+  R_F turns off 8 gt later, R_C 2 gt after it, and A_C pulls C_F back beside a dark D_2, home 12 gt after RB_ST left:
+  the 13 blocks are as in the open state. A_C not sticky passes the close and leaves the step cut.
+- End state against p10_v's run, where commands drive stage 5: outside the 13 blocks and the cut cell three cells
+  differ, RB_F at (1,5,2) instead of (2,5,1) and no G_S at (3,5,1); every dust level is the same. RB_F is where the
+  closed door has it, so drive A's return (HOLD_G back, a pulse on F_S) is not needed.
+- What the order rests on [COMPUTED; INFERRED for the game]: a redstone block that lands behind a repeater starts its
+  delay in that tick (RB_A's landing and r_P10, measured in `close_p10_v_probe`); a conductor that lands above the lower
+  dust of a step cuts it in the block-entity phase, and the dust's change updates a piston two away (C_cut and V in the
+  opening); a piston that lands checks itself before its neighbours are updated (S ahead of T at c13 j, as in p10_v's
+  measured run); and drive C itself (`close_s_feed_probe`). No piston waits powered and not updated: the feed arms
+  nothing. Dust's updates reversed, I_A's event last, both: the same piston events in every tick, the same end state.
+- Updates: DS's two changes (c12 j, c15 g) update P7, T, W_T, Z_S and Z_T, and S at c15; the changes of D_1, D_2 and
+  D_F update F_S alone.
+- Controls fail [COMPUTED]: no R_F (F_S never moves, S lands and stays in, C stays at (1,2,0)); R_F at 3 ticks (every
+  tick of the feed two early: RB_F is pulled home at c13 g, before S lands); no C_F (F_S and S stay out); R_C at 2
+  ticks (released at c17, S pulls C back); glass under D_2; a dust in R_F's place (the feed is lit at c2 j and T fires
+  into the empty (1,3,0) at c6); R_C turned round; each of the eight working blocks left out; R_C at 3 or 4 ticks. Q_F
+  as glass passes: D_F, two above F_S, is a QC source of F_S by itself. The input off fewer than 11 ticks after it went
+  on fails as the trigger chain does.
+- Costs: stage 5 is done at c15 and RB_F is home at c17 j. The cells of the 13 and (1,8,3); (2,8,1) was one of RB_ST's
+  three free neighbours at (2,8,0), which leaves (3,8,0) and (2,8,-1) to whatever returns it. RB_ST has to stay at
+  (2,8,0) through c15, and C_F is home 12 gt after it leaves. Freed: (2,5,1), (3,6,1) and (3,5,1), one of P8's four
+  clean cells.
+- P7 and the returns, not taken on: P7 fires at c3 as before; RB_F is no longer parked at (2,5,1), so that QC source
+  of P7 is gone, and the S feed has nothing left to return. A P7 held in until its stage is updated by DS at c12 j and
+  c15 g. South of the door plane the line now has levels that rise at c10 (D_1, D_2) and c12 (Q_C) and stay up, and
+  A_C's stroke (c12 g to c14 j), for the stages that follow [INFERRED].
+- Probe: `close_s_inputs_probe` (`export_s_inputs`): the run above with no command after the input, and two controls
+  (R_F or C_F removed with setblock air strict before the opening), 64 or 65 cells and the levels of DT, DS, DP, the
+  tap, D_V, NV's four dusts, D_1, D_2 and D_F checked against the simulator after c0, c3, c4, c8, c10, c11, c12, c13,
+  c14, c15, c17 and c20 (the controls: c10, c12, c14, c16; c10, c12, c14, c15, c18). Its steps, read back from the YAML
+  and replayed in the simulator, pass 3/3; without R_F, D_F, R_C or C_F the first test fails [COMPUTED]. Server (2026-11-22, main on the Mac): 3/3
+  [MEASURED]: F_S out at c10, RB_F at (1,5,1) after c12, S out at c14, the cut after c14, S spat at c15, RB_F home
+  after c17; both controls hold; the five earlier close probes still pass.
+
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
 above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
@@ -328,9 +401,9 @@ events of one phase: they show which orders work, not how to get them.
   once after P_W's on; or power south of DP that outlives K's event, for the pusher at (-3,4,3).
 
 ## Still needed (all local)
-1. S H2 feed: done in sim and on the server [MEASURED]. Still to wire, its inputs: F_S on and off (the spit after T's retract
-   event) and G_S's hold off after S's extension (drive A), or F_S alone (drives B, C); after drive A, the return. With P10
-   and V from blocks the spit comes at c11 to c13, while S moves in, and the hold goes at c14 to c16 [COMPUTED p10_v.txt].
+1. S H2 feed: done in sim and on the server [MEASURED]. Its inputs: drive C from 13 blocks, F_S out at c10 on a 4-tick
+   repeater that reads RB_ST at (2,8,0) and released at c15 by a stone pushed onto its feed's step; RB_F is home at c17 j
+   and G_S is taken out [COMPUTED s_inputs.txt; MEASURED: `close_s_inputs_probe` 3/3 on the main server].
 2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [MEASURED: `close_trigger_probe`
    4/4 on sat1]. DP on: RB_D's landing at c2 j, P11 out at c3 [MEASURED: `close_dp_off_probe` 4/4 on sat1].
    P10 at c8 on r_P10, V at c11 on R_V, both on NA's relight [MEASURED: `close_p10_v_probe` 3/3 on sat1].
@@ -338,31 +411,35 @@ events of one phase: they show which orders work, not how to get them.
    right behind P11's extension [MEASURED: `close_dp_off_probe` 4/4 on sat1]. P6 is not spat (it extends at c4 on NA): no piston that can take
    DP's source away is reached from P6's extension [COMPUTED dp.txt, dp_off_search.txt].
    P10 and V need none: they extend once and stay out, as the closed door has them [COMPUTED p10_v.txt].
+   S's: F_S's feed is cut at c14 j and F_S pulls RB_F home at c15 [COMPUTED s_inputs.txt].
 4. Z_T/RB_T reset: P_R re-extends, a down-pusher pushes RB_T to (1,5,-1); (1,7,-1) is now the bus's support. Also the
-   return of RB_ST and its glass, RB12 and G, K, K_T.
+   return of RB_ST and its glass, RB12 and G, K, K_T. RB_ST's return also resets the S feed's cut (A_C pulls C_F back
+   10 gt after RB_ST leaves (2,8,0)); R_F stands at (2,8,1), so RB_ST leaves by (3,8,0), (2,8,-1) or down.
 5. Routing: the bus is laid (east to P_R and AP, west to M_K). DP needs no trunk: its tap reads NP12 at (0,5,3).
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
 DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A_D's head and P11 is spat). P10 and V
-(stages 3 and 4) are MEASURED from two blocks (`close_p10_v_probe` 3/3 on sat1: V out at c11, S at (1,3,0) after c13). Next,
-the S feed's inputs (stage 5, the last commands: F_S's pulse at c12 and G_S's hold at c15); P7, which fires on NA's
-relight at c3, ahead of its stage; and the returns (item 4). If P6 must be
+(stages 3 and 4) are MEASURED from two blocks (`close_p10_v_probe` 3/3 on sat1: V out at c11, S at (1,3,0) after c13). The
+S feed's inputs (stage 5) are MEASURED from thirteen blocks: the close runs through stage 5 from the one input with no
+command (`close_s_inputs_probe` 3/3 on the main server: F_S out at c10, S spat at c15, RB_F home after c17). Next, P7, which fires on
+NA's relight at c3, ahead of its stage, and the returns (item 4). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
 The scripts are in `scripts/door2/close_layout/` (constraints.py/.txt, constraints_P6stage2.txt, feeds.py/.txt,
 puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.txt, export_trigger.py, dp.py/.txt,
 dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py, p10_v.py/.txt, p10_v_search.py/.txt,
-export_p10_v.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
-`library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1) and
-`library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1).
+`library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1),
+`library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1) and
+`library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
-`python -m scripts.try close_p10_v_probe`;
+`python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
@@ -374,4 +451,6 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.door2.close_layout.dp_off_search > scripts/door2/close_layout/dp_off_search.txt` (about 25 minutes);
 `python -m scripts.door2.close_layout.p10_v > scripts/door2/close_layout/p10_v.txt`;
 `python -m scripts.door2.close_layout.export_p10_v`;
-`python -m scripts.door2.close_layout.p10_v_search > scripts/door2/close_layout/p10_v_search.txt` (about 4 minutes)
+`python -m scripts.door2.close_layout.p10_v_search > scripts/door2/close_layout/p10_v_search.txt` (about 4 minutes);
+`python -m scripts.door2.close_layout.s_inputs > scripts/door2/close_layout/s_inputs.txt`;
+`python -m scripts.door2.close_layout.export_s_inputs`
