@@ -348,7 +348,7 @@ so nothing is spat and G_S and its hold are taken out; and the feed is cut, not 
   [MEASURED]: F_S out at c10, RB_F at (1,5,1) after c12, S out at c14, the cut after c14, S spat at c15, RB_F home
   after c17; both controls hold; the five earlier close probes still pass.
 
-## P7, P9 and P8, stages 6 to 8 (2026-11-22; simulator; not yet run on a server)
+## P7, P9 and P8, stages 6 to 8 (2026-11-22; simulator; measured on sat1)
 Nine blocks and one changed support take the close from stage 5 to the closed door's plane: from the one falling input,
 with no command, the door's sixteen pistons and the door plane are at c25 j what the loaded closed state has, and the
 opening is unchanged [COMPUTED p9_p8.txt]. Not as framed in three ways: P7 gets no block and is not held, its fire at c3
@@ -435,8 +435,10 @@ is used; P9, stage 1 of the plan, had no feed at all and fires after stage 5; Q'
   NV's four dusts, D_1, D_2, D_F, LY at (6,4,1) and (6,3,0) and D_8 checked against the simulator after c0, c4, c10, c12,
   c14, c15, c16, c18, c20, c22, c23, c25 and c30 (the controls: c16, c18, c20, c22, c25; c4, c20, c22, c23, c25). Its
   steps, read back from the YAML and replayed in the simulator, pass 3/3; without R_X, A_9, R_9 or R_8, or with the
-  glass left at S_L, the first test fails [COMPUTED]. `python -m scripts.lint close_p9_p8_probe`: ok. Not run on a
-  server.
+  glass left at S_L, the first test fails [COMPUTED]. `python -m scripts.lint close_p9_p8_probe`: ok. MEASURED (sat1) 3/3:
+  the door plane closed from the one input as above; with R_9 removed RB9 still shuttles, LY lit after c18 and dark
+  after c20, P9 and P8 stay in; with R_8 removed P9 runs and is spat, P8 stays in, Q stays at (3,3,0). Traits ok,
+  5x7x4, 10 blocks.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -520,7 +522,7 @@ events of one phase: they show which orders work, not how to get them.
    deadline.
 5. Routing: the bus is laid (east to P_R and AP, west to M_K). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
-   [COMPUTED p9_p8.txt]. `close_p9_p8_probe` is written and replayed, not yet run on a server.
+   [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
@@ -528,11 +530,10 @@ DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A
 (stages 3 and 4) are MEASURED from two blocks (`close_p10_v_probe` 3/3 on sat1: V out at c11, S at (1,3,0) after c13). The
 S feed's inputs (stage 5) are MEASURED from thirteen blocks: the close runs through stage 5 from the one input with no
 command (`close_s_inputs_probe` 3/3 on the main server: F_S out at c10, S spat at c15, RB_F home after c17). The last
-stages are COMPUTED from nine blocks and a stone (p9_p8.txt): P7 at c3 as it was, P9's 0-tick at c20 and c22, P8 at c23,
-the door plane closed at c25 j. Next, the server run of `close_p9_p8_probe`: 3/3, and in the first test's trace R_X on
-after c16, RB9 at (5,4,1) and LY 15 and 14 after c18, P9 out and LY 0 after c20, TM at (2,2) and TR at (1,2) after c22,
-P8 out after c23, Q at (3,2) after c25. The earlier probes build none of these blocks, so they need no rerun for it.
-Then the returns (item 4): with them the door cycles. If P6 must be
+stages are MEASURED from nine blocks and a stone: the door plane closes from the one input with no command
+(`close_p9_p8_probe` 3/3 on sat1: R_X on at c16, RB9 at (5,4,1) after c18 with LY lit, P9 out at c20, TM at (2,2,0) and
+TR at (1,2,0) after c22, P8 out at c23, Q at (3,2,0) after c25; with R_9 removed P9 and P8 stay in, with R_8 removed P8
+stays in and Q at (3,3,0)). Next, the returns (item 4): with them the door cycles. If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
@@ -546,7 +547,7 @@ export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py, p9_p8.py/.txt, export_p9_
 `library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1),
 `library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1),
 `library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server) and
-`library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; not yet run on a server).
+`library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; 3/3 on sat1).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
