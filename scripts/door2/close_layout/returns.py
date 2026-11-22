@@ -25,7 +25,7 @@ Verdict In the screen RB_T and RB12 have no route home; RB_ST has one now that t
         opening (below), or by Z_T's own pull, and RB_T at (1,6,-1) holds Z_T by QC; the other ways pass a cell
         where a redstone block fires Z_T or the opening, or have no free mover. RB12 cannot move: K's head is
         under it, G above it, M_K and Y12's head beside it, the box edge west, and south no mover. G's closed
-        cell is Y12's head. K_T made sticky would pull SPC home, but only once RB_T has left (2,6,-1).
+        cell is Y12's head. K_T, sticky since rbt_drives.py, pulls SPC home, but only once RB_T has left (2,6,-1).
 Grown   The box grown by 2 on every side: RB12 has a route west round (-5,3,2) to (-5,2,2), movers out to x -6,
         RB_ST's is the one in the box, RB_T has none. Every way into (1,5,-1), for any block, needs a mover in
         R_8's cell, r_P10's, (1,7,-1), Z_T's (non-sticky, and held by a block at (1,6,-1)), W_T's or a wall's, or
@@ -56,12 +56,13 @@ Trap    P_R cannot push RB_T straight back under the column: K_T, held by RB_T a
         pushes RB_T back, and RB_T's landing in front of P_R is the update P_R needs. P_R's hold (RB_ST at
         (3,7,0)) must arrive while RB_T is parked: earlier, P_R extends into the empty cell when RB_T is pulled
         away.
-What-if RB_T returned by command (sim only): N_T's and H_T's sources and the returns of RB_ST and SPC are stood in
-        for by commands after the close. The trigger chain's east side (RB_T, GA, GB, P_R, K_T, SPC, RB_ST, Z_T,
+What-if RB_T returned by command (sim only): N_T's and H_T's sources and RB_ST's return are stood in for by
+        commands after the close. The trigger chain's east side (RB_T, GA, GB, P_R, K_T, SPC, RB_ST, Z_T,
         W_T, AP) and the S feed's thirteen end as the closed state has them, T powered by RB_T. What still
-        differs is the opening's seven relays with their blocks and the west side (K, M_K, RB12, G). K_T made
-        sticky (a measured block) would pull SPC home at the kick. Not designed: the two sources and their
-        timing, RB_ST's route and SPC's mover; no command may follow the input, so this is not yet a design.
+        differs is the opening's seven relays with their blocks and the west side (K, M_K, RB12, G). K_T
+        (sticky since rbt_drives.py; a plain piston when this what-if was first run) pulls SPC home at the kick.
+        The design that needs no command is rbt_drives.py's: another kicker (U_T, above RB_T, in N_T's place), a
+        loop of three redstone blocks in place of RB_ST's route, and one pulse for the timing.
 What-if Z9 in place, by command (sim only): the up relays need not be re-oriented. ARM_Z9 taken out before c22
         or earlier: RB9's departure (c16 g) or P9's spit (c22 g) updates Z9, unpowered, and it retracts. A_9 brings
         RB9 back over it at c22 j, where RB9 QC-powers Z9 without updating it. D9, a piston at (4,5,1) facing down,
@@ -358,13 +359,13 @@ def probe_build(drop=()):
     return b
 
 
-def rbt_ticks(kick=(32, 34), home=37, back=(38, 43), src=(45, 48), spc=51, last=58, poke=None):
+def rbt_ticks(kick=(32, 34), home=37, back=(38, 43), src=(45, 48), spc=None, last=58, poke=None):
     """idle ticks with the what-if's commands, each set before tick c<n> with updates. kick: a redstone block at
     SRC_N, N_T's stand-in source, on and off (N_T out and in: RB_T pulled north to PARK). home: RB_ST taken out of
     (2,8,0) and set at (3,7,0), its closed cell (stand-in for its return). back: SRC_N on and off again (N_T pushes
     RB_T back in front of P_R and stays out until P_R has taken it). src: a redstone block at SRC_H, H_T's stand-in
-    source, on and off. spc: SPC taken out of (2,7,0) and set at (2,6,0) (stand-in for its return). poke: a glass
-    block set and cleared beside P_R. None leaves a command out."""
+    source, on and off. spc: SPC taken out of (2,7,0) and set at (2,6,0) (the stand-in for its return when K_T was
+    a plain piston; K_T pulls it now). poke: a glass block set and cleared beside P_R. None leaves a command out."""
     ticks = pp.idle(last)
     for k, cmds in ((kick and kick[0], [(SRC_N, t.RB)]), (kick and kick[1], [(SRC_N, AIR)]),
                     (home, [(t.UP, AIR), (t.RB_ST, B("rb", id="RB_ST"))]), (poke, [(POKE_R, t.GLASS), (POKE_R, AIR)]),
@@ -434,18 +435,18 @@ if __name__ == "__main__":
     st, _ = stop((2, 7, 0), (2, 8, 0))
     print("   RB_ST down to (2,7,0), SPC taken out first (what-if): a redstone block there fires", ", ".join(st), "(DT lit, FT powers W_T, "
           "whose head takes (1,5,-1), RB_T's closed cell)")
-    print("   SPC (2,7,0) to (2,6,0): K_T's head is in (2,6,0) and RB_T holds K_T. K_T sticky (what-if): opening and close the same but",
-          end=" ")
+    print("   SPC (2,7,0) to (2,6,0): K_T's head is in (2,6,0) and RB_T holds K_T. K_T is sticky (since rbt_drives.py); as the plain piston it "
+          "was, opening and close the same but", end=" ")
     bk = copy.deepcopy(b)
-    bk.b[t.K_T] = t.pis("sticky_piston", "up", "K_T")
+    bk.b[t.K_T] = t.pis("piston", "up", "K_T")
     g, g2 = frames(bk), frames(bk)
     next(g), next(g2)
     own = (t.K_T, t.SPC, t.SRC)
     diffs = [tick_name(k) for k, ((bl, be), (rb, rbe)) in enumerate(zip(g, ref))
              if be - {t.SRC} != rbe - {t.SRC} or {p_: s for p_, s in bl.items() if p_ not in own} != {p_: s for p_, s in rb.items() if p_ not in own}]
     spc = [tick_name(k) for k, ((bl, be), (rb, rbe)) in enumerate(zip(g2, ref)) if bl.get(t.SRC) != rb.get(t.SRC) or (t.SRC in be) != (t.SRC in rbe)]
-    print("K_T's head is sticky and SPC is real at (2,7,0) instead of moving after", ", ".join(spc) + "; any other cell:", diffs or "none",
-          "| K_T would pull SPC home when it retracts, which needs RB_T gone from (2,6,-1)")
+    print("K_T's head is not sticky and SPC is moving, not real, at (2,7,0) after", ", ".join(spc) + "; any other cell:", diffs or "none",
+          "| K_T pulls SPC home when it retracts, which needs RB_T gone from (2,6,-1)")
     print("   G (-4,4,2) to (-3,3,2): its closed cell is Y12's head, and Y12 is held by its arm (above)")
 
     print("\n== what-if (sim only): Z9 returned in place, by command. D9, a piston at (4,5,1) facing down, added; ARM_Z9 out before c13 "
@@ -596,7 +597,7 @@ if __name__ == "__main__":
 
     print("\n== what-if (sim only): RB_T returned by command. N_T's stand-in source (3,6,-3) before c32 and out before c34 (the kick); RB_ST out "
           "of (2,8,0) and at (3,7,0) before c37; the source again before c38 and out before c43; H_T's stand-in source (1,10,-1) before c45 and out "
-          "before c48; SPC out of (2,7,0) and at (2,6,0) before c51")
+          "before c48; no command for SPC: K_T pulls it home at the kick")
     rw = pp.noted(ro, rbt_ticks())
     print("\n".join("   " + x for x in shown(rw, 31, ("N_T", "P_R", "K_T", "W_T", "H_T", "Z_T", "A_C", "T"))))
     bad = rbt_verdict(rw, rcl)
@@ -624,7 +625,7 @@ if __name__ == "__main__":
             kw[key] = k if i is None else tuple(k if j == i else v for j, v in enumerate(base[key]))
             res[k] = not rbt_verdict(pp.noted(ro, rbt_ticks(**kw)), rcl)
         print(f"      {title}:", " ".join(f"c{k} {'done' if ok else 'FAILS'}" for k, ok in res.items()))
-    early = {k: not rbt_verdict(pp.noted(ro, rbt_ticks(kick=(k, k + 2), home=k + 5, back=(k + 6, k + 11), src=(k + 13, k + 16), spc=k + 19, last=58)), rcl)
+    early = {k: not rbt_verdict(pp.noted(ro, rbt_ticks(kick=(k, k + 2), home=k + 5, back=(k + 6, k + 11), src=(k + 13, k + 16), last=58)), rcl)
              for k in range(3, 33)}
     print("   the whole schedule moved earlier, the kick's source on before:", " ".join(f"c{k} {'done' if ok else 'FAILS'}" for k, ok in early.items()))
     for name, kw in (("dust's neighbour updates in reverse order", dict(reverse=True)), ("I_A's retract event behind P_R's and M_K's", dict(ia_last=True))):
@@ -641,7 +642,7 @@ if __name__ == "__main__":
         bad = rbt_verdict(x, d.make_world(cb)[0])
         print(f"      {title}:", "FAILS: " + "; ".join(bad[:4]) if bad else "done", "| RB_T", t.at(x, "RB_T")[0], "P_R", "out" if t.at(x, "P_R")[2] else "in",
               "W_T", "out" if t.at(x, "W_T")[2] else "in")
-    kb = rbt_build(swap={t.K_T: t.pis("sticky_piston", "up", "K_T")})
-    x = pp.noted(t.opened(kb)[0], rbt_ticks(spc=None))
-    print("   K_T made sticky (what-if; a measured block changed), no command for SPC:", "FAILS: " + "; ".join(rbt_verdict(x, d.make_world(kb)[0])[:4])
-          if rbt_verdict(x, d.make_world(kb)[0]) else "done: K_T pulls SPC home when the kick releases it", "| SPC", t.at(x, "SPC")[0])
+    kb = rbt_build(swap={t.K_T: t.pis("piston", "up", "K_T")})
+    x = pp.noted(t.opened(kb)[0], rbt_ticks())
+    print("      K_T a plain piston, as it was when this what-if was first run (SPC was then set home by command):",
+          "FAILS: " + "; ".join(rbt_verdict(x, d.make_world(kb)[0])[:4]) if rbt_verdict(x, d.make_world(kb)[0]) else "done", "| SPC", t.at(x, "SPC")[0])

@@ -2,16 +2,17 @@ name: close_trigger_probe
 description: 'Scratch probe for the close''s trigger chain (door2/close_layout/trigger.py). The design_c door with I_A sticky, the close feeds, P_R and the S feed are fixture; the design is 36 blocks, here
   in door coordinates (door + (4,3,8) = spec). A dust bus fed by K_in (1,8,-2) is lit while the input is on. East branch (2,8,-2), (3,8,-2), (3,8,-1) on stone (3,7,-1) above P_R: P_R''s hold. (4,8,-2) on
   stone (4,7,-2) feeds a 4-tick repeater (4,7,-1) into piston AP (4,7,0) facing west, which pushes redstone block RB_ST from (3,7,0) to (2,7,0) beside T''s feed dust DT (1,7,0); it lands at t10 j, after
-  T''s last update of the opening, so T waits powered and not updated. West branch (1,8,-1), (0,8,-1), (-1,7,-1), (-2,7,-1), (-3,7,-1), (-4,6,-1), (-4,5,0), (-4,5,1) on stone (-4,4,1) above sticky piston
-  M_K (-4,3,1) facing down, which holds glass WK (-4,1,1) beside K (-4,1,2), a piston facing up under RB12, QC-powered by NP12''s first dust and armed from the load behind design_c''s blocker at (-4,3,2).
-  Stone cuts (1,8,0) over DT and (-3,5,0) over DP. W_T (1,5,0), a piston facing north above T, is powered by T''s feed stone and blocked by Z_T''s head. K_T (2,5,0), a piston facing up, glass (2,6,0) and
-  RB_ST above it: K_T is QC-powered by RB_ST. The input falls; two ticks later (c0) the repeater R_in turns off and in that tick''s block-event phase: I_A pulls RB_A home, P_R pulls RB_T, M_K pulls WK;
-  Z_T retracts and K pushes RB12 and gate stone G up (NP12 dies; P12 stays out, QC-powered by the feed stone); T extends, W_T extends and updates K_T; K_T pushes the glass and RB_ST up, DT dies; W_T retracts
-  and updates T and P12; P12 retracts and pulls the spare, T is spat. After c0 C is real at (1,2), T and P12 are moving pistons, (1,3) and (0,3) are air and DT reads 0. Stage 2 and on are commands between
-  ticks: c1 a redstone block at (-3,4,1) (P11 and P6 extend), c2 removed (spat, S real at (0,3)); c3 a redstone block at (-1,5,1) (P10); c4 removed, blocks at (-1,3,1) (V) and (1,6,3) (F_S); c5 both removed
-  (RB_F spat to (1,5,1), V spat, S fires at (1,3)); c6 G_S''s hold (3,6,1) removed (S spat, C real at (1,1)). NA relights when RB_A lands (c2 j): P7 is out from c3, P1 to P6 from c4. Each test checks the
-  frame 5 ticks into the opening and the open state, then the cells the chain moves or must leave alone and the levels of DT and DS against the simulator. Controls remove one block with setblock air strict
-  before the opening: the glass under RB_ST (the feed stays lit, T and P12 stay out), W_T (T and P12 get no update), WK (K is not woken, P12 stays out and P11 shoves the top row).'
+  T''s last update of the opening, so T waits powered and not updated. West branch from K_in''s top, (1,9,-2), (0,10,-2), (0,9,-1), (-1,9,-1), (-2,8,-1), (-3,7,-1), (-4,6,-1), (-4,5,0), (-4,5,1) on stone
+  (-4,4,1) above sticky piston M_K (-4,3,1) facing down, which holds glass WK (-4,1,1) beside K (-4,1,2), a piston facing up under RB12, QC-powered by NP12''s first dust and armed from the load behind design_c''s
+  blocker at (-4,3,2). A stone cut (-3,5,0) over DP. W_T (1,5,0), a piston facing north above T, is powered by T''s feed stone and blocked by Z_T''s head. K_T (2,5,0), a sticky piston facing up, glass (2,6,0)
+  and RB_ST above it: K_T is QC-powered by RB_ST. The input falls; two ticks later (c0) the repeater R_in turns off and in that tick''s block-event phase: I_A pulls RB_A home, P_R pulls RB_T, M_K pulls
+  WK; Z_T retracts and K pushes RB12 and gate stone G up (NP12 dies; P12 stays out, QC-powered by the feed stone); T extends, W_T extends and updates K_T; K_T pushes the glass and RB_ST up, DT dies and
+  K_T, unpowered inside its own extension, is released at once: the glass is real at (2,7,0), RB_ST moves on to (2,8,0); W_T retracts and updates T and P12; P12 retracts and pulls the spare, T is spat.
+  After c0 C is real at (1,2), T and P12 are moving pistons, (1,3) and (0,3) are air and DT reads 0. Stage 2 and on are commands between ticks: c1 a redstone block at (-3,4,1) (P11 and P6 extend), c2 removed
+  (spat, S real at (0,3)); c3 a redstone block at (-1,5,1) (P10); c4 removed, blocks at (-1,3,1) (V) and (1,6,3) (F_S); c5 both removed (RB_F spat to (1,5,1), V spat, S fires at (1,3)); c6 G_S''s hold (3,6,1)
+  removed (S spat, C real at (1,1)). NA relights when RB_A lands (c2 j): P7 is out from c3, P1 to P6 from c4. Each test checks the frame 5 ticks into the opening and the open state, then the cells the chain
+  moves or must leave alone and the levels of DT and DS against the simulator. Controls remove one block with setblock air strict before the opening: the glass under RB_ST (the feed stays lit, T and P12
+  stay out), W_T (T and P12 get no update), WK (K is not woken, P12 stays out and P11 shoves the top row).'
 traits:
 - piston_based
 palette:
@@ -98,19 +99,20 @@ palette:
     block: redstone_wire
     fixture: true
     name: dt
-  f:
+  f: sticky_piston[facing=up,extended=false]
+  g:
     block: piston_head[facing=west,type=sticky]
     fixture: true
-  g:
+  h:
     block: sticky_piston[facing=west,extended=false]
     fixture: true
-  h:
+  j:
     block: sticky_piston[facing=west,extended=true]
     fixture: true
-  j: redstone_block
-  k: repeater[facing=north,delay=4,powered=false]
-  m: piston[facing=west,extended=false]
-  n:
+  k: redstone_block
+  m: repeater[facing=north,delay=4,powered=false]
+  n: piston[facing=west,extended=false]
+  o:
     block: repeater[facing=east,delay=1,powered=true]
     fixture: true
 layers:
@@ -174,7 +176,7 @@ layers:
     .DEQ...Q..E.
     ..AQ...Q..E.
     ..AQ...Q..E.
-    ...QQQQQDnE.
+    ...QQQQQDoE.
     ...Q...Q....
     ...Q...Q....
     ...Q...Q....
@@ -191,7 +193,7 @@ layers:
     .E.Q...Q....
     .DEQ...Q....
     ..LQ...Q....
-    AAMRQQQfh...
+    AAMRQQQgj...
     B..Q...Q....
     CA.Q...Q....
     ...Q...Q....
@@ -208,7 +210,7 @@ layers:
     ...Q...Q....
     .E.Q...Q....
     DD.Q...QA.A.
-    EKMRQQQgg.A.
+    EKMRQQQhh.A.
     ...Q...QO...
     FE.Q...Q....
     .AAQ...Q....
@@ -259,8 +261,8 @@ layers:
     ....E....AHH
     .EEED....D..
     I..T.F...E..
-    JI.UXbC.EE..
-    J.H.A.fh....
+    JI.UXbf.EE..
+    J.H.A.gj....
     ....AF..E...
     ....Ec......
     ............
@@ -275,7 +277,7 @@ layers:
     ......AA.E.D
     .........E..
     ....EF...E..
-    JI....fhB...
+    JI....gjB...
     ....EDB.....
     ....E..F....
     ....E.F.....
@@ -292,8 +294,8 @@ layers:
     .....FEEAADE
     .....d......
     ....AXBBI...
-    .JI....Ik...
-    ....De.jm...
+    .JI....Im...
+    ....De.kn...
     ............
     ............
     ............
@@ -404,7 +406,7 @@ tests:
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=false]
   - check: if block ~6 ~9 ~8 glass
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
@@ -460,7 +462,7 @@ tests:
   - check: if block ~5 ~8 ~7 air
   - check: if block ~6 ~8 ~8 moving_piston
   - check: if block ~6 ~9 ~8 air
-  - check: if block ~6 ~10 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 moving_piston
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
   - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
@@ -512,7 +514,7 @@ tests:
   - check: if block ~4 ~6 ~8 sticky_piston[facing=down,extended=false]
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=false]
   - check: if block ~6 ~9 ~8 air
   - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 redstone_block
@@ -564,7 +566,7 @@ tests:
   - check: if block ~4 ~6 ~8 sticky_piston[facing=down,extended=false]
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
   - check: if block ~6 ~9 ~8 moving_piston
   - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 redstone_block
@@ -623,8 +625,8 @@ tests:
   - check: if block ~4 ~6 ~8 air
   - check: if block ~5 ~8 ~8 moving_piston
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
-  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=sticky]
   - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 redstone_block
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
@@ -679,8 +681,8 @@ tests:
   - check: if block ~4 ~6 ~8 air
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
-  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=normal]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
+  - check: if block ~6 ~9 ~8 piston_head[facing=up,type=sticky]
   - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 redstone_block
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=false]
@@ -766,7 +768,7 @@ tests:
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=false]
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
@@ -800,7 +802,7 @@ tests:
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=true]
   - check: if block ~5 ~8 ~7 moving_piston
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
@@ -835,7 +837,7 @@ tests:
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=true]
   - check: if block ~5 ~8 ~7 piston_head[facing=north,type=normal]
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
@@ -901,7 +903,7 @@ tests:
   - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=false]
   - check: if block ~6 ~9 ~8 glass
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
@@ -935,7 +937,7 @@ tests:
   - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=false]
   - check: if block ~6 ~9 ~8 glass
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
@@ -970,7 +972,7 @@ tests:
   - check: if block ~4 ~7 ~8 piston_head[facing=down,type=sticky]
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
   - check: if block ~6 ~9 ~8 moving_piston
   - check: if block ~6 ~10 ~8 moving_piston
   - check: if block ~6 ~11 ~8 moving_piston
@@ -1038,7 +1040,7 @@ tests:
   - check: if block ~4 ~6 ~8 quartz_block
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 piston_head[facing=up,type=normal]
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=false]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=false]
   - check: if block ~6 ~9 ~8 glass
   - check: if block ~6 ~10 ~8 redstone_block
   - check: if block ~6 ~11 ~8 air
@@ -1078,7 +1080,7 @@ tests:
   - check: if block ~5 ~8 ~7 air
   - check: if block ~6 ~8 ~8 moving_piston
   - check: if block ~6 ~9 ~8 air
-  - check: if block ~6 ~10 ~8 moving_piston
+  - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 moving_piston
   - check: if block ~8 ~10 ~8 piston[facing=west,extended=true]
   - check: if block ~7 ~10 ~8 piston_head[facing=west,type=normal]
@@ -1115,7 +1117,7 @@ tests:
   - check: if block ~4 ~6 ~8 sticky_piston[facing=down,extended=false]
   - check: if block ~5 ~8 ~8 piston[facing=north,extended=false]
   - check: if block ~5 ~8 ~7 air
-  - check: if block ~6 ~8 ~8 piston[facing=up,extended=true]
+  - check: if block ~6 ~8 ~8 sticky_piston[facing=up,extended=true]
   - check: if block ~6 ~9 ~8 moving_piston
   - check: if block ~6 ~10 ~8 glass
   - check: if block ~6 ~11 ~8 redstone_block
