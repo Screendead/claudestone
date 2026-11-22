@@ -1,0 +1,135 @@
+added: 9 blocks (3 repeaters, 1 dust, 1 sticky piston, 1 obsidian, 3 glass) and S_L, a stone in place of design_c's glass (6, 3, 1); no stand-in, no command after the input
+opening, s_inputs' build vs this one, open-state differences: none but O_8's own cell
+cell differences outside the added blocks: none | tick by tick, the door's pistons and the door plane (O_8's cell apart): the same at every tick | every cell outside the added blocks, dust levels included: the same at every tick
+moved during load: none | closed state: R_X off | R_9 on | R_8 on | LY (6, 4, 1) 11, LY (6, 3, 0) 12, D_8 12 | RB9 (4, 3, 1) | P9 powered by [(4, 3, 1), (5, 3, 0)] | P8 by [(3, 5, -1), (4, 5, 0)] | A_9 by nothing | cells that differ from s_inputs' closed state: none
+the opening at the added blocks: t0g level 2 wire (3, 5, -2) power 12->0; t0g level 3 wire (6, 3, 0) power 12->0; t2d repeater (3, 5, -1) off; t2d repeater (5, 3, 0) off; t3g level 0 RETRACT P8@(3, 4, 0) ev1: retract+PULL Q@(3, 2, 0); t3g level 1 EXTEND P9@(4, 2, 0) west; t3g level 3 RETRACT P9@(4, 2, 0) ev1: retract+PULL TM@(2, 2, 0); t5j land sticky_piston@(4, 2, 0)
+   in s_inputs' build: t3g level 0 RETRACT P8@(3, 4, 0) ev1: retract+PULL Q@(3, 2, 0); t3g level 1 EXTEND P9@(4, 2, 0) west; t3g level 3 RETRACT P9@(4, 2, 0) ev1: retract+PULL TM@(2, 2, 0)
+   P8's updates while it is out, t2 and t3: t2d powered, t2j powered, t2j not powered | A_9's updates: t0g not powered, free; t3g not powered, free; t5j not powered, blocked; t5j not powered, free
+   power on A_9, and A_9 or the cell east of RB9 moving, at any tick of the opening: none | RB9 after it: ((4, 4, 1), 'real') (pushed by Z9; its landing updates A_9)
+open state: R_X off | R_9 off | R_8 off | LY (6, 4, 1) 0, LY (6, 3, 0) 0, D_8 0 | A_9 ('real', False) | P8 ((3, 4, 0), 'real', False) Q (3, 3, 0) P9 ('real', False) TM (3, 2, 0) TR (2, 3, 0)
+pistons with an added cell among their power sources: closed state {'P8': [(3, 5, -1)], 'P9': [(5, 3, 0)]} | open state none
+box, opening: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== the close from the input, no command: c-1 to c30
+   c-1 to c15: the piston events of s_inputs' run, tick by tick
+   c2j wire (3, 5, -2) power 0->10
+   c3g level 0 EXTEND P7@(2, 4, 0) down
+   c4d repeater (3, 5, -1) on
+   c12g level 0 EXTEND A_C@(-1, 8, 3) east
+   c13g level 0 EXTEND W_T@(1, 5, 0) north
+   c14g level 0 EXTEND S@(1, 3, 0) down
+   c14g level 0 sticky_piston@(1, 4, 0) ev0 resolve failed
+   c15g level 0 RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   c15g level 1 RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+   c15g level 1 RETRACT W_T@(1, 5, 0) ev1: retract
+   c16d repeater (2, 5, 1) on
+   c16g level 0 EXTEND A_9@(3, 4, 1) east
+   c18j wire (6, 3, 0) power 0->14
+   c18j land rb@(5, 4, 1)
+   c20d repeater (2, 5, 1) off
+   c20d repeater (5, 3, 0) on
+   c20g level 0 wire (6, 3, 0) power 14->0
+   c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1)
+   c20g level 0 EXTEND P9@(4, 2, 0) west
+   c22d repeater (5, 3, 0) off
+   c22g level 0 RETRACT P9@(4, 2, 0) ev2: retract+SPIT (2, 2, 0)
+   c22j land sticky_piston@(3, 4, 1)
+   c22j land rb@(4, 4, 1)
+   c22j land quartz@(1, 2, 0)
+   c23g level 0 EXTEND P8@(3, 4, 0) down
+   c24j land sticky_piston@(4, 2, 0)
+   c25j land sticky_piston@(3, 2, 0)
+   stages 0 to 2 -> done as in s_inputs' run: stages 0 and 1 in c0, P11 out and spat in c3, S real at (0,3,0), RB_D and A_D home
+   stages 3 and 4, after c13 -> done as in s_inputs' run: P10 out at c8, V out at c11, S real at (1,3,0), retracted; no dust lost; nothing powers V or S where they wait; P8's dust 0
+   stage 5, after c19 -> done as in s_inputs' run: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; RB_F home, F_S in; TM at (3,2,0), Q at (3,3,0), P8 in; P7 out over TR at (2,2,0)
+   stages 6 and 7, after c30 -> done: the door's sixteen pistons where the closed door has them and in its state; the door plane the closed door's, cell for cell, labels apart; A_9 in, RB9 at (4,4,1); R_X and R_9 off, R_8 on, LY 0; nothing moving
+   P7: c3 out; A_9: c16 out, c20 in; P9: c20 out, c22 spat; P8: c23 out; Q: never fires; after c30: TM (2, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 2, 0), P8 out
+   P9's updates while it is in: c20d powered, free; c20g powered, blocked; c24j not powered, blocked; c25j not powered, blocked
+   P8's updates while it is in: c2j not powered, blocked; c3g not powered, blocked; c4d powered, blocked; c16g powered, blocked; c18j powered, blocked; c20g powered, blocked; c22j powered, free; c23g powered, blocked
+   levels after c17: LY (6, 4, 1) 0, LY (6, 3, 0) 0, D_8 10 | c18: LY (6, 4, 1) 15, LY (6, 3, 0) 14, D_8 10 | c19: LY (6, 4, 1) 15, LY (6, 3, 0) 14, D_8 10 | c20: LY (6, 4, 1) 0, LY (6, 3, 0) 0, D_8 10 | c30: LY (6, 4, 1) 0, LY (6, 3, 0) 0, D_8 10 | LY after c18, from RB_Y's end to Z_S's: 11, 12, 13, 14, 15, 14, 15, 14, 13, 12
+   pistons updated by a change of LY: c18 ['A_9', 'P8', 'Y1', 'Z_Q', 'Z_S']; c20 ['P8', 'Y1', 'Z_Q', 'Z_S'] | by a change of DS (s_inputs' count): c12 ['A_9', 'P7', 'T', 'W_T', 'Z_S', 'Z_T']; c15 ['A_9', 'P7', 'S', 'T', 'W_T', 'Z_S', 'Z_T']
+   door plane against the loaded closed state: labels that differ: (1, 2, 0): TM there, TR here; (2, 2, 0): TR there, TM here (the same block)
+   the rest of the world against it (the returns): 41 cells, the blocks A_C, C_F, C_cut, G, K, K_T, M_K, P_R, RB11, RB12, RB9, RB_Q, RB_S, RB_ST, RB_T, RB_X, RB_Y, SPC, X2, Y1, Y12, Z11, Z9, Z_Q, Z_S and the repeaters R_F, R_C, R_9 | dust levels: DQ 5, DS 1, D_1 1, D_2 1, D_8 1, LY 10, NB 10, NP12 1, NV 13
+   end state against s_inputs.py's run: cells that differ outside the added blocks:
+      (1, 2, 0): air there, quartz[id=TR] here; (2, 2, 0): quartz[id=TR] there, quartz[id=TM] here; (3, 2, 0): quartz[id=TM] there, sticky_piston[extended=False,facing=west,id=Q] here; (3, 3, 0): sticky_piston[extended=False,facing=west,id=Q] there, piston_head[facing=down,sticky=True] here; (3, 4, 0): sticky_piston[extended=False,facing=down,id=P8] there, sticky_piston[extended=True,facing=down,id=P8] here
+      dust levels that differ: none
+   box, opening + close: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== order (must pass): against the run above
+   dust's neighbour updates in reverse order: stages 0 to 5 done, stages 6 and 7 done; piston events of each tick the same set; end-state cells the same
+   I_A's retract event behind P_R's and M_K's: stages 0 to 5 done, stages 6 and 7 done; piston events of each tick the same set; end-state cells the same
+   both: stages 0 to 5 done, stages 6 and 7 done; piston events of each tick the same set; end-state cells the same
+
+== ctl 1: no R_X: nothing reads RB_F's cell
+   moved during load: none | opening: the same at every tick | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: nothing moves at A_9, P9 or P8
+   -> FAILS: P8 ((3, 4, 0), 'real', False); Q ((3, 3, 0), 'real', False); (1, 2, 0) air; (3, 2, 0) quartz[id=TM]; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q] | after c30: TM (3, 2, 0), TR (2, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 3, 0), P8 in
+
+== ctl 2: R_X at 1 tick: A_9 is home at c19 j, a tick ahead of P9's spit, and its landing finds P8 behind P9's head
+   moved during load: none | opening: the same at every tick | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c14d repeater (2, 5, 1) on; c14g level 0 EXTEND A_9@(3, 4, 1) east; c17d repeater (2, 5, 1) off; c17g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1); c18d repeater (5, 3, 0) on; c18g level 0 EXTEND P9@(4, 2, 0) west; c20d repeater (5, 3, 0) off; c20g level 0 RETRACT P9@(4, 2, 0) ev2: retract+SPIT (2, 2, 0)
+   -> FAILS: P8 ((3, 4, 0), 'real', False); Q ((3, 3, 0), 'real', False); (3, 2, 0) air; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q] | after c30: TM (2, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 3, 0), P8 in
+
+== ctl 3: R_X at 3 ticks: RB9 stands beside LY for 4 gt, R_9's pulse is 4 gt and P9 pulls TM back
+   moved during load: none | opening: the same at every tick | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c18d repeater (2, 5, 1) on; c18g level 0 EXTEND A_9@(3, 4, 1) east; c22d repeater (5, 3, 0) on; c22g level 0 EXTEND P9@(4, 2, 0) west; c24d repeater (2, 5, 1) off; c24g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1); c26d repeater (5, 3, 0) off; c26g level 0 RETRACT P9@(4, 2, 0) ev1: retract+PULL TM@(2, 2, 0)
+   -> FAILS: P8 ((3, 4, 0), 'real', False); Q ((3, 3, 0), 'real', False); (2, 2, 0) air; (3, 2, 0) quartz[id=TM]; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q] | after c30: TM (3, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 3, 0), P8 in
+
+== ctl 4: A_9 not sticky: RB9 stays beside LY, R_9 stays on and P9 stays out
+   moved during load: none | opening: the same at every tick | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c16d repeater (2, 5, 1) on; c16g level 0 EXTEND A_9@(3, 4, 1) east; c20d repeater (2, 5, 1) off; c20d repeater (5, 3, 0) on; c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract; c20g level 0 EXTEND P9@(4, 2, 0) west
+   -> FAILS: P8 ((3, 4, 0), 'real', False); P9 ((4, 2, 0), 'real', True); Q ((3, 3, 0), 'real', False); (3, 2, 0) piston_head[facing=west,sticky=True]; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q]; RB9 ((5, 4, 1), 'real', None) | after c30: TM (2, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 out, Q (3, 3, 0), P8 in
+
+== ctl 5: design_c's glass left under LY's dust (6,4,1): LY's dust (6,3,0) stays dark
+   moved during load: none | opening: the same at every tick | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c16d repeater (2, 5, 1) on; c16g level 0 EXTEND A_9@(3, 4, 1) east; c20d repeater (2, 5, 1) off; c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1)
+   -> FAILS: P8 ((3, 4, 0), 'real', False); Q ((3, 3, 0), 'real', False); (1, 2, 0) air; (3, 2, 0) quartz[id=TM]; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q] | after c30: TM (3, 2, 0), TR (2, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 3, 0), P8 in
+
+== ctl 6: R_9 at 2 ticks: its pulse is 4 gt, and in the opening it is still on at t3, when P9 fires
+   moved during load: none | opening: differ at t[3, 5] | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c16d repeater (2, 5, 1) on; c16g level 0 EXTEND A_9@(3, 4, 1) east; c20d repeater (2, 5, 1) off; c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1); c22d repeater (5, 3, 0) on; c22g level 0 EXTEND P9@(4, 2, 0) west; c26d repeater (5, 3, 0) off; c26g level 0 RETRACT P9@(4, 2, 0) ev1: retract+PULL TM@(2, 2, 0)
+   -> FAILS: P8 ((3, 4, 0), 'real', False); Q ((3, 3, 0), 'real', False); (2, 2, 0) air; (3, 2, 0) quartz[id=TM]; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q] | after c30: TM (3, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 3, 0), P8 in
+
+== ctl 7: R_8 at 2 ticks: in the opening it is still on when NV is cut, and P8 retracts late
+   moved during load: none | opening: differ at t[3, 5] | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c16d repeater (2, 5, 1) on; c16g level 0 EXTEND A_9@(3, 4, 1) east; c20d repeater (2, 5, 1) off; c20d repeater (5, 3, 0) on; c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1); c20g level 0 EXTEND P9@(4, 2, 0) west; c22d repeater (5, 3, 0) off; c22g level 0 RETRACT P9@(4, 2, 0) ev2: retract+SPIT (2, 2, 0); c23g level 0 EXTEND P8@(3, 4, 0) down
+   -> done | after c30: TM (2, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 2, 0), P8 out
+
+== ctl 8: a stone under R_X: DS, lit from c12 j, points into it and it powers A_9, which fires at c13
+   moved during load: none | opening: the same at every tick | open state: TM (3, 2, 0), TR (2, 3, 0), C (1, 3, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in
+   close: c13g level 0 EXTEND A_9@(3, 4, 1) east; c15g level 1 RETRACT A_9@(3, 4, 1) ev2: retract+SPIT (5, 4, 1); c16d repeater (2, 5, 1) on; c17d repeater (5, 3, 0) on; c17g level 0 EXTEND P9@(4, 2, 0) west; c18g level 0 EXTEND A_9@(3, 4, 1) east; c20d repeater (2, 5, 1) off; c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1); c22d repeater (5, 3, 0) off; c22g level 0 RETRACT P9@(4, 2, 0) ev1: retract+PULL TM@(2, 2, 0)
+   -> FAILS: P8 ((3, 4, 0), 'real', False); Q ((3, 3, 0), 'real', False); (2, 2, 0) air; (3, 2, 0) quartz[id=TM]; (3, 3, 0) sticky_piston[extended=False,facing=west,id=Q] | after c30: TM (3, 2, 0), TR (1, 2, 0), C (1, 1, 0), R (2, 1, 0), P9 in, Q (3, 3, 0), P8 in
+
+== ctl 9: a stone under D_8: NA's dust (2,4,-2) and DQ's (4,4,-2) read D_8 down the step and are one net
+   moved during load: none | opening: differ at t[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] | open state: TM (1, 3, 0), TR (2, 3, 0), C (1, 1, 0), R (3, 1, 0), P9 in, Q (2, 2, 0), P8 in
+   close: c16d repeater (2, 5, 1) on; c16g level 0 EXTEND A_9@(3, 4, 1) east; c20d repeater (2, 5, 1) off; c20d repeater (5, 3, 0) on; c20g level 0 RETRACT A_9@(3, 4, 1) ev1: retract+PULL RB9@(5, 4, 1); c20g level 0 EXTEND P9@(4, 2, 0) west; c22d repeater (5, 3, 0) off; c22g level 0 RETRACT P9@(4, 2, 0) ev1: retract+PULL TR@(2, 2, 0)
+   -> FAILS: P5 ((4, 1, 0), 'real', False); Q ((2, 1, 0), 'real', False); (2, 1, 0) sticky_piston[extended=False,facing=west,id=Q]; (2, 2, 0) air; (3, 1, 0) quartz[id=R]; (3, 2, 0) quartz[id=TR] | after c30: TM (1, 2, 0), TR (3, 2, 0), C (1, 1, 0), R (3, 1, 0), P9 in, Q (2, 1, 0), P8 out
+
+== each of the seven working blocks left out (S_L: the glass stays): stages 6 and 7
+   R_X FAILS, A_9 FAILS, S_L FAILS, R_9 FAILS, O_8 done, D_8 FAILS, R_8 FAILS (O_8: in the simulator's order of c4's events; the what-if below) | G_9 as stone: done
+
+== the three delays, each 1 to 4 ticks with the others as built: stages 6 and 7, and the opening
+   R_X: 1 FAILS, opening the same at every tick; 2 done, opening the same at every tick; 3 FAILS, opening the same at every tick; 4 FAILS, opening the same at every tick
+   R_9: 1 done, opening the same at every tick; 2 FAILS, opening differ at t[3, 5]; 3 FAILS, opening differ at t[3, 4, 5, 6, 7]; 4 FAILS, opening differ at t[3, 4, 5, 6, 7, 8, 9]
+   R_8: 1 done, opening the same at every tick; 2 done, opening differ at t[3, 5]; 3 FAILS, opening differ at t[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; 4 FAILS, opening differ at t[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+== what-if (sim only): O_8 left out and P8's event put ahead of the others queued in phase d of c4 (R_8 and r_P5 both turn on there; the scheduled ticks' order decides in the game)
+   O_8 left out, the simulator's order: P8's updates c2 to c4: c2j not powered, free, c3g not powered, free, c4d powered, free; c4: P5 out, P8's push fails; -> done
+   O_8 left out, P8's event first: P8's updates c2 to c4: c2j not powered, free, c3g not powered, free, c4d powered, free, c4g powered, blocked; c4: P8 out, P5's push fails; -> FAILS: Q ((2, 2, 0), 'real', False); (2, 2, 0) sticky_piston[extended=False,facing=west,id=Q]; (3, 2, 0) air | TM (2, 1, 0), TR (1, 2, 0), C (1, 1, 0), R (3, 0, 0), P9 in, Q (2, 2, 0), P8 out, the static block (3, -1, 0)
+   as built, P8's event first: P8's updates c2 to c4: c2j not powered, blocked, c3g not powered, blocked, c4d powered, blocked; c4: P5 out; -> done
+
+== what-if (sim only): P9 by command in s_inputs' build, QC-powered as R_9 powers it (a lit repeater set into R_9's cell without updates, then taken out, P9 updated each time)
+   the plan's order, P9 in stage 1 (out at c1, spat at c2) with P7 on NA at c3: c1g level 0 EXTEND P9@(4, 2, 0) west; c2g level 0 RETRACT P9@(4, 2, 0) ev2: retract+SPIT (2, 2, 0); c3g level 0 EXTEND P7@(2, 4, 0) down -> TM (2, 1, 0), TR (2, 2, 0), C (1, 1, 0), R (3, 1, 0), P9 in, Q (3, 3, 0), P8 in, P5 in (r_P5's turning on at c4 finds R's cell (2,1,0) taken)
+   this order, P9 after stage 5 (S's head is in (1,2,0) from c14 g to its spit in c15 g); done: TM real at (2,2,0), TR at (1,2,0), P9 in
+   P9 powered before c14, released 1 / 2 / 3 gt later: FAILS (TM (3, 2, 0), TR (2, 2, 0)) / FAILS (TM (3, 2, 0), TR (2, 2, 0)) / FAILS (TM (3, 2, 0), TR (2, 2, 0))
+   P9 powered before c15, released 1 / 2 / 3 gt later: FAILS (TM (3, 2, 0), TR (2, 2, 0)) / FAILS (TM (3, 2, 0), TR (2, 2, 0)) / FAILS (TM (3, 2, 0), TR (2, 2, 0))
+   P9 powered before c16, released 1 / 2 / 3 gt later: done / done / FAILS (TM (3, 2, 0), TR (1, 2, 0))
+   P9 powered before c17, released 1 / 2 / 3 gt later: done / done / FAILS (TM (3, 2, 0), TR (1, 2, 0))
+
+== the closed door loaded with the labels as this close leaves them (TM and TR exchanged), opened: every cell outside the four the two blocks pass through, against the opening above: the same at every tick; open state: TM (2, 3, 0), TR (3, 2, 0)
+
+== after the close (what-if; RB_ST's return is not designed): RB_ST taken out of (2,8,0) by command before c34, to c54
+   the S feed's 13 blocks and its cut cell against the open state: the same | P8 out powered by [(3, 5, -1)] | Q (3, 2, 0) | stages 6 and 7 -> still done
+
+== ctl 10: the input off n ticks after it went on (trigger.py's feed is armed at t10 j, R_D on at t8 d)
+   stages 0 to 7: {8: 'FAILS', 9: 'FAILS', 10: 'FAILS', 11: 'done', 12: 'done', 16: 'done'}

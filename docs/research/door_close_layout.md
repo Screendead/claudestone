@@ -3,7 +3,8 @@
 Labels: SOURCED (file), MEASURED (sat1, plot mechanics_8), COMPUTED (sim.py), INFERRED.
 
 ## Verdict
-No structural obstruction; full close not yet shown end to end.
+No structural obstruction. The close runs from one input to the closed door's plane in the simulator [COMPUTED
+p9_p8.txt]: stages 0 to 5 are measured in game, the last two are not yet, and the returns are not designed.
 - Every close mover (15) has power cells that at its stage reach no piston still to fire/wait [COMPUTED constraints.py].
 - Wave-1 dead end had three non-structural causes: coupling treated as fatal regardless of order (a piston whose retract
   event ran is a moving block for the rest of c0 g [SOURCED PistonBaseBlock.java:168-178]); opening wiring on free cells
@@ -22,8 +23,14 @@ No structural obstruction; full close not yet shown end to end.
 - The S feed's inputs (stage 5): thirteen blocks, shown in the simulator on 2026-11-22, the last commands are gone: the
   close runs through stage 5 from the one falling input. F_S is out from c10 to c15 on a repeater that reads RB_ST and a
   stone that cuts its feed; RB_F goes home by itself and G_S is taken out. Section "The S feed's inputs, stage 5" below.
+- P7, P9 and P8 (stages 6 to 8): nine blocks and a stone for one glass, shown in the simulator on 2026-11-22: the door
+  plane is the closed door's at c25 j, from the one falling input. P7 needs no block: its fire at c3 is used. P9, which
+  no block fed, fires after stage 5 and pushes TM and TR; P8 follows; Q does not fire. Section "P7, P9 and P8, stages 6
+  to 8" below.
 
 Close order [SOURCED plan_common.txt]: 0 P12 retract | 1 T, P9, P1-P6 | 2 P11 | 3 P10 | 4 V H2 | 5 S H2 | 6 P8 | 7 Q H2 | 8 P7
+As built [COMPUTED p9_p8.txt]: 0 P12 retract, 1 T (c0) | 2 P11, and P7 (c3) | P1-P6 (c4) | 3 P10 (c8) | 4 V (c11) | 5 S H2
+(c14, c15) | 6 P9 H2 with TM and TR (c20, c22) | 7 P8 (c23, Q home at c25 j). Q does not fire.
 
 ## Added blocks (9)
 - T feed: FT stone (1,6,0) (QC cell of T and P12); DT dust (1,7,0); CT stone cut (0,7,0) isolating DT from G12 (0,6,0).
@@ -271,7 +278,7 @@ no block, and neither P10 nor V is spat (below).
   to c17, so P8 stays in. `close_dp_off_probe` 4/4, `close_trigger_probe` 4/4, `close_s_feed_probe` 6/6 and
   `close_feeds_probe` 8/8 still pass.
 
-## The S feed's inputs, stage 5 (2026-11-22; simulator; not yet run on a server)
+## The S feed's inputs, stage 5 (2026-11-22; simulator; measured on the main server)
 Thirteen blocks take the last three commands out of the close: stages 0 to 5 run from the one falling input with no
 command after it, and the opening is unchanged [COMPUTED s_inputs.txt]. Not as framed in two ways: the drive is C, not A,
 so nothing is spat and G_S and its hold are taken out; and the feed is cut, not turned off.
@@ -340,6 +347,98 @@ so nothing is spat and G_S and its hold are taken out; and the feed is cut, not 
   and replayed in the simulator, pass 3/3; without R_F, D_F, R_C or C_F the first test fails [COMPUTED]. Server (2026-11-22, main on the Mac): 3/3
   [MEASURED]: F_S out at c10, RB_F at (1,5,1) after c12, S out at c14, the cut after c14, S spat at c15, RB_F home
   after c17; both controls hold; the five earlier close probes still pass.
+
+## P7, P9 and P8, stages 6 to 8 (2026-11-22; simulator; measured on sat1)
+Nine blocks and one changed support take the close from stage 5 to the closed door's plane: from the one falling input,
+with no command, the door's sixteen pistons and the door plane are at c25 j what the loaded closed state has, and the
+opening is unchanged [COMPUTED p9_p8.txt]. Not as framed in three ways: P7 gets no block and is not held, its fire at c3
+is used; P9, stage 1 of the plan, had no feed at all and fires after stage 5; Q's H2 is not needed.
+- What the close did after stage 5 [COMPUTED s_inputs.txt]: nothing. P8 and Q never fire. P9 never fired in any run: no
+  block feeds it (in the closed door RB9 does; Z9 takes it away at t3). TM stays at (3,2,0), Q at (3,3,0), (1,2,0) is
+  empty, and P7 is out from c3 with TR at (2,2,0).
+- Order: the plan closes the top row as 1 P9 (TM to (2,2,0), spat), 6 P8 (Q down), 7 Q H2 (TM on to (1,2,0)), 8 P7 (TR
+  down), so P7 would have to be held in until Q has fired. With P7 on NA at c3 the plan's stage 1 fails: P9 by command
+  at c1 and c2 leaves TM at (2,2,0), P7 pushes TR down onto it, TM lands at (2,1,0), R's cell, and P5 stays in [COMPUTED
+  what-if]. As built P7 goes first (TR at (2,2,0) at c5 j), P9 pushes TM and TR one cell west after stage 5 and is spat,
+  and P8 pushes Q down to (3,2,0). TM and TR end in each other's cells. They are the same block: the closed state loaded
+  with the two labels exchanged opens the same at every tick [COMPUTED].
+- P7: no block. NA's relight fires it at c3, a tick ahead of P1 to P6. DS's changes update it at c12 j and c15 g: out and
+  powered, no event.
+- Blocks: R_X, a 2-tick repeater at (2,5,1) facing west on glass G_X (2,4,1), which stands on the hallway's roof beside
+  DS; A_9, a sticky piston at (3,4,1) facing east; S_L, a stone at (6,3,1) in place of design_c's glass under LY's dust
+  (6,4,1); R_9, a 1-tick repeater at (5,3,0) facing east on glass G_9 (5,2,0); R_8, a 1-tick repeater at (3,5,-1) facing
+  north on design_c's stone (3,4,-1); D_8, a dust at (3,5,-2) on glass G_8 (3,4,-2); O_8, an obsidian block at (3,-1,0),
+  under the static block (3,0,0). Seven work and three carry them. Opening: open-state diff none but O_8's own cell, no
+  cell differs outside the added blocks at any tick, dust levels included, the door's pistons and the door plane the
+  same at every tick, nothing moves during the load, box 1728 through the opening and the close [COMPUTED].
+- Pulse: R_X reads (1,5,1), where RB_F stands from c12 j to c15 g. It turns on at c16 d and, its input gone, off at
+  c20 d: its pulse is its delay long. That gives the S feed's timing to the east side with S's 0-tick already done.
+- Shuttle: A_9 is QC-powered by R_X through (3,5,1), the cell above it, and updated by its changes. In front of it is
+  RB9, the opening's own redstone block, which Z9 pushed up to (4,4,1) at t3. A_9 extends at c16; RB9 lands at (5,4,1)
+  at c18 j, beside LY's dusts (5,4,2) and (6,4,1); A_9 pulls it back at c20 and both are home at c22 j. RB9 stands
+  beside LY for 2 gt.
+- Wire: LY, the opening's dust from RB_Y to Z_S, dark since t0, runs from RB9's cell to P9. Its dust (6,4,1) stands on a
+  glass that passes nothing down to its dust (6,3,0); on S_L it does: 15 and 14 from c18 j to c20 g. In the closed state
+  and the opening LY's levels are what they were.
+- P9: R_9 reads LY's dust (6,3,0) and points into (4,3,0), the cell above P9. On at c20 d, off at c22 d. P9 extends at
+  c20, level 0, and pushes TM and TR; at c22 it is spat: TM real at (2,2,0) in that event, TR lands at (1,2,0) at c22 j,
+  P9 is home at c24 j. By command [COMPUTED]: P9 powered before c14 or c15 does nothing (the row is blocked; S's head
+  is in (1,2,0) until its spit in c15 g); from c16 and released 1 or 2 gt later it is done; at 3 gt it pulls TM back.
+- P8: R_8 reads D_8, which reads NA's dust (2,4,-2) up the step (and DQ's (4,4,-2); the glass passes nothing back), and
+  points into (3,5,0), the cell above P8. It is on in the closed state, a second source beside NV's dust, off through
+  the open state, and on again from c4 d, two ticks after NA's relight. O_8 makes P8's column immovable while TM is at
+  (3,2,0): at c4 d R_8 and r_P5 both turn on, and without O_8 P8 can push Q, TM, R and the static block down if its
+  event runs ahead of P5's. With it P8 waits powered and blocked: by O_8, then P5's head, then P9's head.
+- Wake: A_9 stands south of P8. Its landing at c22 j updates P8, powered and free since P9's spit in c22 g: P8 extends at
+  c23 and stays out; Q lands at (3,2,0) at c25 j. P8's updates before that (c4 d, c16 g, c18 j, c20 g) find it blocked.
+- Opening: D_8 and LY die at t0 g, R_8 and R_9 turn off at t2 d, ahead of NV's cut (t2 j) and of P9's 0-tick (t3), as
+  R_V does: P8 retracts at t3 and P9 fires at t3 as before. A_9 is updated at t0 g, t3 g and t5 j (RB9 landing in
+  front of it) and never powered. In the closed state P9 has R_9 beside RB9 among its sources and P8 has R_8 beside
+  NV; in the open state no piston has an added cell among its sources.
+- End state [COMPUTED]: the door's pistons and the door plane as the loaded closed state has them, cell for cell, the
+  labels of TM and TR exchanged; A_9, RB9, R_X and LY as in the open state; R_8 on. Against s_inputs' end state five
+  cells differ, (1,2,0), (2,2,0), (3,2,0), (3,3,0) and (3,4,0), and no dust level. Against the closed state 41 cells
+  outside the door plane still differ, all of them the returns: the opening's relays X2, Z_Q, Y1, Z_S, Z9, Z11, Y12 with
+  RB_X, C_cut, RB_Q, RB_Y, RB_S, RB9, RB11 and G; the trigger chain's K, M_K, RB12, P_R, RB_T, K_T, SPC and RB_ST; the S
+  feed's A_C, C_F, R_F and R_C; and R_9, off while LY is dark. With RB_ST taken out by command the S feed resets as
+  before and P8 stays out on R_8.
+- What the order rests on [COMPUTED; INFERRED for the game]: a repeater whose input is gone when its delay ends still
+  turns on, for its delay (R_X; MEASURED as a rule in docs/MECHANICS.md, repeater_extends_short_pulses: 3 gt in at
+  delay 2 gives 4 gt); a sticky piston released 2 gt after it pushed two blocks leaves both (P9; with one block the
+  spit is measured at 1 and 2 gt, sticky_piston_short_pulse_drops_block, and S's here); a repeater that points into
+  the cell above a piston powers it by QC and updates it (A_9, P9, P8), as dust pointing into that cell does (P8 on NV
+  in the opening); a repeater reads the dust behind it whichever way that dust's line runs (R_9 behind LY's (6,3,0));
+  a piston base that lands updates its neighbours (A_9 and P8), as a landing head does (P10's and V, measured). No
+  order inside a phase is used: R_X's off and R_9's on are both scheduled ticks of c20, A_9's and P9's events both run
+  in c20 g in either order, and P8's update at c22 j follows P9's spit at c22 g by phase. Dust's updates reversed,
+  I_A's event last, both: the same piston events in every tick, the same end state.
+- Controls fail [COMPUTED]: no R_X; R_X at 1 tick (P9's 0-tick still runs, at c18 and c20, but A_9 is home at c19 j,
+  when P8 is behind P9's head, and P8 is never updated again); R_X at 3 or 4 ticks (RB9 stands beside LY for 4 gt or
+  more, R_9's pulse is as long and P9 pulls TM back); A_9 not sticky (RB9 stays beside LY and P9 stays out); the glass
+  left at S_L; R_9 at 2 to 4 ticks (its pulse is 4 gt or more, and the opening differs from t3: it is still on when P9
+  fires); a stone under R_X (DS points into it from c12 j and A_9 fires at c13); a stone under D_8 (NA and DQ are one
+  net; the opening differs from t0); each of R_X, A_9, S_L, R_9, D_8 and R_8 left out. R_8 at 2 ticks passes the close
+  and changes the opening from t3 (it is still on at NV's cut); at 3 or 4 ticks both fail. O_8 left out passes in the
+  simulator's order of c4's events and fails with P8's event first. G_9 as stone passes. The input off fewer than 11
+  ticks after it went on fails as the trigger chain does.
+- Costs: the door closes at c25 j, eight ticks after stage 5's last landing. The cells of the ten and (5,4,1), RB9's
+  stroke; (3,5,-1) was one of P8's clean cells, (5,2,0) and (5,3,0) two of P9's. One of design_c's blocks changes: the
+  glass under LY's dust (6,4,1) is a stone, and LY passes that step both ways. RB9 is borrowed: it has to stand at
+  (4,4,1) until c22 j, so its return comes after that and leaves (3,4,1) and (5,4,1) alone. LY's two changes (c18 j, c20 g) update
+  Y1, Z_Q and Z_S, fired and powered, so no event now; a re-arm that resets a fired relay by dust within 2 would be
+  hit by them [INFERRED]. P8 waits powered and blocked from c4 d to c22 j. O_8 stands in the door plane's corner
+  (3,-1,0), outside the frame and the wall ring.
+- Not searched: no screen for fewer blocks was run. One block in every free cell around P9 and P8, as p10_v_search
+  does, is about half an hour of CPU here.
+- Probe: `close_p9_p8_probe` (`export_p9_p8`): the run above with no command after the input, and two controls (R_9 or
+  R_8 removed with setblock air strict before the opening), 77 or 76 cells and the levels of DT, DS, DP, the tap, D_V,
+  NV's four dusts, D_1, D_2, D_F, LY at (6,4,1) and (6,3,0) and D_8 checked against the simulator after c0, c4, c10, c12,
+  c14, c15, c16, c18, c20, c22, c23, c25 and c30 (the controls: c16, c18, c20, c22, c25; c4, c20, c22, c23, c25). Its
+  steps, read back from the YAML and replayed in the simulator, pass 3/3; without R_X, A_9, R_9 or R_8, or with the
+  glass left at S_L, the first test fails [COMPUTED]. `python -m scripts.lint close_p9_p8_probe`: ok. MEASURED (sat1) 3/3:
+  the door plane closed from the one input as above; with R_9 removed RB9 still shuttles, LY lit after c18 and dark
+  after c20, P9 and P8 stay in; with R_8 removed P9 runs and is spat, P8 stays in, Q stays at (3,3,0). Traits ok,
+  5x7x4, 10 blocks.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -412,34 +511,47 @@ events of one phase: they show which orders work, not how to get them.
    DP's source away is reached from P6's extension [COMPUTED dp.txt, dp_off_search.txt].
    P10 and V need none: they extend once and stay out, as the closed door has them [COMPUTED p10_v.txt].
    S's: F_S's feed is cut at c14 j and F_S pulls RB_F home at c15 [COMPUTED s_inputs.txt].
+   P9's: R_9's pulse is 2 gt, c20 d to c22 d. P7 and P8 need none: they stay out [COMPUTED p9_p8.txt].
 4. Z_T/RB_T reset: P_R re-extends, a down-pusher pushes RB_T to (1,5,-1); (1,7,-1) is now the bus's support. Also the
    return of RB_ST and its glass, RB12 and G, K, K_T. RB_ST's return also resets the S feed's cut (A_C pulls C_F back
    10 gt after RB_ST leaves (2,8,0)); R_F stands at (2,8,1), so RB_ST leaves by (3,8,0), (2,8,-1) or down.
+   And the opening's own relays, which every close leaves fired: X2, Z_Q, Y1, Z_S, Z9, Z11, Y12 with RB_X, C_cut, RB_Q,
+   RB_Y, RB_S, RB9, RB11 and G (41 cells outside the door plane differ from the closed state after the close [COMPUTED
+   p9_p8.txt]). RB9's return comes after c22 j (A_9 borrows it at (4,4,1)) and keeps off (3,4,1) and (5,4,1). RB_Y's
+   return relights LY and R_9 then powers P9 behind Q, as RB9 does. P8 is held by R_8 on NA, so C_cut's return has no
+   deadline.
 5. Routing: the bus is laid (east to P_R and AP, west to M_K). DP needs no trunk: its tap reads NP12 at (0,5,3).
+6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
+   [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
 Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within 2 of one resets it [SOURCED door_relay_rearm.md].
 
 ## Next
 DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A_D's head and P11 is spat). P10 and V
 (stages 3 and 4) are MEASURED from two blocks (`close_p10_v_probe` 3/3 on sat1: V out at c11, S at (1,3,0) after c13). The
 S feed's inputs (stage 5) are MEASURED from thirteen blocks: the close runs through stage 5 from the one input with no
-command (`close_s_inputs_probe` 3/3 on the main server: F_S out at c10, S spat at c15, RB_F home after c17). Next, P7, which fires on
-NA's relight at c3, ahead of its stage, and the returns (item 4). If P6 must be
+command (`close_s_inputs_probe` 3/3 on the main server: F_S out at c10, S spat at c15, RB_F home after c17). The last
+stages are MEASURED from nine blocks and a stone: the door plane closes from the one input with no command
+(`close_p9_p8_probe` 3/3 on sat1: R_X on at c16, RB9 at (5,4,1) after c18 with LY lit, P9 out at c20, TM at (2,2,0) and
+TR at (1,2,0) after c22, P8 out at c23, Q at (3,2,0) after c25; with R_9 removed P9 and P8 stay in, with R_8 removed P8
+stays in and Q at (3,3,0)). Next, the returns (item 4): with them the door cycles. If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
 The scripts are in `scripts/door2/close_layout/` (constraints.py/.txt, constraints_P6stage2.txt, feeds.py/.txt,
 puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.txt, export_trigger.py, dp.py/.txt,
 dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py, p10_v.py/.txt, p10_v_search.py/.txt,
-export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py, p9_p8.py/.txt, export_p9_p8.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
 `library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1),
-`library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1) and
-`library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server).
+`library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1),
+`library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server) and
+`library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; 3/3 on sat1).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
+`python -m scripts.try close_p9_p8_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
@@ -453,4 +565,6 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.door2.close_layout.export_p10_v`;
 `python -m scripts.door2.close_layout.p10_v_search > scripts/door2/close_layout/p10_v_search.txt` (about 4 minutes);
 `python -m scripts.door2.close_layout.s_inputs > scripts/door2/close_layout/s_inputs.txt`;
-`python -m scripts.door2.close_layout.export_s_inputs`
+`python -m scripts.door2.close_layout.export_s_inputs`;
+`python -m scripts.door2.close_layout.p9_p8 > scripts/door2/close_layout/p9_p8.txt` (about 20 s);
+`python -m scripts.door2.close_layout.export_p9_p8`
