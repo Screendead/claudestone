@@ -5,9 +5,11 @@ Labels: SOURCED (file), MEASURED (sat1, plot mechanics_8), COMPUTED (sim.py), IN
 ## Verdict
 No structural obstruction. The close runs from one input to the closed door's plane in the simulator [COMPUTED
 p9_p8.txt]: stages 0 to 8 are measured in game. Of the returns, the trigger chain's east side goes home from blocks, with
-no command after the input [COMPUTED rbt_drives.txt; not yet measured], after two changes to measured blocks (the bus's
+no command after the input [COMPUTED rbt_drives.txt; MEASURED 4/4], after two changes to measured blocks (the bus's
 west branch re-laid, K_T made sticky): with added blocks alone it cannot, whatever the box [COMPUTED returns.txt]. The
-west side and the opening's relays are not designed.
+west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; not yet measured], but for
+G, which ends where the opening puts it: its closed cell is Y12's head, so NP12 is lit again until Y12 is re-armed. The
+opening's relays are not designed.
 - Every close mover (15) has power cells that at its stage reach no piston still to fire/wait [COMPUTED constraints.py].
 - Wave-1 dead end had three non-structural causes: coupling treated as fatal regardless of order (a piston whose retract
   event ran is a moving block for the rest of c0 g [SOURCED PistonBaseBlock.java:168-178]); opening wiring on free cells
@@ -41,6 +43,12 @@ west side and the opening's relays are not designed.
   pistons) but a second and a third redstone block move one place each with it round a loop of five pistons; one pulse,
   read from the S feed's dust and sent down a line of repeaters, times the loop and H_T. The trigger chain's east side
   and the S feed's cut end as loaded. Section "RB_T's return from blocks" below.
+- The west side's return from blocks (2026-11-22, simulator): 34 blocks, no measured block changed, box 2520. A sticky
+  piston west of RB12, built out and held by a redstone block that a second piston takes away and brings back, pulls RB12
+  off K's head and pushes it back; K and M_K retract in between. One piston above G then pushes G and RB12 down together:
+  M_K, released two ticks after its push, leaves WK beside K, and RB12 lands on a K that cannot push, G being above it.
+  One pulse, read from the east return's line. G ends at (-4,3,2) and NP12 is lit again: G's last cell is the relays'
+  step's. Section "The west side's return from blocks" below.
 
 Close order [SOURCED plan_common.txt]: 0 P12 retract | 1 T, P9, P1-P6 | 2 P11 | 3 P10 | 4 V H2 | 5 S H2 | 6 P8 | 7 Q H2 | 8 P7
 As built [COMPUTED p9_p8.txt]: 0 P12 retract, 1 T (c0) | 2 P11, and P7 (c3) | P1-P6 (c4) | 3 P10 (c8) | 4 V (c11) | 5 S H2
@@ -730,6 +738,115 @@ timing each but one pulse on a line of repeaters.
   are to be measured again, and the new one for the first time. `close_feeds_probe` and `close_s_feed_probe` are
   unchanged.
 
+## The west side's return from blocks (2026-11-22; simulator)
+From the one falling input, with no command after it, the trigger chain's west side goes home after the close: RB12 on K
+at (-4,2,2), K in and armed as the load leaves it (powered by L, not updated), M_K in, WK beside K. 34 blocks added and
+no measured block changed; box 14x15x12 = 2520 [COMPUTED west_drives.txt]. Not as framed in two ways: RB12 does not take
+the route of the first pass's screen, round (-5,2,2) with three pistons, but is pulled one cell west and pushed back, a
+kick as RB_T's was, and then pushed down together with G; and the closed state is not all restored, because G cannot be:
+it ends at (-4,3,2), its cell in the open state, and the gate over L stays open until Y12 is re-armed.
+- After the close [COMPUTED returns.txt]: RB12 at (-4,3,2) on K's head, G above it at (-4,4,2), K out (RB12 is its payload,
+  two above it: QC), M_K out (RB12 beside it), WK at (-4,1,1). K retracts only once RB12 has left, and its closed state is
+  powered and not updated under RB12, so whatever brings RB12 back onto it has to stop K's push at that landing.
+- The screen's route [COMPUTED west_drives.txt, what-if]: with RB12 pulled west to (-5,3,2), K and M_K in and WK at
+  (-4,2,1), the route's east pusher at (-6,2,2) is powered by RB12 from where it is parked (QC); RB12 at (-5,2,2) powers
+  K by QC, in and free to push; nothing on the route sends M_K out again, so WK stays up; and RB12 set on K with
+  (-4,3,2) empty is pushed up again at once (L powers K and updates it). The route's three pistons would need a fourth
+  mover for WK and something to stop K as well.
+- The kick [COMPUTED]: P_W, a sticky piston at (-6,3,2) facing east, built out, its head at (-5,3,2), held by RB_W, a
+  redstone block north of it at (-6,3,1). A_W, a sticky piston at (-6,4,1) facing down, pushes RB_W down to (-6,2,1) and
+  pulls it back. RB_W's leaving updates P_W inside A_W's event: it retracts and pulls RB12 west to (-5,3,2); K and M_K,
+  updated by RB12's leaving and unpowered, retract in that phase, M_K pulling WK up to (-4,2,1). Parked, RB12 powers no
+  piston. RB_W's landing back beside P_W updates it: it pushes RB12 east again and stays out, as loaded. Above P_W a
+  redstone block cannot be taken away in one push (every neighbour of that cell is a QC cell of P_W); north, south and
+  below it can. P_W is held, not pulsed: released with G at (-4,3,2) it pulls G west (what-if).
+- M_K and WK [COMPUTED]: RB12's landing back at (-4,3,2) (c55 j) powers and updates M_K, which pushes WK down at c56.
+  RB12 there powers K again, and WK's landing beside K at c58 j would update it: in the control without R_G, K goes out
+  again at c59. So RB12 has to leave within two ticks of M_K's push.
+- The push down [COMPUTED]: P_G, a sticky piston at (-4,6,2) facing down, over glass SPG (-4,5,2), pushes SPG, G and RB12
+  down one cell at c58. RB12's leaving releases M_K two ticks after its push: it leaves WK at (-4,1,1) (a sticky piston
+  released within 2 gt of its push leaves the block: measured for P9 and F_S), and WK, real at once, updates K, which
+  nothing powers then. RB12 lands on K at c60 j and lights L, whose change updates K with QC power on: its push stops
+  on G, moving above RB12, and after that on P_G's head over SPG and G (K's updates while it is in: c58 g not powered,
+  c60 j powered and blocked). P_G pulls SPG back at c66. K is left powered and not updated under RB12 and G, as the open
+  state has it. P_G stands two above G's cell of after the close because the bus's last dust (-4,5,1) points into
+  (-4,5,2): a piston there is out through the open state.
+- The timer [COMPUTED]: one pulse, from the east return's line. R_W, a 4-tick repeater at (1,10,2) on glass, reads the
+  line's dust (2,10,2), lit from c26 to c34, and a dust joins it to R_M (-1,10,2), 4 ticks, on from c42 d to c50 d.
+  Eight dusts run from R_M: (-2,10,2), (-2,10,1) and (-2,10,0) at y 10, then down four stone steps, (-3,9,0), (-4,8,0),
+  (-5,7,0), (-6,6,0), beside the bus's west branch (two cells higher and one south) and two cells north of P_G's
+  column, to D_A (-6,6,1) on S_A, a stone on A_W: S_A powers A_W and D_A's change updates it, as the bus's last dust
+  does M_K from the stone on it (levels 15 to 8).
+  R_X (-6,6,2), 4 ticks, reads D_A and powers stone Y_X (-6,6,3); R_G (-5,6,3), 4 ticks, reads Y_X and powers stone
+  Y_G (-4,6,3), south of P_G, from c58 d to c66 d. In the closed and the open state and through the opening every
+  repeater is off and every dust dark.
+- The run [COMPUTED west_drives.txt]: c42 A_W out, P_W pulls RB12 (level 1), K and M_K in (level 2). c44 j RB12 at
+  (-5,3,2), WK at (-4,2,1), RB_W at (-6,2,1). c50 A_W pulls RB_W back, c52 j it lands, c53 P_W out, c55 j RB12 at
+  (-4,3,2). c56 M_K out. c58 P_G out, M_K released: WK real at (-4,1,1). c60 j RB12 at (-4,2,2), G at (-4,3,2), L 15.
+  c66 P_G in, c68 j SPG home. 10 piston events are added to the east return's run, none taken away.
+- The same [COMPUTED]: every added block stands in a cell that the build of rbt_drives.py never fills; nothing moves
+  during the load; the opening and the close to c30 are the same at every tick in every cell outside the added blocks,
+  and no added cell changes before c34. From c31 to c70, against the same build without the 34 blocks, the cells that
+  differ are the west column's seven (K, its head cell, (-4,3,2), (-4,4,2), M_K, its head cell, WK's) from c42 and, from
+  c60, L, NP12's dust and the DP tap (its repeater from c62): the east side's return is the same at every tick. Of the
+  added pistons P_W is powered throughout, by RB_W; A_W and P_G never before their pulse.
+- End state [COMPUTED]: K, its head cell with RB12 in it, M_K, its head cell, WK and (-4,4,2) as loaded, K powered by L
+  alone as in the closed state, M_K unpowered; the 34 blocks as loaded, P_W held by RB_W, the repeaters off, the line
+  dark; the east side as rbt_drives.py leaves it; the door plane closed; nothing moving, no tick or block event pending.
+  24 cells outside the door plane still differ (28 before this step): the opening's seven relays with their blocks, G,
+  and the DP tap's repeater.
+- The open gate [COMPUTED]: from c60 j H reads L up the step that G should cover. NP12 is lit as in the open state (H 14,
+  G12 on P12 8, the tap's dust 10), the tap's repeater is on from c62, P12 is powered and its push stops on V's head
+  under the spare block, and A_D is powered through the tap's stone and not updated, as it is from t8 in the open
+  state. Nothing moves. When NP12 dies again, H's death updates A_D while the tap still powers it, as at c0 (the what-if
+  under G). The step that re-arms Y12 starts from this.
+- G [COMPUTED the what-ifs; INFERRED the judgement]: G's return is in two steps and only the first is this one's. Down
+  to (-4,3,2) it goes here: it is the middle block of P_G's push and, moving above RB12, what stops K. East into
+  (-3,3,2) it can go only when Y12 has retracted, and Y12 is held by ARM_Z11 above it and by RB_D beside the cell above
+  it (QC): the relays' step. With those two taken out by command after the returns, Y12 as built retracts and leaves G
+  at (-4,3,2), which then needs a mover from the west, where P_W's head stands; Y12 made sticky (a measured block of
+  design_c) pulls G home by itself: H 0, the tap's repeater off two ticks after G lands, and A_D extends once (RB_D
+  being out, it pushes nothing). With Y12 sticky nothing moves during the load and the opening, the close and both
+  returns are the same at every tick outside Y12 and its head. Holding RB12 back until G is home was not tried: the
+  push down would lose its middle block (P_G reaches one cell past SPG) and K the block that stops it.
+- The relight and the east side [COMPUTED]: NP12's relight updates W_T, and RB_T powers W_T by QC while it stands at
+  (1,6,-1), c42 j to c47 (the trap of the bus section). Built, RB12 lands at c60 j, ten ticks after RB_T is home. With
+  the line 14 ticks early (R_M a dust, R_W at 1 tick) it lands at c46 j: W_T extends at c47 and its head takes RB_T's
+  closed cell. With two repeaters on the line the earliest landing is c48 j, when H_T has pushed RB_T on.
+- Margins [COMPUTED]: each delay moved alone, 1 to 4 ticks. R_W and R_M: all done, and all 16 pairs (the kick at c30 to
+  c42). R_X and R_G: 3 or 4, not both 3: P_G's push has to fall in c56 to c58, after M_K's extension and before WK
+  lands (at 2, R_G is on while RB12 is still moving into (-4,3,2), the push fails and nothing updates P_G; at 1, P_G
+  pushes G into the empty cell at c52). With one of them at 3, P_G's event runs in c56 behind M_K's extension, queued
+  in c55 j (first in, first out), and M_K is released inside that phase; with the two events exchanged (what-if) M_K's
+  is dropped and WK stays up. Built at 4 and 4 nothing rests on that order. Dust's updates reversed, I_A's event last,
+  the scheduled ticks of each tick reversed from c30 and the moving blocks west of x -3 in reverse order from c40
+  change nothing, nor do 60 seeded runs with both in a random order. The input off 11 ticks or more after it went on: the close and both returns are done.
+- Controls fail [COMPUTED]: no R_W or no A_W (nothing starts in the west); A_W not sticky (RB_W stays down, P_W in, RB12
+  at (-5,3,2)); no RB_W (P_W retracts in the load); P_W not sticky; no P_G, R_X, Y_X, R_G or Y_G (K out again at c59);
+  no SPG; P_G not sticky (SPG left at (-4,4,2)); R_X and R_G both at 3 ticks; the line 14 ticks early. Each of the 24
+  blocks that are not glass or S_A under a dust or a repeater, left out alone, fails the return.
+- A second cycle [COMPUTED, sim only]: with the 72 cells that still differ, labels apart, set back as loaded without
+  updates (the relays, G, and the dust and the tap that the open gate lights), the second opening is the same as the
+  first at every tick in every cell, and the second close and returns have the same piston events. With D9 built as
+  well: the same events.
+- What the probe is there to measure [COMPUTED here; INFERRED that the game agrees]: A_W out at c42 on D_A; P_W's pull
+  inside A_W's event and K's and M_K's retracts behind it; P_W out again at c53 on RB_W's landing; M_K leaving WK at
+  c58, two ticks after its push; K in after c60, with L at 15, RB12 on it and G above; NP12 lit from c60 with P12 and
+  A_D in; and, in the control, K out at c59 on WK's landing.
+- Earlier scripts and searches [COMPUTED]: this step adds files and changes none. feeds, puller, trigger, dp, dp_off,
+  p10_v, s_feed, s_inputs, p9_p8, returns, rbt_route and rbt_drives, rerun, give their .txt files byte for byte; the
+  seven exporters from `export_trigger` to `export_rbt_drives`, rerun, write the same YAML. The three searches, rerun
+  (p10_v_search 180 cells, dp_off_search 36, dp_search 41 and 39), give their files byte for byte: they screen the
+  builds of their own steps, which hold none of the 34 blocks; three of these stand in cells of the two DP screens
+  (P_G, SPG and Y_G, at (-4,6,2), (-4,5,2) and (-4,6,3)).
+- Probe: `close_west_drives_probe` (`export_west_drives`): the 34 blocks on the whole build, three tests with no
+  command after the input: the run, checked against the simulator after c0, c3, c34, c42, c44, c50, c52, c53, c55, c56,
+  c58, c60, c62, c66, c68 and c70 (54 cells of the west side and 29 dust levels each time, 174 cells after c70), and two
+  controls that take one block out before the opening: R_M (the line stays dark, nothing moves in the west) and R_G
+  (the kick and RB12's way back as in the run, P_G stays in, K out again at c59). Its steps, read back from the YAML
+  and replayed in the simulator, pass 3/3; without R_W, R_M, A_W, RB_W, P_W, R_X, Y_X, R_G, Y_G, P_G or SPG the first
+  test fails. `python -m scripts.lint close_west_drives_probe`: ok. Not yet run on a server.
+
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
 above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
@@ -812,8 +929,13 @@ events of one phase: they show which orders work, not how to get them.
    cut resets when RB_ST leaves; one pulse from the S feed's dust times it; 28 cells then still differ. MEASURED
    (2026-11-22, main server): `close_rbt_drives_probe` 4/4, and the six probes re-exported for K_T 23/23. The fix first chosen for RB_T, a piston at (1,7,-1),
    fires in the opening (K_in powers it by QC), and Z_T sticky, W_T sticky or another hold for T do not open it either;
-   RB_ST's own route takes eight pistons (rbt_route.txt). Not designed: the west side, RB12 (a route west round x -5 if
-   the box grows there), K, M_K and G.
+   RB_ST's own route takes eight pistons (rbt_route.txt). The west side goes home from blocks as well [COMPUTED
+   west_drives.txt; MEASURED (2026-11-22, main server): `close_west_drives_probe` 3/3]: RB12 kicked west and back by P_W (-6,3,2), which RB_W
+   holds and A_W releases, K and M_K in at the kick, then G and RB12 pushed down together by P_G (-4,6,2), WK left
+   beside K by M_K's release, K stopped by G above RB12; one pulse from the east return's line; 34 blocks, no measured
+   block changed, box 2520; 24 cells then still differ. G ends at (-4,3,2), not at (-3,3,2), which is Y12's head: its
+   last cell is the relays' step's, and until then NP12 is lit again (P12 powered, stopped by V's head; A_D powered and
+   not updated).
    The opening's relays, which every close leaves fired (X2, Z_Q, Y1, Z_S, Z9, Z11, Y12 with RB_X, C_cut, RB_Q, RB_Y,
    RB_S, RB9, RB11): each is held by its arm, the four that face up also by their payload at R+2. They need no
    re-orienting: Z9 is re-armed in place by command, its arm taken out before c22, D9 (4,5,1) pushing RB9 down at c23
@@ -821,7 +943,10 @@ events of one phase: they show which orders work, not how to get them.
    source (on by c23, off from c24) and ARM_Z9's puller (from (5,2,1) or (5,3,2); powered in the closed and the open
    state, off from c22 or before until c23 or after). RB_Y's return relights LY and R_9 then powers P9 behind Q, as RB9
    does, and LY's relight updates Y1, so Y1 needs the blocker, a head in (7,5,-3) [INFERRED]. P8 is held by R_8 on NA, so C_cut's
-   return has no deadline.
+   return has no deadline. Y12 is held by ARM_Z11, which Z11 shares, and by RB_D; when it retracts G has to go from
+   (-4,3,2) into (-3,3,2): Y12 made sticky pulls it there by itself (a measured block of design_c; what-if in
+   west_drives.txt), as built it needs a mover from the west, where P_W's head stands. NP12 then dies and A_D, armed
+   since RB12 came home, fires once as at c0.
 5. Routing: the bus is laid (east to P_R and AP, west over the input repeater to M_K; re-laid 2026-11-22, box 2016). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
    [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
@@ -842,9 +967,12 @@ the rest of the trigger chain's east side (returns.txt; `close_returns_probe` 6/
 re-exported probes pass in game on the re-laid bus (23/23 on the main server, 2026-11-22). RB_T's return is designed from
 blocks and MEASURED (rbt_drives.txt: 49 blocks, K_T sticky, box 2160; `close_rbt_drives_probe` 4/4 and the six probes
 re-exported for K_T 23/23 on the main server, 2026-11-22, traits ok): the trigger chain's east side ends as loaded from the
-one input with no command. Next: the west
-side (RB12, K, M_K, G); then D9's source and ARM_Z9's puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1
-with the blocker). If P6 must be
+one input with no command. The west side's return is designed from blocks (west_drives.txt: 34 blocks, no measured block
+changed, box 2520; MEASURED: `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` still 4/4 on the main server,
+2026-11-22, traits ok): RB12, K, M_K and WK end as loaded, G at (-4,3,2), and NP12 is lit again from c60. Next: the opening's
+relays, Y12 first because the lit NP12 waits on it: its two holds (ARM_Z11 and RB_D) away and back without an update,
+G's last cell (Y12 sticky, or a mover from the west), and A_D's shot when NP12 dies; then D9's source and ARM_Z9's
+puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
@@ -852,7 +980,8 @@ The scripts are in `scripts/door2/close_layout/` (constraints.py/.txt, constrain
 puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.txt, export_trigger.py, dp.py/.txt,
 dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py, p10_v.py/.txt, p10_v_search.py/.txt,
 export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py, p9_p8.py/.txt, export_p9_p8.py, returns.py/.txt,
-export_returns.py, rbt_route.py/.txt, rbt_drives.py/.txt, export_rbt_drives.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+export_returns.py, rbt_route.py/.txt, rbt_drives.py/.txt, export_rbt_drives.py, west_drives.py/.txt,
+export_west_drives.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
@@ -860,17 +989,19 @@ export_returns.py, rbt_route.py/.txt, rbt_drives.py/.txt, export_rbt_drives.py),
 `library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1),
 `library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server),
 `library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; 3/3 on sat1),
-`library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server) and
-`library/mechanics/close_rbt_drives_probe.redstone.yaml` (written by `export_rbt_drives`; not yet run on a server).
+`library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server),
+`library/mechanics/close_rbt_drives_probe.redstone.yaml` (written by `export_rbt_drives`; 4/4 on the main server) and
+`library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; not yet run on a server).
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
 three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
 (2026-11-22): 4/4, 4/4, 3/3, 3/3, 3/3 and 6/6. They were written a third time on 2026-11-22 with K_T sticky
-(rbt_drives.py) and have not been measured since.
+(rbt_drives.py) and pass again on the main server, 23/23, with `close_rbt_drives_probe` 4/4. west_drives.py changes none
+of them.
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
 `python -m scripts.try close_p9_p8_probe`; `python -m scripts.try close_returns_probe`;
-`python -m scripts.try close_rbt_drives_probe`;
+`python -m scripts.try close_rbt_drives_probe`; `python -m scripts.try close_west_drives_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
@@ -891,4 +1022,6 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.door2.close_layout.export_returns`;
 `python -m scripts.door2.close_layout.rbt_route > scripts/door2/close_layout/rbt_route.txt` (about a minute);
 `python -m scripts.door2.close_layout.rbt_drives > scripts/door2/close_layout/rbt_drives.txt` (about 30 s);
-`python -m scripts.door2.close_layout.export_rbt_drives`
+`python -m scripts.door2.close_layout.export_rbt_drives`;
+`python -m scripts.door2.close_layout.west_drives > scripts/door2/close_layout/west_drives.txt` (under a minute);
+`python -m scripts.door2.close_layout.export_west_drives`
