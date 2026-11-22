@@ -193,11 +193,12 @@ way: P11 is spat, P6 is not (below).
   same piston events in every tick, stage 5 done.
 - P6: P11's extension queues P6 (QC through FP) behind A_D's retract; that event finds FP dark and is dropped, in every
   order. P6 extends once, at c4, on NA's repeater with P1 to P5, and stays out, where the closed door has it. It is not
-  spat: for that DP must stay lit one event longer. `dp_off_search.py` screens one and two more blocks in the 35 free
-  cells of dp_search's region for a design that spits P6 too: one more, 1 of 560, a dust at (-2,4,0) (DP's change
-  reaches it and its own reaches P6, so P6 is queued with P11); built, the opening differs from t1 (RB11 beside it
+  spat: for that DP must stay lit one event longer. `dp_off_search.py` screens one and two more blocks in the 36 free
+  cells of dp_search's region for a design that spits P6 too (rerun 2026-11-22 on the re-laid bus, which freed one
+  cell; the counts were 35, 1 of 560, 441 of 152320 and 435, with the same passes): one more, 1 of 576, a dust at
+  (-2,4,0) (DP's change reaches it and its own reaches P6, so P6 is queued with P11); built, the opening differs from t1 (RB11 beside it
   lights it and DP in the closed state), lit it points into V, and it stands on P11, whose top the game does not take
-  as a support once it extends [INFERRED; the simulator has no rule for support]. Two more: 441 of 152320, 435 of them
+  as a support once it extends [INFERRED; the simulator has no rule for support]. Two more: 455 of 161280, 449 of them
   with that dust and 6 without, four ideas: a dust on NA's dust that ties DP to NA, dp_search's row pusher, a redstone
   block beside NA's and NV's dust, and a relay above A_D. Built, each fails: the first three move pistons during the
   load and change the opening, and the relay fires in the opening [COMPUTED dp_off_search.txt, dp_off.txt].
@@ -551,8 +552,14 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
   passes, as before) and in the bus's levels (M_K's dust 7, was 8).
 - One net [COMPUTED]: (1,9,-2) sits on K_in and reads the east branch's (2,8,-2) down the step. Whatever else lights the
   bus now powers K_in from above, so I_A, P_R and AP see it; before, a lit west branch reached M_K only. Nothing in the
-  design lights it. It shows in the screens' what-ifs: a block that knocks the cut off DP lets the bus read DP's pulse,
-  and I_A and P_R fire and are spat (dp.txt, dp_off_search.txt).
+  design lights it. It showed in the screens: rerun under their old rule (output not kept), dp_off_search passed two
+  one-block and 31 two-block candidates in which I_A extends again; traced for one, a piston at (-3,5,1) facing north
+  that RB11 powers: it pushes the cut off DP, the bus reads DP's pulse, I_A and P_R fire and are spat, and NA's death
+  then "spits" P6 at c6. The rule now also wants I_A not to extend again (`dp_search.py`), and with it dp_off_search
+  passes what it passed before the re-lay: the dust on P11 and the same six pairs, in 36 cells.
+- Searches rerun on the re-laid bus [COMPUTED]: p10_v_search (180 cells: the same three single blocks), dp_off_search
+  (36 cells: the same dust and six pairs) and dp_search (41 cells: nothing in the free cells, the same two on the
+  south pusher), the last two under the rule with I_A.
 - Probes: `close_trigger_probe`, `close_dp_off_probe`, `close_p10_v_probe`, `close_s_inputs_probe` and `close_p9_p8_probe`
   re-exported; each replays in the simulator with its controls live and lints ok [COMPUTED]. Every MEASURED line above
   is for the bus before the re-lay: all five are to be measured again.
@@ -577,9 +584,9 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
   (1,6,-1) powers by QC: W_T's head takes (1,5,-1) and H_T's push stops on it. The first pass's stop screen set a
   redstone block at (1,6,-1) and saw nothing fire: it is lenient about pistons left powered and not updated.
 - The kick [COMPUTED]: N_T, a sticky piston at (2,6,-3) facing south (nothing moves during the load with it, the opening
-  and the close are the same, and it is unpowered in the closed state and after every tick of both). Out and in, it pulls RB_T north to (2,6,-2): K_T retracts and
-  lands with W_T unpowered. Out again, it pushes RB_T back; RB_T's landing in front of P_R is the update P_R needs, and
-  K_T, powered again and not updated, stays in.
+  and the close are the same, and it is unpowered in the closed state and after every tick of both). Out and in, it
+  pulls RB_T north to (2,6,-2): K_T retracts and lands with W_T unpowered. Out again, it pushes RB_T back; RB_T's
+  landing in front of P_R is the update P_R needs, and K_T, powered again and not updated, stays in.
 - RB_T by command [COMPUTED returns.txt, what-if; H_T, GA, GB and N_T added]: after the close, N_T's stand-in source
   (a redstone block at (3,6,-3)) before c32 and out before c34; RB_ST taken out of (2,8,0) and set at (3,7,0) before
   c37; the source again before c38 and out before c43; H_T's stand-in source (1,10,-1) before c45 and out before c48;
@@ -597,6 +604,9 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
   push ends a cell short); no source for H_T; N_T not sticky.
 - K_T made sticky [COMPUTED what-if; a measured block]: K_T pulls SPC home when the kick releases it, with no command
   for SPC.
+- A lead for H_T's source [COMPUTED the fact; INFERRED the lead]: set in the open state and left on, it moves nothing,
+  there (Z_T's head under RB_T stops H_T's push) or through the close (H_T is powered and not updated). A source that
+  is on while RB_T is at (1,6,-1) and off in the closed state would need no timing of its own.
 - Not designed: N_T's source and its two pulses, H_T's source, RB_ST's return (its landing at (3,7,0) is P_R's hold and
   must fall while RB_T is parked; the screen's route for it has six steps, in the box now that it reaches y 10) and
   SPC's mover (the cell above SPC is RB_ST's rest cell).
@@ -608,7 +618,8 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
 above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
-`dp_search.py` screens every one and two added blocks in the 40 free cells of x -4..-2, y 2..6, z -1..3, and the same on
+`dp_search.py` screens every one and two added blocks in the free cells of x -4..-2, y 2..6, z -1..3 (40; 41 since the
+bus was re-laid, rerun 2026-11-22 with the same result), and the same on
 top of the pusher south of DP's source cell: nothing that passes can be built [COMPUTED dp.txt, dp_search.txt]. Through
 NA the on alone has a one-block answer and the off has none. The what-ifs below set or clear SRC_P between two block
 events of one phase: they show which orders work, not how to get them.
@@ -649,10 +660,12 @@ events of one phase: they show which orders work, not how to get them.
   cell outside the box. Not adopted: it replaces the stand-in's on with an on no command can cut.
 - Search [COMPUTED dp_search.txt]: blocks set without updates into the open state (a piston may stand powered and not
   extended), then the close from the input with no DP command; a pass needs stages 0 and 1 done, P11 out after P12's
-  retract and spat, P6 out and spat, S at (0,3,0), no dust lost, by c6. In the 40 free cells of x -4..-2, y 2..6,
-  z -1..3, with 16 blocks (piston and sticky piston in six facings, redstone block, stone, glass, dust): one block, 0
-  of 640; two blocks, 0 of 199680. On top of the south pusher (sticky (-3,4,3) facing north, redstone block
-  (-3,4,2)), which fails alone: one more, 0 of 608; two more, 2 of 179968. The two are one idea: a redstone block at
+  retract and spat, P6 out and spat, S at (0,3,0), no dust lost, by c6 (and, since 2026-11-22, I_A not extending
+  again). In the 41 free cells of x -4..-2, y 2..6, z -1..3, with 16 blocks (piston and sticky piston in six facings,
+  redstone block, stone, glass, dust): one block, 0 of 656; two blocks, 0 of 209920. On top of the south pusher (sticky
+  (-3,4,3) facing north, redstone block (-3,4,2)), which fails alone: one more, 0 of 624; two more, 2 of 189696 (rerun
+  on the re-laid bus, which freed (-2,6,-1); before it 40 cells, 0 of 640, 0 of 199680, 0 of 608 and the same 2 of
+  179968). The two are one idea: a redstone block at
   (-4,4,3) powers the pusher, K's event starts it, its block lands at c2 j, and a piston at (-4,4,-1) facing south,
   which NA powers at c3, pushes the row (-4,4,0)..(-4,4,3) south, so the pusher loses power after P6's extension and
   pulls its block back. Built, it fails: the pusher and the piston move during the load, DP is lit in the closed state,
