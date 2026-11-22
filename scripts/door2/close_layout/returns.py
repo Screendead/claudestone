@@ -5,7 +5,8 @@ server.
 
 Holds   Every fired piston outside the door plane is still powered after the close: each of the opening's seven
         relays by its arm, a redstone block design_c leaves beside it for good (X2's set strict after the load;
-        Y12's is Z11's, and DP's RB_D holds Y12 too; RB_F holds Z_S too), and K by RB12; the up relays Z_Q, Y1, Z9, Z11 and K also by their own payload, which rests at R+2, a QC
+        Y12's is Z11's, and DP's RB_D holds Y12 too; RB_F holds Z_S too), and K by RB12; the up relays Z_Q, Y1,
+        Z9, Z11 and K also by their own payload, which rests at R+2, a QC
         cell (MEASURED for a sticky up relay in door_relay_rearm, test 3). K_T is held by RB_T at (2,6,-1). A
         relay goes home only if its arm leaves first and something updates it then.
 Routes  A moved block goes home one cell at a time. A step from u to v needs v empty (or v the block's closed
@@ -25,17 +26,25 @@ Verdict RB_T, RB_ST and RB12 have no route home: the trigger chain cannot be ret
         ways pass a cell where a redstone block fires Z_T or AP, or have no free mover. RB12 cannot move: K's head
         is under it, G above it, M_K and Y12's head beside it, the box edge west, and south no mover. G's closed
         cell is Y12's head. K_T made sticky would pull SPC home, but only once RB_T has left (2,6,-1).
+Grown   The box grown by 2 on every side, measured blocks unchanged (the lead's relaxation of 2026-11-22): RB12 and
+        RB_ST have routes in the screen (west round (-5,3,2) to (-5,2,2), movers out to x -6; up over (2,9,0), (3,9,0),
+        (3,9,1), (3,8,1), (3,7,1), movers up to y 10; the screen is static and does not keep movers off the path:
+        (3,9,1) is on it). RB_T has none, as in the box: every way into (1,5,-1), for any block, needs a mover in
+        R_8's cell, r_P10's, the bus's glass (1,7,-1), Z_T's (non-sticky, and held by a block at (1,6,-1)), W_T's or a
+        wall's, or one of three free cells whose piston moves during the load ((0,5,-1): NA's stone beside it;
+        (1,5,-3): NA's dust and RB_A) or fires at c3 ((2,5,-1): under RB_T); all of them inside the box. So the
+        trigger chain cannot be returned without changing a measured block, whatever the box.
 What-if Z9 in place, by command (sim only): the up relays need not be re-oriented. ARM_Z9 taken out before c22
         or earlier: RB9's departure (c16 g) or P9's spit (c22 g) updates Z9, unpowered, and it retracts. A_9 brings
         RB9 back over it at c22 j, where RB9 QC-powers Z9 without updating it. D9, a piston at (4,5,1) facing down,
         its source on before c24 at the latest and off before c24 at the earliest, is updated by RB9's landing or
-        by its source and pushes RB9 down; RB9 is moving when P9's base lands (c24 j), which would otherwise fire Z9, and lands on Z9 at c25 j or
-        later. ARM_Z9 set back from c23 on: its landing updates Z9's head cell, not Z9. Back before c25 j, it powers
-        Z9 at P9's landing and RB9's, and Z9's push fails, on RB9 moving, then on D9's head: the blocker the load
-        puts at (4,4,1). Z9, RB9, ARM_Z9 and D9 end as the closed state has them and Z9 fires on the next update.
+        by its source and pushes RB9 down; RB9 is moving when P9's base lands (c24 j), which would otherwise fire Z9,
+        and lands on Z9 at c25 j or later. ARM_Z9 set back from c23 on: its landing updates Z9's head cell, not Z9.
+        Back before c25 j, it powers Z9 at P9's landing and RB9's, and Z9's push fails, on RB9 moving, then on D9's
+        head: the blocker the load puts at (4,4,1). Z9, RB9, ARM_Z9 and D9 end as the closed state has them and Z9 fires on the next update.
         D9's and ARM_Z9's drives are not designed; no command may follow the input, so this is not yet a design.
 
-Run from the repo root (sim; about 10 s):
+Run from the repo root (sim; about 2 minutes):
 python -m scripts.door2.close_layout.returns > scripts/door2/close_layout/returns.txt"""
 import copy, functools
 from collections import deque
@@ -57,8 +66,11 @@ GROUPS = (("the opening's relays and their blocks", ("X2", "Z_Q", "Y1", "Z_S", "
 D9_BLOCK = t.pis("piston", "down", "D9")
 
 
+BOX = [LO, HI]                                   # the box routes keep to; main grows it for the second pass
+
+
 def in_box(c):
-    return all(lo <= x <= hi for x, lo, hi in zip(c, LO, HI))
+    return all(lo <= x <= hi for x, lo, hi in zip(c, *BOX))
 
 
 def plane_or_hall(c):
@@ -75,12 +87,23 @@ def worlds():
     mine, _ = t.opened(b)
     w = pp.noted(mine)
     ref = list(frames(b))[1:]
-    used = set(d.full_blocks(b)) | set(cl.b) | set(v.cumulative_cells(b)[0])
+    taken = set(d.full_blocks(b)) | set(cl.b) | set(v.cumulative_cells(b)[0])
     for blocks, be in w.frames:
-        used |= set(blocks) | set(be)
-    free = frozenset(c for c in ((x, y, z) for x in range(LO[0], HI[0] + 1) for y in range(LO[1], HI[1] + 1)
-                                 for z in range(LO[2], HI[2] + 1)) if c not in used and not plane_or_hall(c))
-    return b, cl, w, ref, free
+        taken |= set(blocks) | set(be)
+    used.cells = frozenset(taken)
+    return b, cl, w, ref, free_in(LO, HI)
+
+
+def used():
+    """every cell the closed state, the opening or the close to c30 occupies (set by worlds())."""
+    return used.cells
+
+
+def free_in(lo, hi):
+    """the free cells of a box: in it, not used, off the door plane and out of the hallway."""
+    taken = used()
+    return frozenset(c for c in ((x, y, z) for x in range(lo[0], hi[0] + 1) for y in range(lo[1], hi[1] + 1)
+                                 for z in range(lo[2], hi[2] + 1)) if c not in taken and not plane_or_hall(c))
 
 
 def frames(b):
@@ -346,3 +369,25 @@ if __name__ == "__main__":
         x = pp.noted(zo, z9_ticks(**kw))
         bad = z9_verdict(x, zcl)
         print(f"      {title}:", "FAILS: " + "; ".join(bad[:3]) if bad else "done", "| Z9", "out" if t.at(x, "Z9")[2] else "in", "RB9", t.at(x, "RB9")[0])
+
+    grow = 2
+    lo, hi = tuple(x - grow for x in LO), tuple(x + grow for x in HI)
+    BOX[:] = [lo, hi]
+    fr = free_in(lo, hi)
+    print(f"\n== the box grown by {grow} on every side, x {lo[0]}..{hi[0]} y {lo[1]}..{hi[1]} z {lo[2]}..{hi[2]} ({len(fr)} free cells), measured blocks "
+          "unchanged: routes home")
+    for n, home in (("RB_T", RB_T_HOME), ("RB12", RB12_HOME), ("RB_ST", RB_ST_HOME)):
+        start = t.at(w, n)[0]
+        path, reached, rejected = route(start, home, w, fr)
+        print(f"   {n} {start} to {home}:", "; ".join(path) if path else f"NO ROUTE; reached {', '.join(map(str, reached))}, as in the box")
+    print("   every way into (1,5,-1), RB_T's closed cell, for any block (box-independent: every cell named is inside the box):")
+    for name, dv in DIRS.items():
+        u, push, pull = add(RB_T_HOME, dv, -1), add(RB_T_HOME, dv, -2), add(RB_T_HOME, dv)
+
+        def what(m, kinds, facing):
+            if m in fr:
+                return ", ".join(f"a {k.replace('_', ' ')} there {mover(m, k, facing)}" for k in kinds)
+            return f"{label(w, m)} there" if m in w.b else "not free"
+        print(f"      moving {name} from {u} ({label(w, u) if u in w.b else 'air'}): pushed from {push}: {what(push, ('piston', 'sticky_piston'), name)}; "
+              f"pulled from {pull}: {what(pull, ('sticky_piston',), NEG[name])}")
+    BOX[:] = [LO, HI]
