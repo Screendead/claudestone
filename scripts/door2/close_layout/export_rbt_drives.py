@@ -24,10 +24,8 @@ MINE = set(rd.MINE)
 CELLS = list(dict.fromkeys(x9.ALL + rd.CELLS))
 # test name: (cell removed before the opening, last tick, ticks after which cells are checked: 2 is c0, 36 is c34)
 TESTS = {
-    "one input and no command after it: U_T out at c3; P_U out at c26 and RB_ST pulled up at c34, U_T pulling RB_T up and "
-    "K_T pulling SPC home in that tick; a redstone block in (3,7,0) and RB_T at (2,7,-1) after c36; RB_T back in front of P_R "
-    "after c39, at (1,6,-1) after c42, under T after c50; the three redstone blocks a place on after c52; everything in "
-    "after c60": (None, rd.LAST, (2, 5, 7, 20, 28, 36, 38, 39, 41, 42, 44, 45, 46, 49, 50, 52, 54, 58, 62, 64)),
+    "one input and no command after it: U_T out at c3, RB_ST up at c34, RB_T in front of P_R after c39 and under T "
+    "after c50, everything in after c60": (None, rd.LAST, (2, 5, 7, 20, 28, 36, 38, 39, 41, 42, 44, 45, 46, 49, 50, 52, 54, 58, 62, 64)),
     "without R_0 nothing reads the S feed's pulse: nothing starts, RB_ST stays at (2,8,0) and U_T out above RB_T "
     "(control)": (rd.R_0, 52, (7, 20, 28, 38, 54)),
     "without U_T there is no kick: the redstone blocks go round, RB_T stays in front of P_R and K_T out under SPC "
