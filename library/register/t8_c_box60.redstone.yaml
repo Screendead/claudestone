@@ -1,0 +1,1054 @@
+name: t8_c_box60
+description: 'Addressable RAM at 60 blocks per bit in a box: the cell is a 5x2x6 box (x east 5, y up 2, z south 6) that tiles in all three directions (ORE 4x4x4 Tileable RAM Cube rules: repeater-lock memory, no pistons, data-in/out lines parallel, hold/read control lines parallel, the two sets perpendicular, no diodes in any line). Found by the RAM-cell floor search (sat4, found_box_v60.jsonl, copied to tools/t8_found_box_v60.jsonl) and turned into this array by tools/t8_cell_to_spec.py. Same three-repeater model as t8_c_v51: s (memory) reads din through the block behind it and is side-locked by k (reads hold); o reads rd, is side-locked by s and powers dout through the block behind its output. s stores the inverted bit, so din carries the inverted bit and hold is active-low (1 keeps, 0 writes); rd=1 puts the bit on dout. Data lines run east along x on flat dust (din on the upper layer of each cell, dout on the lower), control lines climb y as glass staircases, which carry signal upward
+  only, so hold and rd are driven from the bottom. This spec is a 3x3x2 array (words ik = hold ik/rd ik, bits j = din jk/dout jk; i east, j up, k south): 18 cells, din fed at the west end, dout read at its west end, hold and rd fed below the lowest cell (the columns of words 1x and 2x run one cell below the array to make room for their drivers). A data line is 5 dust per cell: din reaches the far cell at strength 2 and the far cell''s o gives 3 at dout, so 3 cells is the most one 15-strength data line serves. Reading and writing one word at the same time is not supported.'
+traits:
+- pistonless
+- entityless
+- silent
+- lightless
+palette:
+  .: air
+  A: glass
+  h: {input: hold10}
+  B: {input: hold20}
+  C: redstone_wire[north=side,east=none,south=up,west=none]
+  D: redstone_wire[north=up,east=none,south=side,west=none]
+  r: {input: rd20}
+  E: {input: rd00}
+  F: {input: rd10}
+  G: {input: hold11}
+  H: {input: hold21}
+  I: {input: rd21}
+  J: {input: rd01}
+  K: {input: rd11}
+  '=': smooth_stone
+  M: {input: hold00}
+  N: redstone_wire[north=none,east=side,south=up,west=none]
+  k: {name: k000, block: 'repeater[facing=west]'}
+  s: {name: s000, block: 'repeater[facing=north]'}
+  O: {name: k100, block: 'repeater[facing=west]'}
+  P: {name: s100, block: 'repeater[facing=north]'}
+  Q: {name: k200, block: 'repeater[facing=west]'}
+  T: {name: s200, block: 'repeater[facing=north]'}
+  o: {name: o000, block: 'repeater[facing=east]'}
+  U: redstone_wire[north=up,east=none,south=none,west=side]
+  V: {name: o100, block: 'repeater[facing=east]'}
+  W: {name: o200, block: 'repeater[facing=east]'}
+  X: redstone_wire[north=none,east=side,south=side,west=none]
+  Y: redstone_wire[north=none,east=none,south=side,west=side]
+  d: {output: dout00, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  Z: redstone_wire[north=side,east=side,south=none,west=side]
+  b: redstone_wire[north=none,east=side,south=none,west=side]
+  c: {input: hold01}
+  e: {name: k001, block: 'repeater[facing=west]'}
+  f: {name: s001, block: 'repeater[facing=north]'}
+  g: {name: k101, block: 'repeater[facing=west]'}
+  i: {name: s101, block: 'repeater[facing=north]'}
+  j: {name: k201, block: 'repeater[facing=west]'}
+  l: {name: s201, block: 'repeater[facing=north]'}
+  m: {name: o001, block: 'repeater[facing=east]'}
+  p: {name: o101, block: 'repeater[facing=east]'}
+  q: {name: o201, block: 'repeater[facing=east]'}
+  t: {output: dout01, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  w: {input: din00}
+  x: redstone_wire[north=none,east=side,south=side,west=side]
+  y: redstone_wire[north=side,east=side,south=none,west=none]
+  z: redstone_wire[north=side,east=none,south=none,west=side]
+  '0': {input: din01}
+  '1': {name: k010, block: 'repeater[facing=west]'}
+  '2': {name: s010, block: 'repeater[facing=north]'}
+  '3': {name: k110, block: 'repeater[facing=west]'}
+  '4': {name: s110, block: 'repeater[facing=north]'}
+  '5': {name: k210, block: 'repeater[facing=west]'}
+  '6': {name: s210, block: 'repeater[facing=north]'}
+  '7': {name: o010, block: 'repeater[facing=east]'}
+  '8': {name: o110, block: 'repeater[facing=east]'}
+  '9': {name: o210, block: 'repeater[facing=east]'}
+  α: {output: dout10, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  β: {name: k011, block: 'repeater[facing=west]'}
+  γ: {name: s011, block: 'repeater[facing=north]'}
+  δ: {name: k111, block: 'repeater[facing=west]'}
+  ε: {name: s111, block: 'repeater[facing=north]'}
+  ζ: {name: k211, block: 'repeater[facing=west]'}
+  η: {name: s211, block: 'repeater[facing=north]'}
+  θ: {name: o011, block: 'repeater[facing=east]'}
+  ι: {name: o111, block: 'repeater[facing=east]'}
+  κ: {name: o211, block: 'repeater[facing=east]'}
+  λ: {output: dout11, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  μ: {input: din10}
+  ν: {input: din11}
+  ξ: {name: k020, block: 'repeater[facing=west]'}
+  π: {name: s020, block: 'repeater[facing=north]'}
+  ρ: {name: k120, block: 'repeater[facing=west]'}
+  σ: {name: s120, block: 'repeater[facing=north]'}
+  τ: {name: k220, block: 'repeater[facing=west]'}
+  υ: {name: s220, block: 'repeater[facing=north]'}
+  φ: {name: o020, block: 'repeater[facing=east]'}
+  χ: {name: o120, block: 'repeater[facing=east]'}
+  ψ: {name: o220, block: 'repeater[facing=east]'}
+  ω: {output: dout20, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  Γ: {name: k021, block: 'repeater[facing=west]'}
+  Δ: {name: s021, block: 'repeater[facing=north]'}
+  Θ: {name: k121, block: 'repeater[facing=west]'}
+  Λ: {name: s121, block: 'repeater[facing=north]'}
+  Ξ: {name: k221, block: 'repeater[facing=west]'}
+  Π: {name: s221, block: 'repeater[facing=north]'}
+  Σ: {name: o021, block: 'repeater[facing=east]'}
+  Φ: {name: o121, block: 'repeater[facing=east]'}
+  Ψ: {name: o221, block: 'repeater[facing=east]'}
+  Ω: {output: dout21, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  б: {input: din20}
+  в: redstone_wire[north=side,east=none,south=side,west=none]
+  г: {input: din21}
+layers:
+  0: |
+    ................
+    ................
+    ................
+    ......A....A....
+    ....A....A....A.
+    ................
+    ................
+    ................
+    ................
+    ......A....A....
+    ....A....A....A.
+    ................
+    ................
+  1: |
+    ................
+    ................
+    ......h....B....
+    ....A.C..A.C..A.
+    ....D.A..D.A..Dr
+    ....E....F......
+    ................
+    ................
+    ......G....H....
+    ....A.C..A.C..A.
+    ....D.A..D.A..DI
+    ....J....K......
+    ................
+  2: |
+    ................
+    ................
+    ................
+    .AAAC.AAAC.AAAC.
+    ...AA.D.AA.D.AA.
+    ..A=...A=...A=..
+    .===============
+    ................
+    ................
+    .AAAC.AAAC.AAAC.
+    ...AA.D.AA.D.AA.
+    ..A=...A=...A=..
+    .===============
+  3: |
+    ................
+    .===============
+    .A==A.A==A.A==A.
+    MNksA.NOPA.NQTA.
+    .A=oU=A=VU=A=WU=
+    ..XYA=.XYA=.XYA=
+    .dZZbbbZZbbbZZbb
+    .===============
+    .A==A.A==A.A==A.
+    cNefA.NgiA.NjlA.
+    .A=mU=A=pU=A=qU=
+    ..XYA=.XYA=.XYA=
+    .tZZbbbZZbbbZZbb
+  4: |
+    .w..............
+    .bxxbbbxxbbbxxbb
+    ..yzAA.yzAA.yzAA
+    .AAAC=AAAC=AAAC=
+    .D.AA.D.AA.D.AA.
+    ..A=...A=...A=..
+    .===============
+    0bxxbbbxxbbbxxbb
+    ..yzAA.yzAA.yzAA
+    .AAAC=AAAC=AAAC=
+    .D.AA.D.AA.D.AA.
+    ..A=...A=...A=..
+    .===============
+  5: |
+    ................
+    .===============
+    .A==A.A==A.A==A.
+    .N12A.N34A.N56A.
+    .A=7U=A=8U=A=9U=
+    ..XYA=.XYA=.XYA=
+    .αZZbbbZZbbbZZbb
+    .===============
+    .A==A.A==A.A==A.
+    .NβγA.NδεA.NζηA.
+    .A=θU=A=ιU=A=κU=
+    ..XYA=.XYA=.XYA=
+    .λZZbbbZZbbbZZbb
+  6: |
+    .μ..............
+    .bxxbbbxxbbbxxbb
+    ..yzAA.yzAA.yzAA
+    .AAAC=AAAC=AAAC=
+    .D.AA.D.AA.D.AA.
+    ..A=...A=...A=..
+    .===============
+    νbxxbbbxxbbbxxbb
+    ..yzAA.yzAA.yzAA
+    .AAAC=AAAC=AAAC=
+    .D.AA.D.AA.D.AA.
+    ..A=...A=...A=..
+    .===============
+  7: |
+    ................
+    .===============
+    .A==A.A==A.A==A.
+    .NξπA.NρσA.NτυA.
+    .A=φU=A=χU=A=ψU=
+    ..XYA=.XYA=.XYA=
+    .ωZZbbbZZbbbZZbb
+    .===============
+    .A==A.A==A.A==A.
+    .NΓΔA.NΘΛA.NΞΠA.
+    .A=ΣU=A=ΦU=A=ΨU=
+    ..XYA=.XYA=.XYA=
+    .ΩZZbbbZZbbbZZbb
+  8: |
+    .б..............
+    .bxxbbbxxbbbxxbb
+    ..yzAA.yzAA.yzAA
+    .AAAв=AAAв=AAAв=
+    .в.AA.в.AA.в.AA.
+    ..A=...A=...A=..
+    .===============
+    гbxxbbbxxbbbxxbb
+    ..yzAA.yzAA.yzAA
+    .AAAв=AAAв=AAAв=
+    .в.AA.в.AA.в.AA.
+    ..A=...A=...A=..
+    .===============
+tests:
+- name: write and read latency, word 00 bit 0
+  initial:
+    hold00: 1
+    hold10: 1
+    hold20: 1
+    hold01: 1
+    hold11: 1
+    hold21: 1
+  settle: 30
+  steps:
+  - drive: {din00: 1}
+  - {wait: 4}
+  - drive: {hold00: 0}
+  - wave: {k000: '11000000', s000: '00001111'}
+  - drive: {hold00: 1}
+  - {wait: 6}
+  - drive: {din00: 0}
+  - {wait: 6}
+  - expect: {s000: 1, dout00: 0}
+  - drive: {rd00: 1}
+  - wave: {dout00: '00000000'}
+  - drive: {rd00: 0}
+  - {wait: 4}
+  - drive: {hold00: 0}
+  - wave: {k000: '11000000', s000: '11110000'}
+  - drive: {hold00: 1}
+  - {wait: 6}
+  - drive: {rd00: 1}
+  - wave: {dout00: '00111111'}
+  - drive: {rd00: 0}
+  - wave: {dout00: '11000000'}
+- name: 3d checkerboard, neighbours undisturbed
+  initial:
+    hold00: 1
+    hold10: 1
+    hold20: 1
+    hold01: 1
+    hold11: 1
+    hold21: 1
+  settle: 30
+  steps:
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - {wait: 2}
+  - drive: {hold00: 0}
+  - {wait: 6}
+  - drive: {hold00: 1}
+  - {wait: 6}
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - {wait: 4}
+  - expect:
+      s000: 1
+      s010: 0
+      s020: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - {wait: 2}
+  - drive: {hold10: 0}
+  - {wait: 6}
+  - drive: {hold10: 1}
+  - {wait: 6}
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - {wait: 4}
+  - expect:
+      s000: 1
+      s010: 0
+      s020: 1
+      s100: 0
+      s110: 1
+      s120: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - {wait: 2}
+  - drive: {hold20: 0}
+  - {wait: 6}
+  - drive: {hold20: 1}
+  - {wait: 6}
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - {wait: 4}
+  - expect:
+      s000: 1
+      s010: 0
+      s020: 1
+      s100: 0
+      s110: 1
+      s120: 0
+      s200: 1
+      s210: 0
+      s220: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - {wait: 2}
+  - drive: {hold01: 0}
+  - {wait: 6}
+  - drive: {hold01: 1}
+  - {wait: 6}
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - {wait: 4}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s110: 1
+      s120: 0
+      s200: 1
+      s210: 0
+      s220: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - {wait: 2}
+  - drive: {hold11: 0}
+  - {wait: 6}
+  - drive: {hold11: 1}
+  - {wait: 6}
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - {wait: 4}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s210: 0
+      s220: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - {wait: 2}
+  - drive: {hold21: 0}
+  - {wait: 6}
+  - drive: {hold21: 1}
+  - {wait: 6}
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - {wait: 4}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd00: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 1
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd00: 0}
+  - {wait: 6}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd10: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 1
+      dout10: 0
+      dout20: 1
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd10: 0}
+  - {wait: 6}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd20: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 1
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd20: 0}
+  - {wait: 6}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd01: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 1
+      dout11: 0
+      dout21: 1
+  - drive: {rd01: 0}
+  - {wait: 6}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd11: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 1
+      dout21: 0
+  - drive: {rd11: 0}
+  - {wait: 6}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd21: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 1
+      dout11: 0
+      dout21: 1
+  - drive: {rd21: 0}
+  - {wait: 6}
+  - expect:
+      s000: 1
+      s001: 0
+      s010: 0
+      s011: 1
+      s020: 1
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - {wait: 2}
+  - drive: {hold00: 0}
+  - {wait: 6}
+  - drive: {hold00: 1}
+  - {wait: 6}
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - {wait: 4}
+  - expect:
+      s000: 0
+      s001: 0
+      s010: 1
+      s011: 1
+      s020: 0
+      s021: 0
+      s100: 0
+      s101: 1
+      s110: 1
+      s111: 0
+      s120: 0
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din00: 1, din10: 0, din20: 1}
+  - {wait: 2}
+  - drive: {hold10: 0}
+  - {wait: 6}
+  - drive: {hold10: 1}
+  - {wait: 6}
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - {wait: 4}
+  - expect:
+      s000: 0
+      s001: 0
+      s010: 1
+      s011: 1
+      s020: 0
+      s021: 0
+      s100: 1
+      s101: 1
+      s110: 0
+      s111: 0
+      s120: 1
+      s121: 1
+      s200: 1
+      s201: 0
+      s210: 0
+      s211: 1
+      s220: 1
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din00: 0, din10: 1, din20: 0}
+  - {wait: 2}
+  - drive: {hold20: 0}
+  - {wait: 6}
+  - drive: {hold20: 1}
+  - {wait: 6}
+  - drive: {din00: 0, din10: 0, din20: 0}
+  - {wait: 4}
+  - expect:
+      s000: 0
+      s001: 0
+      s010: 1
+      s011: 1
+      s020: 0
+      s021: 0
+      s100: 1
+      s101: 1
+      s110: 0
+      s111: 0
+      s120: 1
+      s121: 1
+      s200: 0
+      s201: 0
+      s210: 1
+      s211: 1
+      s220: 0
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - {wait: 2}
+  - drive: {hold01: 0}
+  - {wait: 6}
+  - drive: {hold01: 1}
+  - {wait: 6}
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - {wait: 4}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 1
+      s110: 0
+      s111: 0
+      s120: 1
+      s121: 1
+      s200: 0
+      s201: 0
+      s210: 1
+      s211: 1
+      s220: 0
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din01: 0, din11: 1, din21: 0}
+  - {wait: 2}
+  - drive: {hold11: 0}
+  - {wait: 6}
+  - drive: {hold11: 1}
+  - {wait: 6}
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - {wait: 4}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 0
+      s210: 1
+      s211: 1
+      s220: 0
+      s221: 0
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {din01: 1, din11: 0, din21: 1}
+  - {wait: 2}
+  - drive: {hold21: 0}
+  - {wait: 6}
+  - drive: {hold21: 1}
+  - {wait: 6}
+  - drive: {din01: 0, din11: 0, din21: 0}
+  - {wait: 4}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd00: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 1
+      dout10: 0
+      dout20: 1
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd00: 0}
+  - {wait: 6}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd10: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 1
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd10: 0}
+  - {wait: 6}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd20: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 1
+      dout10: 0
+      dout20: 1
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd20: 0}
+  - {wait: 6}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd01: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 1
+      dout21: 0
+  - drive: {rd01: 0}
+  - {wait: 6}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd11: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 1
+      dout11: 0
+      dout21: 1
+  - drive: {rd11: 0}
+  - {wait: 6}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
+  - drive: {rd21: 1}
+  - {wait: 6}
+  - expect:
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 1
+      dout21: 0
+  - drive: {rd21: 0}
+  - {wait: 6}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s020: 0
+      s021: 1
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      s120: 1
+      s121: 0
+      s200: 0
+      s201: 1
+      s210: 1
+      s211: 0
+      s220: 0
+      s221: 1
+      dout00: 0
+      dout10: 0
+      dout20: 0
+      dout01: 0
+      dout11: 0
+      dout21: 0
