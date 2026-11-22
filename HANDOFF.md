@@ -55,7 +55,8 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
 - **Y12 sticky; room for U_Y's source** (lead, 2026-11-22). Y12 is made a sticky piston: with it the opening, the
   close and both returns are the same at every tick, and without it G cannot reach its closed cell. U_Y's source may
   take z 4 or move the glass under R_C or under the west line, whichever adds fewest blocks; no measured block changes.
-- **B_Y's source at z 5?** (2026-11-22, waiting on the lead). Y12's re-arm from blocks (y12_holds.py) takes z 4 for U_Y's hold, as
+- **B_Y's source at z 5** (lead, 2026-11-22: accepted; the box at 2940 stays well under the record's 3762 and no measured
+  block changes). Y12's re-arm from blocks (y12_holds.py) takes z 4 for U_Y's hold, as
   called, and z 5 for B_Y's source (box 2940, from 2520): a repeater reads Y_G only from (-4,6,4), facing north, and Y_G alone is one
   tick short. Within z 4 the repeaters that read the timer's other blocks (S_W, S_F, Y_X, the tap's stone) point away from B_Y
   or into z 5, and no single block near B_Y does it (y12_holds_search.txt); no z 4 route was built.
