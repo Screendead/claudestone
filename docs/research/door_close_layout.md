@@ -161,7 +161,7 @@ design").
   simulator after c0 and later ticks. Its steps, read back from the YAML and replayed in the simulator, pass 4/4; without
   K_T, W_T, M_K or the dust above P_R the first test fails [COMPUTED]. Server (2026-11-21, sat1): 4/4 [MEASURED];
   `close_feeds_probe` 8/8 and `close_s_feed_probe` 6/6 still pass. Re-exported on the re-laid bus (2026-11-22): replays
-  4/4 with the same controls live, lint ok [COMPUTED]; not measured again yet.
+  4/4 with the same controls live, lint ok [COMPUTED]; in game 4/4 [MEASURED 2026-11-22, main server on the Mac].
 
 ## DP, stage 2: the design (2026-11-21; simulator; measured on a satellite)
 Seven blocks light DP after P12's retract and cut it again from the one input: the DP command is gone, the opening is
@@ -535,7 +535,7 @@ need not be re-oriented.
   in the blocker test the push stops on RB9 moving and D9's head; in the control RB9 stays over Z9 and P9's landing at
   c24 fires Z9 again. `close_p9_p8_probe` still passes 3/3.
 
-## The bus re-laid, and RB_T's return (2026-11-22; simulator; nothing here measured yet)
+## The bus re-laid, and RB_T's return (2026-11-22; simulator; its six probes measured on the main server)
 The lead's fix for RB_T was one measured block changed: the bus's first west dust off (1,8,-1), a down-pusher at (1,7,-1).
 The bus is re-laid and every stage holds. The piston cannot stand at (1,7,-1); a column two cells higher does its work,
 and with four drives stood in for by commands RB_T goes home. Not as framed in three ways: the piston's cell; the size
@@ -613,7 +613,9 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
 - Probe: `close_returns_probe` (`export_returns`) now builds D9, H_T, GA, GB and N_T and has six tests: the three for Z9,
   RB_T home by command, the trap (no kick: W_T takes RB_T's cell) and the control without H_T's source. Its steps,
   read back from the YAML and replayed in the simulator, pass 6/6; without D9 the first test fails, without H_T or N_T
-  the fourth [COMPUTED]. `python -m scripts.lint close_returns_probe`: ok. Not measured with these blocks.
+  the fourth [COMPUTED]. `python -m scripts.lint close_returns_probe`: ok. Server (2026-11-22, main on the Mac): 6/6
+  [MEASURED], traits ok; the five other re-exported probes pass too (trigger 4/4, dp_off 4/4, p10_v 3/3, s_inputs
+  3/3, p9_p8 3/3), so every stage holds in game on the re-laid bus.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -722,9 +724,8 @@ TR at (1,2,0) after c22, P8 out at c23, Q at (3,2,0) after c25; with R_9 removed
 stays in and Q at (3,3,0)). The returns' first pass (item 4) finds the trigger chain blocked with added blocks, inside the
 box or out of it (RB_T: returns.txt), and Z9 re-armed in place by command (`close_returns_probe` 3/3 in game). The bus's
 west branch is re-laid over the input repeater (box 2016) and RB_T goes home by command, down a column after a kick, with
-the rest of the trigger chain's east side (returns.txt; `close_returns_probe` 6/6 in the simulator). Next: measure the six
-re-exported probes in game (`close_trigger_probe`, `close_dp_off_probe`, `close_p10_v_probe`, `close_s_inputs_probe`,
-`close_p9_p8_probe`, `close_returns_probe`; `close_feeds_probe` and `close_s_feed_probe` are unchanged); then the drives
+the rest of the trigger chain's east side (returns.txt; `close_returns_probe` 6/6 in the simulator and in game). The six
+re-exported probes pass in game on the re-laid bus (23/23 on the main server, 2026-11-22). Next: the drives
 of RB_T's return (N_T's two pulses, H_T's pulse, RB_ST's route home timed into RB_T's park, SPC's mover) and the west
 side (RB12, K, M_K, G); then D9's source and ARM_Z9's puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1
 with the blocker). If P6 must be
@@ -745,7 +746,8 @@ export_returns.py), run from the repo root as `python -m scripts.door2.close_lay
 `library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; 3/3 on sat1) and
 `library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server).
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
-three more tests); the results in brackets are from before it.
+three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
+(2026-11-22): 4/4, 4/4, 3/3, 3/3, 3/3 and 6/6.
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
