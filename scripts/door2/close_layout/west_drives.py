@@ -30,11 +30,12 @@ Down    P_G, a sticky piston at (-4,6,2) facing down, over glass SPG (-4,5,2), p
         load leaves it under its blocker. P_G stands two above G's cell because the bus's last dust (-4,5,1)
         points into (-4,5,2).
 Timer   One pulse, from rbt_drives.py's line. R_W, a 4-tick repeater at (1,10,2), reads the line's dust
-        (2,10,2), lit from c26 to c34; R_M (-1,10,2), 4 ticks, is on from c42 d to c50 d. Seven dusts run from
-        it west at y 10 and down four stone steps, north of P_G's column and south of the bus's west branch, to
-        D_A (-6,6,1), on glass two above A_W: A_W is powered by QC and updated by D_A's change. R_X (-6,6,2),
-        4 ticks, reads D_A and powers stone Y_X (-6,6,3); R_G (-5,6,3), 4 ticks, reads Y_X and powers stone Y_G
-        (-4,6,3), south of P_G: on from c58 d to c66 d.
+        (2,10,2), lit from c26 to c34; a dust joins it to R_M (-1,10,2), 4 ticks, on from c42 d to c50 d. Eight
+        dusts run from R_M, three at y 10 and then down four stone steps beside the bus's west branch (two cells
+        higher and one south) and two cells north of P_G's column, to D_A (-6,6,1) on S_A, a stone on A_W, as
+        the bus's last dust stands on the stone on M_K: S_A powers A_W and D_A's change updates it. R_X
+        (-6,6,2), 4 ticks, reads D_A and powers stone Y_X (-6,6,3); R_G (-5,6,3), 4 ticks, reads Y_X and powers
+        stone Y_G (-4,6,3), south of P_G: on from c58 d to c66 d.
 Order   c42 A_W out, P_W pulls RB12, K and M_K in. c44 j RB12 at (-5,3,2), WK at (-4,2,1). c50 A_W pulls RB_W
         back, c52 j it lands, c53 P_W out, c55 j RB12 at (-4,3,2). c56 M_K out. c58 P_G out, M_K released: WK
         real at (-4,1,1). c60 j RB12 at (-4,2,2), G at (-4,3,2), L 15. c66 P_G in, c68 j SPG home. The east
@@ -47,7 +48,8 @@ Gate    G's closed cell (-3,3,2) is Y12's head: G goes home only when Y12 retrac
         state, P12 is powered (its push stops on V's head) and A_D is powered and not updated: the relays' step
         starts from that. Y12 made sticky (a measured block; what-if) pulls G home from (-4,3,2) by itself.
 
-Not controls: the nine glass blocks carry dust and repeaters (the simulator has no rule for support).
+Not controls: the eight glass blocks under dust and repeaters and S_A carry them (the simulator has no rule for
+support, and without S_A D_A powers A_W by QC through the empty cell).
 Run from the repo root (sim; under a minute):
 python -m scripts.door2.close_layout.west_drives > scripts/door2/close_layout/west_drives.txt"""
 import copy, re
@@ -62,7 +64,7 @@ P_G, SPG = (-4, 6, 2), (-4, 5, 2)
 R_W, R_M = (1, 10, 2), (-1, 10, 2)
 LINE = ((0, 10, 2), (-2, 10, 2), (-2, 10, 1), (-2, 10, 0), (-3, 9, 0), (-4, 8, 0), (-5, 7, 0), (-6, 6, 0), (-6, 6, 1))
 STEPS = ((-2, 9, 0), (-3, 8, 0), (-4, 7, 0), (-5, 6, 0))            # stone under a dust that the next one reads down a step
-D_A = LINE[-1]
+D_A, S_A = LINE[-1], (-6, 5, 1)                                     # the line's last dust, on a stone on A_W
 R_X, Y_X, R_G, Y_G = (-6, 6, 2), (-6, 6, 3), (-5, 6, 3), (-4, 6, 3)
 TAPPED = rd.CLIMB[6]                                                # (2,10,2), the dust of rbt_drives' line that R_W reads
 LAST = 70                                                           # the runs end after c70
@@ -75,13 +77,13 @@ KICK = {P_W: t.pis("sticky_piston", "east", "P_W", True), HEAD_W: B("piston_head
         RB_W: B("rb", id="RB_W"), A_W: t.pis("sticky_piston", "down", "A_W")}
 DOWN = {P_G: t.pis("sticky_piston", "down", "P_G"), SPG: B("glass", id="SPG")}
 REPEATERS = {R_W: rep("east", 4), R_M: rep("east", 4), R_X: rep("north", 4), R_G: rep("west", 4)}
-STONES = {**{c: t.STONE for c in STEPS}, Y_X: t.STONE, Y_G: t.STONE}
+STONES = {**{c: t.STONE for c in STEPS}, Y_X: t.STONE, Y_G: t.STONE, S_A: t.STONE}
 DUSTS = {c: t.DUST for c in LINE}
-GLASSES = {(x, y - 1, z): t.GLASS for x, y, z in (*REPEATERS, *LINE) if (x, y - 1, z) not in STEPS}
+GLASSES = {(x, y - 1, z): t.GLASS for x, y, z in (*REPEATERS, *LINE) if (x, y - 1, z) not in (*STEPS, S_A)}
 TIMER = {**REPEATERS, **STONES, **DUSTS, **GLASSES}
 MINE = {**KICK, **DOWN, **TIMER}
 NAMES = {R_W: "R_W", R_M: "R_M", R_X: "R_X", R_G: "R_G", Y_X: "Y_X", Y_G: "Y_G", D_A: "D_A", LINE[0]: "the dust R_W lights",
-         **{c: f"the step stone {c}" for c in STEPS}, **{c: st.p["id"] for c, st in {**KICK, **DOWN}.items() if "id" in st.p}}
+         S_A: "S_A", **{c: f"the step stone {c}" for c in STEPS}, **{c: st.p["id"] for c, st in {**KICK, **DOWN}.items() if "id" in st.p}}
 MY_PISTONS = {st.p["id"]: c for c, st in MINE.items() if st.n in ("piston", "sticky_piston")}
 MOVED = (PARK_W,)                                                   # the free cell the added blocks move through: RB_W's
 WEST = (K, K_UP, G_UP, M_K, M_HEAD, WK)                             # trigger.py's cells that end as loaded; UP ends with G in it
@@ -314,7 +316,7 @@ if __name__ == "__main__":
     kinds = [st.n for st in MINE.values()]
     print(f"added: {len(MINE)} blocks ({kinds.count('sticky_piston')} sticky pistons, one of them built out with its head, {kinds.count('rb')} redstone "
           f"block, {kinds.count('repeater')} repeaters, {kinds.count('redstone_wire')} dust, {kinds.count('stone')} stone, {kinds.count('glass')} glass: "
-          f"SPG and {len(GLASSES)} under dust and repeaters); no measured block changed; no stand-in, no command after the input")
+          f"SPG and {len(GLASSES)} under dust and repeaters; S_A, the stone under D_A, among the stone); no measured block changed; no stand-in, no command after the input")
     taken = set(d.full_blocks(rb)) | set(rcl.b) | set(v.cumulative_cells(rb)[0])
     for blocks, be in (*ref, *rw.frames):
         taken |= set(blocks) | be
@@ -442,9 +444,9 @@ if __name__ == "__main__":
           [x for _, x in power_sources(d.make_world(bx)[0], SPG)] or "nothing", "| open state:", "out" if t.at(ox, "X")[2] else "in", "powered by",
           [x for _, x in power_sources(ox, SPG)], "(the bus's last dust points into it: it would be out through the open state, its head in "
           "(-4,4,2))")
-    work = [c for c in MINE if c not in GLASSES and c != HEAD_W]
+    work = [c for c in MINE if c not in GLASSES and c not in (HEAD_W, S_A)]
     left = {c: bool(run(build(drop=(c,)))[2]) for c in work}
-    print(f"   each of the {len(work)} blocks that are not glass under a dust or a repeater (P_W with its head) left out, one at a time:",
+    print(f"   each of the {len(work)} blocks that are not glass or S_A under a dust or a repeater (P_W with its head) left out, one at a time:",
           "the return FAILS every time" if all(left.values()) else "done without " + ", ".join(f"{NAMES.get(c, c)} {c}" for c, bad_ in left.items() if not bad_))
 
     print("\n== the input off n ticks after it went on (trigger.py's feed is armed at t10 j): the close (p9_p8's four verdicts) and the returns")
