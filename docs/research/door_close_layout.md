@@ -505,7 +505,10 @@ need not be re-oriented.
   D9's source; the cells the close moves or must leave alone, Z9's cells and the levels of p9_p8's probe checked after
   c0, c16, c18, c20, c22 to c25, c28 and c32 (by test), then Z9, RB9's cells and D9 four ticks after a glass block is
   set under Z9 and taken out. Its steps, read back from the YAML and replayed in the simulator, pass 3/3; without D9 the
-  first test fails [COMPUTED]. `python -m scripts.lint close_returns_probe`: ok.
+  first test fails [COMPUTED]. `python -m scripts.lint close_returns_probe`: ok. Server (2026-11-22, main on the Mac): 3/3
+  [MEASURED]: Z9 in at c16, RB9 over it after c22, D9 pushes at c23 and is in at c29, Z9 fires on the update under it;
+  in the blocker test the push stops on RB9 moving and D9's head; in the control RB9 stays over Z9 and P9's landing at
+  c24 fires Z9 again. `close_p9_p8_probe` still passes 3/3.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -588,7 +591,7 @@ events of one phase: they show which orders work, not how to get them.
    The opening's relays, which every close leaves fired (X2, Z_Q, Y1, Z_S, Z9, Z11, Y12 with RB_X, C_cut, RB_Q, RB_Y,
    RB_S, RB9, RB11): each is held by its arm, the four that face up also by their payload at R+2. They need no
    re-orienting: Z9 is re-armed in place by command, its arm taken out before c22, D9 (4,5,1) pushing RB9 down at c23
-   and the arm back from c23 on [COMPUTED returns.txt; `close_returns_probe` written, not run]. Not designed: D9's
+   and the arm back from c23 on [COMPUTED returns.txt; MEASURED `close_returns_probe` 3/3]. Not designed: D9's
    source (on by c23, off from c24) and ARM_Z9's puller (from (5,2,1) or (5,3,2); powered in the closed and the open
    state, off from c22 or before until c23 or after). RB_Y's return relights LY and R_9 then powers P9 behind Q, as RB9
    does, and LY's relight updates Y1, so Y1 needs the blocker, a head in (7,5,-3) [INFERRED]. P8 is held by R_8 on NA, so C_cut's
@@ -607,11 +610,9 @@ stages are MEASURED from nine blocks and a stone: the door plane closes from the
 (`close_p9_p8_probe` 3/3 on sat1: R_X on at c16, RB9 at (5,4,1) after c18 with LY lit, P9 out at c20, TM at (2,2,0) and
 TR at (1,2,0) after c22, P8 out at c23, Q at (3,2,0) after c25; with R_9 removed P9 and P8 stay in, with R_8 removed P8
 stays in and Q at (3,3,0)). The returns' first pass (item 4) finds the trigger chain blocked inside the box with added
-blocks (returns.txt) and Z9 re-armed in place by command. Next: the call on the trigger chain (change the T feed's off
-or the bus's west branch, or raise the box); run `close_returns_probe` (expect 3/3: Z9 in at c16, RB9 at (4,4,1) after
-c22 and moving after c23, at (4,3,1) after c25, Z9 out four ticks after the update under it; in the blocker test the
-same with no Z9 event at c24 or c25; in the control Z9 out from c25 with RB9 at (4,4,1)); then D9's source and ARM_Z9's
-puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1 with the blocker). If P6 must be
+blocks (returns.txt) and Z9 re-armed in place by command (`close_returns_probe` 3/3 in game). Next: the trigger chain's
+returns with the box allowed to grow (the T feed's off or the bus's west branch changed, or the box raised); then D9's
+source and ARM_Z9's puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
@@ -627,7 +628,7 @@ export_returns.py), run from the repo root as `python -m scripts.door2.close_lay
 `library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1),
 `library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server),
 `library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; 3/3 on sat1) and
-`library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; not yet run).
+`library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
