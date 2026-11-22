@@ -27,9 +27,8 @@ ALL = list(dict.fromkeys(xi.ALL + [pp.R_X, pp.A_9, pp.RB9_CLOSED, pp.RB9_OPEN, p
                                    pp.P5, (3, 1, 0), (3, 0, 0)]))
 # test name: (cell removed before the opening, last tick, ticks after which cells are checked: 2 is c0, 22 is c20)
 TESTS = {
-    "one input and no command after it: stages 0 to 5 as before; R_X on at c16 and A_9 out; RB9 at (5,4,1) after c18, LY "
-    "lit; R_9 on at c20, P9 out, RB9 pulled; P9 spat at c22, TM at (2,2), TR at (1,2); A_9 home after c22; P8 out at c23; Q "
-    "at (3,2) after c25: the door plane closed": (None, pp.LAST, (2, 6, 12, 14, 16, 17, 18, 20, 22, 24, 25, 27, 32), ALL),
+    "one input and no command after it: R_X on at c16, RB9 at (5,4,1) after c18, P9 out at c20, TM at (2,2) and TR "
+    "at (1,2) after c22, P8 out at c23, Q at (3,2) after c25: the door plane closed": (None, pp.LAST, (2, 6, 12, 14, 16, 17, 18, 20, 22, 24, 25, 27, 32), ALL),
     "without R_9 nothing reads LY: A_9 moves RB9 out and back, LY is lit after c18 and dark after c20, P9 stays in, TM stays "
     "at (3,2) and P8 stays in (control)": (pp.R_9, 25, (18, 20, 22, 24, 27), ALL),
     "without R_8 nothing powers P8: P9 pushes TM and TR and is spat, A_9 comes home, P8 stays in and Q stays at (3,3) "
