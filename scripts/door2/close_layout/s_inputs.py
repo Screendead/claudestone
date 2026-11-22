@@ -79,7 +79,9 @@ def by_command(on, off, last=LAST):
 
 
 class Noted(pv.Noted):
-    """p10_v's Noted with this step's lines, and each update of F_S with whether F_S is powered then."""
+    """p10_v's Noted with this step's lines, each update of F_S with whether F_S is powered then, and the pistons
+    that a change of DS or of the feed's dust updates."""
+    feed = 0
 
     def L(self, msg):
         World.L(self, msg)
@@ -89,7 +91,15 @@ class Noted(pv.Noted):
     def check_extend(self, p):
         if p == s.F_S and self.get(p).n == "sticky_piston":
             self.fed.append((self.tick_no, self.phase, bool(self.neighbor_signal(p, DIRS["north"]))))
+        for n, on in (("DS", self.storm), ("feed", self.feed)):
+            if on and self.tick_no >= 1:
+                self.reached.setdefault((n, self.tick_no), set()).add(self.get(p).p.get("id", str(p)))
         pv.Noted.check_extend(self, p)
+
+    def wire_update(self, p):
+        self.feed += p in (D_1, D_2, D_F)
+        pv.Noted.wire_update(self, p)
+        self.feed -= p in (D_1, D_2, D_F)
 
 
 def noted(w, ticks=None, first=-1, before=None, **kw):
@@ -100,6 +110,7 @@ def noted(w, ticks=None, first=-1, before=None, **kw):
     w.__class__ = Noted
     w.reverse, w.ia_last = kw.get("reverse", False), kw.get("ia_last", False)
     w.lvl, w.order, w.seen, w.after, w.said, w.lines, w.noted, w.fed, w.power, w.frames = {}, [], None, None, [], [], [], [], [], []
+    w.reached = {}
     for k, cmds in enumerate(idle() if ticks is None else ticks):
         w.log.clear()
         w.tick_no = k + first
@@ -221,6 +232,8 @@ if __name__ == "__main__":
     print("   block events from c1 on whose updates reach F_S:", [f"c{k} {n}" for k, _, n, _, sn in w.order if s.F_S in sn and k >= 1],
           "| T while DS is lit:", "; ".join(x for x in pv.told(w, "c", lambda m: " T@" in m or str((1, 4, 0)) in m) if pv.tick_of(x) >= 10) or
           "no event")
+    print("   pistons updated by a change of DS:", "; ".join(f"c{k} {sorted(ids)}" for (n, k), ids in sorted(w.reached.items()) if n == "DS"),
+          "| of D_1, D_2 or D_F:", "; ".join(f"c{k} {sorted(ids)}" for (n, k), ids in sorted(w.reached.items()) if n == "feed"))
     r0 = pv.noted(base, pv.staged(last=LAST))
     rest, dust = pv.differing(r0, w, set(MINE) | {CUT})
     print("   end state against p10_v.py's run, where commands drive stage 5 (drive A): cells that differ outside the 13 blocks and the cut cell:")
