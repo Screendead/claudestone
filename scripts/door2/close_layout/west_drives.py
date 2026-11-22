@@ -52,9 +52,9 @@ Gate    G's closed cell (-3,3,2) is Y12's head: G goes home only when Y12 retrac
 
 Not controls: the eight glass blocks under dust and repeaters and S_A carry them (the simulator has no rule for
 support, and without S_A D_A powers A_W by QC through the empty cell).
-Run from the repo root (sim; under a minute):
+Run from the repo root (sim; about a minute):
 python -m scripts.door2.close_layout.west_drives > scripts/door2/close_layout/west_drives.txt"""
-import copy, re
+import copy, random, re
 from scripts.door2.close_layout import feeds as f, trigger as t, p9_p8 as pp, p10_v as pv, returns as r, rbt_drives as rd, dp_off as o
 from scripts.door2.close_layout.feeds import d, B, AIR, power_sources
 from scripts.door2.sim import World, DIRS, add
@@ -110,8 +110,10 @@ def build(drop=(), swap=None):
 
 class Noted(rd.Noted):
     """rbt_drives' Noted with this step's lines; `late` (tick, cell) puts that cell's block events behind those
-    queued in phase d of that tick (sim only)."""
-    late = None
+    queued in phase d of that tick; with `rng`, from c30 on the scheduled ticks that fall due in one tick run in a
+    random order, priorities ignored, and the moving blocks west of x -3 tick in a random order among themselves
+    (both sim only)."""
+    late = rng = None
 
     def L(self, msg):
         World.L(self, msg)
@@ -124,15 +126,26 @@ class Noted(rd.Noted):
             for key in [k for k in self.events if k[0] == self.late[1]]:
                 self.events.move_to_end(key)
 
+    def tick(self):
+        if self.rng and self.tick_no >= 30:
+            due = sorted((x for x in self.sched if x[0] <= self.time + 1), key=lambda x: (x[1], x[2]))
+            mixed = self.rng.sample(due, len(due))
+            self.sched = [x for x in self.sched if x[0] > self.time + 1] + [(x[0], 0, sub, x[3], x[4]) for x, sub in zip(mixed, sorted(y[2] for y in due))]
+            idx = [i for i, be in enumerate(self.tickers) if not be.removed and be.pos[0] <= -4]
+            for i, be in zip(idx, self.rng.sample([self.tickers[i] for i in idx], len(idx))):
+                self.tickers[i] = be
+        rd.Noted.tick(self)
 
-def noted(w, ticks=None, first=-1, before=None, late=None, **kw):
+
+def noted(w, ticks=None, first=-1, before=None, late=None, seed=None, **kw):
     """rbt_drives.noted with this module's Noted: a copy of w taken through ticks (each: its commands, then the
     tick; default: the input off, then nothing to c`LAST`), with the shown lines, K's updates while it is in and
     (blocks, moving cells) after each tick. `before` {tick number: function of the world} acts ahead of that tick,
-    `late` is Noted.late (both sim only)."""
+    `late` is Noted.late, `seed` seeds Noted.rng (all sim only)."""
     w = copy.deepcopy(w)
     w.__class__ = Noted
     w.reverse, w.ia_last, w.first, w.backwards, w.late = kw.get("reverse", False), kw.get("ia_last", False), None, kw.get("backwards", False), late
+    w.rng = None if seed is None else random.Random(seed)
     w.lvl, w.order, w.seen, w.after, w.said, w.lines, w.noted, w.fed, w.power, w.frames = {}, [], None, None, [], [], [], [], [], []
     w.reached, w.woke, w.held = {}, {"P8": [], "P9": [], "A_9": [], "K": []}, []
     for k, cmds in enumerate(pp.idle(LAST) if ticks is None else ticks):
@@ -404,6 +417,12 @@ if __name__ == "__main__":
         _, x, badx = run(b, **kw)
         print(f"   {name}:", "FAILS: " + "; ".join(badx[:4]) if badx else "done;", "piston events of each tick",
               "the same set" if pv.per_tick(x, -1, LAST) == mine_ev else "DIFFER")
+
+    mixed = [run(b, seed=n, reverse=bool(n & 1), ia_last=bool(n & 2)) for n in range(60)]
+    print("   60 runs, in each from c30 on the scheduled ticks of every tick in a random order, priorities ignored, and the moving blocks west of x -3 "
+          "in a random order among themselves; dust's updates reversed in every second run, I_A's event last in two of every four:",
+          "done in all 60;" if not any(x[2] for x in mixed) else f"FAILS in {sum(bool(x[2]) for x in mixed)};", "piston events of each tick",
+          "the same set in all" if all(pv.per_tick(x[1], -1, LAST) == mine_ev for x in mixed) else "DIFFER in some")
 
     print("\n== the four delays, each 1 to 4 ticks with the others as built: the returns, and the close to c30 outside the added blocks")
     for c, st in REPEATERS.items():
