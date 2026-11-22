@@ -428,6 +428,7 @@ to up (9,2,7) |
 | close_feeds_probe | 8x5x2 | 80 | 9 | - | piston_based | Scratch probe for the door close (door2/close_layout/feeds.py) |
 | close_p10_v_probe | 2x1x1 | 2 | 2 | - | piston_based | Scratch probe for P10 and V, stages 3 and 4 of the 3x3 door's close (door2/close_layout/p10_v.py) |
 | close_p9_p8_probe | 5x7x4 | 140 | 10 | - | piston_based | Scratch probe for the last stages of the 3x3 door's close, P9's 0-tick and P8 (door2/close_layout/p9_p8.py) |
+| close_returns_probe | 1x1x1 | 1 | 1 | - | piston_based | Scratch probe for the returns of the 3x3 door's close (door2/close_layout/returns.py): Z9, one of design_c's four relays that face up, re-armed in place |
 | close_s_feed_probe | 3x2x3 | 18 | 5 | - | piston_based | Scratch probe for S's H2 feed in the door close (door2/close_layout/s_feed.py) |
 | close_s_inputs_probe | 4x3x3 | 36 | 13 | - | piston_based | Scratch probe for the S feed's inputs, stage 5 of the 3x3 door's close (door2/close_layout/s_inputs.py) |
 | close_trigger_probe | 9x8x5 | 360 | 36 | - | piston_based | Scratch probe for the close's trigger chain (door2/close_layout/trigger.py) |
