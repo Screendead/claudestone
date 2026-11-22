@@ -1,0 +1,112 @@
+added: 13 blocks (2 repeaters, 3 dust, 1 sticky piston, 4 stone, 3 glass); taken out: G_S, its head and HOLD_G; no stand-in, no command after the input
+opening, p10_v's build vs this one, open-state differences: none
+cell differences outside the added blocks and G_S's three cells: none | tick by tick, the door's pistons and the door plane: the same at every tick
+moved during load: none | closed state: R_F off | R_C off | D_1 0, D_2 0, D_F 0, DS 15 | RB_ST (3, 7, 0) | F_S powered by nothing | cells that differ from p10_v's closed state: none
+the opening: added cells that change or move, and power on F_S or A_C, at any tick: none | RB_ST after it: (2, 7, 0)
+open state: R_F off | R_C off | D_1 0, D_2 0, D_F 0, DS 0 | F_S ((1, 5, 3), 'real', False) RB_F ((1, 5, 2), 'real') A_C ('real', False) C_F (0, 8, 3)
+pistons with an added cell among their power sources, closed and open state: none
+box, opening: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== the close from the input, no command: c-1 to c20
+   c-1 to c9: the piston events of p10_v's run with no command, tick by tick
+   c2j land rb@(2, 8, 0)
+   c8g level 0 RETRACT AP@(4, 7, 0) ev1: retract
+   c8g level 0 EXTEND P10@(-1, 5, 0) down
+   c10d wire (2, 8, 2) power 0->15
+   c10d wire (1, 7, 3) power 0->13
+   c10d repeater (2, 8, 1) on
+   c10g level 0 EXTEND F_S@(1, 5, 3) north
+   c11g level 0 EXTEND V@(-1, 3, 0) east
+   c12d repeater (0, 8, 2) on
+   c12g level 0 EXTEND A_C@(-1, 8, 3) east
+   c12j wire (1, 4, 1) power 0->15
+   c12j land rb@(1, 5, 1)
+   c13g level 0 EXTEND W_T@(1, 5, 0) north
+   c13j land sticky_piston@(1, 3, 0)
+   c14g level 0 EXTEND S@(1, 3, 0) down
+   c14g level 0 sticky_piston@(1, 4, 0) ev0 resolve failed
+   c14j wire (1, 7, 3) power 13->0
+   c14j land stone@(1, 8, 3)
+   c15g level 0 wire (1, 4, 1) power 15->0
+   c15g level 0 RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   c15g level 1 RETRACT S@(1, 3, 0) ev2: retract+SPIT (1, 1, 0)
+   c15g level 1 RETRACT W_T@(1, 5, 0) ev1: retract
+   c17j land rb@(1, 5, 2)
+   c17j land sticky_piston@(1, 3, 0)
+   stages 0 to 2 -> done as in p10_v's run: stages 0 and 1 in c0, P11 out and spat in c3, S real at (0,3,0), RB_D and A_D home
+   stages 3 and 4, after c13 -> done as in p10_v's run: P10 out at c8, V out at c11, S real at (1,3,0), retracted; no dust lost; nothing powers V or S where they wait; P8's dust 0
+   stage 5, after c20 -> done: S real at (1,3,0), retracted; C real at (1,1,0); (1,2,0) air; T, P12, P11 in; V and P10 out; SP, TL, Q, TM, P8 where the close needs them; RB_F home at (1,5,2), F_S in; DS and D_F 0; A_C out, C_F on the step; P7 out over TR at (2,2,0)
+   F_S: c10 out, c15 in; S: c14 out, c15 spat; A_C: c12 out; W_T: c0 out, c0 in, c13 out, c15 in
+   F_S's updates: c10d powered, c10g powered, c12j powered, c14j not powered, c17j not powered
+   levels after c9: D_1 0, D_2 0, D_F 0, DS 0 | c10: D_1 15, D_2 14, D_F 13, DS 0 | c12: D_1 15, D_2 14, D_F 13, DS 15 | c13: D_1 15, D_2 14, D_F 13, DS 15 | c14: D_1 15, D_2 14, D_F 0, DS 15 | c20: D_1 15, D_2 14, D_F 0, DS 0
+   block events from c1 on whose updates reach F_S: ['c10 F_S ev0', 'c15 F_S ev1'] | T while DS is lit: c14g level 0 sticky_piston@(1, 4, 0) ev0 resolve failed
+   end state against p10_v.py's run, where commands drive stage 5 (drive A): cells that differ outside the 13 blocks and the cut cell:
+      (1, 5, 2): air there, rb[id=RB_F] here; (2, 5, 1): rb[id=RB_F] there, air here; (3, 5, 1): sticky_piston[extended=False,facing=west,id=G_S] there, air here
+      dust levels that differ: none
+   box, opening + close through stage 5: x -4..7 y -3..8 z -8..3 -> 12 x 12 x 12 = 1728
+
+== order (must pass): against the run above
+   dust's neighbour updates in reverse order: stages 0 to 4 done, stage 5 done; piston events of each tick the same set; end-state cells the same
+   I_A's retract event behind P_R's and M_K's: stages 0 to 4 done, stage 5 done; piston events of each tick the same set; end-state cells the same
+   both: stages 0 to 4 done, stage 5 done; piston events of each tick the same set; end-state cells the same
+
+== ctl 1: no R_F: nothing reads RB_ST
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: nothing moves at F_S
+   -> FAILS: C ((1, 2, 0), 'real', None); A_C ((-1, 8, 3), 'real', False); C_F ((0, 8, 3), 'real', None); (1,2,0) quartz[id=C]
+
+== ctl 2: R_F at 3 ticks: every tick of the feed two early, and F_S pulls RB_F home at c13 g, before S lands (c13 j)
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: c8d repeater (2, 8, 1) on; c8g level 0 EXTEND F_S@(1, 5, 3) north; c10d repeater (0, 8, 2) on; c10g level 0 EXTEND A_C@(-1, 8, 3) east; c10j land rb@(1, 5, 1); c12j land stone@(1, 8, 3); c13g level 0 RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1)
+   -> FAILS: C ((1, 2, 0), 'real', None); (1,2,0) quartz[id=C]
+
+== ctl 3: no C_F: A_C pushes nothing, the step is never cut
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: c10d repeater (2, 8, 1) on; c10g level 0 EXTEND F_S@(1, 5, 3) north; c12d repeater (0, 8, 2) on; c12g level 0 EXTEND A_C@(-1, 8, 3) east; c12j land rb@(1, 5, 1); c14g level 0 EXTEND S@(1, 3, 0) down
+   -> FAILS: S ((1, 3, 0), 'real', True); F_S ((1, 5, 3), 'real', True); RB_F ((1, 5, 1), 'real', None); W_T ((1, 5, 0), 'real', True); C_F (None, None, None)
+
+== ctl 4: R_C at 2 ticks: C_F lands at c16 j and F_S is released at c17, three ticks after S's extension
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: c10d repeater (2, 8, 1) on; c10g level 0 EXTEND F_S@(1, 5, 3) north; c12j land rb@(1, 5, 1); c14d repeater (0, 8, 2) on; c14g level 0 EXTEND S@(1, 3, 0) down; c14g level 0 EXTEND A_C@(-1, 8, 3) east; c16j land stone@(1, 8, 3); c17g level 0 RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1); c17g level 1 RETRACT S@(1, 3, 0) ev1: retract+PULL C@(1, 1, 0)
+   -> FAILS: C ((1, 2, 0), 'real', None); (1,2,0) quartz[id=C]
+
+== ctl 5: glass under D_2: D_F does not read D_2 down the step
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: c10d repeater (2, 8, 1) on; c12d repeater (0, 8, 2) on; c12g level 0 EXTEND A_C@(-1, 8, 3) east; c14j land stone@(1, 8, 3)
+   -> FAILS: C ((1, 2, 0), 'real', None); (1,2,0) quartz[id=C]
+
+== ctl 6: a dust in R_F's place (no delay): the feed is lit when RB_ST lands, c2 j, and T fires into the empty (1,3,0)
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: c3g level 0 EXTEND F_S@(1, 5, 3) north; c4d repeater (0, 8, 2) on; c4g level 0 EXTEND A_C@(-1, 8, 3) east; c5j land rb@(1, 5, 1); c6g level 0 EXTEND T@(1, 4, 0) down; c6j land stone@(1, 8, 3); c7g level 0 RETRACT F_S@(1, 5, 3) ev1: retract+PULL RB_F@(1, 5, 1); c7g level 1 RETRACT T@(1, 4, 0) ev1: retract+PULL C@(1, 2, 0)
+   -> FAILS: S ((0, 3, 0), 'real', False); C ((1, 3, 0), 'real', None); V ((-1, 3, 0), 'real', False)
+
+== ctl 7: R_C turned round (facing west): it reads Q_C and drives D_2
+   moved during load: none | opening: the same at every tick | open state: F_S in RB_F (1, 5, 2) D_F 0
+   close: c10d repeater (2, 8, 1) on; c10g level 0 EXTEND F_S@(1, 5, 3) north; c12j land rb@(1, 5, 1); c14g level 0 EXTEND S@(1, 3, 0) down
+   -> FAILS: S ((1, 3, 0), 'real', True); F_S ((1, 5, 3), 'real', True); RB_F ((1, 5, 1), 'real', None); W_T ((1, 5, 0), 'real', True); A_C ((-1, 8, 3), 'real', False)
+
+== each of the eight working blocks left out: stage 5
+   R_F FAILS, D_1 FAILS, D_2 FAILS, D_F FAILS, R_C FAILS, Q_C FAILS, A_C FAILS, C_F FAILS | Q_F as glass (D_F a QC source of F_S by itself): done
+
+== the two delays, R_F 1 to 4 ticks with R_C at 1, and R_C 1 to 4 ticks with R_F at 4: stage 5
+   R_F: 1 FAILS, 2 FAILS, 3 FAILS, 4 done | R_C: 1 done, 2 FAILS, 3 FAILS, 4 FAILS
+
+== why c10 and c15: drive C by command in p10_v's build with G_S and its hold out (SRC_F (1,6,3) set before the first tick, cleared before the second)
+   F_S out from c8, released at c13 / c14 / c15 / c16 / c17: FAILS / FAILS / FAILS / FAILS / FAILS
+   F_S out from c9, released at c13 / c14 / c15 / c16 / c17: FAILS / done / done / done / FAILS
+   F_S out from c10, released at c13 / c14 / c15 / c16 / c17: FAILS / done / done / done / FAILS
+   F_S out from c11, released at c13 / c14 / c15 / c16 / c17: FAILS / FAILS / FAILS / FAILS / done
+
+== with G_S, its head and HOLD_G left in (HOLD_G never removed): opening the same at every tick; piston events of each tick the same set; end-state cells outside G_S's three: none
+
+== after the close (what-if; RB_ST's return is not designed): RB_ST taken out of (2,8,0) by command before c24, to c44
+   c31d wire (2, 8, 2) power 15->0
+   c31d repeater (2, 8, 1) off
+   c33d repeater (0, 8, 2) off
+   c33g level 0 RETRACT A_C@(-1, 8, 3) ev1: retract+PULL C_F@(1, 8, 3)
+   c35j land stone@(0, 8, 3)
+   the 13 blocks and the cut cell against the open state: the same | D_1 0, D_2 0, D_F 0, DS 0 | F_S c10 out, c15 in | A_C c12 out, c33 in
+   ctl 8: A_C not sticky: stage 5 done; after RB_ST is taken out: A_C c12 out, c33 in, C_F at (1, 8, 3) -> the step stays cut for the next close
+
+== ctl 9: the input off n ticks after it went on (trigger.py's feed is armed at t10 j, R_D on at t8 d)
+   stages 0 to 5: {8: 'FAILS', 9: 'FAILS', 10: 'FAILS', 11: 'done', 12: 'done', 16: 'done'}
