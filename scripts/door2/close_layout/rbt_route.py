@@ -19,7 +19,7 @@ Verdict Two steps: the block would stand at (2,7,0), where it lights DT (W_T fir
         to (3,7,1), down, which only a sticky piston at (3,6,1) facing up can drive off the path: neither can be
         built. Eight steps: the shortest that can, eight pistons, each with a source and a time of its own.
 
-Run from the repo root (sim; about 10 minutes):
+Run from the repo root (sim; about a minute):
 python -m scripts.door2.close_layout.rbt_route > scripts/door2/close_layout/rbt_route.txt"""
 from scripts.door2.close_layout import trigger as t, returns as r
 from scripts.door2.close_layout.feeds import power_sources
