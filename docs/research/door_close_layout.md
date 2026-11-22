@@ -889,7 +889,17 @@ until c61.
   source needs an edge 2 ticks after R_G from a cell that does not update A_D at c62 (the cell above B_Y is beside A_D).
 - Probe: `close_y12_probe` (`export_y12`): three tests with the stand-in commands, replayed in the simulator 3/3; the
   first test fails with Y12 plain or without U_Y, W_Y, B_Y, S_W, R_F, S_F or D_X. `python -m scripts.lint
-  close_y12_probe`: ok. Not yet run on a server.
+  close_y12_probe`: ok. MEASURED on the main server, 2026-11-22: 0/3, R_F still off at c54 (control 1 first off at c62,
+  control 2 on the same R_F check at c60).
+- The cause [INFERRED from the export and MEASURED mechanics, the trace not yet read]: D_X (-6,7,3) has no dust beside
+  it. The simulator treats a lone dust as a cross, pointing east into S_F; the export set it as bare `redstone_wire`,
+  and a bare dust set by command is a dot that powers no neighbour [MEASURED dust_dot_vs_cross_isolated; AUTHORING.md],
+  so S_F, R_F and S_W stay dark and W_Y never fires. Fix: D_X is a cross in the build and the export writes
+  `redstone_wire[east=side,north=side,south=side,west=side]` for it (`state_str` writes a dust's four sides only when the
+  build marks it a cross), and the probe now checks that shape. y12.txt is unchanged; close_y12_probe re-exported (3/3
+  replayed, the same controls live, lint ok); the other exporters write the same YAML. The two older lone dusts, (1,7,0)
+  and (-3,4,0), are dots in game; with them as dots the simulator gives the same runs of west_drives.py and y12.py at
+  every tick, which fits their probes passing. To measure again.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design

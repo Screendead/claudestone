@@ -17,13 +17,15 @@ When    RB_D has two movers, A_D and a piston above it, and the DP tap powers bo
 W_Y     A sticky piston at (-3,6,2) facing down, above RB_D, in at rest. S_W, a stone at (-3,7,3) on the tap's
         stone and beside the cell above W_Y, powers it without an update from c52 d to c60 d: R_F, a 1-tick
         repeater at (-4,7,3) on Y_G, reads S_F, a stone at (-5,7,3) on R_G, which D_X, a dust at (-6,7,3) on Y_X,
-        powers while Y_X is (c50 to c58). P_G's extension beside W_Y at c58 g is its update: it goes out, its head
-        lands on RB_D at c60 j and updates it, by then unpowered: at c61 g it retracts and pulls RB_D up. RB_D
-        lands in front of it at c63 j with the tap on: W_Y pushes it down at c64 g. G's landing at c63 j has put
-        NP12 out, the tap's repeater turns off at c65 d and updates W_Y, a neighbour of its stone, one tick into
-        the push: W_Y leaves RB_D and retracts (a sticky piston released within 2 gt of its push). In the open
-        state the tap holds W_Y out, its head on RB_D; it retracts at c2 g, with A_D's head under it, and pulls
-        nothing.
+        powers while Y_X is (c50 to c58). D_X has no dust beside it: it is placed as a cross (all four sides), as the
+        simulator treats a lone dust; set bare by command it is a dot, which points into nothing (AUTHORING.md), and
+        the first export did that: in game R_F never came on (close_y12_probe 0/3, 2026-11-22). P_G's extension
+        beside W_Y at c58 g is its update: it goes out, its head lands on RB_D at c60 j and updates it, by then
+        unpowered: at c61 g it retracts and pulls RB_D up. RB_D lands in front of it at c63 j with the tap on: W_Y
+        pushes it down at c64 g. G's landing at c63 j has put NP12 out, the tap's repeater turns off at c65 d and
+        updates W_Y, a neighbour of its stone, one tick into the push: W_Y leaves RB_D and retracts (a sticky piston
+        released within 2 gt of its push). In the open state the tap holds W_Y out, its head on RB_D; it retracts
+        at c2 g, with A_D's head under it, and pulls nothing.
 U_Y     A sticky piston at (-2,6,2) facing down, above ARM_Z11, built out, its head on ARM_Z11. STAND-IN: it is
         held by a redstone block at (-2,8,2), two above it (QC, no update), which a command takes out before c60
         and another sets back before c63, both without updates. NP12's relight at c60 j is its update (the tap's
@@ -67,7 +69,8 @@ STICKY = t.pis("sticky_piston", "west", "Y12")
 HOLD_BLOCK = B("rb", id="HOLD_U")
 PISTONS = {U_Y: t.pis("sticky_piston", "down", "U_Y", True), U_HEAD: B("piston_head", facing="down", sticky=True),
            W_Y: t.pis("sticky_piston", "down", "W_Y"), B_Y: t.pis("piston", "north", "B_Y")}
-FEED = {D_X: t.DUST, S_F: t.STONE, R_F: rd.rep("west", 1), S_W: t.STONE}
+CROSS = B("redstone_wire", power=0, cross=True)                     # placed with all four sides: a lone dust set by command is a dot
+FEED = {D_X: CROSS, S_F: t.STONE, R_F: rd.rep("west", 1), S_W: t.STONE}
 MINE = {**PISTONS, **FEED}
 NAMES = {U_Y: "U_Y", W_Y: "W_Y", B_Y: "B_Y", D_X: "D_X", S_F: "S_F", R_F: "R_F", S_W: "S_W", HOLD: "U_Y's stand-in hold", Y12: "Y12"}
 ADDED = (*MINE, HOLD, SRC_B, W_HEAD, Y12, G_HOME)                    # cells left out when a run is set beside west_drives.py's
