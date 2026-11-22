@@ -206,9 +206,9 @@ way: P11 is spat, P6 is not (below).
   both are in place after the run (read from the world). `close_trigger_probe` 4/4, `close_feeds_probe` 8/8 and
   `close_s_feed_probe` 6/6 still pass.
 
-## P10 and V, stages 3 and 4 (2026-11-22; simulator; the probe awaits a satellite run)
+## P10 and V, stages 3 and 4 (2026-11-22; simulator; measured on a satellite)
 Two blocks take the P10 and V commands out of the close: stages 0 to 4 run from the one input, the opening is unchanged
-and stage 5 is done with its commands moved to c12, c13 and c15 [COMPUTED p10_v.txt]. Not as framed in two ways: P10 needs
+and stage 5 is done with its commands moved to c12, c13 and c15 [COMPUTED p10_v.txt; MEASURED 3/3 on sat1, below]. Not as framed in two ways: P10 needs
 no block, and neither P10 nor V is spat (below).
 - Blocks: D_V, a dust at (1,4,-4) on the hallway's roof, between NA's dusts (2,4,-4) and (1,4,-3); R_V, a 1-tick repeater
   at (0,4,-4) facing east on the roof beside it, which reads D_V and powers NV's dust (-1,4,-4). Opening: open-state diff
@@ -261,7 +261,12 @@ no block, and neither P10 nor V is spat (below).
   before the opening), 55 or 56 cells and the levels of DT, DS, DP, the tap, D_V and NV at (-1,4,-4), (-1,3,-1), (5,5,0)
   and (4,5,0) checked against the simulator after c0, c3, c4, c8, c10, c11, c13, c14, c15 and c17 (the controls: c4, c10,
   c11, c14). Its steps, read back from the YAML and replayed in the simulator, pass 3/3; without D_V or R_V the first
-  test fails [COMPUTED]. Not yet run on a server.
+  test fails [COMPUTED]. Server (2026-11-22, sat1): 3/3 [MEASURED], every test's failures empty. The game orders it as
+  the simulator assumes: after c10 V is in at (-1,3,0), lit, P10 out; after c11 V is out, its head and S moving; after
+  c13 S is at (1,3,0). Trace levels (input falls at t40, c0 = t42): NV's dust (-1,4,-4) 0 through c3 and 15 from c4
+  (t46) to c17, with (-1,3,-1) 12 and (5,5,0) 1 at c4; D_V's 12 from c3; P8's dust (4,5,0) 0 at every snapshot from c0
+  to c17, so P8 stays in. `close_dp_off_probe` 4/4, `close_trigger_probe` 4/4, `close_s_feed_probe` 6/6 and
+  `close_feeds_probe` 8/8 still pass.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -328,7 +333,7 @@ events of one phase: they show which orders work, not how to get them.
    and V from blocks the spit comes at c11 to c13, while S moves in, and the hold goes at c14 to c16 [COMPUTED p10_v.txt].
 2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [MEASURED: `close_trigger_probe`
    4/4 on sat1]. DP on: RB_D's landing at c2 j, P11 out at c3 [MEASURED: `close_dp_off_probe` 4/4 on sat1].
-   P10 at c8 on r_P10, V at c11 on R_V, both on NA's relight [COMPUTED p10_v.txt; `close_p10_v_probe` not yet run].
+   P10 at c8 on r_P10, V at c11 on R_V, both on NA's relight [MEASURED: `close_p10_v_probe` 3/3 on sat1].
 3. Depowers: T's done (W_T, K_T) [COMPUTED]. DP's done for P11: A_D's own head landing releases it and it pulls RB_D
    right behind P11's extension [MEASURED: `close_dp_off_probe` 4/4 on sat1]. P6 is not spat (it extends at c4 on NA): no piston that can take
    DP's source away is reached from P6's extension [COMPUTED dp.txt, dp_off_search.txt].
@@ -340,7 +345,7 @@ Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within
 
 ## Next
 DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A_D's head and P11 is spat). P10 and V
-(stages 3 and 4) are COMPUTED from two blocks: run `close_p10_v_probe` on a satellite, with the four earlier probes. Next,
+(stages 3 and 4) are MEASURED from two blocks (`close_p10_v_probe` 3/3 on sat1: V out at c11, S at (1,3,0) after c13). Next,
 the S feed's inputs (stage 5, the last commands: F_S's pulse at c12 and G_S's hold at c15); P7, which fires on NA's
 relight at c3, ahead of its stage; and the returns (item 4). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
@@ -354,7 +359,7 @@ export_p10_v.py), run from the repo root as `python -m scripts.door2.close_layou
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
 `library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1) and
-`library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; not yet run).
+`library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`;
