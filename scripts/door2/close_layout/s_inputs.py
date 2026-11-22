@@ -5,7 +5,7 @@ unchanged. Everything printed is COMPUTED on the simulator; nothing here ran on 
 
 Drive   C of s_feed.py, not A: F_S pushes RB_F and stays out, RB_F lands at (1,5,1), F_S's release pulls it home.
         Nothing is spat and nothing pulls RB_F aside, so G_S (3,5,1), its head (2,5,1) and its hold HOLD_G (3,6,1)
-        are taken out: RB_F is never parked at (2,5,1), where it QC-powered P7, and it has no way back to design.
+        are taken out: RB_F is never parked at (2,5,1), where it QC-powered P7, and needs no return.
 Source  RB_ST, trigger.py's redstone block. K_T's push in c0 leaves it at (2,8,0), where it lands at c2 j and
         rests until its return; in the closed state it is at (3,7,0) and in the open state at (2,7,0).
 Feed    R_F, a 4-tick repeater at (2,8,1) facing north on glass, reads RB_ST and turns on at c10 d. Dust D_1
@@ -286,6 +286,9 @@ if __name__ == "__main__":
     gone = noted(mine, idle(44), before={24: lambda x: x.cmd_set(RB_UP, AIR)})
     print("\n== after the close (what-if; RB_ST's return is not designed): RB_ST taken out of (2,8,0) by command before c24, to c44")
     print("\n".join("   " + x for x in pv.told(gone) if pv.tick_of(x) >= 24))
+    print(f"   RB_ST's neighbours after c{LAST}:", ", ".join(f"{c} " + (PARTS.get(c) or w.get(c).p.get("id") or w.get(c).n) for c in
+                                                             [tuple(a + b_ for a, b_ in zip(RB_UP, x)) for x in DIRS.values()]),
+          "((2,9,0) is outside the box)")
     print("   the 13 blocks and the cut cell against the open state:", "the same" if state(gone) == state(mine) else
           {c: (mine.get(c), gone.get(c)) for c in state(mine) if mine.get(c) != gone.get(c)}, "|", levels(gone), "| F_S", pv.fired(gone, "F_S"),
           "| A_C", pv.fired(gone, "A_C"))
