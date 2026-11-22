@@ -131,7 +131,7 @@ def main():
             "taken out of (2,8,0) and set at (3,7,0), its closed cell, before c37: it powers P_R by QC without updating it. The "
             "source again before c38: N_T pushes RB_T back, its landing at the end of c40 updates P_R, and P_R pushes it to (1,6,-1) "
             "at c41; the source out before c43. A redstone block above H_T ((1,10,-1)) before c45: H_T pushes GA, GB and RB_T down "
-            "one cell and RB_T lands at (1,5,-1) at the end of c46; the block out before c48, H_T retracts. SPC is set back at "
+            "one cell and RB_T lands at (1,5,-1) at the end of c47; the block out before c48, H_T retracts. SPC is set back at "
             "(2,6,0) by command before c51. RB_T, GA, GB, P_R, K_T, Z_T, W_T and the S feed's cut are then as the closed state has "
             "them. The fifth test leaves the kick out (RB_ST home before c31, a glass block set and cleared beside P_R before c32): "
             "K_T's base lands in the same tick as RB_T, behind it, and wakes W_T, which RB_T at (1,6,-1) powers by QC; W_T's head "
