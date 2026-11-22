@@ -21,6 +21,8 @@ def state_str(st):
         return f"piston_head[facing={st.p['facing']},type={'sticky' if st.p.get('sticky') else 'normal'}]"
     if n == "rb":
         return "redstone_block"
+    if n == "redstone_wire" and st.p.get("cross"):                 # a lone dust placed as a cross; bare it is a dot
+        return "redstone_wire[east=side,north=side,south=side,west=side]"
     if n == "repeater":
         return f"repeater[facing={st.p['facing']},delay={st.p.get('delay', 1)},powered={'true' if st.p['powered'] else 'false'}]"
     return n

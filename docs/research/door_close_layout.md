@@ -889,13 +889,23 @@ until c61.
   source needs an edge 2 ticks after R_G from a cell that does not update A_D at c62 (the cell above B_Y is beside A_D).
 - Probe: `close_y12_probe` (`export_y12`): three tests with the stand-in commands, replayed in the simulator 3/3; the
   first test fails with Y12 plain or without U_Y, W_Y, B_Y, S_W, R_F, S_F or D_X. `python -m scripts.lint
-  close_y12_probe`: ok. Not yet run on a server.
+  close_y12_probe`: ok. MEASURED on the main server, 2026-11-22: 0/3, R_F still off at c54 (control 1 first off at c62,
+  control 2 on the same R_F check at c60).
+- The cause [INFERRED from the export and MEASURED mechanics, the trace not yet read]: D_X (-6,7,3) has no dust beside
+  it. The simulator treats a lone dust as a cross, pointing east into S_F; the export set it as bare `redstone_wire`,
+  and a bare dust set by command is a dot that powers no neighbour [MEASURED dust_dot_vs_cross_isolated; AUTHORING.md],
+  so S_F, R_F and S_W stay dark and W_Y never fires. Fix: D_X is a cross in the build and the export writes
+  `redstone_wire[east=side,north=side,south=side,west=side]` for it (`state_str` writes a dust's four sides only when the
+  build marks it a cross), and the probe now checks that shape. y12.txt is unchanged; close_y12_probe re-exported (3/3
+  replayed, the same controls live, lint ok); the other exporters write the same YAML. The two older lone dusts, (1,7,0)
+  and (-3,4,0), are dots in game; with them as dots the simulator gives the same runs of west_drives.py and y12.py at
+  every tick, which fits their probes passing. To measure again.
 
 ## Y12's holds from blocks (2026-11-22; simulator)
 Y12's re-arm needs no command after the input [COMPUTED y12_holds.txt; not measured]: y12.py's two stand-in sources are
 made of blocks, 14 on y12.py's 8, Y12 sticky (the lead's call) and no other measured block changed. From the one falling
 input Y12 goes in and is armed again, G lands at (-3,3,2), NP12 and the tap end dark and A_D never moves. Box 14x15x14 =
-2940: z 4 for U_Y's hold (the lead's call) and z 5 for B_Y's source, which needs the lead's OK.
+2940: z 4 for U_Y's hold (the lead's call) and z 5 for B_Y's source, which the lead accepted (2026-11-22).
 - Why a hold alone cannot do it [COMPUTED y12_holds_search.txt]: U_Y is updated at W_Y's extension (c58 g, it must be
   powered) and at NP12's relight (c60 j, it must be dark, or W_Y's retract at c61 g). The cells that power U_Y without
   an update are (-3,7,2) (it also powers P_G and W_Y), (-2,7,1) (kept free), (-2,7,3), (-2,8,2) and (-1,7,2). A block a
@@ -946,7 +956,10 @@ input Y12 goes in and is armed again, G lands at (-3,3,2), NP12 and the tap end 
   out: U_Y and Y12 stay out; R_B taken out: Y12 out again at c67), replayed in the simulator 3/3; the first test fails
   with Y12 plain or without RB_U, H_U, S_U, D_U, D_S, D_Z, R_B, S_B, D_B, S_B2, D_Y, U_Y or W_Y. `python -m scripts.lint
   close_y12_holds_probe`: ok. Not yet run on a server. Earlier scripts, searches and exporters: unchanged, their outputs
-  byte for byte.
+  byte for byte. After close_y12_probe's 0/3 (above: D_X exported as a dot) the probe is re-exported with D_X a cross;
+  only D_X's glyph and checks change, y12_holds.txt and y12_holds_search.txt are the same byte for byte, the replay is
+  still 3/3 with the same controls live, lint ok. Its other dusts all have a neighbour to point at, so none is a lone
+  dot; the two older lone dusts, (1,7,0) and (-3,4,0), are as in west_drives.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -1049,7 +1062,7 @@ events of one phase: they show which orders work, not how to get them.
    west_drives.txt), as built it needs a mover from the west, where P_W's head stands. NP12 then dies and A_D, armed
    since RB12 came home, fires once as at c0. First pass [COMPUTED y12.txt]: done with Y12 sticky, three pistons and two
    stand-in sources, inside the west return (c58 to c70); A_D does not fire. From blocks [COMPUTED y12_holds.txt]: 14 more
-   blocks, no command after the input, box 2940 (z 5 for B_Y's source: the lead's OK needed). Left: Z11, then D9's source,
+   blocks, no command after the input, box 2940 (z 5 for B_Y's source, accepted by the lead). Left: Z11, then D9's source,
    ARM_Z9's puller and the other up relays.
 5. Routing: the bus is laid (east to P_R and AP, west over the input repeater to M_K; re-laid 2026-11-22, box 2016). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
@@ -1075,9 +1088,9 @@ one input with no command. The west side's return is designed from blocks (west_
 changed, box 2520; MEASURED: `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` still 4/4 on the main server,
 2026-11-22, traits ok): RB12, K, M_K and WK end as loaded, G at (-4,3,2), and NP12 is lit again from c60. Y12 is
 re-armed from blocks with no command after the input (y12.txt, then y12_holds.txt: Y12 sticky, 22 blocks, box 2940; G
-home at (-3,3,2), NP12 and the tap dark, A_D never moves; COMPUTED, `close_y12_probe` and `close_y12_holds_probe` not yet
-run on a server). Next: Z11 (its retract updates Y12, so it falls inside Y12's window or needs the blocker again; RB_U
-QC-powers its down-pusher's cell (-2,6,1) from c14 to c44 and c54 to c60), then D9's source and ARM_Z9's puller, and the
+home at (-3,3,2), NP12 and the tap dark, A_D never moves; COMPUTED; `close_y12_probe` measured 0/3 on an export fault,
+D_X placed as a dot, now fixed in both probes, which are to be measured). Next: Z11 (its retract updates Y12, so it
+falls inside Y12's window or needs the blocker again; RB_U QC-powers its down-pusher's cell (-2,6,1) from c14 to c44 and c54 to c60), then D9's source and ARM_Z9's puller, and the
 same in-place re-arm for Z_Q and Y1 (Y1 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
@@ -1098,7 +1111,7 @@ export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_
 `library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server),
 `library/mechanics/close_rbt_drives_probe.redstone.yaml` (written by `export_rbt_drives`; 4/4 on the main server) and
 `library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; 3/3 on the main server),
-`library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; not yet run on a server) and
+`library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; 0/3 on main before the D_X fix) and
 `library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; not yet run on a server).
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
 three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
