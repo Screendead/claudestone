@@ -4,7 +4,9 @@ WK beside K. 34 blocks on top of rbt_drives.py's build, no measured block change
 at every tick, the close the same to c30 and rbt_drives.py's return of the east side the same to its end in
 every cell outside the added ones. Everything printed is COMPUTED on the simulator; nothing here ran on a server.
 
-Not as framed in two ways. RB12 does not go round by (-5,2,2), the route of returns.py's screen: it is pulled one
+Not as framed in two ways. RB12 does not go round by (-5,2,2), the route of returns.py's screen: on it the east
+pusher is powered by RB12 where the pull west leaves it, RB12 at (-5,2,2) powers K, nothing sends M_K out again to
+push WK down, and K's push at RB12's landing still has to be stopped (the what-if near the end). RB12 is pulled one
 cell west and pushed back, a kick as RB_T's was, and one push from above then takes G and RB12 down together. And
 the closed state is not all restored: G ends at (-4,3,2), where the opening puts it, not at (-3,3,2), which holds
 Y12's head while Y12 is out. G's last step belongs to the step that re-arms Y12; until then the gate over L is
@@ -68,7 +70,6 @@ D_A, S_A = LINE[-1], (-6, 5, 1)                                     # the line's
 R_X, Y_X, R_G, Y_G = (-6, 6, 2), (-6, 6, 3), (-5, 6, 3), (-4, 6, 3)
 TAPPED = rd.CLIMB[6]                                                # (2,10,2), the dust of rbt_drives' line that R_W reads
 LAST = 70                                                           # the runs end after c70
-LO, HI = (-6, -3, -8), rd.HI                                        # the box with these blocks: two cells further west
 V_HEAD, P12 = (0, 3, 0), (0, 5, 0)
 ARM_Z11 = (-2, 4, 2)
 
@@ -471,6 +472,26 @@ if __name__ == "__main__":
     _, z, badz = run(zb)
     print("\n== with D9, the down-pusher of returns.py's what-if for Z9, built as well (its drives are not designed):", "FAILS" if badz else "done;",
           "piston events of each tick", "the same set" if pv.per_tick(z, -1, LAST) == mine_ev else "DIFFER")
+
+    print("\n== what-if (sim only): the route of returns.py's screen for RB12, west to (-5,3,2), down to (-5,2,2), east to (-4,2,2), without the 34 "
+          "blocks: rbt_drives.py's world after its return, with RB12 set at (-5,3,2), K and M_K in and WK at (-4,2,1) as a pull west leaves them")
+    x = copy.deepcopy(rw)
+    x.__class__ = World
+    for c, st in ((UP, AIR), (K_UP, AIR), (K, t.pis("piston", "up", "K")), (M_K, t.pis("sticky_piston", "down", "M_K")), (WK, AIR),
+                  (M_HEAD, B("glass", id="WK")), (HEAD_W, B("rb", id="RB12")), ((-6, 2, 2), t.pis("piston", "east", "X"))):
+        x.cmd_set_silent(c, st)
+    print("   the route's east pusher, a piston at (-6,2,2) facing east: powered by", [c for _, c in power_sources(x, (-6, 2, 2))],
+          "(RB12 where the pull leaves it, QC: an update sends its head into (-5,2,2), RB12's next cell)")
+    for c, st in (((-6, 2, 2), AIR), (HEAD_W, AIR), ((-5, 2, 2), B("rb", id="RB12"))):
+        x.cmd_set_silent(c, st)
+    print("   RB12 at (-5,2,2): K powered by", [c for _, c in power_sources(x, K)], "(QC), in and free to push | M_K by",
+          [c for _, c in power_sources(x, M_K)] or "nothing", "| WK", t.at(x, "WK")[0], "(nothing on this route sends M_K out again to push WK down)")
+    x.cmd_set_silent((-5, 2, 2), AIR)
+    x.log.clear()
+    x.cmd_set(K_UP, B("rb", id="RB12"))
+    x.run(3)
+    print("   RB12 set on K with (-4,3,2) empty:", next(m for _, _, m in x.log if "EXTEND" in m or "RETRACT" in m), "| RB12", t.at(x, "RB12")[0],
+          "(L powers K by QC and updates it: something has to stop its push, as the blocker does in the load)")
 
     print("\n== what-ifs (sim only) for the step that takes G home: commands after the returns")
     x, ev = after(w, [(RB_W, AIR, True)])
