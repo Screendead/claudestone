@@ -337,8 +337,9 @@ so nothing is spat and G_S and its hold are taken out; and the feed is cut, not 
   (R_F or C_F removed with setblock air strict before the opening), 64 or 65 cells and the levels of DT, DS, DP, the
   tap, D_V, NV's four dusts, D_1, D_2 and D_F checked against the simulator after c0, c3, c4, c8, c10, c11, c12, c13,
   c14, c15, c17 and c20 (the controls: c10, c12, c14, c16; c10, c12, c14, c15, c18). Its steps, read back from the YAML
-  and replayed in the simulator, pass 3/3; without R_F, D_F, R_C or C_F the first test fails [COMPUTED]. Server:
-  MEASURED pending a satellite run.
+  and replayed in the simulator, pass 3/3; without R_F, D_F, R_C or C_F the first test fails [COMPUTED]. Server (2026-11-22, main on the Mac): 3/3
+  [MEASURED]: F_S out at c10, RB_F at (1,5,1) after c12, S out at c14, the cut after c14, S spat at c15, RB_F home
+  after c17; both controls hold; the five earlier close probes still pass.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -402,7 +403,7 @@ events of one phase: they show which orders work, not how to get them.
 ## Still needed (all local)
 1. S H2 feed: done in sim and on the server [MEASURED]. Its inputs: drive C from 13 blocks, F_S out at c10 on a 4-tick
    repeater that reads RB_ST at (2,8,0) and released at c15 by a stone pushed onto its feed's step; RB_F is home at c17 j
-   and G_S is taken out [COMPUTED s_inputs.txt; `close_s_inputs_probe` written and replayed, not yet run on a server].
+   and G_S is taken out [COMPUTED s_inputs.txt; MEASURED: `close_s_inputs_probe` 3/3 on the main server].
 2. Trigger order: E0, P_R release, NP12 kill, T and P12's retract run from the input in c0 [MEASURED: `close_trigger_probe`
    4/4 on sat1]. DP on: RB_D's landing at c2 j, P11 out at c3 [MEASURED: `close_dp_off_probe` 4/4 on sat1].
    P10 at c8 on r_P10, V at c11 on R_V, both on NA's relight [MEASURED: `close_p10_v_probe` 3/3 on sat1].
@@ -420,8 +421,8 @@ Fired relays under the re-arm design are BUD-armed from f+3 g: close dust within
 ## Next
 DP's design is MEASURED (`close_dp_off_probe` 4/4 on sat1: RB_D lands ahead of A_D's head and P11 is spat). P10 and V
 (stages 3 and 4) are MEASURED from two blocks (`close_p10_v_probe` 3/3 on sat1: V out at c11, S at (1,3,0) after c13). The
-S feed's inputs (stage 5) are COMPUTED from thirteen blocks: the close runs through stage 5 from the one input with no
-command; `close_s_inputs_probe` is written and replayed and has still to run on a satellite. Next, P7, which fires on
+S feed's inputs (stage 5) are MEASURED from thirteen blocks: the close runs through stage 5 from the one input with no
+command (`close_s_inputs_probe` 3/3 on the main server: F_S out at c10, S spat at c15, RB_F home after c17). Next, P7, which fires on
 NA's relight at c3, ahead of its stage, and the returns (item 4). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
@@ -435,7 +436,7 @@ export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py), run from the repo root a
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
 `library/mechanics/close_dp_off_probe.redstone.yaml` (written by `export_dp_off`; 4/4 on sat1),
 `library/mechanics/close_p10_v_probe.redstone.yaml` (written by `export_p10_v`; 3/3 on sat1) and
-`library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; not yet run on a server).
+`library/mechanics/close_s_inputs_probe.redstone.yaml` (written by `export_s_inputs`; 3/3 on the main server).
 Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_s_feed_probe`;
 `python -m scripts.try close_trigger_probe`; `python -m scripts.try close_dp_off_probe`;
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
