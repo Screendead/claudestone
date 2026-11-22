@@ -18,8 +18,8 @@ Opening NA dies at t0 g, R_V turns off at t2 d, C_cut cuts NV at t2 j as before:
 P8      NV's east branch reads the feed too: 1 at (5,5,0) and 0 at (4,5,0), the dust that points into P8's
         QC cell. One dust further up NV the feed would light it.
 Stage 5 Still commands, now from c12: F_S on, c13 off (RB_F spat while S moves in), c15 G_S's hold.
-Fewer   p10_v_search.py builds every single block in 175 free cells around V, P10 and NV's west branch: 3 of
-        5600 pass its rule and none can be built; they are opened at the end here.
+Fewer   p10_v_search.py builds every single block in 180 free cells around V, P10 and NV's west branch: 3 of
+        5760 pass its rule and none can be built; they are opened at the end here.
 
 Not controls: the roof under D_V and R_V is the hallway's wall ring.
 Run from the repo root (sim; replay-only):
@@ -331,7 +331,7 @@ if __name__ == "__main__":
           "->", "; ".join(verdict_end(x)[:3]))
     print("   s_feed.py's ticks (F_S on c5, off c6, hold c7), as in dp_off's run:", "FAILS: " + "; ".join(verdict_end(noted(mine, staged((5, 6, 7))))[:3]))
 
-    print("\n== one block instead of two? p10_v_search.txt: every single block built into 175 free cells, 3 of 5600 pass its rule (c14); "
+    print("\n== one block instead of two? p10_v_search.txt: every single block built into 180 free cells, 3 of 5760 pass its rule (c14); "
           "none can be built")
     for title, (c, blk) in ONE.items():
         bo = o.build(swap={c: blk})
