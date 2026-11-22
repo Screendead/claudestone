@@ -809,8 +809,8 @@ events of one phase: they show which orders work, not how to get them.
    (H_T at (1,9,-1) over glass GA and GB, which Z_T lifts with RB_T) after a kick from above by U_T (2,8,-1), which
    RB_ST itself powers; P_R out on a redstone block that P_N pushes into RB_ST's closed cell, RB_ST and a third block
    moving one place on round a loop of five pistons; K_T, sticky now, in at the kick and SPC home with it; the S feed's
-   cut resets when RB_ST leaves; one pulse from the S feed's dust times it; 28 cells then still differ. To be measured:
-   `close_rbt_drives_probe`, and the six probes re-exported for K_T. The fix first chosen for RB_T, a piston at (1,7,-1),
+   cut resets when RB_ST leaves; one pulse from the S feed's dust times it; 28 cells then still differ. MEASURED
+   (2026-11-22, main server): `close_rbt_drives_probe` 4/4, and the six probes re-exported for K_T 23/23. The fix first chosen for RB_T, a piston at (1,7,-1),
    fires in the opening (K_in powers it by QC), and Z_T sticky, W_T sticky or another hold for T do not open it either;
    RB_ST's own route takes eight pistons (rbt_route.txt). Not designed: the west side, RB12 (a route west round x -5 if
    the box grows there), K, M_K and G.
@@ -840,10 +840,9 @@ box or out of it (RB_T: returns.txt), and Z9 re-armed in place by command (`clos
 west branch is re-laid over the input repeater (box 2016) and RB_T goes home by command, down a column after a kick, with
 the rest of the trigger chain's east side (returns.txt; `close_returns_probe` 6/6 in the simulator and in game). The six
 re-exported probes pass in game on the re-laid bus (23/23 on the main server, 2026-11-22). RB_T's return is designed from
-blocks (rbt_drives.txt: 49 blocks, K_T sticky, box 2160; `close_rbt_drives_probe` 4/4 in the simulator), not yet measured:
-the trigger chain's east side ends as loaded from the one input with no command. Next: measure `close_rbt_drives_probe`
-and the six probes re-exported for K_T (`close_trigger_probe` 4, `close_dp_off_probe` 4, `close_p10_v_probe` 3,
-`close_s_inputs_probe` 3, `close_p9_p8_probe` 3, `close_returns_probe` 6 tests); then the west
+blocks and MEASURED (rbt_drives.txt: 49 blocks, K_T sticky, box 2160; `close_rbt_drives_probe` 4/4 and the six probes
+re-exported for K_T 23/23 on the main server, 2026-11-22, traits ok): the trigger chain's east side ends as loaded from the
+one input with no command. Next: the west
 side (RB12, K, M_K, G); then D9's source and ARM_Z9's puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1
 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
