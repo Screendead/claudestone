@@ -26,10 +26,10 @@ Kick    U_T, a sticky piston at (2,8,-1) facing down, beside RB_ST's rest cell (
         (c2 j) powers and updates it: out at c3, head at (2,7,-1) above RB_T, through the rest of the close. When
         P_U pulls RB_ST up, U_T is released inside that event and pulls RB_T up to (2,7,-1); K_T, which RB_T held
         out, retracts behind it and, being sticky now, pulls SPC home. Two ticks later RB_ST lands at (2,9,0),
-        beside the cell above U_T, ahead of U_T's own base and of RB_T (its move began first; were it the last
-        of the three to land, U_T would stay in: the what-if below): U_T is powered by QC when they land and
-        update it, goes out again and pushes RB_T back down in front of P_R. It stays out until RB_ST is pulled
-        on.
+        beside the cell above U_T, then U_T's base (it cannot push: RB_T is still moving in front of it), then
+        RB_T, whose landing updates U_T: powered by QC, it goes out again and pushes RB_T back down in front of
+        P_R. RB_ST lands ahead of RB_T because its move began first and is what released U_T; were it the last
+        of the three to land, U_T would stay in (the what-if below). U_T stays out until RB_ST is pulled on.
 P_R     RB_1 lands in (3,7,0) in the tick RB_T lands at (2,7,-1): P_R is powered by QC, as in the closed state,
         and not updated; before, when RB_T left its front, it was not powered. RB_T's landing in front of it is
         its update: it pushes RB_T to (1,6,-1), under GB and GA. K_T landed three ticks before, so W_T is not
@@ -38,11 +38,11 @@ H_T     Pushes GA, GB and RB_T down once RB_T has landed at (1,6,-1), as in retu
 Timer   One pulse. R_0, a 4-tick repeater at (2,6,3) facing west, reads Q_F, the stone under the S feed's dust
         D_F, lit from c10 d to c14 j: on from c18 d to c26 d. R_1 (3,6,3), 4 ticks, into stone Y_0 (4,6,3): c26 d
         to c34 d. Eight dusts on glass climb from beside Y_0 to (2,10,1), which points into P_U: P_U is out from
-        c26 and pulls at c34, the first tick at which a cell outside the added blocks changes after c30. Four
-        repeaters read that line: R_N (4,8,3), 4 ticks, into the cell above P_N; R_E (5,9,1), 4 ticks, into stone
-        Y_E (5,9,0) beside P_E; R_S (4,10,-1), 4 ticks, reading two dusts on and beside Y_E, into stone Y_S
-        (3,10,-1) above P_S; R_H (2,10,-1), 3 ticks, reading Y_S, into the cell above H_T; R_D (3,11,0), 4 ticks,
-        reading a dust on Y_S, into the cell above P_D.
+        c26 and pulls at c34, the first tick at which a cell outside the added blocks changes after c30. Two
+        repeaters read that line: R_N (4,8,3), 4 ticks, into the cell above P_N, and R_E (5,9,1), 4 ticks, into
+        stone Y_E (5,9,0) beside P_E. R_S (4,10,-1), 4 ticks, reads two dusts on and beside Y_E and points into
+        stone Y_S (3,10,-1) above P_S; R_H (2,10,-1), 3 ticks, reads Y_S and points into the cell above H_T; R_D
+        (3,11,0), 4 ticks, reads a dust on Y_S and points into the cell above P_D.
 Order   c34: P_U pulls (the kick), P_N and P_E go out. c36 j: RB_1 home, RB_ST at (2,9,0), RB_T at (2,7,-1). c37
         U_T pushes RB_T back, c40 P_R takes it, c42 j it is under the column. c42: P_N pulls G_N back, P_E pulls
         RB_ST east, R_S powers P_S, which P_E's head and then the moving block stop; RB_ST's landing at (3,9,0)
@@ -59,12 +59,12 @@ Margin  Each delay moved alone: R_0 and R_1 may be 3 or 4 ticks (shorter, the re
         empty cell); R_E, R_S and R_D 2 to 4; R_H 1 to 4.
 
 Not controls: the sixteen glass blocks carry dust and repeaters (the simulator has no rule for support).
-Run from the repo root (sim; about 2 minutes):
+Run from the repo root (sim; about 30 s):
 python -m scripts.door2.close_layout.rbt_drives > scripts/door2/close_layout/rbt_drives.txt"""
-import copy, functools, re
+import copy, re
 from scripts.door2.close_layout import feeds as f, puller as pr, trigger as t, s_inputs as si, p9_p8 as pp, p10_v as pv, returns as r
 from scripts.door2.close_layout.feeds import d, B, AIR, power_sources
-from scripts.door2.sim import World, DIRS, add
+from scripts.door2.sim import World
 
 H_T, GA, GB, COLUMN, RB_T_HOME = r.H_T, r.GA, r.GB, r.COLUMN, r.RB_T_HOME
 U_T, PARK = (2, 8, -1), (2, 7, -1)                                   # the kicker, and where it parks RB_T
@@ -123,12 +123,21 @@ def build(drop=(), swap=None):
 
 
 class Noted(pp.Noted):
-    """p9_p8's Noted with this step's lines."""
+    """p9_p8's Noted with this step's lines; with `backwards` the scheduled ticks that fall due in one tick run in
+    reverse order from c30 on, priorities ignored (sim only: the repeaters of the timer that tick together)."""
+    backwards = False
 
     def L(self, msg):
         World.L(self, msg)
         if any(x in msg for x in SHOW):
             self.lines.append((self.tick_no, self.phase, self.cur if self.phase == "g" and self.seen is not None else None, msg))
+
+    def tick(self):
+        due = sorted((x for x in self.sched if x[0] <= self.time + 1), key=lambda x: (x[1], x[2]))
+        if self.backwards and self.tick_no >= 30 and len(due) > 1:
+            self.sched = [x for x in self.sched if x[0] > self.time + 1] + \
+                [(x[0], 0, sub, x[3], x[4]) for x, sub in zip(reversed(due), sorted(y[2] for y in due))]
+        pp.Noted.tick(self)
 
 
 def noted(w, ticks=None, first=-1, before=None, **kw):
@@ -137,7 +146,7 @@ def noted(w, ticks=None, first=-1, before=None, **kw):
     the world} acts ahead of that tick (sim only)."""
     w = copy.deepcopy(w)
     w.__class__ = Noted
-    w.reverse, w.ia_last, w.first = kw.get("reverse", False), kw.get("ia_last", False), None
+    w.reverse, w.ia_last, w.first, w.backwards = kw.get("reverse", False), kw.get("ia_last", False), None, kw.get("backwards", False)
     w.lvl, w.order, w.seen, w.after, w.said, w.lines, w.noted, w.fed, w.power, w.frames = {}, [], None, None, [], [], [], [], [], []
     w.reached, w.woke, w.held = {}, {"P8": [], "P9": [], "A_9": []}, []
     for k, cmds in enumerate(pp.idle(LAST) if ticks is None else ticks):
@@ -347,7 +356,9 @@ if __name__ == "__main__":
 
     print("\n== order (must pass): against the run above")
     for name, kw in (("dust's neighbour updates in reverse order", dict(reverse=True)), ("I_A's retract event behind P_R's and M_K's", dict(ia_last=True)),
-                     ("both", dict(reverse=True, ia_last=True))):
+                     ("both", dict(reverse=True, ia_last=True)),
+                     ("from c30 on, the scheduled ticks of each tick in reverse order, priorities ignored (the repeaters that tick together at "
+                      "c34, c42 and c50)", dict(backwards=True))):
         _, x, badx = run(b, **kw)
         print(f"   {name}:", "FAILS" if badx else "done;", "piston events of each tick", "the same set" if pv.per_tick(x, -1, LAST) == mine_ev else "DIFFER")
 
@@ -369,6 +380,10 @@ if __name__ == "__main__":
         _, x, badc = run(bc)
         print(f"   {name}: {title}:", "FAILS: " + "; ".join(badc[:4]) + (" ..." if len(badc) > 4 else "") if badc else "done", "|", where(x),
               "| moved during load:" * bool(mv), ", ".join(m.split("@")[0] for m in mv), "| opening or close to c30 differ" * bool(dc and "K_T" not in name))
+    work = [c for c in MINE if c not in GLASSES]
+    left = {c: bool(run(build(drop=(c,)))[2]) for c in work}
+    print(f"   each of the {len(work)} blocks that are not glass under a dust or a repeater left out, one at a time:",
+          "the return FAILS every time" if all(left.values()) else "done without " + ", ".join(f"{NAMES.get(c, c)} {c}" for c, bad_ in left.items() if not bad_))
     pb = build(**CONTROLS["P_E's work by a pusher at (1,9,0) fed through a stone beside the cell above it"][1])
     print("      the pusher at (1,9,0) after c44: powered by", [c for _, c in power_sources(noted(t.opened(pb)[0], pp.idle(44)), (1, 9, 0))],
           "(QC) | RB_ST at", t.at(noted(t.opened(pb)[0], pp.idle(44)), "RB_ST")[0], "| its events to c62:",
@@ -383,8 +398,8 @@ if __name__ == "__main__":
     print("  ", res)
 
     print("\n== what-if (sim only): the order of the landings at c36 j. RB_ST lands at (2,9,0) ahead of U_T's base and of RB_T because its move began "
-          "first (P_U's event, level 0; U_T's, level 1) and moving blocks tick in the order their moves began. U_T is updated by its base's "
-          "landing and by RB_T's, in front of it; RB_ST's own landing does not update it")
+          "first (P_U's event, level 0; U_T's, which RB_ST's leaving queued, level 1) and moving blocks tick in the order their moves began. U_T "
+          "is updated by its base's landing, when RB_T, still moving, stops its push, and by RB_T's; RB_ST's own landing does not update it")
     for title, cell in (("U_T's base ahead of RB_ST, RB_T behind it", U_T), ("both ahead of RB_ST", PARK)):
         _, x, badx = run(b, before={36: lands_after(cell)})
         print(f"   {title}:", "FAILS: " + "; ".join(badx[:4]) if badx else "done", "|", where(x), "| U_T's events from c34:",

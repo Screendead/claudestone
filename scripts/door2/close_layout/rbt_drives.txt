@@ -69,6 +69,7 @@ open state: U_T ('real', False) | RB_ST (2, 7, 0) | the timer's repeaters on: no
    dust's neighbour updates in reverse order: done; piston events of each tick the same set
    I_A's retract event behind P_R's and M_K's: done; piston events of each tick the same set
    both: done; piston events of each tick the same set
+   from c30 on, the scheduled ticks of each tick in reverse order, priorities ignored (the repeaters that tick together at c34, c42 and c50): done; piston events of each tick the same set
 
 == the seven delays, each 1 to 4 ticks with the others as built: the return, and the close to c30 outside the added blocks
    R_0 (built 4): 1 done, close differs from c28; 2 done, close differs from c30; 3 done; 4 done
@@ -102,12 +103,13 @@ open state: U_T ('real', False) | RB_ST (2, 7, 0) | the timer's repeaters on: no
    no R_H: the same: FAILS: (1, 5, -1) air; (1, 6, -1) rb[id=RB_T]; (1, 8, -1) glass[id=GA]; Z_T powered by [(1, 6, -1)] ... | RB_T (1, 6, -1), P_R (3, 6, -1) out, K_T (2, 5, 0) in, SPC (2, 6, 0), U_T (2, 8, -1) in, RB_ST (3, 8, 1), RB_1 (3, 7, 0), RB_2 (3, 7, 1), G_N (3, 7, 2), GB (1, 7, -1)   
    no GB: Z_T lifts RB_T alone and H_T's push ends a cell short (returns.py): FAILS: (1, 5, -1) air; (1, 6, -1) rb[id=RB_T]; Z_T powered by [(1, 6, -1)]; W_T powered by [(1, 6, -1)] ... | RB_T (1, 6, -1), P_R (3, 6, -1) out, K_T (2, 5, 0) in, SPC (2, 6, 0), U_T (2, 8, -1) in, RB_ST (3, 8, 1), RB_1 (3, 7, 0), RB_2 (3, 7, 1), G_N (3, 7, 2), GB None   
    P_E's work by a pusher at (1,9,0) fed through a stone beside the cell above it: a 4-tick and a 3-tick repeater from the line into a stone at (0,10,0), on from c40 d to c48 d: FAILS: (1, 5, -1) air; (1, 6, -1) rb[id=RB_T]; (1, 8, -1) glass[id=GA]; (2, 8, -1) sticky_piston[extended=True,facing=down,id=U_T] ... | RB_T (1, 6, -1), P_R (3, 6, -1) out, K_T (2, 5, 0) in, SPC (2, 6, 0), U_T (2, 8, -1) out, RB_ST (2, 9, 0), RB_1 (3, 7, 0), RB_2 (3, 8, 1), G_N (3, 7, 2), GB (1, 7, -1)   
+   each of the 33 blocks that are not glass under a dust or a repeater left out, one at a time: the return FAILS every time
       the pusher at (1,9,0) after c44: powered by [(0, 10, 0)] (QC) | RB_ST at (2, 9, 0) | its events to c62: none
 
 == the input off n ticks after it went on (trigger.py's feed is armed at t10 j): the close (p9_p8's four verdicts) and the return
    {8: 'close FAILS, return FAILS', 9: 'close FAILS, return FAILS', 10: 'close FAILS, return FAILS', 11: 'close done, return done', 12: 'close done, return done', 16: 'close done, return done'}
 
-== what-if (sim only): the order of the landings at c36 j. RB_ST lands at (2,9,0) ahead of U_T's base and of RB_T because its move began first (P_U's event, level 0; U_T's, level 1) and moving blocks tick in the order their moves began. U_T is updated by its base's landing and by RB_T's, in front of it; RB_ST's own landing does not update it
+== what-if (sim only): the order of the landings at c36 j. RB_ST lands at (2,9,0) ahead of U_T's base and of RB_T because its move began first (P_U's event, level 0; U_T's, which RB_ST's leaving queued, level 1) and moving blocks tick in the order their moves began. U_T is updated by its base's landing, when RB_T, still moving, stops its push, and by RB_T's; RB_ST's own landing does not update it
    U_T's base ahead of RB_ST, RB_T behind it: done | RB_T (1, 5, -1), P_R (3, 6, -1) out, K_T (2, 5, 0) in, SPC (2, 6, 0), U_T (2, 8, -1) in, RB_ST (3, 8, 1), RB_1 (3, 7, 0), RB_2 (3, 7, 1), G_N (3, 7, 2), GB (1, 6, -1) | U_T's events from c34: c34g RETRACT; c37g EXTEND; c43g RETRACT
    both ahead of RB_ST: FAILS: (1, 5, -1) air; (3, 6, -1) sticky_piston[extended=False,facing=west,id=P_R]; (2, 6, -1) air; (2, 7, -1) rb[id=RB_T] | RB_T (2, 7, -1), P_R (3, 6, -1) in, K_T (2, 5, 0) in, SPC (2, 6, 0), U_T (2, 8, -1) in, RB_ST (3, 8, 1), RB_1 (3, 7, 0), RB_2 (3, 7, 1), G_N (3, 7, 2), GB (1, 6, -1) | U_T's events from c34: c34g RETRACT
 
