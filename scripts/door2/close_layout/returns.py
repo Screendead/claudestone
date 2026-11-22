@@ -563,8 +563,16 @@ if __name__ == "__main__":
             last_ = cur
     print("   (1,5,-1), (1,6,-1), (1,7,-1), (1,8,-1) after each tick they change (~ moving):", "; ".join(seen))
     ra = pp.noted(ro)
-    print("   powered: H_T closed", names(power_sources(rcl, H_T), rcl), "open", names(power_sources(ro, H_T), ro), "after the close", names(power_sources(ra, H_T), ra),
-          "| N_T closed", names(power_sources(rcl, N_T), rcl), "open", names(power_sources(ro, N_T), ro), "after the close", names(power_sources(ra, N_T), ra))
+    wq, _ = d.make_world(rb_)
+    lit = [f"{n} closed" for n, c in (("H_T", H_T), ("N_T", N_T)) if power_sources(wq, c)]
+    wq.run(4)
+    wq.cmd_set(f.DRIVER, t.RB)
+    for k in range(t.OPEN_TICKS + CLOSE):
+        if k == t.OPEN_TICKS:
+            wq.cmd_set(f.DRIVER, AIR)
+        wq.tick()
+        lit += [f"{n} {tick_name(k)}" for n, c in (("H_T", H_T), ("N_T", N_T)) if power_sources(wq, c)]
+    print("   H_T and N_T powered:", ", ".join(lit) or "never: not in the closed state, nor after any tick of the opening or of the close to c30")
     print("   the bus dust beside H_T in the open state:", {c: ro.get(c).p["power"] for c in ((1, 9, -2), (0, 9, -1))},
           "| neither points at it: (1,9,-2) runs west up the step and east down it, (0,9,-1) north up the step and west")
 

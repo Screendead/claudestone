@@ -570,14 +570,14 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
   two glass spacers, GA (1,7,-1) and GB (1,6,-1) in the closed state. Z_T lifts RB_T, GB and GA together at t3; in the
   open state and after the close GB is at (1,7,-1) and GA at (1,8,-1), and H_T's push moves GA, GB and RB_T down one
   cell. GB stands in (1,6,-1), a cell of the opening. Nothing moves during the load, the opening and the close are the
-  same at every tick outside the column's three cells, and H_T is unpowered in the closed state, the open state and
-  after the close: the bus dust beside it, (1,9,-2) and (0,9,-1), points past it.
+  same at every tick outside the column's three cells, and H_T is unpowered in the closed state and after every tick of
+  the opening and of the close to c30: the bus dust beside it, (1,9,-2) and (0,9,-1), points past it.
 - The trap [COMPUTED returns.txt]: P_R cannot push RB_T straight back to (1,6,-1). K_T, held by RB_T at (2,6,-1),
   retracts in P_R's phase; its base lands in the same phase j as RB_T, behind it, and updates W_T, which RB_T at
   (1,6,-1) powers by QC: W_T's head takes (1,5,-1) and H_T's push stops on it. The first pass's stop screen set a
   redstone block at (1,6,-1) and saw nothing fire: it is lenient about pistons left powered and not updated.
-- The kick [COMPUTED]: N_T, a sticky piston at (2,6,-3) facing south (it passes the mover screen, and is unpowered in
-  the closed state, the open state and after the close). Out and in, it pulls RB_T north to (2,6,-2): K_T retracts and
+- The kick [COMPUTED]: N_T, a sticky piston at (2,6,-3) facing south (nothing moves during the load with it, the opening
+  and the close are the same, and it is unpowered in the closed state and after every tick of both). Out and in, it pulls RB_T north to (2,6,-2): K_T retracts and
   lands with W_T unpowered. Out again, it pushes RB_T back; RB_T's landing in front of P_R is the update P_R needs, and
   K_T, powered again and not updated, stays in.
 - RB_T by command [COMPUTED returns.txt, what-if; H_T, GA, GB and N_T added]: after the close, N_T's stand-in source
@@ -588,11 +588,11 @@ of the change (four dusts re-laid, the box 2016); and P_R's push, which the firs
   GA, GB, P_R, K_T, SPC, RB_ST, Z_T, W_T, AP and the S feed's thirteen as the closed state has them, T powered by
   RB_T, Z_T not powered, the door plane closed. 28 cells outside the door plane still differ (44 after the close in
   this build): the opening's seven relays with their blocks, and K, M_K, RB12 and G.
-- Windows, one command moved at a time [COMPUTED]: the kick's source on c27 to c33, off c33 to c36; RB_ST home c35 to
-  c40 (earlier, P_R is powered when RB_T is pulled away and extends into the empty cell; later, RB_T's landing finds
-  P_R unpowered); the source again c35 to c39 (N_T must stay out until P_R has taken RB_T) and off c39 to c45; H_T's
-  source on from c44 (RB_T lands at (1,6,-1) at c43 j) and off from c46. The whole
-  schedule moved earlier passes with the kick from c7 on. Dust's updates reversed and I_A's event last change nothing.
+- Windows, one command moved at a time [COMPUTED]: the kick's source on before c27 to c33 (all tried) and off before c33
+  to c36; RB_ST home before c35 to c40 (earlier, P_R is powered when RB_T is pulled away and extends into the empty
+  cell; later, RB_T's landing finds P_R unpowered); the source again before c35 to c39 (N_T must stay out until P_R
+  has taken RB_T) and off before c39 to c45 (all tried); H_T's source on before c44 or later (RB_T lands at (1,6,-1) at
+  c43 j) and off before c46 to c50 (all tried). Dust's updates reversed and I_A's event last change nothing.
 - Controls fail [COMPUTED]: RB_ST home before the kick (RB_T stays at (2,6,-2)); no GB (Z_T lifts RB_T alone, H_T's
   push ends a cell short); no source for H_T; N_T not sticky.
 - K_T made sticky [COMPUTED what-if; a measured block]: K_T pulls SPC home when the kick releases it, with no command
@@ -622,15 +622,14 @@ events of one phase: they show which orders work, not how to get them.
   at c4, which is enough for a close by ticks, not for one phase). Cleared after P6's, in that phase or one or two ticks
   later, both are spat; three ticks later both pull their blocks back.
 - Who can time it [COMPUTED]: P12's retract event updates one free cell, (0,5,-1). A piston there can face only up or
-  down, and at x < 0 its extension updates r_P10, its glass (-1,4,-1) and the bus's glass (-1,6,-1): nothing carries the
+  down, and at x < 0 its extension updates r_P10, its glass (-1,4,-1) and (-1,6,-1), the bus's glass until the re-lay: nothing carries the
   event west. At x <= -2 the block events of c0 are M_K's (level 0) and K's (level 1); the next are M_K's at c3 (RB12
   landing beside it) and NA's P4 and P6 at c4. An on inside c0 after P12's retract needs an event of level 6 there,
   five levels past K's.
 - Source [COMPUTED]: a redstone block lights DP from (-3,4,1) or (-2,4,0). At (-2,4,0) it powers V directly and S by QC.
-  At (-3,4,1) it QC-powers M_K (and Z11), so it cannot stand there before c0 [INFERRED]. Beside that cell it can rest only
-  to the
-  south, (-3,4,2): at (-3,5,1) it holds the bus's last dust at 15 and at (-3,3,1) it holds M_K; either way the NP12 kill
-  never comes. The pusher's cell (-3,4,3) is updated by K's event, which would start it at level 2, but nothing powers
+  At (-3,4,1) it QC-powers M_K (and Z11), so it cannot stand there before c0 [INFERRED]. Beside that cell it can rest only to the
+  south, (-3,4,2): at (-3,5,1) it holds the bus's last dust at 15 (and, the bus being one net since the re-lay, K_in and
+  I_A with it) and at (-3,3,1) it holds M_K; either way the NP12 kill never comes. The pusher's cell (-3,4,3) is updated by K's event, which would start it at level 2, but nothing powers
   it there, and a stone at (-2,4,3) beside it cuts NP12. The signals in reach are NP12, which dies in that event, and
   blocks that never change [INFERRED].
 - Taking it out [COMPUTED]: a piston under the block, (-3,3,1) facing up, is powered by FP and updated by DP's change,
@@ -642,7 +641,7 @@ events of one phase: they show which orders work, not how to get them.
 - NA route [COMPUTED]: a sticky piston P_W at (-4,4,-1) facing east has the bus's stone above it and NA's dust north of
   it, so it is powered except from c0 to c2 j. In the closed state it holds CP at (-2,4,-1) and DP reads NA at 8; P11
   does not move (V is in front [INFERRED]). Opening: open-state diff none, the door's pistons and the door plane the same
-  at every tick, box 1728, DP 0. Close: P_W pulls CP into the cut at c0 (level 0), CP lands at c2 j, P_W pushes it out at
+  at every tick, box 1728 (2016 since the re-lay), DP 0. Close: P_W pulls CP into the cut at c0 (level 0), CP lands at c2 j, P_W pushes it out at
   c3 (level 0) and DP reads NA: P11 extends at level 1 and P6 at level 2, three ticks after P12's retract, as block
   events; the same with dust's updates reversed and I_A's event last. If NA relights before CP lands, the P11 and P6
   events queued then find no power at c3 and are dropped. DP then stays lit: CP's cell takes a block at once only from
