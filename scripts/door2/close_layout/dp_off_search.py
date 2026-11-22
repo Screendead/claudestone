@@ -2,10 +2,10 @@
 blocks, cells and pass rule: each candidate is set without updates into the open state of dp_off's build, then
 the close runs from the input with no command; a pass needs stages 0 and 1 done, P11 out after P12's retract
 and spat, P6 out and spat, S real at (0,3,0), SP, C and Q where the close needs them and no dust or FP lost, by
-c6. dp_off's design alone fails this rule on P6 only: its event is dropped and NA extends it at c4. A pass
+c6, and I_A not extending again (dp_search.py). dp_off's design alone fails this rule on P6 only: its event is dropped and NA extends it at c4. A pass
 still has to be built and opened; dp_off.py does that for the one-block pass, and it fails there.
 
-Cells: the free ones of x -4..-2, y 2..6, z -1..3 (dp_off's blocks take five of dp_search's 40).
+Cells: the free ones of x -4..-2, y 2..6, z -1..3 (dp_off's blocks take five of dp_search's 41).
 Blocks: piston and sticky piston (six facings, retracted), redstone block, stone, glass, dust.
 
 Run from the repo root (sim; about 25 minutes on four cores):

@@ -8,9 +8,13 @@ level n: order that rests on levels does not depend on the order of dust's neigh
 
 Bus   Dust fed by K_in (1,8,-2), lit while the input is on. East branch (2,8,-2), (3,8,-2), DH (3,8,-1) on
       stone (3,7,-1) above P_R: P_R's hold, in place of HOLD. (4,8,-2) on stone (4,7,-2) feeds a 4-tick
-      repeater (4,7,-1) into AP. West branch from K_in's south side: (1,8,-1), (0,8,-1), (-1,7,-1), (-2,7,-1),
-      (-3,7,-1), (-4,6,-1), (-4,5,0), (-4,5,1) on stone (-4,4,1) above M_K. Cuts: stone (1,8,0) over DT (the
-      west branch would read DT up the step and die only with it) and stone (-3,5,0) over DP.
+      repeater (4,7,-1) into AP. West branch from K_in's top, over the input repeater: (1,9,-2) on K_in,
+      (0,10,-2) on stone (0,9,-2) above R_in, (0,9,-1), (-1,9,-1), (-2,8,-1), (-3,7,-1), (-4,6,-1), (-4,5,0),
+      (-4,5,1) on stone (-4,4,1) above M_K. Cut: stone (-3,5,0) over DP. Until 2026-11-22 the west branch left
+      K_in's south side, (1,8,-1) on glass (1,7,-1), (0,8,-1), (-1,7,-1), (-2,7,-1), under a stone cut (1,8,0)
+      over DT: moved off the column above RB_T's cells so that the returns can push RB_T down it (returns.py);
+      K_in's other sides are R_in, X2's top and I_A. (1,9,-2) reads the east branch's (2,8,-2) down the step
+      as well: one net, fed by K_in alone.
 E0    I_A sticky (part 1): pulls RB_A home. Level 0.
 P_R   Held by DH, and in the closed state by RB_ST at (3,7,0), a QC cell. The bus dies in phase d of c0, so
       P_R's retract is level 0 too. It pulls RB_T; Z_T retracts
@@ -45,7 +49,7 @@ from scripts.door2.close_layout.feeds import d, B, AIR, power_sources
 I_A, RB_A_HOME, RB12_UP, G_UP = (1, 7, -2), (1, 6, -2), (-4, 3, 2), (-4, 4, 2)
 AP, REP, RB_ST, SRC, UP = (4, 7, 0), (4, 7, -1), (3, 7, 0), (2, 7, 0), (2, 8, 0)
 W_T, K_T, SPC, DH = (1, 5, 0), (2, 5, 0), (2, 6, 0), (3, 8, -1)
-M_K, WK, K, CUT_DT, CUT_DP = (-4, 3, 1), (-4, 1, 1), (-4, 1, 2), (1, 8, 0), (-3, 5, 0)
+M_K, WK, K, CUT_DP = (-4, 3, 1), (-4, 1, 1), (-4, 1, 2), (-3, 5, 0)
 SRC_P = (-3, 4, 1)
 RB, GLASS, STONE, DUST = s.RB, s.GLASS, B("stone"), B("redstone_wire", power=0)
 
@@ -59,8 +63,8 @@ BUS_EAST = {(2, 7, -2): GLASS, (2, 8, -2): DUST, (3, 7, -2): GLASS, (3, 8, -2): 
 ARMING = {(4, 6, -1): GLASS, REP: B("repeater", facing="north", delay=4, powered=False),
           AP: pis("piston", "west", "AP"), RB_ST: B("rb", id="RB_ST")}
 RELAY = {W_T: pis("piston", "north", "W_T"), K_T: pis("piston", "up", "K_T"), SPC: B("glass", id="SPC")}
-BUS_WEST = {(1, 7, -1): GLASS, (1, 8, -1): DUST, CUT_DT: STONE, (0, 7, -1): STONE, (0, 8, -1): DUST,
-            (-1, 6, -1): GLASS, (-1, 7, -1): DUST, (-2, 6, -1): GLASS, (-2, 7, -1): DUST, (-3, 6, -1): STONE,
+BUS_WEST = {(1, 9, -2): DUST, (0, 9, -2): STONE, (0, 10, -2): DUST, (0, 8, -1): GLASS, (0, 9, -1): DUST,
+            (-1, 8, -1): STONE, (-1, 9, -1): DUST, (-2, 7, -1): STONE, (-2, 8, -1): DUST, (-3, 6, -1): STONE,
             (-3, 7, -1): DUST, (-4, 5, -1): STONE, (-4, 6, -1): DUST, (-4, 4, 0): GLASS, (-4, 5, 0): DUST,
             CUT_DP: STONE, (-4, 4, 1): STONE, (-4, 5, 1): DUST}
 NP12_KILL = {M_K: pis("sticky_piston", "down", "M_K"), WK: B("glass", id="WK"), K: pis("piston", "up", "K")}
@@ -198,8 +202,11 @@ CONTROLS = {
     "ctl 4": ("no glass beside K: K is not woken, NP12 lives, P12 stays out and P11 shoves the top row", dict(drop=(WK,)), {}),
     "ctl 5": ("I_A not sticky (no E0): RB_A keeps Z_T out, T is not woken", dict(ia=pis("piston", "down", "I_A")), {}),
     "ctl 6": ("wrong order: DP lit before c0, P11 fires ahead of P12's retract", {}, dict(early_dp=True)),
-    "ctl 7": ("the bus ending as a down-step onto M_K (stone (-4,4,0), dust (-4,4,1)): the stone QC-holds M_K one update "
-              "longer than its own dust, and the dust on the stone is three from M_K",
+    "ctl 7": ("the bus ending as a down-step onto M_K (stone (-4,4,0), dust (-4,4,1)): the stone QC-holds M_K until its "
+              "own dust is dark, and only the end dust, three from M_K's stone, updates M_K. Not a failure at this length: "
+              "the end dust's last step (1 to 0) follows the stone's (2 to 0) and M_K is released; one dust longer or "
+              "shorter (levels 9 and 8, as before the west branch was re-laid) it is held for good. The end dust is also "
+              "beside SRC_P, whose stand-in block relights the bus at c1",
               dict(drop=((-4, 5, 1),), swap={(-4, 4, 0): STONE, (-4, 4, 1): DUST}), {}),
 }
 SLOW3 = {REP: B("repeater", facing="north", delay=3, powered=False)}
@@ -290,10 +297,6 @@ if __name__ == "__main__":
               "piston events of each tick", "the same set;" if per_tick(rl) == per_tick(lines) else "DIFFER;",
               "c0's first five:", ", ".join(x.split("@")[0].split()[-1] for x in events(rl)[:5]) + ";",
               "Z_T to T's spit in the same order" if chain(rl) == chain(lines) else "chain DIFFERS")
-    v0, v1, vl, _ = close(build(drop=(CUT_DT,)))
-    print("   variant, no cut over DT (the west branch reads the lit DT up the step and dies with it, in K_T's event):",
-          "FAILS" if verdict_c0(v0) or verdict_end(v1) else "done;", "c0:",
-          ", ".join(x.split("@")[0].split()[-1] for x in events(vl[:2])))
 
     for name, (title, bkw, skw) in CONTROLS.items():
         c0, c1, cl, _ = close(build(**bkw), staged(through=2, **skw))

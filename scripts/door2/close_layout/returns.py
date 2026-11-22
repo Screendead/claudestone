@@ -1,7 +1,6 @@
-"""The returns, after the close (door coords): what the 41 cells that still differ from the loaded closed state
-after p9_p8.py's close need, and whether the trigger chain's blocks can go home inside the box. Nothing is added
-to p9_p8.py's build except in the what-ifs. Everything printed is COMPUTED on the simulator; nothing here ran on a
-server.
+"""The returns, after the close (door coords): what the cells that still differ from the loaded closed state after
+p9_p8.py's close need, and how far the trigger chain's blocks can go home. Nothing is added to p9_p8.py's build
+except in the what-ifs. Everything printed is COMPUTED on the simulator; nothing here ran on a server.
 
 Holds   Every fired piston outside the door plane is still powered after the close: each of the opening's seven
         relays by its arm, a redstone block design_c leaves beside it for good (X2's set strict after the load;
@@ -15,25 +14,54 @@ Routes  A moved block goes home one cell at a time. A step from u to v needs v e
         off the door plane and out of the hallway) and is screened: built retracted into the closed state, nothing
         moves during the load and every other cell is the same at every tick of the opening and the close. A stop
         is screened too: a redstone block set into the world after the close at that cell (updates included) must
-        fire no piston in 12 ticks. The screen is lenient: a stop may leave a piston powered and not updated.
-        Breadth first from the block's cell after the close; each step to a cell not reached is printed with why.
-Verdict RB_T, RB_ST and RB12 have no route home: the trigger chain cannot be returned inside the box by blocks
-        added to it, whatever drives them. RB_ST is shut in at (2,8,0) on the box's top layer: a redstone block at
-        (3,8,0) or (2,8,-1) lights the bus (I_A or AP fires, and W_T), R_F stands south, the stone over DT west and
-        SPC below, and at (2,7,0) it lights DT and W_T fires into (1,5,-1); the way out is up, out of the box. RB_T
-        gets to (1,6,-1) (P_R's push), (2,7,-1) and (2,6,-2) and no further: (1,5,-1) is entered from (1,6,-1)
-        only past the bus's glass (1,7,-1) or by Z_T's own pull, and RB_T at (1,6,-1) holds Z_T by QC; the other
-        ways pass a cell where a redstone block fires Z_T or AP, or have no free mover. RB12 cannot move: K's head
-        is under it, G above it, M_K and Y12's head beside it, the box edge west, and south no mover. G's closed
+        fire no piston in 12 ticks. The screen is lenient: a stop may leave a piston powered and not updated (the
+        trap below is one). Breadth first from the block's cell after the close; with no route, each step to a
+        cell not reached is printed with why. The box is the opening's and the close's, 12x14x12 since the bus's
+        west branch was re-laid over the input (trigger.py, 2026-11-22).
+Verdict In the screen RB_T and RB12 have no route home; RB_ST has one now that the box reaches y 10 (up over
+        (2,9,0), (3,9,0), (3,9,1), (3,8,1) and (3,7,1), movers up to y 10; the screen is static and does not keep
+        movers off the path: (3,9,1) is on it), not designed. RB_T gets to (1,6,-1) (P_R's push), (2,7,-1) and
+        (2,6,-2) and no further: (1,5,-1) is entered from (1,6,-1) only from (1,7,-1), where a piston fires in the
+        opening (below), or by Z_T's own pull, and RB_T at (1,6,-1) holds Z_T by QC; the other ways pass a cell
+        where a redstone block fires Z_T or the opening, or have no free mover. RB12 cannot move: K's head is
+        under it, G above it, M_K and Y12's head beside it, the box edge west, and south no mover. G's closed
         cell is Y12's head. K_T made sticky would pull SPC home, but only once RB_T has left (2,6,-1).
-Grown   The box grown by 2 on every side, measured blocks unchanged (the lead's relaxation of 2026-11-22): RB12 and
-        RB_ST have routes in the screen (west round (-5,3,2) to (-5,2,2), movers out to x -6; up over (2,9,0), (3,9,0),
-        (3,9,1), (3,8,1), (3,7,1), movers up to y 10; the screen is static and does not keep movers off the path:
-        (3,9,1) is on it). RB_T has none, as in the box: every way into (1,5,-1), for any block, needs a mover in
-        R_8's cell, r_P10's, the bus's glass (1,7,-1), Z_T's (non-sticky, and held by a block at (1,6,-1)), W_T's or a
-        wall's, or one of three free cells whose piston moves during the load ((0,5,-1): NA's stone beside it;
-        (1,5,-3): NA's dust and RB_A) or fires at c3 ((2,5,-1): under RB_T); all of them inside the box. So the
-        trigger chain cannot be returned without changing a measured block, whatever the box.
+Grown   The box grown by 2 on every side: RB12 has a route west round (-5,3,2) to (-5,2,2), movers out to x -6,
+        RB_ST's is the one in the box, RB_T has none. Every way into (1,5,-1), for any block, needs a mover in
+        R_8's cell, r_P10's, (1,7,-1), Z_T's (non-sticky, and held by a block at (1,6,-1)), W_T's or a wall's, or
+        one of three free cells whose piston moves during the load ((0,5,-1): NA's stone beside it; (1,5,-3): NA's
+        dust and RB_A) or fires at c3 ((2,5,-1): under RB_T).
+Fix     The fix as chosen (2026-11-22: the bus's first west dust off (1,8,-1), a down-pusher at (1,7,-1)) fails
+        on the piston, not on the bus: K_in (1,8,-2) is strongly powered while the input is on and stands beside
+        (1,8,-1), the cell above the piston, so the piston is QC-powered from t0 d whatever is in (1,8,-1); I_A's
+        extension beside it updates it at t0 g, it extends into the empty (1,6,-1) and Z_T cannot lift RB_T at t3.
+        One cell higher it would be powered by K_in directly.
+Others  The report's other ways. Z_T sticky: RB_T back at (1,6,-1) is Z_T's own payload at R+2 and holds it out
+        by QC, so it never pulls RB_T down. W_T sticky would pull a block south out of (1,5,-2), RB_A's open cell:
+        every way into that cell is NA's wiring, a wall, a piston that moves during the load, or I_A's own push
+        (the opening). T held otherwise: T fires at t3 g on RB_T alone (DS is dark by then) and Z_T's lift takes
+        RB_T away in that phase; another hold is another relay inside the opening's T stage, a change to
+        design_c's opening, not tried.
+Column  What does push RB_T down (what-if, sim only): H_T, a piston at (1,9,-1) facing down, two cells higher,
+        where K_in does not reach it, over two glass spacers, GA (1,7,-1) and GB (1,6,-1) in the closed state. Z_T
+        lifts RB_T, GB and GA together at t3, so in the open state and after the close GB is at (1,7,-1) and GA at
+        (1,8,-1); H_T pushes GA, GB and RB_T down one cell and RB_T is home. GB stands in (1,6,-1), a cell of the
+        opening: the opening and the close are the same at every tick outside the column's three cells. That is
+        why the bus's west branch left (1,8,-1) and (1,7,-1). The bus dust beside H_T, (1,9,-2) and (0,9,-1),
+        points past it.
+Trap    P_R cannot push RB_T straight back under the column: K_T, held by RB_T at (2,6,-1), retracts in P_R's
+        phase, its base lands in the same phase j as RB_T, behind it, and updates W_T, which RB_T at (1,6,-1)
+        powers by QC: W_T's head takes (1,5,-1). So N_T, a sticky piston at (2,6,-3) facing south, kicks first:
+        out and in, it pulls RB_T north to (2,6,-2), K_T retracts and lands with W_T unpowered; out again, it
+        pushes RB_T back, and RB_T's landing in front of P_R is the update P_R needs. P_R's hold (RB_ST at
+        (3,7,0)) must arrive while RB_T is parked: earlier, P_R extends into the empty cell when RB_T is pulled
+        away.
+What-if RB_T returned by command (sim only): N_T's and H_T's sources and the returns of RB_ST and SPC are stood in
+        for by commands after the close. The trigger chain's east side (RB_T, GA, GB, P_R, K_T, SPC, RB_ST, Z_T,
+        W_T, AP) and the S feed's thirteen end as the closed state has them, T powered by RB_T. What still
+        differs is the opening's seven relays with their blocks and the west side (K, M_K, RB12, G). K_T made
+        sticky (a measured block) would pull SPC home at the kick. Not designed: the two sources and their
+        timing, RB_ST's route and SPC's mover; no command may follow the input, so this is not yet a design.
 What-if Z9 in place, by command (sim only): the up relays need not be re-oriented. ARM_Z9 taken out before c22
         or earlier: RB9's departure (c16 g) or P9's spit (c22 g) updates Z9, unpowered, and it retracts. A_9 brings
         RB9 back over it at c22 j, where RB9 QC-powers Z9 without updating it. D9, a piston at (4,5,1) facing down,
@@ -48,12 +76,12 @@ Run from the repo root (sim; about 2 minutes):
 python -m scripts.door2.close_layout.returns > scripts/door2/close_layout/returns.txt"""
 import copy, functools
 from collections import deque
-from scripts.door2.close_layout import feeds as f, trigger as t, p9_p8 as pp, p10_v as pv
+from scripts.door2.close_layout import feeds as f, puller as pr, trigger as t, s_inputs as si, p9_p8 as pp, p10_v as pv
 from scripts.door2.close_layout.feeds import d, B, AIR, power_sources
 from scripts.door2.sim import World, DIRS, add
 from scripts.door2 import volume as v
 
-LO, HI = (-4, -3, -8), (7, 8, 3)
+LO, HI = (-4, -3, -8), (7, 10, 3)                # the box of the opening and the close: the bus's west branch tops it at y 10
 NEG = {"west": "east", "east": "west", "up": "down", "down": "up", "north": "south", "south": "north"}
 CLOSE = 32                                       # c-1 to c30
 RB_T_HOME, RB_ST_HOME, RB12_HOME = (1, 5, -1), t.RB_ST, (-4, 2, 2)
@@ -64,6 +92,17 @@ GROUPS = (("the opening's relays and their blocks", ("X2", "Z_Q", "Y1", "Z_S", "
           ("the trigger chain's", ("K", "M_K", "RB12", "P_R", "RB_T", "K_T", "SPC", "RB_ST")),
           ("the S feed's", ("A_C", "C_F", "R_F", "R_C")), ("p9_p8's", ("R_9",)))
 D9_BLOCK = t.pis("piston", "down", "D9")
+# RB_T's return: the down-pusher, its two glass spacers where the closed state has them, the kicker and where it parks RB_T
+H_T, GA, GB, N_T, PARK = (1, 9, -1), (1, 7, -1), (1, 6, -1), (2, 6, -3), (2, 6, -2)
+COLUMN = (GB, GA, (1, 8, -1))
+SRC_H, SRC_N, POKE_R = (1, 10, -1), (3, 6, -3), (3, 6, -2)     # stand-in sources of H_T and N_T; a cell beside P_R
+Z_T, T_CELL, K_IN, RB_A_OPEN = (1, 4, -1), (1, 4, 0), (1, 8, -2), f.RB_A
+RBT_BLOCKS = {H_T: t.pis("piston", "down", "H_T"), GA: B("glass", id="GA"), GB: B("glass", id="GB"),
+              N_T: t.pis("sticky_piston", "south", "N_T")}
+# the cells RB_T's return must leave as the closed state has them: the column, the two pistons, P_R, K_T, SPC's and RB_ST's
+# cells, Z_T, W_T, T, AP, the stand-in cells and the S feed's thirteen with its cut cell
+EAST = [RB_T_HOME, *COLUMN, H_T, N_T, PARK, pr.P_R, pr.HEAD, t.K_T, t.SPC, t.SRC, t.UP, t.RB_ST, Z_T, t.W_T, T_CELL, t.AP,
+        SRC_H, SRC_N, POKE_R, *si.MINE, si.CUT]
 
 
 BOX = [LO, HI]                                   # the box routes keep to; main grows it for the second pass
@@ -274,6 +313,84 @@ def z9_verdict(w, cl):
     return bad + ([] if rb9 == pp.RB9_OPEN else [f"Z9 does not fire on an update ({fired or 'nothing'})"])
 
 
+def against(b, skip):
+    """b beside p9_p8.py's build: what moved during the load, and the ticks of the opening and the close at which a
+    cell outside `skip` differs."""
+    g = frames(b)
+    moved = next(g)
+    return moved, [tick_name(k) for k, ((bl, be), (rb, rbe)) in enumerate(zip(g, worlds()[3]))
+                   if be - skip != rbe - skip or {p: s for p, s in bl.items() if p not in skip} != {p: s for p, s in rb.items() if p not in skip}]
+
+
+def ways_into(cell, w, fr):
+    """one line a direction: the mover a block needs to enter `cell` that way, a pusher behind it or a sticky puller
+    beyond the cell, and what stands in each mover's cell or what the screen says of a piston there."""
+    out = []
+    for name, dv in DIRS.items():
+        u, push, pull = add(cell, dv, -1), add(cell, dv, -2), add(cell, dv)
+
+        def what(m, kinds, facing):
+            if m in fr:
+                return ", ".join(f"a {k.replace('_', ' ')} there {mover(m, k, facing) or 'passes the screen'}" for k in kinds)
+            return f"{label(w, m)} there" if m in w.b else "not free"
+        out.append(f"moving {name} from {u} ({label(w, u) if u in w.b else 'air'}): pushed from {push}: {what(push, ('piston', 'sticky_piston'), name)}; "
+                   f"pulled from {pull}: {what(pull, ('sticky_piston',), NEG[name])}")
+    return out
+
+
+def rbt_build(drop=(), swap=None):
+    """p9_p8.py's build with RB_T's four: H_T, the spacers GA and GB, N_T; `drop` leaves cells out, `swap` replaces
+    or adds some. GB stands in (1,6,-1), a cell of the opening: Z_T lifts it with RB_T."""
+    b = pp.build()
+    for c, st in {**RBT_BLOCKS, **(swap or {})}.items():
+        if c not in drop:
+            b.b[c] = st
+            b.role[c] = "returns"
+    return b
+
+
+def probe_build(drop=()):
+    """rbt_build with D9 as well: close_returns_probe's build (export_returns.py)."""
+    b = rbt_build(drop=drop)
+    if D9 not in drop:
+        b.b[D9] = D9_BLOCK
+        b.role[D9] = "returns"
+    return b
+
+
+def rbt_ticks(kick=(32, 34), home=37, back=(38, 43), src=(45, 48), spc=51, last=58, poke=None):
+    """idle ticks with the what-if's commands, each set before tick c<n> with updates. kick: a redstone block at
+    SRC_N, N_T's stand-in source, on and off (N_T out and in: RB_T pulled north to PARK). home: RB_ST taken out of
+    (2,8,0) and set at (3,7,0), its closed cell (stand-in for its return). back: SRC_N on and off again (N_T pushes
+    RB_T back in front of P_R and stays out until P_R has taken it). src: a redstone block at SRC_H, H_T's stand-in
+    source, on and off. spc: SPC taken out of (2,7,0) and set at (2,6,0) (stand-in for its return). poke: a glass
+    block set and cleared beside P_R. None leaves a command out."""
+    ticks = pp.idle(last)
+    for k, cmds in ((kick and kick[0], [(SRC_N, t.RB)]), (kick and kick[1], [(SRC_N, AIR)]),
+                    (home, [(t.UP, AIR), (t.RB_ST, B("rb", id="RB_ST"))]), (poke, [(POKE_R, t.GLASS), (POKE_R, AIR)]),
+                    (back and back[0], [(SRC_N, t.RB)]), (back and back[1], [(SRC_N, AIR)]),
+                    (src and src[0], [(SRC_H, t.RB)]), (src and src[1], [(SRC_H, AIR)]),
+                    (spc, [(t.SRC, AIR), (t.SPC, B("glass", id="SPC"))])):
+        if k is not None:
+            ticks[k + 1] = ticks[k + 1] + cmds
+    return ticks
+
+
+def rbt_verdict(w, cl):
+    """what keeps the trigger chain's east side and the S feed's cut from the closed state `cl`, cell for cell, the
+    pistons there from the closed state's power, and the door plane from the closed door's."""
+    bad = [f"{c} {'moving' if c in w.be else w.get(c)}" for c in EAST if c in w.be or w.get(c) != cl.get(c)]
+    bad += [f"{n} powered by {[c for _, c in power_sources(w, p)]}" for n, p in (("Z_T", Z_T), ("W_T", t.W_T), ("K_T", t.K_T), ("P_R", pr.P_R),
+                                                                               ("H_T", H_T), ("N_T", N_T), ("AP", t.AP))
+            if w.get(p) == cl.get(p) and power_sources(w, p) != power_sources(cl, p)]
+    bad += ["T not powered by RB_T"] * (("qc", RB_T_HOME) not in power_sources(w, T_CELL))
+    return bad + pp.verdict_end(w, cl)
+
+
+def shown(w, first, names):
+    return [x for x in pv.told(w) if pv.tick_of(x) >= first and any(f" {n}@" in x for n in names)]
+
+
 if __name__ == "__main__":
     b, cl, w, ref, free = worlds()
     print("p9_p8.py's build; the world after c30 of its close against the loaded closed state")
@@ -310,7 +427,7 @@ if __name__ == "__main__":
         start = t.at(w, n)[0]
         path, reached, rejected = route(start, home, w, free)
         print(f"   {n} {start} to {home}:", "; ".join(path) if path else f"NO ROUTE; reached {', '.join(map(str, reached))}")
-        for u in reached:
+        for u in () if path else reached:
             for v_, x in rejected.get(u, []):
                 if v_ not in reached:
                     print(f"      from {u}, {x}")
@@ -381,13 +498,150 @@ if __name__ == "__main__":
         path, reached, rejected = route(start, home, w, fr)
         print(f"   {n} {start} to {home}:", "; ".join(path) if path else f"NO ROUTE; reached {', '.join(map(str, reached))}, as in the box")
     print("   every way into (1,5,-1), RB_T's closed cell, for any block (box-independent: every cell named is inside the box):")
-    for name, dv in DIRS.items():
-        u, push, pull = add(RB_T_HOME, dv, -1), add(RB_T_HOME, dv, -2), add(RB_T_HOME, dv)
-
-        def what(m, kinds, facing):
-            if m in fr:
-                return ", ".join(f"a {k.replace('_', ' ')} there {mover(m, k, facing)}" for k in kinds)
-            return f"{label(w, m)} there" if m in w.b else "not free"
-        print(f"      moving {name} from {u} ({label(w, u) if u in w.b else 'air'}): pushed from {push}: {what(push, ('piston', 'sticky_piston'), name)}; "
-              f"pulled from {pull}: {what(pull, ('sticky_piston',), NEG[name])}")
+    for x in ways_into(RB_T_HOME, w, fr):
+        print("      " + x)
+    print("   every way into (1,5,-2), from where W_T made sticky would pull a block into (1,5,-1) (what-if):")
+    for x in ways_into(RB_A_OPEN, w, fr):
+        print("      " + x)
     BOX[:] = [LO, HI]
+
+    def names(src, x):
+        return [f"{label(x, c)} {c}" + ("" if k == "direct" else " QC") for k, c in src] or "nothing"
+
+    print("\n== RB_T's last step, (1,6,-1) down to (1,5,-1), now that the bus's west branch is off (1,8,-1) and (1,7,-1)")
+    for kind in ("piston", "sticky_piston"):
+        bx = copy.deepcopy(b)
+        bx.b[GA] = t.pis(kind, "down", "X")
+        wx, moved = d.make_world(bx)
+        closed = names(power_sources(wx, GA), wx)
+        wx.run(4)
+        wx.cmd_set(f.DRIVER, t.RB)
+        ev, t0 = [], None
+        for k in range(t.OPEN_TICKS):
+            wx.log.clear()
+            wx.tick()
+            ev += [f"{tick_name(k)}{ph} {m.split(':')[0]}" for _, ph, m in wx.log if any(n in m for n in (" X@", " Z_T@", " T@")) and ("EXTEND" in m or "RETRACT" in m)]
+            t0 = names(power_sources(wx, GA), wx) if k == 1 else t0
+        print(f"   the fix as chosen, a {kind.replace('_', ' ')} at (1,7,-1) facing down: screen: {mover(GA, kind, 'down') or 'passes'} | moved during the load:",
+              moved or "none", f"| powered in the closed state by {closed}, after t0 by {t0} | X, Z_T and T in the opening: {'; '.join(ev)} "
+              f"(p9_p8's build: t3g EXTEND T, t3g EXTEND Z_T, t3g RETRACT T) | after t13: X", "out" if t.at(wx, "X")[2] else "in", "powered by",
+              names(power_sources(wx, GA), wx))
+    print("      K_in is strongly powered while the input is on and stands beside (1,8,-1), the cell above the piston: QC, whatever is in "
+          "(1,8,-1). I_A's extension beside the piston updates it at t0 g, it extends into the empty (1,6,-1), and Z_T cannot lift RB_T at t3")
+    x = after()
+    x.cmd_set_silent(Z_T, t.pis("sticky_piston", "up", "Z_T"))
+    x.cmd_set_silent(t.at(x, "RB_T")[0], AIR)
+    x.cmd_set(GB, B("rb", id="RB_T"))
+    held_by = names(power_sources(x, Z_T), x)
+    x.cmd_set((0, 4, -1), t.GLASS)
+    x.cmd_set((0, 4, -1), AIR)
+    x.run(6)
+    print("   Z_T made sticky (what-if; set into the world after the close, RB_T set at (1,6,-1) as P_R's push leaves it): Z_T powered by", held_by,
+          "(its own payload at R+2) | after an update:", {n: t.at(x, n) for n in ("Z_T", "RB_T")}, "| still powered by", names(power_sources(x, Z_T), x),
+          "| a sticky Z_T is held out by the block it would pull")
+    wt = d.make_world(b)[0]
+    held0 = names(power_sources(wt, T_CELL), wt)
+    wt.run(4)
+    wt.cmd_set(f.DRIVER, t.RB)
+    wt.run(4)
+    print("   T held otherwise: T's power in the closed state:", held0, "| after t2, the tick before it fires:", names(power_sources(wt, T_CELL), wt),
+          "| T fires on RB_T at t3 g and Z_T's lift takes RB_T away in that phase: another hold is another relay for the opening's T stage")
+
+    print("\n== the column (what-if): H_T, a piston at (1,9,-1) facing down, clear of K_in; glass spacers GA (1,7,-1) and GB (1,6,-1) in the "
+          "closed state, lifted with RB_T by Z_T at t3 to (1,8,-1) and (1,7,-1); N_T, a sticky piston at (2,6,-3) facing south")
+    rb_ = rbt_build()
+    moved, differ = against(rb_, set(COLUMN) | {H_T, N_T})
+    print("   moved during the load:", moved or "none", "| the opening and the close to c30 outside the column's three cells:",
+          f"differ at {differ}" if differ else "the same at every tick")
+    rcl = d.make_world(rb_)[0]
+    ro, _ = t.opened(rb_)
+    seen, last_ = [], None
+    for k, (bl, be) in enumerate(list(frames(rb_))[1:t.OPEN_TICKS + 3]):
+        cur = [("~" if c in be else "") + (bl[c].p.get("id") or bl[c].n if c in bl else "air") for c in (RB_T_HOME, *COLUMN)]
+        if cur != last_:
+            seen.append(f"{tick_name(k)} " + ", ".join(cur))
+            last_ = cur
+    print("   (1,5,-1), (1,6,-1), (1,7,-1), (1,8,-1) after each tick they change (~ moving):", "; ".join(seen))
+    ra = pp.noted(ro)
+    wq, _ = d.make_world(rb_)
+    lit = [f"{n} closed" for n, c in (("H_T", H_T), ("N_T", N_T)) if power_sources(wq, c)]
+    wq.run(4)
+    wq.cmd_set(f.DRIVER, t.RB)
+    for k in range(t.OPEN_TICKS + CLOSE):
+        if k == t.OPEN_TICKS:
+            wq.cmd_set(f.DRIVER, AIR)
+        wq.tick()
+        lit += [f"{n} {tick_name(k)}" for n, c in (("H_T", H_T), ("N_T", N_T)) if power_sources(wq, c)]
+    print("   H_T and N_T powered:", ", ".join(lit) or "never: not in the closed state, nor after any tick of the opening or of the close to c30")
+    hx = copy.deepcopy(ro)
+    hx.log.clear()
+    hx.cmd_set(SRC_H, t.RB)
+    hx.run(4)
+    moved_h = [m.split(":")[0] for _, _, m in hx.log if " H_T@" in m and ("EXTEND" in m or "RETRACT" in m)]
+    hw = pp.noted(hx)
+    print("   H_T's stand-in source set in the open state and left on (what-if): H_T", "moves: " + "; ".join(moved_h) if moved_h else
+          "does not move (powered, and Z_T's head under RB_T stops the push)", "| through the close to c30:",
+          "; ".join(x for x in pv.told(hw) if " H_T@" in x) or "no H_T event,", "cells that differ from the close without it:",
+          sorted(c for c in set(hw.b) | set(ra.b) if hw.get(c) != ra.get(c)))
+    print("   the bus dust beside H_T in the open state:", {c: ro.get(c).p["power"] for c in ((1, 9, -2), (0, 9, -1))},
+          "| neither points at it: (1,9,-2) runs west up the step and east down it, (0,9,-1) north up the step and west")
+
+    print("\n== the trap: P_R woken straight after the close (RB_ST set home before c31, a glass block set and cleared beside P_R before c32, "
+          "H_T's source before c40)")
+    tr = pp.noted(ro, rbt_ticks(kick=None, home=31, poke=32, back=None, src=(40, 43), spc=None, last=46))
+    print("\n".join("   " + x for x in shown(tr, 31, ("P_R", "K_T", "W_T", "H_T"))))
+    print("   ->", {n: t.at(tr, n) for n in ("RB_T", "W_T", "K_T", "H_T")}, "| W_T powered by", names(power_sources(tr, t.W_T), tr))
+    print("      K_T, held by RB_T at (2,6,-1), retracts in P_R's phase; its base lands in the same phase j as RB_T, behind it, and updates "
+          "W_T, which RB_T at (1,6,-1) powers by QC: W_T's head takes (1,5,-1) and H_T's push stops on it")
+
+    print("\n== what-if (sim only): RB_T returned by command. N_T's stand-in source (3,6,-3) before c32 and out before c34 (the kick); RB_ST out "
+          "of (2,8,0) and at (3,7,0) before c37; the source again before c38 and out before c43; H_T's stand-in source (1,10,-1) before c45 and out "
+          "before c48; SPC out of (2,7,0) and at (2,6,0) before c51")
+    rw = pp.noted(ro, rbt_ticks())
+    print("\n".join("   " + x for x in shown(rw, 31, ("N_T", "P_R", "K_T", "W_T", "H_T", "Z_T", "A_C", "T"))))
+    bad = rbt_verdict(rw, rcl)
+    print("   ->", "FAILS: " + "; ".join(bad) if bad else "done: RB_T at (1,5,-1), GB and GA under H_T, P_R out, K_T in, N_T and H_T in, Z_T not powered, T powered by "
+          "RB_T, W_T, AP and the S feed's thirteen as the closed state has them; the door plane closed; nothing moving")
+    rest, _ = pv.differing(rcl, rw)
+    off = [x for x in rest if not any(x.startswith(str(c) + ":") for c in pp.PLANE)]
+    off0 = [x for x in pv.differing(rcl, ra)[0] if not any(x.startswith(str(c) + ":") for c in pp.PLANE)]
+    print(f"   cells outside the door plane that still differ from the closed state: {len(off)} ({len(off0)} after the close in this build, the column's three "
+          "among them):",
+          "; ".join(f"{n} {where(rcl, n)}, now {where(rw, n)}" for n in GROUPS[0][1] + ("K", "M_K", "RB12") if t.at(rcl, n) != t.at(rw, n)))
+    ref_ev = pv.per_tick(pp.noted(t.opened(pp.build())[0], pp.idle(58)), -1, 58)
+    mine_ev = pv.per_tick(rw, -1, 58)
+    print("   piston events against p9_p8's run: added", "; ".join(x.split(":")[0] for a, c in zip(mine_ev, ref_ev) for x in sorted(set(a) - set(c))),
+          "| none taken away" if all(set(c) <= set(a) for a, c in zip(mine_ev, ref_ev)) else "| SOME TAKEN AWAY")
+    print("   windows, one command moved at a time (the others as above), done or not:")
+    base = dict(kick=(32, 34), home=37, back=(38, 43), src=(45, 48))
+    for title, key, i, ks in (("the kick's source on before", "kick", 0, range(27, 34)), ("the kick's source off before", "kick", 1, range(33, 38)),
+                              ("RB_ST home before", "home", None, range(31, 44)), ("the source again before", "back", 0, range(35, 43)),
+                              ("and off before", "back", 1, range(39, 46)), ("H_T's source on before", "src", 0, range(40, 48)),
+                              ("H_T's source off before", "src", 1, range(46, 51))):
+        res = {}
+        for k in ks:
+            kw = dict(base)
+            kw[key] = k if i is None else tuple(k if j == i else v for j, v in enumerate(base[key]))
+            res[k] = not rbt_verdict(pp.noted(ro, rbt_ticks(**kw)), rcl)
+        print(f"      {title}:", " ".join(f"c{k} {'done' if ok else 'FAILS'}" for k, ok in res.items()))
+    early = {k: not rbt_verdict(pp.noted(ro, rbt_ticks(kick=(k, k + 2), home=k + 5, back=(k + 6, k + 11), src=(k + 13, k + 16), spc=k + 19, last=58)), rcl)
+             for k in range(3, 33)}
+    print("   the whole schedule moved earlier, the kick's source on before:", " ".join(f"c{k} {'done' if ok else 'FAILS'}" for k, ok in early.items()))
+    for name, kw in (("dust's neighbour updates in reverse order", dict(reverse=True)), ("I_A's retract event behind P_R's and M_K's", dict(ia_last=True))):
+        x = pp.noted(ro, rbt_ticks(), **kw)
+        print(f"   {name}:", "FAILS" if rbt_verdict(x, rcl) else "done;", "piston events of each tick",
+              "the same set" if pv.per_tick(x, -1, 58) == mine_ev else "DIFFER")
+    print("   controls:")
+    for title, bkw, kw in (("RB_ST home before the kick (c31): P_R, powered, is updated when RB_T is pulled away and extends into the empty cell", {}, dict(home=31)),
+                           ("no GB: Z_T lifts RB_T alone and H_T's push ends a cell short", dict(drop=(GB,)), {}),
+                           ("no source for H_T: RB_T stays at (1,6,-1)", {}, dict(src=None)),
+                           ("N_T not sticky: no kick, RB_T is never in front of N_T's head", dict(swap={N_T: t.pis("piston", "south", "N_T")}), {})):
+        cb = rbt_build(**bkw)
+        x = pp.noted(t.opened(cb)[0], rbt_ticks(**kw))
+        bad = rbt_verdict(x, d.make_world(cb)[0])
+        print(f"      {title}:", "FAILS: " + "; ".join(bad[:4]) if bad else "done", "| RB_T", t.at(x, "RB_T")[0], "P_R", "out" if t.at(x, "P_R")[2] else "in",
+              "W_T", "out" if t.at(x, "W_T")[2] else "in")
+    kb = rbt_build(swap={t.K_T: t.pis("sticky_piston", "up", "K_T")})
+    x = pp.noted(t.opened(kb)[0], rbt_ticks(spc=None))
+    print("   K_T made sticky (what-if; a measured block changed), no command for SPC:", "FAILS: " + "; ".join(rbt_verdict(x, d.make_world(kb)[0])[:4])
+          if rbt_verdict(x, d.make_world(kb)[0]) else "done: K_T pulls SPC home when the kick releases it", "| SPC", t.at(x, "SPC")[0])

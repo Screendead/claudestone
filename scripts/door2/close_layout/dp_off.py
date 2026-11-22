@@ -285,8 +285,8 @@ if __name__ == "__main__":
     print("\n== cost: A_D is armed in the open state. A glass block set and cleared above it there (one stray update), then 6 ticks:")
     print("   ", "; ".join(told(stray, "s")), "->", {n: t.at(stray, n)[0] for n in ("RB_D", "S", "Q")}, "DP", stray.get(f.DP).p["power"])
 
-    print("\n== P6 spat as well? dp_off_search.txt: one more block in the 35 free cells, 1 of 560 passes; two more, 441 of 152320, "
-          "435 of them with that one block and 6 without. Set into the open state they pass; built, none does")
+    print("\n== P6 spat as well? dp_off_search.txt: one more block in the 36 free cells, 1 of 576 passes; two more, 455 of 161280, "
+          "449 of them with that one block and 6 without. Set into the open state they pass; built, none does")
     silent = copy.deepcopy(mine)
     silent.cmd_set_silent(ON_P11, t.DUST)
     sw = noted(silent)
