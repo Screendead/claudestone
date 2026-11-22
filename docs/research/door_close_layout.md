@@ -418,13 +418,13 @@ is used; P9, stage 1 of the plan, had no feed at all and fires after stage 5; Q'
   left at S_L; R_9 at 2 to 4 ticks (its pulse is 4 gt or more, and the opening differs from t3: it is still on when P9
   fires); a stone under R_X (DS points into it from c12 j and A_9 fires at c13); a stone under D_8 (NA and DQ are one
   net; the opening differs from t0); each of R_X, A_9, S_L, R_9, D_8 and R_8 left out. R_8 at 2 ticks passes the close
-  and changes the opening from t3 (it is still on at NV's cut); at 3 or 4 ticks both fail. O_8 left out passes in the simulator's order of c4's
-  events and fails with P8's event first. G_9 as stone passes. The input off fewer than 11 ticks after it went on fails
-  as the trigger chain does.
+  and changes the opening from t3 (it is still on at NV's cut); at 3 or 4 ticks both fail. O_8 left out passes in the
+  simulator's order of c4's events and fails with P8's event first. G_9 as stone passes. The input off fewer than 11
+  ticks after it went on fails as the trigger chain does.
 - Costs: the door closes at c25 j, eight ticks after stage 5's last landing. The cells of the ten and (5,4,1), RB9's
-  stroke; (3,5,-1) was one of P8's clean cells, (5,2,0) and (5,3,0) two of P9's. One of design_c's blocks changes: the glass under
-  LY's dust (6,4,1) is a stone, and LY passes that step both ways. RB9 is borrowed: it has to stand at (4,4,1) until
-  c22 j, so its return comes after that and leaves (3,4,1) and (5,4,1) alone. LY's two changes (c18 j, c20 g) update
+  stroke; (3,5,-1) was one of P8's clean cells, (5,2,0) and (5,3,0) two of P9's. One of design_c's blocks changes: the
+  glass under LY's dust (6,4,1) is a stone, and LY passes that step both ways. RB9 is borrowed: it has to stand at
+  (4,4,1) until c22 j, so its return comes after that and leaves (3,4,1) and (5,4,1) alone. LY's two changes (c18 j, c20 g) update
   Y1, Z_Q and Z_S, fired and powered, so no event now; a re-arm that resets a fired relay by dust within 2 would be
   hit by them [INFERRED]. P8 waits powered and blocked from c4 d to c22 j. O_8 stands in the door plane's corner
   (3,-1,0), outside the frame and the wall ring.
