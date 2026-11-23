@@ -8,8 +8,9 @@ p9_p8.txt]: stages 0 to 8 are measured in game. Of the returns, the trigger chai
 no command after the input [COMPUTED rbt_drives.txt; MEASURED 4/4], after two changes to measured blocks (the bus's
 west branch re-laid, K_T made sticky): with added blocks alone it cannot, whatever the box [COMPUTED returns.txt]. The
 west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; not yet measured], but for
-G, which ends where the opening puts it: its closed cell is Y12's head, so NP12 is lit again until Y12 is re-armed. The
-opening's relays are not designed.
+G, which ends where the opening puts it: its closed cell is Y12's head, so NP12 is lit again until Y12 is re-armed. Y12's
+re-arm is computed with Y12 made sticky and two sources stood in for by commands [COMPUTED y12.txt; not measured]; the
+opening's other six relays are not designed.
 - Every close mover (15) has power cells that at its stage reach no piston still to fire/wait [COMPUTED constraints.py].
 - Wave-1 dead end had three non-structural causes: coupling treated as fatal regardless of order (a piston whose retract
   event ran is a moving block for the rest of c0 g [SOURCED PistonBaseBlock.java:168-178]); opening wiring on free cells
@@ -847,6 +848,59 @@ it ends at (-4,3,2), its cell in the open state, and the gate over L stays open 
   and replayed in the simulator, pass 3/3; without R_W, R_M, A_W, RB_W, P_W, R_X, Y_X, R_G, Y_G, P_G or SPG the first
   test fails. `python -m scripts.lint close_west_drives_probe`: ok. Not yet run on a server.
 
+## Y12's re-arm, first pass (2026-11-22; simulator)
+Not done from blocks: Y12 ends re-armed with Y12 made a sticky piston, 8 added blocks and two sources stood in for by
+four commands after the input [COMPUTED y12.txt; not measured]. Box still 14x15x12 = 2520; the opening is the same at
+every tick and the close the same to c30 outside the added cells, Y12 and its head's cell; the returns are the same
+until c61.
+- Sticky [COMPUTED y12.txt, control]: a plain Y12 retracts at c61 and leaves G at (-4,3,2). A block leaves that cell
+  eastward only by a piston in (-5,3,2), where P_W's head stands, or by Y12's pull.
+- Holds [COMPUTED y12.txt, what-if]: a redstone block in any of the five cells one step from ARM_Z11's powers Y12, so
+  ARM_Z11 is not taken away. ARM_Z11 and RB_D are each lifted one cell and put back; a moving block powers nothing and
+  Y12 retracts while both move.
+- When [COMPUTED y12.txt, what-if]: the DP tap powers both of RB_D's movers while NP12 is lit: A_D through its stone,
+  and a piston over RB_D by standing beside that stone. A_D fired with the tap on stays out and parks RB_D in DP's
+  source cell, where it powers M_K by QC; G's leaving then fires M_K. So the lift is at c61 g, after G's landing in
+  (-4,3,2) at c60 j and before the tap's repeater turns on at c62 d.
+- W_Y (-3,6,2), a sticky piston facing down over RB_D, in at rest. S_W (-3,7,3), a stone on the tap's stone, powers it
+  without an update from c52 to c60: R_F (-4,7,3), a 1-tick repeater on Y_G, reads S_F (-5,7,3), a stone on R_G, which
+  D_X (-6,7,3), a dust on Y_X, powers. P_G's extension beside W_Y at c58 updates it and it goes out; its head lands on
+  RB_D at c60 j and updates it, unpowered: at c61 it pulls RB_D up. RB_D lands in front of it at c63 j with the tap on
+  and W_Y pushes it down at c64; the tap's repeater turns off at c65 d, updates W_Y, and W_Y leaves RB_D and retracts.
+  R_F at 2 to 4 ticks fails. In the open state the tap holds W_Y out; it retracts at c2 over A_D's head and pulls nothing.
+- U_Y (-2,6,2), a sticky piston facing down over ARM_Z11, built out. STAND-IN: its hold is a redstone block at
+  (-2,8,2), taken out before c60 and set back before c63 without updates (out before c59 to c61, back before c62 to
+  c65). NP12's relight at c60 j updates U_Y: it pulls ARM_Z11 up at c61 and pushes it back at c64.
+- B_Y (-4,3,3), a piston facing north. STAND-IN: a redstone block at (-5,3,3), set before c62 and cleared before c70
+  with updates (set before c62 or c63; cleared before c67 or later). Its head is in (-4,3,2) from c62: G's landing at
+  c63 j and ARM_Z11's at c66 j update Y12, powered, and its push fails. The head also keeps K in.
+- A_D: G's landing puts NP12 out with the tap still on and updates A_D. Its push, queued behind W_Y's, fails at c64 on
+  RB_D moving into the cell in front of it. With G landing ahead of RB_D (sim only) A_D's head takes that cell and
+  RB_D stays up [COMPUTED y12.txt, order]: it rests on moving blocks ticking in the order their moves began [MEASURED
+  `close_rbt_drives_probe`]. A_D never moves and DP is never lit.
+- End state [COMPUTED y12.txt]: Y12 in, powered by ARM_Z11 and RB_D and not updated; G at (-3,3,2); NP12 and the tap
+  dark; 20 cells outside the door plane still differ (the other six relays with their blocks, and R_9). A second cycle
+  is the same.
+- Left [INFERRED from the cells, not searched]: U_Y's hold from blocks needs a source that goes dark without updating
+  U_Y. The cells that power U_Y silently are (-1,7,2), (-2,7,3) and (-2,8,2); a redstone block there has no second
+  powering cell one step away but (-2,7,2), whose leaving updates U_Y; the cells that would feed them hold the glass
+  under R_C (0,7,2) or under the west line (-2,9,2), the tap's repeater (-2,6,3), lie at z 4, or are two above P_G or
+  P10. (-2,6,1) and the cells that power it are left free for the down-pusher over RB11 that Z11's return needs. B_Y's
+  source needs an edge 2 ticks after R_G from a cell that does not update A_D at c62 (the cell above B_Y is beside A_D).
+- Probe: `close_y12_probe` (`export_y12`): three tests with the stand-in commands, replayed in the simulator 3/3; the
+  first test fails with Y12 plain or without U_Y, W_Y, B_Y, S_W, R_F, S_F or D_X. `python -m scripts.lint
+  close_y12_probe`: ok. MEASURED on the main server, 2026-11-22: 0/3, R_F still off at c54 (control 1 first off at c62,
+  control 2 on the same R_F check at c60).
+- The cause [INFERRED from the export and MEASURED mechanics, the trace not yet read]: D_X (-6,7,3) has no dust beside
+  it. The simulator treats a lone dust as a cross, pointing east into S_F; the export set it as bare `redstone_wire`,
+  and a bare dust set by command is a dot that powers no neighbour [MEASURED dust_dot_vs_cross_isolated; AUTHORING.md],
+  so S_F, R_F and S_W stay dark and W_Y never fires. Fix: D_X is a cross in the build and the export writes
+  `redstone_wire[east=side,north=side,south=side,west=side]` for it (`state_str` writes a dust's four sides only when the
+  build marks it a cross), and the probe now checks that shape. y12.txt is unchanged; close_y12_probe re-exported (3/3
+  replayed, the same controls live, lint ok); the other exporters write the same YAML. The two older lone dusts, (1,7,0)
+  and (-3,4,0), are dots in game; with them as dots the simulator gives the same runs of west_drives.py and y12.py at
+  every tick, which fits their probes passing. To measure again.
+
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
 above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
@@ -946,7 +1000,8 @@ events of one phase: they show which orders work, not how to get them.
    return has no deadline. Y12 is held by ARM_Z11, which Z11 shares, and by RB_D; when it retracts G has to go from
    (-4,3,2) into (-3,3,2): Y12 made sticky pulls it there by itself (a measured block of design_c; what-if in
    west_drives.txt), as built it needs a mover from the west, where P_W's head stands. NP12 then dies and A_D, armed
-   since RB12 came home, fires once as at c0.
+   since RB12 came home, fires once as at c0. First pass [COMPUTED y12.txt]: done with Y12 sticky, three pistons and two
+   stand-in sources, inside the west return (c58 to c70); A_D does not fire. Left: U_Y's hold and B_Y's source from blocks.
 5. Routing: the bus is laid (east to P_R and AP, west over the input repeater to M_K; re-laid 2026-11-22, box 2016). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
    [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
