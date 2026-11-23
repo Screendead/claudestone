@@ -67,9 +67,13 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
   Our own `t8_b_lock3_444` is also 64 but is ours, not the bar. Sources found on the Mac (#85, 2026-11-23,
   `tools/t8_ref64/SOURCE.md`): the bar is Pepich1851's "4^3 tileable memory cell" (YouTube, 2018-05-21; write-locked
   repeater storage, subtract-comparator read, inverted read and write enables, 4x4x4 = 64 per bit). No schematic or
-  world download exists for it or for any ORE "4x4x4 Tileable RAM Cube" entry (2014; claimed, never posted). Next: read
-  one cell layer by layer from the video's frames (0:53–3:10, tiling repeaters 4:56–5:26) on the Mac, then rebuild it
-  as `library/register/ref_pepich1851_cube444` and test it.
+  world download exists for it or for any ORE "4x4x4 Tileable RAM Cube" entry (2014; claimed, never posted). The Mac read
+  one cell layer by layer from the frames (#88, `tools/t8_ref64/CELL.md`). Rebuilt (2026-11-23) as
+  `library/register/ref_pepich1851_cube444`, a 2x2x2 array made by `tools/t8_ref64/cell_to_spec.py` from CELL.md's
+  layers; lint ok, not yet run on a server. As read, the cell does not tile sideways: a word's read-enable dust (x=3)
+  lies against the next word's write-enable dust (x=0) at the same level and joins it, so two words share a line.
+  Next (Mac): re-read how the second word sits beside the first (5:41–6:57), fix the layers if the read changes, and
+  run the spec's two tests on a satellite; then bank `t8_c_box60` against it if it holds.
 - **Lead waits out another run's 3-hour hold** (2026-11-22, asked when the no-progress counter reached 3). Jack's
   answer, verbatim: "A · Wait it out". Acted on: a cloud PR pushed in the last 3 hours stays another run's claim; idle
   runs wait rather than take it over sooner.

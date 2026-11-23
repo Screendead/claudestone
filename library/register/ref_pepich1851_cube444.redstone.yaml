@@ -1,0 +1,292 @@
+name: ref_pepich1851_cube444
+description: 'Rebuilt reference: Pepich1851''s "4^3 tileable memory cell" (YouTube, 2018-05-21; source and timestamps in tools/t8_ref64/SOURCE.md), the community 64-blocks-per-bit RAM cell, read block by block from the video into tools/t8_ref64/CELL.md and tiled here by tools/t8_ref64/cell_to_spec.py into a 2x2x2 array (8 cells). In each cell s is the storage repeater, locked from its side by l, and c a subtract comparator that reads s from behind and the read-enable line from its side. Words run along z (bits j), words sideways along x (i), layers up y (k): word ik is hold ik (write enable, dark blue wool) and nrd ik (read enable, cyan); bit jk is din jk (red, along x) and dout jk (orange, along x, read at its west end). Both enables are inverted: hold 1 keeps and 0 writes; nrd 1 keeps the word off dout (15 - 14 = 1, which dies before the line) and 0 reads it. Each enable line enters at its south end through a fixture repeater standing where the next cell''s repeater would be. Not built:
+  the repeaters a long data line needs, which the video leaves to the user.'
+traits:
+- pistonless
+- entityless
+- silent
+- lightless
+palette:
+  .: air
+  A: blue_wool
+  B: orange_wool
+  C: cyan_wool
+  D: yellow_wool
+  E: {block: stone, fixture: true}
+  F: repeater[facing=south,delay=1]
+  G: redstone_wire[north=side,east=none,south=up,west=none]
+  H: redstone_wire[north=side,east=none,south=side,west=none]
+  c: {name: c000, block: 'comparator[facing=south,mode=subtract]'}
+  I: redstone_wire[north=side,east=side,south=side,west=side]
+  J: redstone_wire[north=side,east=none,south=side,west=side]
+  K: {name: c100, block: 'comparator[facing=south,mode=subtract]'}
+  M: redstone_wire[north=side,east=side,south=none,west=none]
+  l: {name: l000, block: 'repeater[facing=west,delay=1]'}
+  s: {name: s000, block: 'repeater[facing=south,delay=1]'}
+  N: redstone_wire[north=side,east=side,south=none,west=side]
+  O: {name: l100, block: 'repeater[facing=west,delay=1]'}
+  P: {name: s100, block: 'repeater[facing=south,delay=1]'}
+  Q: red_wool
+  T: {name: c010, block: 'comparator[facing=south,mode=subtract]'}
+  U: {name: c110, block: 'comparator[facing=south,mode=subtract]'}
+  V: {name: l010, block: 'repeater[facing=west,delay=1]'}
+  W: {name: s010, block: 'repeater[facing=south,delay=1]'}
+  X: {name: l110, block: 'repeater[facing=west,delay=1]'}
+  Y: {name: s110, block: 'repeater[facing=south,delay=1]'}
+  Z: {block: 'repeater[facing=south,delay=1]', fixture: true}
+  h: {input: hold00}
+  b: {input: nrd00}
+  d: {input: hold10}
+  e: {input: nrd10}
+  f: redstone_wire[north=side,east=up,south=none,west=up]
+  g: redstone_wire[north=none,east=up,south=none,west=up]
+  i: {output: dout00, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  j: redstone_wire[north=none,east=side,south=none,west=side]
+  k: {input: din00}
+  m: {output: dout10, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  p: {input: din10}
+  q: {name: c001, block: 'comparator[facing=south,mode=subtract]'}
+  r: {name: c101, block: 'comparator[facing=south,mode=subtract]'}
+  t: {name: l001, block: 'repeater[facing=west,delay=1]'}
+  w: {name: s001, block: 'repeater[facing=south,delay=1]'}
+  x: {name: l101, block: 'repeater[facing=west,delay=1]'}
+  y: {name: s101, block: 'repeater[facing=south,delay=1]'}
+  z: {name: c011, block: 'comparator[facing=south,mode=subtract]'}
+  '0': {name: c111, block: 'comparator[facing=south,mode=subtract]'}
+  '1': {name: l011, block: 'repeater[facing=west,delay=1]'}
+  '2': {name: s011, block: 'repeater[facing=south,delay=1]'}
+  '3': {name: l111, block: 'repeater[facing=west,delay=1]'}
+  '4': {name: s111, block: 'repeater[facing=south,delay=1]'}
+  '5': {input: hold01}
+  '6': {input: nrd01}
+  '7': {input: hold11}
+  '8': {input: nrd11}
+  '9': {output: dout01, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  α: {input: din01}
+  β: {output: dout11, block: 'redstone_wire[north=none,east=side,south=none,west=side]'}
+  γ: {input: din11}
+layers:
+  0: |
+    .AB.CAB.C
+    .A.DCA.DC
+    .ADDCADDC
+    .........
+    .AB.CAB.C
+    .A.DCA.DC
+    .ADDCADDC
+    .........
+    .E..EE..E
+    .........
+  1: |
+    .FGBFFGBF
+    .HBcIJBKJ
+    .MlsMNOPH
+    .A.QCA.QC
+    .FGBFFGBF
+    .HBTIJBUJ
+    .MVWMNXYH
+    .A.QCA.QC
+    .Z..ZZ..Z
+    .h..bd..e
+  2: |
+    .........
+    .BfBBBfBB
+    .........
+    .QQgQQQgQ
+    .........
+    .BfBBBfBB
+    .........
+    .QQgQQQgQ
+    .........
+    .........
+  3: |
+    .........
+    .i.jjj.jj
+    .........
+    kjj.jjj.j
+    .........
+    .m.jjj.jj
+    .........
+    pjj.jjj.j
+    .........
+    .........
+  4: |
+    .AB.CAB.C
+    .A.DCA.DC
+    .ADDCADDC
+    .........
+    .AB.CAB.C
+    .A.DCA.DC
+    .ADDCADDC
+    .........
+    .E..EE..E
+    .........
+  5: |
+    .FGBFFGBF
+    .HBqIJBrJ
+    .MtwMNxyH
+    .A.QCA.QC
+    .FGBFFGBF
+    .HBzIJB0J
+    .M12MN34H
+    .A.QCA.QC
+    .Z..ZZ..Z
+    .5..67..8
+  6: |
+    .........
+    .BfBBBfBB
+    .........
+    .QQgQQQgQ
+    .........
+    .BfBBBfBB
+    .........
+    .QQgQQQgQ
+    .........
+    .........
+  7: |
+    .........
+    .9.jjj.jj
+    .........
+    αjj.jjj.j
+    .........
+    .β.jjj.jj
+    .........
+    γjj.jjj.j
+    .........
+    .........
+tests:
+- name: write, hold and read one bit
+  initial:
+    hold00: 1
+    hold01: 1
+    hold10: 1
+    hold11: 1
+    nrd00: 1
+    nrd01: 1
+    nrd10: 1
+    nrd11: 1
+  settle: 30
+  steps:
+  - drive: {din00: 1}
+  - {wait: 2}
+  - drive: {hold00: 0}
+  - {wait: 10}
+  - drive: {hold00: 1}
+  - {wait: 10}
+  - drive: {din00: 0}
+  - {wait: 10}
+  - expect: {s000: 1, s010: 0, dout00: 0}
+  - drive: {nrd00: 0}
+  - {wait: 8}
+  - expect: {dout00: 1, dout10: 0}
+  - drive: {nrd00: 1}
+  - {wait: 8}
+  - expect: {dout00: 0}
+  - drive: {hold00: 0}
+  - {wait: 10}
+  - drive: {hold00: 1}
+  - {wait: 10}
+  - expect: {s000: 0}
+  - drive: {nrd00: 0}
+  - {wait: 8}
+  - expect: {dout00: 0}
+- name: checkerboard in all three directions, neighbours undisturbed
+  initial:
+    hold00: 1
+    hold01: 1
+    hold10: 1
+    hold11: 1
+    nrd00: 1
+    nrd01: 1
+    nrd10: 1
+    nrd11: 1
+  settle: 30
+  steps:
+  - drive: {din00: 0, din10: 1}
+  - {wait: 2}
+  - drive: {hold00: 0}
+  - {wait: 10}
+  - drive: {hold00: 1}
+  - {wait: 10}
+  - drive: {din00: 1, din10: 0}
+  - {wait: 2}
+  - drive: {hold10: 0}
+  - {wait: 10}
+  - drive: {hold10: 1}
+  - {wait: 10}
+  - drive: {din01: 1, din11: 0}
+  - {wait: 2}
+  - drive: {hold01: 0}
+  - {wait: 10}
+  - drive: {hold01: 1}
+  - {wait: 10}
+  - drive: {din01: 0, din11: 1}
+  - {wait: 2}
+  - drive: {hold11: 0}
+  - {wait: 10}
+  - drive: {hold11: 1}
+  - {wait: 10}
+  - drive:
+      din00: 0
+      din01: 0
+      din10: 0
+      din11: 0
+  - {wait: 10}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
+      dout00: 0
+      dout01: 0
+      dout10: 0
+      dout11: 0
+  - drive: {nrd00: 0}
+  - {wait: 8}
+  - expect:
+      dout00: 0
+      dout01: 0
+      dout10: 1
+      dout11: 0
+  - drive: {nrd00: 1}
+  - {wait: 8}
+  - drive: {nrd10: 0}
+  - {wait: 8}
+  - expect:
+      dout00: 1
+      dout01: 0
+      dout10: 0
+      dout11: 0
+  - drive: {nrd10: 1}
+  - {wait: 8}
+  - drive: {nrd01: 0}
+  - {wait: 8}
+  - expect:
+      dout00: 0
+      dout01: 1
+      dout10: 0
+      dout11: 0
+  - drive: {nrd01: 1}
+  - {wait: 8}
+  - drive: {nrd11: 0}
+  - {wait: 8}
+  - expect:
+      dout00: 0
+      dout01: 0
+      dout10: 0
+      dout11: 1
+  - drive: {nrd11: 1}
+  - {wait: 8}
+  - expect:
+      s000: 0
+      s001: 1
+      s010: 1
+      s011: 0
+      s100: 1
+      s101: 0
+      s110: 0
+      s111: 1
