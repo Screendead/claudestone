@@ -71,7 +71,7 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
   returns Z11 with no command (COMPUTED what-if with a redstone block there; the dusts and the re-laid line INFERRED, not
   designed); (b) keep the stand-in and design H11's drive together with D9's source and ARM_Z9's puller, which face the same
   kind of box. Recommended: (a), since the S feed already has the right time and W_Y is powered then anyway.
-- **Z9's re-arm: ARM_Z9's mover** (2026-11-23; for the lead). D9's source is made of blocks (z9.py, no command for it): R9_1
+- **Z9's re-arm: ARM_Z9's mover** (lead, 2026-11-23: (a), as the next step, once this pass with the stand-in is measured). D9's source is made of blocks (z9.py, no command for it): R9_1
   reads the S feed's dust (2,8,2), lit c10 to c42, and a line of 24 blocks (five 1-tick repeaters, seven dust, two stones,
   ten glass) goes round x 3 and the timer into the cell above D9; no measured block changed, box 2940. Chosen over LY, the
   earlier lead (lit in the closed state, and its death at t0 updates D9 with (4,4,1) empty), and over a repeater on A_9
