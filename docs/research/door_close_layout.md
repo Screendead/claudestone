@@ -7,9 +7,9 @@ No structural obstruction. The close runs from one input to the closed door's pl
 p9_p8.txt]: stages 0 to 8 are measured in game. Of the returns, the trigger chain's east side goes home from blocks, with
 no command after the input [COMPUTED rbt_drives.txt; MEASURED 4/4], after two changes to measured blocks (the bus's
 west branch re-laid, K_T made sticky): with added blocks alone it cannot, whatever the box [COMPUTED returns.txt]. The
-west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; not yet measured], but for
+west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; MEASURED 3/3], but for
 G, which ends where the opening puts it: its closed cell is Y12's head, so NP12 is lit again until Y12 is re-armed. Y12's
-re-arm is computed with Y12 made sticky and two sources stood in for by commands [COMPUTED y12.txt; not measured]; the
+re-arm is done from blocks with Y12 made sticky, no command after the input [COMPUTED y12_holds.txt; MEASURED 3/3]; the
 opening's other six relays are not designed.
 - Every close mover (15) has power cells that at its stage reach no piston still to fire/wait [COMPUTED constraints.py].
 - Wave-1 dead end had three non-structural causes: coupling treated as fatal regardless of order (a piston whose retract
@@ -846,11 +846,11 @@ it ends at (-4,3,2), its cell in the open state, and the gate over L stays open 
   controls that take one block out before the opening: R_M (the line stays dark, nothing moves in the west) and R_G
   (the kick and RB12's way back as in the run, P_G stays in, K out again at c59). Its steps, read back from the YAML
   and replayed in the simulator, pass 3/3; without R_W, R_M, A_W, RB_W, P_W, R_X, Y_X, R_G, Y_G, P_G or SPG the first
-  test fails. `python -m scripts.lint close_west_drives_probe`: ok. Not yet run on a server.
+  test fails. `python -m scripts.lint close_west_drives_probe`: ok. MEASURED 3/3 on the main server (2026-11-22).
 
 ## Y12's re-arm, first pass (2026-11-22; simulator)
 Not done from blocks: Y12 ends re-armed with Y12 made a sticky piston, 8 added blocks and two sources stood in for by
-four commands after the input [COMPUTED y12.txt; not measured]. Box still 14x15x12 = 2520; the opening is the same at
+four commands after the input [COMPUTED y12.txt; MEASURED 3/3 after the D_X fix]. Box still 14x15x12 = 2520; the opening is the same at
 every tick and the close the same to c30 outside the added cells, Y12 and its head's cell; the returns are the same
 until c61.
 - Sticky [COMPUTED y12.txt, control]: a plain Y12 retracts at c61 and leaves G at (-4,3,2). A block leaves that cell
@@ -899,7 +899,70 @@ until c61.
   build marks it a cross), and the probe now checks that shape. y12.txt is unchanged; close_y12_probe re-exported (3/3
   replayed, the same controls live, lint ok); the other exporters write the same YAML. The two older lone dusts, (1,7,0)
   and (-3,4,0), are dots in game; with them as dots the simulator gives the same runs of west_drives.py and y12.py at
-  every tick, which fits their probes passing. To measure again.
+  every tick, which fits their probes passing. MEASURED again on the main server, 2026-11-23, with D_X a cross: 3/3 (the
+  run and both controls): lift at c61, G home after c63, RB_D left at c65, ARM_Z11 back after c66, Y12 in and armed,
+  A_D never out.
+
+## Y12's holds from blocks (2026-11-22; simulator)
+Y12's re-arm needs no command after the input [COMPUTED y12_holds.txt; MEASURED 3/3]: y12.py's two stand-in sources are
+made of blocks, 14 on y12.py's 8, Y12 sticky (the lead's call) and no other measured block changed. From the one falling
+input Y12 goes in and is armed again, G lands at (-3,3,2), NP12 and the tap end dark and A_D never moves. Box 14x15x14 =
+2940: z 4 for U_Y's hold (the lead's call) and z 5 for B_Y's source, which the lead accepted (2026-11-22).
+- Why a hold alone cannot do it [COMPUTED y12_holds_search.txt]: U_Y is updated at W_Y's extension (c58 g, it must be
+  powered) and at NP12's relight (c60 j, it must be dark, or W_Y's retract at c61 g). The cells that power U_Y without
+  an update are (-3,7,2) (it also powers P_G and W_Y), (-2,7,1) (kept free), (-2,7,3), (-2,8,2) and (-1,7,2). A block a
+  sticky piston moves out of one and back is gone 5 gt at least; the only usable moves (piston and away cells free, the
+  block there powering nothing that stands) are out of (-2,8,2) to (-2,8,1), out of (-1,7,2) to (-1,7,1) (pushed or
+  pulled) and out of (-2,7,3) to (-2,7,4) (pulled from z 5); no neighbour update reaches any of those pistons from W_Y's
+  extension to the end of c59, and no tick is scheduled in c59. So the hold leaves before c58 and U_Y needs a second
+  source for c58.
+- S_U [COMPUTED]: a stone at (-2,7,3) under dust D_U (-2,8,3), which dust D_S on S_W (-3,8,3) lights while S_W is (c52 d
+  to c60 d): U_Y is lit by QC, D_U three cells from U_Y and D_S three from W_Y. D_U is beside A_C: D_Z, a dust at
+  (-2,8,4) on glass G_Z (-2,7,4), turns it north-south; without D_Z A_C pushes C_F out at c52 and back at c60.
+- The hold [COMPUTED]: RB_U, a redstone block at (-1,7,2), beside the cell above U_Y, in place of the stand-in at
+  (-2,8,2). H_U, a sticky piston at (-1,7,3) facing north, under A_C, pushes it to (-1,7,1) and pulls it back. S_U
+  powers H_U (beside it; D_U's changes update it): out at c52 g, back at c60 g, RB_U home at c62 j. Q_C, which powers
+  A_C's cell from c12 to c44, powers H_U too (QC): A_C's extension at c12 updates it and RB_U is away from c12 to c46 j;
+  no update reaches U_Y from c5 to c58.
+- The run [COMPUTED]: U_Y lit c46 to c59 (RB_U, then S_U), dark after c60 d to c62 j: NP12's relight at c60 j finds it
+  dark and it pulls ARM_Z11 at c61 g with W_Y's pull of RB_D, as the stand-in had it (out before c60, back before c62);
+  ARM_Z11's landing at c63 j finds it lit, it pushes at c64 g and stays out on RB_U.
+- B_Y's source [COMPUTED]: R_B, a 3-tick repeater at (-4,6,4) facing north on glass G_B, reads Y_G and powers stone S_B
+  (-4,6,5) from c64 d to c72 d; dust D_B under S_B on stone S_B2 (-4,4,5) steps down north to dust D_Y (-4,4,4) on glass
+  G_Y (-4,3,4), pointing north into the cell above B_Y. B_Y goes out at c64 g into (-4,3,2), empty since G left at c61
+  g; ARM_Z11's landing at c66 j finds its head there; in at c72 g. D_Y updates A_D at c64 d, when A_D's push is already
+  queued (G's landing, c63 j, behind W_Y's), and at c72 d, with the tap off. Y_G alone (a dot under it) is one tick
+  short: B_Y goes in at c66 g and Y12 out at c67 (what-if). A repeater reads Y_G only from (-4,6,4), facing north, so its
+  output is at z 5 [COMPUTED y12_holds_search.txt: the cells from which a repeater reads Y_G, S_W, S_F, Y_X or the tap's
+  stone]. No single block near B_Y re-arms Y12 [y12_holds_search.txt].
+- Against y12.py's run [COMPUTED]: the opening, the close and the returns are the same at every tick outside the added
+  cells and B_Y's head cell (out c64 to c72, two ticks after the stand-in source's c62 to c70); against west_drives.py's
+  run the cells that differ are y12.py's. 20 cells outside the door plane still differ from the closed state, as after
+  y12.py.
+- Margins [COMPUTED]: R_B 1 to 4 ticks re-arm Y12. At 1 tick B_Y is powered at G's landing in (-4,3,2) at c60 j and its
+  push stops only because M_K's base lands after G (the landings reversed: fails); at 2 ticks D_Y updates A_D in c62 d
+  beside the tap's turning on (the scheduled ticks reversed: fails); at 3 (built) and 4 neither. Order: dust's updates
+  reversed, I_A's event last, the scheduled ticks reversed, and the landings of c14, c46, c54, c60, c62, c64, c66 and c72
+  each reversed among themselves change nothing; 60 runs with the scheduled ticks of every tick in a random order (and
+  dust's updates reversed in half) re-arm Y12 every time. As in y12.py, A_D's push ahead of W_Y's at c64 and the c63 j
+  landings reversed fail: they rest on moving blocks ticking in the order their moves began [MEASURED
+  `close_rbt_drives_probe`].
+- Controls fail [COMPUTED]: no RB_U (U_Y retracts in the load), no H_U, no S_U, D_U or D_S (U_Y and Y12 stay out), H_U
+  not sticky (RB_U left at (-1,7,1): U_Y never pushes ARM_Z11 back and Y12 goes out at c64), no D_Z (A_C moves C_F out
+  and back, c52 to c61), no R_B, S_B, D_B, S_B2 or D_Y (Y12 out again at c67); each of y12.py's 7 blocks left out and Y12
+  plain still fail. A second cycle [COMPUTED, sim only] is the same: second opening identical at every tick, second close
+  and returns re-arm Y12 with the same piston events.
+- Cost [INFERRED]: RB_U at (-1,7,1), from c14 j to c44 g and from c54 j to c60 g, is one step from (-2,7,1): it would
+  power a piston at (-2,6,1), the cell kept free for Z11's down-pusher, by QC. Z11's design has to allow for it.
+- Probe: `close_y12_holds_probe` (`export_y12_holds`): three tests with no command after the input (the run; H_U taken
+  out: U_Y and Y12 stay out; R_B taken out: Y12 out again at c67), replayed in the simulator 3/3; the first test fails
+  with Y12 plain or without RB_U, H_U, S_U, D_U, D_S, D_Z, R_B, S_B, D_B, S_B2, D_Y, U_Y or W_Y. `python -m scripts.lint
+  close_y12_holds_probe`: ok. MEASURED on the main server, 2026-11-23: 3/3; in the run RB_U out c12 to c46 and c52 to
+  c62, U_Y lit by S_U at c58, the lift at c61, G home after c63, B_Y out c64 to c72. Earlier scripts, searches and exporters: unchanged, their outputs
+  byte for byte. After close_y12_probe's 0/3 (above: D_X exported as a dot) the probe is re-exported with D_X a cross;
+  only D_X's glyph and checks change, y12_holds.txt and y12_holds_search.txt are the same byte for byte, the replay is
+  still 3/3 with the same controls live, lint ok. Its other dusts all have a neighbour to point at, so none is a lone
+  dot; the two older lone dusts, (1,7,0) and (-3,4,0), are as in west_drives.
 
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
@@ -1001,7 +1064,9 @@ events of one phase: they show which orders work, not how to get them.
    (-4,3,2) into (-3,3,2): Y12 made sticky pulls it there by itself (a measured block of design_c; what-if in
    west_drives.txt), as built it needs a mover from the west, where P_W's head stands. NP12 then dies and A_D, armed
    since RB12 came home, fires once as at c0. First pass [COMPUTED y12.txt]: done with Y12 sticky, three pistons and two
-   stand-in sources, inside the west return (c58 to c70); A_D does not fire. Left: U_Y's hold and B_Y's source from blocks.
+   stand-in sources, inside the west return (c58 to c70); A_D does not fire. From blocks [COMPUTED y12_holds.txt]: 14 more
+   blocks, no command after the input, box 2940 (z 5 for B_Y's source, accepted by the lead). Left: Z11, then D9's source,
+   ARM_Z9's puller and the other up relays.
 5. Routing: the bus is laid (east to P_R and AP, west over the input repeater to M_K; re-laid 2026-11-22, box 2016). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
    [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
@@ -1024,10 +1089,12 @@ blocks and MEASURED (rbt_drives.txt: 49 blocks, K_T sticky, box 2160; `close_rbt
 re-exported for K_T 23/23 on the main server, 2026-11-22, traits ok): the trigger chain's east side ends as loaded from the
 one input with no command. The west side's return is designed from blocks (west_drives.txt: 34 blocks, no measured block
 changed, box 2520; MEASURED: `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` still 4/4 on the main server,
-2026-11-22, traits ok): RB12, K, M_K and WK end as loaded, G at (-4,3,2), and NP12 is lit again from c60. Next: the opening's
-relays, Y12 first because the lit NP12 waits on it: its two holds (ARM_Z11 and RB_D) away and back without an update,
-G's last cell (Y12 sticky, or a mover from the west), and A_D's shot when NP12 dies; then D9's source and ARM_Z9's
-puller, and the same in-place re-arm for Z11, Z_Q and Y1 (Y1 with the blocker). If P6 must be
+2026-11-22, traits ok): RB12, K, M_K and WK end as loaded, G at (-4,3,2), and NP12 is lit again from c60. Y12 is
+re-armed from blocks with no command after the input (y12.txt, then y12_holds.txt: Y12 sticky, 22 blocks, box 2940; G
+home at (-3,3,2), NP12 and the tap dark, A_D never moves; COMPUTED; `close_y12_probe` measured 0/3 on an export fault,
+D_X placed as a dot, now fixed in both probes, which are to be measured). Next: Z11 (its retract updates Y12, so it
+falls inside Y12's window or needs the blocker again; RB_U QC-powers its down-pusher's cell (-2,6,1) from c14 to c44 and c54 to c60), then D9's source and ARM_Z9's puller, and the
+same in-place re-arm for Z_Q and Y1 (Y1 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
@@ -1036,7 +1103,7 @@ puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.t
 dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py, p10_v.py/.txt, p10_v_search.py/.txt,
 export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py, p9_p8.py/.txt, export_p9_p8.py, returns.py/.txt,
 export_returns.py, rbt_route.py/.txt, rbt_drives.py/.txt, export_rbt_drives.py, west_drives.py/.txt,
-export_west_drives.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_search.py/.txt, export_y12_holds.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
@@ -1046,7 +1113,10 @@ export_west_drives.py), run from the repo root as `python -m scripts.door2.close
 `library/mechanics/close_p9_p8_probe.redstone.yaml` (written by `export_p9_p8`; 3/3 on sat1),
 `library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server),
 `library/mechanics/close_rbt_drives_probe.redstone.yaml` (written by `export_rbt_drives`; 4/4 on the main server) and
-`library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; not yet run on a server).
+`library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; 3/3 on the main server),
+`library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; 0/3 on main before the D_X fix, 3/3 after) and
+`library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; 3/3 on the main server).
+On 2026-11-23, with the Y12 holds merged, `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` 4/4 still pass.
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
 three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
 (2026-11-22): 4/4, 4/4, 3/3, 3/3, 3/3 and 6/6. They were written a third time on 2026-11-22 with K_T sticky
@@ -1057,6 +1127,7 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.try close_p10_v_probe`; `python -m scripts.try close_s_inputs_probe`;
 `python -m scripts.try close_p9_p8_probe`; `python -m scripts.try close_returns_probe`;
 `python -m scripts.try close_rbt_drives_probe`; `python -m scripts.try close_west_drives_probe`;
+`python -m scripts.try close_y12_probe`; `python -m scripts.try close_y12_holds_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
@@ -1079,4 +1150,9 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.door2.close_layout.rbt_drives > scripts/door2/close_layout/rbt_drives.txt` (about 30 s);
 `python -m scripts.door2.close_layout.export_rbt_drives`;
 `python -m scripts.door2.close_layout.west_drives > scripts/door2/close_layout/west_drives.txt` (under a minute);
-`python -m scripts.door2.close_layout.export_west_drives`
+`python -m scripts.door2.close_layout.export_west_drives`;
+`python -m scripts.door2.close_layout.y12 > scripts/door2/close_layout/y12.txt`;
+`python -m scripts.door2.close_layout.export_y12`;
+`python -m scripts.door2.close_layout.y12_holds > scripts/door2/close_layout/y12_holds.txt` (about a minute);
+`python -m scripts.door2.close_layout.y12_holds_search > scripts/door2/close_layout/y12_holds_search.txt` (about 5 minutes);
+`python -m scripts.door2.close_layout.export_y12_holds`
