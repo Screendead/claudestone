@@ -74,6 +74,10 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
   lies against the next word's write-enable dust (x=0) at the same level and joins it, so two words share a line.
   Next (Mac): re-read how the second word sits beside the first (5:41–6:57), fix the layers if the read changes, and
   run the spec's two tests on a satellite; then bank `t8_c_box60` against it if it holds.
+- **If the community RAM cell won't tile as read, what do we bank against?** (2026-11-23, #92, opened when the
+  no-progress counter reached 3: every step waits on the Mac). Options: A make the faithful copy tile with the smallest
+  change at 64 per bit, then bank against it (recommended); B bank against the video's cell as published; C don't bank.
+  Waiting on Jack.
 - **Lead waits out another run's 3-hour hold** (2026-11-22, asked when the no-progress counter reached 3). Jack's
   answer, verbatim: "A · Wait it out". Acted on: a cloud PR pushed in the last 3 hours stays another run's claim; idle
   runs wait rather than take it over sooner.
