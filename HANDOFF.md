@@ -68,7 +68,7 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
   `tools/t8_ref64/SOURCE.md`): the bar is Pepich1851's "4^3 tileable memory cell" (YouTube, 2018-05-21; write-locked
   repeater storage, subtract-comparator read, inverted read and write enables, 4x4x4 = 64 per bit). No schematic or
   world download exists for it or for any ORE "4x4x4 Tileable RAM Cube" entry (2014; claimed, never posted). Next: read
-  one cell layer by layer from the video's frames (0:53–3:10, tiling repeaters 4:56–5:26) on the Mac (needs-mac #86),
+  one cell layer by layer from the video's frames (0:53–3:10, tiling repeaters 4:56–5:26) on the Mac (needs-mac #88),
   then rebuild it as `library/register/ref_pepich1851_cube444` and test it. The ORE thread's replies are unverified
   claims with no designs: Darkroom 4x4x4, redstonewarrior 4x4x4 and a 4x3x4 shared-bus variant, WrytXander 3x4x5 = 60.
   Before banking, WINS rules 2 and 4 need judging: Pepich's repeaters between cells break the ORE rule our cell keeps
