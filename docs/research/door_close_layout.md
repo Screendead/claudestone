@@ -9,8 +9,9 @@ no command after the input [COMPUTED rbt_drives.txt; MEASURED 4/4], after two ch
 west branch re-laid, K_T made sticky): with added blocks alone it cannot, whatever the box [COMPUTED returns.txt]. The
 west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; MEASURED 3/3], but for
 G, which ends where the opening puts it: its closed cell is Y12's head, so NP12 is lit again until Y12 is re-armed. Y12's
-re-arm is done from blocks with Y12 made sticky, no command after the input [COMPUTED y12_holds.txt; MEASURED 3/3]; the
-opening's other six relays are not designed.
+re-arm is done from blocks with Y12 made sticky, no command after the input [COMPUTED y12_holds.txt; MEASURED 3/3]. Z11
+goes home with one drive stood in for (z11.txt), Z9 with D9's source from blocks and ARM_Z9's mover stood in for (z9.txt);
+the opening's other four relays are not designed.
 - Every close mover (15) has power cells that at its stage reach no piston still to fire/wait [COMPUTED constraints.py].
 - Wave-1 dead end had three non-structural causes: coupling treated as fatal regardless of order (a piston whose retract
   event ran is a moving block for the rest of c0 g [SOURCED PistonBaseBlock.java:168-178]); opening wiring on free cells
@@ -1027,6 +1028,78 @@ c61. The last drive needs a measured block moved, the west timer's line: the lea
   `close_y12_holds_probe`. The controls: with no command, D11 out at c60 and Y12 left out; without H11, Z11 out at the
   end; without R11, RB11 left on (-2,5,1).
 
+## Z9's re-arm in place: D9's source from blocks (2026-11-23; simulator)
+Half done from blocks: D9 pushes RB9 home on a source made of blocks, with no command for it; ARM_Z9 has no mover in the
+free cells and is still taken out and set back by two commands after the input [COMPUTED z9.txt, z9_search.txt; not
+measured]. 25 blocks on z11.py's build (D9 and its line), no measured block changed; box still 14x15x14 = 2940. The
+opening is the same at every tick, and the close and the returns are z11.py's at every tick outside the 25 blocks, Z9's
+column ((4,2,1) to (4,4,1)) and ARM_Z9's cell. Not as framed in two ways: LY, the lead, cannot be D9's source, and ARM_Z9
+cannot be pulled aside at all.
+- The window [COMPUTED]: as in returns.py's what-if, ARM_Z9 gone, RB9's departure (c16 g) updates Z9 through its head and
+  it retracts; RB9's return (c22 j) powers it by QC without an update. P9's base lands beside Z9 at c24 j: RB9 must be
+  moving into (4,3,1) by then, or Z9 fires into the empty cell. So D9 has to be powered at RB9's landing (c22 j), which
+  updates it, or turn on, with an update, by the end of c23: from c16 g to c22 j its pushes fail harmlessly (A_9's head,
+  then RB9 moving, in (4,4,1)), and before that RB9 sits on Z9's head. It must be dark in the closed state and in the
+  opening to t5, when (4,4,1) is empty.
+- Why not LY [COMPUTED z9_search.txt, 2]: D9 stands beside LY's dust (4,5,2). LY is lit in the closed state (RB_Y), so a
+  repeater reading it powers D9 there, and LY's death at t0 g updates D9 while that repeater is still on and (4,4,1) is
+  empty: D9 fires in the opening.
+- Sources in reach [COMPUTED z9_search.txt, 3 and 4]: the signals dark in the closed state and through the opening and lit
+  at c22 and c23 are the S feed's line ((2,8,1), (2,8,2), (1,8,2) and Q_C, c10 to c42, from RB_ST at (2,8,0)), R_0 (c18 to
+  c26), RB_ST, RB_T, and RB11, RB_U and RB12 on the west side: all at x 2 or below. Between them and D9's eight power cells
+  stand RB_1, RB_2, G_N, ARM_ZS and R_X at x 3, LY and the timer's dust at z 3. No single block within six steps of D9 or of
+  the cell above it re-arms Z9 (237 cells, 6756 runs; in the two that push D9 in time a piston at (1,7,1) facing
+  east, on the S feed's line, shoves RB_1 to (4,7,1) and breaks RB_T's return). R_X (c16 d to c20 d) would, read by a
+  repeater of 2 to 4 ticks in its front cell (3,5,1) [COMPUTED what-if], but that cell is on A_9, and A_9's extension at
+  c16 leaves no full face under it: the game pops a repeater there [INFERRED from the support rule; the simulator has
+  none].
+- The line [COMPUTED z9.txt]: R9_1, a 1-tick repeater at (2,8,3) facing north on glass, reads the line's dust (2,8,2).
+  Dust W9_1 to W9_3, (2,8,4) to (4,8,4), on glass. R9_2 (5,8,4) and R9_3 (6,8,4), 1-tick repeaters facing west on glass,
+  pass the timer's dust (5,8,3) and its step (6,7,3), which dust there would join. Dust W9_4 (7,8,4) on glass; R9_4
+  (7,8,3), 1-tick, facing south on glass, past (6,7,3) again. Dust W9_5 (7,8,2), W9_6 (7,7,1) and W9_7 (6,6,1) step down,
+  W9_5 and W9_6 on stone (S9_1 (7,7,2), S9_2 (7,6,1)): a dust passes power down a step only over a conductor (the
+  simulator's rule, from the game's wire code; on glass W9_6 stays dark). R9_5, a 1-tick repeater at (5,6,1) facing east
+  on glass, points into (4,6,1), the cell above D9: D9 is powered by QC and updated by R9_5's changes. Ten glass blocks,
+  two stones, seven dust, five repeaters and D9.
+  The line is dark in the closed state and through the opening; R9_1 is on from c12 d to c44 d, R9_5 from c20 d to c52 d.
+- The run [COMPUTED]: STAND-IN: ARM_Z9 taken out before c13 and set back before c27, setblock with updates (returns.py's
+  what-if, MEASURED there). c16 g A_9 pushes RB9 east and Z9 retracts. c20 d R9_5 on: D9 powered, its push fails on A_9's
+  head. c22 j RB9 lands at (4,4,1) and updates D9; c23 g D9 pushes it down; c24 j P9's base lands with RB9 moving; c25 j
+  RB9 lands at (4,3,1). ARM_Z9's landing updates the cell above Z9, where RB9 now is: not Z9. c52 d R9_5 off, D9 retracts
+  at c52 g. End: Z9 in, powered by ARM_Z9 and not updated, RB9 at (4,3,1), (4,4,1) empty, D9 in, the line dark; an update
+  under Z9 fires it. Three piston events are added to z11.py's run (Z9 in at c16, D9 out at c23 and in at c52), none
+  taken away. 14 cells outside the door plane still differ from the closed state (17 after z11.py): the opening's other
+  four relays with their blocks, and R_9.
+- Windows and margins [COMPUTED]: ARM_Z9 out before c10 to c22 (before c23 is too late: RB9 is home over Z9 by then); back
+  before c23 to c60, all tried (before c22, P9's spit at c22 g fires Z9 into the empty cell; from c23 Z9's pushes fail on
+  RB9 moving or D9's head; after c52 RB9 rests on Z9's head cell and the landing does not update Z9). Each of the five
+  repeaters works at 1 to 3 ticks; at 4 D9 is on only at c26 d and P9's landing fires Z9 at c25.
+- Order [COMPUTED]: dust's updates reversed, I_A's event last, the scheduled ticks reversed from c30 and, separately, from
+  c10 to c29, and the landings of c22, c24 and c25 each reversed among themselves change nothing; 60 runs with the
+  scheduled ticks of every tick from c10 on in a random order (dust reversed in half, I_A last in half) re-arm Z9 every
+  time with the same piston events. A second cycle is the same.
+- Controls fail [COMPUTED]: no D9, no R9_1 or no R9_5 (RB9 stays over Z9 and P9's landing fires it at c25); no command
+  for ARM_Z9 (Z9 stays out, D9's pushes fail on Z9's head); ARM_Z9 back before c22. Each of the 15 added blocks that are
+  not glass, left out alone, fails.
+- ARM_Z9 [COMPUTED z9_search.txt, 1]: its six neighbours are Z9's head cell, S_L (6,3,1), R_9 (5,3,0), LY's glass (5,3,2)
+  under the dust (5,4,2) (a redstone block there lights LY), RB9's stroke (5,4,1) beside LY's dust, and (5,2,1). In
+  (5,2,1) it powers Z9 directly, and the only puller for it, a sticky piston at (5,1,1) facing up, is held out by ARM_Z9
+  itself (QC through its head cell) in the closed state, the open state and every tick of the close. A pusher at (5,2,1)
+  moves in the load (RB9 powers it by QC). So ARM_Z9 has no mover without a measured block changed; the stand-in stays.
+- What would open it [COMPUTED what-if; the drive INFERRED]: ARM_Z9 one cell over, at (4,3,2), beside the cell above Z9 as
+  (5,3,1) is (a design_c block moved: the lead's call). Nothing moves during the load, Z9 is powered by it alone in the
+  closed state, and the opening, the close and the returns are the same at every tick outside the moved cells. P_A, a
+  sticky piston at (4,3,4) facing north built out, its head at (4,3,3), pulls it to (4,3,3) and pushes it back; with
+  P_A's power (a redstone block at (4,3,5)) taken out and set back by command Z9 is re-armed for every pair tried, from
+  out before c10 to c21 and back before c21 to c60. P_A's drive is an inverted pulse, on in the closed and the open state
+  and off over c21: the S feed's line (lit c10 to c42), which D9's line already carries to z 4, through a sticky piston
+  that moves P_A's redstone block aside while it is lit, for one.
+- Probe: `close_z9_probe` (`export_z9`): three tests, the run with ARM_Z9's two commands (then a glass block set under Z9
+  and taken out: Z9 fires) and two controls (R9_1 taken out with setblock air strict before the opening: D9 never moves
+  and Z9 fires at c25; no command for ARM_Z9: Z9 stays out and D9's pushes fail). Replayed in the simulator 3/3; the first
+  test fails without D9 or any of the line's repeaters, dust or stones. `python -m scripts.lint close_z9_probe`: ok. To be
+  measured.
+
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
 above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
@@ -1118,10 +1191,12 @@ events of one phase: they show which orders work, not how to get them.
    not updated).
    The opening's relays, which every close leaves fired (X2, Z_Q, Y1, Z_S, Z9, Z11, Y12 with RB_X, C_cut, RB_Q, RB_Y,
    RB_S, RB9, RB11): each is held by its arm, the four that face up also by their payload at R+2. They need no
-   re-orienting: Z9 is re-armed in place by command, its arm taken out before c22, D9 (4,5,1) pushing RB9 down at c23
-   and the arm back from c23 on [COMPUTED returns.txt; MEASURED `close_returns_probe` 3/3]. Not designed: D9's
-   source (on by c23, off from c24) and ARM_Z9's puller (from (5,2,1) or (5,3,2); powered in the closed and the open
-   state, off from c22 or before until c23 or after). RB_Y's return relights LY and R_9 then powers P9 behind Q, as RB9
+   re-orienting: Z9 is re-armed in place, its arm taken out before c22, D9 (4,5,1) pushing RB9 down at c23 and the arm
+   back from c23 on [COMPUTED returns.txt; MEASURED `close_returns_probe` 3/3]. D9's source is made of blocks: a line of
+   24 from the S feed's dust (2,8,2) round x 3 and the timer into the cell above D9, on c20 to c52 [COMPUTED z9.txt].
+   ARM_Z9 has no mover: (5,2,1) is the only free cell beside it, where it powers Z9 directly and holds its own puller
+   (5,1,1) out, and (5,3,2) is LY's glass [COMPUTED z9_search.txt]; it is taken out and set back by command until
+   ARM_Z9 may move to (4,3,2) (the call). RB_Y's return relights LY and R_9 then powers P9 behind Q, as RB9
    does, and LY's relight updates Y1, so Y1 needs the blocker, a head in (7,5,-3) [INFERRED]. P8 is held by R_8 on NA, so C_cut's
    return has no deadline. Y12 is held by ARM_Z11, which Z11 shares, and by RB_D; when it retracts G has to go from
    (-4,3,2) into (-3,3,2): Y12 made sticky pulls it there by itself (a measured block of design_c; what-if in
@@ -1130,7 +1205,7 @@ events of one phase: they show which orders work, not how to get them.
    stand-in sources, inside the west return (c58 to c70); A_D does not fire. From blocks [COMPUTED y12_holds.txt]: 14 more
    blocks, no command after the input, box 2940 (z 5 for B_Y's source, accepted by the lead). Z11, first pass [COMPUTED
    z11.txt]: home with 3 blocks (H11, D11, R11) and one stand-in drive (H11's pull), which needs the west timer's line
-   re-laid (the call). Left: D9's source, ARM_Z9's puller and the other up relays.
+   re-laid (the call). Left: ARM_Z9's mover (the call), H11's pull and the other up relays.
 5. Routing: the bus is laid (east to P_R and AP, west over the input repeater to M_K; re-laid 2026-11-22, box 2016). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
    [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
@@ -1159,8 +1234,11 @@ home at (-3,3,2), NP12 and the tap dark, A_D never moves; COMPUTED; `close_y12_p
 D_X placed as a dot, now fixed in both probes, both since MEASURED 3/3). Z11's return, first pass (z11.txt; COMPUTED):
 Z11 home with 3 blocks (H11 spits RB11 east on DP's pulse at c3, so Z11 retracts in Y12's window; H11 pulls RB11 back and
 D11, on R11, pushes it home) and one stand-in drive, H11's pull, which only a re-laid west timer's line lets blocks carry
-(the call; `close_z11_probe` to be measured). Next: D9's source and ARM_Z9's puller, then the
-same in-place re-arm for Z_Q and Y1 (Y1 with the blocker). If P6 must be
+(the call; `close_z11_probe` to be measured). Z9's re-arm in place (z9.txt; COMPUTED): D9's source from blocks, a line of
+24 from the S feed's dust round x 3 and the timer, with no command for it; ARM_Z9 has no mover in the free cells and is
+still taken out and set back by command (`close_z9_probe` to be measured; the call: ARM_Z9 moved to (4,3,2), where a sticky
+piston at (4,3,4) pulls it aside and back). Next: measure `close_z11_probe` and `close_z9_probe`; ARM_Z9's puller and its
+drive from blocks once the call is made; then the same in-place re-arm for Z_Q and Y1 (Y1 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
 
@@ -1169,7 +1247,7 @@ puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.t
 dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py, p10_v.py/.txt, p10_v_search.py/.txt,
 export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py, p9_p8.py/.txt, export_p9_p8.py, returns.py/.txt,
 export_returns.py, rbt_route.py/.txt, rbt_drives.py/.txt, export_rbt_drives.py, west_drives.py/.txt,
-export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_search.py/.txt, export_y12_holds.py, z11.py/.txt, z11_search.py/.txt, export_z11.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_search.py/.txt, export_y12_holds.py, z11.py/.txt, z11_search.py/.txt, export_z11.py, z9.py/.txt, z9_search.py/.txt, export_z9.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
@@ -1182,7 +1260,8 @@ export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_
 `library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; 3/3 on the main server),
 `library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; 0/3 on main before the D_X fix, 3/3 after) and
 `library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; 3/3 on the main server),
-`library/mechanics/close_z11_probe.redstone.yaml` (written by `export_z11`; with the stand-in, not yet run on a server).
+`library/mechanics/close_z11_probe.redstone.yaml` (written by `export_z11`; with the stand-in, not yet run on a server) and
+`library/mechanics/close_z9_probe.redstone.yaml` (written by `export_z9`; with ARM_Z9's stand-in, not yet run on a server).
 On 2026-11-23, with the Y12 holds merged, `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` 4/4 still pass.
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
 three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
@@ -1195,7 +1274,7 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.try close_p9_p8_probe`; `python -m scripts.try close_returns_probe`;
 `python -m scripts.try close_rbt_drives_probe`; `python -m scripts.try close_west_drives_probe`;
 `python -m scripts.try close_y12_probe`; `python -m scripts.try close_y12_holds_probe`;
-`python -m scripts.try close_z11_probe`;
+`python -m scripts.try close_z11_probe`; `python -m scripts.try close_z9_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
@@ -1226,4 +1305,7 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.door2.close_layout.export_y12_holds`;
 `python -m scripts.door2.close_layout.z11 > scripts/door2/close_layout/z11.txt` (about 20 s);
 `python -m scripts.door2.close_layout.z11_search > scripts/door2/close_layout/z11_search.txt` (about 30 minutes on one core; it uses every core);
-`python -m scripts.door2.close_layout.export_z11`
+`python -m scripts.door2.close_layout.export_z11`;
+`python -m scripts.door2.close_layout.z9 > scripts/door2/close_layout/z9.txt` (about a minute);
+`python -m scripts.door2.close_layout.z9_search > scripts/door2/close_layout/z9_search.txt` (about 10 minutes on four cores; it uses every core);
+`python -m scripts.door2.close_layout.export_z9`
