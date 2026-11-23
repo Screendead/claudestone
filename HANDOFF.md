@@ -60,9 +60,13 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
   called, and z 5 for B_Y's source (box 2940, from 2520): a repeater reads Y_G only from (-4,6,4), facing north, and Y_G alone is one
   tick short. Within z 4 the repeaters that read the timer's other blocks (S_W, S_F, Y_X, the tap's stone) point away from B_Y
   or into z 5, and no single block near B_Y does it (y12_holds_search.txt); no z 4 route was built.
-- **Bank the 60-block box RAM cell as a win?** (2026-11-22, waiting on Jack). `t8_c_box60` passes in game at 60
-  blocks per bit in a 5x2x6 box, under the community's 64; banking it needs the box reading of the cube challenge and
-  the 64 figure, which has no rebuilt reference, accepted.
+- **Bank the 60-block box RAM cell as a win?** (2026-11-22, answered 2026-11-23). `t8_c_box60` passes in game at 60
+  blocks per bit in a 5x2x6 box, under the community's 64. Jack's answer, verbatim: "B · Rebuild the 64 design first".
+  Acted on: the community 64-block 4x4x4 tileable cell is found, rebuilt as `ref_<author>_<design>` in
+  `library/register/` and tested on our server before anything is banked; `t8_c_box60` stays a candidate until then.
+  This machine reaches neither the video nor the ORE forum, so finding the source went to the Mac (needs-mac issue).
+  The lead's only lead: "Minecraft redstone: 4^3 tileable memory cell" (youtube.com/watch?v=Wa6TiN1pm40), built for a
+  redstoner.com request. Not to be confused with our own `t8_b_lock3_444` (also 64), which is ours, not the bar.
 
 ## Queued
 
