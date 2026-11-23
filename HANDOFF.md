@@ -64,6 +64,12 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
 - **Bank the 60-block box RAM cell as a win?** (2026-11-22). Jack's answer, verbatim: "B · Rebuild the 64 design first".
   Acted on: `t8_c_box60` is not banked yet. Next: find the community 64-block tileable RAM cell, rebuild it as a
   `ref_<author>_<design>` spec, test it in game, then bank the 60 against it in `docs/WINS.md` if it holds.
+  Our own `t8_b_lock3_444` is also 64 but is ours, not the bar. Sources found on the Mac (#85, 2026-11-23,
+  `tools/t8_ref64/SOURCE.md`): the bar is Pepich1851's "4^3 tileable memory cell" (YouTube, 2018-05-21; write-locked
+  repeater storage, subtract-comparator read, inverted read and write enables, 4x4x4 = 64 per bit). No schematic or
+  world download exists for it or for any ORE "4x4x4 Tileable RAM Cube" entry (2014; claimed, never posted). Next: read
+  one cell layer by layer from the video's frames (0:53–3:10, tiling repeaters 4:56–5:26) on the Mac, then rebuild it
+  as `library/register/ref_pepich1851_cube444` and test it.
 - **Lead waits out another run's 3-hour hold** (2026-11-22, asked when the no-progress counter reached 3). Jack's
   answer, verbatim: "A · Wait it out". Acted on: a cloud PR pushed in the last 3 hours stays another run's claim; idle
   runs wait rather than take it over sooner.
