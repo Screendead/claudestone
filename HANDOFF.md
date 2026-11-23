@@ -64,6 +64,9 @@ tick; doors need it to measure opening and closing times, volume and seamlessnes
 - **Bank the 60-block box RAM cell as a win?** (2026-11-22). Jack's answer, verbatim: "B · Rebuild the 64 design first".
   Acted on: `t8_c_box60` is not banked yet. Next: find the community 64-block tileable RAM cell, rebuild it as a
   `ref_<author>_<design>` spec, test it in game, then bank the 60 against it in `docs/WINS.md` if it holds.
+  The cloud machine reaches neither YouTube nor the ORE forum, so finding the source and capturing its blocks is on
+  the Mac (needs-mac issue #85; lead: "Minecraft redstone: 4^3 tileable memory cell", youtube.com/watch?v=Wa6TiN1pm40).
+  Our own `t8_b_lock3_444` is also 64 but is ours, not the bar.
 - **Lead waits out another run's 3-hour hold** (2026-11-22, asked when the no-progress counter reached 3). Jack's
   answer, verbatim: "A · Wait it out". Acted on: a cloud PR pushed in the last 3 hours stays another run's claim; idle
   runs wait rather than take it over sooner.
