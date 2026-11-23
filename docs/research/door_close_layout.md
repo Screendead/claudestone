@@ -964,6 +964,69 @@ input Y12 goes in and is armed again, G lands at (-3,3,2), NP12 and the tap end 
   still 3/3 with the same controls live, lint ok. Its other dusts all have a neighbour to point at, so none is a lone
   dot; the two older lone dusts, (1,7,0) and (-3,4,0), are as in west_drives.
 
+## Z11's return, first pass (2026-11-23; simulator)
+Not done from blocks: Z11 goes home, in and armed as loaded, with 3 added blocks and one drive stood in for by two
+commands after the input [COMPUTED z11.txt; not measured]. No measured block changed; box still 14x15x14 = 2940. The
+opening is the same at every tick, and the close and the returns are y12_holds.py's at every tick outside the 3 blocks,
+the stand-in's cell, Z11's column and RB11's park: (-2,5,1) and (-1,5,1) from c3 (RB11 spat east), Z11 and (-2,4,1) from
+c61. The last drive needs a measured block moved, the west timer's line: the lead's call (HANDOFF, Calls).
+- Holds [COMPUTED]: after the close Z11 (-2,3,1) is held by ARM_Z11 (-2,4,2) and by its own payload RB11 at (-2,5,1), two
+  above it (QC). ARM_Z11 is away only in Y12's window (U_Y lifts it at c61 g, it lands back at c66 j), so RB11 has to be
+  off (-2,5,1) then and back in (-2,4,1) by the end. The only way into (-2,4,1) is down from (-2,5,1), pushed from
+  (-2,6,1) [z11_search.txt, 1].
+- The way out [COMPUTED]: H11, a sticky piston at (-3,5,1) facing east, beside RB11, fired by DP's pulse: RB_D lands in
+  DP's source cell (-3,4,1), under H11, at c2 j and A_D pulls it back at c3 g, the pulse that spits P11. H11 pushes RB11
+  east at c3 g and is spat in the same phase: RB11 rests at (-1,5,1) from c3, beside P10, which it powers until c60.
+  P11's head is moving through (-1,3,0) then, in P10's way, so P10's push fails and it goes out at c8 as before. That
+  rests on order: H11's spit is queued ahead of P11's (A_D's pull updates H11, above RB_D's old cell, before DP's dust,
+  which reaches P11). With P11's first (sim only), or H11 a plain piston (RB11 lands only at c5 j), P10 goes out early and
+  the door plane fails (P8, Q, S). Of the twelve one-step moves of RB11 out of (-2,5,1) it is the only one whose piston
+  cell is free and whose block lands where it powers nothing that waits [z11_search.txt, 1]. Z11, held by ARM_Z11 alone,
+  retracts at c61 g when U_Y's lift updates its head: inside Y12's window, with Y12 retracting and P11 unpowered. With H11
+  alone y12_holds.py's verdict holds, and only H11's cell, RB11's two cells (from c3) and Z11's (from c61) differ
+  [what-if].
+- The way back [COMPUTED, with a STAND-IN]: H11 pulls RB11 back into (-2,5,1) and D11, a piston at (-2,6,1) facing down,
+  pushes it into (-2,4,1). R11, a 4-tick repeater at (-2,7,2) on U_Y facing south, reads S_U and points into (-2,7,1), the
+  cell above D11: D11 is powered c60 d to c68 d. STAND-IN for H11's second drive: a redstone block at (-3,6,0), beside the
+  cell above H11 (it powers no other piston), set before c56 and taken out before c61, both with setblock strict. W_Y's
+  extension at c58 g updates H11, which goes out into the empty (-2,5,1); its head lands at c60 j beside U_Y's head,
+  which NP12's relight updates then anyway. Z11's retract at c61 g updates H11, unpowered, and it pulls RB11 back, after
+  Z11's event, so RB11 lands at c63 j after Z11's base. RB11's landing updates D11: it pushes RB11 down at c64 g while
+  ARM_Z11 moves; ARM_Z11 lands at c66 j, RB11 right after it, and Z11, powered again, cannot push RB11 into D11's head.
+  D11 goes in at c68 g. End: Z11 in, powered by ARM_Z11 and not updated; RB11 at (-2,4,1); (-2,5,1) and (-1,5,1) empty;
+  17 cells outside the door plane still differ from the closed state (20 after y12_holds.py): the other five relays and
+  their blocks, and R_9.
+- Margins [COMPUTED]: the stand-in works set before c4 to c58 (before c59 it misses W_Y's update) and taken out before
+  c59, c60 or c61 (before c58 or c62 it fails). R11 works only at 4 ticks: at 1 to 3 it comes on before H11's head is in
+  (-2,5,1) and D11 pushes into the empty cell. RB_U in its park (-1,7,1) powers D11 too (QC) from c14 to c44 and c54 to c60,
+  while (-2,5,1) is empty until c58 (the lead's warning): nothing updates D11 then. Order: dust's updates reversed, I_A's
+  event last, the scheduled ticks reversed, RB11 landing ahead of Z11's base at c63 j, and the landings of c60 and c66
+  reversed among themselves change nothing; 60 runs with the scheduled ticks shuffled return Z11 every time; P11's spit
+  ahead of H11's at c3 fails (above). A second cycle is the same.
+- Controls fail [COMPUTED]: no H11 (RB11 holds Z11 out); H11 plain (P10 out at c6); no D11 or no R11 (RB11 back on
+  (-2,5,1), (-2,4,1) empty); no stand-in (R11 comes on at c60 with (-2,5,1) empty, D11's head arrives beside U_Y's and U_Y
+  retracts a tick early: Y12's re-arm fails); stand-in taken out before c62 (H11 pulls only at c64 and Z11 pushes RB11 up
+  again at c70).
+- The drive [COMPUTED z11_search.txt and what-if; INFERRED where marked]: H11 must be powered at W_Y's extension (c58 g)
+  and not from Z11's retract (c61 g) on, without updating W_Y (in and powered c52 to c58), U_Y (out and dark c60 d to
+  c61 g) or D11 (dark beside the empty (-2,5,1) before c58). Every cell that powers H11 is the bus's last dust (-4,5,1),
+  DP's source cell, CUT_DP, W_Y's head cell or W_Y, D11's cell, a cell where a block also powers W_Y and D11 ((-3,6,1),
+  (-3,7,1)) or P_G ((-4,6,1)), or (-3,6,0), whose own neighbours are the bus's dust and stone and P10's QC cell; a dust in
+  any free one of them is within two steps of W_Y. No single block in the 249 free cells up to six steps away (6963 runs) returns Z11
+  with Y12's re-arm intact (z11_search.txt, 3). The S feed's own time would: a redstone block at (-3,7,1) set before c52
+  and taken out before c60, in place of the stand-in, returns Z11 (W_Y, QC from it, is powered then by S_W anyway). A
+  stone there under a dust at (-3,8,1), lit from D_S through a dust at (-3,9,2) on glass at (-3,8,2), would carry that
+  [INFERRED, 4 blocks], but both dusts join the west timer's line ((-3,8,1) beside its step stone (-3,8,0) under (-3,9,0);
+  (-3,9,2) up the glass (-2,9,2) to (-2,10,2)). The line, measured in `close_west_drives_probe`, would have to be re-laid
+  off x -3 to -2 there: the call.
+- Probe: `close_z11_probe` (`export_z11`): four tests (the stand-in run; no command after the input; H11 taken out; R11
+  taken out; the last three controls), replayed in the simulator 4/4; the first test fails with H11 a plain piston or
+  without H11, D11 or R11. `python -m scripts.lint close_z11_probe`: ok. To be measured, with the stand-in commands: H11
+  out and spat at c3 with RB11 at (-1,5,1) after it and P10 in until c8; H11 out at c58; Z11 in at c61 and RB11 back in
+  (-2,5,1) after c63; D11 out at c64 and RB11 in (-2,4,1) after c66; D11 in after c68; Y12's re-arm as in
+  `close_y12_holds_probe`. The controls: with no command, D11 out at c60 and Y12 left out; without H11, Z11 out at the
+  end; without R11, RB11 left on (-2,5,1).
+
 ## DP, stage 2: what the on and the off need (2026-11-21; simulator; the first pass, which found no design)
 This pass found no set of real blocks that lights DP and cuts it again. What it computed still holds, and the design
 above is the last of its three ways out. `dp.py` computes what the on and the off need and what the free cells allow;
@@ -1065,8 +1128,9 @@ events of one phase: they show which orders work, not how to get them.
    west_drives.txt), as built it needs a mover from the west, where P_W's head stands. NP12 then dies and A_D, armed
    since RB12 came home, fires once as at c0. First pass [COMPUTED y12.txt]: done with Y12 sticky, three pistons and two
    stand-in sources, inside the west return (c58 to c70); A_D does not fire. From blocks [COMPUTED y12_holds.txt]: 14 more
-   blocks, no command after the input, box 2940 (z 5 for B_Y's source, accepted by the lead). Left: Z11, then D9's source,
-   ARM_Z9's puller and the other up relays.
+   blocks, no command after the input, box 2940 (z 5 for B_Y's source, accepted by the lead). Z11, first pass [COMPUTED
+   z11.txt]: home with 3 blocks (H11, D11, R11) and one stand-in drive (H11's pull), which needs the west timer's line
+   re-laid (the call). Left: D9's source, ARM_Z9's puller and the other up relays.
 5. Routing: the bus is laid (east to P_R and AP, west over the input repeater to M_K; re-laid 2026-11-22, box 2016). DP needs no trunk: its tap reads NP12 at (0,5,3).
 6. Stages 6 to 8: P7 on NA at c3, P9's 0-tick with TM and TR at c20 and c22, P8 at c23, the door plane closed at c25 j
    [COMPUTED p9_p8.txt]. MEASURED: `close_p9_p8_probe` 3/3 on sat1.
@@ -1092,8 +1156,10 @@ changed, box 2520; MEASURED: `close_west_drives_probe` 3/3 and `close_rbt_drives
 2026-11-22, traits ok): RB12, K, M_K and WK end as loaded, G at (-4,3,2), and NP12 is lit again from c60. Y12 is
 re-armed from blocks with no command after the input (y12.txt, then y12_holds.txt: Y12 sticky, 22 blocks, box 2940; G
 home at (-3,3,2), NP12 and the tap dark, A_D never moves; COMPUTED; `close_y12_probe` measured 0/3 on an export fault,
-D_X placed as a dot, now fixed in both probes, which are to be measured). Next: Z11 (its retract updates Y12, so it
-falls inside Y12's window or needs the blocker again; RB_U QC-powers its down-pusher's cell (-2,6,1) from c14 to c44 and c54 to c60), then D9's source and ARM_Z9's puller, and the
+D_X placed as a dot, now fixed in both probes, both since MEASURED 3/3). Z11's return, first pass (z11.txt; COMPUTED):
+Z11 home with 3 blocks (H11 spits RB11 east on DP's pulse at c3, so Z11 retracts in Y12's window; H11 pulls RB11 back and
+D11, on R11, pushes it home) and one stand-in drive, H11's pull, which only a re-laid west timer's line lets blocks carry
+(the call; `close_z11_probe` to be measured). Next: D9's source and ARM_Z9's puller, then the
 same in-place re-arm for Z_Q and Y1 (Y1 with the blocker). If P6 must be
 spat, the relay above A_D is the lead: find what holds N_X in through the opening. A close inside one phase would need
 DP's on in c0 after P12's retract, five levels past K's event at x <= -2 (dp.txt).
@@ -1103,7 +1169,7 @@ puller.py/.txt, export_feeds.py, s_feed.py/.txt, export_s_feed.py, trigger.py/.t
 dp_search.py/.txt, dp_off.py/.txt, dp_off_search.py/.txt, export_dp_off.py, p10_v.py/.txt, p10_v_search.py/.txt,
 export_p10_v.py, s_inputs.py/.txt, export_s_inputs.py, p9_p8.py/.txt, export_p9_p8.py, returns.py/.txt,
 export_returns.py, rbt_route.py/.txt, rbt_drives.py/.txt, export_rbt_drives.py, west_drives.py/.txt,
-export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_search.py/.txt, export_y12_holds.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
+export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_search.py/.txt, export_y12_holds.py, z11.py/.txt, z11_search.py/.txt, export_z11.py), run from the repo root as `python -m scripts.door2.close_layout.<module>`; the simulator is `scripts/door2/sim.py`. The specs are in the library:
 `library/builds/compactB_open_c.redstone.yaml` (design_c's opening), `library/mechanics/close_feeds_probe.redstone.yaml`,
 `library/mechanics/close_s_feed_probe.redstone.yaml` (written by `export_s_feed`),
 `library/mechanics/close_trigger_probe.redstone.yaml` (written by `export_trigger`),
@@ -1115,7 +1181,8 @@ export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_
 `library/mechanics/close_rbt_drives_probe.redstone.yaml` (written by `export_rbt_drives`; 4/4 on the main server) and
 `library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; 3/3 on the main server),
 `library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; 0/3 on main before the D_X fix, 3/3 after) and
-`library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; 3/3 on the main server).
+`library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; 3/3 on the main server),
+`library/mechanics/close_z11_probe.redstone.yaml` (written by `export_z11`; with the stand-in, not yet run on a server).
 On 2026-11-23, with the Y12 holds merged, `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` 4/4 still pass.
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
 three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
@@ -1128,6 +1195,7 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.try close_p9_p8_probe`; `python -m scripts.try close_returns_probe`;
 `python -m scripts.try close_rbt_drives_probe`; `python -m scripts.try close_west_drives_probe`;
 `python -m scripts.try close_y12_probe`; `python -m scripts.try close_y12_holds_probe`;
+`python -m scripts.try close_z11_probe`;
 `python -m scripts.door2.close_layout.s_feed > scripts/door2/close_layout/s_feed.txt`;
 `python -m scripts.door2.close_layout.export_s_feed`;
 `python -m scripts.door2.close_layout.trigger > scripts/door2/close_layout/trigger.txt`;
@@ -1155,4 +1223,7 @@ Re-run: `python -m scripts.try close_feeds_probe`; `python -m scripts.try close_
 `python -m scripts.door2.close_layout.export_y12`;
 `python -m scripts.door2.close_layout.y12_holds > scripts/door2/close_layout/y12_holds.txt` (about a minute);
 `python -m scripts.door2.close_layout.y12_holds_search > scripts/door2/close_layout/y12_holds_search.txt` (about 5 minutes);
-`python -m scripts.door2.close_layout.export_y12_holds`
+`python -m scripts.door2.close_layout.export_y12_holds`;
+`python -m scripts.door2.close_layout.z11 > scripts/door2/close_layout/z11.txt` (about 20 s);
+`python -m scripts.door2.close_layout.z11_search > scripts/door2/close_layout/z11_search.txt` (about 30 minutes on one core; it uses every core);
+`python -m scripts.door2.close_layout.export_z11`
