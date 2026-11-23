@@ -1,0 +1,31 @@
+== 1. one-step moves of RB11 out of (-2,5,1)
+   push west: piston at (-1, 5, 1) facing west (free); RB11 to (-3, 5, 1) (free; a redstone block there powers ['dust@(-4, 5, 1)']) | piston: changes nothing; sticky_piston: changes nothing
+   pull west: piston at (-4, 5, 1) facing east (redstone_wire), built out with its head at (-3, 5, 1) (free); RB11 to (-3, 5, 1) (free; a redstone block there powers ['dust@(-4, 5, 1)'])
+   push east: piston at (-3, 5, 1) facing east (free); RB11 to (-1, 5, 1) (free; a redstone block there powers ['P10@(-1, 5, 0)']) | piston: changes (-1, 5, 1) at c3, (-2, 5, 1) at c3, (-1, 5, 0) at c6; sticky_piston: changes (-1, 5, 1) at c3, (-2, 5, 1) at c3, (-2, 3, 1) at c61
+   pull east: piston at (0, 5, 1) facing west (glass), built out with its head at (-1, 5, 1) (free); RB11 to (-1, 5, 1) (free; a redstone block there powers ['P10@(-1, 5, 0)'])
+   push down: piston at (-2, 6, 1) facing down (free); RB11 to (-2, 4, 1) (RB11) | piston: changes nothing; sticky_piston: changes nothing
+   pull down: piston at (-2, 3, 1) facing up (Z11), built out with its head at (-2, 4, 1) (RB11); RB11 to (-2, 4, 1) (RB11)
+   push up: piston at (-2, 4, 1) facing up (RB11); RB11 to (-2, 6, 1) (free; a redstone block there powers ['U_Y@(-2, 6, 2)'])
+   pull up: piston at (-2, 7, 1) facing down (free), built out with its head at (-2, 6, 1) (free); RB11 to (-2, 6, 1) (free; a redstone block there powers ['U_Y@(-2, 6, 2)'])
+   push north: piston at (-2, 5, 2) facing north (piston_head); RB11 to (-2, 5, 0) (free; a redstone block there powers ['P10@(-1, 5, 0)', 'P11@(-2, 3, 0)'])
+   pull north: piston at (-2, 5, -1) facing south (free), built out with its head at (-2, 5, 0) (free); RB11 to (-2, 5, 0) (free; a redstone block there powers ['P10@(-1, 5, 0)', 'P11@(-2, 3, 0)'])
+   push south: piston at (-2, 5, 0) facing south (free); RB11 to (-2, 5, 2) (piston_head) | piston: changes nothing; sticky_piston: changes nothing
+   pull south: piston at (-2, 5, 3) facing north (glass), built out with its head at (-2, 5, 2) (piston_head); RB11 to (-2, 5, 2) (piston_head)
+   (-3,5,1) push east is H11: it changes only (-2,5,1) and (-1,5,1), from c3 (RB_D's pulse in DP's source cell under it). The block at (-1,5,1) powers P10, out and powered from c8 (z11.txt); at (-3,5,1) it would light the bus's last dust (-4,5,1), at (-2,6,1) and (-2,5,0) it would power U_Y and P10 or P11
+
+== 2. the cells from which a block powers H11 (-3,5,1): beside it, the front (-2,5,1) apart, or beside the cell above it (-3,6,1)
+   (-4, 5, 1) (direct): redstone_wire; a dust there would update ['P_G', 'M_K']; beside the bus or the west timer's line at [(-4, 5, 0)]
+   (-3, 4, 1) (direct): taken; a redstone block there also powers ['Z11@(-2, 3, 1)', 'M_K@(-4, 3, 1)', 'dust@(-3, 4, 0)']; a dust there would update ['Z11', 'M_K', 'A_D']
+   (-3, 6, 1) (direct): free; a redstone block there also powers ['W_Y@(-3, 6, 2)', 'D11@(-2, 6, 1)']; a dust there would update ['W_Y', 'U_Y', 'D11', 'P_G']
+   (-3, 5, 0) (direct): stone; a dust there would update ['P10']; beside the bus or the west timer's line at [(-4, 5, 0)]
+   (-3, 5, 2) (direct): taken; a redstone block there also powers ['A_D@(-3, 4, 3)']; a dust there would update ['W_Y', 'U_Y', 'P_G', 'A_D']
+   (-4, 6, 1) (QC): free; a redstone block there also powers ['P_G@(-4, 6, 2)', 'dust@(-4, 5, 1)']; a dust there would update ['W_Y', 'D11', 'P_G']; beside the bus or the west timer's line at [(-4, 5, 1)]
+   (-2, 6, 1) (QC): D11; a dust there would update ['W_Y', 'U_Y', 'D11']
+   (-3, 7, 1) (QC): free; a redstone block there also powers ['W_Y@(-3, 6, 2)', 'D11@(-2, 6, 1)']; a dust there would update ['W_Y', 'D11']
+   (-3, 6, 0) (QC): free, the stand-in's cell; a redstone block there also powers nothing else; a dust there would update ['W_Y', 'D11']
+   (-3, 6, 2) (QC): W_Y; a dust there would update ['W_Y', 'U_Y', 'D11', 'P_G']
+   so a drive for H11 reaches it only through (-3,6,0), whose neighbours are the bus's stone (-3,6,-1), the bus's dust (-3,7,-1) beside (-3,7,0), the bus's dust (-4,5,0) under (-4,6,0), CUT_DP and P10's QC cell (-2,6,0) by (-1,6,0); or through (-3,7,1), which powers W_Y (QC) and D11 (QC); a dust in any of the free ones is within two steps of W_Y
+
+== 3. one block near H11, on z11.py's build without the stand-in, from the input, no command
+   249 free cells in the box, 6963 runs (dust and repeaters only where something can carry them): Z11 home and Y12 re-armed in none | done: 0; H11 out in time: 34; no: 6870; broken: 59 (broken: the block breaks a dust or a check of the build; 'H11 out in time': H11 goes out again from c4 to c60 but the return still fails)
+   the runs in which H11 goes out again from c4 to c60: dust at (-5, 3, 1) on glass; dot at (-5, 3, 1) on glass; repeater west 1 at (-5, 3, 1) on glass; repeater west 2 at (-5, 3, 1) on glass; repeater west 3 at (-5, 3, 1) on glass; repeater west 4 at (-5, 3, 1) on glass; dust at (-5, 5, 1) on glass; dot at (-5, 5, 1) on glass; dust at (-5, 6, -1) on glass; dot at (-5, 6, -1) on glass; dust at (-5, 6, 1) on glass; dot at (-5, 6, 1) on glass; dust at (-5, 7, -1) on glass; dot at (-5, 7, -1) on glass; dust at (-4, 6, -2) on glass; dot at (-4, 6, -2) on glass; dust at (-4, 8, -1) on glass; dot at (-4, 8, -1) on glass; piston up at (-3, 3, 1); repeater north 1 at (-3, 5, -1); repeater north 2 at (-3, 5, -1); repeater north 3 at (-3, 5, -1); repeater north 4 at (-3, 5, -1); dust at (-3, 9, -1) on glass; dot at (-3, 9, -1) on glass; piston west at (-2, 4, 3); sticky_piston west at (-2, 4, 3); dust at (-1, 5, 2) on glass; dot at (-1, 5, 2) on glass; dust at (-1, 9, 0) on glass; dot at (-1, 9, 0) on glass; repeater north 3 at (1, 7, 1) on glass; piston south at (2, 6, 1); sticky_piston south at (2, 6, 1)
