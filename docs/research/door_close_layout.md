@@ -7,9 +7,9 @@ No structural obstruction. The close runs from one input to the closed door's pl
 p9_p8.txt]: stages 0 to 8 are measured in game. Of the returns, the trigger chain's east side goes home from blocks, with
 no command after the input [COMPUTED rbt_drives.txt; MEASURED 4/4], after two changes to measured blocks (the bus's
 west branch re-laid, K_T made sticky): with added blocks alone it cannot, whatever the box [COMPUTED returns.txt]. The
-west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; not yet measured], but for
+west side goes home from blocks too, with no measured block changed [COMPUTED west_drives.txt; MEASURED 3/3], but for
 G, which ends where the opening puts it: its closed cell is Y12's head, so NP12 is lit again until Y12 is re-armed. Y12's
-re-arm is computed with Y12 made sticky and two sources stood in for by commands [COMPUTED y12.txt; not measured]; the
+re-arm is done from blocks with Y12 made sticky, no command after the input [COMPUTED y12_holds.txt; MEASURED 3/3]; the
 opening's other six relays are not designed.
 - Every close mover (15) has power cells that at its stage reach no piston still to fire/wait [COMPUTED constraints.py].
 - Wave-1 dead end had three non-structural causes: coupling treated as fatal regardless of order (a piston whose retract
@@ -846,11 +846,11 @@ it ends at (-4,3,2), its cell in the open state, and the gate over L stays open 
   controls that take one block out before the opening: R_M (the line stays dark, nothing moves in the west) and R_G
   (the kick and RB12's way back as in the run, P_G stays in, K out again at c59). Its steps, read back from the YAML
   and replayed in the simulator, pass 3/3; without R_W, R_M, A_W, RB_W, P_W, R_X, Y_X, R_G, Y_G, P_G or SPG the first
-  test fails. `python -m scripts.lint close_west_drives_probe`: ok. Not yet run on a server.
+  test fails. `python -m scripts.lint close_west_drives_probe`: ok. MEASURED 3/3 on the main server (2026-11-22).
 
 ## Y12's re-arm, first pass (2026-11-22; simulator)
 Not done from blocks: Y12 ends re-armed with Y12 made a sticky piston, 8 added blocks and two sources stood in for by
-four commands after the input [COMPUTED y12.txt; not measured]. Box still 14x15x12 = 2520; the opening is the same at
+four commands after the input [COMPUTED y12.txt; MEASURED 3/3 after the D_X fix]. Box still 14x15x12 = 2520; the opening is the same at
 every tick and the close the same to c30 outside the added cells, Y12 and its head's cell; the returns are the same
 until c61.
 - Sticky [COMPUTED y12.txt, control]: a plain Y12 retracts at c61 and leaves G at (-4,3,2). A block leaves that cell
@@ -899,10 +899,12 @@ until c61.
   build marks it a cross), and the probe now checks that shape. y12.txt is unchanged; close_y12_probe re-exported (3/3
   replayed, the same controls live, lint ok); the other exporters write the same YAML. The two older lone dusts, (1,7,0)
   and (-3,4,0), are dots in game; with them as dots the simulator gives the same runs of west_drives.py and y12.py at
-  every tick, which fits their probes passing. To measure again.
+  every tick, which fits their probes passing. MEASURED again on the main server, 2026-11-23, with D_X a cross: 3/3 (the
+  run and both controls): lift at c61, G home after c63, RB_D left at c65, ARM_Z11 back after c66, Y12 in and armed,
+  A_D never out.
 
 ## Y12's holds from blocks (2026-11-22; simulator)
-Y12's re-arm needs no command after the input [COMPUTED y12_holds.txt; not measured]: y12.py's two stand-in sources are
+Y12's re-arm needs no command after the input [COMPUTED y12_holds.txt; MEASURED 3/3]: y12.py's two stand-in sources are
 made of blocks, 14 on y12.py's 8, Y12 sticky (the lead's call) and no other measured block changed. From the one falling
 input Y12 goes in and is armed again, G lands at (-3,3,2), NP12 and the tap end dark and A_D never moves. Box 14x15x14 =
 2940: z 4 for U_Y's hold (the lead's call) and z 5 for B_Y's source, which the lead accepted (2026-11-22).
@@ -955,7 +957,8 @@ input Y12 goes in and is armed again, G lands at (-3,3,2), NP12 and the tap end 
 - Probe: `close_y12_holds_probe` (`export_y12_holds`): three tests with no command after the input (the run; H_U taken
   out: U_Y and Y12 stay out; R_B taken out: Y12 out again at c67), replayed in the simulator 3/3; the first test fails
   with Y12 plain or without RB_U, H_U, S_U, D_U, D_S, D_Z, R_B, S_B, D_B, S_B2, D_Y, U_Y or W_Y. `python -m scripts.lint
-  close_y12_holds_probe`: ok. Not yet run on a server. Earlier scripts, searches and exporters: unchanged, their outputs
+  close_y12_holds_probe`: ok. MEASURED on the main server, 2026-11-23: 3/3; in the run RB_U out c12 to c46 and c52 to
+  c62, U_Y lit by S_U at c58, the lift at c61, G home after c63, B_Y out c64 to c72. Earlier scripts, searches and exporters: unchanged, their outputs
   byte for byte. After close_y12_probe's 0/3 (above: D_X exported as a dot) the probe is re-exported with D_X a cross;
   only D_X's glyph and checks change, y12_holds.txt and y12_holds_search.txt are the same byte for byte, the replay is
   still 3/3 with the same controls live, lint ok. Its other dusts all have a neighbour to point at, so none is a lone
@@ -1111,8 +1114,9 @@ export_west_drives.py, y12.py/.txt, export_y12.py, y12_holds.py/.txt, y12_holds_
 `library/mechanics/close_returns_probe.redstone.yaml` (written by `export_returns`; 3/3 on the main server),
 `library/mechanics/close_rbt_drives_probe.redstone.yaml` (written by `export_rbt_drives`; 4/4 on the main server) and
 `library/mechanics/close_west_drives_probe.redstone.yaml` (written by `export_west_drives`; 3/3 on the main server),
-`library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; 0/3 on main before the D_X fix) and
-`library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; not yet run on a server).
+`library/mechanics/close_y12_probe.redstone.yaml` (written by `export_y12`; 0/3 on main before the D_X fix, 3/3 after) and
+`library/mechanics/close_y12_holds_probe.redstone.yaml` (written by `export_y12_holds`; 3/3 on the main server).
+On 2026-11-23, with the Y12 holds merged, `close_west_drives_probe` 3/3 and `close_rbt_drives_probe` 4/4 still pass.
 The six from `close_trigger_probe` on were written again on 2026-11-22 for the re-laid bus (`close_returns_probe` with
 three more tests); the results in brackets are from before it. On the re-laid bus all six pass on the main server
 (2026-11-22): 4/4, 4/4, 3/3, 3/3, 3/3 and 6/6. They were written a third time on 2026-11-22 with K_T sticky
