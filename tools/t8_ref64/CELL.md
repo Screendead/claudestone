@@ -45,8 +45,8 @@ comparator entries name the side the input is on and the direction of the output
 | z \ x | 0 | 1 | 2 | 3 |
 |---|---|---|---|---|
 | 0 | repeater, input +z, out -z, delay 1 | dust | orange wool | repeater, input +z, out -z, delay 1 |
-| 1 | dust | orange wool | comparator, rear +z, out -z, **subtract** | dust |
-| 2 | dust | repeater, input -x, out +x, delay 1 (lock) | repeater, input +z, out -z, delay 1 (storage) | dust |
+| 1 | repeater, input +z, out -z, delay 1 | orange wool | comparator, rear +z, out -z, **subtract** | dust |
+| 2 | dust | repeater, input -x, out +x, delay 1 (lock) | repeater, input +z, out -z, delay 1 (storage) | repeater, input +z, out -z, delay 1 |
 | 3 | blue wool | air | red wool | cyan wool |
 
 - The storage repeater (2,1,2) is locked from its side by the lock repeater (1,1,2), which takes the
@@ -93,14 +93,18 @@ comparator entries name the side the input is on and the direction of the output
 ## Lines and levels
 
 - **Write enable**: dark blue, x=0. Enters at z=3: the next cell's repeater (along +z) powers the y=1 wool
-  at (0,1,3), which powers the dust at (0,1,2) (15) and (0,1,1) (14). It leaves through the repeater at
-  (0,1,0) into the y=1 wool at z=3 of the next cell along -z. The dust at (0,1,2) also feeds the lock
-  repeater.
-- **Read enable**: cyan, x=3, the same shape. The dust beside the comparator, at (3,1,1), carries 14, the
-  narration's "15 minus 14" (2:12–2:21).
+  at (0,1,3), which powers the dust at (0,1,2) (15). That dust feeds the lock repeater from its side and the
+  repeater at (0,1,1), which drives the repeater at (0,1,0) and so the y=1 wool at z=3 of the next cell
+  along -z.
+- **Read enable**: cyan, x=3. The wool at (3,1,3) drives the repeater at (3,1,2), which powers the dust at
+  (3,1,1) at 15. That dust feeds the comparator's side and the repeater at (3,1,0).
+- **The two lines are not the same shape** (re-read 2026-11-23, see "Words side by side"): blue runs wool,
+  dust, repeater, repeater from z=3 to z=0; cyan runs wool, repeater, dust, repeater. An earlier read had dust
+  at both z=1 and z=2 of both lines, with 14 at (3,1,1) from the narration's "15 minus 14" (2:12–2:21); that
+  remark is about the first cell before the line had its repeaters, and the cell as built gives 15 - 15.
 - **Both enables are inverted: off means enabled** (1:40). Write enable on locks the storage repeater; off
-  lets it follow the data input. Read enable on: the comparator gives 15 - 14 = 1, which reaches the dust at
-  (1,1,0) as 1 and dies before the output line. Off: the comparator passes the stored bit (15 or 0).
+  lets it follow the data input. Read enable on: the comparator gives 15 - 15 = 0. Off: the comparator passes
+  the stored bit (15 or 0).
 - **Data input**: red, along x at z=3: dust at y=3 on the red at y=2, dipping at x=2 to dust at y=2 on the red
   wool (2,1,3), which feeds the storage repeater from behind. It enters and leaves through the x=0 and x=3
   faces at (0,3,3) and (3,3,3).
@@ -110,6 +114,25 @@ comparator entries name the side the input is on and the direction of the output
   and (3,2,1). It enters and leaves at (0,3,1) and (3,3,1).
 - The repeaters needed on long data lines are not part of the cell. The narration (3:49–3:58) says to add
   them "eventually", depending on how far the line goes.
+
+## Words side by side (5:38–6:57, re-read 2026-11-23)
+
+Read from the 1080p video, frame by frame, with the auto transcript.
+
+- **No gap, shift or mirror.** The second word's blue line is laid first (5:38, "blue line again") directly
+  against the first word's cyan line, x=3 of one word beside x=0 of the next, same y, same z phase. The
+  cells between are built in the same order as the first word (5:41–6:17), then the cyan line on the far
+  side (5:59–6:05). The top-down view at 6:18 shows the seam: the first word's cyan line and the second
+  word's blue line in adjacent rows, with every z=3 wool block of one beside the z=3 wool of the other.
+- **Do the cyan dust and the next blue dust touch? No.** Along z the cyan line is wool (z=3), repeater
+  (z=2), dust (z=1), repeater (z=0); the blue line is wool, dust (z=2), repeater (z=1), repeater (z=0). Seen
+  clearly at 6:01–6:05 on the second word, each line still on its own: the cyan line's single dust sits
+  between two repeaters, and two lit repeaters stand between the blue line's dust and the next z=3 wool.
+  So beside each dust in the neighbouring line is a repeater's side, and dust never touches dust across the
+  seam.
+- **Different from the earlier read:** (0,1,1) and (3,1,2) are repeaters (input +z, delay 1 as far as can be
+  seen), not dust. 5:20–5:33 shows repeaters going onto the first word's lines before the second word starts;
+  which of them were already there at 1:24–2:20 was not re-read.
 
 ## The tiling repeaters (4:47–5:33)
 

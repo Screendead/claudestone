@@ -42,7 +42,7 @@ KEY = {
 }
 LAYERS = [
     ["bo.c", "b.yc", "byyc", "...."],   # y=0
-    ["R-oR", "-oC-", "-LR-", "b.rc"],   # y=1
+    ["R-oR", "RoC-", "-LRR", "b.rc"],   # y=1
     ["....", "o-oo", "....", "rr-r"],   # y=2
     ["....", "-.--", "....", "--.-"],   # y=3
 ]
@@ -131,7 +131,7 @@ DESCRIPTION = (
     "and the read-enable line from its side. Words run along z (bits j), words sideways along x (i), layers up y (k): "
     "word ik is hold ik (write enable, dark blue wool) and nrd ik (read enable, cyan); bit jk is din jk (red, along x) "
     "and dout jk (orange, along x, read at its west end). Both enables are inverted: hold 1 keeps and 0 writes; nrd 1 "
-    "keeps the word off dout (15 - 14 = 1, which dies before the line) and 0 reads it. Each enable line enters at its "
+    "keeps the word off dout (15 - 15 = 0) and 0 reads it. Each enable line enters at its "
     "south end through a fixture repeater standing where the next cell's repeater would be. Not built: the repeaters "
     "a long data line needs, which the video leaves to the user.")
 
